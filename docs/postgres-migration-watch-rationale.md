@@ -11,7 +11,7 @@
 
 ## 摘要
 
-- Watch 语句：`73`。
+- Watch 语句：`75`。
 - Watch 安全问题：`0`。
 
 ## 语句清单
@@ -91,3 +91,5 @@
 | 179-patrol-runtime-metadata.sql | 60 | drop-operator | guarded-if-exists | Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently. | DROP OPERATOR IF EXISTS public.= (text, boolean); |
 | 189-wom-manual-task-entry.sql | 243 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_add_wom_manual_task_button(jsonb); |
 | 190-rm-web-formula-editor.sql | 195 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_rm_formula_web_editor_button(jsonb); |
+| 193-qcs-bpi-quality-gate-outbox.sql | 343 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS trg_qcs_bpi_quality_gate ON public.qcs_inspect_reports; |
+| 193-qcs-bpi-quality-gate-outbox.sql | 372 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS trg_qcs_bpi_quality_gate_component ON public.qcs_report_coms; |

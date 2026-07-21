@@ -149,11 +149,12 @@ def main() -> int:
         if isinstance(item, dict)
     }
     required_phase2_endpoints = {
+        ("GET", "/internal/bpi/v1/batches/resolve", None),
         ("POST", "/internal/bpi/v1/qcs-quality-gates", "QcsQualityGateV1"),
         ("POST", "/internal/bpi/v1/wms-inbound-receipts", "WmsCompletionInboundReceiptV1"),
     }
     if phase2_endpoints != required_phase2_endpoints:
-        failures.append("service Phase 2 profile must expose only the approved QCS and WMS bridges")
+        failures.append("service Phase 2 profile must expose only the approved batch resolver, QCS and WMS bridges")
     phase2_topics = {
         (item.get("topic"), item.get("message"))
         for field in ("inboundTopics", "outboundTopics")
@@ -180,6 +181,7 @@ def main() -> int:
         "Phase 1 service profile remains SHADOW_ONLY",
         "QCS and WMS integration flags remain phase-locked in the runtime UI",
         "Every inbound event is inbox-idempotent and payload-checksummed",
+        "External order resolution requires bpi.qcs-link and exactly one batch in the trusted tenant/plant/line scope",
         "Batch transition, integration projection, outbox and audit rows share one PostgreSQL transaction",
         "A WMS receipt cannot precede durable outbox publication",
         "Only an accepted WMS receipt with document_id can transition RELEASED to INBOUNDED",

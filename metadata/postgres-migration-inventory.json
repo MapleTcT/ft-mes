@@ -1,37 +1,37 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 192,
+  "migrationCount": 193,
   "firstNumber": 1,
-  "lastNumber": 192,
+  "lastNumber": 193,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 73,
+  "watchStatementCount": 75,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 10818,
-    "create-function": 88,
-    "create-index": 999,
-    "create-table": 578,
+    "create-function": 92,
+    "create-index": 1002,
+    "create-table": 579,
     "create-view": 142,
-    "insert": 11011,
-    "update": 11095
+    "insert": 11012,
+    "update": 11098
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 227,
+    "create-or-replace": 231,
     "do-block": 392,
-    "if-exists": 114,
-    "if-not-exists": 13024,
-    "on-conflict": 10949,
+    "if-exists": 117,
+    "if-not-exists": 13028,
+    "on-conflict": 10950,
     "to-regclass": 219,
     "where-not-exists": 44
   },
   "tagTotals": {
     "auth-rbac-org": 37,
-    "business": 34,
+    "business": 35,
     "compatibility": 76,
     "configuration": 42,
     "general": 34,
@@ -7249,6 +7249,60 @@
       },
       "highRiskStatements": [],
       "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/193-qcs-bpi-quality-gate-outbox.sql",
+      "name": "193-qcs-bpi-quality-gate-outbox.sql",
+      "number": 193,
+      "slug": "qcs-bpi-quality-gate-outbox",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 385,
+      "sha256": "92063c4e9be072c715b196b8e8fe8bd6a7a15b1445b1dfc21f9b22039ff64bd9",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 4,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 3,
+        "if-not-exists": 4,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 4,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 343,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_qcs_bpi_quality_gate ON public.qcs_inspect_reports;",
+          "statement": "DROP TRIGGER IF EXISTS trg_qcs_bpi_quality_gate ON public.qcs_inspect_reports;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        },
+        {
+          "line": 372,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_qcs_bpi_quality_gate_component ON public.qcs_report_coms;",
+          "statement": "DROP TRIGGER IF EXISTS trg_qcs_bpi_quality_gate_component ON public.qcs_report_coms;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        }
+      ],
       "unguardedStructuralStatements": []
     }
   ]

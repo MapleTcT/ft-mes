@@ -156,7 +156,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
-.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-wms-adapter-test bpi-wms-adapter-package bpi-wms-outage-fixture-test bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only acceptance-bpi-quality-release-target acceptance-bpi-wms-reconciliation-target acceptance-bpi-wms-outage-recovery-target acceptance-bpi-force-close-target rehearse-bpi-wms-outage-recovery-target bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
+.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-wms-adapter-test bpi-wms-adapter-package bpi-wms-outage-fixture-test bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only acceptance-bpi-quality-release-target acceptance-bpi-wms-reconciliation-target acceptance-bpi-wms-outage-recovery-target acceptance-bpi-force-close-target acceptance-qcs-bpi-quality-gate-target rehearse-bpi-wms-outage-recovery-target bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test qcs-quality-gate-outbox-test qcs-quality-gate-outbox-postgres-test qcs-quality-gate-outbox-package up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -166,6 +166,10 @@ help:
 	@printf '%s\n' '  make verify-pom             Validate parent/module POM structure'
 	@printf '%s\n' '  make bpi-contracts-test     Generate and test BPI v1 Protobuf contracts'
 	@printf '%s\n' '  make bpi-api-contract-check Validate BPI OpenAPI, AsyncAPI and simulation scope'
+	@printf '%s\n' '  make qcs-quality-gate-outbox-test Run Java 8 QCS-to-BPI outbox tests'
+	@printf '%s\n' '  make qcs-quality-gate-outbox-postgres-test Validate QCS outbox triggers on PostgreSQL 15'
+	@printf '%s\n' '  make qcs-quality-gate-outbox-package Build the executable QCS outbox JAR'
+	@printf '%s\n' '  make acceptance-qcs-bpi-quality-gate-target Run protected real QCS page to BPI replay acceptance'
 	@printf '%s\n' '  make bpi-simulation-test    Run deterministic BPI shadow-batch API acceptance'
 	@printf '%s\n' '  make bpi-service-static-check Validate BPI Java 17/PostgreSQL service boundaries'
 	@printf '%s\n' '  make bpi-service-test      Run BPI service tests (Java 17; live PG test needs BPI_TEST_DATABASE_URL)'
@@ -385,7 +389,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify bpi-contracts-test bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-stream-static-check bpi-stream-deployment-check bpi-production-context-test bpi-adapter-static-check bpi-ui-static-check bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check runtime-script-check sustainable-check ci-required-file-inventory-check ci-required-file-strict-check project-goal-acceptance-check goal-gap-register-check backend-table-audit-handoff-check basic-config-coverage-check basic-config-action-matrix-check entity-model-config-crud-readiness-check test-environment-address-check test-environment-static-bundle-link-check persistence-acceptance-check production-testcase-check wom-toolbar-action-coverage-check production-blocker-check production-module-backlog-check production-action-map-check platform-validation-check runtime-smoke-reports-check business-dependency-readiness-check business-dependency-contract-check business-module-intake-requirements-check business-package-scan-check production-export-readiness-check production-export-gap-breakdown-check production-source-evidence-refresh-check production-migration-readiness-check production-cutover-gate-check production-rehearsal-plan-check production-db-migration-evidence-check production-rollback-evidence-check production-license-strategy-check production-network-tls-check production-security-hardening-check production-business-smoke-signoff-check production-nacos-runtime-patch-check production-minio-migration-evidence-check production-keycloak-migration-evidence-check production-evidence-ready-gate-regression-check runtime-patch-manifest-check rm-web-formula-editor-acceptance-check source-module-check module-intake-precheck-regression-check module-intake-candidate-report-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
+ci: verify bpi-contracts-test bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-stream-static-check bpi-stream-deployment-check bpi-production-context-test qcs-quality-gate-outbox-test bpi-adapter-static-check bpi-ui-static-check bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check runtime-script-check sustainable-check ci-required-file-inventory-check ci-required-file-strict-check project-goal-acceptance-check goal-gap-register-check backend-table-audit-handoff-check basic-config-coverage-check basic-config-action-matrix-check entity-model-config-crud-readiness-check test-environment-address-check test-environment-static-bundle-link-check persistence-acceptance-check production-testcase-check wom-toolbar-action-coverage-check production-blocker-check production-module-backlog-check production-action-map-check platform-validation-check runtime-smoke-reports-check business-dependency-readiness-check business-dependency-contract-check business-module-intake-requirements-check business-package-scan-check production-export-readiness-check production-export-gap-breakdown-check production-source-evidence-refresh-check production-migration-readiness-check production-cutover-gate-check production-rehearsal-plan-check production-db-migration-evidence-check production-rollback-evidence-check production-license-strategy-check production-network-tls-check production-security-hardening-check production-business-smoke-signoff-check production-nacos-runtime-patch-check production-minio-migration-evidence-check production-keycloak-migration-evidence-check production-evidence-ready-gate-regression-check runtime-patch-manifest-check rm-web-formula-editor-acceptance-check source-module-check module-intake-precheck-regression-check module-intake-candidate-report-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
 
 ci-java17: bpi-contracts-test bpi-api-contract-check bpi-runtime-replay-test bpi-stream-test bpi-service-test
 
@@ -426,6 +430,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-bpi-rule-retirement-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-runtime-image-rollback-rehearsal.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-quality-release-target-acceptance.js
+	$(NODE) --check deploy/docker/scripts/run-qcs-bpi-quality-gate-target.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-wms-outage-recovery-acceptance.js
 	$(NODE) --check deploy/docker/scripts/generate-bpi-wms-outage-fixture.js
 	$(NODE) --check deploy/docker/scripts/test-bpi-wms-outage-fixture.js
@@ -735,6 +740,9 @@ acceptance-bpi-wms-outage-recovery-target:
 acceptance-bpi-force-close-target:
 	NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" node deploy/docker/scripts/adp-bpi-force-close-acceptance.js
 
+acceptance-qcs-bpi-quality-gate-target:
+	NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" node deploy/docker/scripts/run-qcs-bpi-quality-gate-target.js
+
 rehearse-bpi-wms-outage-recovery-target:
 	NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" node deploy/docker/scripts/run-bpi-wms-outage-recovery-target.js
 
@@ -814,6 +822,15 @@ bpi-production-context-test:
 
 bpi-production-context-postgres-test:
 	sh backend/source-modules/mes-production-context-outbox/scripts/test-postgres-outbox.sh
+
+qcs-quality-gate-outbox-test:
+	$(MVN) -pl backend/source-modules/qcs-quality-gate-outbox -am test
+
+qcs-quality-gate-outbox-postgres-test:
+	sh backend/source-modules/qcs-quality-gate-outbox/scripts/test-postgres-outbox.sh
+
+qcs-quality-gate-outbox-package:
+	$(MVN) -pl backend/source-modules/qcs-quality-gate-outbox -am -DskipTests package
 
 down-bpi-stream:
 	@if [ ! -f "$(BPI_STREAM_ENV_FILE)" ]; then printf '%s\n' 'ERROR: deploy/bpi-streaming/.env is required' >&2; exit 1; fi

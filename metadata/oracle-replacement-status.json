@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-20T19:49:45+00:00",
-  "repoCommit": "23e98051fc266c2d9653f4240b7327cb2607009b",
+  "generatedAt": "2026-07-21T01:53:30+00:00",
+  "repoCommit": "21ec56c744c23f2db52ab1a5abc077023fc44462",
   "generatedFrom": [
     "metadata/current-content-inventory.json",
     "metadata/backend-module-dependency-inventory.json",
@@ -20,11 +20,11 @@
     "gapCount": 1,
     "watchCount": 2,
     "plannedCount": 1,
-    "sourceModuleCount": 9,
+    "sourceModuleCount": 10,
     "sourceModuleOraclePolicyPass": true,
-    "oracleBacklogReferenceCount": 1607,
+    "oracleBacklogReferenceCount": 1609,
     "directOracleDependencyCount": 2,
-    "postgresMigrationCount": 192,
+    "postgresMigrationCount": 193,
     "postgresMigrationHighRiskCount": 0,
     "postgresMapperAuditErrorCount": 0,
     "postgresMapperAuditWarningCount": 0,
@@ -39,7 +39,7 @@
     "decompiledServices": 23,
     "frontendSourceMaps": 366,
     "frontendRecoveredFiles": 991,
-    "composeServices": 64,
+    "composeServices": 65,
     "businessRuntimeServices": 20
   },
   "composeDefaults": {
@@ -69,7 +69,7 @@
   },
   "sourceModuleOraclePolicy": {
     "returnCode": 0,
-    "output": "Source module verification passed. Modules: 9."
+    "output": "Source module verification passed. Modules: 10."
   },
   "postgresMapperAudit": {
     "findingCount": 0,
@@ -82,18 +82,18 @@
     "topFiles": []
   },
   "oracleMigrationAudit": {
-    "generatedAt": "2026-07-20T19:49:30+00:00",
-    "repoCommit": "23e98051fc266c2d9653f4240b7327cb2607009b",
-    "findingCount": 1607,
-    "categoryTotal": 1607,
+    "generatedAt": "2026-07-21T01:53:15+00:00",
+    "repoCommit": "21ec56c744c23f2db52ab1a5abc077023fc44462",
+    "findingCount": 1609,
+    "categoryTotal": 1609,
     "unclassifiedReferenceCount": 0
   },
   "oracleBacklogCategoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 188,
+    "documentation-or-workflow": 189,
     "frontend-row-index-noise": 4,
-    "java-row-index-noise": 76,
+    "java-row-index-noise": 77,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 574,
@@ -140,7 +140,7 @@
       "verification": "提升模块后运行 `make source-module-check`、`make source-module-test`，并用登录/currentuser 或升级任务 dry-run 验证。"
     }
   ],
-  "postgresMigrationWatchCount": 73,
+  "postgresMigrationWatchCount": 75,
   "checks": [
     {
       "id": "runtime-default-postgresql",
@@ -170,7 +170,7 @@
       "id": "oracle-legacy-only",
       "title": "Oracle 只作为 legacy 路径保留",
       "status": "watch",
-      "evidence": "Oracle migration backlog has 1607 tracked references.",
+      "evidence": "Oracle migration backlog has 1609 tracked references.",
       "nextAction": "逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。",
       "blocking": false
     },
@@ -178,7 +178,7 @@
       "id": "oracle-audit-current-and-classified",
       "title": "Oracle migration audit 可追溯且无未分类引用",
       "status": "pass",
-      "evidence": "generatedAt=2026-07-20T19:49:30+00:00, repoCommit=23e98051fc266c2d9653f4240b7327cb2607009b, unclassified=0, findingCount=1607, categoryTotal=1607",
+      "evidence": "generatedAt=2026-07-21T01:53:15+00:00, repoCommit=21ec56c744c23f2db52ab1a5abc077023fc44462, unclassified=0, findingCount=1609, categoryTotal=1609",
       "nextAction": "先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。",
       "blocking": false
     },
@@ -202,7 +202,7 @@
       "id": "postgres-migration-governance",
       "title": "PostgreSQL 初始化脚本可审计",
       "status": "pass",
-      "evidence": "192 scripts, range=001-192, highRisk=0, watch=73",
+      "evidence": "193 scripts, range=001-193, highRisk=0, watch=75",
       "nextAction": "新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。",
       "blocking": false
     },
@@ -210,7 +210,7 @@
       "id": "recovered-source-inventory",
       "title": "当前恢复内容有机器库存",
       "status": "pass",
-      "evidence": "250 source jars, 991 frontend files, 64 compose services.",
+      "evidence": "250 source jars, 991 frontend files, 65 compose services.",
       "nextAction": "新增包、服务或 source map 后运行 `make inventory`。",
       "blocking": false
     },
@@ -218,7 +218,7 @@
       "id": "source-module-promotion",
       "title": "恢复源码已开始提升为可编译模块",
       "status": "watch",
-      "evidence": "`backend/source-modules` currently declares 9 buildable modules.",
+      "evidence": "`backend/source-modules` currently declares 10 buildable modules.",
       "nextAction": "按 auth/rbac/organization/configuration/workflow 顺序提升高频维护模块。",
       "blocking": false
     },
@@ -226,7 +226,7 @@
       "id": "source-module-oracle-policy",
       "title": "已提升源码模块不含 Oracle 默认依赖",
       "status": "pass",
-      "evidence": "Source module verification passed. Modules: 9.",
+      "evidence": "Source module verification passed. Modules: 10.",
       "nextAction": "修复 `backend/source-modules` 中的 Oracle JDBC、Oracle 默认配置、Oracle dialect 或 mapper/oracle 资源后重新运行 `make source-module-check`。",
       "blocking": false
     },

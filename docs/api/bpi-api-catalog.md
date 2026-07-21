@@ -3,7 +3,7 @@
 状态：Phase 0/1 合约基线
 权威合约：`contracts/bpi-api/openapi.json`、`contracts/bpi-api/asyncapi.json`
 首期模拟范围：`contracts/bpi-api/simulation-profile.json`
-真实服务范围：`contracts/bpi-api/service-phase1-profile.json`
+真实服务范围：`contracts/bpi-api/service-phase1-profile.json`、`contracts/bpi-api/service-phase2-profile.json`
 
 ## 1. 使用约定
 
@@ -180,12 +180,20 @@ durable receipt、`INBOUNDED/r4`、相同 QCS 重放、强制 Kafka command 重�
 所有 Phase 2 开关和 allowlist 均恢复关闭。`reconcileWmsInbound` 只处理“单据可能已创建但回执未知”或
 outbox 终态失败：复用原 `commandEventId`、protobuf payload 和 WMS 幂等键，受管理员权限、
 `Idempotency-Key`、WMS link `If-Match`、安全等待期和审计保护；它不是红字冲销，也不能重试 WMS
-明确 `REJECTED` 的业务回执。外部 QCS 主动事件、外部 ERP/WMS 冲销与真实宕机补偿验收仍未激活。
+明确 `REJECTED` 的业务回执。QCS PostgreSQL 事务 outbox 和 Java 8 sidecar 已实现且默认关闭：它从
+QCS report -> inspect -> WOM task -> 受控 BPI binding 获取唯一 scope，通过内部 resolver 将外部生产订单
+精确关联到一个批次后才发布 Kafka；零条、多条、缺映射或快照矛盾均失败关闭。目标环境真实 QCS 页面到
+Kafka/BPI/PostgreSQL 的 marker 首发与同事件重放验收已经完成，取证后开关恢复关闭且双库 marker 残留为 0。
+resolver 同时返回当前质量门的外部 ID、revision 和 source event ID，
+仅当三者与待发布 outbox 完全一致时，sidecar 才允许终态批次重放；终态上的新事件仍进入 DEAD，不能据此宣称
+外部 QCS 主动事件已投产。当前目标验收使用影子批次，按设计没有生成 WMS command；外部 ERP/WMS 冲销与
+真实宕机补偿验收也仍未激活。完整证据见 `docs/testing/qcs-bpi-quality-gate-target-acceptance.md`。
 
 ## 3. 内部受信接入 API
 
 | Method | Path | 调用方 | 权限 | 成功/隔离结果 | 持久化 |
 |---|---|---|---|---|---|
+| GET | `/internal/bpi/v1/batches/resolve` | QCS quality-gate sidecar | `BPI_INTEGRATION_INGEST` + tenant/plant/line scope + Phase 2 allowlist + 该 scope 的 `bpi.qcs-link` | 唯一匹配 `200`，并返回当前质量门外部 ID/revision/source event ID；无匹配 `404`；同 scope/order 多批次 `409`；未启用或越权 `403` | 只读，不落库 |
 | POST | `/internal/bpi/v1/candidates` | Flink/候选适配器 | `BPI_EVENT_INGEST` + tenant/plant/line scope | `201` 候选；重复事件返回原对象；冲突 `409` | inbox、candidate |
 | POST | `/internal/bpi/v1/candidate-events` | Flink/Kafka consumer 的受控验收桥 | `BPI_EVENT_INGEST` + tenant/plant/line scope + 显式启用 | `201` 候选；非法 Protobuf/证据 `422`；跨 tenant `403` | inbox、candidate evidence/missing signals |
 | POST | `/internal/bpi/v1/telemetry` | 仅受控 replay/验收工具 | `BPI_EVENT_INGEST` + tenant/plant/line scope + 显式启用 | `201` 接收；幂等重放 `200`；隔离 `202`；身份冲突 `409` | 短期 staging：event、point、point reject、source state、quarantine |
@@ -218,8 +226,8 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 | `bpi.batch.candidate.dlq.v1` | 原 partition/key | 原 `BatchCandidateV1` bytes + DLT headers | BPI consumer -> 运维处置 | CONSUMER_WIRED_LIVE_BLOCKED |
 | `bpi.data-quality.v1` | `tenantId|lineId|sourceEventId|propertyId|issueCode` | `DataQualityEventV1`；payload 另含 `plantId/deviceId/headers.stage` | ingest/Flink -> BPI consumer/PostgreSQL | LOCAL_KAFKA_POSTGRES_ACCEPTED_TARGET_PENDING |
 | `bpi.data-quality.dlq.v1` | 原 partition/key | 原 `DataQualityEventV1` bytes + DLT headers | BPI consumer -> 运维处置 | LOCAL_KAFKA_POSTGRES_ACCEPTED_TARGET_PENDING |
-| `qcs.batch.quality-gate.v1` | `batchId|qualityGateId` | `QcsQualityGateV1` | QCS adapter -> BPI inbox/PostgreSQL | TARGET_TOPIC_CREATED_CONTROLLED_HTTP_INGRESS_ACCEPTED_DISABLED_BY_DEFAULT |
-| `qcs.batch.quality-gate.dlq.v1` | 原 partition/key | 原 `QcsQualityGateV1` bytes + DLT headers | BPI consumer -> 运维处置 | TARGET_TOPIC_CREATED_DISABLED_BY_DEFAULT |
+| `qcs.batch.quality-gate.v1` | `batchId|qualityGateId` | `QcsQualityGateV1` | QCS PostgreSQL outbox/Java 8 sidecar -> BPI inbox/PostgreSQL | TARGET_QCS_PAGE_KAFKA_POSTGRES_ACCEPTED_REPLAY_CLEANED_DISABLED_BY_DEFAULT |
+| `qcs.batch.quality-gate.dlq.v1` | 原 partition/key | 原 `QcsQualityGateV1` bytes + DLT headers | BPI consumer -> 运维处置 | TARGET_ZERO_DLQ_ACCEPTED_DISABLED_BY_DEFAULT |
 | `bpi.wms.completion-inbound-command.v1` | `tenantId|plantId|batchId` | `WmsCompletionInboundCommandV1` | BPI transactional outbox -> WMS adapter | TARGET_CONTROLLED_KAFKA_MATERIAL_WMS_ACCEPTED_DISABLED_BY_DEFAULT |
 | `bpi.wms.completion-inbound-command.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundCommandV1` bytes + DLT headers | WMS adapter -> 运维处置 | TARGET_TOPIC_CREATED_DISABLED_BY_DEFAULT |
 | `wms.completion-inbound.receipt.v1` | `commandEventId` | `WmsCompletionInboundReceiptV1` | WMS adapter -> BPI inbox/PostgreSQL | TARGET_CONTROLLED_KAFKA_POSTGRES_ACCEPTED_DISABLED_BY_DEFAULT |

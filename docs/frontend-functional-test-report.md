@@ -789,12 +789,29 @@ force-close 精确路由；修复提交 `1962f599b3ea90b1863548f45998f6e0fa89cc1
 完整请求、PostgreSQL 中间态、最终态、哈希和边界见
 `docs/testing/bpi-force-close-acceptance.md`。
 
+### QCS 主动质量门到 BPI 幂等重放（2026-07-21）
+
+本节在当前唯一测试环境 `http://10.11.100.17:18080` 使用真实 WOM/QCS 页面、PostgreSQL 事务
+outbox、Java 8 sidecar、三 broker Kafka、Java 17 BPI service 和 `ft_mes_bpi` PostgreSQL V24。
+验收期间只临时开启精确 LINE scope；取证后双库 marker 已清零，六个相关开关均恢复为 false。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WOM/QCS 质量门 | `/msService/WOM/produceTask/produceTask/makeTaskList` -> `/msService/QCS/inspect/inspect/manuInspectList` -> `/msService/QCS/inspectReport/inspectReport/manuInspReportEdit` | marker 任务请检、请检两段提交、报告保存和两段生效 | `POST .../createManuInspect`；`POST .../bulkSubmit`；`POST .../batchDealReports` | 所有业务请求 200；WOM、QCS 列表和报告页真实渲染；console/page/request/failed response 均为 0 | 报告 `99/r4/合格`；WOM/批次回写已检、合格；事务 outbox `SENT/attempt=1`；BPI `RELEASED/r3/ACCEPTED` | WOM/QCS/批次/工作流、`qcs_bpi_quality_gate_outbox`、BPI batch/gate/link/inbox/state/audit | PASS_TARGET_QCS_BPI | QCS 列表仍显示 `ec.common.tableNo`；生效报告只读页未回显“检验结论”，但 API/PG report 与 component 均为合格，均作为独立显示缺陷保留 |
+| QCS 质量门幂等重放 | 不适用，受控运维复验 | 同一 outbox 定向重排并等待 Kafka 第二次消费 | `GET /internal/bpi/v1/batches/resolve`；Kafka `qcs.batch.quality-gate.v1` | 不增加额外页面动作 | 同 event、同 payload SHA；outbox `SENT/attempt=2`；BPI 投影前后完全一致；topic replay +1、DLQ 0、lag 0 | 同上 | PASS_IDEMPOTENT_CLEANED | 终态仅允许 gate ID/revision/source event 三元组完全一致的重放 |
+
+marker：`ADP_E2E_20260721021607_QCS_BPI`。机器证据：
+`metadata/qcs-bpi-quality-gate-target-acceptance.json`；截图：
+`metadata/qcs-bpi-quality-gate-target-wom.png`、`metadata/qcs-bpi-quality-gate-target-list.png`、
+`metadata/qcs-bpi-quality-gate-target-report.png`；详细报告：
+`docs/testing/qcs-bpi-quality-gate-target-acceptance.md`。本轮使用影子批次，因此 WMS 不应被请求。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。
 - 基础配置中的系统编码字典项/字典值 CRUD，以及系统配置 app 目录/配置项新增、配置值更新读取、删除清理已完成真实前端和 PostgreSQL 落库验收；系统配置内置目录已补只读列表/详情/页面/PG 元数据 smoke，QCS 单项运行配置已补保存/回读/回滚和配置回滚后完整报告链路复验证据；RM/BaseSet 后续运行配置、PostgreSQL 物理模型表自动创建、Nacos/Keycloak 生产配置链路和其他配置类页面仍需继续形成专项验收记录。
 - 生产模块当前已有 API/layout 与页面可达性 smoke，WOM 动作页渲染、列表动作、制造指令、报工、独立不良数量、请检、二维码生成与打印状态回填、QCS 合格/不合格处理、完工入库、ProcessAnalysis 追溯和 6 个生产列表导出均已完成真实前端与 PostgreSQL/文件响应验收。现场 Batch/DCS 联调作为生产切换门禁单独管理。
-- 生产列表页仍存在 `ec.common.tableNo` 这类 i18n key 外露的显示问题；本轮未把它作为落库阻断项处理，后续需要补 i18n/resource 专项修复和复验。
+- 生产/QCS 页面仍存在 `ec.common.tableNo` 这类 i18n key 外露，以及生效报告只读页未回显“检验结论”的显示问题；本轮未把它们误记为落库失败，后续需要补 i18n/resource 与只读表单绑定专项修复和复验。
 
 ## 记录要求
 

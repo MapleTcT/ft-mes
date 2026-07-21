@@ -194,6 +194,8 @@ function runWomManufacturingInspect(evidence) {
     status: womEvidence.status,
     marker: womEvidence.marker,
     taskId: womEvidence.ids && womEvidence.ids.task,
+    tableNo: womEvidence.tableNo,
+    womLineId: womEvidence.womLineId,
     batchNo: womEvidence.batchNo,
     inspectId: womEvidence.persistence && womEvidence.persistence.inspect && womEvidence.persistence.inspect[1],
     createManuInspect: womEvidence.createManuInspect,

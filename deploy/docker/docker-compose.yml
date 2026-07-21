@@ -625,6 +625,46 @@ services:
       bpi-migrate:
         condition: service_completed_successfully
 
+  qcs-quality-gate-outbox:
+    image: ${QCS_BPI_OUTBOX_IMAGE:-ft-mes-qcs-quality-gate-outbox:local}
+    profiles: ["bpi"]
+    build:
+      context: ../..
+      dockerfile: backend/source-modules/qcs-quality-gate-outbox/Dockerfile.runtime
+      args:
+        JAVA_IMAGE: ${QCS_BPI_OUTBOX_JAVA_IMAGE:-m.daocloud.io/docker.io/eclipse-temurin:8-jre}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      QCS_BPI_OUTBOX_SERVER_PORT: "19083"
+      QCS_BPI_OUTBOX_DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-adp}
+      QCS_BPI_OUTBOX_DATABASE_USERNAME: ${QCS_BPI_OUTBOX_DATABASE_USERNAME:-adp}
+      QCS_BPI_OUTBOX_DATABASE_PASSWORD: ${QCS_BPI_OUTBOX_DATABASE_PASSWORD:-adp123456}
+      QCS_BPI_OUTBOX_ENABLED: ${QCS_BPI_OUTBOX_ENABLED:-false}
+      QCS_BPI_OUTBOX_TOPIC: ${BPI_PHASE2_QCS_TOPIC:-qcs.batch.quality-gate.v1}
+      QCS_BPI_OUTBOX_BPI_BASE_URL: http://bpi-service:19091
+      BPI_INTERNAL_JWT_SECRET: ${BPI_INTERNAL_JWT_SECRET:-bpi-dev-secret-change-before-deploy-0001}
+      BPI_INTERNAL_JWT_ISSUER: ${BPI_INTERNAL_JWT_ISSUER:-ft-mes-adapter}
+      BPI_INTERNAL_JWT_AUDIENCE: ${BPI_INTERNAL_JWT_AUDIENCE:-bpi-service}
+      QCS_BPI_OUTBOX_KAFKA_BOOTSTRAP_SERVERS: ${QCS_BPI_OUTBOX_KAFKA_BOOTSTRAP_SERVERS:-100.99.133.43:29092,100.99.133.43:39092,100.99.133.43:49092}
+      QCS_BPI_OUTBOX_KAFKA_CLIENT_ID: ${QCS_BPI_OUTBOX_KAFKA_CLIENT_ID:-ft-mes-qcs-quality-gate-outbox}
+      QCS_BPI_OUTBOX_BATCH_SIZE: ${QCS_BPI_OUTBOX_BATCH_SIZE:-50}
+      QCS_BPI_OUTBOX_MAX_ATTEMPTS: ${QCS_BPI_OUTBOX_MAX_ATTEMPTS:-20}
+      QCS_BPI_OUTBOX_CLAIM_TIMEOUT_MS: ${QCS_BPI_OUTBOX_CLAIM_TIMEOUT_MS:-120000}
+      QCS_BPI_OUTBOX_POLL_DELAY_MS: ${QCS_BPI_OUTBOX_POLL_DELAY_MS:-1000}
+    ports:
+      - "${QCS_BPI_OUTBOX_BIND_ADDRESS:-127.0.0.1}:${QCS_BPI_OUTBOX_HTTP_PORT:-19083}:19083"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/19083'"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    depends_on:
+      postgres:
+        condition: service_healthy
+      bpi-service:
+        condition: service_healthy
+
   bpi-adapter:
     image: ${BPI_ADAPTER_IMAGE:-ft-mes-bpi-adapter:local}
     profiles: ["bpi"]

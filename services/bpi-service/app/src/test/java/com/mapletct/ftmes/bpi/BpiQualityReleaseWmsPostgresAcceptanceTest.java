@@ -75,6 +75,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
     private UUID topologyId;
     private UUID ruleId;
     private UUID batchId;
+    private String orderId;
     private String integrationToken;
     private String viewerToken;
     private String adminToken;
@@ -85,6 +86,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
         topologyId = UUID.randomUUID();
         ruleId = UUID.randomUUID();
         batchId = UUID.randomUUID();
+        orderId = "ADP_E2E_ORDER_" + batchId;
         jdbc.update("""
                 INSERT INTO bpi.bpi_topology_versions
                     (id, tenant_id, topology_code, version, state, checksum, definition, created_by)
@@ -108,11 +110,78 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                         now() - interval '2 hours', now() - interval '1 hour',
                         12.345000, 't', 'NOT_APPLICABLE', 'NOT_REQUESTED', ?, ?, 'acceptance')
                 """, batchId, tenantId, PLANT_ID, "ADP_E2E_BATCH_" + batchId,
-                LINE_ID, "ADP_E2E_ORDER_" + batchId, MATERIAL_CODE, topologyId, ruleId);
+                LINE_ID, orderId, MATERIAL_CODE, topologyId, ruleId);
         integrationToken = token(List.of("BPI_INTEGRATION_INGEST"));
         viewerToken = token(List.of("BPI_VIEWER"));
         adminToken = token(List.of("BPI_ADMIN"));
         System.out.printf("BPI_PHASE2_ACCEPTANCE_MARKER tenant=%s batchId=%s%n", tenantId, batchId);
+    }
+
+    @Test
+    void integrationBatchResolutionIsScopedAndFailsClosedOnAmbiguity() throws Exception {
+        mockMvc.perform(get("/internal/bpi/v1/batches/resolve")
+                        .header("Authorization", "Bearer " + integrationToken)
+                        .param("plantId", PLANT_ID)
+                        .param("lineId", LINE_ID)
+                        .param("orderId", orderId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(batchId.toString()))
+                .andExpect(jsonPath("$.data.orderId").value(orderId))
+                .andExpect(jsonPath("$.data.materialCode").value(MATERIAL_CODE))
+                .andExpect(jsonPath("$.data.quantity").value(12.345))
+                .andExpect(jsonPath("$.data.quantityUnit").value("t"))
+                .andExpect(jsonPath("$.data.currentQualityGateId").doesNotExist())
+                .andExpect(jsonPath("$.data.currentQualityGateRevision").doesNotExist())
+                .andExpect(jsonPath("$.data.currentQualityGateSourceEventId").doesNotExist());
+
+        mockMvc.perform(get("/internal/bpi/v1/batches/resolve")
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .param("plantId", PLANT_ID)
+                        .param("lineId", LINE_ID)
+                        .param("orderId", orderId))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/internal/bpi/v1/batches/resolve")
+                        .header("Authorization", "Bearer " + integrationToken)
+                        .param("plantId", PLANT_ID)
+                        .param("lineId", LINE_ID)
+                        .param("orderId", orderId + "-MISSING"))
+                .andExpect(status().isNotFound());
+
+        jdbc.update("""
+                INSERT INTO bpi.bpi_batch_instances
+                    (id, tenant_id, plant_id, batch_no, line_id, stage_code, order_id,
+                     material_code, state, revision, is_shadow, start_time, end_time,
+                     quantity, quantity_unit, quality_gate, wms_status,
+                     topology_version_id, rule_version_id, created_by)
+                VALUES (?, ?, ?, ?, ?, 'PACKING', ?, ?, 'CLOSED_RAW', 1, false,
+                        now() - interval '3 hours', now() - interval '2 hours',
+                        12.345000, 't', 'NOT_APPLICABLE', 'NOT_REQUESTED', ?, ?, 'acceptance')
+                """, UUID.randomUUID(), tenantId, PLANT_ID, "ADP_E2E_DUPLICATE_" + batchId,
+                LINE_ID, orderId, MATERIAL_CODE, topologyId, ruleId);
+
+        mockMvc.perform(get("/internal/bpi/v1/batches/resolve")
+                        .header("Authorization", "Bearer " + integrationToken)
+                        .param("plantId", PLANT_ID)
+                        .param("lineId", LINE_ID)
+                        .param("orderId", orderId))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail")
+                        .value(org.hamcrest.Matchers.containsString("Multiple BPI batches")));
+    }
+
+    @Test
+    void integrationBatchResolutionRequiresQcsLinkAtExactScope() throws Exception {
+        jdbc.update("DELETE FROM bpi.bpi_feature_flags WHERE tenant_id = ? AND flag_key = 'bpi.qcs-link'", tenantId);
+
+        mockMvc.perform(get("/internal/bpi/v1/batches/resolve")
+                        .header("Authorization", "Bearer " + integrationToken)
+                        .param("plantId", PLANT_ID)
+                        .param("lineId", LINE_ID)
+                        .param("orderId", orderId))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.detail")
+                        .value(org.hamcrest.Matchers.containsString("disabled for this scope")));
     }
 
     @AfterEach
@@ -185,6 +254,18 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.batch.wmsStatus").value("PENDING"))
                 .andExpect(jsonPath("$.data.qualityGate.state").value("ACCEPTED"))
                 .andExpect(jsonPath("$.data.wmsInbound.status").value("PENDING"));
+
+        mockMvc.perform(get("/internal/bpi/v1/batches/resolve")
+                        .header("Authorization", "Bearer " + integrationToken)
+                        .param("plantId", PLANT_ID)
+                        .param("lineId", LINE_ID)
+                        .param("orderId", orderId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("RELEASED"))
+                .andExpect(jsonPath("$.data.currentQualityGateId").value(gateId))
+                .andExpect(jsonPath("$.data.currentQualityGateRevision").value(2))
+                .andExpect(jsonPath("$.data.currentQualityGateSourceEventId")
+                        .value("QCS-ACCEPTED-" + batchId));
 
         assertThat(count("bpi_outbox_events")).isEqualTo(1);
         assertThat(count("bpi_wms_inbound_links")).isEqualTo(1);

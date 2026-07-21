@@ -506,6 +506,21 @@ public class BpiPostgresRepository {
         return jdbc.query(sql.toString(), parameters, batchRowMapper());
     }
 
+    public List<BatchInstance> findBatchesByOrder(
+            ActorContext actor, String plantId, String lineId, String orderId) {
+        StringBuilder sql = new StringBuilder(BATCH_SELECT)
+                .append(" WHERE b.tenant_id = :tenantId")
+                .append(" AND b.plant_id = :plantId")
+                .append(" AND b.line_id = :lineId")
+                .append(" AND b.order_id = :orderId");
+        MapSqlParameterSource parameters = scopedParameters(actor, sql, "b")
+                .addValue("plantId", plantId)
+                .addValue("lineId", lineId)
+                .addValue("orderId", orderId);
+        sql.append(" ORDER BY b.start_time DESC, b.id LIMIT 2");
+        return jdbc.query(sql.toString(), parameters, batchRowMapper());
+    }
+
     public BatchInstance findBatch(ActorContext actor, UUID batchId) {
         return findBatch(actor, batchId, false);
     }

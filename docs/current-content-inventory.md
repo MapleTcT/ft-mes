@@ -10,7 +10,7 @@
 - 反编译服务 Java：`259` 个文件。
 - 前端 source map：`366` 个。
 - 前端恢复源码：`991` 个文件。
-- Docker Compose 服务：`64` 个。
+- Docker Compose 服务：`65` 个。
 - 默认数据库：`postgresql`。
 - Oracle 模式：`legacy-template-only`。
 
@@ -135,6 +135,7 @@
 | ProcessAnalysis | business-runtime | bap-server/module-Server/ProcessAnalysis/manual/process-analysis.jar |
 | bpi-migrate | support-runtime | - |
 | bpi-service | support-runtime | - |
+| qcs-quality-gate-outbox | support-runtime | - |
 | bpi-adapter | support-runtime | - |
 | bpi-wms-adapter | support-runtime | - |
 | FoundationMs | business-runtime | bap-server/module-Server/FoundationMs/manual/FoundationMs-1.0.0.jar |

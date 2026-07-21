@@ -22,6 +22,7 @@
     {"name": "Feature Flags"},
     {"name": "Datasets"},
     {"name": "Integrations"},
+    {"name": "Internal Integrations"},
     {"name": "Audit"}
   ],
   "paths": {
@@ -163,6 +164,26 @@
           {"$ref": "#/components/parameters/Limit"}
         ],
         "responses": {"200": {"description": "批次列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BatchListResponse"}}}}}
+      }
+    },
+    "/internal/bpi/v1/batches/resolve": {
+      "get": {
+        "tags": ["Internal Integrations"],
+        "operationId": "resolveIntegrationBatch",
+        "summary": "按受信 tenant、工厂、产线和外部生产订单唯一解析 BPI 批次",
+        "description": "仅供 QCS 等内部 sidecar 使用。Phase 2、精确 allowlist 和该 scope 的 bpi.qcs-link 均启用后才可访问；零条返回 404，多条返回 409，不做猜测。",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": true, "schema": {"type": "string", "maxLength": 64}},
+          {"name": "lineId", "in": "query", "required": true, "schema": {"type": "string", "maxLength": 128}},
+          {"name": "orderId", "in": "query", "required": true, "schema": {"type": "string", "maxLength": 128}}
+        ],
+        "responses": {
+          "200": {"description": "唯一匹配的批次", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/IntegrationBatchResolutionResponse"}}}},
+          "403": {"$ref": "#/components/responses/Forbidden"},
+          "404": {"$ref": "#/components/responses/NotFound"},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "422": {"$ref": "#/components/responses/Unprocessable"}
+        }
       }
     },
     "/bpi/v1/batches/{batchId}": {
@@ -819,6 +840,36 @@
       },
       "BatchResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Batch"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "BatchListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Batch"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "IntegrationBatchResolution": {
+        "type": "object",
+        "required": ["id", "batchNo", "tenantId", "plantId", "lineId", "stageCode", "orderId", "materialCode", "state", "revision", "shadow", "startTime", "quantity", "quantityUnit", "qualityGate", "wmsStatus"],
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "batchNo": {"type": "string"},
+          "tenantId": {"type": "string"},
+          "plantId": {"type": "string"},
+          "lineId": {"type": "string"},
+          "stageCode": {"type": "string"},
+          "orderId": {"type": "string"},
+          "materialCode": {"type": ["string", "null"]},
+          "state": {"type": "string"},
+          "revision": {"type": "integer", "format": "int64", "minimum": 0},
+          "shadow": {"type": "boolean"},
+          "startTime": {"type": "string", "format": "date-time"},
+          "endTime": {"type": ["string", "null"], "format": "date-time"},
+          "quantity": {"type": "number"},
+          "quantityUnit": {"type": "string"},
+          "dryMatter": {"type": ["number", "null"]},
+          "qualityGate": {"type": "string"},
+          "wmsStatus": {"type": "string"},
+          "ruleVersion": {"type": ["string", "null"]},
+          "topologyVersion": {"type": ["string", "null"]},
+          "currentQualityGateId": {"type": ["string", "null"]},
+          "currentQualityGateRevision": {"type": ["integer", "null"], "format": "int64", "minimum": 0},
+          "currentQualityGateSourceEventId": {"type": ["string", "null"]}
+        }
+      },
+      "IntegrationBatchResolutionResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/IntegrationBatchResolution"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "ShadowRunCreateCommand": {
         "type": "object",
         "required": ["runCode", "name", "plantId", "lineId", "ruleVersionId", "minimumDurationDays", "minimumReviewedBatches", "boundaryToleranceSeconds", "minimumBoundaryAgreement", "quantityTolerancePercent", "reason"],

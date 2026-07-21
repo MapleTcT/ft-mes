@@ -587,12 +587,12 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 64,
+    "composeServiceCount": 65,
     "composeServiceKindCounts": {
       "business-runtime": 20,
       "infrastructure": 11,
       "platform-runtime": 28,
-      "support-runtime": 5
+      "support-runtime": 6
     },
     "composeServices": [
       {
@@ -842,6 +842,11 @@
       },
       {
         "service": "bpi-service",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "qcs-quality-gate-outbox",
         "jarPath": "",
         "kind": "support-runtime"
       },

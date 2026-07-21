@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`192`。
-- 编号范围：`001` 到 `192`。
+- 脚本数量：`193`。
+- 编号范围：`001` 到 `193`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`73`。
+- 需关注语句：`75`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -21,7 +21,7 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 37 |
-| business | 34 |
+| business | 35 |
 | compatibility | 76 |
 | configuration | 42 |
 | general | 34 |
@@ -34,22 +34,22 @@
 | Statement | Count |
 | --- | --- |
 | alter-table | 10818 |
-| create-function | 88 |
-| create-index | 999 |
-| create-table | 578 |
+| create-function | 92 |
+| create-index | 1002 |
+| create-table | 579 |
 | create-view | 142 |
-| insert | 11011 |
-| update | 11095 |
+| insert | 11012 |
+| update | 11098 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 227 |
+| create-or-replace | 231 |
 | do-block | 392 |
-| if-exists | 114 |
-| if-not-exists | 13024 |
-| on-conflict | 10949 |
+| if-exists | 117 |
+| if-not-exists | 13028 |
+| on-conflict | 10950 |
 | to-regclass | 219 |
 | where-not-exists | 44 |
 
@@ -249,6 +249,7 @@
 | 190 | 190-rm-web-formula-editor.sql | general | 195 | create-table:3, create-function:1, create-index:4, update:2 | 13 | watch:1 |
 | 191 | 191-wom-quality-quantity-reporting.sql | general | 482 | create-table:4, create-function:1, create-index:9, alter-table:16, insert:1, update:4 | 25 | - |
 | 192 | 192-material-wms-bpi-idempotency.sql | general | 29 | create-index:3, alter-table:5 | 9 | - |
+| 193 | 193-qcs-bpi-quality-gate-outbox.sql | business | 385 | create-table:1, create-function:4, create-index:3, insert:1, update:3 | 12 | watch:2 |
 
 ## 规则
 

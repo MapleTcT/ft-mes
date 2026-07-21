@@ -1,6 +1,9 @@
 package com.mapletct.ftmes.bpi.application;
 
 import com.mapletct.ftmes.bpi.application.error.BpiForbiddenException;
+import com.mapletct.ftmes.bpi.application.error.BpiConflictException;
+import com.mapletct.ftmes.bpi.application.error.BpiNotFoundException;
+import com.mapletct.ftmes.bpi.application.error.BpiValidationException;
 import com.mapletct.ftmes.bpi.domain.BatchInstance;
 import com.mapletct.ftmes.bpi.domain.BatchStateEvent;
 import com.mapletct.ftmes.bpi.domain.BoundaryType;
@@ -34,6 +37,30 @@ public class BatchQueryService {
     }
 
     @Transactional(readOnly = true)
+    public BatchInstance resolveIntegrationBatch(
+            ActorContext actor, String plantId, String lineId, String orderId) {
+        String normalizedPlant = required(plantId, "plantId", 64);
+        String normalizedLine = required(lineId, "lineId", 128);
+        String normalizedOrder = required(orderId, "orderId", 128);
+        if (!actor.canAccess(normalizedPlant, normalizedLine)) {
+            throw new BpiForbiddenException("Token scope does not allow this batch scope.");
+        }
+        if (!repository.featureEnabled(actor, normalizedPlant, normalizedLine, "bpi.qcs-link")) {
+            throw new BpiForbiddenException("QCS quality-gate integration is disabled for this scope.");
+        }
+        List<BatchInstance> matches = repository.findBatchesByOrder(
+                actor, normalizedPlant, normalizedLine, normalizedOrder);
+        if (matches.isEmpty()) {
+            throw new BpiNotFoundException("No BPI batch matches the external production order.");
+        }
+        if (matches.size() > 1) {
+            throw new BpiConflictException(
+                    "Multiple BPI batches match the external production order; explicit mapping is required.", null);
+        }
+        return matches.get(0);
+    }
+
+    @Transactional(readOnly = true)
     public Map<String, List<EvidenceView>> evidence(ActorContext actor, UUID batchId) {
         BatchInstance batch = get(actor, batchId);
         return Map.of(
@@ -51,5 +78,16 @@ public class BatchQueryService {
         if (!actor.canAccess(batch.plantId(), batch.lineId())) {
             throw new BpiForbiddenException("Token scope does not allow this batch.");
         }
+    }
+
+    private String required(String value, String field, int maxLength) {
+        if (value == null || value.isBlank()) {
+            throw new BpiValidationException(field + " is required.");
+        }
+        String normalized = value.trim();
+        if (normalized.length() > maxLength) {
+            throw new BpiValidationException(field + " exceeds the maximum length.");
+        }
+        return normalized;
     }
 }

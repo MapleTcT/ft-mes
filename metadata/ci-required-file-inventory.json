@@ -561,6 +561,174 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/scripts/test-postgres-outbox.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/BpiBatchResolutionResponse.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/BpiBatchResolver.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/HttpBpiBatchResolver.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/KafkaQcsQualityGatePublisher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/PermanentQcsOutboxException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/QcsInspectionSnapshot.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/QcsInternalJwtIssuer.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/QcsOutboxConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/QcsQualityGateOutboxApplication.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/QcsQualityGateOutboxDispatcher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/QcsQualityGateOutboxProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/QcsQualityGateOutboxRecord.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/QcsQualityGateOutboxRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/QcsQualityGateProjector.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/QcsQualityGatePublisher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/ResolvedBpiBatch.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/java/com/mapletct/ftmes/qcsoutbox/RetryableQcsOutboxException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/test/java/com/mapletct/ftmes/qcsoutbox/HttpBpiBatchResolverTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/test/java/com/mapletct/ftmes/qcsoutbox/KafkaQcsQualityGatePublisherTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/test/java/com/mapletct/ftmes/qcsoutbox/QcsInternalJwtIssuerTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/test/java/com/mapletct/ftmes/qcsoutbox/QcsQualityGateOutboxApplicationTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/test/java/com/mapletct/ftmes/qcsoutbox/QcsQualityGateOutboxDispatcherTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/test/java/com/mapletct/ftmes/qcsoutbox/QcsQualityGateOutboxPropertiesTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/qcs-quality-gate-outbox/src/test/java/com/mapletct/ftmes/qcsoutbox/QcsQualityGateProjectorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "backend/source-modules/rm-formula-editor/README.md",
       "state": "tracked",
       "tracked": true
@@ -3285,6 +3453,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/193-qcs-bpi-quality-gate-outbox.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4144,6 +4318,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/run-bpi-wms-outage-recovery-target.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/run-qcs-bpi-quality-gate-target.js",
       "state": "tracked",
       "tracked": true
     },
@@ -5367,6 +5547,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/qcs-bpi-quality-gate-target-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/wom-toolbar-action-coverage.md",
       "state": "tracked",
       "tracked": true
@@ -6280,6 +6466,30 @@
     {
       "ignored": false,
       "path": "metadata/project-goal-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-bpi-quality-gate-target-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-bpi-quality-gate-target-list.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-bpi-quality-gate-target-report.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-bpi-quality-gate-target-wom.png",
       "state": "tracked",
       "tracked": true
     },
@@ -7216,6 +7426,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/GoldenBoundary.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/IntegrationBatchResolution.java",
       "state": "tracked",
       "tracked": true
     },
@@ -9212,22 +9428,22 @@
       "tracked": 3
     },
     "backend": {
-      "tracked": 164
+      "tracked": 192
     },
     "contracts": {
       "tracked": 20
     },
     "deploy": {
-      "tracked": 594
+      "tracked": 596
     },
     "docs": {
-      "tracked": 112
+      "tracked": 113
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 175
+      "tracked": 179
     },
     "package.json": {
       "tracked": 1
@@ -9239,7 +9455,7 @@
       "tracked": 55
     },
     "services": {
-      "tracked": 291
+      "tracked": 292
     },
     "simulation": {
       "tracked": 4
@@ -9251,8 +9467,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1532,
-    "tracked": 1532,
+    "totalFiles": 1568,
+    "tracked": 1568,
     "untracked": 0
   },
   "untrackedByDirectory": []

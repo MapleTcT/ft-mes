@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-20T21:35:04.217Z",
-  "repoCommit": "1962f599b3ea90b1863548f45998f6e0fa89cc1d",
+  "generatedAt": "2026-07-21T01:30:49.045Z",
+  "repoCommit": "21ec56c744c23f2db52ab1a5abc077023fc44462",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
-    "generatedAt": "2026-07-19T21:10:26.000Z",
+    "generatedAt": "2026-07-21T01:30:49.045Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -141,11 +141,17 @@
       "marker": "ADP_E2E_20260721_015610_WMS_RECON",
       "evidence": "metadata/bpi-wms-reconciliation-target-acceptance.json; metadata/bpi-wms-reconciliation-target.png",
       "assertions": "real batch page action and POST 200; same command event and WMS idempotency key; link/outbox PENDING r2; API replay header true; stale revision 409/currentRevision=2; audit/idempotency/outbox 1/1/1; browser errors zero; marker residual zero; five Phase 2/WMS switches restored false; external ERP/WMS outage, reversal and compensation remain pending"
+    },
+    "bpiQcsQualityGateTarget": {
+      "status": "PASS_TARGET_QCS_PAGE_KAFKA_POSTGRES_REPLAY_CLEANED",
+      "marker": "ADP_E2E_20260721021607_QCS_BPI",
+      "evidence": "metadata/qcs-bpi-quality-gate-target-acceptance.json; metadata/qcs-bpi-quality-gate-target-wom.png; metadata/qcs-bpi-quality-gate-target-list.png; metadata/qcs-bpi-quality-gate-target-report.png",
+      "assertions": "real WOM/QCS pages and HTTP 200 chain; browser errors zero; QCS transaction outbox SENT attempt 1; Kafka first delta 1; BPI RELEASED/r3 and ACCEPTED with gate/link/inbox 1/1/1, state/audit 2/2 and WMS outbox 0; exact same event and payload replay SENT attempt 2 with unchanged projection; replay delta 1, DLQ 0, lag 0; ADP/BPI residual zero; six switches restored false; external production enablement and WMS remain pending"
     }
   },
   "summary": {
-    "testedFeatures": 196,
-    "pass": 193,
+    "testedFeatures": 197,
+    "pass": 194,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -4285,9 +4291,49 @@
       "status": "PASS",
       "evidence": "metadata/bpi-force-close-target-acceptance.json; cleanup output SHA-256 86f7462ca487cd787491630ba23cd015e201f03d8b5d156340ebfd94ed672a8f, residualRows=0 and three BPI containers healthy",
       "issues": []
+    },
+    {
+      "module": "QCS主动质量门到BPI",
+      "route": "http://10.11.100.17:18080/msService/WOM/produceTask/produceTask/makeTaskList -> /msService/QCS/inspect/inspect/manuInspectList -> /msService/QCS/inspectReport/inspectReport/manuInspReportEdit",
+      "operation": "真实WOM请检和QCS合格报告生效后发布质量门，并将同一outbox定向重放",
+      "api": "POST /msService/WOM/produceTask/produceTask/createManuInspect; POST /msService/QCS/inspect/inspect/bulkSubmit; POST /msService/QCS/inspectReport/inspectReport/batchDealReports; GET /internal/bpi/v1/batches/resolve; Kafka qcs.batch.quality-gate.v1",
+      "method": "POST/GET/KAFKA",
+      "requiresPersistence": true,
+      "backendEntry": "QCSInspectReportServiceImpl.batchDealReports -> qcs_bpi_enqueue_quality_gate -> QcsQualityGateOutboxDispatcher -> HttpBpiBatchResolver -> KafkaQcsQualityGatePublisher -> QcsQualityGateKafkaListener -> BatchReleaseService -> BatchReleasePostgresRepository",
+      "tables": [
+        "public.qcs_inspects",
+        "public.qcs_inspect_reports",
+        "public.qcs_report_coms",
+        "public.qcs_bpi_quality_gate_outbox",
+        "public.wom_produce_tasks",
+        "public.wom_wait_put_records",
+        "public.wom_produce_task_exelog",
+        "public.baseset_batch_infos",
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_quality_gates",
+        "bpi.bpi_quality_links",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_outbox_events"
+      ],
+      "marker": "ADP_E2E_20260721021607_QCS_BPI",
+      "verificationSql": "deploy/docker/scripts/bpi-qcs-quality-gate-target-verification.sql; verify QCS outbox SENT/attempt 1 then 2, same event and SHA, BPI RELEASED/r3/ACCEPTED/NOT_REQUESTED, gate/link/inbox/state/audit/WMS outbox 1/1/1/2/2/0 before and after replay, then run bpi-qcs-quality-gate-target-cleanup.sql and require ADP/BPI residual 0",
+      "status": "PASS",
+      "evidence": "metadata/qcs-bpi-quality-gate-target-acceptance.json; real QCS pages and business requests returned 200 with zero browser errors; Kafka first/replay delta 1/1, DLQ 0 and lag 0; six related switches restored false",
+    "issues": [
+      "The accepted batch is SHADOW, so WMS outbox=0 is expected and external WMS is not covered.",
+      "The existing QCS list i18n key ec.common.tableNo remains a separate display defect.",
+      "The effective QCS report read-only page does not visually echo the qualified conclusion even though API and PostgreSQL report/component values are qualified."
+    ]
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260721021607_QCS_BPI",
+      "artifact": "metadata/qcs-bpi-quality-gate-target-acceptance.json",
+      "summary": "Real WOM/QCS pages, PostgreSQL transactional outbox, Java 8 sidecar, Kafka, BPI PostgreSQL projection, exact terminal replay and dual-database zero cleanup passed on 10.11.100.17; the shadow batch correctly produced no WMS command and all six write switches were restored false."
+    },
     {
       "marker": "ADP_E2E_20260721053253_BPI_FORCE_CLOSE",
       "artifact": "metadata/bpi-force-close-target-acceptance.json",

@@ -2,8 +2,14 @@
   "profile": "phase-2-quality-release-wms-inbound",
   "description": "Dormant-by-default QCS quality-gate and WMS completion-inbound integration implemented behind independent code, scope and feature gates.",
   "mode": "DISABLED_BY_DEFAULT",
-  "readOperationIds": ["getBatchRelease"],
+  "readOperationIds": ["getBatchRelease", "resolveIntegrationBatch"],
   "internalEndpoints": [
+    {
+      "method": "GET",
+      "path": "/internal/bpi/v1/batches/resolve",
+      "message": null,
+      "purpose": "Resolve exactly one BPI batch from the trusted tenant/plant/line/order scope only when bpi.qcs-link is enabled; zero and ambiguous matches fail closed"
+    },
     {
       "method": "POST",
       "path": "/internal/bpi/v1/qcs-quality-gates",
@@ -35,6 +41,7 @@
     "Phase 1 service profile remains SHADOW_ONLY",
     "QCS and WMS integration flags remain phase-locked in the runtime UI",
     "Every inbound event is inbox-idempotent and payload-checksummed",
+    "External order resolution requires bpi.qcs-link and exactly one batch in the trusted tenant/plant/line scope",
     "Batch transition, integration projection, outbox and audit rows share one PostgreSQL transaction",
     "A WMS receipt cannot precede durable outbox publication",
     "Only an accepted WMS receipt with document_id can transition RELEASED to INBOUNDED"

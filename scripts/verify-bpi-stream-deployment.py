@@ -49,6 +49,10 @@ REQUIRED_FILES = [
     "backend/source-modules/mes-production-context-outbox/README.md",
     "deploy/docker/postgres/init/176-wom-bpi-production-context-outbox.sql",
     "deploy/docker/postgres/init/177-wom-bpi-context-revision-clock-floor.sql",
+    "backend/source-modules/qcs-quality-gate-outbox/README.md",
+    "backend/source-modules/qcs-quality-gate-outbox/pom.xml",
+    "backend/source-modules/qcs-quality-gate-outbox/scripts/test-postgres-outbox.sh",
+    "deploy/docker/postgres/init/193-qcs-bpi-quality-gate-outbox.sql",
 ]
 
 

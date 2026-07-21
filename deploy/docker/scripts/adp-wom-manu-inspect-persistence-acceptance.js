@@ -18,6 +18,10 @@ const dbName = process.env.ADP_DB_NAME || "adp";
 const dbUser = process.env.ADP_DB_USER || "adp";
 const pageTimeoutMs = Number(process.env.ADP_PAGE_TIMEOUT_MS || 120000);
 const navigationWaitUntil = process.env.ADP_NAV_WAIT_UNTIL || "commit";
+const womLineId = String(process.env.ADP_WOM_LINE_ID || "").trim();
+if (womLineId && !/^\d+$/.test(womLineId)) {
+  throw new Error("ADP_WOM_LINE_ID must be an unsigned integer when provided");
+}
 const nowToken = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
 const marker = process.env.ADP_E2E_MARKER || `ADP_E2E_${nowToken}_WOM_MANU_INSPECT`;
 const outputDir =
@@ -423,13 +427,13 @@ INSERT INTO public.wom_produce_tasks (
   id, ${commonCols}, status, table_no, table_info_id, batch_contral, finish_num,
   formula_id, plan_num, plan_start_time, plan_end_time, produce_batch_num,
   product_id, quality_std_id, task_run_state, task_type, need_pack, is_analy,
-  is_abnormal, is_prepared, advance_charge, act_start_time, work_area_id,
+  is_abnormal, is_prepared, advance_charge, act_start_time, work_area_id, line_id,
   check_times, check_state, check_result, inpect_deal_id, remark
 ) VALUES (
   ${ids.task}, ${commonVals}, 99, ${sqlLiteral(tableNo)}, ${ids.task}, false, 0,
   ${ids.formula}, 1, now() - interval '1 day', now() + interval '1 day', ${sqlLiteral(batchNo)},
   ${ids.material}, ${ids.qualityStd}, 'WOM_runState/runing', 'WOM_taskType/manufacture', false, false,
-  false, false, false, now(), ${ids.workUnit},
+  false, false, false, now(), ${ids.workUnit}, ${womLineId || "NULL"},
   0, NULL, NULL, NULL, NULL
 ) ON CONFLICT (id) DO UPDATE SET
   valid = true,
@@ -438,6 +442,7 @@ INSERT INTO public.wom_produce_tasks (
   product_id = EXCLUDED.product_id,
   quality_std_id = EXCLUDED.quality_std_id,
   produce_batch_num = EXCLUDED.produce_batch_num,
+  line_id = EXCLUDED.line_id,
   task_run_state = EXCLUDED.task_run_state,
   check_times = 0,
   check_state = NULL,
@@ -1101,6 +1106,7 @@ async function main() {
     route,
     qcsRoute,
     tableNo,
+    womLineId: womLineId || null,
     materialCode,
     formulaCode,
     qualityStdCode,

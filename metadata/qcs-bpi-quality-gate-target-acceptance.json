@@ -1,0 +1,206 @@
+{
+  "generatedAt": "2026-07-21T02:18:43.001Z",
+  "status": "PASS_TARGET_QCS_BPI_REPLAY_CLEANED",
+  "target": {
+    "host": "10.11.100.17",
+    "baseUrl": "http://10.11.100.17:18080",
+    "composeProject": "adp-mes-newbase",
+    "runtimeRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "adpDatabase": "adp",
+    "bpiDatabase": "ft_mes_bpi",
+    "bpiSchema": "bpi",
+    "bpiFlywayVersion": 24
+  },
+  "source": {
+    "baseCommit": "21ec56c744c23f2db52ab1a5abc077023fc44462",
+    "branch": "codex/bpi-qcs-outbox",
+    "artifactDigest": "e420c7a512c4"
+  },
+  "runtime": {
+    "deploymentId": "20260721T100828-e420c7a512c4",
+    "bpiService": {
+      "image": "ft-mes-bpi-service:20260721T092245-40a2c642ffdb",
+      "jarSha256": "f279aa27a1d9ab0e8dc8c24f2dcfc8c72ec629695efd536acacb47bfebcfccb4",
+      "health": "healthy"
+    },
+    "qcsOutbox": {
+      "image": "ft-mes-qcs-quality-gate-outbox:20260721T100828-e420c7a512c4",
+      "jarSha256": "8bd787548390abacbd89e25613bea0f1773537e25d238681d19b9fec6c2f0a81",
+      "health": "healthy"
+    },
+    "environmentBackup": "/home/v6/adp-mes-docker-newbase-20260611-181921/backups/qcs-bpi-quality-gate-replay-20260721T100828-e420c7a512c4/.env.before"
+  },
+  "scenario": {
+    "marker": "ADP_E2E_20260721021607_QCS_BPI",
+    "route": "/msService/WOM/produceTask/produceTask/makeTaskList -> /msService/QCS/inspect/inspect/manuInspectList -> /msService/QCS/inspectReport/inspectReport/manuInspReportEdit",
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "womLineId": "8388157374858567",
+    "womTaskId": "8990060021586247",
+    "qcsInspectId": "768102577255680",
+    "qcsReportId": "768102615504128",
+    "batchId": "47bf07ff-4150-41a6-a76d-be974d97b280",
+    "batchIsShadow": true,
+    "eventId": "qcs-gate:1000:768102577255680:4",
+    "qualityGateId": "qcs-inspect:768102577255680",
+    "qualityGateRevision": 4,
+    "payloadSha256": "6f121f3b8375c523a8b16345b062e45c41db83fc176eeddc02526e1872b09fe7"
+  },
+  "browser": {
+    "operations": [
+      {
+        "method": "POST",
+        "endpoint": "/msService/WOM/produceTask/produceTask/createManuInspect",
+        "status": 200,
+        "result": "data.success=true"
+      },
+      {
+        "method": "POST",
+        "endpoint": "/msService/QCS/inspect/inspect/bulkSubmit",
+        "status": 200,
+        "count": 2
+      },
+      {
+        "method": "POST",
+        "endpoint": "/msService/QCS/inspectReport/inspectReport/batchDealReports",
+        "status": 200,
+        "count": 3,
+        "result": "report status=99, version=4, result=qualified"
+      }
+    ],
+    "errors": {
+      "console": 0,
+      "page": 0,
+      "requestFailures": 0,
+      "failedResponses": 0
+    },
+    "knownDisplayIssues": [
+      "The QCS list still renders the existing i18n key ec.common.tableNo; this did not block the accepted persistence chain.",
+      "The effective report read-only page leaves the quality conclusion control visually empty although the API and PostgreSQL report/component values are qualified; this remains a separate presentation defect."
+    ],
+    "screenshots": [
+      {
+        "path": "metadata/qcs-bpi-quality-gate-target-wom.png",
+        "sha256": "6fbaa3fd5c1f6c879af922e2cae028397d4133aca27ec453f5af28c5bca7014d"
+      },
+      {
+        "path": "metadata/qcs-bpi-quality-gate-target-list.png",
+        "sha256": "c9c845e6e4c258f4fb03e29ee1b6ff67a3027fa39599441c70a5b67085e4b01d"
+      },
+      {
+        "path": "metadata/qcs-bpi-quality-gate-target-report.png",
+        "sha256": "1a5fd8c0fae4e2982295de6c748eb299cfb29578b19124f894eeef5de395c04a"
+      }
+    ]
+  },
+  "firstDelivery": {
+    "outbox": {
+      "id": 7,
+      "publicationState": "SENT",
+      "attemptCount": 1,
+      "resolvedBatchId": "47bf07ff-4150-41a6-a76d-be974d97b280",
+      "blockReason": null,
+      "lastError": null
+    },
+    "bpi": {
+      "batchState": "RELEASED",
+      "batchRevision": 3,
+      "qualityGate": "ACCEPTED",
+      "wmsStatus": "NOT_REQUESTED",
+      "qualityGateRows": 1,
+      "qualityLinkRows": 1,
+      "inboxRows": 1,
+      "stateEventRows": 2,
+      "stateActions": [
+        "QUALITY_GATE_OPENED",
+        "QUALITY_GATE_ACCEPTED"
+      ],
+      "auditRows": 2,
+      "wmsOutboxRows": 0
+    }
+  },
+  "replay": {
+    "sameOutboxId": true,
+    "sameEventId": true,
+    "samePayloadSha256": true,
+    "attemptCount": 2,
+    "idempotent": true,
+    "projectionUnchanged": {
+      "batchState": "RELEASED",
+      "batchRevision": 3,
+      "qualityGate": "ACCEPTED",
+      "wmsStatus": "NOT_REQUESTED",
+      "qualityGateRows": 1,
+      "qualityLinkRows": 1,
+      "inboxRows": 1,
+      "stateEventRows": 2,
+      "auditRows": 2,
+      "wmsOutboxRows": 0
+    }
+  },
+  "kafka": {
+    "topic": "qcs.batch.quality-gate.v1",
+    "dlqTopic": "qcs.batch.quality-gate.dlq.v1",
+    "partitions": 3,
+    "replicationFactor": 3,
+    "minInSyncReplicas": 2,
+    "firstDeliveryDelta": 1,
+    "replayDelta": 1,
+    "totalDelta": 2,
+    "dlqDelta": 0,
+    "finalConsumerLag": 0
+  },
+  "postgres": {
+    "qcsTables": [
+      "public.qcs_inspects",
+      "public.qcs_inspect_reports",
+      "public.qcs_report_coms",
+      "public.qcs_bpi_quality_gate_outbox",
+      "public.wom_produce_tasks",
+      "public.wom_wait_put_records",
+      "public.wom_produce_task_exelog",
+      "public.baseset_batch_infos"
+    ],
+    "bpiTables": [
+      "bpi.bpi_batch_instances",
+      "bpi.bpi_quality_gates",
+      "bpi.bpi_quality_links",
+      "bpi.bpi_inbox_events",
+      "bpi.bpi_batch_state_events",
+      "bpi.bpi_audit_events",
+      "bpi.bpi_outbox_events"
+    ],
+    "verificationScript": "deploy/docker/scripts/bpi-qcs-quality-gate-target-verification.sql",
+    "cleanupScript": "deploy/docker/scripts/bpi-qcs-quality-gate-target-cleanup.sql",
+    "cleanup": {
+      "adpResidualRows": 0,
+      "bpiResidualRows": 0
+    }
+  },
+  "tests": {
+    "java8Sidecar": "20/20",
+    "contracts": "18/18",
+    "bpiApp": "81/81",
+    "wmsAdapter": "9/9",
+    "rules": "9/9",
+    "targetPostgres": "8/8"
+  },
+  "finalSafetyState": {
+    "BPI_PHASE2_INTEGRATION_ENABLED": false,
+    "BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED": false,
+    "BPI_PHASE2_KAFKA_ENABLED": false,
+    "BPI_WMS_OUTBOX_ENABLED": false,
+    "BPI_WMS_ADAPTER_ENABLED": false,
+    "QCS_BPI_OUTBOX_ENABLED": false,
+    "servicesRestored": true,
+    "errors": []
+  },
+  "scopeBoundary": {
+    "closed": "The real WOM/QCS page, QCS PostgreSQL transaction outbox, Java 8 sidecar, Kafka, BPI resolver/consumer, PostgreSQL projection, exact terminal replay and marker cleanup are accepted on the target environment.",
+    "notClosed": "The fixture batch was SHADOW, so WMS was intentionally not requested. External QCS production enablement, external ERP/WMS, reversal/compensation, physical telemetry and a 7-14 day plant pilot remain open."
+  },
+  "operationalNotes": [
+    "A pre-deployment acceptance connection mistakenly created an unused bpi schema in the platform database adp. Marker rows are zero; schema removal was not automated because it is destructive and requires explicit approval."
+  ]
+}

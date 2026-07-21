@@ -796,6 +796,24 @@ Java 17 service 均为目标运行组件；取证后 marker 与临时开关覆�
 `docs/testing/bpi-force-close-acceptance.md`。本项只证明异常人工兜底的受控合同，不替代物理 END
 边界、正式身份系统中的第二管理员会话或 7-14 天现场运行。
 
+### QCS PostgreSQL outbox 到 BPI 质量门（目标 PostgreSQL）
+
+本节使用 marker `ADP_E2E_20260721021607_QCS_BPI`。真实 WOM/QCS 页面先创建请检、生成报告并
+使合格报告生效；同一事务生成 QCS outbox，Java 8 sidecar 通过受控 resolver 解析唯一影子批次并发布
+Kafka。首发成功后将同一 outbox 定向重排，验证终态批次只接受完全相同质量门事件的幂等重放。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| WOM 请检与 QCS 合格报告生效 | WOM 制造任务、QCS 请检列表和报告编辑页 | `POST .../createManuInspect`；`POST .../bulkSubmit`；`POST .../batchDealReports` | `WOMProduceTaskController -> QCSInspectController -> QCSInspectReportServiceImpl.batchDealReports -> WOMQCSServiceImpl.checkReportBackfillWom` | WOM task/wait/exelog、BaseSet batch、QCS inspect/report/component/workflow | 按 task `8990060021586247`、inspect `768102577255680`、report `768102615504128` 精确查询 | 报告 `status=99/version=4/合格`；WOM task/wait/exelog 为已检/合格；批次为 qualified/可用 | PASS |
+| 同事务冻结 QCS 质量快照 | 同一报告生效动作 | PostgreSQL trigger/function | `qcs_bpi_enqueue_quality_gate -> qcs_bpi_quality_gate_outbox` | `public.qcs_bpi_quality_gate_outbox` | 查询 report/version、event/idempotency、scope、inspection JSON、state、SHA、attempt | event `qcs-gate:1000:768102577255680:4`；outbox `SENT/attempt=1`；scope 为 `1000/PLANT-01/LINE-S07-01`，快照含唯一 required ACCEPTED 组件 | PASS_TARGET |
+| resolver 与 Kafka 首发 | 不适用 | `GET /internal/bpi/v1/batches/resolve`；topic `qcs.batch.quality-gate.v1` | `QcsQualityGateOutboxDispatcher -> HttpBpiBatchResolver -> KafkaQcsQualityGatePublisher -> QcsQualityGateKafkaListener -> BatchReleaseService` | QCS outbox；BPI batch/gate/link/inbox/state/audit/outbox | `deploy/docker/scripts/bpi-qcs-quality-gate-target-verification.sql` | BPI batch `RELEASED/r3`，gate `ACCEPTED`；gate/link/inbox `1/1/1`，state/audit `2/2`，WMS outbox `0`；Kafka delta 1、DLQ 0、lag 0 | PASS_TARGET |
+| 终态同事件重放 | 不适用，受控运维动作 | 同 resolver、同 topic、同 event | dispatcher 终态 replay identity guard -> BPI inbox idempotency | 同上 | 比较重放前后 batch revision、gate/link/inbox/state/audit/WMS outbox 和 checksum | outbox `SENT/attempt=2`；同 event、同 SHA；投影始终 `RELEASED/r3/ACCEPTED/NOT_REQUESTED`，计数 `1/1/1/2/2/0`；replay delta 1、DLQ 0、lag 0 | PASS_IDEMPOTENT |
+| 双库 marker 清理与安全恢复 | 不适用 | cleanup SQL；Compose/env restore | 受保护 runner `finally` | 上述表及临时 batch/feature flag | `bpi-qcs-quality-gate-target-cleanup.sql` 和 QCS 链 cleanup 后精确计数 | ADP residual 0、BPI residual 0；环境/服务恢复 true；六开关 false；cleanup errors 为空 | PASS_CLEANED |
+
+机器证据：`metadata/qcs-bpi-quality-gate-target-acceptance.json`；完整页面、API、Kafka、SQL、构建哈希和
+回滚边界见 `docs/testing/qcs-bpi-quality-gate-target-acceptance.md`。当前批次是 `SHADOW`，所以 WMS
+outbox 为 0 是正确结果；该结论不能外推为外部 QCS/WMS 已投产。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。
