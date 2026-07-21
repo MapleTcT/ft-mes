@@ -724,6 +724,36 @@ async function main() {
     );
     states.afterUniqueDisableReplay = queryState("afterUniqueDisableReplay", renamedColumn);
 
+    const uniqueDisableReplayed = states.afterUniqueDisableReplay.metadata[0] || {};
+    requests.fieldOrdinaryIndexRenameToInitial = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: uniqueDisableReplayed.version || "0",
+        columnName: initialColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        isIndex: true,
+        isUnique: false,
+      })
+    );
+    states.afterOrdinaryIndexRenameToInitial = queryState("afterOrdinaryIndexRenameToInitial", initialColumn);
+
+    const ordinaryIndexRenamedToInitial = states.afterOrdinaryIndexRenameToInitial.metadata[0] || {};
+    requests.fieldOrdinaryIndexRenameToFinal = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: ordinaryIndexRenamedToInitial.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: initialColumn,
+        maxLength: "128",
+        isIndex: true,
+        isUnique: false,
+      })
+    );
+    states.afterOrdinaryIndexRenameToFinal = queryState("afterOrdinaryIndexRenameToFinal", renamedColumn);
+
     const externalIndexName = `EXT_${tableName}_${renamedColumn}`;
     runSql(
       `create unique index ${sqlIdentifier(externalIndexName)} on public.${sqlIdentifier(tableName)} ` +
@@ -1095,6 +1125,23 @@ async function main() {
         hasIndex(states.afterUniqueDisableReplay, renamedManagedIndex),
       `response=${requests.fieldUniqueDisableReplay && requests.fieldUniqueDisableReplay.responseStatus}; ` +
         `indexes=${JSON.stringify((states.afterUniqueDisableReplay && states.afterUniqueDisableReplay.indexes) || [])}`
+    ),
+    check(
+      "managed-index-renamed-with-column",
+      responseBusinessOk(requests.fieldOrdinaryIndexRenameToInitial) &&
+        responseBusinessOk(requests.fieldOrdinaryIndexRenameToFinal) &&
+        states.afterOrdinaryIndexRenameToInitial && states.afterOrdinaryIndexRenameToFinal &&
+        states.afterOrdinaryIndexRenameToInitial.indexes.length === 1 &&
+        hasIndex(states.afterOrdinaryIndexRenameToInitial, initialManagedIndex) &&
+        !hasIndex(states.afterOrdinaryIndexRenameToInitial, renamedManagedIndex) &&
+        states.afterOrdinaryIndexRenameToFinal.indexes.length === 1 &&
+        hasIndex(states.afterOrdinaryIndexRenameToFinal, renamedManagedIndex) &&
+        !hasIndex(states.afterOrdinaryIndexRenameToFinal, initialManagedIndex) &&
+        hasProbe(states.afterOrdinaryIndexRenameToInitial) && hasProbe(states.afterOrdinaryIndexRenameToFinal),
+      `toInitial=${requests.fieldOrdinaryIndexRenameToInitial && requests.fieldOrdinaryIndexRenameToInitial.responseStatus}; ` +
+        `toFinal=${requests.fieldOrdinaryIndexRenameToFinal && requests.fieldOrdinaryIndexRenameToFinal.responseStatus}; ` +
+        `initialIndexes=${JSON.stringify((states.afterOrdinaryIndexRenameToInitial && states.afterOrdinaryIndexRenameToInitial.indexes) || [])}; ` +
+        `finalIndexes=${JSON.stringify((states.afterOrdinaryIndexRenameToFinal && states.afterOrdinaryIndexRenameToFinal.indexes) || [])}`
     ),
     check(
       "external-unique-index-fixture-created",
