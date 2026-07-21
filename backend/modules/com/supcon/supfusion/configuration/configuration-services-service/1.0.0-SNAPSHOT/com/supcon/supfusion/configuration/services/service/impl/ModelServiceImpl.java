@@ -270,11 +270,14 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 		model.setOrgTableName(orgTableName);
 		//	FileUtils.updateXml(model, isNew);
 		if (null == model.getType() || Model.TYPE_SQL != model.getType()) {
+			String databaseName = getDbName();
 			try {
-				String dbName = getDbName();
-				ModelSyncDBUtils.modelSyncToDb(entity, model, isNew, template, dbName);
+				ModelSyncDBUtils.modelSyncToDb(entity, model, isNew, template, databaseName);
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
+				if (databaseName != null && databaseName.startsWith("postgres")) {
+					throw new IllegalStateException("PostgreSQL physical model table synchronization failed", e);
+				}
 			}
 		}
 		saveModuleGenerateInfo(model);

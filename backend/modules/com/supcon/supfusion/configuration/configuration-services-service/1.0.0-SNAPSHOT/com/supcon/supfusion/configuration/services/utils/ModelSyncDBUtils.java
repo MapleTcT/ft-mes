@@ -36,6 +36,8 @@ public class ModelSyncDBUtils {
             } else {
                 updateModelAndDefaultTablesMysql(entity, model, template);
             }
+        } else if (dbName.startsWith("postgres")) {
+            PostgresModelSyncSupport.sync(entity, model, isNew, template);
         }
     }
 
@@ -48,6 +50,9 @@ public class ModelSyncDBUtils {
             mneCodeSql = createDefaultMCTableOfModelSqlserver(tableName);
         }else if (dbName.startsWith("mysql") || dbName.startsWith("mariadb")) {
             mneCodeSql = createDefaultMCTableOfModelMysql(tableName);
+        }else if (dbName.startsWith("postgres")) {
+            PostgresModelSyncSupport.createMneCodeTable(model, template);
+            return;
         }
         if (!"".equals(mneCodeSql)) {
             template.batchUpdate(mneCodeSql.split("\\;"));
@@ -885,6 +890,10 @@ public class ModelSyncDBUtils {
             sql = "SELECT COUNT(1) FROM SYSOBJECTS WHERE NAME = '" + tableName + "' AND TYPE = 'U'";
         } else if (dbName.startsWith("mysql") || dbName.startsWith("mariadb")) {
             sql = "select count(1) from information_schema.tables t where t.TABLE_SCHEMA='"+ DbUtils.getCurrentDBName() +"' and table_name ='" + tableName + "'";
+        } else if (dbName.startsWith("postgres")) {
+            return PostgresModelSyncSupport.tableExists(template, tableName);
+        } else {
+            return false;
         }
         int resSql = template.queryForObject(sql, Integer.class);
         isExist = ((resSql >= 1) ? true : false);

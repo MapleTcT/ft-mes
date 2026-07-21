@@ -8,14 +8,15 @@ const { chromium, request } = require("playwright");
 
 const repoRoot = path.resolve(__dirname, "../../..");
 const stamp = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
-const baseUrl = (process.env.ADP_BASE_URL || "http://100.99.133.43:18080").replace(/\/+$/, "");
+const baseUrl = (process.env.ADP_BASE_URL || "http://10.11.100.17:18080").replace(/\/+$/, "");
 const browserBaseUrl = (process.env.ADP_BROWSER_BASE_URL || baseUrl).replace(/\/+$/, "");
 const username = process.env.ADP_USERNAME || "admin";
 const password = process.env.ADP_PASSWORD || "123456";
 const outputPath =
   process.env.ENTITY_MODEL_CONFIG_CRUD_ACCEPTANCE_OUTPUT ||
+  process.env.ADP_ENTITY_MODEL_CONFIG_CRUD_OUTPUT ||
   path.join("/tmp", `adp-entity-model-config-crud-persistence-${stamp}.json`);
-const dbSshTarget = process.env.ADP_DB_SSH_TARGET || "v6@100.99.133.43";
+const dbSshTarget = process.env.ADP_DB_SSH_TARGET || "v6@10.11.100.17";
 const dbContainer = process.env.ADP_DB_CONTAINER || "adp-mes-newbase-postgres-1";
 const dbName = process.env.ADP_DB_NAME || "adp";
 const dbUser = process.env.ADP_DB_USER || "adp";
@@ -30,7 +31,10 @@ const modelName = process.env.ADP_ENTITY_MODEL_MODEL_NAME || `E2eMod${stamp.slic
 const entityCode = `${moduleCode}_${entityName}`;
 const modelCode = `${entityCode}_${modelName}`;
 const tableName = process.env.ADP_ENTITY_MODEL_TABLE_NAME || `DS_E2E_${stamp.slice(8, 14)}`;
+const renamedTableName =
+  process.env.ADP_ENTITY_MODEL_RENAMED_TABLE_NAME || `${tableName.slice(0, 25)}_R`;
 const pagePath = "/msService/ec/engine/msManage";
+const auxiliarySuffixes = ["_DI", "_ACL", "_MC", "_PA", "_SV", "_GI"];
 
 const visibleErrorPattern =
   /(数据库操作异常|系统错误|系统异常|发生未知异常|SQLGrammarException|could not extract ResultSet|column .* does not exist|relation .* does not exist|500 INTERNAL|org\.hibernate\.[\w.]+Exception|org\.springframework\.[\w.]+Exception|java\.lang\.[\w.]+Exception|Invalid bound statement)/i;
@@ -301,20 +305,28 @@ function entityPayload({ version = "0", name, description }) {
   };
 }
 
-function modelPayload({ version = "0", name, description, includeCode = true }) {
+function modelPayload({
+  version = "0",
+  name,
+  description,
+  includeCode = true,
+  physicalTableName = tableName,
+  originalTableName = includeCode ? tableName : "",
+  isExtraCol = false,
+}) {
   return {
     "model.version": version,
     "model.code": includeCode ? modelCode : "",
     "entity.code": entityCode,
     "model.entity.code": entityCode,
     "model.moduleCode": moduleCode,
-    "model.orgTableName": includeCode ? tableName : "",
+    "model.orgTableName": originalTableName,
     "model.modelName": modelName,
-    "model.tableName": tableName,
+    "model.tableName": physicalTableName,
     "model.name": name,
     "model.dataType": "1",
     "model.isMain": "false",
-    "model.isExtraCol": "false",
+    "model.isExtraCol": String(isExtraCol),
     "model.isCache": "false",
     "model.enableSync": "false",
     "model.type": "0",
@@ -364,8 +376,29 @@ function physicalTableSql() {
     "select table_schema::text, table_name::text",
     "from information_schema.tables",
     "where table_schema='public'",
-    `and lower(table_name)=lower(${sqlLiteral(tableName)})`,
+    `and lower(table_name) in (lower(${sqlLiteral(tableName)}), lower(${sqlLiteral(renamedTableName)}))`,
     "order by table_name;",
+  ].join(" ");
+}
+
+function physicalColumnSql() {
+  return [
+    "select table_name::text, column_name::text, data_type::text, is_nullable::text,",
+    "coalesce(column_default::text,'')",
+    "from information_schema.columns",
+    "where table_schema='public'",
+    `and lower(table_name) in (lower(${sqlLiteral(tableName)}), lower(${sqlLiteral(renamedTableName)}))`,
+    "order by table_name, ordinal_position;",
+  ].join(" ");
+}
+
+function physicalCommentSql() {
+  return [
+    "select c.relname::text, coalesce(obj_description(c.oid, 'pg_class'),'')::text",
+    "from pg_class c join pg_namespace n on n.oid=c.relnamespace",
+    "where n.nspname='public' and c.relkind='r'",
+    `and lower(c.relname) in (lower(${sqlLiteral(tableName)}), lower(${sqlLiteral(renamedTableName)}))`,
+    "order by c.relname;",
   ].join(" ");
 }
 
@@ -415,6 +448,14 @@ function queryState(label) {
       "deleteTime",
     ]),
     physicalTables: parseRows(runSql(physicalTableSql()), ["tableSchema", "tableName"]),
+    physicalColumns: parseRows(runSql(physicalColumnSql()), [
+      "tableName",
+      "columnName",
+      "dataType",
+      "nullable",
+      "defaultValue",
+    ]),
+    physicalComments: parseRows(runSql(physicalCommentSql()), ["tableName", "comment"]),
   };
 }
 
@@ -427,17 +468,36 @@ function cleanupSql() {
     `where code=${sqlLiteral(modelCode)} or entity_code=${sqlLiteral(entityCode)} or description::text like ${sqlLiteral(`${marker}%`)};`,
     "delete from public.ec_entity",
     `where code=${sqlLiteral(entityCode)} or description::text like ${sqlLiteral(`${marker}%`)};`,
-    `drop table if exists public.${sqlIdentifier(tableName)} cascade;`,
+    ...[tableName, renamedTableName]
+      .flatMap((name) => [name, ...auxiliarySuffixes.map((suffix) => `${name}${suffix}`)])
+      .map((name) => `drop table if exists public.${sqlIdentifier(name)} cascade;`),
     "commit;",
   ].join(" ");
+}
+
+function hasPhysicalTable(state, expectedTableName) {
+  return state.physicalTables.some(
+    (row) => row.tableName.toLowerCase() === expectedTableName.toLowerCase()
+  );
+}
+
+function columnsFor(state, expectedTableName) {
+  return state.physicalColumns
+    .filter((row) => row.tableName.toLowerCase() === expectedTableName.toLowerCase())
+    .map((row) => row.columnName.toLowerCase());
 }
 
 function buildChecks(states, requests, cleanupState) {
   const requestOk = Object.values(requests).every(responseBusinessOk);
   const afterCreate = states.afterModelCreate;
   const afterEdit = states.afterModelEdit;
+  const afterReplay = states.afterModelIdempotentReplay;
   const afterDelete = states.afterEntityDelete;
   const afterCleanup = cleanupState;
+  const requiredColumns = ["id", "version", "delete_time", "modify_time", "create_time", "valid", "cid", "sort"];
+  const createdColumns = columnsFor(afterCreate, tableName);
+  const renamedColumns = columnsFor(afterEdit, renamedTableName);
+  const replayColumns = columnsFor(afterReplay, renamedTableName);
   return [
     {
       name: "browser-page-context",
@@ -472,6 +532,15 @@ function buildChecks(states, requests, cleanupState) {
       evidence: `modelRows=${afterCreate.model.length}; propertyRows=${afterCreate.properties.length}`,
     },
     {
+      name: "postgres-physical-table-created",
+      status:
+        hasPhysicalTable(afterCreate, tableName) &&
+        requiredColumns.every((column) => createdColumns.includes(column))
+          ? "PASS"
+          : "FAIL",
+      evidence: `table=${tableName}; present=${hasPhysicalTable(afterCreate, tableName)}; columns=${createdColumns.join(",")}`,
+    },
+    {
       name: "entity-model-edited",
       status:
         afterEdit.entity[0] &&
@@ -485,6 +554,32 @@ function buildChecks(states, requests, cleanupState) {
       }`,
     },
     {
+      name: "postgres-physical-table-renamed-and-expanded",
+      status:
+        !hasPhysicalTable(afterEdit, tableName) &&
+        hasPhysicalTable(afterEdit, renamedTableName) &&
+        renamedColumns.includes("extra_col")
+          ? "PASS"
+          : "FAIL",
+      evidence: `oldPresent=${hasPhysicalTable(afterEdit, tableName)}; renamedPresent=${hasPhysicalTable(
+        afterEdit,
+        renamedTableName
+      )}; columns=${renamedColumns.join(",")}`,
+    },
+    {
+      name: "postgres-physical-table-idempotent-replay",
+      status:
+        responseBusinessOk(requests.modelIdempotentReplay) &&
+        afterReplay.physicalTables.length === 1 &&
+        replayColumns.length === new Set(replayColumns).size &&
+        replayColumns.includes("extra_col")
+          ? "PASS"
+          : "FAIL",
+      evidence: `response=${requests.modelIdempotentReplay && requests.modelIdempotentReplay.responseStatus}; tables=${
+        afterReplay.physicalTables.length
+      }; columns=${replayColumns.length}; uniqueColumns=${new Set(replayColumns).size}`,
+    },
+    {
       name: "entity-model-deleted-or-disabled",
       status:
         (afterDelete.entity.length === 0 || afterDelete.entity.every((row) => row.valid !== "1")) &&
@@ -492,6 +587,14 @@ function buildChecks(states, requests, cleanupState) {
           ? "PASS"
           : "FAIL",
       evidence: `entityRows=${afterDelete.entity.length}; modelRows=${afterDelete.model.length}; propertyRows=${afterDelete.properties.length}`,
+    },
+    {
+      name: "physical-table-retained-until-controlled-cleanup",
+      status: hasPhysicalTable(afterDelete, renamedTableName) ? "PASS" : "FAIL",
+      evidence: `renamedTable=${renamedTableName}; presentAfterSoftDelete=${hasPhysicalTable(
+        afterDelete,
+        renamedTableName
+      )}`,
     },
     {
       name: "controlled-cleanup",
@@ -522,10 +625,11 @@ function backendTrace() {
       controller: "ModelController.save(String,HttpServletRequest)",
       dto: "DtoUtils.getModelVO(HttpServletRequest), ModelController.prepare(Model)",
       service: "ModelServiceImpl.saveModel(Model)",
-      persistence: "modelDao.save(model), createInherentProperties(model), propertyDao.save(property)",
+      persistence:
+        "modelDao.save(model), createInherentProperties(model), propertyDao.save(property), ModelSyncDBUtils.modelSyncToDb, PostgresModelSyncSupport.sync",
       postgresNote:
-        "ModelSyncDBUtils.modelSyncToDb has oracle/sqlserver/mysql/mariadb branches only; PostgreSQL does not auto-create physical model tables in the current code path.",
-      tables: ["ec_model", "ec_property"],
+        "The PostgreSQL path validates generated identifiers, creates the physical model table and required auxiliary tables idempotently, preserves tables on soft delete, and fails the transaction on DDL errors.",
+      tables: ["ec_model", "ec_property", tableName, renamedTableName, "information_schema.tables", "information_schema.columns"],
     },
     deleteOrDisable: {
       apiEndpoint: "/msService/ec/model/ordinaryDelete and /msService/ec/entity/ordinaryDelete",
@@ -591,18 +695,37 @@ async function main() {
         version: createdModel.version || "0",
         name: `${marker} model edit`,
         description: `${marker}_EDIT model`,
+        physicalTableName: renamedTableName,
+        originalTableName: tableName,
+        isExtraCol: true,
       })
     );
     states.afterModelEdit = queryState("afterModelEdit");
 
     const editedModel = states.afterModelEdit.model[0] || {};
+    logStage("replay model edit for idempotency");
+    requests.modelIdempotentReplay = await pageFormFetch(
+      page,
+      "/msService/ec/model/save",
+      modelPayload({
+        version: editedModel.version || "0",
+        name: `${marker} model idempotent replay`,
+        description: `${marker}_IDEMPOTENT model`,
+        physicalTableName: renamedTableName,
+        originalTableName: renamedTableName,
+        isExtraCol: true,
+      })
+    );
+    states.afterModelIdempotentReplay = queryState("afterModelIdempotentReplay");
+
+    const replayedModel = states.afterModelIdempotentReplay.model[0] || {};
     const editedEntity = states.afterModelEdit.entity[0] || {};
     logStage("soft delete model");
     requests.modelDelete = await pageFormFetch(page, "/msService/ec/model/ordinaryDelete", {
       "model.code": modelCode,
-      "model.version": editedModel.version || "0",
+      "model.version": replayedModel.version || "0",
       code: modelCode,
-      version: editedModel.version || "0",
+      version: replayedModel.version || "0",
     });
     states.afterModelDelete = queryState("afterModelDelete");
 
@@ -622,6 +745,7 @@ async function main() {
     logStage("final marker cleanup");
     runSql(cleanupSql());
     cleanupState = queryState("afterCleanup");
+    states.afterCleanup = cleanupState;
   }
 
   const checks = fatalError
@@ -629,13 +753,13 @@ async function main() {
     : buildChecks(states, requests, cleanupState);
   const failed = checks.filter((check) => check.status !== "PASS");
   const report = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: new Date().toISOString(),
     repoCommit: getRepoCommit(),
     database: "PostgreSQL",
     module: "basic-config",
     goalId: "G-012",
-    areaId: "configuration-entity-runtime",
+    areaId: "configuration-physical-model-table",
     status: failed.length === 0 ? "PASS" : "FAIL",
     marker,
     baseUrl,
@@ -649,9 +773,16 @@ async function main() {
       entityRowsAfterCreate: (states.afterModelCreate && states.afterModelCreate.entity.length) || 0,
       modelRowsAfterCreate: (states.afterModelCreate && states.afterModelCreate.model.length) || 0,
       propertyRowsAfterCreate: (states.afterModelCreate && states.afterModelCreate.properties.length) || 0,
+      physicalTablesAfterCreate:
+        (states.afterModelCreate && states.afterModelCreate.physicalTables.length) || 0,
+      physicalTablesAfterRename:
+        (states.afterModelEdit && states.afterModelEdit.physicalTables.length) || 0,
+      physicalColumnsAfterReplay:
+        (states.afterModelIdempotentReplay && states.afterModelIdempotentReplay.physicalColumns.length) || 0,
       cleanupEntityRows: cleanupState.entity.length,
       cleanupModelRows: cleanupState.model.length,
       cleanupPropertyRows: cleanupState.properties.length,
+      cleanupPhysicalTables: cleanupState.physicalTables.length,
     },
     identifiers: {
       moduleCode,
@@ -660,6 +791,7 @@ async function main() {
       modelName,
       modelCode,
       tableName,
+      renamedTableName,
     },
     checks,
     requests,
@@ -670,12 +802,14 @@ async function main() {
       model: modelSql(),
       property: propertySql(),
       physicalTable: physicalTableSql(),
+      physicalColumn: physicalColumnSql(),
+      physicalComment: physicalCommentSql(),
     },
     backendTrace: backendTrace(),
     conclusion:
       failed.length === 0
-        ? "Entity/model create, edit, delete/disable and marker cleanup were verified through browser-page-context HTTP requests and PostgreSQL before/after SQL."
-        : "Entity/model CRUD acceptance did not pass; see failed checks and request/state evidence.",
+        ? "Entity/model CRUD plus PostgreSQL physical-table create, rename, expansion, idempotent replay and controlled cleanup were verified through browser-page-context HTTP requests and direct database SQL."
+        : "Entity/model CRUD or PostgreSQL physical-table acceptance did not pass; see failed checks and request/state evidence.",
     issues: failed.map((check) => check.evidence),
   };
 
@@ -686,7 +820,9 @@ async function main() {
     process.exitCode = 1;
     return;
   }
-  console.log(`PASS entity/model CRUD marker=${marker} properties=${report.summary.propertyRowsAfterCreate}`);
+  console.log(
+    `PASS entity/model PostgreSQL physical table marker=${marker} table=${tableName}->${renamedTableName} properties=${report.summary.propertyRowsAfterCreate}`
+  );
   console.log(`REPORT ${outputPath}`);
 }
 

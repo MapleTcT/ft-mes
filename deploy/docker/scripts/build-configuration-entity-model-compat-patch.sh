@@ -26,6 +26,8 @@ javac -encoding UTF-8 -source 8 -target 8 \
   -cp "$classpath" \
   -d "$classes_dir" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/openapi/utils/DtoUtils.java" \
+  "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/PostgresModelSyncSupport.java" \
+  "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.java" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.java"

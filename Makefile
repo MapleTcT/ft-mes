@@ -574,6 +574,7 @@ runtime-script-check:
 	$(PYTHON) -m unittest deploy/docker/scripts/test_foundation_simulated_login_patch.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-eam-patrol-runtime.py
 	$(PYTHON) -m unittest deploy/docker/scripts/test_patch_eam_patrol_runtime.py
+	$(PYTHON) -m unittest deploy/docker/scripts/test_configuration_postgres_model_sync.py
 	$(NODE) deploy/docker/scripts/test-patrol-monitor-fallback.js
 	$(NODE) deploy/docker/scripts/test-patrol-static-assets.js
 	$(PYTHON) -m py_compile deploy/docker/scripts/audit-postgres-mappings.py

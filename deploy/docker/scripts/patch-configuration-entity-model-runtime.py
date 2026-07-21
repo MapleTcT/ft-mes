@@ -22,6 +22,8 @@ PATCH_TARGETS = {
         "com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.class",
     ],
     SERVICE_JAR: [
+        "com/supcon/supfusion/configuration/services/utils/PostgresModelSyncSupport.class",
+        "com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.class",
         "com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.class",
         "com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.class",
         "com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl$1.class",
