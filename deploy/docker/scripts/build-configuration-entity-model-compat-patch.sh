@@ -26,6 +26,7 @@ javac -encoding UTF-8 -source 8 -target 8 \
   -cp "$classpath" \
   -d "$classes_dir" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/openapi/utils/DtoUtils.java" \
+  "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/openapi/controller/PropertyController.java" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/PostgresModelSyncSupport.java" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/PostgresFieldSyncSupport.java" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java" \
@@ -33,6 +34,11 @@ javac -encoding UTF-8 -source 8 -target 8 \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.java" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.java"
+
+mkdir -p "$classes_dir/templates/model"
+cp \
+  "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/model/manage.ftl" \
+  "$classes_dir/templates/model/manage.ftl"
 
 jar cf "$patch_root/configuration-entity-model-compat.jar" -C "$classes_dir" .
 echo "built $patch_root/configuration-entity-model-compat.jar"

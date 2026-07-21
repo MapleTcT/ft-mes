@@ -56,6 +56,20 @@ public class FieldSyncDBUtils {
 			createCustomFieldMysql(propertyList, template);
 		}
 	}
+
+	/**
+	 * Physically removes a property column only for the explicit PostgreSQL delete path.
+	 * Metadata soft deletion must never call this method.
+	 */
+	public static synchronized void deleteFieldFromDb(
+			Property property,
+			Model model,
+			JdbcTemplate template,
+			String dbName) {
+		if (dbName != null && dbName.startsWith("postgres")) {
+			PostgresFieldSyncSupport.delete(property, model, template);
+		}
+	}
 	
 	private static boolean fieldIsExist(String tableName, String colName, String dbType, JdbcTemplate template) {
 		boolean isExist = false;

@@ -79,7 +79,7 @@
 <div id="ec_property_manage_del_div" style="display:none;">
 <div style="padding:8px 8px 8px 8px"">
 	<div>
-	${getHtmlText('ec.entity.checkDeleteProperty')}
+	删除字段会永久删除对应物理列及该字段的全部已有数据，且无法撤销。确认继续？
 	</div>
 </div>
 </div>

@@ -1221,8 +1221,15 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 
 	@Override
 	public String deleteProperty(Property property) {
+		if (property == null || org.apache.commons.lang3.StringUtils.isEmpty(property.getCode())) {
+			throw new StaleObjectStateException(Property.class.getName(), null);
+		}
+		Property persistedProperty = propertyDao.get(property.getCode());
+		if (persistedProperty == null) {
+			throw new StaleObjectStateException(Property.class.getName(), property.getCode());
+		}
 		Set<String> descSet = new HashSet<String>();
-		List<DataGrid> dataGrids = dataGridService.findDataGridsByProperty(property);
+		List<DataGrid> dataGrids = dataGridService.findDataGridsByProperty(persistedProperty);
 		if (null != dataGrids && !dataGrids.isEmpty()) {
 			for(DataGrid dataGrid :dataGrids){
 				try {
@@ -1236,7 +1243,7 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 			}
 			//throw new BAPException(BAPException.Code.ASS_BY_DATAGRID);
 		}
-		List<Field> fields = fieldService.getFieldByPropertyCode(property.getCode());
+		List<Field> fields = fieldService.getFieldByPropertyCode(persistedProperty.getCode());
 		if (null != fields && !fields.isEmpty()) {
 			for (Field field : fields) {
 				try {
@@ -1251,11 +1258,11 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 			}
 			//throw new BAPException(BAPException.Code.USED_BY_VIEW);
 		}
-		property.setValid(false);
-		property.setDeleteTime(new Date());
-		propertyDao.update(property);
-		if (DbColumnType.BAPCODE == property.getType()) {
-			propertyService.deleteCounter(property);
+		persistedProperty.setValid(false);
+		persistedProperty.setDeleteTime(new Date());
+		propertyDao.update(persistedProperty);
+		if (DbColumnType.BAPCODE == persistedProperty.getType()) {
+			propertyService.deleteCounter(persistedProperty);
 		}
 //		cache.remove(CACHE_MODEL_PROPERTY_PREFIX + property.getCode());
 		//开始保存模块信息数据的最后修改时间
@@ -1294,7 +1301,7 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 		}
 		if (null != property) {
 			if(null == ignoreCheck || !ignoreCheck){
-				if(property.getIsInherent()){
+				if(Boolean.TRUE.equals(property.getIsInherent())){
 					descSet.add(property.getName()+"是固有字段不可删除!");
 					return JsonUtils.setToJson(descSet);
 				}
@@ -1306,6 +1313,19 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 				} catch (Exception e) {
 					log.error(e.getMessage(),e);
 					throw new EcException("校验失败，详细错误信息请查看日志");
+				}
+			}
+			if (Boolean.FALSE.equals(deleteType)) {
+				String databaseName = getDbName();
+				try {
+					FieldSyncDBUtils.deleteFieldFromDb(
+							property, property.getModel(), template, databaseName);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+					if (databaseName != null && databaseName.startsWith("postgres")) {
+						throw new IllegalStateException(
+								"PostgreSQL physical field deletion failed", e);
+					}
 				}
 			}
 			propertyDao.deletePhysical(propertyDao.load(propertyCode));

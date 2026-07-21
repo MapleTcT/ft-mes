@@ -23,10 +23,20 @@ POSTGRES_SUPPORT_PATH = MODEL_SYNC_PATH.with_name("PostgresModelSyncSupport.java
 FIELD_SYNC_PATH = MODEL_SYNC_PATH.with_name("FieldSyncDBUtils.java")
 POSTGRES_FIELD_SUPPORT_PATH = MODEL_SYNC_PATH.with_name("PostgresFieldSyncSupport.java")
 MODEL_SERVICE_PATH = MODEL_SYNC_PATH.parents[1] / "service/impl/ModelServiceImpl.java"
+MODEL_MANAGE_TEMPLATE_PATH = (
+    ROOT
+    / "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT"
+    / "templates/model/manage.ftl"
+)
 DTO_UTILS_PATH = (
     ROOT
     / "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT"
     / "com/supcon/supfusion/configuration/services/openapi/utils/DtoUtils.java"
+)
+PROPERTY_CONTROLLER_PATH = (
+    ROOT
+    / "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT"
+    / "com/supcon/supfusion/configuration/services/openapi/controller/PropertyController.java"
 )
 FIELD_ACCEPTANCE_PATH = SCRIPT_DIR / "adp-entity-model-field-persistence-acceptance.js"
 FIELD_TYPE_MATRIX_ACCEPTANCE_PATH = (
@@ -34,6 +44,9 @@ FIELD_TYPE_MATRIX_ACCEPTANCE_PATH = (
 )
 OBJECT_ASSOCIATION_ACCEPTANCE_PATH = (
     SCRIPT_DIR / "adp-entity-model-object-association-acceptance.js"
+)
+FIELD_DELETE_ACCEPTANCE_PATH = (
+    SCRIPT_DIR / "adp-entity-model-field-delete-persistence-acceptance.js"
 )
 MAKEFILE_PATH = ROOT / "Makefile"
 TRIGGER_RETIREMENT_PATH = ROOT / "deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql"
@@ -54,6 +67,8 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         service = MODEL_SERVICE_PATH.read_text(encoding="utf-8")
         field_sync = FIELD_SYNC_PATH.read_text(encoding="utf-8")
         field_support = POSTGRES_FIELD_SUPPORT_PATH.read_text(encoding="utf-8")
+        model_manage_template = MODEL_MANAGE_TEMPLATE_PATH.read_text(encoding="utf-8")
+        property_controller = PROPERTY_CONTROLLER_PATH.read_text(encoding="utf-8")
 
         self.assertIn('dbName.startsWith("postgres")', model_sync)
         self.assertIn("PostgresModelSyncSupport.sync", model_sync)
@@ -68,6 +83,7 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertIn('dbName != null && dbName.startsWith("postgres")', field_sync)
         self.assertIn("PostgresFieldSyncSupport.sync", field_sync)
         self.assertIn("PostgresFieldSyncSupport.syncCustom", field_sync)
+        self.assertIn("PostgresFieldSyncSupport.delete", field_sync)
         table_exists_method = field_sync[
             field_sync.index("public static boolean tableIsExist") : field_sync.index(
                 "private static synchronized void createField"
@@ -127,8 +143,54 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertIn("i.indisunique", equivalent_unique_method)
         self.assertIn("i.indpred is null", equivalent_unique_method)
         self.assertIn("i.indexprs is null", equivalent_unique_method)
-        self.assertNotIn("DROP COLUMN", field_support.upper())
+        sync_section = field_support[
+            field_support.index("public static synchronized void sync(") : field_support.index(
+                "public static synchronized void delete("
+            )
+        ]
+        delete_section = field_support[
+            field_support.index("public static synchronized void delete(") : field_support.index(
+                "static boolean columnExists"
+            )
+        ]
+        self.assertNotIn("DROP COLUMN", sync_section.upper())
+        self.assertIn("DROP COLUMN", delete_section.upper())
+        self.assertIn("RESTRICT", delete_section.upper())
+        self.assertIn("property.getIsInherent()", delete_section)
+        self.assertIn("property.getIsPk()", delete_section)
+        self.assertIn("PostgresModelSyncSupport.tableExists", delete_section)
+        self.assertIn("columnExists", delete_section)
         self.assertIn("PostgreSQL physical field synchronization failed", service)
+        soft_delete_section = service[
+            service.index("public String deleteProperty(Property property)") :
+            service.index("public void deleteProperty(String propertyCode)")
+        ]
+        self.assertIn("propertyDao.get(property.getCode())", soft_delete_section)
+        self.assertIn("persistedProperty.setValid(false)", soft_delete_section)
+        self.assertNotIn("property.setValid(false)", soft_delete_section)
+        delete_service_section = service[
+            service.index("public String deletePropertyPhysical(String propertyCode, Boolean deleteType,Boolean ignoreCheck)") :
+            service.index("public List<Property> findProperties(Model model)")
+        ]
+        self.assertIn("Boolean.FALSE.equals(deleteType)", delete_service_section)
+        self.assertIn("FieldSyncDBUtils.deleteFieldFromDb", delete_service_section)
+        self.assertLess(
+            delete_service_section.index("FieldSyncDBUtils.deleteFieldFromDb"),
+            delete_service_section.index("propertyDao.deletePhysical"),
+        )
+        self.assertIn("永久删除对应物理列", model_manage_template)
+        self.assertIn("无法撤销", model_manage_template)
+        ordinary_delete = property_controller[
+            property_controller.index('@RequestMapping(value = "/ec/property/ordinaryDelete")') :
+            property_controller.index('@RequestMapping(value = "/ec/property/sortitem")')
+        ]
+        self.assertIn("ordinaryDelete(HttpServletRequest request)", ordinary_delete)
+        self.assertIn("DtoUtils.getPropertyVO(request)", ordinary_delete)
+        self.assertIn("physicalDeleteFailureMessage", property_controller)
+        self.assertIn("Collections.singletonList", property_controller)
+        self.assertIn("数据库变更已回滚", property_controller)
+        self.assertIn("数据库视图或其他对象引用", property_controller)
+        self.assertIn("物理结构不一致", property_controller)
 
         service_targets = PATCHER.PATCH_TARGETS[PATCHER.SERVICE_JAR]
         self.assertIn(
@@ -151,6 +213,11 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
             "com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.class",
             service_targets,
         )
+        self.assertIn("templates/model/manage.ftl", PATCHER.PATCH_TARGETS[PATCHER.OPEN_API_JAR])
+        self.assertIn(
+            "com/supcon/supfusion/configuration/services/openapi/controller/PropertyController.class",
+            PATCHER.PATCH_TARGETS[PATCHER.OPEN_API_JAR],
+        )
 
     def test_runtime_patcher_replaces_both_sync_classes(self) -> None:
         target_classes = PATCHER.PATCH_TARGETS[PATCHER.SERVICE_JAR]
@@ -171,7 +238,7 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         with zipfile.ZipFile(empty_jar, "w") as archive:
             archive.writestr("placeholder", b"old")
 
-        with self.assertRaisesRegex(SystemExit, "missing compiled patch classes"):
+        with self.assertRaisesRegex(SystemExit, "missing compiled patch entries"):
             PATCHER.patch_inner_jar(empty_jar.getvalue(), {}, target_classes)
 
     def test_database_trigger_fallback_is_retired_with_reversible_migration(self) -> None:
@@ -277,6 +344,22 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertIn("drop table if exists", acceptance)
         self.assertIn("acceptance-entity-model-object-association", makefile)
         self.assertIn("ADP_ENTITY_MODEL_OBJECT_ASSOCIATION_OUTPUT", makefile)
+
+    def test_postgres_field_delete_acceptance_is_guarded_and_transactional(self) -> None:
+        acceptance = FIELD_DELETE_ACCEPTANCE_PATH.read_text(encoding="utf-8")
+        makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("/msService/ec/property/ordinaryDelete", acceptance)
+        self.assertIn("/msService/ec/property/delete", acceptance)
+        self.assertIn("database-dependency-blocks-restrict-delete", acceptance)
+        self.assertIn("metadata-delete-failure-rolls-back-ddl-and-data", acceptance)
+        self.assertIn("physical-column-drift-fails-closed", acceptance)
+        self.assertIn("inherent-primary-key-delete-rejected", acceptance)
+        self.assertIn("PROPERTYATTACHMENT", acceptance)
+        self.assertIn("No automatic column deletion", acceptance)
+        self.assertIn("controlled-cleanup", acceptance)
+        self.assertIn("acceptance-entity-model-field-delete-persistence", makefile)
+        self.assertIn("ADP_ENTITY_MODEL_FIELD_DELETE_OUTPUT", makefile)
 
 
 if __name__ == "__main__":

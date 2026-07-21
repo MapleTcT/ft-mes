@@ -17,6 +17,8 @@ SERVICE_JAR = "BOOT-INF/lib/configuration-services-service-1.0.0-SNAPSHOT.jar"
 PATCH_TARGETS = {
     OPEN_API_JAR: [
         "com/supcon/supfusion/configuration/services/openapi/utils/DtoUtils.class",
+        "com/supcon/supfusion/configuration/services/openapi/controller/PropertyController.class",
+        "templates/model/manage.ftl",
     ],
     BASE_JAR: [
         "com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.class",
@@ -69,20 +71,20 @@ def write_zip(entries: dict[str, tuple[zipfile.ZipInfo, bytes]]) -> bytes:
     return out.getvalue()
 
 
-def patch_inner_jar(inner_bytes: bytes, class_bytes: dict[str, bytes], target_classes: list[str]) -> bytes:
+def patch_inner_jar(inner_bytes: bytes, patch_bytes: dict[str, bytes], target_entries: list[str]) -> bytes:
     entries = read_zip(inner_bytes)
-    missing = [name for name in target_classes if name not in class_bytes]
+    missing = [name for name in target_entries if name not in patch_bytes]
     if missing:
-        raise SystemExit(f"missing compiled patch classes: {', '.join(missing)}")
+        raise SystemExit(f"missing compiled patch entries: {', '.join(missing)}")
 
-    for class_name in target_classes:
-        if class_name in entries:
-            old_info, _old_data = entries[class_name]
-            entries[class_name] = (old_info, class_bytes[class_name])
+    for entry_name in target_entries:
+        if entry_name in entries:
+            old_info, _old_data = entries[entry_name]
+            entries[entry_name] = (old_info, patch_bytes[entry_name])
         else:
-            info = zipfile.ZipInfo(class_name)
+            info = zipfile.ZipInfo(entry_name)
             info.compress_type = zipfile.ZIP_DEFLATED
-            entries[class_name] = (info, class_bytes[class_name])
+            entries[entry_name] = (info, patch_bytes[entry_name])
     return write_zip(entries)
 
 
@@ -105,8 +107,8 @@ def main() -> None:
     if not args.classes_jar.is_file():
         raise SystemExit(f"compiled patch classes jar not found: {args.classes_jar}")
 
-    class_entries = read_zip(args.classes_jar)
-    class_bytes = {name: data for name, (_info, data) in class_entries.items() if name.endswith(".class")}
+    patch_entries = read_zip(args.classes_jar)
+    patch_bytes = {name: data for name, (_info, data) in patch_entries.items()}
     outer_entries = read_zip(boot_jar)
 
     missing_nested = [name for name in PATCH_TARGETS if name not in outer_entries]
@@ -115,7 +117,7 @@ def main() -> None:
 
     for nested_name, class_names in PATCH_TARGETS.items():
         info, inner_bytes = outer_entries[nested_name]
-        patched_inner = patch_inner_jar(inner_bytes, class_bytes, class_names)
+        patched_inner = patch_inner_jar(inner_bytes, patch_bytes, class_names)
         outer_entries[nested_name] = (info, patched_inner)
 
     stamp = time.strftime("%Y%m%d%H%M%S")

@@ -377,8 +377,8 @@ public class PropertyController extends ConfigurationBaseController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/ec/property/ordinaryDelete")
-	public ResponseMsg ordinaryDelete(Property property) throws Exception {
-		return deleteChoise(property, false);
+	public ResponseMsg ordinaryDelete(HttpServletRequest request) throws Exception {
+		return deleteChoise(DtoUtils.getPropertyVO(request), false);
 	}
 	
 	/**
@@ -434,7 +434,16 @@ public class PropertyController extends ConfigurationBaseController {
 			}
 			//add by yubo20171214
 			if(flag) {
-				String responseMsg = modelService.deletePropertyPhysical(property.getCode(), false,false);
+				String responseMsg;
+				try {
+					responseMsg = modelService.deletePropertyPhysical(property.getCode(), false,false);
+				} catch (RuntimeException e) {
+					log.warn("Physical property delete rejected for {}", property.getCode(), e);
+					response.setSuccess(false);
+					response.setExceptionMsg(mapper.writeValueAsString(
+							Collections.singletonList(physicalDeleteFailureMessage(e))));
+					return response;
+				}
 				//
 				if(responseMsg!=null&&responseMsg.length()!=0&&(!("".equals(responseMsg)))){
 					response.setSuccess(false);
@@ -456,6 +465,25 @@ public class PropertyController extends ConfigurationBaseController {
 		}
 //		return mapper.writeValueAsString(response);
 		return response;
+	}
+
+	private String physicalDeleteFailureMessage(RuntimeException error) {
+		StringBuilder details = new StringBuilder();
+		Throwable current = error;
+		while (current != null) {
+			if (current.getMessage() != null) {
+				details.append(' ').append(current.getMessage().toLowerCase(Locale.ROOT));
+			}
+			current = current.getCause();
+		}
+		String text = details.toString();
+		if (text.contains("other objects depend") || text.contains("because other objects depend")) {
+			return "字段被数据库视图或其他对象引用，无法删除，请先解除依赖。";
+		}
+		if (text.contains("does not exist") || text.contains("missing")) {
+			return "字段元数据与数据库物理结构不一致，已停止删除，请联系管理员修复。";
+		}
+		return "字段删除失败，数据库变更已回滚，数据未被修改。";
 	}
 	
 	@RequestMapping(value = "/ec/property/editCustomProps")

@@ -70,6 +70,37 @@ public final class PostgresFieldSyncSupport {
         }
     }
 
+    /**
+     * Drops the physical column for an explicitly confirmed property deletion.
+     * RESTRICT is intentional: database objects outside the configuration metadata
+     * must block the delete instead of being removed transitively.
+     */
+    public static synchronized void delete(Property property, Model model, JdbcTemplate template) {
+        if (property == null || model == null || template == null) {
+            throw new IllegalArgumentException("property, model and jdbcTemplate are required");
+        }
+        if (Boolean.TRUE.equals(property.getIsInherent()) || Boolean.TRUE.equals(property.getIsPk())) {
+            throw new IllegalStateException("PostgreSQL inherent or primary-key property cannot be deleted");
+        }
+        if (property.getType() == DbColumnType.PROPERTYATTACHMENT) {
+            return;
+        }
+
+        String tableName = identifier(model.getTableName(), "model table");
+        String columnName = identifier(property.getColumnName(), "property column");
+        if (!PostgresModelSyncSupport.tableExists(template, tableName)) {
+            throw new IllegalStateException("PostgreSQL model table does not exist: " + tableName);
+        }
+        if (!columnExists(template, tableName, columnName)) {
+            throw new IllegalStateException(
+                    "PostgreSQL property column does not exist: " + tableName + "." + columnName);
+        }
+
+        execute(
+                template,
+                "ALTER TABLE public." + tableName + " DROP COLUMN " + columnName + " RESTRICT");
+    }
+
     static boolean columnExists(JdbcTemplate template, String tableName, String columnName) {
         String safeTableName = identifier(tableName, "model table");
         String safeColumnName = identifier(columnName, "property column");
