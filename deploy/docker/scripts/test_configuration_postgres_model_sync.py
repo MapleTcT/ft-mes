@@ -24,6 +24,10 @@ FIELD_SYNC_PATH = MODEL_SYNC_PATH.with_name("FieldSyncDBUtils.java")
 POSTGRES_FIELD_SUPPORT_PATH = MODEL_SYNC_PATH.with_name("PostgresFieldSyncSupport.java")
 MODEL_SERVICE_PATH = MODEL_SYNC_PATH.parents[1] / "service/impl/ModelServiceImpl.java"
 FIELD_ACCEPTANCE_PATH = SCRIPT_DIR / "adp-entity-model-field-persistence-acceptance.js"
+FIELD_TYPE_MATRIX_ACCEPTANCE_PATH = (
+    SCRIPT_DIR / "adp-entity-model-field-type-matrix-acceptance.js"
+)
+MAKEFILE_PATH = ROOT / "Makefile"
 TRIGGER_RETIREMENT_PATH = ROOT / "deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql"
 TRIGGER_ROLLBACK_PATH = ROOT / "deploy/docker/postgres/rollback/197-configuration-app-owned-physical-schema-sync.sql"
 
@@ -193,6 +197,29 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertIn("TYPE boolean USING CASE", support)
         self.assertIn("TYPE \" + target.sqlType + \" USING CASE", support)
         self.assertIn("integralDecimalDigits", support)
+
+    def test_postgres_scalar_type_matrix_acceptance_is_fail_closed_and_reproducible(self) -> None:
+        acceptance = FIELD_TYPE_MATRIX_ACCEPTANCE_PATH.read_text(encoding="utf-8")
+        makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
+
+        for native_type in (
+            'dataType: "boolean"',
+            'dataType: "date"',
+            'dataType: "time without time zone"',
+            'dataType: "timestamp without time zone"',
+            'dataType: "bytea"',
+        ):
+            self.assertIn(native_type, acceptance)
+        self.assertIn('type: "OBJECT"', acceptance)
+        self.assertIn("Association fields require a separate target-model fixture", acceptance)
+        self.assertIn("invalid-integer-to-boolean-rolls-back", acceptance)
+        self.assertIn("numeric-capacity-reduction-rolls-back", acceptance)
+        self.assertIn("responseStatus === 500", acceptance)
+        self.assertIn("controlled-cleanup", acceptance)
+        self.assertIn("drop table if exists", acceptance)
+        self.assertIn("No automatic DROP COLUMN", acceptance)
+        self.assertIn("acceptance-entity-model-field-type-matrix", makefile)
+        self.assertIn("ADP_ENTITY_MODEL_FIELD_TYPE_MATRIX_OUTPUT", makefile)
 
 
 if __name__ == "__main__":
