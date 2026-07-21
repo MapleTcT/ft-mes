@@ -176,6 +176,24 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertNotIn('.isIndex === "true"', acceptance)
         self.assertNotIn('.isIndex === "false"', acceptance)
 
+    def test_postgres_scalar_type_matrix_uses_native_types_and_guarded_boolean_conversion(self) -> None:
+        support = POSTGRES_FIELD_SUPPORT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn('ColumnSpec.simple(TypeFamily.BOOLEAN, "boolean")', support)
+        self.assertIn('ColumnSpec.simple(TypeFamily.DATE, "date")', support)
+        self.assertIn('ColumnSpec.simple(TypeFamily.TIME, "time without time zone")', support)
+        self.assertIn('ColumnSpec.simple(TypeFamily.TIMESTAMP, "timestamp without time zone")', support)
+        self.assertNotIn(
+            "type == DbColumnType.INTEGER || type == DbColumnType.BOOLEAN",
+            support,
+        )
+        self.assertIn("synchronizeExplicitSafeConversion", support)
+        self.assertIn("not in (0, 1)", support)
+        self.assertIn("rows are outside the accepted 0/1 domain", support)
+        self.assertIn("TYPE boolean USING CASE", support)
+        self.assertIn("TYPE \" + target.sqlType + \" USING CASE", support)
+        self.assertIn("integralDecimalDigits", support)
+
 
 if __name__ == "__main__":
     unittest.main()

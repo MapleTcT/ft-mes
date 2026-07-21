@@ -111,6 +111,9 @@ public final class PostgresFieldSyncSupport {
         if (isCompatibleWithoutAlter(current, target)) {
             return;
         }
+        if (synchronizeExplicitSafeConversion(template, tableName, columnName, current, target)) {
+            return;
+        }
         if (isSafeTypeChange(current, target)) {
             execute(
                     template,
@@ -146,6 +149,15 @@ public final class PostgresFieldSyncSupport {
             int targetIntegerDigits = target.precision - target.scale;
             return currentIntegerDigits >= targetIntegerDigits && current.numericScale.intValue() >= target.scale;
         }
+        if (target.family == TypeFamily.BOOLEAN) {
+            return "boolean".equals(current.dataType);
+        }
+        if (target.family == TypeFamily.DATE) {
+            return "date".equals(current.dataType);
+        }
+        if (target.family == TypeFamily.TIME) {
+            return "time without time zone".equals(current.dataType);
+        }
         if (target.family == TypeFamily.TIMESTAMP) {
             return "timestamp without time zone".equals(current.dataType);
         }
@@ -176,10 +188,66 @@ public final class PostgresFieldSyncSupport {
             int targetIntegerDigits = target.precision - target.scale;
             return targetIntegerDigits >= currentIntegerDigits && target.scale >= current.numericScale.intValue();
         }
+        if (target.family == TypeFamily.NUMERIC && isIntegralType(current.dataType)) {
+            return target.precision - target.scale >= integralDecimalDigits(current.dataType);
+        }
         if (target.family == TypeFamily.TIMESTAMP) {
             return "date".equals(current.dataType);
         }
         return false;
+    }
+
+    private static boolean synchronizeExplicitSafeConversion(
+            JdbcTemplate template,
+            String tableName,
+            String columnName,
+            ColumnState current,
+            ColumnSpec target) {
+        if (target.family == TypeFamily.BOOLEAN && isIntegralType(current.dataType)) {
+            Integer invalidCount = template.queryForObject(
+                    "select count(1) from public." + tableName + " where " + columnName
+                            + " is not null and " + columnName + " not in (0, 1)",
+                    Integer.class);
+            if (invalidCount != null && invalidCount.intValue() > 0) {
+                throw new IllegalStateException(
+                        "Unsafe PostgreSQL integer-to-boolean property type change for "
+                                + tableName + "." + columnName + ": " + invalidCount
+                                + " rows are outside the accepted 0/1 domain");
+            }
+            execute(
+                    template,
+                    "ALTER TABLE public." + tableName + " ALTER COLUMN " + columnName
+                            + " TYPE boolean USING CASE WHEN " + columnName
+                            + " IS NULL THEN NULL WHEN " + columnName + " = 0 THEN FALSE ELSE TRUE END");
+            return true;
+        }
+        if ((target.family == TypeFamily.INTEGER || target.family == TypeFamily.BIGINT)
+                && "boolean".equals(current.dataType)) {
+            execute(
+                    template,
+                    "ALTER TABLE public." + tableName + " ALTER COLUMN " + columnName
+                            + " TYPE " + target.sqlType + " USING CASE WHEN " + columnName
+                            + " IS NULL THEN NULL WHEN " + columnName + " THEN 1 ELSE 0 END");
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isIntegralType(String dataType) {
+        return "smallint".equals(dataType) || "integer".equals(dataType) || "bigint".equals(dataType);
+    }
+
+    private static int integralDecimalDigits(String dataType) {
+        if ("smallint".equals(dataType)) {
+            return 5;
+        }
+        if ("integer".equals(dataType)) {
+            return 10;
+        }
+        if ("bigint".equals(dataType)) {
+            return 19;
+        }
+        throw new IllegalArgumentException("Not an integral PostgreSQL data type: " + dataType);
     }
 
     private static ColumnState readColumnState(JdbcTemplate template, String tableName, String columnName) {
@@ -509,8 +577,11 @@ public final class PostgresFieldSyncSupport {
         if (type == DbColumnType.BAPCODE || type == DbColumnType.SUMMARY || type == DbColumnType.SYSTEMCODE) {
             return ColumnSpec.varchar(4000);
         }
-        if (type == DbColumnType.INTEGER || type == DbColumnType.BOOLEAN) {
+        if (type == DbColumnType.INTEGER) {
             return ColumnSpec.simple(TypeFamily.INTEGER, "integer");
+        }
+        if (type == DbColumnType.BOOLEAN) {
+            return ColumnSpec.simple(TypeFamily.BOOLEAN, "boolean");
         }
         if (type == DbColumnType.DECIMAL || type == DbColumnType.MONEY) {
             int scale = property.getDecimalNum() == null ? 6 : property.getDecimalNum().intValue();
@@ -519,7 +590,13 @@ public final class PostgresFieldSyncSupport {
             }
             return ColumnSpec.numeric(19, scale);
         }
-        if (type == DbColumnType.DATE || type == DbColumnType.TIME || type == DbColumnType.DATETIME) {
+        if (type == DbColumnType.DATE) {
+            return ColumnSpec.simple(TypeFamily.DATE, "date");
+        }
+        if (type == DbColumnType.TIME) {
+            return ColumnSpec.simple(TypeFamily.TIME, "time without time zone");
+        }
+        if (type == DbColumnType.DATETIME) {
             return ColumnSpec.simple(TypeFamily.TIMESTAMP, "timestamp without time zone");
         }
         if (type == DbColumnType.LONGTEXT || type == DbColumnType.OFFICE) {
@@ -588,6 +665,9 @@ public final class PostgresFieldSyncSupport {
         INTEGER,
         BIGINT,
         NUMERIC,
+        BOOLEAN,
+        DATE,
+        TIME,
         TIMESTAMP,
         BYTEA
     }
