@@ -1,0 +1,998 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-21T13:00:38.966Z",
+  "repoCommit": "d63ea4b0ad708de7f45fab76cc41319a895e0e83",
+  "database": "PostgreSQL",
+  "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+  "status": "PASS_INTEGRATED_ROLLBACK_CONTROLLED_MARKER",
+  "loadClassification": "CONTROLLED_PRODUCTION_EQUIVALENT_NOT_PHYSICAL",
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-IRB-_20260721_2054",
+    "orderId": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054"
+  },
+  "target": {
+    "sshHost": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "remoteRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "streamRoot": "/home/v6/adp-bpi-stream-v15",
+    "backupDir": "/data/docker/bpi-upgrade-backups/ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054"
+  },
+  "rollbackArtifacts": {
+    "serviceImage": "ft-mes-bpi-service:20260721T081611-8b3c1fa56207",
+    "adapterImage": "ft-mes-bpi-adapter:20260720T212943Z-1962f599b3ea",
+    "flinkJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-13b1296c-job.jar",
+    "loadClientJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-integrated-rollback-5b54f79c083d-job.jar"
+  },
+  "safety": {
+    "databaseDowngrade": false,
+    "destructiveSchemaChange": false,
+    "phase2ExpectedEnabled": false,
+    "watchdogSeconds": 1200,
+    "cleanupByMarkerOnly": true,
+    "publishedRuleIsControlledFixture": true,
+    "businessMutationStillRequiresBrowserConfirmation": true
+  },
+  "stages": {
+    "precheck": {
+      "serviceImage": "ft-mes-bpi-service:20260721T092245-40a2c642ffdb",
+      "serviceImageId": "sha256:6217a2670262a575f355cbfc203937653afbfcd59c0a9f58bd83994f325d7cf2",
+      "serviceHealth": "healthy",
+      "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+      "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+      "jobJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-308cca82-job.jar",
+      "jobJarSha256": "7fbcacf8b3a8726b1210d02f7ae122bbb993ef6c84421bfdd96e1f34aaefa11b",
+      "flinkJob": "b1df8fba5f5f65c8fa6457482edab785|36|36",
+      "flinkCheckpoint": "8998",
+      "databaseState": "{\"flywayVersion\" : 24, \"topologies\" : 0, \"rules\" : 0, \"candidates\" : 0, \"batches\" : 0, \"pointCatalogSnapshots\" : 0}",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    },
+    "snapshot": {
+      "currentJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-308cca82-job.jar",
+      "currentJarSha256": "7fbcacf8b3a8726b1210d02f7ae122bbb993ef6c84421bfdd96e1f34aaefa11b",
+      "rollbackJarSha256": "dc0271cb66dd48799a2d8d05c126c2764f5632f67a34953df167ad0548d9c7fe",
+      "loadClientJarSha256": "5b54f79c083d8ea25f36a3335ea0f429316c9a5236e084ca27a6e94760bc3876"
+    },
+    "currentSavepoint": {
+      "currentSavepoint": "s3://ft-mes-bpi-checkpoints/savepoints/savepoint-b1df8f-4504e45b6ced",
+      "watchdogPid": "3855485"
+    },
+    "rollbackFlink": {
+      "serviceImage": "ft-mes-bpi-service:20260721T092245-40a2c642ffdb",
+      "serviceImageId": "sha256:6217a2670262a575f355cbfc203937653afbfcd59c0a9f58bd83994f325d7cf2",
+      "serviceHealth": "healthy",
+      "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+      "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+      "jobJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-13b1296c-job.jar",
+      "jobJarSha256": "dc0271cb66dd48799a2d8d05c126c2764f5632f67a34953df167ad0548d9c7fe",
+      "flinkJob": "9f7b818d1c07b31b2b41621eec972a65|36|36",
+      "flinkCheckpoint": "9001",
+      "databaseState": "{\"flywayVersion\" : 24, \"topologies\" : 0, \"rules\" : 0, \"candidates\" : 0, \"batches\" : 0, \"pointCatalogSnapshots\" : 0}",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    },
+    "rollback": {
+      "serviceImage": "ft-mes-bpi-service:20260721T081611-8b3c1fa56207",
+      "serviceImageId": "sha256:c07083879a7c42e502c11386669c5c11ae2029fdcc0377cfc488fdd1c7b15bf1",
+      "serviceHealth": "healthy",
+      "adapterImage": "ft-mes-bpi-adapter:20260720T212943Z-1962f599b3ea",
+      "adapterImageId": "sha256:2e13ecb7fad38a0f04d359ba8740fad55c4af63bb937ee23c516dfbfcd7577c0",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-IRB-_20260721_2054",
+      "jobJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-13b1296c-job.jar",
+      "jobJarSha256": "dc0271cb66dd48799a2d8d05c126c2764f5632f67a34953df167ad0548d9c7fe",
+      "flinkJob": "9f7b818d1c07b31b2b41621eec972a65|36|36",
+      "flinkCheckpoint": "9002",
+      "databaseState": "{\"flywayVersion\" : 24, \"topologies\" : 0, \"rules\" : 0, \"candidates\" : 0, \"batches\" : 0, \"pointCatalogSnapshots\" : 0}",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    },
+    "rollbackSavepoint": {
+      "rollbackSavepoint": "s3://ft-mes-bpi-checkpoints/savepoints/savepoint-9f7b81-21699f2668bc"
+    },
+    "restoredFlink": {
+      "serviceImage": "ft-mes-bpi-service:20260721T081611-8b3c1fa56207",
+      "serviceImageId": "sha256:c07083879a7c42e502c11386669c5c11ae2029fdcc0377cfc488fdd1c7b15bf1",
+      "serviceHealth": "healthy",
+      "adapterImage": "ft-mes-bpi-adapter:20260720T212943Z-1962f599b3ea",
+      "adapterImageId": "sha256:2e13ecb7fad38a0f04d359ba8740fad55c4af63bb937ee23c516dfbfcd7577c0",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-IRB-_20260721_2054",
+      "jobJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-308cca82-job.jar",
+      "jobJarSha256": "7fbcacf8b3a8726b1210d02f7ae122bbb993ef6c84421bfdd96e1f34aaefa11b",
+      "flinkJob": "40f36698aeee4aaae17eac52608c7939|36|36",
+      "flinkCheckpoint": "9008",
+      "databaseState": "{\"flywayVersion\" : 24, \"topologies\" : 1, \"rules\" : 1, \"candidates\" : 1, \"batches\" : 1, \"pointCatalogSnapshots\" : 0}",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    },
+    "restored": {
+      "serviceImage": "ft-mes-bpi-service:20260721T092245-40a2c642ffdb",
+      "serviceImageId": "sha256:6217a2670262a575f355cbfc203937653afbfcd59c0a9f58bd83994f325d7cf2",
+      "serviceHealth": "healthy",
+      "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+      "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-IRB-_20260721_2054",
+      "jobJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-308cca82-job.jar",
+      "jobJarSha256": "7fbcacf8b3a8726b1210d02f7ae122bbb993ef6c84421bfdd96e1f34aaefa11b",
+      "flinkJob": "40f36698aeee4aaae17eac52608c7939|36|36",
+      "flinkCheckpoint": "9009",
+      "databaseState": "{\"flywayVersion\" : 24, \"topologies\" : 1, \"rules\" : 1, \"candidates\" : 1, \"batches\" : 1, \"pointCatalogSnapshots\" : 0}",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    },
+    "final": {
+      "serviceImage": "ft-mes-bpi-service:20260721T092245-40a2c642ffdb",
+      "serviceImageId": "sha256:6217a2670262a575f355cbfc203937653afbfcd59c0a9f58bd83994f325d7cf2",
+      "serviceHealth": "healthy",
+      "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+      "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+      "jobJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-308cca82-job.jar",
+      "jobJarSha256": "7fbcacf8b3a8726b1210d02f7ae122bbb993ef6c84421bfdd96e1f34aaefa11b",
+      "flinkJob": "40f36698aeee4aaae17eac52608c7939|36|36",
+      "flinkCheckpoint": "9010",
+      "databaseState": "{\"flywayVersion\" : 24, \"topologies\" : 0, \"rules\" : 0, \"candidates\" : 0, \"batches\" : 0, \"pointCatalogSnapshots\" : 0}",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    }
+  },
+  "browser": {
+    "rollbackConfirm": {
+      "generatedAt": "2026-07-21T12:58:05.027Z",
+      "status": "PASS",
+      "action": "confirm",
+      "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "orderId": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "expectedBatchId": null,
+      "expectedBatchState": "ACTIVE",
+      "expectedBoundaryType": "START",
+      "expectedRuntimeStatus": null,
+      "expectedPublishStatus": 200,
+      "expectedPublishDetail": null,
+      "expectedPublishToast": null,
+      "adpBaseUrl": "http://10.11.100.17:18080",
+      "bpiBaseUrl": "http://10.11.100.17:18080/bpi",
+      "loginStatus": 200,
+      "page": {
+        "url": "http://10.11.100.17:18080/bpi/#/candidates",
+        "title": "智能批次"
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/candidates?plantId=PLANT-01&state=PENDING&limit=100",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":[{\"id\":\"71aa3c32-2505-577f-8f5d-8e726dd5fdc1\",\"candidateKey\":\"4ac16595-2db2-57e1-8ff6-800e81537b50\",\"tenantId\":\"1000\",\"plantId\":\"PLANT-01\",\"lineId\":\"LINE-IRB-_20260721_2054\",\"boundaryType\":\"START\",\"orderId\":\"MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054\",\"boundaryTime\":\"2026-07-21T12:56:35.331Z\",\"state\":\"PENDING\",\"revision\":1,\"confidence\":1.000000,\"ruleVersion\":\"RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"topologyVersion\":\"TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"missingSignals\":[],\"evidence\":[{\"eventId\":\"ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-1\",\"signal\":\"feed.flow\",\"classification\":\"QUORUM\",\"satisfied\":true,\"value\":\"4.0\",\"quality\":\"GOOD\",\"eventTime\":\"2026-07-21T12:56:35.331Z\",\"source\":\"bpi-stream-engine\"}]}],\"meta\":{\"traceId\":\"753d12df-0a4a-4eff-9a23-22132c34af2f\",\"generatedAt\":\"2026-07-21T12:58:03.287605964Z\",\"snapshotAt\":\"2026-07-21T12:58:03.287605964Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/candidates/71aa3c32-2505-577f-8f5d-8e726dd5fdc1",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":{\"id\":\"71aa3c32-2505-577f-8f5d-8e726dd5fdc1\",\"candidateKey\":\"4ac16595-2db2-57e1-8ff6-800e81537b50\",\"tenantId\":\"1000\",\"plantId\":\"PLANT-01\",\"lineId\":\"LINE-IRB-_20260721_2054\",\"boundaryType\":\"START\",\"orderId\":\"MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054\",\"boundaryTime\":\"2026-07-21T12:56:35.331Z\",\"state\":\"PENDING\",\"revision\":1,\"confidence\":1.000000,\"ruleVersion\":\"RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"topologyVersion\":\"TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"missingSignals\":[],\"evidence\":[{\"eventId\":\"ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-1\",\"signal\":\"feed.flow\",\"classification\":\"QUORUM\",\"satisfied\":true,\"value\":\"4.0\",\"quality\":\"GOOD\",\"eventTime\":\"2026-07-21T12:56:35.331Z\",\"source\":\"bpi-stream-engine\"}]},\"meta\":{\"traceId\":\"ff1f05c2-25d9-4ecc-bc25-a509d179d0b7\",\"generatedAt\":\"2026-07-21T12:58:03.956027460Z\",\"snapshotAt\":\"2026-07-21T12:58:03.956027460Z\"}}"
+        },
+        {
+          "method": "POST",
+          "url": "http://10.11.100.17:18080/bpi-api/candidates/71aa3c32-2505-577f-8f5d-8e726dd5fdc1/confirm",
+          "requestBody": "{\"reason\":\"现场复核 marker ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054 的 START 生产上下文和瞬时流量证据\"}",
+          "status": 200,
+          "responseBody": "{\"data\":{\"candidate\":{\"id\":\"71aa3c32-2505-577f-8f5d-8e726dd5fdc1\",\"candidateKey\":\"4ac16595-2db2-57e1-8ff6-800e81537b50\",\"tenantId\":\"1000\",\"plantId\":\"PLANT-01\",\"lineId\":\"LINE-IRB-_20260721_2054\",\"boundaryType\":\"START\",\"orderId\":\"MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054\",\"batchId\":\"28fa5580-eeaf-5461-b81c-21e6a982c5a0\",\"boundaryTime\":\"2026-07-21T12:56:35.331Z\",\"state\":\"CONFIRMED\",\"revision\":2,\"confidence\":1.000000,\"ruleVersion\":\"RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"topologyVersion\":\"TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"missingSignals\":[],\"evidence\":[{\"eventId\":\"ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-1\",\"signal\":\"feed.flow\",\"classification\":\"QUORUM\",\"satisfied\":true,\"value\":\"4.0\",\"quality\":\"GOOD\",\"eventTime\":\"2026-07-21T12:56:35.331Z\",\"source\":\"bpi-stream-engine\"}],\"review\":{\"actor\":\"legacy-ticket:admin\",\"reason\":\"现场复核 marker ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054 的 START 生产上下文和瞬时流量证据\",\"at\":\"2026-07-21T12:58:04.398446Z\"}},\"batch\":{\"id\":\"28fa5580-eeaf-5461-b81c-21e6a982c5a0\",\"batchNo\":\"BPI-LINEIRB202607212054-20260721-4AC16595\",\"tenantId\":\"1000\",\"plantId\":\"PLANT-01\",\"lineId\":\"LINE-IRB-_20260721_2054\",\"stageCode\":\"UNASSIGNED\",\"orderId\":\"MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054\",\"state\":\"ACTIVE\",\"revision\":1,\"shadow\":true,\"startTime\":\"2026-07-21T12:56:35.331Z\",\"quantity\":0.000000,\"quantityUnit\":\"t\",\"qualityGate\":\"NOT_APPLICABLE\",\"wmsStatus\":\"NOT_REQUESTED\",\"ruleVersion\":\"RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"topologyVersion\":\"TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\"}},\"meta\":{\"traceId\":\"f3279274-7e12-4860-911b-5f1e205833f4\",\"generatedAt\":\"2026-07-21T12:58:04.473855131Z\",\"snapshotAt\":\"2026-07-21T12:58:04.473855131Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/candidates?plantId=PLANT-01&state=PENDING&limit=100",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":[],\"meta\":{\"traceId\":\"1ca74362-57c4-4943-9b26-961602a42ee7\",\"generatedAt\":\"2026-07-21T12:58:04.540922542Z\",\"snapshotAt\":\"2026-07-21T12:58:04.540922542Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches?plantId=PLANT-01&limit=100",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":[{\"id\":\"28fa5580-eeaf-5461-b81c-21e6a982c5a0\",\"batchNo\":\"BPI-LINEIRB202607212054-20260721-4AC16595\",\"tenantId\":\"1000\",\"plantId\":\"PLANT-01\",\"lineId\":\"LINE-IRB-_20260721_2054\",\"stageCode\":\"UNASSIGNED\",\"orderId\":\"MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054\",\"state\":\"ACTIVE\",\"revision\":1,\"shadow\":true,\"startTime\":\"2026-07-21T12:56:35.331Z\",\"quantity\":0.000000,\"quantityUnit\":\"t\",\"qualityGate\":\"NOT_APPLICABLE\",\"wmsStatus\":\"NOT_REQUESTED\",\"ruleVersion\":\"RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"topologyVersion\":\"TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\"}],\"meta\":{\"traceId\":\"6b84398f-497b-40c5-9447-f81c998dcb0a\",\"generatedAt\":\"2026-07-21T12:58:04.715835346Z\",\"snapshotAt\":\"2026-07-21T12:58:04.715835346Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":{\"id\":\"28fa5580-eeaf-5461-b81c-21e6a982c5a0\",\"batchNo\":\"BPI-LINEIRB202607212054-20260721-4AC16595\",\"tenantId\":\"1000\",\"plantId\":\"PLANT-01\",\"lineId\":\"LINE-IRB-_20260721_2054\",\"stageCode\":\"UNASSIGNED\",\"orderId\":\"MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054\",\"state\":\"ACTIVE\",\"revision\":1,\"shadow\":true,\"startTime\":\"2026-07-21T12:56:35.331Z\",\"quantity\":0.000000,\"quantityUnit\":\"t\",\"qualityGate\":\"NOT_APPLICABLE\",\"wmsStatus\":\"NOT_REQUESTED\",\"ruleVersion\":\"RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"topologyVersion\":\"TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\"},\"meta\":{\"traceId\":\"98a62289-8759-46a3-8a6c-1dc191db153f\",\"generatedAt\":\"2026-07-21T12:58:04.789760752Z\",\"snapshotAt\":\"2026-07-21T12:58:04.789760752Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/28fa5580-eeaf-5461-b81c-21e6a982c5a0/timeline",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":[{\"revision\":1,\"action\":\"SHADOW_BATCH_CREATED\",\"at\":\"2026-07-21T12:58:04.444414Z\",\"actor\":\"legacy-ticket:admin\",\"reason\":\"现场复核 marker ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054 的 START 生产上下文和瞬时流量证据\"}],\"meta\":{\"traceId\":\"de060316-8d42-47d8-8e67-8f10f647f8b5\",\"generatedAt\":\"2026-07-21T12:58:04.797985299Z\",\"snapshotAt\":\"2026-07-21T12:58:04.797985299Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/28fa5580-eeaf-5461-b81c-21e6a982c5a0/force-close",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":null,\"meta\":{\"traceId\":\"ddff7121-088f-4f32-9d81-a430fd60080b\",\"generatedAt\":\"2026-07-21T12:58:04.811241012Z\",\"snapshotAt\":\"2026-07-21T12:58:04.811241012Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/28fa5580-eeaf-5461-b81c-21e6a982c5a0/evidence",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":{\"start\":[{\"eventId\":\"ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-1\",\"signal\":\"feed.flow\",\"classification\":\"QUORUM\",\"satisfied\":true,\"value\":\"4.0\",\"quality\":\"GOOD\",\"eventTime\":\"2026-07-21T12:56:35.331Z\",\"source\":\"bpi-stream-engine\"}],\"end\":[]},\"meta\":{\"traceId\":\"659329a9-8c92-415b-b639-3d385fcf3c16\",\"generatedAt\":\"2026-07-21T12:58:04.812777442Z\",\"snapshotAt\":\"2026-07-21T12:58:04.812777442Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/28fa5580-eeaf-5461-b81c-21e6a982c5a0/release",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":{\"batch\":{\"id\":\"28fa5580-eeaf-5461-b81c-21e6a982c5a0\",\"batchNo\":\"BPI-LINEIRB202607212054-20260721-4AC16595\",\"tenantId\":\"1000\",\"plantId\":\"PLANT-01\",\"lineId\":\"LINE-IRB-_20260721_2054\",\"stageCode\":\"UNASSIGNED\",\"orderId\":\"MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054\",\"state\":\"ACTIVE\",\"revision\":1,\"shadow\":true,\"startTime\":\"2026-07-21T12:56:35.331Z\",\"quantity\":0.000000,\"quantityUnit\":\"t\",\"qualityGate\":\"NOT_APPLICABLE\",\"wmsStatus\":\"NOT_REQUESTED\",\"ruleVersion\":\"RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"topologyVersion\":\"TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\"}},\"meta\":{\"traceId\":\"47ddeb40-3a65-449a-9381-0e54e515e3df\",\"generatedAt\":\"2026-07-21T12:58:04.816034526Z\",\"snapshotAt\":\"2026-07-21T12:58:04.816034526Z\"}}"
+        }
+      ],
+      "consoleErrors": [],
+      "expectedConsoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "evidence": {
+        "candidateId": "71aa3c32-2505-577f-8f5d-8e726dd5fdc1",
+        "candidateState": "CONFIRMED",
+        "boundaryType": "START",
+        "batchState": "ACTIVE",
+        "shadow": true
+      },
+      "screenshot": "/Users/zhangchu/Documents/ADP/adp-bpi-data-quality-workbench/metadata/bpi-integrated-rollback-old-stack.png",
+      "error": null
+    },
+    "restoredBatch": {
+      "generatedAt": "2026-07-21T13:00:03.652Z",
+      "status": "PASS",
+      "action": "batch-read",
+      "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "orderId": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "expectedBatchId": "28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+      "expectedBatchState": "ACTIVE",
+      "expectedBoundaryType": "START",
+      "expectedRuntimeStatus": null,
+      "expectedPublishStatus": 200,
+      "expectedPublishDetail": null,
+      "expectedPublishToast": null,
+      "adpBaseUrl": "http://10.11.100.17:18080",
+      "bpiBaseUrl": "http://10.11.100.17:18080/bpi",
+      "loginStatus": 200,
+      "page": {
+        "url": "http://10.11.100.17:18080/bpi/#/batches",
+        "title": "智能批次"
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches?plantId=PLANT-01&limit=100",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":[{\"id\":\"28fa5580-eeaf-5461-b81c-21e6a982c5a0\",\"batchNo\":\"BPI-LINEIRB202607212054-20260721-4AC16595\",\"tenantId\":\"1000\",\"plantId\":\"PLANT-01\",\"lineId\":\"LINE-IRB-_20260721_2054\",\"stageCode\":\"UNASSIGNED\",\"orderId\":\"MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054\",\"state\":\"ACTIVE\",\"revision\":1,\"shadow\":true,\"startTime\":\"2026-07-21T12:56:35.331Z\",\"quantity\":0.000000,\"quantityUnit\":\"t\",\"qualityGate\":\"NOT_APPLICABLE\",\"wmsStatus\":\"NOT_REQUESTED\",\"ruleVersion\":\"RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"topologyVersion\":\"TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\"}],\"meta\":{\"traceId\":\"a78dcc2e-a4ba-41ba-9804-451c0c40eb11\",\"generatedAt\":\"2026-07-21T13:00:02.768718251Z\",\"snapshotAt\":\"2026-07-21T13:00:02.768718251Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":{\"id\":\"28fa5580-eeaf-5461-b81c-21e6a982c5a0\",\"batchNo\":\"BPI-LINEIRB202607212054-20260721-4AC16595\",\"tenantId\":\"1000\",\"plantId\":\"PLANT-01\",\"lineId\":\"LINE-IRB-_20260721_2054\",\"stageCode\":\"UNASSIGNED\",\"orderId\":\"MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054\",\"state\":\"ACTIVE\",\"revision\":1,\"shadow\":true,\"startTime\":\"2026-07-21T12:56:35.331Z\",\"quantity\":0.000000,\"quantityUnit\":\"t\",\"qualityGate\":\"NOT_APPLICABLE\",\"wmsStatus\":\"NOT_REQUESTED\",\"ruleVersion\":\"RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"topologyVersion\":\"TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\"},\"meta\":{\"traceId\":\"f62801be-70bd-46df-ac60-828947bc8543\",\"generatedAt\":\"2026-07-21T13:00:03.539717678Z\",\"snapshotAt\":\"2026-07-21T13:00:03.539717678Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/28fa5580-eeaf-5461-b81c-21e6a982c5a0/force-close",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":null,\"meta\":{\"traceId\":\"fa4a199f-3b4b-4791-a3ca-aad0fbb34f99\",\"generatedAt\":\"2026-07-21T13:00:03.550007620Z\",\"snapshotAt\":\"2026-07-21T13:00:03.550007620Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/28fa5580-eeaf-5461-b81c-21e6a982c5a0/timeline",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":[{\"revision\":1,\"action\":\"SHADOW_BATCH_CREATED\",\"at\":\"2026-07-21T12:58:04.444414Z\",\"actor\":\"legacy-ticket:admin\",\"reason\":\"现场复核 marker ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054 的 START 生产上下文和瞬时流量证据\"}],\"meta\":{\"traceId\":\"36ce0b55-45b2-4878-a077-3f41b787e71e\",\"generatedAt\":\"2026-07-21T13:00:03.551996098Z\",\"snapshotAt\":\"2026-07-21T13:00:03.551996098Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/28fa5580-eeaf-5461-b81c-21e6a982c5a0/release",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":{\"batch\":{\"id\":\"28fa5580-eeaf-5461-b81c-21e6a982c5a0\",\"batchNo\":\"BPI-LINEIRB202607212054-20260721-4AC16595\",\"tenantId\":\"1000\",\"plantId\":\"PLANT-01\",\"lineId\":\"LINE-IRB-_20260721_2054\",\"stageCode\":\"UNASSIGNED\",\"orderId\":\"MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054\",\"state\":\"ACTIVE\",\"revision\":1,\"shadow\":true,\"startTime\":\"2026-07-21T12:56:35.331Z\",\"quantity\":0.000000,\"quantityUnit\":\"t\",\"qualityGate\":\"NOT_APPLICABLE\",\"wmsStatus\":\"NOT_REQUESTED\",\"ruleVersion\":\"RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\",\"topologyVersion\":\"TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1\"}},\"meta\":{\"traceId\":\"3c7eeded-fe15-4847-b541-64a77ed88a49\",\"generatedAt\":\"2026-07-21T13:00:03.558941312Z\",\"snapshotAt\":\"2026-07-21T13:00:03.558941312Z\"}}"
+        },
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/28fa5580-eeaf-5461-b81c-21e6a982c5a0/evidence",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":{\"start\":[{\"eventId\":\"ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-1\",\"signal\":\"feed.flow\",\"classification\":\"QUORUM\",\"satisfied\":true,\"value\":\"4.0\",\"quality\":\"GOOD\",\"eventTime\":\"2026-07-21T12:56:35.331Z\",\"source\":\"bpi-stream-engine\"}],\"end\":[]},\"meta\":{\"traceId\":\"417ef4d5-3c2e-41c1-9e44-8ac516d1d150\",\"generatedAt\":\"2026-07-21T13:00:03.557378121Z\",\"snapshotAt\":\"2026-07-21T13:00:03.557378121Z\"}}"
+        }
+      ],
+      "consoleErrors": [],
+      "expectedConsoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "evidence": {
+        "batchId": "28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+        "batchRowText": "BPI-LINEIRB202607212054-20260721-4AC16595\nSHADOW\n\t-\tLINE-IRB-_20260721_2054\tUNASSIGNED\t07/21 20:56:35\t0.0t\tNOT_APPLICABLE\tNOT_REQUESTED\tACTIVE\tr1",
+        "batchState": "ACTIVE",
+        "shadow": true,
+        "batchDrawerText": "批次档案\nBPI-LINEIRB202607212054-20260721-4AC16595\nACTIVE\nSHADOW\nrevision 1\n产线 / 工段\nLINE-IRB-_20260721_2054 / UNASSIGNED\n生产指令\nMO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054\n开始时间\n07/21 20:56:35\n结束时间\n-\n累计量\n0.0 t\n干物量\n- t\n质量门\nNOT_APPLICABLE\n库存状态\nNOT_REQUESTED\n质量与库存\nQCS/LIMS → BPI → WMS\n原始批次\n生产事实形成中\n质量放行\n尚未进入质量门\n入库指令\n尚未生成命令\n完工入库\n尚未完成\n质量放行\n尚未进入质量放行\n\n当前没有 QCS/LIMS 质量门投影，系统不会据此生成完工入库命令。\n\nNOT_APPLICABLE\n完工入库\n尚未生成入库命令\n\n只有质量门明确接受后，BPI 才能形成带幂等键的 WMS 完工入库命令。\n\nNOT_REQUESTED\n边界证据\n1 START / 0 END\nfeed.flow\nbpi-stream-engine · 07/21 20:56:35\n4.0\n状态时间线\nSHADOW_BATCH_CREATED\n现场复核 marker ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054 的 START 生产上下文和瞬时流量证据\n07/21 20:58:04 · legacy-ticket:admin\n关闭\n暂停自动处理\n申请强制结束",
+        "drawerBounds": {
+          "left": 600,
+          "right": 1280,
+          "width": 680,
+          "viewportWidth": 1280
+        }
+      },
+      "screenshot": "/Users/zhangchu/Documents/ADP/adp-bpi-data-quality-workbench/metadata/bpi-integrated-rollback-restored-stack.png",
+      "error": null
+    },
+    "cleanup": {
+      "generatedAt": "2026-07-21T13:00:06.009Z",
+      "status": "PASS",
+      "action": "candidate-absent",
+      "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "orderId": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "expectedBatchId": null,
+      "expectedBatchState": "ACTIVE",
+      "expectedBoundaryType": "START",
+      "expectedRuntimeStatus": null,
+      "expectedPublishStatus": 200,
+      "expectedPublishDetail": null,
+      "expectedPublishToast": null,
+      "adpBaseUrl": "http://10.11.100.17:18080",
+      "bpiBaseUrl": "http://10.11.100.17:18080/bpi",
+      "loginStatus": 200,
+      "page": {
+        "url": "http://10.11.100.17:18080/bpi/#/candidates",
+        "title": "智能批次"
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/candidates?plantId=PLANT-01&state=PENDING&limit=100",
+          "requestBody": "",
+          "status": 200,
+          "responseBody": "{\"data\":[],\"meta\":{\"traceId\":\"b7fc789d-06f3-4299-a366-4c104a308f05\",\"generatedAt\":\"2026-07-21T13:00:05.590845884Z\",\"snapshotAt\":\"2026-07-21T13:00:05.590845884Z\"}}"
+        }
+      ],
+      "consoleErrors": [],
+      "expectedConsoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "evidence": {
+        "pendingCandidateCount": 0,
+        "matchingOrderRows": 0,
+        "emptyStateVisible": true
+      },
+      "screenshot": "/Users/zhangchu/Documents/ADP/adp-bpi-data-quality-workbench/metadata/bpi-integrated-rollback-cleanup.png",
+      "error": null
+    }
+  },
+  "postgres": {
+    "seed": {
+      "status": "SEEDED_PUBLISHED_FIXTURE",
+      "fixturePurpose": "CONTROLLED_INTEGRATED_ROLLBACK_ONLY",
+      "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "tenantId": "1000",
+      "plantId": "PLANT-01",
+      "lineId": "LINE-IRB-_20260721_2054",
+      "orderId": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "topologyId": "22d3434c-12d4-09a8-58eb-889cc125984b",
+      "topology": "TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1",
+      "topologyState": "PUBLISHED",
+      "ruleId": "380aa2d8-c487-52db-6809-3d71cf56ff7e",
+      "rule": "RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1",
+      "ruleState": "PUBLISHED"
+    },
+    "rollbackBeforeConfirm": {
+      "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "rule": {
+        "rule_id": "380aa2d8-c487-52db-6809-3d71cf56ff7e",
+        "rule_state": "PUBLISHED",
+        "rule_revision": 1,
+        "latest_simulation_id": null,
+        "outbox_id": null,
+        "publication_status": null,
+        "application_status": null,
+        "application_event_id": null,
+        "application_deployment_id": null,
+        "runtime_readiness_status": null,
+        "runtime_readiness_event_id": null,
+        "runtime_readiness_deployment_id": null,
+        "runtime_readiness_reason_code": null,
+        "runtime_readiness_detail": null,
+        "runtime_point_catalog_event_id": null,
+        "runtime_point_catalog_source_revision": null
+      },
+      "candidate": {
+        "id": "71aa3c32-2505-577f-8f5d-8e726dd5fdc1",
+        "candidate_key": "4ac16595-2db2-57e1-8ff6-800e81537b50",
+        "state": "PENDING",
+        "revision": 1,
+        "batch_id": null,
+        "order_id": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054"
+      },
+      "batch": null,
+      "counts": {
+        "topologies": 1,
+        "rules": 1,
+        "simulations": 0,
+        "outbox": 0,
+        "candidates": 1,
+        "batches": 0,
+        "boundaryEvidence": 0,
+        "stateEvents": 0,
+        "auditEvents": 0
+      }
+    },
+    "rollback": {
+      "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "rule": {
+        "rule_id": "380aa2d8-c487-52db-6809-3d71cf56ff7e",
+        "rule_state": "PUBLISHED",
+        "rule_revision": 1,
+        "latest_simulation_id": null,
+        "outbox_id": null,
+        "publication_status": null,
+        "application_status": null,
+        "application_event_id": null,
+        "application_deployment_id": null,
+        "runtime_readiness_status": null,
+        "runtime_readiness_event_id": null,
+        "runtime_readiness_deployment_id": null,
+        "runtime_readiness_reason_code": null,
+        "runtime_readiness_detail": null,
+        "runtime_point_catalog_event_id": null,
+        "runtime_point_catalog_source_revision": null
+      },
+      "candidate": {
+        "id": "71aa3c32-2505-577f-8f5d-8e726dd5fdc1",
+        "candidate_key": "4ac16595-2db2-57e1-8ff6-800e81537b50",
+        "state": "CONFIRMED",
+        "revision": 2,
+        "batch_id": "28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+        "order_id": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054"
+      },
+      "batch": {
+        "id": "28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+        "batch_no": "BPI-LINEIRB202607212054-20260721-4AC16595",
+        "state": "ACTIVE",
+        "revision": 1,
+        "is_shadow": true
+      },
+      "counts": {
+        "topologies": 1,
+        "rules": 1,
+        "simulations": 0,
+        "outbox": 0,
+        "candidates": 1,
+        "batches": 1,
+        "boundaryEvidence": 1,
+        "stateEvents": 1,
+        "auditEvents": 1
+      }
+    },
+    "restored": {
+      "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "rule": {
+        "rule_id": "380aa2d8-c487-52db-6809-3d71cf56ff7e",
+        "rule_state": "PUBLISHED",
+        "rule_revision": 1,
+        "latest_simulation_id": null,
+        "outbox_id": null,
+        "publication_status": null,
+        "application_status": null,
+        "application_event_id": null,
+        "application_deployment_id": null,
+        "runtime_readiness_status": null,
+        "runtime_readiness_event_id": null,
+        "runtime_readiness_deployment_id": null,
+        "runtime_readiness_reason_code": null,
+        "runtime_readiness_detail": null,
+        "runtime_point_catalog_event_id": null,
+        "runtime_point_catalog_source_revision": null
+      },
+      "candidate": {
+        "id": "71aa3c32-2505-577f-8f5d-8e726dd5fdc1",
+        "candidate_key": "4ac16595-2db2-57e1-8ff6-800e81537b50",
+        "state": "CONFIRMED",
+        "revision": 2,
+        "batch_id": "28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+        "order_id": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054"
+      },
+      "batch": {
+        "id": "28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+        "batch_no": "BPI-LINEIRB202607212054-20260721-4AC16595",
+        "state": "ACTIVE",
+        "revision": 1,
+        "is_shadow": true
+      },
+      "counts": {
+        "topologies": 1,
+        "rules": 1,
+        "simulations": 0,
+        "outbox": 0,
+        "candidates": 1,
+        "batches": 1,
+        "boundaryEvidence": 1,
+        "stateEvents": 1,
+        "auditEvents": 1
+      }
+    },
+    "cleanup": {
+      "status": "CLEANED",
+      "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "remaining": {
+        "topologies": 0,
+        "rules": 0,
+        "candidates": 0,
+        "batches": 0,
+        "inboxEvents": 0,
+        "featureFlags": 0,
+        "auditEvents": 0,
+        "pointCatalogSnapshots": 0
+      }
+    }
+  },
+  "kafkaFlink": {
+    "replay": {
+      "generatedAt": "2026-07-21T12:57:59.333255865Z",
+      "status": "PASS",
+      "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+      "scope": {
+        "tenantId": "1000",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-IRB-_20260721_2054",
+        "topology": "TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1",
+        "rule": "RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1",
+        "orderId": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054"
+      },
+      "clusterSmokeRequired": true,
+      "topics": {
+        "telemetry": "iot.telemetry.selected.v1",
+        "pointCatalog": "iot.point-catalog.snapshot.v1",
+        "context": "mes.production.context.v1",
+        "rule": "bpi.boundary.rule-publication.v1",
+        "ruleApplication": "bpi.boundary.rule-application.v1",
+        "ruleRuntimeReadiness": "bpi.boundary.rule-runtime-readiness.v1",
+        "candidate": "bpi.batch.candidate.v1",
+        "dataQuality": "bpi.data-quality.v1"
+      },
+      "inputs": [
+        {
+          "topic": "iot.point-catalog.snapshot.v1",
+          "partition": 2,
+          "offset": 23,
+          "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-POINT-CATALOG"
+        },
+        {
+          "topic": "bpi.boundary.rule-publication.v1",
+          "partition": 1,
+          "offset": 8,
+          "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-RULE-ACTIVE"
+        },
+        {
+          "topic": "mes.production.context.v1",
+          "partition": 2,
+          "offset": 4,
+          "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-CONTEXT"
+        },
+        {
+          "topic": "iot.telemetry.selected.v1",
+          "partition": 0,
+          "offset": 12,
+          "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-1"
+        },
+        {
+          "topic": "iot.telemetry.selected.v1",
+          "partition": 0,
+          "offset": 13,
+          "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-2"
+        },
+        {
+          "topic": "iot.telemetry.selected.v1",
+          "partition": 0,
+          "offset": 14,
+          "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-3"
+        }
+      ],
+      "activeReadiness": {
+        "topic": "bpi.boundary.rule-runtime-readiness.v1",
+        "partition": 1,
+        "offset": 45,
+        "eventId": "sha256:40e9c41502927117cbfe481b27d91a1ee3b65e44477975420e7924bb68fed729",
+        "publicationEventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-RULE-ACTIVE",
+        "pointCatalogEventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-POINT-CATALOG",
+        "status": "READY"
+      },
+      "cleanup": {
+        "publication": {
+          "topic": "bpi.boundary.rule-publication.v1",
+          "partition": 1,
+          "offset": 9,
+          "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-RULE-INACTIVE"
+        },
+        "application": {
+          "topic": "bpi.boundary.rule-application.v1",
+          "partition": 2,
+          "offset": 13,
+          "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-RULE-INACTIVE|ubuntu-test-v17-308cca82|APPLIED||1784638653990",
+          "publicationEventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-RULE-INACTIVE",
+          "deploymentId": "ubuntu-test-v17-308cca82",
+          "status": "APPLIED"
+        }
+      },
+      "candidate": {
+        "candidateKey": "4ac16595-2db2-57e1-8ff6-800e81537b50",
+        "eventId": "CANDIDATE-4ac16595-2db2-57e1-8ff6-800e81537b50",
+        "topic": "bpi.batch.candidate.v1",
+        "partition": 0,
+        "offset": 4,
+        "matchingRecordCount": 1,
+        "evidenceEventIds": [
+          "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-1"
+        ]
+      },
+      "matchingDataQualityIssues": 0,
+      "error": null
+    }
+  },
+  "checks": [
+    {
+      "name": "current base stack ready before rehearsal",
+      "passed": true,
+      "detail": {
+        "serviceImage": "ft-mes-bpi-service:20260721T092245-40a2c642ffdb",
+        "serviceImageId": "sha256:6217a2670262a575f355cbfc203937653afbfcd59c0a9f58bd83994f325d7cf2",
+        "serviceHealth": "healthy",
+        "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+        "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+        "adapterHealth": "healthy",
+        "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+        "jobJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-308cca82-job.jar",
+        "jobJarSha256": "7fbcacf8b3a8726b1210d02f7ae122bbb993ef6c84421bfdd96e1f34aaefa11b",
+        "flinkJob": "b1df8fba5f5f65c8fa6457482edab785|36|36",
+        "flinkCheckpoint": "8998",
+        "databaseState": "{\"flywayVersion\" : 24, \"topologies\" : 0, \"rules\" : 0, \"candidates\" : 0, \"batches\" : 0, \"pointCatalogSnapshots\" : 0}",
+        "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+      }
+    },
+    {
+      "name": "authenticated user tenant and plant can be isolated to rehearsal line",
+      "passed": true,
+      "detail": {
+        "username": "admin",
+        "tenantId": "1000",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-IRB-_20260721_2054"
+      }
+    },
+    {
+      "name": "unique marker starts clean",
+      "passed": true,
+      "detail": {
+        "flywayVersion": 24,
+        "topologies": 0,
+        "rules": 0,
+        "candidates": 0,
+        "batches": 0,
+        "pointCatalogSnapshots": 0
+      }
+    },
+    {
+      "name": "rollback stack ready together",
+      "passed": true,
+      "detail": {
+        "serviceImage": "ft-mes-bpi-service:20260721T081611-8b3c1fa56207",
+        "serviceImageId": "sha256:c07083879a7c42e502c11386669c5c11ae2029fdcc0377cfc488fdd1c7b15bf1",
+        "serviceHealth": "healthy",
+        "adapterImage": "ft-mes-bpi-adapter:20260720T212943Z-1962f599b3ea",
+        "adapterImageId": "sha256:2e13ecb7fad38a0f04d359ba8740fad55c4af63bb937ee23c516dfbfcd7577c0",
+        "adapterHealth": "healthy",
+        "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-IRB-_20260721_2054",
+        "jobJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-13b1296c-job.jar",
+        "jobJarSha256": "dc0271cb66dd48799a2d8d05c126c2764f5632f67a34953df167ad0548d9c7fe",
+        "flinkJob": "9f7b818d1c07b31b2b41621eec972a65|36|36",
+        "flinkCheckpoint": "9002",
+        "databaseState": "{\"flywayVersion\" : 24, \"topologies\" : 0, \"rules\" : 0, \"candidates\" : 0, \"batches\" : 0, \"pointCatalogSnapshots\" : 0}",
+        "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+      }
+    },
+    {
+      "name": "rollback adapter exposes isolated rehearsal line",
+      "passed": true,
+      "detail": {
+        "username": "admin",
+        "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-IRB-_20260721_2054"
+      }
+    },
+    {
+      "name": "published rule fixture is explicitly scoped to rollback rehearsal",
+      "passed": true,
+      "detail": {
+        "status": "SEEDED_PUBLISHED_FIXTURE",
+        "fixturePurpose": "CONTROLLED_INTEGRATED_ROLLBACK_ONLY",
+        "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+        "tenantId": "1000",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-IRB-_20260721_2054",
+        "orderId": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+        "topologyId": "22d3434c-12d4-09a8-58eb-889cc125984b",
+        "topology": "TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1",
+        "topologyState": "PUBLISHED",
+        "ruleId": "380aa2d8-c487-52db-6809-3d71cf56ff7e",
+        "rule": "RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1",
+        "ruleState": "PUBLISHED"
+      }
+    },
+    {
+      "name": "old Flink produced exactly one candidate",
+      "passed": true,
+      "detail": {
+        "generatedAt": "2026-07-21T12:57:59.333255865Z",
+        "status": "PASS",
+        "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+        "scope": {
+          "tenantId": "1000",
+          "plantId": "PLANT-01",
+          "lineId": "LINE-IRB-_20260721_2054",
+          "topology": "TOPO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1",
+          "rule": "RULE-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054@1",
+          "orderId": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054"
+        },
+        "clusterSmokeRequired": true,
+        "topics": {
+          "telemetry": "iot.telemetry.selected.v1",
+          "pointCatalog": "iot.point-catalog.snapshot.v1",
+          "context": "mes.production.context.v1",
+          "rule": "bpi.boundary.rule-publication.v1",
+          "ruleApplication": "bpi.boundary.rule-application.v1",
+          "ruleRuntimeReadiness": "bpi.boundary.rule-runtime-readiness.v1",
+          "candidate": "bpi.batch.candidate.v1",
+          "dataQuality": "bpi.data-quality.v1"
+        },
+        "inputs": [
+          {
+            "topic": "iot.point-catalog.snapshot.v1",
+            "partition": 2,
+            "offset": 23,
+            "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-POINT-CATALOG"
+          },
+          {
+            "topic": "bpi.boundary.rule-publication.v1",
+            "partition": 1,
+            "offset": 8,
+            "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-RULE-ACTIVE"
+          },
+          {
+            "topic": "mes.production.context.v1",
+            "partition": 2,
+            "offset": 4,
+            "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-CONTEXT"
+          },
+          {
+            "topic": "iot.telemetry.selected.v1",
+            "partition": 0,
+            "offset": 12,
+            "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-1"
+          },
+          {
+            "topic": "iot.telemetry.selected.v1",
+            "partition": 0,
+            "offset": 13,
+            "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-2"
+          },
+          {
+            "topic": "iot.telemetry.selected.v1",
+            "partition": 0,
+            "offset": 14,
+            "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-3"
+          }
+        ],
+        "activeReadiness": {
+          "topic": "bpi.boundary.rule-runtime-readiness.v1",
+          "partition": 1,
+          "offset": 45,
+          "eventId": "sha256:40e9c41502927117cbfe481b27d91a1ee3b65e44477975420e7924bb68fed729",
+          "publicationEventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-RULE-ACTIVE",
+          "pointCatalogEventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-POINT-CATALOG",
+          "status": "READY"
+        },
+        "cleanup": {
+          "publication": {
+            "topic": "bpi.boundary.rule-publication.v1",
+            "partition": 1,
+            "offset": 9,
+            "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-RULE-INACTIVE"
+          },
+          "application": {
+            "topic": "bpi.boundary.rule-application.v1",
+            "partition": 2,
+            "offset": 13,
+            "eventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-RULE-INACTIVE|ubuntu-test-v17-308cca82|APPLIED||1784638653990",
+            "publicationEventId": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-RULE-INACTIVE",
+            "deploymentId": "ubuntu-test-v17-308cca82",
+            "status": "APPLIED"
+          }
+        },
+        "candidate": {
+          "candidateKey": "4ac16595-2db2-57e1-8ff6-800e81537b50",
+          "eventId": "CANDIDATE-4ac16595-2db2-57e1-8ff6-800e81537b50",
+          "topic": "bpi.batch.candidate.v1",
+          "partition": 0,
+          "offset": 4,
+          "matchingRecordCount": 1,
+          "evidenceEventIds": [
+            "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054-TELEMETRY-1"
+          ]
+        },
+        "matchingDataQualityIssues": 0,
+        "error": null
+      }
+    },
+    {
+      "name": "old service persisted confirmed shadow batch",
+      "passed": true,
+      "detail": {
+        "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+        "rule": {
+          "rule_id": "380aa2d8-c487-52db-6809-3d71cf56ff7e",
+          "rule_state": "PUBLISHED",
+          "rule_revision": 1,
+          "latest_simulation_id": null,
+          "outbox_id": null,
+          "publication_status": null,
+          "application_status": null,
+          "application_event_id": null,
+          "application_deployment_id": null,
+          "runtime_readiness_status": null,
+          "runtime_readiness_event_id": null,
+          "runtime_readiness_deployment_id": null,
+          "runtime_readiness_reason_code": null,
+          "runtime_readiness_detail": null,
+          "runtime_point_catalog_event_id": null,
+          "runtime_point_catalog_source_revision": null
+        },
+        "candidate": {
+          "id": "71aa3c32-2505-577f-8f5d-8e726dd5fdc1",
+          "candidate_key": "4ac16595-2db2-57e1-8ff6-800e81537b50",
+          "state": "CONFIRMED",
+          "revision": 2,
+          "batch_id": "28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+          "order_id": "MO-ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054"
+        },
+        "batch": {
+          "id": "28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+          "batch_no": "BPI-LINEIRB202607212054-20260721-4AC16595",
+          "state": "ACTIVE",
+          "revision": 1,
+          "is_shadow": true
+        },
+        "counts": {
+          "topologies": 1,
+          "rules": 1,
+          "simulations": 0,
+          "outbox": 0,
+          "candidates": 1,
+          "batches": 1,
+          "boundaryEvidence": 1,
+          "stateEvents": 1,
+          "auditEvents": 1
+        }
+      }
+    },
+    {
+      "name": "current stack restored exactly",
+      "passed": true,
+      "detail": {
+        "serviceImage": "ft-mes-bpi-service:20260721T092245-40a2c642ffdb",
+        "serviceImageId": "sha256:6217a2670262a575f355cbfc203937653afbfcd59c0a9f58bd83994f325d7cf2",
+        "serviceHealth": "healthy",
+        "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+        "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+        "adapterHealth": "healthy",
+        "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-IRB-_20260721_2054",
+        "jobJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-308cca82-job.jar",
+        "jobJarSha256": "7fbcacf8b3a8726b1210d02f7ae122bbb993ef6c84421bfdd96e1f34aaefa11b",
+        "flinkJob": "40f36698aeee4aaae17eac52608c7939|36|36",
+        "flinkCheckpoint": "9009",
+        "databaseState": "{\"flywayVersion\" : 24, \"topologies\" : 1, \"rules\" : 1, \"candidates\" : 1, \"batches\" : 1, \"pointCatalogSnapshots\" : 0}",
+        "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+      }
+    },
+    {
+      "name": "marker persistence unchanged across restore",
+      "passed": true,
+      "detail": {
+        "rollback": {
+          "candidateId": "71aa3c32-2505-577f-8f5d-8e726dd5fdc1",
+          "candidateKey": "4ac16595-2db2-57e1-8ff6-800e81537b50",
+          "candidateState": "CONFIRMED",
+          "candidateRevision": 2,
+          "batchId": "28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+          "batchState": "ACTIVE",
+          "batchRevision": 1,
+          "counts": {
+            "topologies": 1,
+            "rules": 1,
+            "simulations": 0,
+            "outbox": 0,
+            "candidates": 1,
+            "batches": 1,
+            "boundaryEvidence": 1,
+            "stateEvents": 1,
+            "auditEvents": 1
+          }
+        },
+        "restored": {
+          "candidateId": "71aa3c32-2505-577f-8f5d-8e726dd5fdc1",
+          "candidateKey": "4ac16595-2db2-57e1-8ff6-800e81537b50",
+          "candidateState": "CONFIRMED",
+          "candidateRevision": 2,
+          "batchId": "28fa5580-eeaf-5461-b81c-21e6a982c5a0",
+          "batchState": "ACTIVE",
+          "batchRevision": 1,
+          "counts": {
+            "topologies": 1,
+            "rules": 1,
+            "simulations": 0,
+            "outbox": 0,
+            "candidates": 1,
+            "batches": 1,
+            "boundaryEvidence": 1,
+            "stateEvents": 1,
+            "auditEvents": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "marker cleanup has zero residue",
+      "passed": true,
+      "detail": {
+        "status": "CLEANED",
+        "marker": "ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054",
+        "remaining": {
+          "topologies": 0,
+          "rules": 0,
+          "candidates": 0,
+          "batches": 0,
+          "inboxEvents": 0,
+          "featureFlags": 0,
+          "auditEvents": 0,
+          "pointCatalogSnapshots": 0
+        }
+      }
+    },
+    {
+      "name": "final current stack remains ready",
+      "passed": true,
+      "detail": {
+        "serviceImage": "ft-mes-bpi-service:20260721T092245-40a2c642ffdb",
+        "serviceImageId": "sha256:6217a2670262a575f355cbfc203937653afbfcd59c0a9f58bd83994f325d7cf2",
+        "serviceHealth": "healthy",
+        "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+        "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+        "adapterHealth": "healthy",
+        "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+        "jobJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-308cca82-job.jar",
+        "jobJarSha256": "7fbcacf8b3a8726b1210d02f7ae122bbb993ef6c84421bfdd96e1f34aaefa11b",
+        "flinkJob": "40f36698aeee4aaae17eac52608c7939|36|36",
+        "flinkCheckpoint": "9010",
+        "databaseState": "{\"flywayVersion\" : 24, \"topologies\" : 0, \"rules\" : 0, \"candidates\" : 0, \"batches\" : 0, \"pointCatalogSnapshots\" : 0}",
+        "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+      }
+    }
+  ],
+  "recovery": {
+    "watchdogRestored": "false",
+    "watchdog": {
+      "watchdogRestored": "false"
+    }
+  },
+  "issues": []
+}

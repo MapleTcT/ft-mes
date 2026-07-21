@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T11:14:23+00:00",
-  "repoCommit": "6fac3120734ec14a343cae9ccf232e440c3b1dc8",
+  "generatedAt": "2026-07-21T13:15:41+00:00",
+  "repoCommit": "d63ea4b0ad708de7f45fab76cc41319a895e0e83",
   "generatedFrom": [
     "metadata/current-content-inventory.json",
     "metadata/backend-module-dependency-inventory.json",
@@ -82,8 +82,8 @@
     "topFiles": []
   },
   "oracleMigrationAudit": {
-    "generatedAt": "2026-07-21T11:14:10+00:00",
-    "repoCommit": "6fac3120734ec14a343cae9ccf232e440c3b1dc8",
+    "generatedAt": "2026-07-21T13:11:56+00:00",
+    "repoCommit": "d63ea4b0ad708de7f45fab76cc41319a895e0e83",
     "findingCount": 1607,
     "categoryTotal": 1607,
     "unclassifiedReferenceCount": 0
@@ -178,7 +178,7 @@
       "id": "oracle-audit-current-and-classified",
       "title": "Oracle migration audit 可追溯且无未分类引用",
       "status": "pass",
-      "evidence": "generatedAt=2026-07-21T11:14:10+00:00, repoCommit=6fac3120734ec14a343cae9ccf232e440c3b1dc8, unclassified=0, findingCount=1607, categoryTotal=1607",
+      "evidence": "generatedAt=2026-07-21T13:11:56+00:00, repoCommit=d63ea4b0ad708de7f45fab76cc41319a895e0e83, unclassified=0, findingCount=1607, categoryTotal=1607",
       "nextAction": "先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。",
       "blocking": false
     },

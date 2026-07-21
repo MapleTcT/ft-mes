@@ -89,9 +89,9 @@ candidate/batch 均为 0。该结果仍是受控模拟器，不证明物理设�
 `APPLIED + READY/r5` 真实落库；操作台 `8/8` E2E 验证两个状态域独立显示。目标环境随后已完成
 Flyway V13 expand-only 迁移，并从 V12 savepoint 有状态恢复到 Flink job
 `40408b7907ca7b97ad750cc7d2bfb345`，该阶段为 `RUNNING/33-of-33`；来源目录仍为 1 点/0 READY。
-后续 V14-V24、规则运行时回执、savepoint、单 broker 故障恢复、应用组件回退、受控 QCS/WMS 和
-强制结束兜底已分别闭合；现场来源、7-14 天影子运行、跨组件整体回切和外部 QCS/ERP-WMS 仍未完成，
-因此 G-021 保持 `PARTIAL`。
+后续 V14-V24、规则运行时回执、savepoint、单 broker 故障恢复、应用组件回退、受控 QCS/WMS、
+强制结束兜底和真实候选/批次负载下的跨组件整体回切已分别闭合；现场来源、7-14 天影子运行和外部
+QCS/ERP-WMS 仍未完成，因此 G-021 保持 `PARTIAL`。
 
 2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、
@@ -108,7 +108,7 @@ marker 定向清理后残留为 0。版本比较与业务审批控制面因此�
 写入 candidate/inbox，真实候选页复显 `PENDING/r1` 和 2/2 证据；未确认候选，因此 batch、WOM、
 QCS、WMS 均未写入。当前 marker 与旧诊断 marker 定向清理后 11 类残留均为 0。版本比较、审批、
 受控退役、typed inactive、savepoint 升级和候选在途语义已成为发布回归基线。G-021 仍保持
-`PARTIAL`：现场来源 READY、真实 END 边界、7-14 天影子运行、跨组件整体回切和
+`PARTIAL`：当时现场来源 READY、真实 END 边界、7-14 天影子运行、跨组件整体回切和
 QCS/WMS 写回仍未闭合。证据见
 [BPI 规则版本比较与审批生命周期验收](testing/bpi-rule-version-lifecycle-acceptance.md) 和
 [BPI 规则退役、回滚与延迟候选落库验收](testing/bpi-rule-retirement-acceptance.md)。
@@ -134,7 +134,7 @@ console/page/request error 均为 0。该修复保证运行时证据过期或配
 均通过，Flyway V16 与 9 类核心表计数不变，随后恢复精确 tag/image ID 并复验。marker
 `ADP_BPI_FLINK_ROLLBACK_20260719_120659` 从当前 canonical savepoint 恢复上一版 JAR，再从上一版
 savepoint 恢复当前 JAR；两次均保持 `allowNonRestoredState=false`、33/33 task 和 checkpoint 推进。
-service/adapter/Flink 应用组件回退因此退出阻断项；真实业务负载下的跨组件整体回切仍未验收。证据见
+service/adapter/Flink 应用组件回退因此退出阻断项；当时真实业务负载下的跨组件整体回切仍未验收。证据见
 [BPI 应用组件回滚验收](testing/bpi-application-rollback-acceptance.md)。
 
 同日又关闭 JetLinks 平台前置条件：通过官方 API 安装协议、注册激活
@@ -266,8 +266,8 @@ marker `ADP_E2E_20260720_215500_BPI_WMS` 经 BPI 事务 outbox、目标三 broke
 与 material 表均清理为 0，Phase 2/WMS 开关全关、allowlist/route 恢复 deny-all。
 
 因此 G-021 的当前剩余缺口不再包括“内部 material-wms 未落单”或“Kafka command 未重放”；仍保留
-外部 QCS 实例主动事件与真实检验记录所有权联接、外部 ERP/WMS 冲销/宕机补偿、物理设备与正式校准、
-连续 7-14 天现场运行和真实负载跨组件整体回切，目标状态继续为 `PARTIAL`，不能标记生产 READY。
+外部 QCS 实例主动事件与真实检验记录所有权联接、外部 ERP/WMS 冲销/宕机补偿、物理设备与正式校准
+以及连续 7-14 天现场运行，目标状态继续为 `PARTIAL`，不能标记生产 READY。
 
 2026-07-21 又补齐两个异常治理基线。marker `ADP_E2E_20260721_015610_WMS_RECON` 证明管理员可在
 真实批次页核对并重新排队原 WMS event/key；marker `ADP_E2E_20260720193226_WMS_OUTAGE` 真实停止
@@ -279,6 +279,17 @@ marker `ADP_E2E_20260720_215500_BPI_WMS` 经 BPI 事务 outbox、目标三 broke
 精确路由修复提交 `1962f599b3ea90b1863548f45998f6e0fa89cc1d` 已部署并通过 31/31 测试；取证后 marker
 残留为 0，全部 Phase 2/WMS 开关仍关闭。该能力是异常人工兜底，不替代自动 END 边界和现场运行门禁。
 
+同日 marker `ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054` 又完成真实候选/批次负载下的跨组件整体
+回切。测试窗口同时回退 Java 17 Service、兼容 Java 8 Adapter `1962f599` 和旧 Flink JAR；旧 Flink
+由目录、规则、生产上下文和遥测生成恰好 1 个候选，真实候选页确认后 PostgreSQL 形成
+`CONFIRMED/r2` 与 `ACTIVE/r1/SHADOW` 批次。随后从双 savepoint 恢复当前 Flink JAR，并精确恢复
+当前 Service 与带 `X-BPI-Adapter-Contract-Version: 1` 的 Adapter `d63ea4b0`；恢复前后候选、批次、
+边界证据、状态事件、审计的 ID、revision 和计数完全一致，旧栈/当前栈浏览器 API 均为 200 且错误为 0。
+marker 定向清理后 8 类残留为 0，原 Adapter scope、Flink `36/36`、Flyway V24、六个关闭开关和
+watchdog 状态均复原。因此“真实业务负载跨组件整体回切”退出 G-021 缺口；物理设备、正式校准、现场
+连续 7-14 天、外部 ERP/WMS 和生产激活仍未完成。证据见
+[BPI 整栈回滚验收](testing/bpi-integrated-rollback-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -288,6 +299,7 @@ marker `ADP_E2E_20260720_215500_BPI_WMS` 经 BPI 事务 outbox、目标三 broke
 - [BPI 点位目录重复观测与准入撤销验收](testing/bpi-point-catalog-repeated-observation-acceptance.md)
 - [BPI 单 Broker 故障恢复验收](testing/bpi-broker-failure-recovery-acceptance.md)
 - [BPI 应用组件回滚验收](testing/bpi-application-rollback-acceptance.md)
+- [BPI 整栈回滚验收](testing/bpi-integrated-rollback-acceptance.md)
 - [BPI 试点平台前置条件与单位别名验收](testing/bpi-pilot-platform-prerequisites-acceptance.md)
 - [BPI 点位校准治理与失败关闭验收](testing/bpi-point-calibration-governance-acceptance.md)
 - [BPI 点位校准高基数分页验收](testing/bpi-point-calibration-pagination-acceptance.md)
@@ -475,7 +487,7 @@ marker `ADP_E2E_20260720_215500_BPI_WMS` 经 BPI 事务 outbox、目标三 broke
 
 1. 保持已通过的同一 marker `UI -> Outbox -> Kafka -> Flink -> application receipt -> PostgreSQL -> candidate confirm -> batch/evidence/audit` 联合验收，以及 `selected telemetry -> Flink data quality -> Kafka -> PostgreSQL -> browser` 自动质量链，作为每次发布的回归基线。
 2. 保持已通过的目标环境 Flyway V24、savepoint 恢复、点位目录与来源序列证据自动同步、真实 ADP 会话、页面拓扑创建/校验、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、强制结束四眼审批、typed inactive、PostgreSQL revision、运行开关治理和重启读取作为发布回归；日常配置不得回退到 SQL fixture、直接改表或手工伪造 READY 快照。
-3. 保持已通过的单 broker 故障、service/adapter 镜像往返和 Flink JAR 双向状态回退为发布回归；下一步只补生产等价维护窗口下的跨组件整体回切、入口流量恢复和真实业务 marker 签字。
+3. 保持已通过的单 broker 故障、service/adapter/Flink 双 savepoint 整栈回切、入口流量恢复、真实候选确认和 PostgreSQL 不变性为发布回归；生产切换前只需在生产等价维护窗口复跑并取得业务签字。
 4. 以已通过的 `MapleTcT/iot` 受控 MQTT 双会话链和 `mes-production-context-outbox` 为基线配置试点产线；当前产品、设备、`instantFlow` metadata、单位及受控 `source_epoch + sequence` 重连语义已进入自动链，下一步补真实校准并用物理 DEVICE/GATEWAY 重复同等验收。
 5. 受控 MQTT 与 WOM context 的同指令 START/END 已通过；下一步用物理设备和正式校准替换受控来源，按同一生产指令重复 Kafka、Flink、BPI PostgreSQL candidate/batch、自动 END 和浏览器证据链，再连续运行 7-14 天影子批次。
 6. 达到现场边界人工认同率、累计量偏差和数据质量门槛后，才接入外部 QCS 主动事件及外部 ERP/WMS 写回、查单、拒绝、冲销和补偿。
