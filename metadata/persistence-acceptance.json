@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-21T10:47:47.562Z",
-  "repoCommit": "6fac3120734ec14a343cae9ccf232e440c3b1dc8",
+  "generatedAt": "2026-07-21T13:50:44.858Z",
+  "repoCommit": "d70063e952bd1bfcc5b9ae5f9d7b69bf74fcac31",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
-    "generatedAt": "2026-07-21T10:47:47.562Z",
+    "generatedAt": "2026-07-21T13:50:44.858Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -150,6 +150,12 @@
       "evidence": "metadata/qcs-bpi-quality-gate-target-acceptance.json; metadata/qcs-bpi-quality-gate-target-wom.png; metadata/qcs-bpi-quality-gate-target-list.png; metadata/qcs-bpi-quality-gate-target-report.png",
       "assertions": "real WOM/QCS pages and HTTP 200 chain; browser errors zero; QCS transaction outbox SENT attempt 1; Kafka first delta 1; BPI RELEASED/r3 and ACCEPTED with gate/link/inbox 1/1/1, state/audit 2/2 and WMS outbox 0; exact same event and payload replay SENT attempt 2 with unchanged projection; replay delta 1, DLQ 0, lag 0; ADP/BPI residual zero; six switches restored false; external production enablement and WMS remain pending"
     },
+    "bpiFormalIdentityForceClose": {
+      "status": "PASS_TARGET_FORMAL_IDENTITY_TWO_BROWSER_SESSIONS_CLEANED",
+      "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+      "evidence": "metadata/bpi-formal-identity-force-close-acceptance.json; metadata/bpi-formal-identity-force-close-pending.png; metadata/bpi-formal-identity-force-close-completed.png",
+      "assertions": "temporary person/auth user/systemRole binding persisted through real ADP APIs; second account login and currentuser 200 with tenant 1000 and systemRole; requester and approver used distinct ADP browser sessions through /bpi-api; pending ACTIVE/r2 plus PENDING_APPROVAL/r1 and final CLOSED_RAW/r3 plus COMPLETED/r2 verified directly in PostgreSQL; requestedBy and decidedBy were distinct legacy-ticket subjects; expected same-actor 403 and zero unexpected browser errors; active identity and BPI marker residual zero; adapter image/scope and six disabled switches restored exactly"
+    },
     "qcsDisplayBindings": {
       "status": "PASS_TARGET",
       "evidence": "metadata/qcs-display-cold-restart-acceptance.json; metadata/qcs-inspect-list-display-current.png; metadata/qcs-report-edit-qualified-current.png; metadata/qcs-report-view-qualified-current.png; metadata/qcs-report-edit-unqualified-current.png; metadata/qcs-report-view-unqualified-current.png",
@@ -187,8 +193,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 204,
-    "pass": 201,
+    "testedFeatures": 206,
+    "pass": 203,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -4519,9 +4525,57 @@
       "status": "PASS",
       "evidence": "metadata/entity-model-field-delete-persistence-acceptance.json; 18/18 PASS on 10.11.100.17 at implementation commit 31baf5d0; real entity configuration parent page and model AJAX panel returned 200 with the irreversible warning visible; ordinaryDelete preserved the column and marker data; explicit delete removed metadata/column/data through DROP COLUMN RESTRICT; dependency, metadata-delete failure and drift paths returned HTTP 200/success=false structured messages and preserved state; retries passed after repair; PROPERTYATTACHMENT was metadata-only; inherent primary key was protected; browser errors and cleanup residuals were zero",
       "issues": []
+    },
+    {
+      "module": "BPI 正式身份第二管理员",
+      "route": "/auth/#/user; /bpi/#/batches",
+      "operation": "通过真实组织、认证和 RBAC API 创建临时审批人员/账号并绑定 systemRole，登录 currentuser 验证后执行受控删除",
+      "api": "POST /inter-api/organization/v1/person; POST/DELETE /inter-api/auth/v1/user; POST/DELETE /inter-api/rbac/v1/roleUser; GET /inter-api/auth/v1/currentuser",
+      "method": "POST/GET/DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "Organization person API -> Auth user API -> RBAC roleUser API -> LegacyTicketVerifier/currentuser",
+      "tables": [
+        "public.org_person",
+        "public.auth_user",
+        "public.rbac_roleuser",
+        "public.auth_user_role",
+        "public.rbac_role"
+      ],
+      "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+      "verificationSql": "Query org_person by code ADP_BPI_FORMAL_IDENTITY_20260721134944_PERSON; query auth_user by bpi_reviewer_20260721134944; join rbac_roleuser.role_id to rbac_role.id and auth_user_role.user_id to auth_user.id; after cleanup require person/user valid=0 and active roleUser/authRoles=0.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-formal-identity-force-close-acceptance.json; person/user/role writes returned 200, PostgreSQL proved valid person, encoded auth credential, valid systemRole binding and auth role; login/currentuser returned 200 with username, tenant 1000 and systemRole; cleanup left no active person, user, role binding or auth role; password is REDACTED",
+      "issues": []
+    },
+    {
+      "module": "BPI 正式身份双管理员强制结束",
+      "route": "/bpi/#/batches",
+      "operation": "admin 真实浏览器申请强制结束，同人审批失败关闭，第二个正式 ADP systemRole 浏览器会话独立批准并验证 PostgreSQL 中间态、终态和清理",
+      "api": "GET/POST /bpi-api/batches/cc583ccf-dcf9-4319-8ef2-42eb50061837/force-close",
+      "method": "GET/POST",
+      "requiresPersistence": true,
+      "backendEntry": "BpiProxyController -> BpiRoutePolicy/LegacyTicketVerifier -> BatchController.forceClose -> BatchCommandService.forceClose -> BpiPostgresRepository",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_force_close_tasks",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_feature_flags"
+      ],
+      "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+      "verificationSql": "deploy/docker/scripts/bpi-force-close-acceptance-verification.sql before approval verifies ACTIVE/r2, PENDING_APPROVAL/r1, requested_by legacy-ticket:admin and no decided_by; after approval verifies CLOSED_RAW/r3, COMPLETED/r2, decided_by legacy-ticket:bpi_reviewer_20260721134944, event/audit revisions 2 and idempotency=2; cleanup SQL plus final queries require batch/task/flag/override residual=0.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-formal-identity-force-close-acceptance.json and two screenshots; both ADP login sessions returned 200; requester page POST 202, expected same-actor POST 403, independent approver page POST 202 through /bpi-api; pending and completed PostgreSQL snapshots match exactly; page width 1600/1600 and unexpected BPI HTTP errors=0; adapter image/scope, six false switches and marker cleanup restored exactly",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+      "artifact": "metadata/bpi-formal-identity-force-close-acceptance.json",
+      "summary": "Two distinct real ADP identity sessions closed the governed force-close request/approval flow through the Java 8 adapter and Java 17 service; PostgreSQL proved identity/RBAC provisioning, pending and completed batch/task revisions, distinct requester/approver subjects, expected same-actor rejection, exact cleanup and restored disabled integration controls."
+    },
     {
       "marker": "ADP_E2E_20260721101217_PG_FIELD_DELETE",
       "artifact": "metadata/entity-model-field-delete-persistence-acceptance.json",

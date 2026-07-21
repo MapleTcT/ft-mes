@@ -10,13 +10,17 @@ const marker = required("BPI_ACCEPTANCE_MARKER");
 const batchId = required("BPI_BATCH_ID");
 const boundaryTime = required("BPI_BOUNDARY_TIME");
 const adpBaseUrl = required("ADP_BASE_URL").replace(/\/+$/, "");
-const serviceBaseUrl = required("BPI_SERVICE_BASE_URL").replace(/\/+$/, "");
 const username = required("ADP_USERNAME");
 const password = required("ADP_PASSWORD");
-const internalSecret = required("BPI_INTERNAL_JWT_SECRET");
+const approverUsername = optional("BPI_APPROVER_USERNAME");
+const approverPassword = optional("BPI_APPROVER_PASSWORD");
+const useAdpApproverSession = Boolean(approverUsername && approverPassword);
+const serviceBaseUrl = optional("BPI_SERVICE_BASE_URL").replace(/\/+$/, "");
+const internalSecret = optional("BPI_INTERNAL_JWT_SECRET");
 const plantId = process.env.BPI_PLANT_ID || "PLANT-01";
 const lineId = process.env.BPI_LINE_ID || "LINE-S07-01";
-const approver = process.env.BPI_APPROVER_SUBJECT || `${marker}_BPI_ADMIN`;
+const approver = process.env.BPI_APPROVER_SUBJECT
+  || (useAdpApproverSession ? `legacy-ticket:${approverUsername}` : `${marker}_BPI_ADMIN`);
 const timeoutMs = Number(process.env.BPI_BROWSER_TIMEOUT_MS || 120_000);
 const executablePath = process.env.BPI_CHROMIUM_EXECUTABLE || undefined;
 const reportPath = path.resolve(
@@ -36,7 +40,16 @@ if (!/^[A-Za-z0-9_-]{8,100}$/.test(marker)) {
   throw new Error("BPI_ACCEPTANCE_MARKER must use 8-100 letters, digits, underscores or hyphens");
 }
 if (!/^[0-9a-f-]{36}$/i.test(batchId)) throw new Error("BPI_BATCH_ID must be a UUID");
-if (Buffer.byteLength(internalSecret, "utf8") < 32) {
+if (Boolean(approverUsername) !== Boolean(approverPassword)) {
+  throw new Error("BPI_APPROVER_USERNAME and BPI_APPROVER_PASSWORD must be configured together");
+}
+if (useAdpApproverSession && approverUsername === username) {
+  throw new Error("BPI_APPROVER_USERNAME must differ from ADP_USERNAME");
+}
+if (!useAdpApproverSession && !serviceBaseUrl) {
+  throw new Error("BPI_SERVICE_BASE_URL is required for internal JWT approval mode");
+}
+if (!useAdpApproverSession && Buffer.byteLength(internalSecret, "utf8") < 32) {
   throw new Error("BPI_INTERNAL_JWT_SECRET must contain at least 32 UTF-8 bytes");
 }
 if (approver.length > 128) throw new Error("BPI_APPROVER_SUBJECT must not exceed 128 characters");
@@ -49,6 +62,10 @@ function required(key) {
   const value = process.env[key];
   if (!value || !value.trim()) throw new Error(`${key} is required`);
   return value.trim();
+}
+
+function optional(key) {
+  return String(process.env[key] || "").trim();
 }
 
 function assert(condition, message) {
@@ -79,10 +96,10 @@ async function readBody(response) {
   }
 }
 
-async function login(api) {
+async function login(api, loginUsername, loginPassword, label) {
   const attempts = [
-    { userName: username, password, clientId: "pc_dt" },
-    { username, password, clientId: "pc_dt" },
+    { userName: loginUsername, password: loginPassword, clientId: "pc_dt" },
+    { username: loginUsername, password: loginPassword, clientId: "pc_dt" },
   ];
   const failures = [];
   for (const data of attempts) {
@@ -96,7 +113,59 @@ async function login(api) {
     if (ticket) return { ticket, status: response.status(), payload: parsed.json };
     failures.push({ status: response.status(), response: parsed.text.slice(0, 300) });
   }
-  throw new Error(`ADP login failed: ${JSON.stringify(failures)}`);
+  throw new Error(`ADP login failed for ${label}: ${JSON.stringify(failures)}`);
+}
+
+async function authenticatedContext(browser, auth) {
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true,
+    viewport: { width: 1600, height: 1000 },
+    extraHTTPHeaders: { Authorization: `Bearer ${auth.ticket}` },
+  });
+  await context.addCookies([
+    { name: "suposTicket", value: auth.ticket, url: adpBaseUrl },
+    { name: "SUPOS_TICKET", value: auth.ticket, url: adpBaseUrl },
+  ]);
+  await context.addInitScript(({ token, loginPayload, selectedPlantId, selectedLineId }) => {
+    for (const key of ["suposTicket", "SUPOS_TICKET", "token", "ticket"]) {
+      window.localStorage.setItem(key, token);
+      window.sessionStorage.setItem(key, token);
+    }
+    window.localStorage.setItem("loginMsg", JSON.stringify(loginPayload));
+    window.localStorage.setItem("language", "zh_CN");
+    window.localStorage.setItem("langu_code", "zh_CN");
+    window.localStorage.setItem("locale", "zh-cn");
+    window.localStorage.setItem("bpi.plantId", selectedPlantId);
+    window.localStorage.setItem("bpi.lineId", selectedLineId);
+  }, { token: auth.ticket, loginPayload: auth.payload, selectedPlantId: plantId, selectedLineId: lineId });
+  return context;
+}
+
+function observePage(page, browserReport, session) {
+  page.on("console", (message) => {
+    if (message.type() === "error") browserReport.consoleErrors.push({
+      session,
+      text: message.text(),
+      url: message.location().url || null,
+    });
+  });
+  page.on("pageerror", (error) => browserReport.pageErrors.push({ session, message: error.message }));
+  page.on("requestfailed", (failed) => browserReport.requestFailures.push({
+    session,
+    method: failed.method(),
+    url: failed.url(),
+    error: failed.failure()?.errorText || "",
+  }));
+  page.on("response", (response) => {
+    if (response.url().includes("/bpi-api/") && response.status() >= 400) {
+      browserReport.bpiHttpErrors.push({
+        session,
+        method: response.request().method(),
+        url: response.url(),
+        status: response.status(),
+      });
+    }
+  });
 }
 
 function base64Url(value) {
@@ -209,6 +278,7 @@ async function main() {
   fs.mkdirSync(path.dirname(screenshotPrefix), { recursive: true });
   const api = await request.newContext({ ignoreHTTPSErrors: true });
   let browser;
+  let approverContext;
   const report = {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
@@ -218,9 +288,22 @@ async function main() {
     route: "/bpi/#/batches",
     batchId,
     boundaryTime,
-    environment: { adpBaseUrl, serviceBaseUrl, tenantId: "1000", plantId, lineId },
-    actors: { requesterLogin: username, requesterSubject: null, approver },
+    environment: {
+      adpBaseUrl,
+      serviceBaseUrl: serviceBaseUrl || null,
+      tenantId: "1000",
+      plantId,
+      lineId,
+    },
+    approvalAuthentication: useAdpApproverSession ? "ADP_SESSION" : "INTERNAL_JWT",
+    actors: {
+      requesterLogin: username,
+      requesterSubject: null,
+      approverLogin: approverUsername || null,
+      approverSubject: approver,
+    },
     loginStatus: null,
+    approverLoginStatus: null,
     operations: {},
     browser: {
       url: null,
@@ -253,58 +336,18 @@ async function main() {
     assert([401, 403].includes(unauthenticated.status()),
       `unauthenticated force-close read returned ${unauthenticated.status()}`);
 
-    const auth = await login(api);
+    const auth = await login(api, username, password, "requester");
     report.loginStatus = auth.status;
     browser = await chromium.launch({
       headless: true,
       executablePath,
       args: ["--no-proxy-server"],
     });
-    const context = await browser.newContext({
-      ignoreHTTPSErrors: true,
-      viewport: { width: 1600, height: 1000 },
-      extraHTTPHeaders: { Authorization: `Bearer ${auth.ticket}` },
-    });
-    await context.addCookies([
-      { name: "suposTicket", value: auth.ticket, url: adpBaseUrl },
-      { name: "SUPOS_TICKET", value: auth.ticket, url: adpBaseUrl },
-    ]);
-    await context.addInitScript(({ token, loginPayload, selectedPlantId, selectedLineId }) => {
-      for (const key of ["suposTicket", "SUPOS_TICKET", "token", "ticket"]) {
-        window.localStorage.setItem(key, token);
-        window.sessionStorage.setItem(key, token);
-      }
-      window.localStorage.setItem("loginMsg", JSON.stringify(loginPayload));
-      window.localStorage.setItem("language", "zh_CN");
-      window.localStorage.setItem("langu_code", "zh_CN");
-      window.localStorage.setItem("locale", "zh-cn");
-      window.localStorage.setItem("bpi.plantId", selectedPlantId);
-      window.localStorage.setItem("bpi.lineId", selectedLineId);
-    }, { token: auth.ticket, loginPayload: auth.payload, selectedPlantId: plantId, selectedLineId: lineId });
+    const context = await authenticatedContext(browser, auth);
 
     const page = await context.newPage();
     page.setDefaultTimeout(timeoutMs);
-    page.on("console", (message) => {
-      if (message.type() === "error") report.browser.consoleErrors.push({
-        text: message.text(),
-        url: message.location().url || null,
-      });
-    });
-    page.on("pageerror", (error) => report.browser.pageErrors.push(error.message));
-    page.on("requestfailed", (failed) => report.browser.requestFailures.push({
-      method: failed.method(),
-      url: failed.url(),
-      error: failed.failure()?.errorText || "",
-    }));
-    page.on("response", (response) => {
-      if (response.url().includes("/bpi-api/") && response.status() >= 400) {
-        report.browser.bpiHttpErrors.push({
-          method: response.request().method(),
-          url: response.url(),
-          status: response.status(),
-        });
-      }
-    });
+    observePage(page, report.browser, "requester");
 
     await page.goto(`${adpBaseUrl}/bpi/#/batches`, { waitUntil: "networkidle", timeout: timeoutMs });
     await page.getByRole("heading", { name: "批次档案" }).waitFor();
@@ -373,39 +416,92 @@ async function main() {
     });
     await dialog.getByRole("button", { name: "取消" }).click();
 
-    report.operations.approval = await directApprove(api, 2);
+    let finalPage = page;
+    let finalDrawer = drawer;
+    let finalApiBase;
+    let finalAuthorization;
+    if (useAdpApproverSession) {
+      const approverAuth = await login(api, approverUsername, approverPassword, "approver");
+      report.approverLoginStatus = approverAuth.status;
+      approverContext = await authenticatedContext(browser, approverAuth);
+      const approverPage = await approverContext.newPage();
+      approverPage.setDefaultTimeout(timeoutMs);
+      observePage(approverPage, report.browser, "approver");
+      await approverPage.goto(`${adpBaseUrl}/bpi/#/batches`, {
+        waitUntil: "networkidle",
+        timeout: timeoutMs,
+      });
+      await approverPage.getByRole("heading", { name: "批次档案" }).waitFor();
+      const approverRow = approverPage.locator(`[data-batch-id="${batchId}"]`);
+      await approverRow.waitFor();
+      await approverRow.getByText(marker, { exact: true }).waitFor();
+      await approverRow.click();
+      const approverDrawer = approverPage.locator("#detail-drawer");
+      await approverDrawer.locator('[data-force-close-state="PENDING_APPROVAL"]').waitFor();
+      await approverDrawer.getByRole("button", { name: "批准并强制结束" }).click();
+      const approverDialog = approverPage.locator("#confirm-dialog");
+      await approverDialog.getByRole("heading", { name: "批准强制结束批次" }).waitFor();
+      assert(await approverDialog.locator("#command-boundary-time").inputValue() === localDateTime(boundaryTime),
+        "independent approval session did not recover the stored boundary time");
+      const approvalReason = `${marker} formal ADP administrator independently verified the boundary`;
+      await approverDialog.locator("#confirm-reason").fill(approvalReason);
+      const approvalResponsePromise = approverPage.waitForResponse((response) => (
+        response.request().method() === "POST"
+          && response.url().endsWith(`/bpi-api/batches/${batchId}/force-close`)
+      ));
+      await approverDialog.getByRole("button", { name: "批准并关闭批次" }).click();
+      const approvalResponse = await approvalResponsePromise;
+      const approvalBody = await readBody(approvalResponse);
+      assert(approvalResponse.status() === 202,
+        `formal approver session returned ${approvalResponse.status()}: ${approvalBody.text.slice(0, 500)}`);
+      assert(approvalBody.json?.data?.state === "COMPLETED",
+        "formal approver session did not complete the task");
+      report.operations.approval = operation(approvalResponse, approvalBody, {
+        reason: approvalReason,
+        boundaryTime,
+        approvalMode: "APPROVE",
+      });
+      finalPage = approverPage;
+      finalDrawer = approverDrawer;
+      finalApiBase = `${adpBaseUrl}/bpi-api`;
+      finalAuthorization = `Bearer ${approverAuth.ticket}`;
+    } else {
+      report.operations.approval = await directApprove(api, 2);
+      await page.reload({ waitUntil: "networkidle", timeout: timeoutMs });
+      await page.getByRole("heading", { name: "批次档案" }).waitFor();
+      row = page.locator(`[data-batch-id="${batchId}"]`);
+      await row.waitFor();
+      await row.click();
+      finalApiBase = `${serviceBaseUrl}/bpi/v1`;
+      finalAuthorization = `Bearer ${internalToken()}`;
+    }
     assert(report.operations.approval.response.requestedBy === report.actors.requesterSubject,
       "approval changed the requester identity");
     assert(report.operations.approval.response.decidedBy === approver,
       "approval did not use the independent administrator identity");
 
-    await page.reload({ waitUntil: "networkidle", timeout: timeoutMs });
-    await page.getByRole("heading", { name: "批次档案" }).waitFor();
-    row = page.locator(`[data-batch-id="${batchId}"]`);
-    await row.waitFor();
-    await row.click();
-    await drawer.locator('[data-force-close-state="COMPLETED"]').waitFor();
-    await drawer.locator(".batch-state-band").getByText("CLOSED_RAW", { exact: true }).waitFor();
-    await drawer.getByText("BATCH_FORCE_CLOSED", { exact: true }).waitFor();
-    assert((await drawer.locator(".batch-state-band").textContent()).includes("revision 3"),
+    await finalDrawer.locator('[data-force-close-state="COMPLETED"]').waitFor();
+    await finalDrawer.locator(".batch-state-band").getByText("CLOSED_RAW", { exact: true }).waitFor();
+    await finalDrawer.getByText("BATCH_FORCE_CLOSED", { exact: true }).waitFor();
+    assert((await finalDrawer.locator(".batch-state-band").textContent()).includes("revision 3"),
       "completed batch did not advance to revision 3");
-    assert(await drawer.getByRole("button", { name: "申请强制结束" }).count() === 0,
+    assert(await finalDrawer.getByRole("button", { name: "申请强制结束" }).count() === 0,
       "completed batch still exposes force-close request");
-    assert(await drawer.getByRole("button", { name: "批准并强制结束" }).count() === 0,
+    assert(await finalDrawer.getByRole("button", { name: "批准并强制结束" }).count() === 0,
       "completed batch still exposes force-close approval");
 
-    const finalBatchResponse = await api.get(`${serviceBaseUrl}/bpi/v1/batches/${batchId}`, {
-      headers: { Authorization: `Bearer ${internalToken()}` },
+    const finalBatchResponse = await api.get(`${finalApiBase}/batches/${batchId}`, {
+      headers: { Authorization: finalAuthorization },
       timeout: timeoutMs,
     });
     const finalBatch = await readBody(finalBatchResponse);
-    const finalTaskResponse = await api.get(`${serviceBaseUrl}/bpi/v1/batches/${batchId}/force-close`, {
-      headers: { Authorization: `Bearer ${internalToken()}` },
+    const finalTaskResponse = await api.get(`${finalApiBase}/batches/${batchId}/force-close`, {
+      headers: { Authorization: finalAuthorization },
       timeout: timeoutMs,
     });
     const finalTask = await readBody(finalTaskResponse);
-    const finalTimelineResponse = await api.get(`${serviceBaseUrl}/bpi/v1/batches/${batchId}/timeline`, {
-      headers: { Authorization: `Bearer ${internalToken()}` },
+    const finalTimelineResponse = await api.get(`${finalApiBase}/batches/${batchId}/timeline`, {
+      headers: { Authorization: finalAuthorization },
       timeout: timeoutMs,
     });
     const finalTimeline = await readBody(finalTimelineResponse);
@@ -428,7 +524,7 @@ async function main() {
       timeline: finalTimeline.json.data,
     };
 
-    report.browser.geometry = await page.evaluate(() => ({
+    report.browser.geometry = await finalPage.evaluate(() => ({
       viewportWidth: window.innerWidth,
       documentWidth: document.documentElement.scrollWidth,
       viewportHeight: window.innerHeight,
@@ -437,9 +533,9 @@ async function main() {
     }));
     assert(report.browser.geometry.documentWidth <= report.browser.geometry.viewportWidth + 1,
       `page has horizontal overflow: ${JSON.stringify(report.browser.geometry)}`);
-    await page.screenshot({ path: report.screenshots.completed, fullPage: true });
-    report.browser.url = page.url();
-    report.browser.title = await page.title();
+    await finalPage.screenshot({ path: report.screenshots.completed, fullPage: true });
+    report.browser.url = finalPage.url();
+    report.browser.title = await finalPage.title();
     report.browser.unexpectedBpiHttpErrors = report.browser.bpiHttpErrors.filter((item) => !(
       item.method === "POST"
         && item.url.endsWith(`/bpi-api/batches/${batchId}/force-close`)
@@ -457,6 +553,10 @@ async function main() {
     assert(report.browser.unexpectedBpiHttpErrors.length === 0,
       `browser emitted unexpected BPI HTTP errors: ${JSON.stringify(report.browser.unexpectedBpiHttpErrors)}`);
     report.status = "PASS";
+    if (approverContext) {
+      await approverContext.close();
+      approverContext = null;
+    }
     await context.close();
     console.log(`BPI force-close browser acceptance: PASS (${marker})`);
   } catch (error) {
@@ -465,6 +565,7 @@ async function main() {
   } finally {
     report.generatedAt = new Date().toISOString();
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    if (approverContext) await approverContext.close().catch(() => {});
     if (browser) await browser.close();
     await api.dispose();
   }

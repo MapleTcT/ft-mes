@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-21T13:09:01+00:00` |
-| Repo Commit | `d63ea4b0ad708de7f45fab76cc41319a895e0e83` |
+| Generated At | `2026-07-21T14:07:35+00:00` |
+| Repo Commit | `d70063e952bd1bfcc5b9ae5f9d7b69bf74fcac31` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -38,7 +38,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-018` | `PARTIAL` | 业务模块完整测试用例 | 生产矩阵 44 条已全部 PASS，模块 blocker/backlog 已清零，旧 public produceTaskCreated 已退役；现场 Batch/DCS 切换确认及业务负责人签字仍未完成。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 和独立不良数量闭环已闭合。 | 保持 material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑、独立不良数量闭环、旧 public endpoint 退役契约、PATROL 配置/执行/异常隐患、统计聚合和 Kafka 消费回归；接入有历史值的真实 TagManagement 测点并配置误差基准巡检项，复验中位数落库和误差图表；取得 SESGISConfig 后恢复 GIS 定位/轨迹，若要求整改、复查和销项则先取得真实 SESH；完成现场 Batch/DCS 切换确认，并补齐 before/after SQL 和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
-| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则、点位目录/校准治理、影子验收、运行回执、savepoint、数据质量、broker/组件回退、真实候选/批次负载下的 Service/Adapter/Flink 整体回切、同指令 START/END、受控强制结束四眼审批、真实目标 QCS 页面/事务 outbox/Kafka/BPI 首发与幂等重放、受控 QCS -> Kafka -> query-first material-wms -> durable receipt -> INBOUNDED/r4、同 event/同幂等键 WMS 原单核对与重新排队，以及目标内部 material-wms 停机/DLQ/恢复均已通过。Phase 2 最终继续关闭；尚缺真实连续 7-14 天、物理设备来源、正式身份系统第二管理员会话和外部 ERP/WMS 冲销及外部协议补偿。 | 把 BPI_LIVE_20260720_123058、ADP_E2E_20260721021607_QCS_BPI、ADP_E2E_20260721053253_BPI_FORCE_CLOSE、ADP_E2E_20260720_215500_BPI_WMS、ADP_E2E_20260721_015610_WMS_RECON、ADP_E2E_20260720193226_WMS_OUTAGE 和 ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054 固定为发布回归基线；保持 Phase 2 关闭，先在选定产线用物理来源和正式校准连续运行 7-14 天，再完成外部 ERP/WMS 冲销/查单/响应丢失/补偿。 |
+| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则、点位目录/校准治理、影子验收、运行回执、savepoint、数据质量、broker/组件回退、真实候选/批次负载下的 Service/Adapter/Flink 整体回切、同指令 START/END、正式 ADP 双会话强制结束四眼审批、真实目标 QCS 页面/事务 outbox/Kafka/BPI 首发与幂等重放、受控 QCS -> Kafka -> query-first material-wms -> durable receipt -> INBOUNDED/r4、同 event/同幂等键 WMS 原单核对与重新排队，以及目标内部 material-wms 停机/DLQ/恢复均已通过。Phase 2 最终继续关闭；尚缺真实连续 7-14 天、物理设备来源和外部 ERP/WMS 冲销及外部协议补偿。 | 把 BPI_LIVE_20260720_123058、ADP_E2E_20260721021607_QCS_BPI、ADP_E2E_20260721053253_BPI_FORCE_CLOSE、ADP_BPI_FORMAL_IDENTITY_20260721134944、ADP_E2E_20260720_215500_BPI_WMS、ADP_E2E_20260721_015610_WMS_RECON、ADP_E2E_20260720193226_WMS_OUTAGE 和 ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054 固定为发布回归基线；保持 Phase 2 关闭，先在选定产线用物理来源和正式校准连续运行 7-14 天，再完成外部 ERP/WMS 冲销/查单/响应丢失/补偿。 |
 
 ## Production Blockers
 

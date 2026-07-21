@@ -1,0 +1,834 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-21T13:50:44.858Z",
+  "repoCommit": "d70063e952bd1bfcc5b9ae5f9d7b69bf74fcac31",
+  "database": "PostgreSQL",
+  "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+  "status": "PASS_TARGET_FORMAL_IDENTITY_TWO_BROWSER_SESSIONS_CLEANED",
+  "target": {
+    "sshHost": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "remoteRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "backupDir": "/data/docker/bpi-upgrade-backups/ADP_BPI_FORMAL_IDENTITY_20260721134944"
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "identity": {
+    "requesterLogin": "admin",
+    "requesterSubject": "legacy-ticket:admin",
+    "approverLogin": "bpi_reviewer_20260721134944",
+    "approverSubject": "legacy-ticket:bpi_reviewer_20260721134944",
+    "roleCode": "systemRole",
+    "personCode": "ADP_BPI_FORMAL_IDENTITY_20260721134944_PERSON",
+    "password": "REDACTED",
+    "currentUser": {
+      "loginStatus": 200,
+      "currentUserStatus": 200,
+      "username": "bpi_reviewer_20260721134944",
+      "cid": 1000,
+      "roles": [
+        "systemRole",
+        "管理员角色",
+        "管理员角色"
+      ],
+      "ticketMode": "LEGACY_UUID"
+    }
+  },
+  "safety": {
+    "temporaryFormalIdentity": true,
+    "adapterScopeUsesIsolatedComposeOverride": true,
+    "baseRuntimeEnvEdited": false,
+    "adapterImageMustRemainExact": true,
+    "watchdogSeconds": 900,
+    "phase2ExpectedEnabled": false,
+    "cleanupByMarkerAndIdentityOnly": true
+  },
+  "stages": {
+    "adapterPrecheck": {
+      "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+      "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    },
+    "adapterActivated": {
+      "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+      "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01;bpi_reviewer_20260721134944=1000|PLANT-01|LINE-S07-01",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,",
+      "watchdogPid": "472270"
+    },
+    "adapterRestored": {
+      "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+      "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    }
+  },
+  "operations": {
+    "identityProvisioning": {
+      "person": {
+        "method": "POST",
+        "endpoint": "/inter-api/organization/v1/person",
+        "status": 200
+      },
+      "user": {
+        "method": "POST",
+        "endpoint": "/inter-api/auth/v1/user",
+        "status": 200,
+        "password": "REDACTED"
+      },
+      "role": {
+        "method": "POST",
+        "endpoint": "/inter-api/rbac/v1/roleUser",
+        "status": 200
+      }
+    }
+  },
+  "browser": {
+    "schemaVersion": 1,
+    "generatedAt": "2026-07-21T13:50:23.081Z",
+    "status": "PASS",
+    "database": "PostgreSQL",
+    "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+    "route": "/bpi/#/batches",
+    "batchId": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+    "boundaryTime": "2026-07-21T13:44:44Z",
+    "environment": {
+      "adpBaseUrl": "http://10.11.100.17:18080",
+      "serviceBaseUrl": null,
+      "tenantId": "1000",
+      "plantId": "PLANT-01",
+      "lineId": "LINE-S07-01"
+    },
+    "approvalAuthentication": "ADP_SESSION",
+    "actors": {
+      "requesterLogin": "admin",
+      "requesterSubject": "legacy-ticket:admin",
+      "approverLogin": "bpi_reviewer_20260721134944",
+      "approverSubject": "legacy-ticket:bpi_reviewer_20260721134944"
+    },
+    "loginStatus": 200,
+    "approverLoginStatus": 200,
+    "operations": {
+      "unauthenticatedRead": {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/cc583ccf-dcf9-4319-8ef2-42eb50061837/force-close",
+        "status": 401
+      },
+      "request": {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/cc583ccf-dcf9-4319-8ef2-42eb50061837/force-close",
+        "request": {
+          "payload": {
+            "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+            "boundaryTime": "2026-07-21T13:44:44Z",
+            "approvalMode": "REQUEST"
+          },
+          "idempotencyKey": "77de45d3-5836-4ec8-97e3-f531cba6b973",
+          "ifMatch": "1"
+        },
+        "status": 202,
+        "response": {
+          "taskId": "803623fd-cca2-4292-9ab8-4251e354afd0",
+          "batchId": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+          "state": "PENDING_APPROVAL",
+          "revision": 1,
+          "batchRevision": 2,
+          "sourceState": "ACTIVE",
+          "boundaryTime": "2026-07-21T13:44:44Z",
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-21T13:50:20.469057Z",
+          "requestReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow"
+        }
+      },
+      "sameActorRejection": {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/cc583ccf-dcf9-4319-8ef2-42eb50061837/force-close",
+        "request": {
+          "payload": {
+            "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 same requester must not approve this task",
+            "boundaryTime": "2026-07-21T13:44:44Z",
+            "approvalMode": "APPROVE"
+          },
+          "idempotencyKey": "3b63c27a-2e56-452d-9682-5887865d2c9a",
+          "ifMatch": "2"
+        },
+        "status": 403,
+        "response": {
+          "type": "about:blank",
+          "title": "Forbidden",
+          "status": 403,
+          "detail": "Force-close approval must be completed by a different administrator.",
+          "instance": "/bpi/v1/batches/cc583ccf-dcf9-4319-8ef2-42eb50061837/force-close",
+          "traceId": "b0097c90-6fcd-4b5b-937a-4c7a6751c595"
+        }
+      },
+      "approval": {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/cc583ccf-dcf9-4319-8ef2-42eb50061837/force-close",
+        "request": {
+          "payload": {
+            "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary",
+            "boundaryTime": "2026-07-21T13:44:44Z",
+            "approvalMode": "APPROVE"
+          },
+          "idempotencyKey": "6d3b9d2d-3af7-4ad9-92ae-94aafe3ae150",
+          "ifMatch": "2"
+        },
+        "status": 202,
+        "response": {
+          "taskId": "803623fd-cca2-4292-9ab8-4251e354afd0",
+          "batchId": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+          "state": "COMPLETED",
+          "revision": 2,
+          "batchRevision": 3,
+          "sourceState": "ACTIVE",
+          "boundaryTime": "2026-07-21T13:44:44Z",
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-21T13:50:20.469057Z",
+          "requestReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+          "decidedBy": "legacy-ticket:bpi_reviewer_20260721134944",
+          "decidedAt": "2026-07-21T13:50:22.759403Z",
+          "decisionReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary"
+        }
+      }
+    },
+    "browser": {
+      "url": "http://10.11.100.17:18080/bpi/#/batches",
+      "title": "智能批次",
+      "consoleErrors": [
+        {
+          "session": "requester",
+          "text": "Failed to load resource: the server responded with a status of 403 ()",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/cc583ccf-dcf9-4319-8ef2-42eb50061837/force-close"
+        }
+      ],
+      "pageErrors": [],
+      "requestFailures": [],
+      "bpiHttpErrors": [
+        {
+          "session": "requester",
+          "method": "POST",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/cc583ccf-dcf9-4319-8ef2-42eb50061837/force-close",
+          "status": 403
+        }
+      ],
+      "unexpectedBpiHttpErrors": [],
+      "geometry": {
+        "viewportWidth": 1600,
+        "documentWidth": 1600,
+        "viewportHeight": 1000,
+        "documentHeight": 1000,
+        "drawerWidth": 680
+      }
+    },
+    "final": {
+      "batch": {
+        "id": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+        "batchNo": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+        "tenantId": "1000",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-S07-01",
+        "stageCode": "EVAPORATION",
+        "orderId": "ADP_BPI_FORMAL_IDENTITY_20260721134944_ORDER",
+        "materialCode": "ADP_BPI_FORMAL_IDENTITY_20260721134944_MATERIAL",
+        "state": "CLOSED_RAW",
+        "revision": 3,
+        "shadow": true,
+        "startTime": "2026-07-21T11:50:17.907058Z",
+        "endTime": "2026-07-21T13:44:44Z",
+        "quantity": 12.345,
+        "quantityUnit": "t",
+        "dryMatter": 8.6415,
+        "qualityGate": "NOT_APPLICABLE",
+        "wmsStatus": "NOT_REQUESTED",
+        "ruleVersion": "BPI_LIVE_20260720_123058_START@1.0.0",
+        "topologyVersion": "BPI_LIVE_20260720_123058_TOPOLOGY@1.0.0"
+      },
+      "task": {
+        "taskId": "803623fd-cca2-4292-9ab8-4251e354afd0",
+        "batchId": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+        "state": "COMPLETED",
+        "revision": 2,
+        "batchRevision": 3,
+        "sourceState": "ACTIVE",
+        "boundaryTime": "2026-07-21T13:44:44Z",
+        "requestedBy": "legacy-ticket:admin",
+        "requestedAt": "2026-07-21T13:50:20.469057Z",
+        "requestReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+        "decidedBy": "legacy-ticket:bpi_reviewer_20260721134944",
+        "decidedAt": "2026-07-21T13:50:22.759403Z",
+        "decisionReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary"
+      },
+      "timeline": [
+        {
+          "revision": 2,
+          "action": "BATCH_FORCE_CLOSE_REQUESTED",
+          "at": "2026-07-21T13:50:20.477777Z",
+          "actor": "legacy-ticket:admin",
+          "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow"
+        },
+        {
+          "revision": 3,
+          "action": "BATCH_FORCE_CLOSED",
+          "at": "2026-07-21T13:50:22.775278Z",
+          "actor": "legacy-ticket:bpi_reviewer_20260721134944",
+          "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary"
+        }
+      ]
+    },
+    "screenshots": {
+      "pending": "/tmp/bpi-formal-identity-axULtn/force-close-pending.png",
+      "completed": "/tmp/bpi-formal-identity-axULtn/force-close-completed.png"
+    },
+    "error": null
+  },
+  "postgres": {
+    "identityPrecheck": {
+      "roleId": 1,
+      "positionId": 1,
+      "activeUsers": 0,
+      "activePersons": 0
+    },
+    "bpiPrecheck": {
+      "batchRows": 0,
+      "taskRows": 0,
+      "commandsFlagRows": 0,
+      "plantCommandsOverrides": 0
+    },
+    "identityProvisioned": {
+      "person": {
+        "id": 6689763911385424,
+        "valid": 1,
+        "userId": 6689763945824592,
+        "userName": "bpi_reviewer_20260721134944"
+      },
+      "user": {
+        "id": 6689763945824592,
+        "valid": 1,
+        "userName": "bpi_reviewer_20260721134944",
+        "personId": 6689763911385424,
+        "personCode": "ADP_BPI_FORMAL_IDENTITY_20260721134944_PERSON",
+        "passwordEncoded": true
+      },
+      "roleUser": {
+        "id": 6689763972661584,
+        "valid": true,
+        "roleCode": "systemRole",
+        "userId": 6689763945824592,
+        "userName": "bpi_reviewer_20260721134944"
+      },
+      "authRoles": [
+        {
+          "roleCode": "systemRole",
+          "roleName": "管理员角色"
+        }
+      ]
+    },
+    "fixture": {
+      "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+      "batchId": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+      "commandsFlagId": "64447da6-d25d-4420-b2bb-411e15634538",
+      "batchRows": 1,
+      "commandsEnabled": true,
+      "initialState": "ACTIVE",
+      "initialRevision": 1
+    },
+    "pending": {
+      "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+      "batch": {
+        "id": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+        "batchNo": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+        "state": "ACTIVE",
+        "revision": 2,
+        "startTime": "2026-07-21T19:50:17.907058+08:00",
+        "endTime": null,
+        "updatedAt": "2026-07-21T21:50:20.469057+08:00"
+      },
+      "forceCloseTask": {
+        "id": "803623fd-cca2-4292-9ab8-4251e354afd0",
+        "state": "PENDING_APPROVAL",
+        "revision": 1,
+        "sourceState": "ACTIVE",
+        "boundaryTime": "2026-07-21T21:44:44+08:00",
+        "requestedBy": "legacy-ticket:admin",
+        "requestedAt": "2026-07-21T21:50:20.469057+08:00",
+        "requestReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+        "decidedBy": null,
+        "decidedAt": null,
+        "decisionReason": null
+      },
+      "stateEvents": [
+        {
+          "revision": 2,
+          "action": "BATCH_FORCE_CLOSE_REQUESTED",
+          "fromState": "ACTIVE",
+          "toState": "ACTIVE",
+          "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+          "actorId": "legacy-ticket:admin",
+          "eventTime": "2026-07-21T21:50:20.477777+08:00",
+          "traceId": "acc4c667-1a6c-404c-b178-08050bdd9854"
+        }
+      ],
+      "auditEvents": [
+        {
+          "action": "BATCH_FORCE_CLOSE_REQUESTED",
+          "actorId": "legacy-ticket:admin",
+          "beforeRevision": 1,
+          "afterRevision": 2,
+          "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+          "traceId": "acc4c667-1a6c-404c-b178-08050bdd9854"
+        }
+      ],
+      "idempotencyRows": 1,
+      "qualityGateRows": 0,
+      "wmsLinkRows": 0,
+      "outboxRows": 0
+    },
+    "completed": {
+      "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+      "batch": {
+        "id": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+        "batchNo": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+        "state": "CLOSED_RAW",
+        "revision": 3,
+        "startTime": "2026-07-21T19:50:17.907058+08:00",
+        "endTime": "2026-07-21T21:44:44+08:00",
+        "updatedAt": "2026-07-21T21:50:22.759403+08:00"
+      },
+      "forceCloseTask": {
+        "id": "803623fd-cca2-4292-9ab8-4251e354afd0",
+        "state": "COMPLETED",
+        "revision": 2,
+        "sourceState": "ACTIVE",
+        "boundaryTime": "2026-07-21T21:44:44+08:00",
+        "requestedBy": "legacy-ticket:admin",
+        "requestedAt": "2026-07-21T21:50:20.469057+08:00",
+        "requestReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+        "decidedBy": "legacy-ticket:bpi_reviewer_20260721134944",
+        "decidedAt": "2026-07-21T21:50:22.759403+08:00",
+        "decisionReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary"
+      },
+      "stateEvents": [
+        {
+          "revision": 2,
+          "action": "BATCH_FORCE_CLOSE_REQUESTED",
+          "fromState": "ACTIVE",
+          "toState": "ACTIVE",
+          "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+          "actorId": "legacy-ticket:admin",
+          "eventTime": "2026-07-21T21:50:20.477777+08:00",
+          "traceId": "acc4c667-1a6c-404c-b178-08050bdd9854"
+        },
+        {
+          "revision": 3,
+          "action": "BATCH_FORCE_CLOSED",
+          "fromState": "ACTIVE",
+          "toState": "CLOSED_RAW",
+          "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary",
+          "actorId": "legacy-ticket:bpi_reviewer_20260721134944",
+          "eventTime": "2026-07-21T21:50:22.775278+08:00",
+          "traceId": "2c2b3d29-2b0e-4583-8aa0-fb568540d3dc"
+        }
+      ],
+      "auditEvents": [
+        {
+          "action": "BATCH_FORCE_CLOSE_REQUESTED",
+          "actorId": "legacy-ticket:admin",
+          "beforeRevision": 1,
+          "afterRevision": 2,
+          "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+          "traceId": "acc4c667-1a6c-404c-b178-08050bdd9854"
+        },
+        {
+          "action": "BATCH_FORCE_CLOSED",
+          "actorId": "legacy-ticket:bpi_reviewer_20260721134944",
+          "beforeRevision": 2,
+          "afterRevision": 3,
+          "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary",
+          "traceId": "2c2b3d29-2b0e-4583-8aa0-fb568540d3dc"
+        }
+      ],
+      "idempotencyRows": 2,
+      "qualityGateRows": 0,
+      "wmsLinkRows": 0,
+      "outboxRows": 0
+    },
+    "identityFinal": {
+      "person": {
+        "id": 6689763911385424,
+        "valid": 0,
+        "userId": null,
+        "userName": null
+      },
+      "user": {
+        "id": 6689763945824592,
+        "valid": 0,
+        "userName": "bpi_reviewer_20260721134944",
+        "personId": 6689763911385424,
+        "personCode": "ADP_BPI_FORMAL_IDENTITY_20260721134944_PERSON",
+        "passwordEncoded": true
+      },
+      "roleUser": null,
+      "authRoles": []
+    },
+    "bpiFinal": {
+      "batchRows": 0,
+      "taskRows": 0,
+      "commandsFlagRows": 0,
+      "plantCommandsOverrides": 0
+    }
+  },
+  "cleanup": {
+    "bpi": [
+      "DELETE 1",
+      "COMMIT",
+      "BPI force-close acceptance cleanup residualRows=0"
+    ],
+    "adapter": {
+      "watchdogRestored": "false"
+    }
+  },
+  "checks": [
+    {
+      "name": "formal role and position exist",
+      "passed": true,
+      "detail": {
+        "roleId": 1,
+        "positionId": 1,
+        "activeUsers": 0,
+        "activePersons": 0
+      }
+    },
+    {
+      "name": "formal identity marker starts clean",
+      "passed": true,
+      "detail": {
+        "roleId": 1,
+        "positionId": 1,
+        "activeUsers": 0,
+        "activePersons": 0
+      }
+    },
+    {
+      "name": "BPI marker and plant command override start clean",
+      "passed": true,
+      "detail": {
+        "batchRows": 0,
+        "taskRows": 0,
+        "commandsFlagRows": 0,
+        "plantCommandsOverrides": 0
+      }
+    },
+    {
+      "name": "Phase 2 and write-back switches start disabled",
+      "passed": true,
+      "detail": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    },
+    {
+      "name": "formal identity persisted through organization, auth, and RBAC APIs",
+      "passed": true,
+      "detail": {
+        "person": {
+          "id": 6689763911385424,
+          "valid": 1,
+          "userId": 6689763945824592,
+          "userName": "bpi_reviewer_20260721134944"
+        },
+        "user": {
+          "id": 6689763945824592,
+          "valid": 1,
+          "userName": "bpi_reviewer_20260721134944",
+          "personId": 6689763911385424,
+          "personCode": "ADP_BPI_FORMAL_IDENTITY_20260721134944_PERSON",
+          "passwordEncoded": true
+        },
+        "roleUser": {
+          "id": 6689763972661584,
+          "valid": true,
+          "roleCode": "systemRole",
+          "userId": 6689763945824592,
+          "userName": "bpi_reviewer_20260721134944"
+        },
+        "authRoles": [
+          {
+            "roleCode": "systemRole",
+            "roleName": "管理员角色"
+          }
+        ]
+      }
+    },
+    {
+      "name": "second administrator has a real ADP identity session",
+      "passed": true,
+      "detail": {
+        "loginStatus": 200,
+        "currentUserStatus": 200,
+        "username": "bpi_reviewer_20260721134944",
+        "cid": 1000,
+        "roles": [
+          "systemRole",
+          "管理员角色",
+          "管理员角色"
+        ],
+        "ticketMode": "LEGACY_UUID"
+      }
+    },
+    {
+      "name": "adapter exposes the explicit formal reviewer scope",
+      "passed": true,
+      "detail": "admin=1000|PLANT-01|LINE-S07-01;bpi_reviewer_20260721134944=1000|PLANT-01|LINE-S07-01"
+    },
+    {
+      "name": "adapter image is unchanged while scope is active",
+      "passed": true,
+      "detail": {
+        "before": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+        "active": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977"
+      }
+    },
+    {
+      "name": "controlled shadow batch fixture is active",
+      "passed": true,
+      "detail": {
+        "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+        "batchId": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+        "commandsFlagId": "64447da6-d25d-4420-b2bb-411e15634538",
+        "batchRows": 1,
+        "commandsEnabled": true,
+        "initialState": "ACTIVE",
+        "initialRevision": 1
+      }
+    },
+    {
+      "name": "requester session persisted a pending approval without closing the batch",
+      "passed": true,
+      "detail": {
+        "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+        "batch": {
+          "id": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+          "batchNo": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+          "state": "ACTIVE",
+          "revision": 2,
+          "startTime": "2026-07-21T19:50:17.907058+08:00",
+          "endTime": null,
+          "updatedAt": "2026-07-21T21:50:20.469057+08:00"
+        },
+        "forceCloseTask": {
+          "id": "803623fd-cca2-4292-9ab8-4251e354afd0",
+          "state": "PENDING_APPROVAL",
+          "revision": 1,
+          "sourceState": "ACTIVE",
+          "boundaryTime": "2026-07-21T21:44:44+08:00",
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-21T21:50:20.469057+08:00",
+          "requestReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+          "decidedBy": null,
+          "decidedAt": null,
+          "decisionReason": null
+        },
+        "stateEvents": [
+          {
+            "revision": 2,
+            "action": "BATCH_FORCE_CLOSE_REQUESTED",
+            "fromState": "ACTIVE",
+            "toState": "ACTIVE",
+            "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+            "actorId": "legacy-ticket:admin",
+            "eventTime": "2026-07-21T21:50:20.477777+08:00",
+            "traceId": "acc4c667-1a6c-404c-b178-08050bdd9854"
+          }
+        ],
+        "auditEvents": [
+          {
+            "action": "BATCH_FORCE_CLOSE_REQUESTED",
+            "actorId": "legacy-ticket:admin",
+            "beforeRevision": 1,
+            "afterRevision": 2,
+            "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+            "traceId": "acc4c667-1a6c-404c-b178-08050bdd9854"
+          }
+        ],
+        "idempotencyRows": 1,
+        "qualityGateRows": 0,
+        "wmsLinkRows": 0,
+        "outboxRows": 0
+      }
+    },
+    {
+      "name": "formal approver used a separate ADP browser session through the adapter",
+      "passed": true,
+      "detail": {
+        "status": "PASS",
+        "approvalAuthentication": "ADP_SESSION",
+        "approverLoginStatus": 200,
+        "approval": {
+          "method": "POST",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/cc583ccf-dcf9-4319-8ef2-42eb50061837/force-close",
+          "request": {
+            "payload": {
+              "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary",
+              "boundaryTime": "2026-07-21T13:44:44Z",
+              "approvalMode": "APPROVE"
+            },
+            "idempotencyKey": "6d3b9d2d-3af7-4ad9-92ae-94aafe3ae150",
+            "ifMatch": "2"
+          },
+          "status": 202,
+          "response": {
+            "taskId": "803623fd-cca2-4292-9ab8-4251e354afd0",
+            "batchId": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+            "state": "COMPLETED",
+            "revision": 2,
+            "batchRevision": 3,
+            "sourceState": "ACTIVE",
+            "boundaryTime": "2026-07-21T13:44:44Z",
+            "requestedBy": "legacy-ticket:admin",
+            "requestedAt": "2026-07-21T13:50:20.469057Z",
+            "requestReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+            "decidedBy": "legacy-ticket:bpi_reviewer_20260721134944",
+            "decidedAt": "2026-07-21T13:50:22.759403Z",
+            "decisionReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary"
+          }
+        }
+      }
+    },
+    {
+      "name": "PostgreSQL records distinct formal requester and approver identities",
+      "passed": true,
+      "detail": {
+        "marker": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+        "batch": {
+          "id": "cc583ccf-dcf9-4319-8ef2-42eb50061837",
+          "batchNo": "ADP_BPI_FORMAL_IDENTITY_20260721134944",
+          "state": "CLOSED_RAW",
+          "revision": 3,
+          "startTime": "2026-07-21T19:50:17.907058+08:00",
+          "endTime": "2026-07-21T21:44:44+08:00",
+          "updatedAt": "2026-07-21T21:50:22.759403+08:00"
+        },
+        "forceCloseTask": {
+          "id": "803623fd-cca2-4292-9ab8-4251e354afd0",
+          "state": "COMPLETED",
+          "revision": 2,
+          "sourceState": "ACTIVE",
+          "boundaryTime": "2026-07-21T21:44:44+08:00",
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-21T21:50:20.469057+08:00",
+          "requestReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+          "decidedBy": "legacy-ticket:bpi_reviewer_20260721134944",
+          "decidedAt": "2026-07-21T21:50:22.759403+08:00",
+          "decisionReason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary"
+        },
+        "stateEvents": [
+          {
+            "revision": 2,
+            "action": "BATCH_FORCE_CLOSE_REQUESTED",
+            "fromState": "ACTIVE",
+            "toState": "ACTIVE",
+            "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+            "actorId": "legacy-ticket:admin",
+            "eventTime": "2026-07-21T21:50:20.477777+08:00",
+            "traceId": "acc4c667-1a6c-404c-b178-08050bdd9854"
+          },
+          {
+            "revision": 3,
+            "action": "BATCH_FORCE_CLOSED",
+            "fromState": "ACTIVE",
+            "toState": "CLOSED_RAW",
+            "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary",
+            "actorId": "legacy-ticket:bpi_reviewer_20260721134944",
+            "eventTime": "2026-07-21T21:50:22.775278+08:00",
+            "traceId": "2c2b3d29-2b0e-4583-8aa0-fb568540d3dc"
+          }
+        ],
+        "auditEvents": [
+          {
+            "action": "BATCH_FORCE_CLOSE_REQUESTED",
+            "actorId": "legacy-ticket:admin",
+            "beforeRevision": 1,
+            "afterRevision": 2,
+            "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 shift lead verified pump stop, valve path and zero flow",
+            "traceId": "acc4c667-1a6c-404c-b178-08050bdd9854"
+          },
+          {
+            "action": "BATCH_FORCE_CLOSED",
+            "actorId": "legacy-ticket:bpi_reviewer_20260721134944",
+            "beforeRevision": 2,
+            "afterRevision": 3,
+            "reason": "ADP_BPI_FORMAL_IDENTITY_20260721134944 formal ADP administrator independently verified the boundary",
+            "traceId": "2c2b3d29-2b0e-4583-8aa0-fb568540d3dc"
+          }
+        ],
+        "idempotencyRows": 2,
+        "qualityGateRows": 0,
+        "wmsLinkRows": 0,
+        "outboxRows": 0
+      }
+    },
+    {
+      "name": "temporary formal identity has no active residual binding",
+      "passed": true,
+      "detail": {
+        "person": {
+          "id": 6689763911385424,
+          "valid": 0,
+          "userId": null,
+          "userName": null
+        },
+        "user": {
+          "id": 6689763945824592,
+          "valid": 0,
+          "userName": "bpi_reviewer_20260721134944",
+          "personId": 6689763911385424,
+          "personCode": "ADP_BPI_FORMAL_IDENTITY_20260721134944_PERSON",
+          "passwordEncoded": true
+        },
+        "roleUser": null,
+        "authRoles": []
+      }
+    },
+    {
+      "name": "BPI marker cleanup has zero residual rows",
+      "passed": true,
+      "detail": {
+        "batchRows": 0,
+        "taskRows": 0,
+        "commandsFlagRows": 0,
+        "plantCommandsOverrides": 0
+      }
+    },
+    {
+      "name": "adapter scope and image restored exactly",
+      "passed": true,
+      "detail": {
+        "before": {
+          "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+          "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+          "adapterHealth": "healthy",
+          "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+          "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+        },
+        "restored": {
+          "adapterImage": "ft-mes-bpi-adapter:20260721T125202Z-d63ea4b0ad70",
+          "adapterImageId": "sha256:b21bc093eef5593113a422ed8df26880c277ccfed90a168e239a2951eec38977",
+          "adapterHealth": "healthy",
+          "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+          "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+        }
+      }
+    },
+    {
+      "name": "Phase 2 and write-back switches remain disabled",
+      "passed": true,
+      "detail": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    }
+  ],
+  "issues": []
+}

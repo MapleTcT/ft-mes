@@ -815,8 +815,24 @@ Java 17 service 均为目标运行组件；取证后 marker 与临时开关覆�
 | marker 定向清理与运行保护 | 不适用 | `bpi-force-close-acceptance-cleanup.sql` | PostgreSQL 单事务定向删除 | 上述表及临时 `bpi_feature_flags` | 清理输出和 marker 关联行复查 | `residualRows=0`、临时 commands 覆盖删除，非 marker 删除 0；五个 Phase 2/WMS 开关均为 false，三个 BPI 容器 healthy | PASS_CLEANED |
 
 机器证据：`metadata/bpi-force-close-target-acceptance.json`；完整页面/API/SQL/截图证据见
-`docs/testing/bpi-force-close-acceptance.md`。本项只证明异常人工兜底的受控合同，不替代物理 END
-边界、正式身份系统中的第二管理员会话或 7-14 天现场运行。
+`docs/testing/bpi-force-close-acceptance.md`。本项只证明异常人工兜底的受控合同；后续正式身份双会话
+验收见下节。物理 END 边界和 7-14 天现场运行仍未完成。
+
+### BPI 正式身份双管理员强制结束（目标 PostgreSQL）
+
+本节使用 marker `ADP_BPI_FORMAL_IDENTITY_20260721134944`。申请与审批分别来自两个真实 ADP
+登录会话，均经 Java 8 Adapter；临时审批身份由组织、认证和 RBAC API 创建并在取证后清理。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 创建并验证第二管理员身份 | `/auth/#/user` 页面上下文；ADP 登录 | `POST /inter-api/organization/v1/person`；`POST /inter-api/auth/v1/user`；`POST /inter-api/rbac/v1/roleUser`；`GET /inter-api/auth/v1/currentuser` | Organization/Auth/RBAC controller 与 legacy ticket verifier | `org_person`、`auth_user`、`rbac_roleuser`、`auth_user_role`、`rbac_role` | 按 person code 和 username 查 person/user；`rbac_roleuser.role_id -> rbac_role.id`；按 `auth_user_role.user_id` 查角色 | 三个写 API 与 login/currentuser 均 200；person/user/role binding 有效，密码只证明已编码；currentuser 为 tenant 1000 且含 `systemRole` | PASS_TARGET_FORMAL_IDENTITY |
+| 正式申请人形成待审批中间态 | `/bpi/#/batches`，`admin` 会话 | `POST /bpi-api/batches/cc583ccf-dcf9-4319-8ef2-42eb50061837/force-close` | `BpiProxyController -> BatchController.forceClose -> BatchCommandService -> BpiPostgresRepository` | BPI batch/task/state-event/audit/idempotency | `bpi-force-close-acceptance-verification.sql` | HTTP 202；batch `ACTIVE/r2`，task `PENDING_APPROVAL/r1`，requestedBy `legacy-ticket:admin`，幂等 1，QCS/WMS/outbox 0 | PASS |
+| 正式第二管理员审批 | 同一页面，独立 `bpi_reviewer_20260721134944` ADP 会话 | 同一 POST，`approvalMode=APPROVE` | 同上，经 Adapter legacy ticket 鉴权和 `systemRole -> BPI_ADMIN` 映射 | 同上 | 同一 verification SQL | HTTP 202；batch `CLOSED_RAW/r3`，task `COMPLETED/r2`；decidedBy `legacy-ticket:bpi_reviewer_20260721134944`，与 requestedBy 不同；event/audit/idempotency 2/2/2 | PASS |
+| 临时身份、marker 和作用域清理 | 不适用 | identity DELETE API；BPI cleanup SQL；基础 Compose restore | 受保护 runner `finally` 和 watchdog | ADP 身份表、BPI marker 表、临时 feature flag | 查询 active person/user/role/auth binding 和 BPI batch/task/flag/override；读取容器 image/scope/六开关 | active identity residual 0，BPI residual 0；Adapter 镜像 ID 不变、scope 精确恢复；六开关 false，watchdog 未触发 | PASS_CLEANED |
+
+机器证据：`metadata/bpi-formal-identity-force-close-acceptance.json`；专项报告：
+`docs/testing/bpi-formal-identity-force-close-acceptance.md`。本项关闭 G-021 的正式身份系统第二管理员
+会话缺口；物理来源、正式校准、7-14 天和外部 ERP/WMS 仍未关闭。
 
 ### QCS PostgreSQL outbox 到 BPI 质量门（目标 PostgreSQL）
 

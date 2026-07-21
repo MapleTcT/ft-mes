@@ -815,6 +815,22 @@ force-close 精确路由；修复提交 `1962f599b3ea90b1863548f45998f6e0fa89cc1
 完整请求、PostgreSQL 中间态、最终态、哈希和边界见
 `docs/testing/bpi-force-close-acceptance.md`。
 
+### BPI 正式身份双管理员强制结束（2026-07-21）
+
+本节沿用 Flyway V24 强制结束合同，但申请和审批都由真实 ADP 身份系统签发的独立会话完成，
+不使用内部 BPI token 代替第二管理员。临时账号、scope 和 marker 在取证后全部清理。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 正式身份审批 | `http://10.11.100.17:18080/bpi/#/batches` | `admin` 提交申请；同人审批反证；第二个 `systemRole` ADP 会话打开同一批次并批准 | `GET/POST /bpi-api/batches/cc583ccf-dcf9-4319-8ef2-42eb50061837/force-close` | 两账号登录均 200；申请 202、同人审批 403、第二浏览器审批 202；待审批和完成态截图完整，document/viewport `1600/1600`；预期 403 之外 browser error 为 0 | task `PENDING_APPROVAL/r1 -> COMPLETED/r2`，batch `ACTIVE/r2 -> CLOSED_RAW/r3`；`requestedBy=legacy-ticket:admin`，`decidedBy=legacy-ticket:bpi_reviewer_20260721134944`；event/audit/idempotency 为 2/2/2 | `bpi_batch_instances`、`bpi_batch_force_close_tasks`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency` | PASS_TARGET_FORMAL_IDENTITY | 无 |
+| ADP 临时审批身份 | `/auth/#/user` 页面上下文；ADP 登录；`currentuser` | 通过组织/认证/RBAC API 创建人员和账号、绑定既有 `systemRole`，登录并在验收后删除 | `POST /inter-api/organization/v1/person`；`POST/DELETE /inter-api/auth/v1/user`；`POST/DELETE /inter-api/rbac/v1/roleUser`；`GET /inter-api/auth/v1/currentuser` | 第二账号登录和 currentuser 均 200，角色包含 `systemRole`；密码未进入证据 | 创建时 person/user/role binding 均有效；清理后 person/user `valid=0`，active role/auth binding 为 0 | `org_person`、`auth_user`、`rbac_roleuser`、`auth_user_role`、`rbac_role` | PASS_CLEANED | 临时身份仅用于职责分离验收 |
+
+marker：`ADP_BPI_FORMAL_IDENTITY_20260721134944`。机器证据：
+`metadata/bpi-formal-identity-force-close-acceptance.json`；截图：
+`metadata/bpi-formal-identity-force-close-pending.png`、
+`metadata/bpi-formal-identity-force-close-completed.png`；详细报告：
+`docs/testing/bpi-formal-identity-force-close-acceptance.md`。
+
 ### QCS 主动质量门到 BPI 幂等重放（2026-07-21）
 
 本节在当前唯一测试环境 `http://10.11.100.17:18080` 使用真实 WOM/QCS 页面、PostgreSQL 事务
