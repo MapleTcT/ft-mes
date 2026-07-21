@@ -23,6 +23,11 @@ PATCH_TARGETS = {
     ],
     SERVICE_JAR: [
         "com/supcon/supfusion/configuration/services/utils/PostgresModelSyncSupport.class",
+        "com/supcon/supfusion/configuration/services/utils/PostgresFieldSyncSupport.class",
+        "com/supcon/supfusion/configuration/services/utils/PostgresFieldSyncSupport$TypeFamily.class",
+        "com/supcon/supfusion/configuration/services/utils/PostgresFieldSyncSupport$ColumnSpec.class",
+        "com/supcon/supfusion/configuration/services/utils/PostgresFieldSyncSupport$ColumnState.class",
+        "com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.class",
         "com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.class",
         "com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.class",
         "com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.class",

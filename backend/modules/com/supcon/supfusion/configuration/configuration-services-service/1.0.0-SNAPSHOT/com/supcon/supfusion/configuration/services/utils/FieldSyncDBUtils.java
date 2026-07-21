@@ -20,6 +20,10 @@ public class FieldSyncDBUtils {
 	private static final Logger logger = LoggerFactory.getLogger(FieldSyncDBUtils.class);
 	
 	public static synchronized void fieldSyncToDb(Property property, Model model, boolean isNew, JdbcTemplate template, String dbName) {
+		if (dbName != null && dbName.startsWith("postgres")) {
+			PostgresFieldSyncSupport.sync(property, model, isNew, template);
+			return;
+		}
 		boolean fieldIsExist = fieldIsExist(model.getTableName().toUpperCase(), property.getColumnName(), dbName, template);
 		if (!isNew && fieldIsExist) {
 			if (dbName.startsWith("oracle")) {
@@ -42,7 +46,9 @@ public class FieldSyncDBUtils {
 	
 	public static synchronized void customFieldSyncToDb(List<Property> propertyList, JdbcTemplate template) {
 		String dbName = DbUtils.getDbName();
-		if (dbName.startsWith("oracle")) {
+		if (dbName != null && dbName.startsWith("postgres")) {
+			PostgresFieldSyncSupport.syncCustom(propertyList, template);
+		}else if (dbName.startsWith("oracle")) {
 			createCustomField(propertyList, template);
 		}else if (dbName.startsWith("sqlserver")) {
 			createCustomFieldSqlserver(propertyList, template);
@@ -54,6 +60,9 @@ public class FieldSyncDBUtils {
 	private static boolean fieldIsExist(String tableName, String colName, String dbType, JdbcTemplate template) {
 		boolean isExist = false;
 		if (null != dbType) {
+			if (dbType.startsWith("postgres")) {
+				return PostgresFieldSyncSupport.columnExists(template, tableName, colName);
+			}
 			if (dbType.startsWith("oracle")) {
 				String testSql =  "SELECT COUNT(*) FROM user_tab_columns WHERE TABLE_NAME = '" + tableName + "' AND COLUMN_NAME = '" + colName + "'";
 				if(template.queryForObject(testSql, Integer.class) > 0){
@@ -106,6 +115,9 @@ public class FieldSyncDBUtils {
 		boolean retBool = false;
 		String tarSql = "";
 		String dbName = DbUtils.getDbName();
+		if (dbName != null && dbName.startsWith("postgres")) {
+			return PostgresModelSyncSupport.tableExists(template, tableName);
+		}
 		if (dbName.startsWith("sqlserver")) {
 			tarSql = "select count(1) from sys.tables where name='" + tableName + "'";
 		}else if (dbName.startsWith("oracle")) {

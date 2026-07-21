@@ -20,7 +20,11 @@ MODEL_SYNC_PATH = (
     / "com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java"
 )
 POSTGRES_SUPPORT_PATH = MODEL_SYNC_PATH.with_name("PostgresModelSyncSupport.java")
+FIELD_SYNC_PATH = MODEL_SYNC_PATH.with_name("FieldSyncDBUtils.java")
+POSTGRES_FIELD_SUPPORT_PATH = MODEL_SYNC_PATH.with_name("PostgresFieldSyncSupport.java")
 MODEL_SERVICE_PATH = MODEL_SYNC_PATH.parents[1] / "service/impl/ModelServiceImpl.java"
+TRIGGER_RETIREMENT_PATH = ROOT / "deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql"
+TRIGGER_ROLLBACK_PATH = ROOT / "deploy/docker/postgres/rollback/197-configuration-app-owned-physical-schema-sync.sql"
 
 SPEC = importlib.util.spec_from_file_location("patch_configuration_entity_model_runtime", PATCHER_PATH)
 if SPEC is None or SPEC.loader is None:
@@ -35,6 +39,8 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         model_sync = MODEL_SYNC_PATH.read_text(encoding="utf-8")
         support = POSTGRES_SUPPORT_PATH.read_text(encoding="utf-8")
         service = MODEL_SERVICE_PATH.read_text(encoding="utf-8")
+        field_sync = FIELD_SYNC_PATH.read_text(encoding="utf-8")
+        field_support = POSTGRES_FIELD_SUPPORT_PATH.read_text(encoding="utf-8")
 
         self.assertIn('dbName.startsWith("postgres")', model_sync)
         self.assertIn("PostgresModelSyncSupport.sync", model_sync)
@@ -46,6 +52,26 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertIn("PostgreSQL model table already exists", support)
         self.assertNotIn("DROP TABLE", support.upper())
         self.assertIn("PostgreSQL physical model table synchronization failed", service)
+        self.assertIn('dbName != null && dbName.startsWith("postgres")', field_sync)
+        self.assertIn("PostgresFieldSyncSupport.sync", field_sync)
+        self.assertIn("PostgresFieldSyncSupport.syncCustom", field_sync)
+        table_exists_method = field_sync[
+            field_sync.index("public static boolean tableIsExist") : field_sync.index(
+                "private static synchronized void createField"
+            )
+        ]
+        index_exists_method = field_sync[
+            field_sync.index("private static boolean fieldIndexIsExist") : field_sync.index(
+                "public static boolean tableIsExist"
+            )
+        ]
+        self.assertIn("PostgresModelSyncSupport.tableExists", table_exists_method)
+        self.assertNotIn("PostgresModelSyncSupport.tableExists", index_exists_method)
+        self.assertIn("ALTER TABLE public.", field_support)
+        self.assertIn("information_schema.columns", field_support)
+        self.assertIn("Unsafe PostgreSQL property type change", field_support)
+        self.assertNotIn("DROP COLUMN", field_support.upper())
+        self.assertIn("PostgreSQL physical field synchronization failed", service)
 
         service_targets = PATCHER.PATCH_TARGETS[PATCHER.SERVICE_JAR]
         self.assertIn(
@@ -54,6 +80,14 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         )
         self.assertIn(
             "com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.class",
+            service_targets,
+        )
+        self.assertIn(
+            "com/supcon/supfusion/configuration/services/utils/PostgresFieldSyncSupport.class",
+            service_targets,
+        )
+        self.assertIn(
+            "com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.class",
             service_targets,
         )
 
@@ -78,6 +112,16 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
 
         with self.assertRaisesRegex(SystemExit, "missing compiled patch classes"):
             PATCHER.patch_inner_jar(empty_jar.getvalue(), {}, target_classes)
+
+    def test_database_trigger_fallback_is_retired_with_reversible_migration(self) -> None:
+        migration = TRIGGER_RETIREMENT_PATH.read_text(encoding="utf-8")
+        rollback = TRIGGER_ROLLBACK_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("DROP TRIGGER IF EXISTS tr_adp_ec_model_physical_table_sync", migration)
+        self.assertIn("DROP TRIGGER IF EXISTS tr_adp_ec_property_physical_column_sync", migration)
+        self.assertNotIn("DROP FUNCTION", migration.upper())
+        self.assertIn("CREATE TRIGGER tr_adp_ec_model_physical_table_sync", rollback)
+        self.assertIn("CREATE TRIGGER tr_adp_ec_property_physical_column_sync", rollback)
 
 
 if __name__ == "__main__":

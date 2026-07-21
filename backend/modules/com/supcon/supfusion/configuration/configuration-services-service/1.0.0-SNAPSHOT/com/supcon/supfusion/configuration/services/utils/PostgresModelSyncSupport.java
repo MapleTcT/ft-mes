@@ -42,7 +42,7 @@ public final class PostgresModelSyncSupport {
         createMneCodeTable(identifier(model.getTableName()), template);
     }
 
-    static boolean tableExists(JdbcTemplate template, String tableName) {
+    public static boolean tableExists(JdbcTemplate template, String tableName) {
         String safeTableName = identifier(tableName);
         Integer count = template.queryForObject(
                 "select count(1) from information_schema.tables "

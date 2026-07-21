@@ -791,11 +791,14 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 		Model model = getModel(property.getModel().getCode());
 		// 创建字段前，判断模型对应业务表是否被创建；如果没有创建，先创建
 		if(!tableIsExist(model.getTableName().toUpperCase(), template)){
+			String databaseName = getDbName();
 			try {
-				String dbName = getDbName();
-				ModelSyncDBUtils.modelSyncToDb(entityService.getEntity(model.getEntity().getCode()), model, true, template, dbName);
+				ModelSyncDBUtils.modelSyncToDb(entityService.getEntity(model.getEntity().getCode()), model, true, template, databaseName);
 			} catch (Exception e) {
 				log.error(e.getMessage(),e);
+				if (databaseName != null && databaseName.startsWith("postgres")) {
+					throw new IllegalStateException("PostgreSQL physical model table synchronization failed before property save", e);
+				}
 			}
 		}
 		if (null == property.getCode() || property.getCode().length() == 0) {
@@ -999,17 +1002,23 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 				log.error(e.getMessage(), e);
 			}
 		}
+		String databaseName = getDbName();
 		try {
-			String dbName = getDbName();
-			FieldSyncDBUtils.fieldSyncToDb(property, model, isNew, template, dbName);
+			FieldSyncDBUtils.fieldSyncToDb(property, model, isNew, template, databaseName);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
+			if (databaseName != null && databaseName.startsWith("postgres")) {
+				throw new IllegalStateException("PostgreSQL physical field synchronization failed", e);
+			}
 		}
 	}
 	public boolean tableIsExist(String tableName, JdbcTemplate template) {
 		boolean retBool = false;
 		String tarSql = "";
 		String dbName = getDbName();
+		if (dbName != null && dbName.startsWith("postgres")) {
+			return PostgresModelSyncSupport.tableExists(template, tableName);
+		}
 		if (dbName.startsWith("sqlserver")) {
 			tarSql = "select count(1) from sys.tables where name='" + tableName + "'";
 		} else if (dbName.startsWith("oracle")) {
