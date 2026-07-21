@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
 public class BpiProxyController {
 
     private static final String PREFIX = "/bpi-api";
+    static final String ADAPTER_CONTRACT_HEADER = "X-BPI-Adapter-Contract-Version";
+    static final String ADAPTER_CONTRACT_VERSION = "1";
     private static final int DEFAULT_BODY_LIMIT = 65_536;
     private static final int POINT_CATALOG_BODY_LIMIT = 5 * 1024 * 1024;
     private static final Pattern TRACE = Pattern.compile("[A-Za-z0-9._-]{1,64}");
@@ -90,6 +92,7 @@ public class BpiProxyController {
         }
         if (!responseHeaders.containsKey(HttpHeaders.CONTENT_TYPE)) responseHeaders.setContentType(MediaType.APPLICATION_JSON);
         responseHeaders.set("X-Trace-Id", traceId);
+        responseHeaders.set(ADAPTER_CONTRACT_HEADER, ADAPTER_CONTRACT_VERSION);
         return new ResponseEntity<byte[]>(upstream.getBody(), responseHeaders, upstream.getStatusCode());
     }
 

@@ -55,6 +55,8 @@ public class BpiProxyControllerTest {
         ResponseEntity<byte[]> response = controller.proxy(jwt(), request, "{\"reason\":\"operator confirmed\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(BpiProxyController.ADAPTER_CONTRACT_VERSION,
+                response.getHeaders().getFirst(BpiProxyController.ADAPTER_CONTRACT_HEADER));
         upstream.verify();
     }
 
