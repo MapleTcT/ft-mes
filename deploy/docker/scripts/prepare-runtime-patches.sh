@@ -60,9 +60,13 @@ echo "installed $copied runtime patch jar(s) into $patch_dir"
 "$python_bin" "$docker_dir/scripts/patch-configuration-entity-model-runtime.py" \
   --runtime-root "$runtime_dir"
 
-if [ -f "$runtime_dir/module-Server/LIMS/manual/LIMS-1.0.0.jar" ]; then
-  "$docker_dir/scripts/patch-lims-qcs-inspect-report-service.sh" "$runtime_dir"
-fi
+for lims_service in LIMS LIMSINT; do
+  lims_jar="$runtime_dir/module-Server/$lims_service/manual/$lims_service-1.0.0.jar"
+  if [ -f "$lims_jar" ]; then
+    LIMS_BOOT_JAR="$lims_jar" \
+      "$docker_dir/scripts/patch-lims-qcs-inspect-report-service.sh" "$runtime_dir"
+  fi
+done
 if [ -f "$runtime_dir/module-Server/RMMs/manual/RMMs-1.0.0.jar" ]; then
   rm_jar="$runtime_dir/module-Server/RMMs/manual/RMMs-1.0.0.jar"
   "$python_bin" "$docker_dir/scripts/patch-rm-batch-formula-list.py" "$rm_jar"

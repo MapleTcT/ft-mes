@@ -1,42 +1,42 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 193,
+  "migrationCount": 196,
   "firstNumber": 1,
-  "lastNumber": 193,
+  "lastNumber": 196,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 75,
+  "watchStatementCount": 76,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 10818,
-    "create-function": 92,
-    "create-index": 1002,
-    "create-table": 579,
+    "alter-table": 10820,
+    "create-function": 93,
+    "create-index": 1004,
+    "create-table": 580,
     "create-view": 142,
-    "insert": 11012,
-    "update": 11098
+    "insert": 11016,
+    "update": 11105
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 231,
-    "do-block": 392,
-    "if-exists": 117,
-    "if-not-exists": 13028,
-    "on-conflict": 10950,
+    "create-or-replace": 232,
+    "do-block": 395,
+    "if-exists": 119,
+    "if-not-exists": 13033,
+    "on-conflict": 10953,
     "to-regclass": 219,
-    "where-not-exists": 44
+    "where-not-exists": 45
   },
   "tagTotals": {
     "auth-rbac-org": 37,
-    "business": 35,
-    "compatibility": 76,
-    "configuration": 42,
+    "business": 37,
+    "compatibility": 77,
+    "configuration": 44,
     "general": 34,
     "notification": 9,
-    "platform": 54,
+    "platform": 55,
     "workflow": 21
   },
   "migrations": [
@@ -7301,6 +7301,119 @@
           "safety": "guarded-if-exists",
           "issue": "",
           "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/194-qcs-inspect-report-view-runtime-json.sql",
+      "name": "194-qcs-inspect-report-view-runtime-json.sql",
+      "number": 194,
+      "slug": "qcs-inspect-report-view-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration",
+        "business"
+      ],
+      "lineCount": 46,
+      "sha256": "602766da496d0a998bb4b2e1fb161621cac6963a7c3d082d395c6eed01a5ae33",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 3,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 3,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/195-wom-source-compat.sql",
+      "name": "195-wom-source-compat.sql",
+      "number": 195,
+      "slug": "wom-source-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 120,
+      "sha256": "e4e9e15c5e256e10989bc0b53867ffa14cd6e9d9d87f1424964668087db72580",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 2,
+        "insert": 1,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 5,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/196-qcs-manu-inspect-list-empty-column.sql",
+      "name": "196-qcs-manu-inspect-list-empty-column.sql",
+      "number": 196,
+      "slug": "qcs-manu-inspect-list-empty-column",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business"
+      ],
+      "lineCount": 114,
+      "sha256": "1bb82ec1d07c7c9b184826651e25cddf6335eb8a450784ada8e08c574bf5b532",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 114,
+          "pattern": "drop-function",
+          "excerpt": "DROP FUNCTION IF EXISTS public.adp_qcs_hide_empty_manu_inspect_column(jsonb);",
+          "statement": "DROP FUNCTION IF EXISTS public.adp_qcs_hide_empty_manu_inspect_column(jsonb);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
         }
       ],
       "unguardedStructuralStatements": []

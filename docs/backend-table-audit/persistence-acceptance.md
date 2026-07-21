@@ -1,5 +1,23 @@
 # 后端落库验收报告
 
+## 2026-07-21 QCS 合格/不合格双分支与显示契约
+
+本轮从 `10.11.100.17:18080` 的真实 WOM/QCS 页面执行业务动作，捕获业务请求后直接查询
+`adp-mes-newbase-postgres-1` 的 PostgreSQL。合格和不合格 fixture 均在取证后清理，最终回查
+`cleanup|0|0|0|0|0|0|0`。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| QCS 列表、有效报告编辑/只读显示 | 制造检验列表、`manuInspReportEdit`、`manuInspReportView` | 报告 `data/{id}`；`getStdVerGradesByStdVerId`；`getWomSourceCode` | QCS runtime view -> LIMSBasic 等级/WOM 来源兼容 -> React SystemCode | `runtime_extra_view`、`runtime_view`、`wom_source`、`qcs_inspect_reports`、`limsba_std_ver_grades` | `wom_source.id=1000/code=chemical industry/name=精细化工/valid=true/cid=1000`；合格/不合格等级接口 200；两条有效报告的 `check_result` 与编辑/只读组件一致；原始 i18n 键和空 UUID 列不可见 | PASS |
+| 合格报告生成、保存、生效和回写 | WOM 制造任务、QCS 检验列表和报告页 | `POST createManuInspect`；`POST bulkSubmit`；`POST batchDealReports` | `WOMProduceTaskController -> QCSInspectController.bulkSubmit -> QCSInspectReportServiceImpl.batchDealReports -> WOMQCSServiceImpl.checkReportBackfillWom` | `qcs_inspects`、`qcs_inspects_di`、`qcs_inspect_reports`、`qcs_report_coms`、`wfm_task_pending`、`wf_deal_info`、WOM 三表、`baseset_batch_infos` | marker `ADP_E2E_20260721032432_QCS_QUAL`；报告 `768119254504704/99/r4/合格`、明细 1、待办 0；请检 reported；task/wait/exelog 合格；批次 `qualified/11000/true` | PASS |
+| 不合格报告生成、生效和自动处理单 | 同上 | 同上 | 上述链路 -> `QCSUnQlfDealServiceImpl.listencreateUnQlfDeal` -> WOM 回写 | 上述表及 `qcs_un_qlf_deals` | marker `ADP_E2E_20260721032600_QCS_UNQLF`；报告 `768119601374464/99/r6/不合格/un_qlf_deal_flag=true`；处理单 `768119653766400/88`；task/wait/exelog 不合格；批次 `unqualified/11003/false` | PASS |
+| marker 定向清理 | 不适用 | 不适用 | 受控清理事务 | QCS、WOM、工作流、质量标准夹具和批次表 | 两轮分别删除 marker 及关联 ID，随后独立查询请检/报告/处理单/WOM 任务/物料/配方/待办共 7 类，均为 0 | PASS_CLEANED |
+
+机器记录：`metadata/qcs-report-chain-qualified-current.json`、
+`metadata/qcs-report-chain-unqualified-current.json`、
+`metadata/qcs-display-cold-restart-acceptance.json`。接口返回 200 不是单独通过依据；上述 PASS 同时要求
+页面复显、目标表状态、关联表数量、双 provider 冷启动和清理回查全部一致。
+
 ## 2026-07-18 BPI 规则退役与延迟候选落库
 
 目标环境 `10.11.100.17` 已运行 Flyway V15。marker

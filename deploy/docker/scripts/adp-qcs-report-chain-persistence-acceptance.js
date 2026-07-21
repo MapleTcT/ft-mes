@@ -37,9 +37,14 @@ const womOutputPath = path.join(outputDir, "wom-manu-inspect-persistence-results
 const womScript = path.join(__dirname, "adp-wom-manu-inspect-persistence-acceptance.js");
 const inspectListRoute = "/msService/QCS/inspect/inspect/manuInspectList";
 const reportEditRoute = "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit";
+const reportViewRoute = "/msService/QCS/inspectReport/inspectReport/manuInspReportView";
 const inspectBulkSubmitApi = "/msService/QCS/inspect/inspect/bulkSubmit";
 const reportBatchDealApi = "/msService/QCS/inspectReport/inspectReport/batchDealReports";
 const expectedResult = mode === "unqualified" ? "不合格" : "合格";
+const expectedResultOption =
+  mode === "unqualified"
+    ? "LIMSBasic_standardGrade/Unqualified"
+    : "LIMSBasic_standardGrade/Qualified";
 const expectedBatchResult =
   mode === "unqualified" ? "BaseSet_checkResult/unqualified" : "BaseSet_checkResult/qualified";
 const expectAutoUnqualifiedDeal = process.env.ADP_QCS_EXPECT_UNQLF_DEAL !== "false";
@@ -611,13 +616,13 @@ async function runBrowserWorkflow(ticket, womEvidence, evidence) {
     });
     page.on("request", (requestItem) => {
       const url = requestItem.url();
-      if (/QCS\/inspect|QCS\/inspectReport|WOM\/quality|layoutJson/.test(url)) {
+      if (/QCS\/inspect|QCS\/inspectReport|WOM\/quality|LIMSBasic\/utils|layoutJson|i18n-value\.js/.test(url)) {
         evidence.requests.push({ method: requestItem.method(), url, postData: requestItem.postData() });
       }
     });
     page.on("response", async (response) => {
       const url = response.url();
-      if (!/QCS\/inspect|QCS\/inspectReport|WOM\/quality|layoutJson/.test(url)) {
+      if (!/QCS\/inspect|QCS\/inspectReport|WOM\/quality|LIMSBasic\/utils|layoutJson|i18n-value\.js/.test(url)) {
         return;
       }
       let body = "";
@@ -637,6 +642,24 @@ async function runBrowserWorkflow(ticket, womEvidence, evidence) {
       route: inspectListRoute,
       status: inspectNav && inspectNav.status(),
     };
+    await page.waitForTimeout(2500);
+    evidence.inspectListDisplay = await page.evaluate(() => {
+      const bodyText = document.body.innerText;
+      return {
+        documentNumberVisible: bodyText.includes("单据编号"),
+        rawTableNumberKeyVisible: bodyText.includes("ec.common.tableNo"),
+        rawEmptyCustomKeyVisible: bodyText.includes(
+          "QCS_5_0_0_0_inspect_manuInspectList_LISTPT_CUSTOM_3aaefcb6_6d96_4d9d_b2c6_bde20b55ed9d"
+        ),
+      };
+    });
+    if (
+      !evidence.inspectListDisplay.documentNumberVisible ||
+      evidence.inspectListDisplay.rawTableNumberKeyVisible ||
+      evidence.inspectListDisplay.rawEmptyCustomKeyVisible
+    ) {
+      throw new Error(`QCS inspection list headers were not normalized: ${JSON.stringify(evidence.inspectListDisplay)}`);
+    }
     evidence.screenshots.inspectList = path.join(outputDir, "qcs-inspect-list-before-submit.png");
     await safeScreenshot(page, evidence, evidence.screenshots.inspectList);
 
@@ -743,8 +766,124 @@ async function runBrowserWorkflow(ticket, womEvidence, evidence) {
       }
     }
 
+    report = queryReportState(inspectId, batchNo);
+    const effectiveReportNav = await page.goto(
+      `${reportEditRoute}?id=${encodeURIComponent(report.id)}&ADP_E2E=${encodeURIComponent(marker)}`,
+      { waitUntil: navigationWaitUntil, timeout: pageTimeoutMs }
+    );
+    evidence.effectiveReportNavigation = {
+      route: reportEditRoute,
+      status: effectiveReportNav && effectiveReportNav.status(),
+      reportId: report.id,
+    };
+    await page.waitForFunction(
+      ({ result, resultOption }) => {
+        try {
+          const reactApi = window.ReactAPI;
+          const savedResult = reactApi
+            .getComponentAPI("Input")
+            .APIs("inspectReport.checkResult")
+            .getValue();
+          const selected = reactApi
+            .getComponentAPI("SystemCode")
+            .APIs("inspectReport.checkResOption")
+            .getValue();
+          const selectedValue =
+            typeof selected === "string" ? selected : selected && (selected.value || selected.id);
+          return savedResult === result && selectedValue === resultOption;
+        } catch (_error) {
+          return false;
+        }
+      },
+      { result: expectedResult, resultOption: expectedResultOption },
+      { timeout: Math.min(pageTimeoutMs, 30000) }
+    );
+    await page.waitForTimeout(10000);
+    evidence.effectiveReportDisplay = await page.evaluate(
+      ({ result, resultOption }) => {
+        const reactApi = window.ReactAPI;
+        const savedResult = reactApi
+          .getComponentAPI("Input")
+          .APIs("inspectReport.checkResult")
+          .getValue();
+        const selected = reactApi
+          .getComponentAPI("SystemCode")
+          .APIs("inspectReport.checkResOption")
+          .getValue();
+        const selectedValue =
+          typeof selected === "string" ? selected : selected && (selected.value || selected.id);
+        return {
+          expectedResult: result,
+          expectedResultOption: resultOption,
+          savedResult,
+          selectedValue,
+          bodyHasResult: document.body.innerText.includes(result),
+          compatibilityRestore: window.__ADP_QCS_CONCLUSION_RESTORED__ || null,
+        };
+      },
+      { result: expectedResult, resultOption: expectedResultOption }
+    );
+    if (
+      evidence.effectiveReportDisplay.savedResult !== expectedResult ||
+      evidence.effectiveReportDisplay.selectedValue !== expectedResultOption ||
+      !evidence.effectiveReportDisplay.bodyHasResult
+    ) {
+      throw new Error(
+        `QCS effective report conclusion was not rendered: ${JSON.stringify(
+          evidence.effectiveReportDisplay
+        )}`
+      );
+    }
+
     evidence.screenshots.reportAfterSubmit = path.join(outputDir, "qcs-report-edit-after-submit.png");
     await safeScreenshot(page, evidence, evidence.screenshots.reportAfterSubmit);
+
+    const reportViewNav = await page.goto(
+      `${reportViewRoute}?id=${encodeURIComponent(report.id)}&ADP_E2E=${encodeURIComponent(marker)}`,
+      { waitUntil: navigationWaitUntil, timeout: pageTimeoutMs }
+    );
+    evidence.reportViewNavigation = {
+      route: reportViewRoute,
+      status: reportViewNav && reportViewNav.status(),
+      reportId: report.id,
+    };
+    await page.waitForFunction(
+      (result) => {
+        try {
+          const value = window.ReactAPI
+            .getComponentAPI("Input")
+            .APIs("inspectReport.checkResult")
+            .getValue();
+          return value === result && document.body.innerText.includes(result);
+        } catch (_error) {
+          return false;
+        }
+      },
+      expectedResult,
+      { timeout: Math.min(pageTimeoutMs, 30000) }
+    );
+    await page.waitForTimeout(2500);
+    evidence.reportViewDisplay = await page.evaluate((result) => {
+      const bodyText = document.body.innerText;
+      return {
+        expectedResult: result,
+        savedResult: window.ReactAPI
+          .getComponentAPI("Input")
+          .APIs("inspectReport.checkResult")
+          .getValue(),
+        bodyHasResult: bodyText.includes(result),
+        rawRangeKeyVisible: bodyText.includes("LIMSBasic.qualityStd.stdGrade.range"),
+      };
+    }, expectedResult);
+    if (
+      evidence.reportViewDisplay.savedResult !== expectedResult ||
+      !evidence.reportViewDisplay.bodyHasResult ||
+      evidence.reportViewDisplay.rawRangeKeyVisible
+    ) {
+      throw new Error(`QCS read-only report was not rendered cleanly: ${JSON.stringify(evidence.reportViewDisplay)}`);
+    }
+    evidence.screenshots.reportView = path.join(outputDir, "qcs-report-view-after-submit.png");
+    await safeScreenshot(page, evidence, evidence.screenshots.reportView);
     await context.close();
   } finally {
     await browser.close();

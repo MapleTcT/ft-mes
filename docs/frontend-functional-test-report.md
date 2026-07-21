@@ -1,5 +1,26 @@
 # 前端功能测试报告
 
+## 2026-07-21 QCS 显示契约与合格/不合格双分支复验
+
+本轮在当前唯一测试环境 `http://10.11.100.17:18080` 使用真实 `admin` 会话、WOM/QCS 页面、
+业务 API 和 PostgreSQL 重新验收。合格 marker 为 `ADP_E2E_20260721032432_QCS_QUAL`，
+不合格 marker 为 `ADP_E2E_20260721032600_QCS_UNQLF`；两轮取证后均执行受控清理。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| QCS 显示契约 | 制造检验列表；报告编辑页；报告只读页 | 检查列表表头、有效报告结论和质量等级范围 | 报告 `data/{id}`；`getStdVerGradesByStdVerId`；`getWomSourceCode` | 列表显示“单据编号”，不再出现 `ec.common.tableNo` 或空 UUID 列；编辑页结论在等待 10 秒后仍显示合格/不合格；只读页显示结论和“范围”；console/page/request/HTTP error 均为 0 | `wom_source` 兼容接口连续返回 200；等级接口返回合格/不合格选项；有效报告 API 与组件值一致 | `runtime_extra_view`、`runtime_view`、`wom_source`、`qcs_inspect_reports`、`limsba_std_ver_grades` | PASS | 无 |
+| WOM/QCS 合格链 | 制造任务 -> 制造检验列表 -> 报告编辑/只读页 | 创建请检、两段生成报告、保存、两段生效并复显 | `createManuInspect`；`bulkSubmit`；`batchDealReports` | 所有业务请求 200；页面显示“合格”；浏览器四类错误均为 0 | 报告 `768119254504704` 为 `99/r4/合格`；WOM task/wait/exelog 为合格；批次为 `qualified/11000/available=true` | QCS 检验/报告/明细/工作流、WOM 任务/待入库/日志、批次表 | PASS | 清理回查 `0/0/0/0/0/0/0` |
+| WOM/QCS 不合格链 | 同上 | 创建请检、报告保存/生效、WOM/批次回写并生成处理单 | 同上 | 所有业务请求 200；编辑和只读页显示“不合格”；浏览器四类错误均为 0 | 报告 `768119601374464` 为 `99/r6/不合格`；批次为 `unqualified/11003/available=false`；自动处理单 `768119653766400` 为 `88` | 上述表及 `qcs_un_qlf_deals` | PASS | 清理回查 `0/0/0/0/0/0/0` |
+
+机器证据：`metadata/qcs-report-chain-qualified-current.json`、
+`metadata/qcs-report-chain-unqualified-current.json`。当前截图：
+`metadata/qcs-inspect-list-display-current.png`、`metadata/qcs-report-edit-qualified-current.png`、
+`metadata/qcs-report-view-qualified-current.png`、`metadata/qcs-report-edit-unqualified-current.png`、
+`metadata/qcs-report-view-unqualified-current.png`。此前 QCS 主动质量门验收中记录的两个显示缺陷
+已由本节关闭。`metadata/qcs-display-cold-restart-acceptance.json` 另证明无宿主机 JDK 时可使用
+既有 Java 8 JDK 镜像重建两套 LIMS JAR，冷启动后两个 Nacos provider healthy，来源接口连续
+`10/10` 返回 200；该结论不扩大为外部 ERP/WMS 或现场 DCS 联调完成。
+
 ## 2026-07-20 BPI 旧 MES 原生菜单开关
 
 本轮在 `http://10.11.100.17:18080` 使用真实旧 MES 登录、原生菜单和 BPI 页面验收提交
@@ -797,7 +818,7 @@ outbox、Java 8 sidecar、三 broker Kafka、Java 17 BPI service 和 `ft_mes_bpi
 
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
 |---|---|---|---|---|---|---|---|---|
-| WOM/QCS 质量门 | `/msService/WOM/produceTask/produceTask/makeTaskList` -> `/msService/QCS/inspect/inspect/manuInspectList` -> `/msService/QCS/inspectReport/inspectReport/manuInspReportEdit` | marker 任务请检、请检两段提交、报告保存和两段生效 | `POST .../createManuInspect`；`POST .../bulkSubmit`；`POST .../batchDealReports` | 所有业务请求 200；WOM、QCS 列表和报告页真实渲染；console/page/request/failed response 均为 0 | 报告 `99/r4/合格`；WOM/批次回写已检、合格；事务 outbox `SENT/attempt=1`；BPI `RELEASED/r3/ACCEPTED` | WOM/QCS/批次/工作流、`qcs_bpi_quality_gate_outbox`、BPI batch/gate/link/inbox/state/audit | PASS_TARGET_QCS_BPI | QCS 列表仍显示 `ec.common.tableNo`；生效报告只读页未回显“检验结论”，但 API/PG report 与 component 均为合格，均作为独立显示缺陷保留 |
+| WOM/QCS 质量门 | `/msService/WOM/produceTask/produceTask/makeTaskList` -> `/msService/QCS/inspect/inspect/manuInspectList` -> `/msService/QCS/inspectReport/inspectReport/manuInspReportEdit` | marker 任务请检、请检两段提交、报告保存和两段生效 | `POST .../createManuInspect`；`POST .../bulkSubmit`；`POST .../batchDealReports` | 所有业务请求 200；WOM、QCS 列表和报告页真实渲染；console/page/request/failed response 均为 0 | 报告 `99/r4/合格`；WOM/批次回写已检、合格；事务 outbox `SENT/attempt=1`；BPI `RELEASED/r3/ACCEPTED` | WOM/QCS/批次/工作流、`qcs_bpi_quality_gate_outbox`、BPI batch/gate/link/inbox/state/audit | PASS_TARGET_QCS_BPI | 当时记录的列表原始键和只读结论显示缺陷已在 2026-07-21 双分支复验中关闭 |
 | QCS 质量门幂等重放 | 不适用，受控运维复验 | 同一 outbox 定向重排并等待 Kafka 第二次消费 | `GET /internal/bpi/v1/batches/resolve`；Kafka `qcs.batch.quality-gate.v1` | 不增加额外页面动作 | 同 event、同 payload SHA；outbox `SENT/attempt=2`；BPI 投影前后完全一致；topic replay +1、DLQ 0、lag 0 | 同上 | PASS_IDEMPOTENT_CLEANED | 终态仅允许 gate ID/revision/source event 三元组完全一致的重放 |
 
 marker：`ADP_E2E_20260721021607_QCS_BPI`。机器证据：

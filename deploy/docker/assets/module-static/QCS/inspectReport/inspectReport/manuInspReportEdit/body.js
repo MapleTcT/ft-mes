@@ -72,3 +72,123 @@ function sampleComRefCallback(data, event) {
 	installButton();
 	window.setInterval(installButton, 500);
 }());
+
+(function installQcsPersistedConclusionRestore() {
+	if (window.__adpQcsPersistedConclusionRestore) {
+		return;
+	}
+	var queryString = window.location.search || "";
+	if (!/(?:^|[?&])id(?:=|&|$)/.test(queryString) || /(?:^|[?&])pendingId(?:=|&|$)/.test(queryString)) {
+		return;
+	}
+	window.__adpQcsPersistedConclusionRestore = true;
+
+	var attempts = 0;
+	var maxAttempts = 300;
+	var cachedResult = "";
+	var cachedGradeId = "";
+	var fallbackGradeIds = {
+		"合格": "LIMSBasic_standardGrade/Qualified",
+		"不合格": "LIMSBasic_standardGrade/Unqualified"
+	};
+
+	function componentValue(value) {
+		if (!value) {
+			return "";
+		}
+		if (typeof value === "string") {
+			return value;
+		}
+		return value.value || value.id || "";
+	}
+
+	function gradeIdFor(result) {
+		try {
+			if (window.levelMap && typeof window.levelMap.get === "function") {
+				var sort = window.levelMap.get(result);
+				var gradeId = window.levelMap.get(sort);
+				if (gradeId) {
+					return gradeId;
+				}
+			}
+		} catch (_error) {
+			// The quality-standard map may still be loading.
+		}
+		return fallbackGradeIds[result] || "";
+	}
+
+	function ensureConclusionOption(selector, gradeId, result) {
+		if (!selector || !gradeId || !result || typeof selector.addOption !== "function") {
+			return false;
+		}
+		var option = null;
+		if (typeof selector.getOptionById === "function") {
+			option = selector.getOptionById(gradeId);
+		}
+		if (option && option.label === result) {
+			return false;
+		}
+		selector.addOption(gradeId, result);
+		return true;
+	}
+
+	function restorePersistedConclusion() {
+		attempts += 1;
+		try {
+			var input = ReactAPI.getComponentAPI("Input").APIs("inspectReport.checkResult");
+			var selector = ReactAPI.getComponentAPI("SystemCode").APIs("inspectReport.checkResOption");
+			var result = input && input.getValue ? componentValue(input.getValue()) : "";
+			var selected = selector && selector.getValue ? componentValue(selector.getValue()) : "";
+			if (result) {
+				cachedResult = result;
+				cachedGradeId = gradeIdFor(result) || cachedGradeId;
+			}
+			if (selected) {
+				cachedGradeId = selected;
+			}
+			if (!cachedResult) {
+				return false;
+			}
+
+			var gradeId = cachedGradeId || gradeIdFor(cachedResult);
+			var restoredInput = false;
+			var restoredSelector = false;
+			var restoredOption = false;
+			if (!result && input && typeof input.setValue === "function") {
+				input.setValue(cachedResult);
+				restoredInput = true;
+			}
+			if (!selected && gradeId && selector && typeof selector.setValue === "function") {
+				restoredOption = ensureConclusionOption(selector, gradeId, cachedResult);
+				selector.setValue(gradeId);
+				restoredSelector = true;
+				if (typeof window.onHeadResultChange === "function") {
+					window.onHeadResultChange(gradeId);
+				}
+			}
+			if (input && input.getValue && !componentValue(input.getValue()) && typeof input.setValue === "function") {
+				input.setValue(cachedResult);
+				restoredInput = true;
+			}
+			window.__ADP_QCS_CONCLUSION_RESTORED__ = {
+				result: cachedResult,
+				gradeId: gradeId,
+				attempt: attempts,
+				restoredInput: restoredInput,
+				restoredOption: restoredOption,
+				restoredSelector: restoredSelector
+			};
+			return restoredInput || restoredSelector;
+		} catch (_error) {
+			return false;
+		}
+	}
+
+	restorePersistedConclusion();
+	var timer = window.setInterval(function retryPersistedConclusion() {
+		restorePersistedConclusion();
+		if (attempts >= maxAttempts) {
+			window.clearInterval(timer);
+		}
+	}, 100);
+}());

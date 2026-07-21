@@ -1,23 +1,25 @@
 {
-  "generatedAt": "2026-07-21T01:30:49.045Z",
-  "repoCommit": "21ec56c744c23f2db52ab1a5abc077023fc44462",
+  "generatedAt": "2026-07-21T03:27:00.000Z",
+  "repoCommit": "479dd7ba696ca1e5e4ff05df873220ff4bac4403",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
-    "generatedAt": "2026-07-21T01:30:49.045Z",
+    "generatedAt": "2026-07-21T03:27:00.000Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
     },
     "qcsQualified": {
       "status": "PASS",
-      "marker": "ADP_E2E_20260712015927_QCS_QUAL",
-      "cleanup": "0/0/0/0/0/0/0"
+      "marker": "ADP_E2E_20260721032432_QCS_QUAL",
+      "evidence": "metadata/qcs-report-chain-qualified-current.json",
+      "assertions": "list/edit/view rendered; report 99/合格; WOM task/wait/exelog qualified; batch qualified/available; browser errors 0; cleanup 0/0/0/0/0/0/0"
     },
     "qcsUnqualified": {
       "status": "PASS",
-      "marker": "ADP_E2E_20260712020028_QCS_UNQLF",
-      "cleanup": "0/0/0/0/0/0/0"
+      "marker": "ADP_E2E_20260721032600_QCS_UNQLF",
+      "evidence": "metadata/qcs-report-chain-unqualified-current.json",
+      "assertions": "list/edit/view rendered; report 99/不合格; WOM task/wait/exelog unqualified; batch unavailable; treatment document created; browser errors 0; cleanup 0/0/0/0/0/0/0"
     },
     "materialWms": {
       "status": "PASS",
@@ -147,11 +149,16 @@
       "marker": "ADP_E2E_20260721021607_QCS_BPI",
       "evidence": "metadata/qcs-bpi-quality-gate-target-acceptance.json; metadata/qcs-bpi-quality-gate-target-wom.png; metadata/qcs-bpi-quality-gate-target-list.png; metadata/qcs-bpi-quality-gate-target-report.png",
       "assertions": "real WOM/QCS pages and HTTP 200 chain; browser errors zero; QCS transaction outbox SENT attempt 1; Kafka first delta 1; BPI RELEASED/r3 and ACCEPTED with gate/link/inbox 1/1/1, state/audit 2/2 and WMS outbox 0; exact same event and payload replay SENT attempt 2 with unchanged projection; replay delta 1, DLQ 0, lag 0; ADP/BPI residual zero; six switches restored false; external production enablement and WMS remain pending"
+    },
+    "qcsDisplayBindings": {
+      "status": "PASS_TARGET",
+      "evidence": "metadata/qcs-display-cold-restart-acceptance.json; metadata/qcs-inspect-list-display-current.png; metadata/qcs-report-edit-qualified-current.png; metadata/qcs-report-view-qualified-current.png; metadata/qcs-report-edit-unqualified-current.png; metadata/qcs-report-view-unqualified-current.png",
+      "assertions": "ec.common.tableNo hidden; empty UUID column hidden; persisted qualified/unqualified selector label stable after 10 seconds; read-only conclusion visible; raw range key hidden; two healthy LIMSBasic providers after cold restart; WOM source compatibility endpoint 10/10 HTTP 200"
     }
   },
   "summary": {
-    "testedFeatures": 197,
-    "pass": 194,
+    "testedFeatures": 200,
+    "pass": 197,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -4321,14 +4328,96 @@
       "verificationSql": "deploy/docker/scripts/bpi-qcs-quality-gate-target-verification.sql; verify QCS outbox SENT/attempt 1 then 2, same event and SHA, BPI RELEASED/r3/ACCEPTED/NOT_REQUESTED, gate/link/inbox/state/audit/WMS outbox 1/1/1/2/2/0 before and after replay, then run bpi-qcs-quality-gate-target-cleanup.sql and require ADP/BPI residual 0",
       "status": "PASS",
       "evidence": "metadata/qcs-bpi-quality-gate-target-acceptance.json; real QCS pages and business requests returned 200 with zero browser errors; Kafka first/replay delta 1/1, DLQ 0 and lag 0; six related switches restored false",
-    "issues": [
-      "The accepted batch is SHADOW, so WMS outbox=0 is expected and external WMS is not covered.",
-      "The existing QCS list i18n key ec.common.tableNo remains a separate display defect.",
-      "The effective QCS report read-only page does not visually echo the qualified conclusion even though API and PostgreSQL report/component values are qualified."
-    ]
+      "issues": [
+        "The accepted batch is SHADOW, so WMS outbox=0 is expected and external WMS is not covered."
+      ]
+    },
+    {
+      "module": "质量联动-QCS显示契约",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList; /msService/QCS/inspectReport/inspectReport/manuInspReportEdit; /msService/QCS/inspectReport/inspectReport/manuInspReportView",
+      "operation": "真实列表、有效报告编辑页和只读页显示复验",
+      "api": "GET /msService/QCS/inspectReport/inspectReport/data/{id}; GET /msService/LIMSBasic/qualityStd/stdVerGrade/getStdVerGradesByStdVerId; GET /msService/LIMSBasic/utils/utils/getWomSourceCode",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "QCS report/list runtime -> LIMSBasic std grade/WOM source compatibility -> React SystemCode renderer",
+      "tables": [
+        "public.runtime_extra_view",
+        "public.runtime_view",
+        "public.wom_source",
+        "public.qcs_inspect_reports",
+        "public.limsba_std_ver_grades"
+      ],
+      "marker": "ADP_E2E_20260721032432_QCS_QUAL; ADP_E2E_20260721032600_QCS_UNQLF",
+      "verificationSql": "SELECT id, table_no, std_ver_id, check_result FROM public.qcs_inspect_reports WHERE id IN (768119254504704,768119601374464); SELECT id,code,name,valid,cid FROM public.wom_source WHERE id=1000;",
+      "status": "PASS",
+      "evidence": "metadata/qcs-report-chain-qualified-current.json; metadata/qcs-report-chain-unqualified-current.json; metadata/qcs-display-cold-restart-acceptance.json; list shows 单据编号 without raw key/UUID column; effective edit selector remains qualified/unqualified after 10 seconds; read-only view shows conclusion and 范围; both LIMSBasic providers were healthy after rebuild and cold restart; WOM source endpoint returned 10/10 HTTP 200; console/page/request/HTTP errors were zero",
+      "issues": []
+    },
+    {
+      "module": "生产质量核心主线-QCS",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /msService/QCS/inspect/inspect/manuInspectList; /msService/QCS/inspectReport/inspectReport/manuInspReportEdit; /msService/QCS/inspectReport/inspectReport/manuInspReportView",
+      "operation": "QCS 合格报告生成、保存、生效、WOM和批次回写及页面复显",
+      "api": "POST /msService/WOM/produceTask/produceTask/createManuInspect; POST /msService/QCS/inspect/inspect/bulkSubmit; POST /msService/QCS/inspectReport/inspectReport/batchDealReports",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "WOMProduceTaskController -> QCSInspectController.bulkSubmit -> QCSInspectReportServiceImpl.batchDealReports -> WOMQCSServiceImpl.checkReportBackfillWom",
+      "tables": [
+        "public.qcs_inspects",
+        "public.qcs_inspects_di",
+        "public.qcs_inspect_reports",
+        "public.qcs_report_coms",
+        "public.wfm_task_pending",
+        "public.wf_deal_info",
+        "public.wom_produce_tasks",
+        "public.wom_wait_put_records",
+        "public.wom_produce_task_exelog",
+        "public.baseset_batch_infos"
+      ],
+      "marker": "ADP_E2E_20260721032432_QCS_QUAL",
+      "verificationSql": "Report 768119254504704: verify status=99, version=4, check_result=合格 and marker memo; verify report component count=1 and pending count=0; inspect 768119198979328 reported; task/wait/exelog qualified; batch BaseSet_checkResult/qualified, active state 11000, available=true; cleanup must return 0/0/0/0/0/0/0",
+      "status": "PASS",
+      "evidence": "metadata/qcs-report-chain-qualified-current.json; all business requests HTTP 200; list/edit/view rendered exact Chinese labels and conclusion; PostgreSQL final rows matched; console/page/request/failed response arrays empty; controlled cleanup PASS",
+      "issues": []
+    },
+    {
+      "module": "生产质量核心主线-QCS",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /msService/QCS/inspect/inspect/manuInspectList; /msService/QCS/inspectReport/inspectReport/manuInspReportEdit; /msService/QCS/inspectReport/inspectReport/manuInspReportView",
+      "operation": "QCS 不合格报告生成、保存、生效、WOM和批次回写、自动处理单及页面复显",
+      "api": "POST /msService/WOM/produceTask/produceTask/createManuInspect; POST /msService/QCS/inspect/inspect/bulkSubmit; POST /msService/QCS/inspectReport/inspectReport/batchDealReports",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "WOMProduceTaskController -> QCSInspectController.bulkSubmit -> QCSInspectReportServiceImpl.batchDealReports -> QCSUnQlfDealServiceImpl.listencreateUnQlfDeal -> WOMQCSServiceImpl.checkReportBackfillWom",
+      "tables": [
+        "public.qcs_inspects",
+        "public.qcs_inspects_di",
+        "public.qcs_inspect_reports",
+        "public.qcs_report_coms",
+        "public.qcs_un_qlf_deals",
+        "public.wfm_task_pending",
+        "public.wf_deal_info",
+        "public.wom_produce_tasks",
+        "public.wom_wait_put_records",
+        "public.wom_produce_task_exelog",
+        "public.baseset_batch_infos"
+      ],
+      "marker": "ADP_E2E_20260721032600_QCS_UNQLF",
+      "verificationSql": "Report 768119601374464: verify status=99, version=6, check_result=不合格, marker memo and un_qlf_deal_flag=true; verify treatment 768119653766400 status=88; WOM task/wait/exelog unqualified; batch BaseSet_checkResult/unqualified, active state 11003, available=false; cleanup must return 0/0/0/0/0/0/0",
+      "status": "PASS",
+      "evidence": "metadata/qcs-report-chain-unqualified-current.json; all business requests HTTP 200; edit/view rendered 不合格; PostgreSQL report, WOM, batch and automatic treatment rows matched; console/page/request/failed response arrays empty; controlled cleanup PASS",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260721032432_QCS_QUAL",
+      "artifact": "metadata/qcs-report-chain-qualified-current.json",
+      "summary": "Target WOM/QCS real pages, three business POST families, stable effective/read-only conclusion rendering, PostgreSQL report/WOM/batch verification, zero browser errors and seven-category cleanup passed for the qualified branch."
+    },
+    {
+      "marker": "ADP_E2E_20260721032600_QCS_UNQLF",
+      "artifact": "metadata/qcs-report-chain-unqualified-current.json",
+      "summary": "Target WOM/QCS real pages, stable unqualified conclusion rendering, PostgreSQL report/WOM/batch verification, automatic unqualified treatment creation, zero browser errors and seven-category cleanup passed for the unqualified branch."
+    },
     {
       "marker": "ADP_E2E_20260721021607_QCS_BPI",
       "artifact": "metadata/qcs-bpi-quality-gate-target-acceptance.json",

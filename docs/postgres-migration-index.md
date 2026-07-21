@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`193`。
-- 编号范围：`001` 到 `193`。
+- 脚本数量：`196`。
+- 编号范围：`001` 到 `196`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`75`。
+- 需关注语句：`76`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -21,37 +21,37 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 37 |
-| business | 35 |
-| compatibility | 76 |
-| configuration | 42 |
+| business | 37 |
+| compatibility | 77 |
+| configuration | 44 |
 | general | 34 |
 | notification | 9 |
-| platform | 54 |
+| platform | 55 |
 | workflow | 21 |
 
 ## 语句统计
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10818 |
-| create-function | 92 |
-| create-index | 1002 |
-| create-table | 579 |
+| alter-table | 10820 |
+| create-function | 93 |
+| create-index | 1004 |
+| create-table | 580 |
 | create-view | 142 |
-| insert | 11012 |
-| update | 11098 |
+| insert | 11016 |
+| update | 11105 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 231 |
-| do-block | 392 |
-| if-exists | 117 |
-| if-not-exists | 13028 |
-| on-conflict | 10950 |
+| create-or-replace | 232 |
+| do-block | 395 |
+| if-exists | 119 |
+| if-not-exists | 13033 |
+| on-conflict | 10953 |
 | to-regclass | 219 |
-| where-not-exists | 44 |
+| where-not-exists | 45 |
 
 ## 脚本清单
 
@@ -250,6 +250,9 @@
 | 191 | 191-wom-quality-quantity-reporting.sql | general | 482 | create-table:4, create-function:1, create-index:9, alter-table:16, insert:1, update:4 | 25 | - |
 | 192 | 192-material-wms-bpi-idempotency.sql | general | 29 | create-index:3, alter-table:5 | 9 | - |
 | 193 | 193-qcs-bpi-quality-gate-outbox.sql | business | 385 | create-table:1, create-function:4, create-index:3, insert:1, update:3 | 12 | watch:2 |
+| 194 | 194-qcs-inspect-report-view-runtime-json.sql | platform, configuration, business | 46 | insert:3, update:3 | 4 | - |
+| 195 | 195-wom-source-compat.sql | compatibility | 120 | create-table:1, create-index:2, alter-table:2, insert:1 | 8 | - |
+| 196 | 196-qcs-manu-inspect-list-empty-column.sql | configuration, business | 114 | create-function:1, update:4 | 3 | watch:1 |
 
 ## 规则
 

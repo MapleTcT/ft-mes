@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T01:43:12+00:00",
-  "repoCommit": "21ec56c744c23f2db52ab1a5abc077023fc44462",
+  "generatedAt": "2026-07-21T03:53:58+00:00",
+  "repoCommit": "479dd7ba696ca1e5e4ff05df873220ff4bac4403",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 368,
-    "totalBytes": 54999436,
+    "totalFiles": 376,
+    "totalBytes": 55173081,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 193,
+      "postgres-init-sql": 196,
       "runtime-binary-patch": 7,
-      "runtime-patch-source": 21,
+      "runtime-patch-source": 22,
       "runtime-script": 26,
-      "runtime-static-override": 75
+      "runtime-static-override": 79
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 26755,
-      "postgres-init-sql": 54092204,
+      "nginx-runtime-config": 27463,
+      "postgres-init-sql": 54239193,
       "runtime-binary-patch": 29988,
-      "runtime-patch-source": 82246,
-      "runtime-script": 274780,
-      "runtime-static-override": 451110
+      "runtime-patch-source": 88039,
+      "runtime-script": 278633,
+      "runtime-static-override": 467412
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 26535,
-      "sha256": "3633bb65303fdf13a2887ffddffaa584c60c04fa007ab7c772468b11b85aaf8a"
+      "sizeBytes": 27243,
+      "sha256": "984a06775c62679a654e00bcff0ff864993ede7fc23e9a0ae2329722d7f08f30"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1471,6 +1471,24 @@
       "sha256": "92063c4e9be072c715b196b8e8fe8bd6a7a15b1445b1dfc21f9b22039ff64bd9"
     },
     {
+      "path": "deploy/docker/postgres/init/194-qcs-inspect-report-view-runtime-json.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 138866,
+      "sha256": "602766da496d0a998bb4b2e1fb161621cac6963a7c3d082d395c6eed01a5ae33"
+    },
+    {
+      "path": "deploy/docker/postgres/init/195-wom-source-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 4030,
+      "sha256": "e4e9e15c5e256e10989bc0b53867ffa14cd6e9d9d87f1424964668087db72580"
+    },
+    {
+      "path": "deploy/docker/postgres/init/196-qcs-manu-inspect-list-empty-column.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 4093,
+      "sha256": "1bb82ec1d07c7c9b184826651e25cddf6335eb8a450784ada8e08c574bf5b532"
+    },
+    {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 2603,
@@ -1553,6 +1571,12 @@
       "category": "runtime-patch-source",
       "sizeBytes": 595,
       "sha256": "21463fdd4f898918c721f7cb9084fae995aa4d7eda8183337b0aa9cde2b4f955"
+    },
+    {
+      "path": "deploy/docker/patches/limsbasic-wom-source-response/src/com/supcon/orchid/LIMSBasic/utils/ServiceClientUtils.java",
+      "category": "runtime-patch-source",
+      "sizeBytes": 5793,
+      "sha256": "1cf0cc7116ef1edee74b08c7a64561f16629fbd51a5c9003fb7c97a577903e6c"
     },
     {
       "path": "deploy/docker/patches/notification-dynamic-templates/META-INF/postgresql/dynamic/notice_msg.sql.ftl",
@@ -1695,8 +1719,8 @@
     {
       "path": "deploy/docker/scripts/patch-lims-qcs-inspect-report-service.sh",
       "category": "runtime-script",
-      "sizeBytes": 3859,
-      "sha256": "8467b4ad6bca67c4acd3f3109bc36929e2d4c3e83aeffd33b7612eda9598ef8c"
+      "sizeBytes": 7589,
+      "sha256": "72550345b0477e4d39d0450f29dcb922238c473a219942a724dda7f1dc514d5c"
     },
     {
       "path": "deploy/docker/scripts/patch-notification-empty-time.py",
@@ -1785,8 +1809,8 @@
     {
       "path": "deploy/docker/scripts/prepare-runtime-patches.sh",
       "category": "runtime-script",
-      "sizeBytes": 3797,
-      "sha256": "7b62c10e578a5f6dce42d73b61bba8b84e6b7163f236395f4eb7dce9cc69b6a3"
+      "sizeBytes": 3920,
+      "sha256": "30aded0f6947ad91b240e4a42d4c26cd420c4dea9326e3025f9db4caf939adb7"
     },
     {
       "path": "deploy/docker/scripts/render-nacos-configs.py",
@@ -1885,16 +1909,40 @@
       "sha256": "979853ad29cd2c294e85673b6767204a26f423b769e4dea8fa9b206f21a74d3f"
     },
     {
+      "path": "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectList/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 4553,
+      "sha256": "9219690ffab899616b0b191faa7dfc3a5b69df36199b3a6c4dd4bb49fe4cd7b4"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectList/platform-common-zh_CN.properties",
+      "category": "runtime-static-override",
+      "sizeBytes": 97,
+      "sha256": "7baf514f946aeeb337d386a200dd40e402c0ca94ae940eb5e760d99f8494eac8"
+    },
+    {
       "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportEdit/body-es5.js",
       "category": "runtime-static-override",
-      "sizeBytes": 2316,
-      "sha256": "0189856d00ceb55cf960ea686b525df2ae5b9a940b23f308c50b7189b07ac8e7"
+      "sizeBytes": 5794,
+      "sha256": "f1457d6802550427a5ceae6c2660420d02bad9f00ea63a30e3a198eb925908c8"
     },
     {
       "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportEdit/body.js",
       "category": "runtime-static-override",
-      "sizeBytes": 2316,
-      "sha256": "996a9e9f9598c09a4aab72cd5c7646f6b4cdca848ea9bbe97c65353ddb0915a7"
+      "sizeBytes": 5794,
+      "sha256": "95f42d8bf99b6892d551d55b9a7945fa3f57fd055c8cc51e3a8d370bb7f04d0a"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportView/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 4577,
+      "sha256": "ce7278781bae48d3baf6d2fa02671ddd105523b9575859221ff00afbdf58c4f3"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportView/platform-common-zh_CN.properties",
+      "category": "runtime-static-override",
+      "sizeBytes": 119,
+      "sha256": "3adf79c76b5e30e83f34e6d811b1194badd7b100b51a97fa088621b2624e210e"
     },
     {
       "path": "deploy/docker/assets/module-static/RM/formula/editor.html",

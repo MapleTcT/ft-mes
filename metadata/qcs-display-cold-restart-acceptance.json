@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-07-21T03:39:30Z",
+  "target": "10.11.100.17",
+  "runtimeRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+  "database": "PostgreSQL",
+  "status": "PASS",
+  "rebuild": {
+    "hostJdkAvailable": false,
+    "compiler": "m.daocloud.io/docker.io/eclipse-temurin:8-jdk",
+    "sourceLevel": "8",
+    "targetLevel": "8",
+    "patchScriptSha256": "72550345b0477e4d39d0450f29dcb922238c473a219942a724dda7f1dc514d5c",
+    "sourceSha256": "1cf0cc7116ef1edee74b08c7a64561f16629fbd51a5c9003fb7c97a577903e6c",
+    "jars": [
+      {
+        "service": "LIMS",
+        "sha256": "f4e8c65e737f84d87c192581f239a1a4b6f060a76b277f07cda9211280d5539e",
+        "backup": "LIMS-1.0.0.jar.bak-lims-service-compat-20260721113533"
+      },
+      {
+        "service": "LIMSINT",
+        "sha256": "9c70c3337c07e9b76ea43dcb31c5ad93300532c92eb518c58a0d01f2ae521b2f",
+        "backup": "LIMSINT-1.0.0.jar.bak-lims-service-compat-20260721113541"
+      }
+    ]
+  },
+  "nacos": {
+    "service": "prod@@LIMSBasic",
+    "instanceCount": 2,
+    "healthyInstanceCount": 2,
+    "instances": [
+      "172.25.0.36:8080",
+      "172.25.0.31:8080"
+    ]
+  },
+  "apiProbe": {
+    "method": "GET",
+    "endpoint": "/msService/LIMSBasic/utils/utils/getWomSourceCode",
+    "attempts": 10,
+    "statusCounts": {
+      "200": 10
+    },
+    "body": {
+      "code": 200,
+      "data": "chemical industry",
+      "message": "操作成功"
+    }
+  },
+  "browser": {
+    "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit?id=757554686948608",
+    "navigationStatus": 200,
+    "stabilityWaitSeconds": 10,
+    "result": "合格",
+    "selector": "LIMSBasic_standardGrade/Qualified",
+    "optionLabel": "合格",
+    "visible": true,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "httpErrors": []
+  }
+}

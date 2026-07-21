@@ -440,6 +440,8 @@ runtime-script-check:
 	$(PYTHON) -m py_compile scripts/verify-bpi-stream-deployment.py
 	$(PYTHON) -m py_compile scripts/verify-bpi-feature-flag-governance.py
 	sh -n deploy/docker/scripts/prepare-runtime-patches.sh
+	sh -n deploy/docker/scripts/prepare-qcs-static-assets.sh
+	sh -n deploy/docker/scripts/patch-lims-qcs-inspect-report-service.sh
 	sh -n deploy/docker/scripts/build-rm-import-transaction-patch.sh
 	sh -n deploy/docker/scripts/build-wom-public-produce-created-disabled-boot-jar.sh
 	sh -n deploy/database/production-migration/scripts/run-target-preflight.sh
@@ -531,6 +533,8 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-wom-qrcode-route-probe.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-qrcode-browser-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-qcs-report-chain-persistence-acceptance.js
+	$(NODE) --check deploy/docker/scripts/test-qcs-display-bindings.js
+	$(NODE) deploy/docker/scripts/test-qcs-display-bindings.js
 	$(NODE) --check deploy/docker/scripts/adp-teaminfo-scheduleplan-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-craftgraph-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-rbac-authority-smoke.js

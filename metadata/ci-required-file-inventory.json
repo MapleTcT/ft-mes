@@ -1713,6 +1713,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectList/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectList/platform-common-zh_CN.properties",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportEdit/body-es5.js",
       "state": "tracked",
       "tracked": true
@@ -1720,6 +1732,18 @@
     {
       "ignored": false,
       "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportEdit/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportView/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportView/platform-common-zh_CN.properties",
       "state": "tracked",
       "tracked": true
     },
@@ -2158,6 +2182,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/patches/kafka-jaas-noop/src/main/java/org/springframework/kafka/security/jaas/KafkaJaasLoginModuleInitializer.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/patches/limsbasic-wom-source-response/src/com/supcon/orchid/LIMSBasic/utils/ServiceClientUtils.java",
       "state": "tracked",
       "tracked": true
     },
@@ -3459,6 +3489,24 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/194-qcs-inspect-report-view-runtime-json.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/195-wom-source-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/196-qcs-manu-inspect-list-empty-column.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4366,6 +4414,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/test-patrol-static-assets.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test-qcs-display-bindings.js",
       "state": "tracked",
       "tracked": true
     },
@@ -6495,6 +6549,18 @@
     },
     {
       "ignored": false,
+      "path": "metadata/qcs-display-cold-restart-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-inspect-list-display-current.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/qcs-report-chain-qualified-current.json",
       "state": "tracked",
       "tracked": true
@@ -6502,6 +6568,30 @@
     {
       "ignored": false,
       "path": "metadata/qcs-report-chain-unqualified-current.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-report-edit-qualified-current.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-report-edit-unqualified-current.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-report-view-qualified-current.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-report-view-unqualified-current.png",
       "state": "tracked",
       "tracked": true
     },
@@ -9434,7 +9524,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 596
+      "tracked": 605
     },
     "docs": {
       "tracked": 113
@@ -9443,7 +9533,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 179
+      "tracked": 185
     },
     "package.json": {
       "tracked": 1
@@ -9467,8 +9557,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1568,
-    "tracked": 1568,
+    "totalFiles": 1583,
+    "tracked": 1583,
     "untracked": 0
   },
   "untrackedByDirectory": []
