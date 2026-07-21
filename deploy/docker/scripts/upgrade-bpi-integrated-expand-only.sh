@@ -48,7 +48,7 @@ for path in "$ENV_FILE" "$COMPOSE_FILE" "$MIGRATIONS"; do
         exit 1
     fi
 done
-for command_name in docker git npm python3 rsync sha256sum tar; do
+for command_name in curl docker git npm python3 rsync sha256sum tar; do
     if ! command -v "$command_name" >/dev/null 2>&1; then
         printf 'ERROR: required command is unavailable: %s\n' "$command_name" >&2
         exit 1
@@ -258,7 +258,8 @@ for disabled_key in \
     BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED \
     BPI_PHASE2_KAFKA_ENABLED \
     BPI_WMS_OUTBOX_ENABLED \
-    BPI_WMS_ADAPTER_ENABLED; do
+    BPI_WMS_ADAPTER_ENABLED \
+    QCS_BPI_OUTBOX_ENABLED; do
     if [ "$(env_value "$disabled_key" false)" != "false" ]; then
         printf 'ERROR: %s must remain false during the integrated expand-only upgrade\n' \
             "$disabled_key" >&2
