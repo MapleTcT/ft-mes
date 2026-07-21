@@ -7,9 +7,10 @@ Usage:
   build-wom-public-produce-created-disabled-boot-jar.sh --input-wom-jar PATH --output-wom-jar PATH
 
 Builds a patched WOMMs boot jar by replacing WOMProduceTaskController inside the
-nested com.supcon.greendill.WOM.service jar. The public produceTaskCreated
-endpoint currently returns success without persisting a task; this patch makes
-that endpoint fail explicitly until the product contract is restored.
+nested com.supcon.greendill.WOM.service jar. The legacy public
+produceTaskCreated endpoint returned success without persisting a task. The
+supported creation paths are produceTaskCreated2 and the authenticated manual
+entry page, so this patch keeps the legacy endpoint explicitly retired.
 
 Optional:
   ADP_WOM_PRODUCE_TASK_CONTROLLER_SOURCE_FILE=/path/to/WOMProduceTaskController.java
@@ -96,8 +97,8 @@ text = path.read_text(encoding="utf-8")
 replacement = '''\t@PostMapping ("/public/WOM/produceTask/produceTask/produceTaskCreated")
 \t@ResponseBody
 \tpublic Result produceTaskCreated(@RequestBody String paramJson){
-\t\tlog.warn("public produceTaskCreated is disabled because the recovered implementation returns success without persistence.");
-\t\treturn Result.fail("public produceTaskCreated 已禁用：当前恢复版本不会创建制造指令单，请使用 /msService/WOM/produceTask/produceTask/produceTaskCreated2 或恢复经产品确认的落库实现。");
+\t\tlog.warn("Deprecated public produceTaskCreated endpoint rejected without persistence.");
+\t\treturn Result.fail("public produceTaskCreated 已废弃且不会创建制造指令单；请使用需要认证的 /msService/WOM/produceTask/produceTask/produceTaskCreated2 或制造指令列表的“新建指令单”。");
 \t}
 '''
 pattern = re.compile(
