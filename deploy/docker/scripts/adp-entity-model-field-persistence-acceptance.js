@@ -210,6 +210,8 @@ async function openPage(ticket) {
   const evidence = {
     url: `${browserBaseUrl}${pagePath}`,
     navigationStatus: null,
+    navigationAttempts: 0,
+    navigationTransientErrors: [],
     consoleErrors: [],
     pageErrors: [],
     requestFailures: [],
@@ -239,16 +241,35 @@ async function openPage(ticket) {
       expected: false,
     });
   });
-  const response = await page.goto(evidence.url, { waitUntil: "domcontentloaded", timeout: 45000 });
-  evidence.navigationStatus = response ? response.status() : null;
-  await page.waitForTimeout(1500);
-  const bodyText = await page.locator("body").innerText({ timeout: 5000 }).catch(() => "");
-  evidence.visibleError =
-    bodyText
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .find((line) => line && visibleErrorPattern.test(line)) || null;
-  return { browser, context, page, evidence };
+  try {
+    let response = null;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      evidence.navigationAttempts = attempt;
+      try {
+        response = await page.goto(evidence.url, { waitUntil: "domcontentloaded", timeout: 45000 });
+        break;
+      } catch (error) {
+        evidence.navigationTransientErrors.push(error && error.message ? error.message : String(error));
+        if (attempt === 3) {
+          throw error;
+        }
+        await page.waitForTimeout(1500 * attempt);
+      }
+    }
+    evidence.navigationStatus = response ? response.status() : null;
+    await page.waitForTimeout(1500);
+    const bodyText = await page.locator("body").innerText({ timeout: 5000 }).catch(() => "");
+    evidence.visibleError =
+      bodyText
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .find((line) => line && visibleErrorPattern.test(line)) || null;
+    return { browser, context, page, evidence };
+  } catch (error) {
+    await context.close().catch(() => {});
+    await browser.close().catch(() => {});
+    throw error;
+  }
 }
 
 async function pageFormFetch(page, endpoint, payload) {
@@ -996,6 +1017,8 @@ async function main() {
         unexpectedConsoleErrors.length === 0 && browserEvidence.pageErrors.length === 0 &&
         browserEvidence.requestFailures.length === 0 && unexpectedNetworkErrors.length === 0,
       `status=${browserEvidence.navigationStatus}; visibleError=${browserEvidence.visibleError || "none"}; ` +
+        `navigationAttempts=${browserEvidence.navigationAttempts}; ` +
+        `transientNavigation=${browserEvidence.navigationTransientErrors.length}; ` +
         `unexpectedConsole=${unexpectedConsoleErrors.length}; expectedConsole=${expectedConsoleErrors.length}; ` +
         `page=${browserEvidence.pageErrors.length}; request=${browserEvidence.requestFailures.length}; ` +
         `unexpectedNetwork=${unexpectedNetworkErrors.length}`
