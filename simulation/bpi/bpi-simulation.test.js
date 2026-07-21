@@ -1224,6 +1224,117 @@ test('data quality and integration impact remain visible', async () => {
   assert.match(timescale.businessImpact, /不阻断批次事实查询/);
 });
 
+test('dataset manifests are immutable, point-in-time and stop before materialization', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+  result = await request('POST', '/__simulation/prepare-dataset-manifest');
+  assert.equal(result.json.preparedReviewCount, 3);
+  const ruleVersionId = result.json.ruleVersionId;
+
+  result = await request('GET', '/bpi/v1/datasets?plantId=PLANT-01&limit=100');
+  assert.equal(result.response.status, 200);
+  assert.deepEqual(result.json.data, []);
+
+  const definitionBody = {
+    datasetCode: 'BPI-START-BOUNDARY',
+    version: '1.0.0',
+    name: '启动边界受控训练清单',
+    plantId: 'PLANT-01',
+    lineIds: ['LINE-S07-01'],
+    predictionTimePolicy: 'AUTOMATIC_BATCH_START',
+    featureCutoffPolicy: 'AT_OR_BEFORE_PREDICTION_TIME',
+    featureRefs: [
+      'batch.order_id', 'batch.material_code', 'batch.stage_code',
+      'rule.version_id', 'topology.version_id', 'point_catalog.snapshot_id',
+    ],
+    labelRefs: [
+      'review.manual_start_time', 'review.manual_end_time',
+      'review.reference_quantity', 'review.boundary_acceptance',
+      'review.quantity_acceptance',
+    ],
+    maxLabelDelayHours: 48,
+    minimumConfidence: 0.8,
+    splitPolicy: 'PRODUCTION_TIME',
+    reason: '建立 Phase 3A point-in-time 数据集清单',
+  };
+  const definitionHeaders = commandHeaders('dataset-definition-0001', 0);
+  result = await request('POST', '/bpi/v1/datasets', {
+    headers: definitionHeaders,
+    body: definitionBody,
+  });
+  assert.equal(result.response.status, 200);
+  const definition = result.json.data;
+  assert.equal(definition.revision, 1);
+  assert.equal(definition.latestSnapshot, null);
+  assert.match(definition.checksum, /^[a-f0-9]{64}$/);
+
+  result = await request('POST', '/bpi/v1/datasets', {
+    headers: definitionHeaders,
+    body: definitionBody,
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.equal(result.json.data.id, definition.id);
+
+  const snapshotBody = {
+    freezeAt: '2026-07-12T08:00:00.000Z',
+    lineIds: ['LINE-S07-01'],
+    predictionTimePolicy: 'AUTOMATIC_BATCH_START',
+    ruleVersionIds: [ruleVersionId],
+    excludeLowConfidence: true,
+    reason: '冻结受控影子复核样本并生成不可变清单',
+  };
+  const snapshotHeaders = commandHeaders('dataset-snapshot-0001', definition.revision);
+  result = await request('POST', `/bpi/v1/datasets/${definition.id}/snapshots`, {
+    headers: snapshotHeaders,
+    body: snapshotBody,
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'QUEUED');
+  assert.equal(result.json.data.materializationState, 'NOT_STARTED');
+  const queued = result.json.data;
+
+  result = await request('POST', `/bpi/v1/datasets/${definition.id}/snapshots`, {
+    headers: snapshotHeaders,
+    body: snapshotBody,
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.equal(result.json.data.id, queued.id);
+  assert.equal(result.json.data.state, 'QUEUED');
+
+  result = await request('GET', `/bpi/v1/dataset-snapshots/${queued.id}`);
+  assert.equal(result.response.status, 200);
+  const ready = result.json.data;
+  assert.equal(ready.state, 'MANIFEST_READY');
+  assert.equal(ready.includedCount, 1);
+  assert.equal(ready.excludedCount, 2);
+  assert.equal(ready.exclusionSummary.CONFIDENCE_BELOW_THRESHOLD, 1);
+  assert.equal(ready.exclusionSummary.LABEL_DELAY_EXCEEDED, 1);
+  assert.equal(ready.manifest.phaseBoundary.deliveryState, 'MANIFEST_ONLY');
+  assert.equal(ready.manifest.phaseBoundary.materializationState, 'NOT_STARTED');
+  assert.equal(ready.manifest.phaseBoundary.artifactUri, null);
+  assert.equal(ready.manifest.phaseBoundary.icebergReady, false);
+  assert.equal(ready.manifest.phaseBoundary.mlflowRegistered, false);
+  assert.equal(ready.manifest.phaseBoundary.modelTrained, false);
+  assert.equal(ready.manifest.samples.every((sample) => sample.predictionTime === sample.featureCutoffTime), true);
+  assert.equal(ready.manifest.samples.every((sample) => !Object.keys(sample.features)
+    .some((reference) => reference.startsWith('review.'))), true);
+  assert.match(ready.manifestChecksum, /^[a-f0-9]{64}$/);
+
+  result = await request('POST', `/bpi/v1/datasets/${definition.id}/snapshots`, {
+    headers: commandHeaders('dataset-snapshot-0002', definition.revision),
+    body: snapshotBody,
+  });
+  const secondId = result.json.data.id;
+  result = await request('GET', `/bpi/v1/dataset-snapshots/${secondId}`);
+  assert.equal(result.json.data.manifestChecksum, ready.manifestChecksum,
+    'snapshot identity must not change the deterministic manifest checksum');
+
+  result = await request('GET', '/bpi/v1/datasets?plantId=PLANT-01&limit=100');
+  assert.equal(result.json.data.length, 1);
+  assert.equal(result.json.data[0].latestSnapshot.snapshotVersion, 2);
+  assert.equal(result.json.data[0].latestSnapshot.state, 'MANIFEST_READY');
+});
+
 test('shadow run acceptance is version-pinned, review-driven and fail-closed on critical data quality', async () => {
   let result = await request('POST', '/__simulation/reset');
   assert.equal(result.response.status, 200);

@@ -8,6 +8,10 @@ import type {
   DataQualityIncidentDetail,
   DataQualityIncidentState,
   DataQualitySummary,
+  DatasetDefinition,
+  DatasetDefinitionCreateCommand,
+  DatasetSnapshot,
+  DatasetSnapshotCommand,
   Evidence,
   FeatureFlag,
   FeatureFlagOverrideCommand,
@@ -232,6 +236,22 @@ export const bpiApi = {
       headers: { 'Idempotency-Key': key, 'If-Match': String(incident.revision) },
       body: JSON.stringify({ reason }),
     }),
+  datasets: (plantId: string) =>
+    request<DatasetDefinition[]>(`/datasets?plantId=${encodeURIComponent(plantId)}&limit=100`),
+  createDatasetDefinition: (command: DatasetDefinitionCreateCommand, key: string) =>
+    request<DatasetDefinition>('/datasets', {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': '0' },
+      body: JSON.stringify(command),
+    }),
+  createDatasetSnapshot: (definition: DatasetDefinition, command: DatasetSnapshotCommand, key: string) =>
+    request<DatasetSnapshot>(`/datasets/${encodeURIComponent(definition.id)}/snapshots`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(definition.revision) },
+      body: JSON.stringify(command),
+    }),
+  datasetSnapshot: (snapshotId: string) =>
+    request<DatasetSnapshot>(`/dataset-snapshots/${encodeURIComponent(snapshotId)}`),
   topologies: (plantId: string) =>
     request<TopologyVersion[]>(`/topologies?plantId=${encodeURIComponent(plantId)}`),
   currentPointCatalog: (

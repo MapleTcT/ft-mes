@@ -99,9 +99,10 @@
 | 影子验收 | POST | `/bpi/v1/shadow-runs/{shadowRunId}/approve` | `approveShadowRun` | SERVICE_IMPLEMENTED；独立管理员审批，全部指标和 CRITICAL 数据质量门通过才批准 |
 | 影子验收 | POST | `/bpi/v1/shadow-runs/{shadowRunId}/reject` | `rejectShadowRun` | SERVICE_IMPLEMENTED；独立管理员可在 EVALUATING 驳回并保留证据 |
 | 影子验收 | POST | `/bpi/v1/shadow-runs/{shadowRunId}/cancel` | `cancelShadowRun` | SERVICE_IMPLEMENTED；仅 DRAFT/RUNNING，可审计取消 |
-| 训练数据 | GET | `/bpi/v1/datasets` | `listDatasets` | CONTRACT_ONLY |
-| 训练数据 | POST | `/bpi/v1/datasets/{datasetId}/snapshots` | `createDatasetSnapshot` | CONTRACT_ONLY |
-| 训练数据 | GET | `/bpi/v1/dataset-snapshots/{snapshotId}` | `getDatasetSnapshot` | CONTRACT_ONLY |
+| 训练数据 | GET | `/bpi/v1/datasets` | `listDatasets` | SERVICE_IMPLEMENTED；按 tenant/plant scope 返回不可变定义及最近快照 |
+| 训练数据 | POST | `/bpi/v1/datasets` | `createDatasetDefinition` | SERVICE_IMPLEMENTED；仅允许受控特征/标签、固定 prediction time/cutoff/split policy |
+| 训练数据 | POST | `/bpi/v1/datasets/{datasetId}/snapshots` | `createDatasetSnapshot` | SERVICE_IMPLEMENTED；202 后台任务，只接受冻结时点前已批准且有复核的影子运行 |
+| 训练数据 | GET | `/bpi/v1/dataset-snapshots/{snapshotId}` | `getDatasetSnapshot` | SERVICE_IMPLEMENTED；返回 point-in-time manifest、checksum、样本排除原因和失败状态 |
 | 集成运行 | GET | `/bpi/v1/integrations/health` | `getIntegrationHealth` | SIMULATED |
 | 集成运行 | POST | `/bpi/v1/integrations/{integrationId}/checks` | `runIntegrationCheck` | CONTRACT_ONLY |
 | 审计记录 | GET | `/bpi/v1/audit/events` | `listAuditEvents` | CONTRACT_ONLY |

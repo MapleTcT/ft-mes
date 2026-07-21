@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-22T04:45:13+08:00",
+  "repoBaseCommit": "8e13071e245cf06ae063d4fb26cd030d33cf52c4",
+  "status": "PASS_LOCAL_BROWSER_API_POSTGRES_MANIFEST_ONLY",
+  "database": "PostgreSQL 16.13",
+  "databaseName": "ft_mes_bpi_v26_dataset_20260722_0414",
+  "flywayVersion": 26,
+  "phase": "3A_MANIFEST_ONLY",
+  "productionActivationAllowed": false,
+  "summary": {
+    "testedFeatures": 10,
+    "pass": 9,
+    "fail": 0,
+    "blocked": 1,
+    "browserTests": 20,
+    "browserFailures": 0,
+    "simulatorTests": 15,
+    "simulatorFailures": 0,
+    "postgresAcceptanceTests": 1,
+    "postgresAcceptanceFailures": 0,
+    "unexpectedConsoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "horizontalOverflowFailures": 0
+  },
+  "items": [
+    {
+      "scenario": "create-immutable-controlled-dataset-definition",
+      "route": "/bpi/#/datasets",
+      "api": "POST /bpi/v1/datasets",
+      "backendEntry": "DatasetController#createDefinition -> DatasetService#createDefinition -> DatasetPostgresRepository#insertDefinition",
+      "tables": ["bpi.bpi_dataset_definitions", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "ACTIVE/r1 definition with controlled refs, fixed point-in-time policies and a 64-character checksum; same Idempotency-Key replays the original id"
+    },
+    {
+      "scenario": "role-and-line-scope-fail-closed",
+      "api": "POST /bpi/v1/datasets",
+      "backendEntry": "Spring Method Security and DatasetService#assertScopes",
+      "tables": [],
+      "requiresPersistence": false,
+      "status": "PASS",
+      "evidence": "BPI_VIEWER and an engineer scoped to another line both received HTTP 403; an approved PLANT-02 fact using the same line code was excluded from the PLANT-01 manifest (persisted rows=0)"
+    },
+    {
+      "scenario": "queue-point-in-time-snapshot",
+      "route": "/bpi/#/datasets",
+      "api": "POST /bpi/v1/datasets/{datasetId}/snapshots",
+      "backendEntry": "DatasetService#createSnapshot -> DatasetPostgresRepository#insertSnapshot",
+      "tables": ["bpi.bpi_dataset_snapshots", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "one QUEUED snapshot persisted; replay returns the same snapshot id; a future freezeAt receives HTTP 422"
+    },
+    {
+      "scenario": "build-leakage-safe-manifest",
+      "api": "worker plus GET /bpi/v1/dataset-snapshots/{snapshotId}",
+      "backendEntry": "DatasetManifestProcessor#processOne -> DatasetManifestBuilder#build -> DatasetPostgresRepository#completeManifest",
+      "tables": ["bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_snapshot_samples", "bpi.bpi_audit_events"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "MANIFEST_READY with total=3, included=1, excluded=2, cutoff_safe=3 and leaked=0"
+    },
+    {
+      "scenario": "exclude-low-confidence-and-late-labels",
+      "api": "GET /bpi/v1/dataset-snapshots/{snapshotId}",
+      "backendEntry": "DatasetManifestBuilder#sample",
+      "tables": ["bpi.bpi_dataset_snapshot_samples"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "CONFIDENCE_BELOW_THRESHOLD=1 and LABEL_DELAY_EXCEEDED=1"
+    },
+    {
+      "scenario": "deterministic-rebuild",
+      "api": "two snapshot POST commands and worker runs",
+      "backendEntry": "CanonicalJson -> DatasetManifestBuilder -> Checksums.sha256",
+      "tables": ["bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_snapshot_samples"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "two independent snapshot ids over the same frozen facts have the same 64-character manifest checksum"
+    },
+    {
+      "scenario": "terminal-snapshot-immutability",
+      "api": "negative direct SQL",
+      "backendEntry": "trg_bpi_dataset_snapshot_transition",
+      "tables": ["bpi.bpi_dataset_snapshots"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "an UPDATE against a MANIFEST_READY snapshot raises an immutable DataAccessException"
+    },
+    {
+      "scenario": "manifest-only-phase-boundary",
+      "route": "/bpi/#/datasets",
+      "api": "GET /bpi/v1/dataset-snapshots/{snapshotId}",
+      "backendEntry": "DatasetManifestBuilder#manifest",
+      "tables": ["bpi.bpi_dataset_snapshots"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "deliveryState=MANIFEST_ONLY, materializationState=NOT_STARTED, artifactUri=null, icebergReady=false, mlflowRegistered=false, modelTrained=false"
+    },
+    {
+      "scenario": "desktop-mobile-dataset-workbench",
+      "route": "/bpi/#/datasets",
+      "api": "deterministic simulator dataset APIs",
+      "backendEntry": "frontend/apps/bpi and simulation/bpi",
+      "tables": [],
+      "requiresPersistence": false,
+      "status": "PASS",
+      "evidence": "20/20 full browser suite; desktop 1440x900 and mobile 390x844; zero unexpected console/page/request errors and zero horizontal overflow failures"
+    },
+    {
+      "scenario": "target-adp-browser-api-postgres-acceptance",
+      "requiresPersistence": true,
+      "status": "BLOCKED",
+      "evidence": "V26, the adapter route and the dataset workbench have not yet been deployed and accepted on 10.11.100.17"
+    }
+  ],
+  "postgres": {
+    "markerPattern": "ADP_E2E_BPI_DATASET_<UUID>",
+    "migrationHistory": "Flyway current version 26",
+    "manifestProjection": "MANIFEST_READY|total=3|included=1|excluded=2|cutoff_safe=3|leaked=0|cross_plant_rows=0",
+    "exclusionCounts": {
+      "CONFIDENCE_BELOW_THRESHOLD": 1,
+      "LABEL_DELAY_EXCEEDED": 1
+    },
+    "completionAuditRows": 2,
+    "verificationSql": "SELECT state, manifest_checksum, included_count, excluded_count, materialization_state, artifact_uri FROM bpi.bpi_dataset_snapshots WHERE tenant_id=:tenant_id AND id=:snapshot_id; SELECT count(*) total, count(*) FILTER (WHERE included) included, count(*) FILTER (WHERE NOT included) excluded, count(*) FILTER (WHERE feature_cutoff=prediction_time) cutoff_safe FROM bpi.bpi_dataset_snapshot_samples WHERE tenant_id=:tenant_id AND snapshot_id=:snapshot_id"
+  },
+  "cleanup": {
+    "datasetDefinitionRows": 0,
+    "datasetSnapshotRows": 0,
+    "datasetSampleRows": 0
+  },
+  "browser": {
+    "desktopScreenshot": {
+      "path": "/tmp/bpi-dataset-manifest-desktop.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "131c362185672fab6062466cfa51b4c7b2350dca612b5dc84be40b159d788daa"
+    },
+    "mobileScreenshot": {
+      "path": "/tmp/bpi-dataset-manifest-mobile.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "837c4dcfece56537682673fb064cc7d8bd932690915b8fb53989176a79406929"
+    }
+  },
+  "artifacts": [
+    "services/bpi-service/app/src/main/resources/db/migration/V26__bpi_dataset_manifest_workbench.sql",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilder.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestProcessor.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetController.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDatasetManifestPostgresAcceptanceTest.java",
+    "frontend/apps/bpi/src/main.ts",
+    "frontend/apps/bpi/tests/bpi-console.e2e.cjs",
+    "simulation/bpi/server.js",
+    "contracts/bpi-api/openapi.json",
+    "docs/testing/bpi-dataset-manifest-acceptance.md",
+    "docs/backend-table-audit/bpi-dataset-manifest.md"
+  ],
+  "limitations": [
+    "Browser acceptance used the deterministic simulator; Java API and PostgreSQL persistence were accepted separately.",
+    "No target ADP browser-to-PostgreSQL acceptance has been claimed yet.",
+    "No Iceberg artifact, MLflow registration, model training, online inference or production activation was performed.",
+    "The manifest is a governed point-in-time training-data contract, not a trained model or a production dataset artifact."
+  ]
+}

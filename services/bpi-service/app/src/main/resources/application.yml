@@ -33,6 +33,12 @@ management:
         enabled: true
 
 bpi:
+  dataset-manifest:
+    enabled: ${BPI_DATASET_MANIFEST_ENABLED:true}
+    batch-size: ${BPI_DATASET_MANIFEST_BATCH_SIZE:10}
+    max-attempts: ${BPI_DATASET_MANIFEST_MAX_ATTEMPTS:3}
+    poll-delay: ${BPI_DATASET_MANIFEST_POLL_DELAY:2s}
+    claim-timeout: ${BPI_DATASET_MANIFEST_CLAIM_TIMEOUT:5m}
   candidate-event:
     protobuf-http-ingress-enabled: ${BPI_CANDIDATE_PROTOBUF_HTTP_INGRESS_ENABLED:false}
     max-payload-bytes: ${BPI_CANDIDATE_EVENT_MAX_PAYLOAD_BYTES:1048576}

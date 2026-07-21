@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T19:35:39+00:00",
-  "repoCommit": "341745bab543060e2c437beb08a4c87b0acc85ea",
-  "findingCount": 1610,
+  "generatedAt": "2026-07-21T21:25:39+00:00",
+  "repoCommit": "8e13071e245cf06ae063d4fb26cd030d33cf52c4",
+  "findingCount": 1619,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 187,
+    "documentation-or-workflow": 188,
     "frontend-row-index-noise": 4,
-    "java-row-index-noise": 79,
+    "java-row-index-noise": 87,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 575,
@@ -21,8 +21,8 @@
     "decode-sql": 3,
     "from-dual": 140,
     "ojdbc": 15,
-    "oracle-keyword": 637,
-    "rownum": 680,
+    "oracle-keyword": 638,
+    "rownum": 688,
     "sysdate": 135
   },
   "topFiles": [
@@ -9533,6 +9533,14 @@
       "excerpt": "- [Oracle 到 PostgreSQL 替换路线](../oracle-to-postgres-transition.md)"
     },
     {
+      "file": "docs/backend-table-audit/bpi-dataset-manifest.md",
+      "line": 6,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "生成、读取、幂等、审计和清理。默认数据库保持 PostgreSQL；Oracle 不参与该运行路径。"
+    },
+    {
       "file": "docs/backend-table-audit/business-production.md",
       "line": 124,
       "pattern": "oracle-keyword",
@@ -9622,7 +9630,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 280,
+      "line": 294,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10098,7 +10106,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `213` 项，其中 `210 PASS / 0 FAIL / 0 BLOCKED / 3 NOT_APPLICABLE`；"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `220` 项，其中 `217 PASS / 0 FAIL / 0 BLOCKED / 3 NOT_APPLICABLE`；"
     },
     {
       "file": "docs/project-objectives.md",
@@ -10134,7 +10142,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 342,
+      "line": 348,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10142,7 +10150,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 364,
+      "line": 370,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10150,7 +10158,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 367,
+      "line": 373,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10158,7 +10166,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 369,
+      "line": 375,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10166,7 +10174,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 376,
+      "line": 382,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10174,7 +10182,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 379,
+      "line": 385,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10182,7 +10190,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 381,
+      "line": 387,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10190,7 +10198,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 386,
+      "line": 392,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10198,7 +10206,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 387,
+      "line": 393,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10206,7 +10214,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 389,
+      "line": 395,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10214,7 +10222,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 391,
+      "line": 397,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10222,7 +10230,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 455,
+      "line": 461,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10230,7 +10238,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 459,
+      "line": 465,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10238,7 +10246,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 461,
+      "line": 467,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10246,7 +10254,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 465,
+      "line": 471,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10254,7 +10262,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 466,
+      "line": 472,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -11710,7 +11718,7 @@
     },
     {
       "file": "scripts/verify-bpi-service.py",
-      "line": 1166,
+      "line": 1267,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12763,6 +12771,70 @@
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
       "excerpt": "(rs, rowNum) -> new Aggregate("
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+      "line": 92,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "return jdbc.query(sql.toString(), parameters, (rs, rowNum) -> mapDefinition(rs));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+      "line": 103,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "sql.toString(), parameters, (rs, rowNum) -> mapDefinition(rs));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+      "line": 253,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "sql.toString(), parameters, (rs, rowNum) -> rs.getObject(1, UUID.class)));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+      "line": 299,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "(rs, rowNum) -> rs.getObject(1, UUID.class));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+      "line": 335,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "return jdbc.query(sql.toString(), parameters, (rs, rowNum) -> mapSource(rs));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+      "line": 408,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "sql.toString(), parameters, (rs, rowNum) -> mapSnapshot(rs));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+      "line": 460,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "sql.toString(), parameters, (rs, rowNum) -> mapDefinition(rs));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+      "line": 490,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "(rs, rowNum) -> new DatasetManifestClaim("
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/FeatureFlagPostgresRepository.java",

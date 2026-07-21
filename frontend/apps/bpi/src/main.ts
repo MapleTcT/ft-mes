@@ -36,6 +36,10 @@ import type {
   DataQualityIncidentDetail,
   DataQualityIncidentState,
   DataQualitySummary,
+  DatasetDefinition,
+  DatasetDefinitionCreateCommand,
+  DatasetSnapshot,
+  DatasetSnapshotCommand,
   Evidence,
   FeatureFlag,
   FeatureFlagOverrideCommand,
@@ -66,7 +70,7 @@ import type {
 } from './types';
 import './styles.css';
 
-type View = 'overview' | 'candidates' | 'batches' | 'shadowRuns' | 'dataQuality' | 'points' | 'rules' | 'featureFlags';
+type View = 'overview' | 'candidates' | 'batches' | 'shadowRuns' | 'dataQuality' | 'points' | 'rules' | 'datasets' | 'featureFlags';
 const CALIBRATION_PAGE_SIZE = 50;
 const POINT_CATALOG_PAGE_SIZE = 100;
 const POINT_SEARCH_DEBOUNCE_MS = 250;
@@ -103,6 +107,7 @@ const state = {
   pointCatalog: null as PointCatalogView | null,
   calibrations: [] as PointCalibration[],
   featureFlags: [] as FeatureFlag[],
+  datasets: [] as DatasetDefinition[],
   featureFlagLineId: localStorage.getItem('bpi.featureFlagLineId') || 'LINE-S07-01',
   featureFlagScopeType: (localStorage.getItem('bpi.featureFlagScopeType') || 'LINE') as FeatureFlagScopeType,
   pointSearch: '',
@@ -124,6 +129,8 @@ const state = {
   selectedDataQualityIncident: null as DataQualityIncident | null,
   selectedDataQualityDetail: null as DataQualityIncidentDetail | null,
   selectedFeatureFlag: null as FeatureFlag | null,
+  selectedDataset: null as DatasetDefinition | null,
+  selectedDatasetSnapshot: null as DatasetSnapshot | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | 'reconcileWms' | 'forceCloseRequest' | 'forceCloseApprove' | 'requestWmsReversal' | 'approveWmsReversal' | null,
   shadowRunCommand: null as 'start' | 'complete' | 'approve' | 'reject' | 'cancel' | null,
@@ -218,8 +225,8 @@ function dataQualityCategoryCount(patterns: string[]): number {
 }
 
 function statusTone(status: string): string {
-  if (['RUNNING', 'ACTIVE', 'READY', 'PASS', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED', 'QUALIFIED', 'COMPLETED', 'INBOUNDED', 'INBOUND_REVERSED', 'REVERSED'].includes(status)) return 'ok';
-  if (['PENDING', 'PENDING_APPROVAL', 'PENDING_WMS', 'INBOUND_REVERSING', 'REVERSAL_PENDING', 'EVALUATING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING'].includes(status)) return 'warn';
+  if (['RUNNING', 'ACTIVE', 'READY', 'PASS', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED', 'QUALIFIED', 'COMPLETED', 'INBOUNDED', 'INBOUND_REVERSED', 'REVERSED', 'MANIFEST_READY'].includes(status)) return 'ok';
+  if (['PENDING', 'PENDING_APPROVAL', 'PENDING_WMS', 'INBOUND_REVERSING', 'REVERSAL_PENDING', 'EVALUATING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING', 'QUEUED', 'BUILDING'].includes(status)) return 'warn';
   if (['FAILED', 'REVERSAL_FAILED', 'FAIL', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED', 'OPEN', 'CRITICAL', 'ERROR', 'MISSING', 'DISABLED'].includes(status)) return 'danger';
   return 'neutral';
 }
@@ -336,6 +343,7 @@ function shell(): void {
           <button class="nav-item" data-view="dataQuality" title="数据质量">${icon('circle-alert', '数据质量')}</button>
           <button class="nav-item" data-view="points" title="点位准入">${icon('database', '点位准入')}</button>
           <button class="nav-item" data-view="rules" title="规则与拓扑">${icon('network', '规则与拓扑')}</button>
+          <button class="nav-item" data-view="datasets" title="数据集清单">${icon('boxes', '数据集清单')}</button>
           <button class="nav-item" data-view="featureFlags" title="运行开关">${icon('settings-2', '运行开关')}</button>
         </nav>
         <div class="mode-flag"><i data-lucide="shield-check"></i><div><strong>SHADOW</strong><span>外部写入关闭</span></div></div>
@@ -469,6 +477,55 @@ function shell(): void {
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="shadow-review-submit" value="default" class="button button--primary">提交批次复核</button></footer>
         </form>
       </dialog>
+      <dialog id="dataset-definition-dialog" class="command-dialog editor-dialog dataset-dialog">
+        <form method="dialog" id="dataset-definition-form">
+          <header><div><span>训练数据治理</span><h2>新建数据集定义</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <div class="editor-fields">
+            <label><span>数据集编码</span><input id="dataset-code" required maxlength="128" pattern="[A-Za-z0-9](?:[A-Za-z0-9._:]|-)*" /></label>
+            <label><span>版本</span><input id="dataset-version" required maxlength="64" pattern="[A-Za-z0-9](?:[A-Za-z0-9._]|-)*" /></label>
+            <label class="editor-field--wide"><span>名称</span><input id="dataset-name" required maxlength="256" /></label>
+            <label class="editor-field--wide"><span>产线（逗号分隔）</span><input id="dataset-lines" required maxlength="2048" /></label>
+            <label><span>预测时点</span><input id="dataset-prediction-policy" value="AUTOMATIC_BATCH_START" readonly /></label>
+            <label><span>特征截止</span><input id="dataset-cutoff-policy" value="AT_OR_BEFORE_PREDICTION_TIME" readonly /></label>
+            <label><span>最大标签延迟（小时）</span><input id="dataset-label-delay" type="number" min="1" max="2160" value="48" required /></label>
+            <label><span>最低置信度</span><input id="dataset-confidence" type="number" min="0" max="1" step="0.01" value="0.8" required /></label>
+            <fieldset class="dataset-ref-fieldset editor-field--wide"><legend>特征字段</legend><div>
+              <label><input type="checkbox" data-dataset-feature value="batch.order_id" checked />生产指令</label>
+              <label><input type="checkbox" data-dataset-feature value="batch.material_code" checked />物料编码</label>
+              <label><input type="checkbox" data-dataset-feature value="batch.stage_code" checked />工段编码</label>
+              <label><input type="checkbox" data-dataset-feature value="batch.quantity_unit" checked />数量单位</label>
+              <label><input type="checkbox" data-dataset-feature value="rule.version_id" checked />规则版本</label>
+              <label><input type="checkbox" data-dataset-feature value="topology.version_id" checked />拓扑版本</label>
+              <label><input type="checkbox" data-dataset-feature value="point_catalog.snapshot_id" checked />点位目录快照</label>
+            </div></fieldset>
+            <fieldset class="dataset-ref-fieldset editor-field--wide"><legend>标签字段</legend><div>
+              <label><input type="checkbox" data-dataset-label value="review.manual_start_time" checked />人工开始时间</label>
+              <label><input type="checkbox" data-dataset-label value="review.manual_end_time" checked />人工结束时间</label>
+              <label><input type="checkbox" data-dataset-label value="review.reference_quantity" checked />参考数量</label>
+              <label><input type="checkbox" data-dataset-label value="review.boundary_acceptance" checked />边界验收</label>
+              <label><input type="checkbox" data-dataset-label value="review.quantity_acceptance" checked />数量验收</label>
+              <label><input type="checkbox" data-dataset-label value="batch.automatic_end_time" checked />自动结束时间</label>
+              <label><input type="checkbox" data-dataset-label value="batch.automatic_quantity" checked />自动累计量</label>
+            </div></fieldset>
+            <label class="editor-field--wide"><span>创建依据</span><textarea id="dataset-reason" required maxlength="500"></textarea></label>
+          </div>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="dataset-definition-submit" value="default" class="button button--primary">创建定义</button></footer>
+        </form>
+      </dialog>
+      <dialog id="dataset-snapshot-dialog" class="command-dialog editor-dialog">
+        <form method="dialog" id="dataset-snapshot-form">
+          <header><div><span>Point-in-time</span><h2>生成数据集清单</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <div id="dataset-snapshot-summary" class="command-summary"></div>
+          <div class="editor-fields dataset-snapshot-fields">
+            <label><span>冻结时间</span><input id="dataset-freeze-at" type="datetime-local" step="1" required /></label>
+            <label><span>产线（逗号分隔）</span><input id="dataset-snapshot-lines" required maxlength="2048" /></label>
+            <label class="editor-field--wide"><span>规则版本 ID（可选，逗号分隔）</span><input id="dataset-rule-versions" maxlength="4096" /></label>
+            <label class="dataset-checkbox editor-field--wide"><input id="dataset-exclude-low-confidence" type="checkbox" checked /><span>排除低置信度样本</span></label>
+            <label class="editor-field--wide"><span>生成依据</span><textarea id="dataset-snapshot-reason" required maxlength="500"></textarea></label>
+          </div>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="dataset-snapshot-submit" value="default" class="button button--primary">生成清单</button></footer>
+        </form>
+      </dialog>
       <dialog id="feature-flag-dialog" class="command-dialog">
         <form method="dialog" id="feature-flag-form">
           <header><div><span>运行治理</span><h2 id="feature-flag-dialog-title">变更运行开关</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
@@ -515,6 +572,8 @@ function bindShellEvents(): void {
   document.querySelector<HTMLFormElement>('#point-calibration-form')?.addEventListener('submit', handlePointCalibrationSubmit);
   document.querySelector<HTMLFormElement>('#shadow-run-form')?.addEventListener('submit', handleShadowRunCreate);
   document.querySelector<HTMLFormElement>('#shadow-review-form')?.addEventListener('submit', handleShadowRunBatchReview);
+  document.querySelector<HTMLFormElement>('#dataset-definition-form')?.addEventListener('submit', handleDatasetDefinitionCreate);
+  document.querySelector<HTMLFormElement>('#dataset-snapshot-form')?.addEventListener('submit', handleDatasetSnapshotCreate);
   document.querySelector<HTMLFormElement>('#feature-flag-form')?.addEventListener('submit', handleFeatureFlagChange);
   document.querySelector<HTMLSelectElement>('#shadow-review-batch')?.addEventListener('change', applyShadowReviewBatch);
   document.querySelector<HTMLDialogElement>('#confirm-dialog')?.addEventListener('close', () => {
@@ -636,6 +695,10 @@ async function loadView(silent = false): Promise<void> {
       );
       state.featureFlags = response.data;
       state.meta = response.meta;
+    } else if (state.view === 'datasets') {
+      const response = await bpiApi.datasets(state.plantId);
+      state.datasets = response.data;
+      state.meta = response.meta;
     } else {
       const [rules, topologies] = await Promise.all([
         bpiApi.rules(state.plantId),
@@ -669,6 +732,7 @@ function renderView(): void {
     dataQuality: ['运行治理', '数据质量事件'],
     points: ['数据准入', '点位目录'],
     rules: ['边界治理', '规则与拓扑'],
+    datasets: ['训练数据治理', '数据集清单'],
     featureFlags: ['运行治理', '运行开关'],
   };
   document.querySelector('#view-kicker')!.textContent = titles[state.view][0];
@@ -685,6 +749,7 @@ function renderView(): void {
   else if (state.view === 'shadowRuns') renderShadowRuns();
   else if (state.view === 'dataQuality') renderDataQuality();
   else if (state.view === 'points') renderPoints();
+  else if (state.view === 'datasets') renderDatasets();
   else if (state.view === 'featureFlags') renderFeatureFlags();
   else renderRules();
   refreshIcons();
@@ -3167,6 +3232,212 @@ async function handleBatchCommand(): Promise<void> {
   }
 }
 
+function datasetListValues(value: string, required = true): string[] {
+  const values = value.split(/[,，]/).map((item) => item.trim()).filter(Boolean).sort();
+  if (required && values.length === 0) throw new Error('至少填写一个值');
+  if (new Set(values).size !== values.length) throw new Error('列表中不能包含重复值');
+  return values;
+}
+
+function checkedDatasetRefs(selector: string): string[] {
+  return Array.from(document.querySelectorAll<HTMLInputElement>(selector))
+    .filter((input) => input.checked)
+    .map((input) => input.value)
+    .sort();
+}
+
+function renderDatasets(): void {
+  const content = document.querySelector('#content')!;
+  const readyCount = state.datasets.filter((dataset) => dataset.latestSnapshot?.state === 'MANIFEST_READY').length;
+  const activeCount = state.datasets.filter((dataset) => ['QUEUED', 'BUILDING'].includes(dataset.latestSnapshot?.state || '')).length;
+  const failedCount = state.datasets.filter((dataset) => dataset.latestSnapshot?.state === 'FAILED').length;
+  const toolbar = `<div class="toolbar dataset-toolbar"><div class="dataset-phase-badge"><i data-lucide="shield-check"></i><span>MANIFEST_ONLY</span><b>NOT_STARTED</b></div><div class="toolbar-actions"><button id="open-dataset-definition" class="icon-text-button"><i data-lucide="plus"></i>新建定义</button></div></div>`;
+  const summary = `<div class="dataset-summary"><div><span>数据集定义</span><b>${state.datasets.length}</b></div><div><span>清单已就绪</span><b>${readyCount}</b></div><div><span>后台构建中</span><b>${activeCount}</b></div><div><span>构建失败</span><b>${failedCount}</b></div></div>`;
+  const rows = state.datasets.map((dataset) => {
+    const latest = dataset.latestSnapshot;
+    return `<tr data-dataset-id="${escapeHtml(dataset.id)}" tabindex="0"><td><strong>${escapeHtml(dataset.name)}</strong><small>${escapeHtml(dataset.datasetCode)}@${escapeHtml(dataset.version)}</small></td><td>${escapeHtml(dataset.lineIds.join(', '))}</td><td>${escapeHtml(dataset.predictionTimePolicy)}</td><td>${dataset.featureRefs.length} / ${dataset.labelRefs.length}</td><td>${number(dataset.minimumConfidence * 100, 0)}%</td><td>${latest ? statusChip(latest.state) : statusChip('NOT_CREATED')}</td><td>${latest ? `v${latest.snapshotVersion} · ${formatTime(latest.freezeAt)}` : '-'}</td><td>${latest?.manifestChecksum ? `<code class="dataset-checksum">${escapeHtml(latest.manifestChecksum.slice(0, 12))}</code>` : '-'}</td><td><button class="icon-text-button dataset-row-action" data-create-dataset-snapshot="${escapeHtml(dataset.id)}"><i data-lucide="play"></i>生成清单</button></td></tr>`;
+  }).join('');
+  content.innerHTML = state.datasets.length
+    ? `${toolbar}${summary}<div class="table-frame"><table class="dataset-table"><thead><tr><th>数据集</th><th>产线</th><th>预测时点</th><th>特征 / 标签</th><th>最低置信度</th><th>最近状态</th><th>最近快照</th><th>清单校验和</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>`
+    : `${toolbar}${summary}<div class="empty-state"><i data-lucide="boxes"></i><strong>尚未建立数据集定义</strong><span>当前工厂没有不可变数据集定义。</span></div>`;
+  content.querySelector('#open-dataset-definition')?.addEventListener('click', openDatasetDefinitionDialog);
+  content.querySelectorAll<HTMLElement>('[data-dataset-id]').forEach((row) => row.addEventListener('click', () => {
+    const dataset = state.datasets.find((item) => item.id === row.dataset.datasetId);
+    if (dataset) openDatasetDefinition(dataset);
+  }));
+  content.querySelectorAll<HTMLButtonElement>('[data-create-dataset-snapshot]').forEach((button) => button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const dataset = state.datasets.find((item) => item.id === button.dataset.createDatasetSnapshot);
+    if (dataset) openDatasetSnapshotDialog(dataset);
+  }));
+}
+
+function openDatasetDefinitionDialog(): void {
+  const form = document.querySelector<HTMLFormElement>('#dataset-definition-form')!;
+  form.reset();
+  document.querySelector<HTMLInputElement>('#dataset-version')!.value = '1.0.0';
+  document.querySelector<HTMLInputElement>('#dataset-lines')!.value = state.pointLineId;
+  document.querySelector<HTMLInputElement>('#dataset-prediction-policy')!.value = 'AUTOMATIC_BATCH_START';
+  document.querySelector<HTMLInputElement>('#dataset-cutoff-policy')!.value = 'AT_OR_BEFORE_PREDICTION_TIME';
+  document.querySelector<HTMLInputElement>('#dataset-label-delay')!.value = '48';
+  document.querySelector<HTMLInputElement>('#dataset-confidence')!.value = '0.8';
+  document.querySelectorAll<HTMLInputElement>('[data-dataset-feature], [data-dataset-label]')
+    .forEach((input) => { input.checked = true; });
+  document.querySelector<HTMLDialogElement>('#dataset-definition-dialog')!.showModal();
+}
+
+async function handleDatasetDefinitionCreate(event: SubmitEvent): Promise<void> {
+  event.preventDefault();
+  const featureRefs = checkedDatasetRefs('[data-dataset-feature]');
+  const labelRefs = checkedDatasetRefs('[data-dataset-label]');
+  if (!featureRefs.length || !labelRefs.length) {
+    showToast('特征字段和标签字段都至少选择一项', true);
+    return;
+  }
+  let command: DatasetDefinitionCreateCommand;
+  try {
+    command = {
+      datasetCode: document.querySelector<HTMLInputElement>('#dataset-code')!.value.trim(),
+      version: document.querySelector<HTMLInputElement>('#dataset-version')!.value.trim(),
+      name: document.querySelector<HTMLInputElement>('#dataset-name')!.value.trim(),
+      plantId: state.plantId,
+      lineIds: datasetListValues(document.querySelector<HTMLInputElement>('#dataset-lines')!.value),
+      predictionTimePolicy: 'AUTOMATIC_BATCH_START',
+      featureCutoffPolicy: 'AT_OR_BEFORE_PREDICTION_TIME',
+      featureRefs,
+      labelRefs,
+      maxLabelDelayHours: Number(document.querySelector<HTMLInputElement>('#dataset-label-delay')!.value),
+      minimumConfidence: Number(document.querySelector<HTMLInputElement>('#dataset-confidence')!.value),
+      splitPolicy: 'PRODUCTION_TIME',
+      reason: document.querySelector<HTMLTextAreaElement>('#dataset-reason')!.value.trim(),
+    };
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+    return;
+  }
+  const button = document.querySelector<HTMLButtonElement>('#dataset-definition-submit')!;
+  button.disabled = true;
+  button.textContent = '创建中...';
+  try {
+    const response = await bpiApi.createDatasetDefinition(command, commandId());
+    document.querySelector<HTMLDialogElement>('#dataset-definition-dialog')!.close();
+    showToast(`${response.data.datasetCode}@${response.data.version} 已创建`);
+    await loadView(true);
+    openDatasetDefinition(response.data);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = '创建定义';
+  }
+}
+
+function openDatasetDefinition(dataset: DatasetDefinition): void {
+  state.selectedDataset = dataset;
+  const latest = dataset.latestSnapshot;
+  const featureItems = dataset.featureRefs.map((reference) => `<li><code>${escapeHtml(reference)}</code></li>`).join('');
+  const labelItems = dataset.labelRefs.map((reference) => `<li><code>${escapeHtml(reference)}</code></li>`).join('');
+  const latestHtml = latest
+    ? `<div class="dataset-latest"><div><span>v${latest.snapshotVersion}</span>${statusChip(latest.state)}</div><b>${formatTime(latest.freezeAt)}</b><code>${escapeHtml(latest.manifestChecksum || '-')}</code><button id="open-latest-dataset-snapshot" class="button button--secondary">查看最近快照</button></div>`
+    : '<div class="simulation-empty">尚未生成快照</div>';
+  openDrawer(`<header><div><span>不可变数据集定义</span><h2>${escapeHtml(dataset.name)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(dataset.state)}<span class="shadow-label">MANIFEST ONLY</span></div><span>revision ${dataset.revision}</span></div><div class="drawer-section facts-grid"><div><span>编码 / 版本</span><b>${escapeHtml(dataset.datasetCode)}@${escapeHtml(dataset.version)}</b></div><div><span>工厂 / 产线</span><b>${escapeHtml(dataset.plantId)} / ${escapeHtml(dataset.lineIds.join(', '))}</b></div><div><span>预测时点</span><b>${escapeHtml(dataset.predictionTimePolicy)}</b></div><div><span>特征截止</span><b>${escapeHtml(dataset.featureCutoffPolicy)}</b></div><div><span>标签最大延迟</span><b>${dataset.maxLabelDelayHours} 小时</b></div><div><span>最低置信度</span><b>${number(dataset.minimumConfidence * 100, 0)}%</b></div><div><span>拆分策略</span><b>${escapeHtml(dataset.splitPolicy)}</b></div><div><span>定义 checksum</span><b class="mono-value">${escapeHtml(dataset.checksum)}</b></div></div><div class="drawer-section dataset-ref-columns"><div><div class="section-title"><h3>特征字段</h3><span>${dataset.featureRefs.length} 项</span></div><ul class="dataset-ref-list">${featureItems}</ul></div><div><div class="section-title"><h3>标签字段</h3><span>${dataset.labelRefs.length} 项</span></div><ul class="dataset-ref-list">${labelItems}</ul></div></div><div class="drawer-section"><div class="section-title"><h3>最近快照</h3><span>${latest ? `v${latest.snapshotVersion}` : '无'}</span></div>${latestHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--primary" id="open-dataset-snapshot"><i data-lucide="play"></i>生成清单</button></footer>`, `dataset:${dataset.id}`);
+  document.querySelector('#open-dataset-snapshot')?.addEventListener('click', () => openDatasetSnapshotDialog(dataset));
+  document.querySelector('#open-latest-dataset-snapshot')?.addEventListener('click', () => {
+    if (latest) void openDatasetSnapshotById(latest.id);
+  });
+}
+
+function openDatasetSnapshotDialog(dataset: DatasetDefinition): void {
+  state.selectedDataset = dataset;
+  const now = new Date(Date.now() - 60_000).toISOString();
+  document.querySelector('#dataset-snapshot-summary')!.innerHTML = `<div><span>数据集</span><b>${escapeHtml(dataset.datasetCode)}@${escapeHtml(dataset.version)}</b></div><div><span>定义 revision</span><b>r${dataset.revision}</b></div>`;
+  document.querySelector<HTMLInputElement>('#dataset-freeze-at')!.value = toLocalDateTimeValue(now);
+  document.querySelector<HTMLInputElement>('#dataset-snapshot-lines')!.value = dataset.lineIds.join(', ');
+  document.querySelector<HTMLInputElement>('#dataset-rule-versions')!.value = '';
+  document.querySelector<HTMLInputElement>('#dataset-exclude-low-confidence')!.checked = true;
+  document.querySelector<HTMLTextAreaElement>('#dataset-snapshot-reason')!.value = '';
+  document.querySelector<HTMLDialogElement>('#dataset-snapshot-dialog')!.showModal();
+}
+
+async function handleDatasetSnapshotCreate(event: SubmitEvent): Promise<void> {
+  event.preventDefault();
+  const dataset = state.selectedDataset;
+  if (!dataset) return;
+  let command: DatasetSnapshotCommand;
+  try {
+    const freezeAtValue = document.querySelector<HTMLInputElement>('#dataset-freeze-at')!.value;
+    const freezeAt = new Date(freezeAtValue);
+    if (Number.isNaN(freezeAt.getTime())) throw new Error('冻结时间无效');
+    command = {
+      freezeAt: freezeAt.toISOString(),
+      lineIds: datasetListValues(document.querySelector<HTMLInputElement>('#dataset-snapshot-lines')!.value),
+      predictionTimePolicy: dataset.predictionTimePolicy,
+      ruleVersionIds: datasetListValues(document.querySelector<HTMLInputElement>('#dataset-rule-versions')!.value, false),
+      excludeLowConfidence: document.querySelector<HTMLInputElement>('#dataset-exclude-low-confidence')!.checked,
+      reason: document.querySelector<HTMLTextAreaElement>('#dataset-snapshot-reason')!.value.trim(),
+    };
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+    return;
+  }
+  const button = document.querySelector<HTMLButtonElement>('#dataset-snapshot-submit')!;
+  button.disabled = true;
+  button.textContent = '排队中...';
+  try {
+    const response = await bpiApi.createDatasetSnapshot(dataset, command, commandId());
+    document.querySelector<HTMLDialogElement>('#dataset-snapshot-dialog')!.close();
+    state.selectedDatasetSnapshot = response.data;
+    showToast(`快照 v${response.data.snapshotVersion} 已进入后台队列`);
+    renderDatasetSnapshotDrawer(response.data);
+    await pollDatasetSnapshot(response.data.id);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = '生成清单';
+  }
+}
+
+async function pollDatasetSnapshot(snapshotId: string): Promise<void> {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const response = await bpiApi.datasetSnapshot(snapshotId);
+    state.selectedDatasetSnapshot = response.data;
+    if (activeDrawerKey === `dataset-snapshot:${snapshotId}`) renderDatasetSnapshotDrawer(response.data);
+    if (['MANIFEST_READY', 'FAILED'].includes(response.data.state)) {
+      await loadView(true);
+      return;
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 600));
+  }
+  showToast('清单仍在后台构建，可稍后刷新快照', true);
+  await loadView(true);
+}
+
+async function openDatasetSnapshotById(snapshotId: string): Promise<void> {
+  try {
+    const response = await bpiApi.datasetSnapshot(snapshotId);
+    state.selectedDatasetSnapshot = response.data;
+    renderDatasetSnapshotDrawer(response.data);
+    if (['QUEUED', 'BUILDING'].includes(response.data.state)) await pollDatasetSnapshot(snapshotId);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  }
+}
+
+function renderDatasetSnapshotDrawer(snapshot: DatasetSnapshot): void {
+  const manifest = snapshot.manifest;
+  const exclusions = Object.entries(snapshot.exclusionSummary || {})
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([reason, count]) => `<li><code>${escapeHtml(reason)}</code><b>${count}</b></li>`).join('');
+  const samples = (manifest?.samples || []).slice(0, 50).map((sample) => `<tr><td><strong>${escapeHtml(sample.batchNo)}</strong><small>${escapeHtml(sample.lineId)}</small></td><td>${formatTime(sample.predictionTime)}</td><td>${escapeHtml(sample.splitKey)}</td><td>${number(sample.confidence * 100, 0)}%</td><td>${sample.included ? statusChip('INCLUDED') : statusChip('EXCLUDED')}</td><td>${escapeHtml(sample.exclusionReasons.join(', ') || '-')}</td></tr>`).join('');
+  const phase = manifest?.phaseBoundary;
+  const buildHtml = manifest
+    ? `<div class="drawer-section dataset-phase-grid"><div><span>交付状态</span><b>${escapeHtml(phase?.deliveryState || 'MANIFEST_ONLY')}</b></div><div><span>物化状态</span><b>${escapeHtml(phase?.materializationState || snapshot.materializationState)}</b></div><div><span>Iceberg</span>${statusChip(phase?.icebergReady ? 'READY' : 'NOT_STARTED')}</div><div><span>MLflow</span>${statusChip(phase?.mlflowRegistered ? 'REGISTERED' : 'NOT_STARTED')}</div><div><span>模型训练</span>${statusChip(phase?.modelTrained ? 'TRAINED' : 'NOT_STARTED')}</div><div><span>Artifact URI</span><b>${escapeHtml(phase?.artifactUri || '-')}</b></div></div><div class="drawer-section"><div class="section-title"><h3>样本统计</h3><span>${manifest.counts.total} 条</span></div><div class="metric-grid dataset-metrics"><div><span>总样本</span><b>${manifest.counts.total}</b></div><div><span>纳入</span><b>${manifest.counts.included}</b></div><div><span>排除</span><b>${manifest.counts.excluded}</b></div><div><span>排除原因</span><b>${Object.keys(manifest.counts.exclusionSummary).length}</b></div></div>${exclusions ? `<ul class="dataset-exclusion-list">${exclusions}</ul>` : ''}</div><div class="drawer-section"><div class="section-title"><h3>Point-in-time 样本</h3><span>${samples ? `显示 ${Math.min(manifest.samples.length, 50)} / ${manifest.samples.length}` : '无'}</span></div>${samples ? `<div class="table-frame dataset-sample-frame"><table><thead><tr><th>批次</th><th>预测时点</th><th>拆分</th><th>置信度</th><th>结果</th><th>排除原因</th></tr></thead><tbody>${samples}</tbody></table></div>` : '<div class="simulation-empty">没有满足冻结条件的影子复核样本</div>'}</div>`
+    : `<div class="drawer-section"><div class="batch-detail-loading"><i data-lucide="refresh-cw"></i><div><strong>${snapshot.state === 'FAILED' ? '清单构建失败' : '后台正在构建清单'}</strong><span>${escapeHtml(snapshot.failureDetail || `attempt ${snapshot.attemptCount}`)}</span></div></div></div>`;
+  openDrawer(`<header><div><span>数据集快照 v${snapshot.snapshotVersion}</span><h2>${escapeHtml(snapshot.datasetName)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(snapshot.state)}<span class="shadow-label">MANIFEST ONLY</span></div><span>revision ${snapshot.revision}</span></div><div class="drawer-section facts-grid"><div><span>冻结时间</span><b>${formatTime(snapshot.freezeAt)}</b></div><div><span>产线</span><b>${escapeHtml(snapshot.lineIds.join(', '))}</b></div><div><span>规则版本筛选</span><b>${escapeHtml(snapshot.ruleVersionIds.join(', ') || '全部合格版本')}</b></div><div><span>低置信度排除</span><b>${snapshot.excludeLowConfidence ? '是' : '否'}</b></div><div><span>定义 checksum</span><b class="mono-value">${escapeHtml(snapshot.definitionChecksum)}</b></div><div><span>manifest checksum</span><b class="mono-value">${escapeHtml(snapshot.manifestChecksum || '-')}</b></div></div>${buildHtml}<footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${['QUEUED', 'BUILDING'].includes(snapshot.state) ? '<button class="button button--primary" id="refresh-dataset-snapshot"><i data-lucide="refresh-cw"></i>刷新状态</button>' : ''}</footer>`, `dataset-snapshot:${snapshot.id}`);
+  document.querySelector('#refresh-dataset-snapshot')?.addEventListener('click', () => void openDatasetSnapshotById(snapshot.id));
+}
+
 function openDrawer(html: string, drawerKey: string | null = null): void {
   const drawer = document.querySelector<HTMLElement>('#detail-drawer')!;
   activeDrawerKey = drawerKey;
@@ -3193,6 +3464,6 @@ function showToast(message: string, error = false): void {
 
 shell();
 const initialView = location.hash.replace('#/', '') as View;
-if (['overview', 'candidates', 'batches', 'shadowRuns', 'dataQuality', 'points', 'rules', 'featureFlags'].includes(initialView)) state.view = initialView;
+if (['overview', 'candidates', 'batches', 'shadowRuns', 'dataQuality', 'points', 'rules', 'datasets', 'featureFlags'].includes(initialView)) state.view = initialView;
 void loadView();
 window.setInterval(() => { if (!document.hidden && state.view === 'overview') void loadView(true); }, 5_000);

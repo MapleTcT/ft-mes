@@ -51,6 +51,7 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V23__bpi_quality_release_wms_inbound.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V24__bpi_batch_force_close_workflow.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V25__bpi_wms_inbound_reversal_workflow.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V26__bpi_dataset_manifest_workbench.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -119,6 +120,13 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiQualityReleaseWmsPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/BatchReleaseService.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/WmsInboundReversalService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilder.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestProcessor.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataset/DatasetManifestDispatcher.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataset/DatasetManifestProperties.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetController.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/WmsInboundReversalTaskView.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/WmsInboundReversalPostgresRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/WmsInboundReversalCommand.java",
@@ -127,6 +135,8 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/WmsInboundOutboxRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalPhase2IntegrationController.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfigurationTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilderTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDatasetManifestPostgresAcceptanceTest.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
     "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluatorTest.java",
     "contracts/bpi-api/service-phase1-profile.json",
@@ -171,6 +181,9 @@ REQUIRED_FILES = [
     "metadata/bpi-quality-release-wms-inbound-acceptance.json",
     "docs/testing/bpi-wms-inbound-reversal-acceptance.md",
     "metadata/bpi-wms-inbound-reversal-acceptance.json",
+    "docs/testing/bpi-dataset-manifest-acceptance.md",
+    "docs/backend-table-audit/bpi-dataset-manifest.md",
+    "metadata/bpi-dataset-manifest-acceptance.json",
     "docs/testing/bpi-formal-identity-wms-reversal-acceptance.md",
     "metadata/bpi-formal-identity-wms-reversal-acceptance.json",
     "metadata/bpi-formal-identity-wms-reversal-pending.png",
@@ -486,6 +499,92 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V26__bpi_dataset_manifest_workbench.sql",
+        [
+            "bpi_dataset_definitions",
+            "bpi_dataset_snapshots",
+            "bpi_dataset_snapshot_samples",
+            "MANIFEST_READY",
+            "materialization_state = 'NOT_STARTED'",
+            "CHECK (artifact_uri IS NULL)",
+            "feature_cutoff = prediction_time",
+            "trg_bpi_dataset_definition_immutable",
+            "trg_bpi_dataset_snapshot_transition",
+            "trg_bpi_dataset_sample_immutable",
+            "FOR EACH ROW EXECUTE FUNCTION bpi.guard_dataset_snapshot_transition()",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilder.java",
+        [
+            "ALLOWED_FEATURE_REFS",
+            "ALLOWED_LABEL_REFS",
+            "AT_OR_BEFORE_PREDICTION_TIME",
+            "LABEL_DELAY_EXCEEDED",
+            "CONFIDENCE_BELOW_THRESHOLD",
+            'boundary.put("deliveryState", "MANIFEST_ONLY")',
+            'boundary.put("materializationState", "NOT_STARTED")',
+            'boundary.put("icebergReady", false)',
+            'boundary.put("mlflowRegistered", false)',
+            'boundary.put("modelTrained", false)',
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetService.java",
+        [
+            "A new dataset definition must use If-Match 0.",
+            "Snapshot lines must be a subset of the immutable dataset definition.",
+            "Every selected line requires an APPROVED shadow run",
+            "freezeAt must not be in the future.",
+            '"deliveryBoundary", "MANIFEST_ONLY"',
+            "reserveIdempotency",
+            "completeIdempotency",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+        [
+            "FOR UPDATE SKIP LOCKED",
+            "bpi.bpi_dataset_snapshot_samples",
+            "DATASET_MANIFEST_READY",
+            "review.superseded_at > :freezeAt",
+            "batch.plant_id = run.plant_id AND batch.line_id = run.line_id",
+            "SELECT plant_id FROM bpi.bpi_dataset_definitions",
+            "manifest_checksum",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetController.java",
+        [
+            'GetMapping("/bpi/v1/datasets")',
+            'PostMapping("/bpi/v1/datasets")',
+            'PostMapping("/bpi/v1/datasets/{datasetId}/snapshots")',
+            'GetMapping("/bpi/v1/dataset-snapshots/{snapshotId}")',
+            "hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')",
+            "Idempotent-Replay",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/BpiDatasetManifestPostgresAcceptanceTest.java",
+        [
+            "apiWorkerAndPostgresProveLeakageSafeReproducibleManifestOnlySnapshot",
+            "ADP_E2E_BPI_DATASET_",
+            'jsonPath("$.data.state").value("MANIFEST_READY")',
+            'containsEntry("cutoff_safe", 3)',
+            'containsEntry("leaked", 0)',
+            "CONFIDENCE_BELOW_THRESHOLD",
+            "LABEL_DELAY_EXCEEDED",
+            "secondChecksum).isEqualTo(firstChecksum",
+            "hasMessageContaining(\"immutable\")",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/BatchReleaseService.java",
         [
             "BatchState.CLOSED_RAW",
@@ -529,13 +628,15 @@ def main() -> int:
     )
     require_text(
         ROOT / "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicy.java",
-        ["wms/reversal", "wms/(?:reconcile|reversal)"],
+        ["wms/reversal", "wms/(?:reconcile|reversal)",
+         "datasets|dataset-snapshots/", "datasets(?:/"],
         failures,
     )
     require_text(
         ROOT / "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiProxyControllerTest.java",
         ["forwardsWmsReversalReadAndCommandWithInternalIdentityAndConcurrencyHeaders",
-         "wms-reversal-request-1", "Idempotent-Replay"],
+         "forwardsDatasetDefinitionSnapshotAndManifestReadsThroughExactRoutes",
+         "wms-reversal-request-1", "dataset-snapshot-command-1", "Idempotent-Replay"],
         failures,
     )
     require_text(
@@ -1660,6 +1761,61 @@ def main() -> int:
         fail("BPI WMS reversal activation defaults must remain false", failures)
     if any(reversal_acceptance.get("cleanup", {}).values()):
         fail("BPI WMS reversal cleanup must leave zero fixture rows", failures)
+
+    dataset_acceptance = json.loads(
+        (ROOT / "metadata/bpi-dataset-manifest-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if (dataset_acceptance.get("status")
+            != "PASS_LOCAL_BROWSER_API_POSTGRES_MANIFEST_ONLY"
+            or dataset_acceptance.get("database") != "PostgreSQL 16.13"
+            or dataset_acceptance.get("flywayVersion") != 26
+            or dataset_acceptance.get("phase") != "3A_MANIFEST_ONLY"
+            or dataset_acceptance.get("productionActivationAllowed") is not False
+            or len(dataset_acceptance.get("repoBaseCommit", "")) != 40):
+        fail("BPI dataset manifest runtime or phase boundary is incomplete", failures)
+    dataset_summary = dataset_acceptance.get("summary", {})
+    expected_dataset_summary = {
+        "testedFeatures": 10,
+        "pass": 9,
+        "fail": 0,
+        "blocked": 1,
+        "browserTests": 20,
+        "browserFailures": 0,
+        "simulatorTests": 15,
+        "simulatorFailures": 0,
+        "postgresAcceptanceTests": 1,
+        "postgresAcceptanceFailures": 0,
+        "unexpectedConsoleErrors": 0,
+        "pageErrors": 0,
+        "requestFailures": 0,
+        "horizontalOverflowFailures": 0,
+    }
+    if any(dataset_summary.get(key) != value
+           for key, value in expected_dataset_summary.items()):
+        fail("BPI dataset manifest automated evidence summary is incomplete", failures)
+    dataset_items = dataset_acceptance.get("items", [])
+    if (len(dataset_items) != 10
+            or sum(item.get("status") == "PASS" for item in dataset_items) != 9
+            or sum(item.get("status") == "BLOCKED" for item in dataset_items) != 1):
+        fail("BPI dataset manifest item statuses do not match the summary", failures)
+    dataset_postgres = dataset_acceptance.get("postgres", {})
+    if ("MANIFEST_READY" not in dataset_postgres.get("manifestProjection", "")
+            or "leaked=0" not in dataset_postgres.get("manifestProjection", "")
+            or "cross_plant_rows=0" not in dataset_postgres.get("manifestProjection", "")
+            or dataset_postgres.get("exclusionCounts") != {
+                "CONFIDENCE_BELOW_THRESHOLD": 1,
+                "LABEL_DELAY_EXCEEDED": 1,
+            }
+            or dataset_postgres.get("completionAuditRows") != 2):
+        fail("BPI dataset manifest PostgreSQL evidence is incomplete", failures)
+    if any(dataset_acceptance.get("cleanup", {}).values()):
+        fail("BPI dataset manifest cleanup must leave zero fixture rows", failures)
+    dataset_limitations = " ".join(dataset_acceptance.get("limitations", [])).lower()
+    for boundary in ("target adp", "iceberg", "mlflow", "model training"):
+        if boundary not in dataset_limitations:
+            fail(f"BPI dataset manifest limitation is missing: {boundary}", failures)
 
     formal_reversal = json.loads(
         (ROOT / "metadata/bpi-formal-identity-wms-reversal-acceptance.json").read_text(

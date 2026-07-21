@@ -11,11 +11,14 @@ import com.mapletct.ftmes.bpi.infrastructure.dataquality.BpiDataQualityKafkaProp
 import com.mapletct.ftmes.bpi.infrastructure.sourcesequence.BpiSourceSequenceKafkaProperties;
 import com.mapletct.ftmes.bpi.infrastructure.integration.BpiPhase2IntegrationProperties;
 import com.mapletct.ftmes.bpi.infrastructure.integration.BpiWmsOutboxProperties;
+import com.mapletct.ftmes.bpi.infrastructure.dataset.DatasetManifestProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 @EnableConfigurationProperties({
         BpiSecurityProperties.class,
         BpiTelemetryProperties.class,
@@ -27,7 +30,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
         BpiRuleApplicationKafkaProperties.class,
         RulePublicationOutboxProperties.class,
         BpiPhase2IntegrationProperties.class,
-        BpiWmsOutboxProperties.class
+        BpiWmsOutboxProperties.class,
+        DatasetManifestProperties.class
 })
 public class BpiServiceApplication {
 

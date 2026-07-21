@@ -7,6 +7,18 @@ const PROBLEM_TYPE = 'application/problem+json; charset=utf-8';
 const POINT_CATALOG_CURSOR_SECRET = 'bpi-simulator-point-catalog-cursor-v1';
 const SOURCE_SEQUENCE_FINGERPRINT = /^sha256:[0-9a-f]{64}$/;
 const FEATURE_FLAG_TENANT = 'TENANT-01';
+const DATASET_PREDICTION_TIME_POLICY = 'AUTOMATIC_BATCH_START';
+const DATASET_FEATURE_CUTOFF_POLICY = 'AT_OR_BEFORE_PREDICTION_TIME';
+const DATASET_SPLIT_POLICY = 'PRODUCTION_TIME';
+const DATASET_FEATURE_REFS = new Set([
+  'batch.order_id', 'batch.material_code', 'batch.stage_code', 'batch.quantity_unit',
+  'rule.version_id', 'topology.version_id', 'point_catalog.snapshot_id',
+]);
+const DATASET_LABEL_REFS = new Set([
+  'review.manual_start_time', 'review.manual_end_time', 'review.reference_quantity',
+  'review.boundary_acceptance', 'review.quantity_acceptance',
+  'batch.automatic_end_time', 'batch.automatic_quantity',
+]);
 const FEATURE_FLAG_DEFINITIONS = [
   { flagKey: 'bpi.ui', displayName: 'BPI 导航入口', description: '控制旧平台是否展示 BPI 导航入口。', riskLevel: 'MEDIUM', enforcementStatus: 'ENFORCED', editable: true, blockedReason: null },
   { flagKey: 'bpi.commands', displayName: '批次人工命令', description: '控制候选确认、驳回和批次状态命令。', riskLevel: 'HIGH', enforcementStatus: 'ENFORCED', editable: true, blockedReason: null },
@@ -590,6 +602,299 @@ function stableUuid(value) {
   return `${digest.slice(0, 8)}-${digest.slice(8, 12)}-5${digest.slice(13, 16)}-a${digest.slice(17, 20)}-${digest.slice(20, 32)}`;
 }
 
+function datasetSnapshotView(snapshot) {
+  return clone(snapshot);
+}
+
+function datasetSnapshotSummary(snapshot) {
+  return {
+    id: snapshot.id,
+    snapshotVersion: snapshot.snapshotVersion,
+    state: snapshot.state,
+    revision: snapshot.revision,
+    freezeAt: snapshot.freezeAt,
+    manifestChecksum: snapshot.manifestChecksum,
+    includedCount: snapshot.includedCount,
+    excludedCount: snapshot.excludedCount,
+    materializationState: snapshot.materializationState,
+    createdAt: snapshot.createdAt,
+    completedAt: snapshot.completedAt,
+    failureCode: snapshot.failureCode,
+    failureDetail: snapshot.failureDetail,
+  };
+}
+
+function datasetDefinitionView(state, definition) {
+  const latestSnapshot = state.datasetSnapshots
+    .filter((snapshot) => snapshot.datasetId === definition.id)
+    .sort((left, right) => right.snapshotVersion - left.snapshotVersion)[0] || null;
+  return {
+    ...clone(definition),
+    latestSnapshot: latestSnapshot ? datasetSnapshotSummary(latestSnapshot) : null,
+  };
+}
+
+function normalizeDatasetStrings(values) {
+  if (!Array.isArray(values) || !values.length) return null;
+  const normalized = values.map((value) => String(value || '').trim()).sort();
+  if (normalized.some((value) => !value) || new Set(normalized).size !== normalized.length) return null;
+  return normalized;
+}
+
+function validateDatasetDefinition(body) {
+  const lineIds = normalizeDatasetStrings(body.lineIds);
+  const featureRefs = normalizeDatasetStrings(body.featureRefs);
+  const labelRefs = normalizeDatasetStrings(body.labelRefs);
+  const validCode = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(body.datasetCode || '');
+  const validVersion = /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(body.version || '');
+  const validFeatures = featureRefs?.every((reference) => DATASET_FEATURE_REFS.has(reference));
+  const validLabels = labelRefs?.every((reference) => DATASET_LABEL_REFS.has(reference));
+  const validDelay = Number.isInteger(body.maxLabelDelayHours)
+    && body.maxLabelDelayHours >= 1 && body.maxLabelDelayHours <= 2160;
+  const confidence = Number(body.minimumConfidence);
+  if (!validCode || !validVersion || !String(body.name || '').trim()
+      || !String(body.plantId || '').trim() || !lineIds || !featureRefs || !labelRefs
+      || !validFeatures || !validLabels || !validDelay
+      || !Number.isFinite(confidence) || confidence < 0 || confidence > 1
+      || body.predictionTimePolicy !== DATASET_PREDICTION_TIME_POLICY
+      || body.featureCutoffPolicy !== DATASET_FEATURE_CUTOFF_POLICY
+      || body.splitPolicy !== DATASET_SPLIT_POLICY
+      || !String(body.reason || '').trim()) {
+    return null;
+  }
+  return { lineIds, featureRefs, labelRefs, confidence };
+}
+
+function prepareDatasetManifestAcceptance(state) {
+  prepareShadowRunAcceptance(state);
+  const runId = stableUuid('dataset-manifest-approved-shadow-run');
+  const run = {
+    id: runId,
+    runCode: 'DATASET-MANIFEST-ACCEPTANCE',
+    name: 'Dataset manifest acceptance source',
+    tenantId: FEATURE_FLAG_TENANT,
+    plantId: 'PLANT-01',
+    lineId: 'LINE-S07-01',
+    state: 'APPROVED',
+    revision: 15,
+    ruleVersionId: state.rule.id,
+    ruleVersion: `${state.rule.code}@${state.rule.version}`,
+    topologyVersionId: state.topology.id,
+    topologyVersion: `${state.topology.code}@${state.topology.version}`,
+    pointCatalogSnapshotId: state.pointCatalog.snapshot.id,
+    pointCatalogChecksum: state.pointCatalog.snapshot.checksum,
+    minimumDurationDays: 7,
+    minimumReviewedBatches: 3,
+    boundaryToleranceSeconds: 60,
+    minimumBoundaryAgreement: 0.95,
+    quantityTolerancePercent: 2,
+    createdBy: 'simulated.process.engineer',
+    createdAt: '2026-07-05T07:00:00.000Z',
+    startedBy: 'simulated.process.engineer',
+    startedAt: '2026-07-05T08:00:00.000Z',
+    completedBy: 'simulated.process.engineer',
+    completedAt: '2026-07-12T07:50:00.000Z',
+    decidedBy: 'simulated.bpi.admin',
+    decidedAt: '2026-07-12T07:55:00.000Z',
+    decisionReason: '受控影子样本满足数据集清单验收条件',
+    cancelledBy: null,
+    cancelledAt: null,
+    cancellationReason: null,
+  };
+  state.shadowRuns = [run];
+  state.shadowRunReviews = state.batches.slice(0, 3).map((batch, index) => {
+    const automaticStart = Date.parse(batch.startTime);
+    const reviewDelayHours = index === 2 ? 80 : index + 2;
+    const accepted = index !== 1;
+    return {
+      id: stableUuid(`dataset-manifest-review-${index + 1}`),
+      shadowRunId: run.id,
+      batchId: batch.id,
+      batchNo: batch.batchNo,
+      reviewSequence: 1,
+      state: 'ACTIVE',
+      automaticStartTime: batch.startTime,
+      automaticEndTime: batch.endTime,
+      manualStartTime: index === 1
+        ? new Date(automaticStart + 120_000).toISOString() : batch.startTime,
+      manualEndTime: index === 1
+        ? new Date(Date.parse(batch.endTime) + 120_000).toISOString() : batch.endTime,
+      startDeviationSeconds: index === 1 ? 120 : 0,
+      endDeviationSeconds: index === 1 ? 120 : 0,
+      startBoundaryAccepted: accepted,
+      endBoundaryAccepted: accepted,
+      automaticQuantity: batch.quantity,
+      referenceQuantity: index === 1 ? batch.quantity * 0.9 : batch.quantity,
+      quantityUnit: batch.quantityUnit,
+      quantityDeviationPercent: index === 1 ? 11.111111 : 0,
+      quantityWithinTolerance: accepted,
+      reviewedBy: 'simulated.shift.lead',
+      reviewReason: `数据集清单受控复核样本 ${index + 1}`,
+      reviewedAt: new Date(automaticStart + reviewDelayHours * 3_600_000).toISOString(),
+      supersededAt: null,
+    };
+  });
+  state.datasetDefinitions = [];
+  state.datasetSnapshots = [];
+  state.pendingDatasetSnapshotIds = new Set();
+  state.idempotency = new Map();
+  return { runId, ruleVersionId: state.rule.id, preparedReviewCount: state.shadowRunReviews.length };
+}
+
+function selectedDatasetPayload(references, values) {
+  return Object.fromEntries(references.map((reference) => [reference, values[reference]]));
+}
+
+function buildDatasetSnapshot(state, snapshot) {
+  const definition = state.datasetDefinitions.find((item) => item.id === snapshot.datasetId);
+  if (!definition) return;
+  snapshot.state = 'BUILDING';
+  snapshot.revision = 2;
+  snapshot.startedAt = FIXED_TIME;
+  snapshot.attemptCount = 1;
+  const selectedRuleIds = new Set(snapshot.ruleVersionIds);
+  const rows = state.shadowRunReviews
+    .filter((review) => review.state === 'ACTIVE' && Date.parse(review.reviewedAt) <= Date.parse(snapshot.freezeAt))
+    .map((review) => ({
+      review,
+      run: state.shadowRuns.find((run) => run.id === review.shadowRunId),
+      batch: state.batches.find((batch) => batch.id === review.batchId),
+    }))
+    .filter(({ run, batch }) => run && batch && run.state === 'APPROVED'
+      && Date.parse(run.decidedAt) <= Date.parse(snapshot.freezeAt)
+      && snapshot.lineIds.includes(run.lineId)
+      && (!selectedRuleIds.size || selectedRuleIds.has(run.ruleVersionId)))
+    .sort((left, right) => left.batch.lineId.localeCompare(right.batch.lineId)
+      || Date.parse(left.batch.startTime) - Date.parse(right.batch.startTime)
+      || left.batch.id.localeCompare(right.batch.id)
+      || left.review.id.localeCompare(right.review.id));
+  const exclusionSummary = {};
+  const samples = rows.map(({ review, run, batch }) => {
+    const acceptedChecks = Number(review.startBoundaryAccepted)
+      + Number(review.endBoundaryAccepted) + Number(review.quantityWithinTolerance);
+    const confidence = Number((acceptedChecks / 3).toFixed(6));
+    const reasons = [];
+    if (Date.parse(review.reviewedAt) < Date.parse(batch.startTime)) {
+      reasons.push('LABEL_AVAILABLE_BEFORE_PREDICTION_TIME');
+    }
+    if (Date.parse(review.reviewedAt) > Date.parse(snapshot.freezeAt)) {
+      reasons.push('LABEL_AVAILABLE_AFTER_FREEZE_AT');
+    }
+    if (Date.parse(review.reviewedAt) - Date.parse(batch.startTime)
+        > definition.maxLabelDelayHours * 3_600_000) {
+      reasons.push('LABEL_DELAY_EXCEEDED');
+    }
+    if (snapshot.excludeLowConfidence && confidence < definition.minimumConfidence) {
+      reasons.push('CONFIDENCE_BELOW_THRESHOLD');
+      if (!review.startBoundaryAccepted) reasons.push('START_BOUNDARY_OUTSIDE_TOLERANCE');
+      if (!review.endBoundaryAccepted) reasons.push('END_BOUNDARY_OUTSIDE_TOLERANCE');
+      if (!review.quantityWithinTolerance) reasons.push('QUANTITY_OUTSIDE_TOLERANCE');
+    }
+    const stableReasons = [...new Set(reasons)].sort();
+    stableReasons.forEach((reason) => { exclusionSummary[reason] = (exclusionSummary[reason] || 0) + 1; });
+    const featureValues = {
+      'batch.order_id': batch.orderId,
+      'batch.material_code': batch.materialCode,
+      'batch.stage_code': batch.stageCode,
+      'batch.quantity_unit': batch.quantityUnit,
+      'rule.version_id': run.ruleVersionId,
+      'topology.version_id': run.topologyVersionId,
+      'point_catalog.snapshot_id': run.pointCatalogSnapshotId,
+    };
+    const labelValues = {
+      'review.manual_start_time': review.manualStartTime,
+      'review.manual_end_time': review.manualEndTime,
+      'review.reference_quantity': review.referenceQuantity,
+      'review.boundary_acceptance': {
+        start: review.startBoundaryAccepted,
+        end: review.endBoundaryAccepted,
+      },
+      'review.quantity_acceptance': review.quantityWithinTolerance,
+      'batch.automatic_end_time': batch.endTime,
+      'batch.automatic_quantity': batch.quantity,
+    };
+    return {
+      reviewId: review.id,
+      shadowRunId: run.id,
+      batchId: batch.id,
+      batchNo: batch.batchNo,
+      lineId: batch.lineId,
+      included: stableReasons.length === 0,
+      exclusionReasons: stableReasons,
+      predictionTime: batch.startTime,
+      featureCutoffTime: batch.startTime,
+      labelAvailableAt: review.reviewedAt,
+      confidence,
+      splitKey: batch.startTime.slice(0, 7),
+      features: selectedDatasetPayload(definition.featureRefs, featureValues),
+      labels: selectedDatasetPayload(definition.labelRefs, labelValues),
+      source: {
+        reviewId: review.id,
+        shadowRunId: run.id,
+        batchId: batch.id,
+        batchNo: batch.batchNo,
+        automaticStartTime: batch.startTime,
+        automaticEndTime: batch.endTime,
+        reviewedAt: review.reviewedAt,
+        startBoundaryAccepted: review.startBoundaryAccepted,
+        endBoundaryAccepted: review.endBoundaryAccepted,
+        quantityWithinTolerance: review.quantityWithinTolerance,
+      },
+    };
+  });
+  const includedCount = samples.filter((sample) => sample.included).length;
+  const manifest = {
+    schemaVersion: 'bpi.dataset-manifest.v1',
+    definition: {
+      datasetId: definition.id,
+      datasetCode: definition.datasetCode,
+      datasetVersion: definition.version,
+      definitionChecksum: definition.checksum,
+      predictionTimePolicy: definition.predictionTimePolicy,
+      featureCutoffPolicy: definition.featureCutoffPolicy,
+      featureRefs: definition.featureRefs,
+      labelRefs: definition.labelRefs,
+      maxLabelDelayHours: definition.maxLabelDelayHours,
+      minimumConfidence: definition.minimumConfidence,
+      splitPolicy: definition.splitPolicy,
+    },
+    selection: {
+      freezeAt: snapshot.freezeAt,
+      plantId: snapshot.plantId,
+      lineIds: snapshot.lineIds,
+      ruleVersionIds: snapshot.ruleVersionIds,
+      approvedShadowRunsOnly: true,
+      activeReviewAtFreezeOnly: true,
+      excludeLowConfidence: snapshot.excludeLowConfidence,
+    },
+    phaseBoundary: {
+      deliveryState: 'MANIFEST_ONLY',
+      materializationState: 'NOT_STARTED',
+      artifactUri: null,
+      icebergReady: false,
+      mlflowRegistered: false,
+      modelTrained: false,
+    },
+    counts: {
+      total: samples.length,
+      included: includedCount,
+      excluded: samples.length - includedCount,
+      exclusionSummary,
+    },
+    samples,
+  };
+  snapshot.state = 'MANIFEST_READY';
+  snapshot.revision = 3;
+  snapshot.manifestSchemaVersion = manifest.schemaVersion;
+  snapshot.manifestChecksum = sha256(manifest);
+  snapshot.manifest = manifest;
+  snapshot.includedCount = includedCount;
+  snapshot.excludedCount = samples.length - includedCount;
+  snapshot.exclusionSummary = exclusionSummary;
+  snapshot.completedAt = FIXED_TIME;
+  state.pendingDatasetSnapshotIds.delete(snapshot.id);
+}
+
 function calibrationEffectiveness(calibration, now = Date.now()) {
   if (calibration.state !== 'APPROVED') return calibration.state;
   if (now < Date.parse(calibration.validFrom)) return 'NOT_YET_EFFECTIVE';
@@ -843,6 +1148,10 @@ function createHandler(state) {
       if (req.method === 'POST' && path === '/__simulation/prepare-shadow-run') {
         const prepared = prepareShadowRunAcceptance(state);
         return send(res, 200, { status: 'SHADOW_RUN_READY', ...prepared }, 'simulationPrepareShadowRun');
+      }
+      if (req.method === 'POST' && path === '/__simulation/prepare-dataset-manifest') {
+        const prepared = prepareDatasetManifestAcceptance(state);
+        return send(res, 200, { status: 'DATASET_MANIFEST_SOURCE_READY', ...prepared }, 'simulationPrepareDatasetManifest');
       }
       if (req.method === 'POST' && path === '/__simulation/prepare-batch-release') {
         const prepared = prepareBatchReleaseAcceptance(state);
@@ -2398,6 +2707,156 @@ function createHandler(state) {
           actorId: incident.resolvedBy, assignee: incident.assignee, reason, at: FIXED_TIME,
         });
         return rememberAndSend(state, context, res, 200, envelope(operationId, incident), operationId);
+      }
+      if (req.method === 'GET' && path === '/bpi/v1/datasets') {
+        const operationId = 'listDatasets';
+        const plantId = url.searchParams.get('plantId');
+        const limit = Number(url.searchParams.get('limit') || 100);
+        if (!plantId || !Number.isInteger(limit) || limit < 1 || limit > 200) {
+          return send(res, 422, problem(422, 'Validation Failed', 'plantId and a limit between 1 and 200 are required.', operationId), operationId);
+        }
+        const definitions = state.datasetDefinitions
+          .filter((definition) => definition.plantId === plantId)
+          .sort((left, right) => right.createdAt.localeCompare(left.createdAt)
+            || left.datasetCode.localeCompare(right.datasetCode))
+          .slice(0, limit)
+          .map((definition) => datasetDefinitionView(state, definition));
+        return send(res, 200, envelope(operationId, definitions), operationId);
+      }
+      if (req.method === 'POST' && path === '/bpi/v1/datasets') {
+        const operationId = 'createDatasetDefinition';
+        const context = commandContext(req, res, operationId, 0, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        const validated = validateDatasetDefinition(body);
+        if (!validated) {
+          const response = problem(422, 'Validation Failed', 'Dataset definition violates the immutable Phase 3A contract.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (state.datasetDefinitions.some((definition) => definition.datasetCode === body.datasetCode
+            && definition.version === body.version)) {
+          const response = problem(409, 'Dataset Definition Exists', 'datasetCode and version already exist.', operationId, 0);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const controlled = {
+          datasetCode: body.datasetCode,
+          version: body.version,
+          name: body.name,
+          plantId: body.plantId,
+          lineIds: validated.lineIds,
+          predictionTimePolicy: body.predictionTimePolicy,
+          featureCutoffPolicy: body.featureCutoffPolicy,
+          featureRefs: validated.featureRefs,
+          labelRefs: validated.labelRefs,
+          maxLabelDelayHours: body.maxLabelDelayHours,
+          minimumConfidence: validated.confidence,
+          splitPolicy: body.splitPolicy,
+        };
+        const definition = {
+          id: stableUuid({ type: 'dataset-definition', code: body.datasetCode, version: body.version }),
+          ...controlled,
+          tenantId: FEATURE_FLAG_TENANT,
+          state: 'ACTIVE',
+          revision: 1,
+          checksum: sha256(controlled),
+          createdBy: 'simulated.data.engineer',
+          createReason: body.reason,
+          createdAt: FIXED_TIME,
+        };
+        state.datasetDefinitions.push(definition);
+        const response = envelope(operationId, datasetDefinitionView(state, definition));
+        return rememberAndSend(state, context, res, 200, response, operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/datasets\/([^/]+)\/snapshots$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'createDatasetSnapshot';
+        const definition = state.datasetDefinitions.find((item) => item.id === ids[0]);
+        if (!definition) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset definition not found.', operationId), operationId);
+        }
+        const context = commandContext(req, res, operationId, definition.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        const freezeAtMs = Date.parse(body.freezeAt);
+        const lineIds = normalizeDatasetStrings(body.lineIds);
+        const requestedRuleIds = body.ruleVersionIds === undefined || body.ruleVersionIds === null
+          ? [] : body.ruleVersionIds;
+        const ruleVersionIds = Array.isArray(requestedRuleIds) && requestedRuleIds.length === 0
+          ? [] : normalizeDatasetStrings(requestedRuleIds);
+        const validRules = ruleVersionIds !== null
+          && ruleVersionIds.every((id) => /^[0-9a-f-]{36}$/i.test(id));
+        if (!Number.isFinite(freezeAtMs) || freezeAtMs > Date.now() || !lineIds || !validRules
+            || !lineIds.every((lineId) => definition.lineIds.includes(lineId))
+            || body.predictionTimePolicy !== definition.predictionTimePolicy
+            || !String(body.reason || '').trim()) {
+          const response = problem(422, 'Validation Failed', 'Snapshot selection violates the immutable dataset definition.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        const selectedRules = new Set(ruleVersionIds);
+        const eligibleRuns = state.shadowRuns.filter((run) => run.state === 'APPROVED'
+          && lineIds.includes(run.lineId) && Date.parse(run.decidedAt) <= freezeAtMs
+          && (!selectedRules.size || selectedRules.has(run.ruleVersionId))
+          && state.shadowRunReviews.some((review) => review.shadowRunId === run.id
+            && Date.parse(review.reviewedAt) <= freezeAtMs
+            && (review.state === 'ACTIVE' || Date.parse(review.supersededAt) > freezeAtMs)));
+        const eligibleLines = new Set(eligibleRuns.map((run) => run.lineId));
+        const eligibleRules = new Set(eligibleRuns.map((run) => run.ruleVersionId));
+        if (!lineIds.every((lineId) => eligibleLines.has(lineId))
+            || !ruleVersionIds.every((ruleVersionId) => eligibleRules.has(ruleVersionId))) {
+          const response = problem(422, 'Approved Shadow Evidence Required', 'Every selected line and rule requires approved active reviews at freezeAt.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        const snapshotVersion = state.datasetSnapshots
+          .filter((snapshot) => snapshot.datasetId === definition.id)
+          .reduce((maximum, snapshot) => Math.max(maximum, snapshot.snapshotVersion), 0) + 1;
+        const snapshot = {
+          id: stableUuid({ type: 'dataset-snapshot', datasetId: definition.id, snapshotVersion }),
+          datasetId: definition.id,
+          datasetCode: definition.datasetCode,
+          datasetVersion: definition.version,
+          datasetName: definition.name,
+          tenantId: definition.tenantId,
+          plantId: definition.plantId,
+          snapshotVersion,
+          state: 'QUEUED',
+          revision: 1,
+          freezeAt: new Date(freezeAtMs).toISOString(),
+          lineIds,
+          predictionTimePolicy: body.predictionTimePolicy,
+          ruleVersionIds,
+          excludeLowConfidence: body.excludeLowConfidence !== false,
+          definitionChecksum: definition.checksum,
+          manifestSchemaVersion: null,
+          manifestChecksum: null,
+          manifest: null,
+          includedCount: null,
+          excludedCount: null,
+          exclusionSummary: null,
+          materializationState: 'NOT_STARTED',
+          artifactUri: null,
+          requestedBy: 'simulated.data.engineer',
+          requestReason: body.reason,
+          createdAt: FIXED_TIME,
+          startedAt: null,
+          completedAt: null,
+          attemptCount: 0,
+          failureCode: null,
+          failureDetail: null,
+        };
+        state.datasetSnapshots.push(snapshot);
+        state.pendingDatasetSnapshotIds.add(snapshot.id);
+        const response = envelope(operationId, datasetSnapshotView(snapshot));
+        return rememberAndSend(state, context, res, 202, response, operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-snapshots\/([^/]+)$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getDatasetSnapshot';
+        const snapshot = state.datasetSnapshots.find((item) => item.id === ids[0]);
+        if (!snapshot) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset snapshot not found.', operationId), operationId);
+        }
+        if (state.pendingDatasetSnapshotIds.has(snapshot.id)) buildDatasetSnapshot(state, snapshot);
+        return send(res, 200, envelope(operationId, datasetSnapshotView(snapshot)), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/integrations/health') {
         return send(res, 200, envelope('getIntegrationHealth', state.integrations), 'getIntegrationHealth');

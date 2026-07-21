@@ -88,6 +88,59 @@ public class BpiProxyControllerTest {
     }
 
     @Test
+    public void forwardsDatasetDefinitionSnapshotAndManifestReadsThroughExactRoutes() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        String id = "9c392d57-7502-4cd8-bc37-e72961bb08b4";
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/datasets?plantId=PLANT-01&limit=100"))
+                .andExpect(method(org.springframework.http.HttpMethod.GET))
+                .andRespond(withSuccess("{\"data\":[]}", MediaType.APPLICATION_JSON));
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/datasets"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "dataset-definition-command-1"))
+                .andExpect(header("If-Match", "0"))
+                .andRespond(withSuccess("{\"data\":{\"id\":\"" + id + "\"}}", MediaType.APPLICATION_JSON));
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/datasets/" + id + "/snapshots"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "dataset-snapshot-command-1"))
+                .andExpect(header("If-Match", "1"))
+                .andRespond(org.springframework.test.web.client.response.MockRestResponseCreators
+                        .withStatus(HttpStatus.ACCEPTED)
+                        .body("{\"data\":{\"id\":\"" + id + "\",\"state\":\"QUEUED\"}}")
+                        .contentType(MediaType.APPLICATION_JSON));
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/dataset-snapshots/" + id))
+                .andExpect(method(org.springframework.http.HttpMethod.GET))
+                .andRespond(withSuccess("{\"data\":{\"id\":\"" + id + "\",\"state\":\"MANIFEST_READY\"}}",
+                        MediaType.APPLICATION_JSON));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest list = new MockHttpServletRequest("GET", "/bpi-api/datasets");
+        list.setQueryString("plantId=PLANT-01&limit=100");
+        assertEquals(HttpStatus.OK, controller.proxy(jwt(), list, null).getStatusCode());
+
+        MockHttpServletRequest create = new MockHttpServletRequest("POST", "/bpi-api/datasets");
+        create.addHeader("Idempotency-Key", "dataset-definition-command-1");
+        create.addHeader("If-Match", "0");
+        assertEquals(HttpStatus.OK, controller.proxy(jwt(), create,
+                "{\"datasetCode\":\"ADP-E2E\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8)).getStatusCode());
+
+        MockHttpServletRequest snapshot = new MockHttpServletRequest(
+                "POST", "/bpi-api/datasets/" + id + "/snapshots");
+        snapshot.addHeader("Idempotency-Key", "dataset-snapshot-command-1");
+        snapshot.addHeader("If-Match", "1");
+        assertEquals(HttpStatus.ACCEPTED, controller.proxy(jwt(), snapshot,
+                "{\"freezeAt\":\"2026-07-12T08:00:00Z\"}"
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8)).getStatusCode());
+
+        MockHttpServletRequest manifest = new MockHttpServletRequest(
+                "GET", "/bpi-api/dataset-snapshots/" + id);
+        assertEquals(HttpStatus.OK, controller.proxy(jwt(), manifest, null).getStatusCode());
+        upstream.verify();
+    }
+
+    @Test
     public void forwardsBatchSuspendAndResumeOnlyThroughTheFixedUpstream() {
         BpiAdapterProperties properties = properties();
         RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();

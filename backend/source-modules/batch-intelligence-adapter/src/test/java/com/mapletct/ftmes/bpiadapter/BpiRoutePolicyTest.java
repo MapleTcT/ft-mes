@@ -53,6 +53,10 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.GET, "/data-quality/incidents/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertTrue(policy.allows(HttpMethod.POST, "/data-quality/incidents/9c392d57-7502-4cd8-bc37-e72961bb08b4/acknowledge"));
         assertTrue(policy.allows(HttpMethod.POST, "/data-quality/incidents/9c392d57-7502-4cd8-bc37-e72961bb08b4/resolve"));
+        assertTrue(policy.allows(HttpMethod.GET, "/datasets"));
+        assertTrue(policy.allows(HttpMethod.POST, "/datasets"));
+        assertTrue(policy.allows(HttpMethod.POST, "/datasets/9c392d57-7502-4cd8-bc37-e72961bb08b4/snapshots"));
+        assertTrue(policy.allows(HttpMethod.GET, "/dataset-snapshots/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START/compare"));
@@ -85,6 +89,9 @@ public class BpiRoutePolicyTest {
         assertFalse(policy.allows(HttpMethod.POST, "/point-calibrations/9c392d57-7502-4cd8-bc37-e72961bb08b4/update"));
         assertFalse(policy.allows(HttpMethod.POST, "/data-quality/incidents/9c392d57-7502-4cd8-bc37-e72961bb08b4/delete"));
         assertFalse(policy.allows(HttpMethod.GET, "/data-quality/incidents/9c392d57-7502-4cd8-bc37-e72961bb08b4/raw/export"));
+        assertFalse(policy.allows(HttpMethod.GET, "/datasets/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
+        assertFalse(policy.allows(HttpMethod.POST, "/datasets/9c392d57-7502-4cd8-bc37-e72961bb08b4/snapshots/retry"));
+        assertFalse(policy.allows(HttpMethod.DELETE, "/dataset-snapshots/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertFalse(policy.allows(HttpMethod.DELETE, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertFalse(policy.allows(HttpMethod.GET, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/release/export"));
         assertFalse(policy.allows(HttpMethod.GET, "/http://attacker.example"));

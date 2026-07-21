@@ -126,6 +126,66 @@ test('desktop operator confirms a candidate and opens the shadow batch', async (
   await context.close();
 });
 
+test('data engineer creates a point-in-time dataset manifest on desktop and inspects it on mobile', async () => {
+  let response = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(response.status, 200);
+  response = await fetch(`${simulatorUrl}/__simulation/prepare-dataset-manifest`, { method: 'POST' });
+  assert.equal(response.status, 200);
+
+  const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await desktop.newPage();
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/datasets`, { waitUntil: 'networkidle' });
+  await page.getByRole('heading', { name: '数据集清单' }).waitFor();
+  await page.locator('#open-dataset-definition').click();
+  await page.locator('#dataset-code').fill('ADP-E2E-START-BOUNDARY');
+  await page.locator('#dataset-name').fill('ADP E2E 启动边界清单');
+  await page.locator('#dataset-reason').fill('建立浏览器到 manifest 的受控验收定义');
+  await page.locator('#dataset-definition-submit').click();
+
+  await page.getByRole('heading', { name: 'ADP E2E 启动边界清单' }).waitFor();
+  await page.locator('#open-dataset-snapshot').click();
+  await page.locator('#dataset-snapshot-reason').fill('冻结已批准影子复核记录并生成 point-in-time 清单');
+  await page.locator('#dataset-snapshot-submit').click();
+
+  await page.locator('.batch-state-band').getByText('MANIFEST_READY', { exact: true }).waitFor();
+  await page.locator('.batch-state-band').getByText('MANIFEST ONLY', { exact: true }).waitFor();
+  await page.locator('.dataset-exclusion-list').getByText('CONFIDENCE_BELOW_THRESHOLD', { exact: true }).waitFor();
+  await page.locator('.dataset-exclusion-list').getByText('LABEL_DELAY_EXCEEDED', { exact: true }).waitFor();
+  assert.equal(await page.locator('.dataset-sample-frame tbody tr').count(), 3);
+  assert.match(await page.locator('.facts-grid .mono-value').last().textContent(), /^[a-f0-9]{64}$/);
+
+  const definitions = await fetch(`${simulatorUrl}/bpi/v1/datasets?plantId=PLANT-01&limit=100`).then((item) => item.json());
+  assert.equal(definitions.data.length, 1);
+  assert.equal(definitions.data[0].latestSnapshot.state, 'MANIFEST_READY');
+  const snapshot = await fetch(`${simulatorUrl}/bpi/v1/dataset-snapshots/${definitions.data[0].latestSnapshot.id}`).then((item) => item.json());
+  assert.equal(snapshot.data.manifest.phaseBoundary.deliveryState, 'MANIFEST_ONLY');
+  assert.equal(snapshot.data.manifest.phaseBoundary.materializationState, 'NOT_STARTED');
+  assert.equal(snapshot.data.manifest.phaseBoundary.artifactUri, null);
+  assert.equal(snapshot.data.manifest.phaseBoundary.icebergReady, false);
+  assert.equal(snapshot.data.manifest.phaseBoundary.mlflowRegistered, false);
+  assert.equal(snapshot.data.manifest.phaseBoundary.modelTrained, false);
+  assert.equal(snapshot.data.includedCount, 1);
+  assert.equal(snapshot.data.excludedCount, 2);
+  await page.screenshot({ path: '/tmp/bpi-dataset-manifest-desktop.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await desktop.close();
+
+  const mobile = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const mobilePage = await mobile.newPage();
+  const mobileErrors = observe(mobilePage);
+  await mobilePage.goto(`${APP_URL}/#/datasets`, { waitUntil: 'networkidle' });
+  await mobilePage.getByRole('heading', { name: '数据集清单' }).waitFor();
+  const geometry = await mobilePage.evaluate(() => ({ body: document.body.scrollWidth, viewport: window.innerWidth }));
+  assert.ok(geometry.body <= geometry.viewport + 1, `dataset page overflows viewport: ${JSON.stringify(geometry)}`);
+  await mobilePage.locator('[data-dataset-id]').click();
+  await assertDrawerSettled(mobilePage);
+  await mobilePage.getByRole('heading', { name: 'ADP E2E 启动边界清单' }).waitFor();
+  await mobilePage.screenshot({ path: '/tmp/bpi-dataset-manifest-mobile.png', fullPage: true });
+  assert.deepEqual(mobileErrors, []);
+  await mobile.close();
+});
+
 test('shift lead confirms the END boundary and closes the raw batch', async () => {
   const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
   assert.equal(reset.status, 200);

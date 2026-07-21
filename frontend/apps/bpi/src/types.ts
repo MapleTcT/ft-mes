@@ -741,3 +741,131 @@ export interface RuleSimulation {
   emittedBoundaries: string[];
   failureReason?: string | null;
 }
+
+export type DatasetSnapshotState = 'QUEUED' | 'BUILDING' | 'MANIFEST_READY' | 'FAILED';
+
+export interface DatasetSnapshotSummary {
+  id: string;
+  snapshotVersion: number;
+  state: DatasetSnapshotState;
+  revision: number;
+  freezeAt: string;
+  manifestChecksum?: string | null;
+  includedCount?: number | null;
+  excludedCount?: number | null;
+  materializationState: 'NOT_STARTED';
+  createdAt: string;
+  completedAt?: string | null;
+  failureCode?: string | null;
+  failureDetail?: string | null;
+}
+
+export interface DatasetDefinition {
+  id: string;
+  datasetCode: string;
+  version: string;
+  name: string;
+  tenantId: string;
+  plantId: string;
+  lineIds: string[];
+  state: 'ACTIVE';
+  revision: number;
+  predictionTimePolicy: 'AUTOMATIC_BATCH_START';
+  featureCutoffPolicy: 'AT_OR_BEFORE_PREDICTION_TIME';
+  featureRefs: string[];
+  labelRefs: string[];
+  maxLabelDelayHours: number;
+  minimumConfidence: number;
+  splitPolicy: 'PRODUCTION_TIME';
+  checksum: string;
+  createdBy: string;
+  createReason: string;
+  createdAt: string;
+  latestSnapshot?: DatasetSnapshotSummary | null;
+}
+
+export interface DatasetDefinitionCreateCommand {
+  datasetCode: string;
+  version: string;
+  name: string;
+  plantId: string;
+  lineIds: string[];
+  predictionTimePolicy: 'AUTOMATIC_BATCH_START';
+  featureCutoffPolicy: 'AT_OR_BEFORE_PREDICTION_TIME';
+  featureRefs: string[];
+  labelRefs: string[];
+  maxLabelDelayHours: number;
+  minimumConfidence: number;
+  splitPolicy: 'PRODUCTION_TIME';
+  reason: string;
+}
+
+export interface DatasetSnapshotCommand {
+  freezeAt: string;
+  lineIds: string[];
+  predictionTimePolicy: 'AUTOMATIC_BATCH_START';
+  ruleVersionIds: string[];
+  excludeLowConfidence: boolean;
+  reason: string;
+}
+
+export interface DatasetManifestSample {
+  reviewId: string;
+  shadowRunId: string;
+  batchId: string;
+  batchNo: string;
+  lineId: string;
+  included: boolean;
+  exclusionReasons: string[];
+  predictionTime: string;
+  featureCutoffTime: string;
+  labelAvailableAt: string;
+  confidence: number;
+  splitKey: string;
+  features: Record<string, unknown>;
+  labels: Record<string, unknown>;
+  source: Record<string, unknown>;
+}
+
+export interface DatasetManifest {
+  schemaVersion: 'bpi.dataset-manifest.v1';
+  definition: Record<string, unknown>;
+  selection: Record<string, unknown>;
+  phaseBoundary: {
+    deliveryState: 'MANIFEST_ONLY';
+    materializationState: 'NOT_STARTED';
+    artifactUri: null;
+    icebergReady: false;
+    mlflowRegistered: false;
+    modelTrained: false;
+  };
+  counts: {
+    total: number;
+    included: number;
+    excluded: number;
+    exclusionSummary: Record<string, number>;
+  };
+  samples: DatasetManifestSample[];
+}
+
+export interface DatasetSnapshot extends DatasetSnapshotSummary {
+  datasetId: string;
+  datasetCode: string;
+  datasetVersion: string;
+  datasetName: string;
+  tenantId: string;
+  plantId: string;
+  lineIds: string[];
+  predictionTimePolicy: 'AUTOMATIC_BATCH_START';
+  ruleVersionIds: string[];
+  excludeLowConfidence: boolean;
+  definitionChecksum: string;
+  manifestSchemaVersion?: string | null;
+  manifest?: DatasetManifest | null;
+  exclusionSummary?: Record<string, number> | null;
+  artifactUri?: null;
+  requestedBy: string;
+  requestReason: string;
+  startedAt?: string | null;
+  attemptCount: number;
+}

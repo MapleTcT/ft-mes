@@ -469,6 +469,51 @@ td > svg { width: 16px; color: #8b96a1; }
 .editor-fields .editor-field--wide textarea { min-height: 82px; }
 .editor-fields .editor-field--wide textarea[id$="definition"], .editor-fields #rule-ast, .editor-fields #point-import-json { min-height: 210px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 11px; line-height: 1.5; }
 
+.dataset-phase-badge { min-height: 36px; display: inline-grid; grid-template-columns: 18px auto auto; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid #9fc8b1; background: #eef8f2; color: #315d45; font-size: 10px; }
+.dataset-phase-badge svg { width: 15px; color: var(--green); }
+.dataset-phase-badge span { font-weight: 750; }
+.dataset-phase-badge b { padding-left: 8px; border-left: 1px solid #b9d9c6; color: #587263; font-weight: 600; }
+.dataset-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 12px; background: var(--line); border: 1px solid var(--line); gap: 1px; }
+.dataset-summary > div { min-height: 66px; display: grid; align-content: center; gap: 5px; padding: 10px 14px; background: #fff; }
+.dataset-summary span { color: var(--muted); font-size: 10px; }
+.dataset-summary b { font-size: 20px; }
+.dataset-table { min-width: 1420px; }
+.dataset-table th:first-child { width: 240px; }
+.dataset-table th:nth-child(2) { width: 150px; }
+.dataset-table th:nth-child(3) { width: 210px; }
+.dataset-table th:last-child { width: 126px; }
+.dataset-row-action { height: 30px; padding: 0 8px; font-size: 11px; }
+.dataset-checksum { font-family: "SFMono-Regular", Consolas, monospace; font-size: 10px; }
+.dataset-dialog { width: min(900px, calc(100vw - 32px)); }
+.dataset-ref-fieldset { min-width: 0; margin: 0; padding: 11px; border: 1px solid var(--line); }
+.dataset-ref-fieldset legend { padding: 0 5px; color: #4a5662; font-size: 11px; }
+.dataset-ref-fieldset > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; }
+.dataset-ref-fieldset label { min-width: 0; display: flex; align-items: center; gap: 7px; color: #43505d; font-size: 10px; }
+.dataset-ref-fieldset input, .dataset-checkbox input { width: 16px; height: 16px; accent-color: var(--blue); }
+.dataset-checkbox { min-height: 36px; display: flex !important; flex-direction: row !important; align-items: center; gap: 8px !important; padding: 8px 0 !important; }
+.dataset-checkbox span { color: #43505d; font-size: 11px; }
+.dataset-ref-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.dataset-ref-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.dataset-ref-list li { min-width: 0; padding: 7px 8px; background: #f7f9fa; border: 1px solid var(--line); }
+.dataset-ref-list code { overflow-wrap: anywhere; color: #31556f; font-size: 10px; }
+.dataset-latest { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; align-items: center; padding: 12px; background: #f7f9fa; border: 1px solid var(--line); }
+.dataset-latest > div { display: flex; align-items: center; gap: 8px; }
+.dataset-latest > b { justify-self: end; font-size: 11px; }
+.dataset-latest > code { min-width: 0; overflow-wrap: anywhere; color: #31556f; font-size: 9px; }
+.dataset-latest > button { justify-self: end; }
+.dataset-phase-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; padding: 1px; background: var(--line); }
+.dataset-phase-grid > div { min-width: 0; min-height: 66px; display: grid; align-content: center; gap: 6px; padding: 10px 12px; background: #fff; }
+.dataset-phase-grid span { color: var(--muted); font-size: 10px; }
+.dataset-phase-grid b { overflow-wrap: anywhere; font-size: 11px; }
+.dataset-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.dataset-exclusion-list { display: grid; gap: 1px; margin: 12px 0 0; padding: 1px; background: var(--line); list-style: none; }
+.dataset-exclusion-list li { min-height: 34px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 0 10px; background: #fff; }
+.dataset-exclusion-list code { overflow-wrap: anywhere; color: #6f4b0f; font-size: 9px; }
+.dataset-exclusion-list b { font-size: 11px; }
+.dataset-sample-frame table { min-width: 900px; }
+.dataset-sample-frame th:first-child { width: 190px; }
+.dataset-sample-frame th:last-child { width: 260px; }
+
 .toast { position: fixed; z-index: 80; top: 86px; right: 22px; max-width: min(460px, calc(100vw - 44px)); padding: 12px 16px; background: #183d2c; color: #fff; border-left: 4px solid #59b987; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transform: translateY(-8px); transition: 150ms ease-out; font-size: 13px; }
 .toast.is-visible { opacity: 1; transform: translateY(0); }
 .toast.is-error { background: #502229; border-left-color: #ee7b84; }
@@ -489,7 +534,7 @@ td > svg { width: 16px; color: #8b96a1; }
   .console-shell { display: block; }
   .side-nav { position: fixed; z-index: 30; top: auto; bottom: 0; width: 100%; height: 58px; display: block; border-top: 1px solid #0d141c; }
   .brand-mark, .mode-flag { display: none; }
-  .side-nav nav { height: 58px; grid-template-columns: repeat(8, 1fr); padding: 4px 4px; }
+  .side-nav nav { height: 58px; grid-template-columns: repeat(9, 1fr); padding: 4px 4px; }
   .nav-item { height: 48px; grid-template-columns: 1fr; justify-items: center; padding: 0; }
   .nav-item span { display: none; }
   .nav-item.is-active::before { left: 25%; bottom: -4px; width: 50%; height: 2px; }
@@ -528,6 +573,10 @@ td > svg { width: 16px; color: #8b96a1; }
   .shadow-run-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .feature-flag-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .feature-flag-summary > div { border-bottom: 1px solid var(--line); }
+  .dataset-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dataset-ref-fieldset > div, .dataset-ref-columns, .dataset-phase-grid { grid-template-columns: 1fr; }
+  .dataset-latest { grid-template-columns: 1fr; }
+  .dataset-latest > b, .dataset-latest > button { justify-self: start; }
   .feature-flag-toolbar .toolbar-actions { grid-template-columns: 1fr 44px; }
   .feature-flag-toolbar .segmented { grid-column: 1 / -1; width: 100%; }
   .feature-flag-toolbar .segmented button { min-width: 0; }

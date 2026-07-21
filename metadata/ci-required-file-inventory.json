@@ -5109,6 +5109,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-dataset-manifest.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-iot-replay-runtime-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5500,6 +5506,12 @@
     {
       "ignored": false,
       "path": "docs/testing/bpi-data-quality-workbench-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/bpi-dataset-manifest-acceptance.md",
       "state": "tracked",
       "tracked": true
     },
@@ -5932,6 +5944,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-data-quality-workbench-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-manifest-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -7557,6 +7575,24 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilder.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestProcessor.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/FeatureFlagService.java",
       "state": "tracked",
       "tracked": true
@@ -7798,6 +7834,48 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DataQualitySummary.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetDefinitionView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetManifestBuild.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetManifestClaim.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetManifestSample.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetSampleSource.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetSnapshotSummary.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetSnapshotView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8169,6 +8247,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataset/DatasetManifestDispatcher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataset/DatasetManifestProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/BpiPhase2IntegrationProperties.java",
       "state": "tracked",
       "tracked": true
@@ -8290,6 +8380,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DataQualityPostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8440,6 +8536,24 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DataQualityController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetDefinitionCreateCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetSnapshotCommand.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8727,6 +8841,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V26__bpi_dataset_manifest_workbench.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V2__bpi_tenant_and_runtime_hardening.sql",
       "state": "tracked",
       "tracked": true
@@ -8782,6 +8902,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityTargetMarkerProducerTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDatasetManifestPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8926,6 +9052,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/CanonicalJsonTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilderTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -9917,13 +10049,13 @@
       "tracked": 625
     },
     "docs": {
-      "tracked": 120
+      "tracked": 122
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 209
+      "tracked": 210
     },
     "package.json": {
       "tracked": 1
@@ -9935,7 +10067,7 @@
       "tracked": 55
     },
     "services": {
-      "tracked": 306
+      "tracked": 325
     },
     "simulation": {
       "tracked": 4
@@ -9947,8 +10079,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1648,
-    "tracked": 1648,
+    "totalFiles": 1670,
+    "tracked": 1670,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-21T05:48:15+08:00",
-  "repoCommit": "bcf40e2f91a18163fb8523598d06a980414d9ce6",
-  "workingTree": "clean-at-source-commit",
+  "generatedAt": "2026-07-22T04:45:13+08:00",
+  "repoCommit": "8e13071e245cf06ae063d4fb26cd030d33cf52c4+v26-working-tree",
+  "workingTree": "V26 dataset manifest acceptance candidate",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
     "path": "frontend/apps/bpi",
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 18,
-    "pass": 18,
+    "browserTests": 20,
+    "pass": 20,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -417,12 +417,40 @@
       "status": "PASS",
       "expectedFailureEvidence": "one controlled Chromium 503 network console message; zero unexpected errors",
       "evidence": "/tmp/bpi-console-batch-quality-inventory-mobile.png"
+    },
+    {
+      "id": "desktop-mobile-dataset-manifest",
+      "viewport": "1440x900 and 390x844",
+      "routes": [
+        "/bpi/#/datasets"
+      ],
+      "operations": [
+        "create a versioned dataset definition from controlled feature and label references",
+        "queue a point-in-time snapshot with an immutable freeze time and approved source scope",
+        "poll from QUEUED to MANIFEST_READY",
+        "inspect one included and two excluded samples with stable exclusion reasons",
+        "verify the same frozen facts produce the same manifest checksum",
+        "verify MANIFEST_ONLY, NOT_STARTED and false Iceberg, MLflow and model readiness",
+        "open the definition and manifest drawers at desktop and mobile sizes without page overflow"
+      ],
+      "apis": [
+        "GET /bpi/v1/datasets",
+        "POST /bpi/v1/datasets",
+        "POST /bpi/v1/datasets/{id}/snapshots",
+        "GET /bpi/v1/dataset-snapshots/{id}"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-dataset-manifest-desktop.png",
+      "additionalEvidence": [
+        "/tmp/bpi-dataset-manifest-mobile.png",
+        "metadata/bpi-dataset-manifest-acceptance.json"
+      ]
     }
   ],
   "persistence": {
     "performed": false,
     "reason": "The browser suite uses the deterministic in-memory simulator and does not claim database persistence.",
-    "separateEvidence": "metadata/bpi-phase1-persistence-acceptance.json, metadata/bpi-rule-management-acceptance.json, metadata/bpi-topology-rule-productization-acceptance.json, metadata/bpi-shadow-run-acceptance.json and metadata/bpi-force-close-target-acceptance.json"
+    "separateEvidence": "metadata/bpi-phase1-persistence-acceptance.json, metadata/bpi-rule-management-acceptance.json, metadata/bpi-topology-rule-productization-acceptance.json, metadata/bpi-shadow-run-acceptance.json, metadata/bpi-dataset-manifest-acceptance.json and metadata/bpi-force-close-target-acceptance.json"
   },
   "limitations": [
     "Browser APIs were served by the deterministic simulator, not the Java 17 BPI service.",

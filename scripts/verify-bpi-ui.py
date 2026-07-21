@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 UI = ROOT / "frontend/apps/bpi"
 ACCEPTANCE = ROOT / "metadata/bpi-ui-acceptance.json"
 QUALITY_INVENTORY_ACCEPTANCE = ROOT / "metadata/bpi-quality-inventory-ui-acceptance.json"
+DATASET_MANIFEST_ACCEPTANCE = ROOT / "metadata/bpi-dataset-manifest-acceptance.json"
 REQUIRED = [
     "README.md",
     "package.json",
@@ -34,6 +35,8 @@ def main() -> int:
         failures.append("missing BPI UI acceptance evidence: metadata/bpi-ui-acceptance.json")
     if not QUALITY_INVENTORY_ACCEPTANCE.is_file():
         failures.append("missing BPI quality/inventory UI acceptance evidence")
+    if not DATASET_MANIFEST_ACCEPTANCE.is_file():
+        failures.append("missing BPI dataset manifest UI acceptance evidence")
 
     if not failures:
         package = json.loads((UI / "package.json").read_text(encoding="utf-8"))
@@ -45,7 +48,7 @@ def main() -> int:
                 failures.append(f"BPI UI package is missing {name!r} script")
 
         api = (UI / "src/api.ts").read_text(encoding="utf-8")
-        for required in ("const API_ROOT = '/bpi-api'", "localStorage.getItem('ticket')", "Idempotency-Key", "If-Match", "rejectCandidate", "suspendBatch", "resumeBatch", "forceCloseTask", "forceCloseBatch", "batchRelease", "featureFlags", "changeFeatureFlag", "simulateRule", "publishRule", "topologies", "createTopologyDraft", "validateTopology", "publishTopology", "createRuleDraft", "currentPointCatalog", "options?.cursor", "options?.search", "listPointCalibrations", "submitPointCalibration", "approvePointCalibration", "rejectPointCalibration", "revokePointCalibration", "shadowRuns", "createShadowRun", "reviewShadowRunBatch", "startShadowRun", "completeShadowRun", "approveShadowRun", "rejectShadowRun", "cancelShadowRun"):
+        for required in ("const API_ROOT = '/bpi-api'", "localStorage.getItem('ticket')", "Idempotency-Key", "If-Match", "rejectCandidate", "suspendBatch", "resumeBatch", "forceCloseTask", "forceCloseBatch", "batchRelease", "featureFlags", "changeFeatureFlag", "simulateRule", "publishRule", "topologies", "createTopologyDraft", "validateTopology", "publishTopology", "createRuleDraft", "currentPointCatalog", "options?.cursor", "options?.search", "listPointCalibrations", "submitPointCalibration", "approvePointCalibration", "rejectPointCalibration", "revokePointCalibration", "shadowRuns", "createShadowRun", "reviewShadowRunBatch", "startShadowRun", "completeShadowRun", "approveShadowRun", "rejectShadowRun", "cancelShadowRun", "datasets", "createDatasetDefinition", "createDatasetSnapshot", "datasetSnapshot"):
             if required not in api:
                 failures.append(f"BPI UI API client is missing {required!r}")
         forbidden = ("BPI_INTERNAL_JWT_SECRET", "http://bpi-service", "https://bpi-service")
@@ -57,7 +60,7 @@ def main() -> int:
                         failures.append(f"{path.relative_to(ROOT)} exposes forbidden marker {marker!r}")
 
         e2e = (UI / "tests/bpi-console.e2e.cjs").read_text(encoding="utf-8")
-        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "/tmp/bpi-console-candidate-rejected.png", "/tmp/bpi-console-batch-lifecycle.png", "/tmp/bpi-console-force-close.png", "/tmp/bpi-console-end-boundary.png", "/tmp/bpi-console-feature-flags.png", "/tmp/bpi-console-point-catalog-pagination.png", "/tmp/bpi-console-point-calibration-governance.png", "/tmp/bpi-console-rule-published.png", "/tmp/bpi-console-rule-application-applied.png", "/tmp/bpi-console-rule-publication-blocked.png", "/tmp/bpi-console-shadow-run-approved.png", "/tmp/bpi-console-batch-quality-inventory.png", "/tmp/bpi-console-batch-quality-inventory-mobile.png", "getBatchRelease", "WMS_LOCATION_LOCKED", "ADP-E2E-RELEASE-TRACE-503", "CLOSED_RAW", "END_BOUNDARY_CONFIRMED", "PENDING_APPROVAL", "批准并强制结束", "bpi.wms-link", "overrideRevision", "sourceCalibrationStatus", "calibrationEvidenceId", "REVOKED", "point catalog incrementally loads a pinned snapshot", "property.0204", "wrongSearch.status, 422", "rule-runtime-readiness", "DEGRADED", "runtimeReadinessStatus", "UNRESOLVED_CRITICAL_DATA_QUALITY", "boundaryAgreement", "externalWrites", "document.documentElement.scrollWidth"):
+        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "/tmp/bpi-console-candidate-rejected.png", "/tmp/bpi-console-batch-lifecycle.png", "/tmp/bpi-console-force-close.png", "/tmp/bpi-console-end-boundary.png", "/tmp/bpi-console-feature-flags.png", "/tmp/bpi-console-point-catalog-pagination.png", "/tmp/bpi-console-point-calibration-governance.png", "/tmp/bpi-console-rule-published.png", "/tmp/bpi-console-rule-application-applied.png", "/tmp/bpi-console-rule-publication-blocked.png", "/tmp/bpi-console-shadow-run-approved.png", "/tmp/bpi-console-batch-quality-inventory.png", "/tmp/bpi-console-batch-quality-inventory-mobile.png", "/tmp/bpi-dataset-manifest-desktop.png", "/tmp/bpi-dataset-manifest-mobile.png", "getBatchRelease", "WMS_LOCATION_LOCKED", "ADP-E2E-RELEASE-TRACE-503", "CLOSED_RAW", "END_BOUNDARY_CONFIRMED", "PENDING_APPROVAL", "批准并强制结束", "bpi.wms-link", "overrideRevision", "sourceCalibrationStatus", "calibrationEvidenceId", "REVOKED", "point catalog incrementally loads a pinned snapshot", "property.0204", "wrongSearch.status, 422", "rule-runtime-readiness", "DEGRADED", "runtimeReadinessStatus", "UNRESOLVED_CRITICAL_DATA_QUALITY", "boundaryAgreement", "externalWrites", "data engineer creates a point-in-time dataset manifest", "MANIFEST_READY", "MANIFEST_ONLY", "modelTrained", "document.documentElement.scrollWidth"):
             if required not in e2e:
                 failures.append(f"BPI UI E2E is missing {required!r} evidence")
 
@@ -66,8 +69,8 @@ def main() -> int:
             failures.append("BPI UI acceptance must declare its deterministic simulator scope")
         summary = acceptance.get("summary", {})
         browser_tests = summary.get("browserTests", 0)
-        if browser_tests < 18 or summary.get("pass") != browser_tests or summary.get("fail") != 0:
-            failures.append("BPI UI acceptance must record at least eighteen browser tests with every test passing")
+        if browser_tests < 20 or summary.get("pass") != browser_tests or summary.get("fail") != 0:
+            failures.append("BPI UI acceptance must record at least twenty browser tests with every test passing")
         item_ids = {item.get("id") for item in acceptance.get("items", [])}
         if "desktop-topology-rule-productization" not in item_ids:
             failures.append("BPI UI acceptance must cover topology and rule productization")
@@ -89,6 +92,8 @@ def main() -> int:
             failures.append("BPI UI acceptance must cover governed batch force-close")
         if "mobile-batch-release-partial-failure" not in item_ids:
             failures.append("BPI UI acceptance must cover local release failure and mobile recovery")
+        if "desktop-mobile-dataset-manifest" not in item_ids:
+            failures.append("BPI UI acceptance must cover the desktop/mobile point-in-time dataset manifest workbench")
         rule_item = next(
             (item for item in acceptance.get("items", [])
              if item.get("id") == "desktop-rule-replay-and-publication"),
@@ -117,6 +122,19 @@ def main() -> int:
         for required in ("simulator", "QCS", "WMS", "target"):
             if required not in quality_limitations:
                 failures.append(f"BPI quality/inventory UI limitations are missing {required!r}")
+
+        dataset_acceptance = json.loads(DATASET_MANIFEST_ACCEPTANCE.read_text(encoding="utf-8"))
+        if dataset_acceptance.get("status") != "PASS_LOCAL_BROWSER_API_POSTGRES_MANIFEST_ONLY":
+            failures.append("BPI dataset acceptance must preserve the manifest-only local boundary")
+        dataset_summary = dataset_acceptance.get("summary", {})
+        if (dataset_summary.get("browserTests") != 20
+                or dataset_summary.get("browserFailures") != 0
+                or dataset_summary.get("postgresAcceptanceFailures") != 0):
+            failures.append("BPI dataset browser or PostgreSQL acceptance summary is incomplete")
+        dataset_limitations = " ".join(dataset_acceptance.get("limitations", []))
+        for required in ("simulator", "target ADP", "Iceberg", "MLflow", "model"):
+            if required not in dataset_limitations:
+                failures.append(f"BPI dataset acceptance limitations are missing {required!r}")
 
     if failures:
         print("\n".join(f"BPI UI error: {item}" for item in failures), file=sys.stderr)

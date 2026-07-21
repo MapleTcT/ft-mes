@@ -7,6 +7,7 @@ Modules:
 
 - `batch-rule-runtime`: framework-free deterministic rule primitives shared by live and replay jobs.
 - `app`: REST, application services, PostgreSQL repositories and Flyway migrations.
+- `wms-adapter`: disabled-by-default Java 17 Kafka/HTTP adapter for the material WMS boundary.
 
 The Phase 1 service accepts boundary candidates through an internal replay/event-ingest boundary.
 START confirmation creates one `ACTIVE` shadow batch per tenant/line; END confirmation closes the
@@ -80,6 +81,15 @@ failed task and allow a new independently approved attempt with a distinct comma
 V15 rule-lifecycle outbox index is narrowed to rule publication events so legitimate red-command
 retries are not blocked. Phase 2, WMS outbox and WMS link gates remain disabled by default.
 
+Flyway V26 starts Phase 3A with a governed point-in-time dataset manifest workbench. Engineers create
+immutable definitions from controlled feature and label references, then freeze snapshots only over
+approved shadow-run reviews visible at the requested time. The worker uses a recoverable
+`FOR UPDATE SKIP LOCKED` claim, persists included and excluded samples, prevents label fields from
+entering feature payloads, records stable exclusion reasons and produces a deterministic manifest
+checksum. Definitions, terminal snapshots and samples are immutable. This phase deliberately stops
+at `MANIFEST_ONLY`: materialization remains `NOT_STARTED`, `artifactUri` is null and Iceberg, MLflow
+and model readiness remain false.
+
 ```bash
 make bpi-service-test
 ```
@@ -111,6 +121,16 @@ The focused shadow-run lifecycle test uses a fresh PostgreSQL schema migrated th
 ```bash
 JAVA_HOME=/path/to/jdk17 mvn -f services/bpi-service/pom.xml -pl :bpi-service -am \
   -Dtest=BpiShadowRunPostgresAcceptanceTest \
+  -Dsurefire.failIfNoSpecifiedTests=false test
+```
+
+The focused Phase 3A dataset-manifest acceptance uses a fresh PostgreSQL schema migrated through V26:
+
+```bash
+JAVA_HOME=/path/to/jdk17 BPI_TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/ft_mes_bpi_test \
+  BPI_TEST_DATABASE_USER=bpi_test BPI_TEST_DATABASE_PASSWORD=... \
+  mvn -f services/bpi-service/pom.xml -pl :bpi-service -am \
+  -Dtest=BpiDatasetManifestPostgresAcceptanceTest \
   -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 

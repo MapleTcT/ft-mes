@@ -58,6 +58,10 @@
     "getDataQualityIncident",
     "acknowledgeDataQualityIncident",
     "resolveDataQualityIncident",
+    "listDatasets",
+    "createDatasetDefinition",
+    "createDatasetSnapshot",
+    "getDatasetSnapshot",
     "getIntegrationHealth"
   ]
 }

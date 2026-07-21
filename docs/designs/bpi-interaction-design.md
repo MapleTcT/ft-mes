@@ -324,14 +324,19 @@ point catalog 时可用。批次复核只列出同 scope、同规则/拓扑版�
 
 ### 5.10 训练数据集 `/bpi/datasets`
 
-数据集定义列表显示特征版本、标签版本、prediction time、允许批次状态、排除规则和最近快照。
-创建快照时选择冻结时间、工厂/产线/工段、规则版本和数据范围。预检必须显示：低置信度批次数、
-人工修订数、缺标签数、未来信息泄漏风险和估算输出规模。
+数据工程师先创建不可变定义：编码、版本、工厂/产线、特征字段、标签字段、最大标签延迟、最低置信度，
+并固定 `AUTOMATIC_BATCH_START` prediction time、`AT_OR_BEFORE_PREDICTION_TIME` 特征截止和
+`PRODUCTION_TIME` 拆分策略。列表显示最近快照状态、冻结时间和 manifest checksum。
 
-快照为后台任务，页面关闭后继续。结果展示 manifest、checksum、Iceberg snapshot、MLflow run、
-排除统计和下载入口。已发布快照不可覆盖。
+创建快照时选择冻结时间、定义内产线、可选规则版本并决定是否排除低置信度样本。任务按
+`QUEUED -> BUILDING -> MANIFEST_READY/FAILED` 在后台推进；结果展示纳入/排除数量、逐项排除原因、
+point-in-time 样本、manifest 和 checksum。定义、清单样本和终态快照均不可覆盖。
 
-**主要 API：** `listDatasets`、`createDatasetSnapshot`、`getDatasetSnapshot`。
+Phase 3A 的产品边界固定为 `MANIFEST_ONLY / NOT_STARTED`：`artifactUri=null`、`icebergReady=false`、
+`mlflowRegistered=false`、`modelTrained=false`。页面不得把 manifest 就绪展示成 Iceberg 物化、
+MLflow 注册或模型训练完成。
+
+**主要 API：** `listDatasets`、`createDatasetDefinition`、`createDatasetSnapshot`、`getDatasetSnapshot`。
 
 ### 5.11 集成运行 `/bpi/integrations`
 
