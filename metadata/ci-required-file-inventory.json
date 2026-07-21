@@ -3507,6 +3507,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3640,6 +3646,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-entity-model-config-crud-readiness-probe.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -6262,6 +6274,12 @@
     {
       "ignored": false,
       "path": "metadata/entity-model-config-crud-readiness-probe.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/entity-model-field-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -9530,7 +9548,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 606
+      "tracked": 608
     },
     "docs": {
       "tracked": 113
@@ -9539,7 +9557,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 185
+      "tracked": 186
     },
     "package.json": {
       "tracked": 1
@@ -9563,8 +9581,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1584,
-    "tracked": 1584,
+    "totalFiles": 1587,
+    "tracked": 1587,
     "untracked": 0
   },
   "untrackedByDirectory": []

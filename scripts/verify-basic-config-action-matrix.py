@@ -15,6 +15,7 @@ BUILTINS_PATH = ROOT / "metadata/systemconfig-builtins-readiness-smoke.json"
 RUNTIME_CONFIG_PATH = ROOT / "metadata/runtime-configuration-readiness-smoke.json"
 CUSTOM_PROPERTY_PATH = ROOT / "metadata/custom-property-persistence-acceptance.json"
 ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persistence-acceptance.json"
+ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
 PRODUCTION_MATRIX_PATH = ROOT / "metadata/production-module-test-cases.json"
 
 ALLOWED_STATUSES = {
@@ -46,6 +47,7 @@ REQUIRED_ACTION_IDS = {
     "entity-model-edit",
     "entity-model-delete",
     "entity-model-postgres-physical-table-autocreate",
+    "entity-model-postgres-field-sync",
     "nacos-production-export-diff",
     "keycloak-production-realm-migration",
 }
@@ -314,6 +316,7 @@ def check_coverage_alignment(matrix: dict[str, Any], failures: list[str]) -> Non
         "systemconfig-built-in-catalogs": "PARTIAL",
         "configuration-entity-runtime": "PASS",
         "configuration-physical-model-table": "PASS",
+        "configuration-physical-model-field": "PASS",
         "nacos-keycloak-production-config": "PARTIAL",
     }
     for area_id, expected_status in required_area_status.items():
@@ -804,6 +807,122 @@ def check_entity_model_physical_table_acceptance(
             fail(failures, f"entity/model physical-table acceptance states missing {state_key}")
 
 
+def check_entity_model_field_acceptance(
+    actions: dict[str, dict[str, Any]],
+    failures: list[str],
+) -> None:
+    action_id = "entity-model-postgres-field-sync"
+    area_id = "configuration-physical-model-field"
+    action = actions.get(action_id)
+    if not action:
+        return
+    if action.get("status") != "PASS":
+        fail(failures, f"{action_id} must be PASS after field lifecycle acceptance")
+    if action.get("areaId") != area_id:
+        fail(failures, f"{action_id} areaId must be {area_id}")
+    if action.get("route") != "/msService/ec/engine/msManage":
+        fail(failures, f"{action_id} route must be /msService/ec/engine/msManage")
+    if action.get("requiresPersistence") is not True:
+        fail(failures, f"{action_id} requiresPersistence must be true")
+
+    refs = set(as_list(action.get("evidenceRefs")))
+    for required_ref in (
+        "metadata/entity-model-field-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
+        "metadata/persistence-acceptance.json",
+        "metadata/basic-config-coverage.json",
+    ):
+        if required_ref not in refs:
+            fail(failures, f"{action_id} evidenceRefs must include {required_ref}")
+    tables = set(str(table) for table in as_list(action.get("tables")))
+    for required_table in ("ec_property", "information_schema.columns", "pg_index", "generated_model_physical_table"):
+        if required_table not in tables:
+            fail(failures, f"{action_id} tables must include {required_table}")
+
+    report = read_json(
+        ENTITY_MODEL_FIELD_PERSISTENCE_PATH,
+        failures,
+        "entity/model PostgreSQL field persistence acceptance report",
+    )
+    if not report:
+        return
+    for key, expected in (
+        ("database", "PostgreSQL"),
+        ("module", "basic-config"),
+        ("actionId", action_id),
+        ("areaId", area_id),
+        ("status", "PASS"),
+        ("route", "/msService/ec/engine/msManage"),
+    ):
+        if report.get(key) != expected:
+            fail(failures, f"field persistence report {key} must be {expected}")
+    marker = str(report.get("marker", ""))
+    if not marker.startswith("ADP_E2E_") or "PG_FIELD" not in marker:
+        fail(failures, "field persistence marker must be ADP_E2E_*_PG_FIELD")
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    for key, expected in (("testedChecks", 9), ("pass", 9), ("fail", 0), ("blocked", 0), ("status", "PASS")):
+        if summary.get(key) != expected:
+            fail(failures, f"field persistence summary.{key} must be {expected}")
+
+    required_checks = {
+        "browser-page-context",
+        "create-requests",
+        "field-metadata-created",
+        "postgres-column-created-and-indexed",
+        "marker-row-written",
+        "field-renamed-widened-and-data-preserved",
+        "field-idempotent-replay",
+        "unsafe-type-change-rolled-back",
+        "controlled-cleanup",
+    }
+    passed_checks = {
+        str(check.get("name"))
+        for check in as_list(report.get("checks"))
+        if isinstance(check, dict) and check.get("status") == "PASS"
+    }
+    missing_checks = sorted(required_checks - passed_checks)
+    if missing_checks:
+        fail(failures, "field persistence acceptance missing PASS checks: " + ", ".join(missing_checks))
+
+    requests = report.get("requests") if isinstance(report.get("requests"), dict) else {}
+    for request_key in ("entityCreate", "modelCreate", "fieldCreate", "fieldRenameAndWiden", "fieldIdempotentReplay"):
+        request = requests.get(request_key)
+        if not isinstance(request, dict) or request.get("responseStatus") != 200:
+            fail(failures, f"field persistence request {request_key} must return HTTP 200")
+    unsafe_request = requests.get("unsafeTypeChange")
+    if not isinstance(unsafe_request, dict) or unsafe_request.get("responseStatus") != 500:
+        fail(failures, "unsafe field type conversion must fail closed with HTTP 500")
+
+    browser = report.get("browser") if isinstance(report.get("browser"), dict) else {}
+    if browser.get("navigationStatus") != 200 or browser.get("visibleError"):
+        fail(failures, "field persistence browser evidence must load without a visible error")
+    for key in ("pageErrors", "requestFailures"):
+        if as_list(browser.get(key)):
+            fail(failures, f"field persistence browser {key} must be empty")
+    unexpected_network = [
+        item
+        for item in as_list(browser.get("networkErrors"))
+        if not isinstance(item, dict) or item.get("expected") is not True
+    ]
+    if unexpected_network:
+        fail(failures, "field persistence browser must not contain unexpected network errors")
+
+    trace_text = json.dumps(report.get("backendTrace", {}), ensure_ascii=False)
+    for fragment in ("FieldSyncDBUtils", "PostgresFieldSyncSupport", "ALTER TABLE", "roll back"):
+        if fragment not in trace_text:
+            fail(failures, f"field persistence backendTrace missing {fragment}")
+    sql_text = json.dumps(report.get("verificationSql", {}), ensure_ascii=False)
+    for fragment in ("ec_property", "information_schema.columns", "pg_index", "drop table"):
+        if fragment not in sql_text:
+            fail(failures, f"field persistence verificationSql missing {fragment}")
+    cleanup = report.get("cleanup") if isinstance(report.get("cleanup"), dict) else {}
+    for key in ("property", "model", "entity", "physicalTable"):
+        if cleanup.get(key) != 0:
+            fail(failures, f"field persistence cleanup.{key} must be 0")
+    if report.get("fatalError") is not None:
+        fail(failures, "field persistence acceptance fatalError must be null")
+
+
 def production_case_statuses(failures: list[str]) -> dict[str, str]:
     report = read_json(PRODUCTION_MATRIX_PATH, failures, "production module test matrix")
     statuses: dict[str, str] = {}
@@ -947,6 +1066,7 @@ def check_matrix(matrix: dict[str, Any], failures: list[str]) -> None:
     check_custom_property_acceptance(actions_by_id, failures)
     check_entity_model_persistence_acceptance(actions_by_id, failures)
     check_entity_model_physical_table_acceptance(actions_by_id, failures)
+    check_entity_model_field_acceptance(actions_by_id, failures)
     production_statuses = production_case_statuses(failures)
     for action_id in (
         "builtin-qcs-runtime-config",

@@ -16,6 +16,7 @@ SYSCONFIG_BUILTINS_PATH = ROOT / "metadata/systemconfig-builtins-readiness-smoke
 RUNTIME_CONFIG_PATH = ROOT / "metadata/runtime-configuration-readiness-smoke.json"
 CUSTOM_PROPERTY_PATH = ROOT / "metadata/custom-property-persistence-acceptance.json"
 ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persistence-acceptance.json"
+ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
 NACOS_CONFIG_PATH = ROOT / "metadata/nacos-config-drift-smoke.json"
 KEYCLOAK_JWT_PATH = ROOT / "metadata/keycloak-jwt-runtime-smoke.json"
 
@@ -26,6 +27,7 @@ REQUIRED_AREA_IDS = {
     "systemconfig-built-in-catalogs",
     "configuration-entity-runtime",
     "configuration-physical-model-table",
+    "configuration-physical-model-field",
     "nacos-keycloak-production-config",
 }
 SUMMARY_KEYS_BY_STATUS = {
@@ -103,7 +105,9 @@ def check_doc(failures: list[str]) -> None:
         "systemconfig-builtins-readiness-smoke.json",
         "runtime-configuration-readiness-smoke.json",
         "entity-model-config-crud-persistence-acceptance.json",
+        "entity-model-field-persistence-acceptance.json",
         "configuration-physical-model-table",
+        "configuration-physical-model-field",
         "nacos-config-drift-smoke.json",
         "keycloak-jwt-runtime-smoke.json",
         "PARTIAL",
@@ -760,6 +764,66 @@ def check_physical_model_table_acceptance(area: dict[str, Any], failures: list[s
             fail(failures, f"entity/model physical-table acceptance SQL missing {fragment}")
 
 
+def check_physical_model_field_acceptance(area: dict[str, Any], failures: list[str]) -> None:
+    area_id = "configuration-physical-model-field"
+    if not area:
+        return
+    if area.get("status") != "PASS":
+        fail(failures, f"{area_id} must be PASS after field lifecycle acceptance")
+    if area.get("route") != "/msService/ec/engine/msManage":
+        fail(failures, f"{area_id} route must be /msService/ec/engine/msManage")
+    if area.get("requiresPersistence") is not True:
+        fail(failures, f"{area_id} requiresPersistence must be true")
+    refs = set(as_list(area.get("evidenceRefs")))
+    for required_ref in (
+        "metadata/entity-model-field-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
+        "metadata/basic-config-action-matrix.json",
+    ):
+        if required_ref not in refs:
+            fail(failures, f"{area_id} evidenceRefs must include {required_ref}")
+    tables = set(str(table) for table in as_list(area.get("tables")))
+    for required_table in ("ec_property", "information_schema.columns", "pg_index", "generated_model_physical_table"):
+        if required_table not in tables:
+            fail(failures, f"{area_id} tables must include {required_table}")
+    if as_list(area.get("remainingGaps")):
+        fail(failures, f"{area_id} remainingGaps must be empty for its accepted scope")
+
+    report = read_json(
+        ENTITY_MODEL_FIELD_PERSISTENCE_PATH,
+        failures,
+        "entity/model PostgreSQL field persistence acceptance report",
+    )
+    if not report:
+        return
+    if report.get("areaId") != area_id or report.get("status") != "PASS":
+        fail(failures, f"field persistence report must PASS area {area_id}")
+    if report.get("database") != "PostgreSQL":
+        fail(failures, "field persistence report database must remain PostgreSQL")
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    if summary.get("testedChecks") != 9 or summary.get("pass") != 9 or summary.get("fail") != 0 or summary.get("blocked") != 0:
+        fail(failures, "field persistence report must retain 9/9 PASS with zero fail/blocked")
+    required_checks = {
+        "postgres-column-created-and-indexed",
+        "marker-row-written",
+        "field-renamed-widened-and-data-preserved",
+        "field-idempotent-replay",
+        "unsafe-type-change-rolled-back",
+        "controlled-cleanup",
+    }
+    passed_checks = {
+        str(check.get("name"))
+        for check in as_list(report.get("checks"))
+        if isinstance(check, dict) and check.get("status") == "PASS"
+    }
+    missing_checks = sorted(required_checks - passed_checks)
+    if missing_checks:
+        fail(failures, "field persistence coverage missing PASS checks: " + ", ".join(missing_checks))
+    cleanup = report.get("cleanup") if isinstance(report.get("cleanup"), dict) else {}
+    if any(cleanup.get(key) != 0 for key in ("property", "model", "entity", "physicalTable")):
+        fail(failures, "field persistence controlled cleanup must leave all marker counts at 0")
+
+
 def check_coverage(data: dict[str, Any], failures: list[str]) -> None:
     for key in (
         "schemaVersion",
@@ -830,6 +894,10 @@ def check_coverage(data: dict[str, Any], failures: list[str]) -> None:
     physical_model_table = area_by_id.get("configuration-physical-model-table", {})
     if physical_model_table:
         check_physical_model_table_acceptance(physical_model_table, failures)
+
+    physical_model_field = area_by_id.get("configuration-physical-model-field", {})
+    if physical_model_field:
+        check_physical_model_field_acceptance(physical_model_field, failures)
 
     nacos_keycloak = area_by_id.get("nacos-keycloak-production-config", {})
     if nacos_keycloak:

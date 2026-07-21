@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-21T04:33:34.652Z",
-  "repoCommit": "13ee71e5a4b12ae10eb19e275a0c72fe45aa0bbe",
+  "generatedAt": "2026-07-21T05:35:53.567Z",
+  "repoCommit": "c1bbaae8888b15cb07a4a4b3460eb918d60af7a8",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
-    "generatedAt": "2026-07-21T03:27:00.000Z",
+    "generatedAt": "2026-07-21T05:35:53.567Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -154,11 +154,17 @@
       "status": "PASS_TARGET",
       "evidence": "metadata/qcs-display-cold-restart-acceptance.json; metadata/qcs-inspect-list-display-current.png; metadata/qcs-report-edit-qualified-current.png; metadata/qcs-report-view-qualified-current.png; metadata/qcs-report-edit-unqualified-current.png; metadata/qcs-report-view-unqualified-current.png",
       "assertions": "ec.common.tableNo hidden; empty UUID column hidden; persisted qualified/unqualified selector label stable after 10 seconds; read-only conclusion visible; raw range key hidden; two healthy LIMSBasic providers after cold restart; WOM source compatibility endpoint 10/10 HTTP 200"
+    },
+    "configurationFieldSync": {
+      "status": "PASS_TARGET_POSTGRES_FIELD_LIFECYCLE_CLEANED",
+      "marker": "ADP_E2E_20260721053537_PG_FIELD",
+      "evidence": "metadata/entity-model-field-persistence-acceptance.json",
+      "assertions": "real /msService/ec/engine/msManage page; entity/model/field create; TEXT varchar(64) plus index; marker row; rename and widen to varchar(256) preserving data; idempotent replay one column/one index; unsafe TEXT to INTEGER HTTP 500 with metadata and DDL rollback; cleanup 0/0/0/0"
     }
   },
   "summary": {
-    "testedFeatures": 200,
-    "pass": 197,
+    "testedFeatures": 201,
+    "pass": 198,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -4407,9 +4413,36 @@
       "status": "PASS",
       "evidence": "metadata/qcs-report-chain-unqualified-current.json; all business requests HTTP 200; edit/view rendered 不合格; PostgreSQL report, WOM, batch and automatic treatment rows matched; console/page/request/failed response arrays empty; controlled cleanup PASS",
       "issues": []
+    },
+    {
+      "module": "基础配置-实体模型字段",
+      "route": "/msService/ec/engine/msManage",
+      "operation": "创建 TEXT 字段与索引、写入 marker 行、字段重命名与安全扩容、幂等重放、危险类型转换回滚和受控清理",
+      "api": "POST /msService/ec/entity/save; POST /msService/ec/model/save; POST /msService/ec/property/save",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PropertyController.save -> DtoUtils.getPropertyVO -> ModelServiceImpl.saveProperty -> FieldSyncDBUtils.fieldSyncToDb -> PostgresFieldSyncSupport.sync",
+      "tables": [
+        "public.ec_entity",
+        "public.ec_model",
+        "public.ec_property",
+        "information_schema.columns",
+        "pg_index",
+        "public.ds_e2ef_053537"
+      ],
+      "marker": "ADP_E2E_20260721053537_PG_FIELD",
+      "verificationSql": "Query ec_property by property code; query information_schema.columns for E2E_TXT_053537/E2E_TEXT_053537; query pg_index for the generated field index; query public.ds_e2ef_053537 id=1784612137520 for ADP_E2E_20260721053537_PG_FIELD_ROW; after controlled cleanup verify property/model/entity/physical table counts are all 0.",
+      "status": "PASS",
+      "evidence": "metadata/entity-model-field-persistence-acceptance.json; 9/9 PASS on 10.11.100.17; browser navigation 200; create/rename/widen/replay requests 200; expected unsafe conversion 500 rolled metadata and DDL back; marker data preserved; cleanup property/model/entity/table=0/0/0/0",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260721053537_PG_FIELD",
+      "artifact": "metadata/entity-model-field-persistence-acceptance.json",
+      "summary": "Real entity-model page, POST property lifecycle, PostgreSQL ec_property/column/index/marker-row verification, safe rename and widening, idempotent replay, expected unsafe-conversion rollback and four-category zero cleanup passed 9/9 on 10.11.100.17."
+    },
     {
       "marker": "ADP_E2E_20260721032432_QCS_QUAL",
       "artifact": "metadata/qcs-report-chain-qualified-current.json",

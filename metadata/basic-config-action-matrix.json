@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T04:33:34.652Z",
-  "repoCommit": "13ee71e5a4b12ae10eb19e275a0c72fe45aa0bbe",
+  "generatedAt": "2026-07-21T05:35:53.567Z",
+  "repoCommit": "c1bbaae8888b15cb07a4a4b3460eb918d60af7a8",
   "database": "PostgreSQL",
   "module": "basic-config",
   "goalId": "G-012",
   "overallStatus": "PARTIAL",
   "summary": {
-    "totalActions": 16,
-    "pass": 7,
+    "totalActions": 17,
+    "pass": 8,
     "readOnlyGuarded": 4,
     "controlledMarkerRequired": 3,
     "planned": 2,
@@ -766,6 +766,92 @@
           "make basic-config-action-matrix-check",
           "make basic-config-coverage-check",
           "ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_ENTITY_MODEL_TABLE_NAME=<marker-table> ADP_ENTITY_MODEL_CONFIG_CRUD_OUTPUT=metadata/entity-model-config-crud-persistence-acceptance.json node deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js"
+        ],
+        "currentGaps": []
+      },
+      "remainingGaps": []
+    },
+    {
+      "id": "entity-model-postgres-field-sync",
+      "areaId": "configuration-physical-model-field",
+      "title": "实体/模型配置 PostgreSQL 自定义字段同步",
+      "status": "PASS",
+      "mutationPolicy": "dedicated-marker-required",
+      "riskLevel": "high",
+      "route": "/msService/ec/engine/msManage",
+      "requiresPersistence": true,
+      "markerPattern": "ADP_E2E_*_PG_FIELD",
+      "tables": [
+        "ec_property",
+        "information_schema.columns",
+        "pg_index",
+        "generated_model_physical_table"
+      ],
+      "requiredBeforeMutation": [
+        "dedicated-marker",
+        "before-after-sql",
+        "rollback-plan",
+        "field-sync-postgresql-branch",
+        "runtime-page-regression"
+      ],
+      "evidenceRefs": [
+        "metadata/entity-model-field-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md",
+        "metadata/basic-config-coverage.json",
+        "docs/basic-config-coverage.md",
+        "docs/basic-config-action-matrix.md"
+      ],
+      "acceptedOperations": [
+        "real browser page context loaded and entity/model/field create requests returned HTTP 200",
+        "PostgreSQL created the TEXT field as varchar(64) with one index",
+        "a marker row was inserted and read through the generated physical column",
+        "field rename and safe widening to varchar(256) preserved marker data",
+        "idempotent replay retained one physical column and one index",
+        "unsafe TEXT to INTEGER conversion failed closed with HTTP 500 and rolled metadata plus DDL back",
+        "controlled cleanup removed property/model/entity metadata and the generated physical table"
+      ],
+      "acceptanceContract": {
+        "targetActionId": "entity-model-postgres-field-sync",
+        "scope": "create a dedicated TEXT field and verify PostgreSQL column/index creation, marker write, rename, widening, idempotent replay, incompatible conversion rollback and controlled cleanup",
+        "requiredTables": [
+          "ec_property",
+          "information_schema.columns",
+          "pg_index",
+          "generated_model_physical_table"
+        ],
+        "frontendRequirement": "Browser operation on /msService/ec/engine/msManage is required; metadata or HTTP 200 alone is not sufficient.",
+        "apiEvidenceRequired": [
+          "POST /msService/ec/property/save request payload",
+          "HTTP status and response body",
+          "expected HTTP 500 for incompatible type conversion"
+        ],
+        "backendTraceRequired": [
+          "PropertyController.save",
+          "ModelServiceImpl.saveProperty",
+          "FieldSyncDBUtils",
+          "PostgresFieldSyncSupport",
+          "ALTER TABLE, COMMENT and CREATE INDEX"
+        ],
+        "persistenceRequirement": "Use ADP_E2E_*_PG_FIELD and query ec_property, information_schema.columns, pg_index and the generated marker row before cleanup.",
+        "minimumPassConditions": [
+          "TEXT column and index exist in PostgreSQL",
+          "marker row survives rename and widening",
+          "idempotent replay creates no duplicate column or index",
+          "unsafe conversion rolls metadata and physical DDL back together",
+          "controlled cleanup leaves metadata and physical table counts at zero"
+        ],
+        "rollbackPlan": [
+          "Delete only marker-created ec_property/ec_model/ec_entity rows",
+          "Drop only the marker-created generated physical table",
+          "Verify metadata rows and information_schema table state are clean"
+        ],
+        "recheckCommands": [
+          "make acceptance-entity-model-field-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ENTITY_MODEL_FIELD_PERSISTENCE_OUTPUT=metadata/entity-model-field-persistence-acceptance.json",
+          "make basic-config-action-matrix-check",
+          "make basic-config-coverage-check"
         ],
         "currentGaps": []
       },

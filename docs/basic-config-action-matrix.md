@@ -11,7 +11,7 @@ make basic-config-action-matrix-check
 make entity-model-config-crud-readiness-check
 ```
 
-当前结论：基础配置动作矩阵仍是 `PARTIAL`。系统编码、普通 app 系统配置、低代码自定义字段模型映射、实体/模型元数据 CRUD，以及 PostgreSQL 基础物理模型表创建、重命名、扩列和幂等保存已完成写入验收；身份、授权、凭证和密码策略目录只能由只读 smoke 观察；QCS/RM/BaseSet
+当前结论：基础配置动作矩阵仍是 `PARTIAL`。系统编码、普通 app 系统配置、低代码自定义字段模型映射、实体/模型元数据 CRUD、PostgreSQL 基础物理模型表生命周期，以及 TEXT 字段新增/索引/重命名/安全扩容/幂等与危险转换回滚已完成写入验收；身份、授权、凭证和密码策略目录只能由只读 smoke 观察；QCS/RM/BaseSet
 运行配置后续新改动仍必须另做专用 marker、before/after SQL、回滚和业务回归；Nacos/Keycloak 生产迁移仍是计划项。
 
 | 动作 | 状态 | 写入策略 | 证据 | 完成前还需要 |
@@ -29,7 +29,8 @@ make entity-model-config-crud-readiness-check
 | 实体/模型配置新增 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js`、`metadata/runtime-configuration-readiness-smoke.json` | marker `ADP_E2E_20260721_1240_ENTITY_MODEL_PHYSICAL_TABLE` 已证明 `ec_entity=1`、`ec_model=1`、内置 `ec_property=3` 和基础物理表创建 |
 | 实体/模型配置编辑 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js`、`metadata/runtime-configuration-readiness-smoke.json` | 7 个写请求均 `HTTP 200/success=true`，PostgreSQL 证明 entity/model marker、物理表重命名、`extra_col` 和幂等重复保存 |
 | 实体/模型配置删除/禁用 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js`、`metadata/entity-model-config-crud-readiness-probe.json` | model/entity `ordinaryDelete` 均 `HTTP 200/success=true`，PostgreSQL 证明 entity/model/property 软删并受控清理为 0 |
-| 实体/模型 PostgreSQL 物理表自动创建 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`metadata/basic-config-coverage.json` | `ModelSyncDBUtils -> PostgresModelSyncSupport` 已通过真实页面/API/PG 验证创建、重命名、`extra_col` 扩展、12 列幂等重复保存、软删保留和受控清理；任意自定义字段类型 DDL 另行验收 |
+| 实体/模型 PostgreSQL 物理表自动创建 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`metadata/basic-config-coverage.json` | `ModelSyncDBUtils -> PostgresModelSyncSupport` 已通过真实页面/API/PG 验证创建、重命名、`extra_col` 扩展、12 列幂等重复保存、软删保留和受控清理 |
+| 实体/模型 PostgreSQL 自定义字段同步 | PASS | dedicated-marker-required | `metadata/entity-model-field-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js`、`metadata/persistence-acceptance.json` | marker `ADP_E2E_20260721053537_PG_FIELD` 已证明 TEXT 列和索引创建、marker 行、重命名、安全扩容、幂等重放、危险类型转换事务回滚和受控清理；自动删列、索引删除、唯一/非空约束变更及更广类型矩阵仍不在该动作范围 |
 | Nacos 生产配置 export/diff | PLANNED | production-evidence-required | `metadata/nacos-config-drift-smoke.json`、`deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json` | 生产 export/diff、漂移审阅、签名 patch、回退演练 |
 | Keycloak 生产 realm 迁移 | PLANNED | production-evidence-required | `metadata/keycloak-jwt-runtime-smoke.json`、`deploy/keycloak/production-migration/keycloak-migration-evidence.example.json` | realm inventory、数据库恢复演练、secret 轮换、JWT/Nacos 同步、登录 smoke、回滚 |
 
@@ -39,7 +40,9 @@ make entity-model-config-crud-readiness-check
 
 验收使用 marker `ADP_E2E_20260721_1240_ENTITY_MODEL_PHYSICAL_TABLE`，在 `10.11.100.17` 真实页面上下文打开 `/msService/ec/engine/msManage`，记录实体新增、模型新增、实体编辑、模型重命名/扩列、模型幂等重复保存、模型删除、实体删除 7 个写请求，全部返回 `HTTP 200/success=true`。后端链路追踪到 `ModelSyncDBUtils -> PostgresModelSyncSupport`；PostgreSQL 证明 `DS_E2E_124000` 创建后重命名为 `DS_E2E_124000_R`，加入 `extra_col`，重复保存后仍为 1 张表和 12 个唯一列，软删除不误删物理表，受控 marker 清理后元数据和物理表均为 0。
 
-边界仍要说清：这次关闭的是基础模型物理表创建/重命名/扩展与幂等路径，不代表 `FieldSyncDBUtils` 对任意自定义字段类型、索引、约束和字段删除都已完成 PostgreSQL 兼容；这些动作需另立 marker 验收，不能从本报告外推。
+字段级路径随后使用 marker `ADP_E2E_20260721053537_PG_FIELD` 完成独立验收。真实页面导航为 `200`，实体/模型/字段创建、字段重命名与安全扩容、幂等重放均返回 `200`；PostgreSQL 证明 `E2E_TXT_053537 varchar(64)` 和索引创建，marker 行在重命名为 `E2E_TEXT_053537` 并扩至 `varchar(256)` 后保持不变。`TEXT -> INTEGER` 危险转换按预期返回 `500`，`ec_property` 和物理列一起回滚，清理后 property/model/entity/table 均为 0。链路为 `PropertyController -> ModelServiceImpl -> FieldSyncDBUtils -> PostgresFieldSyncSupport`，证据见 `metadata/entity-model-field-persistence-acceptance.json`。
+
+边界仍要说清：当前关闭的是 TEXT 字段新增、索引创建、重命名、安全扩容、幂等和不兼容转换回滚。自动 `DROP COLUMN` 明确关闭，索引删除、唯一/非空约束变更及更广字段类型矩阵仍需分别验收，不能从本报告外推。
 
 2026-06-22 新增 `make smoke-entity-model-config-crud-readiness` 和
 `make entity-model-config-crud-readiness-check`。该 probe 会登录测试环境，打开

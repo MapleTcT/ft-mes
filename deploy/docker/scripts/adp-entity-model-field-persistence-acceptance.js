@@ -682,10 +682,16 @@ async function main() {
   ];
   const pass = checks.filter((item) => item.status === "PASS").length;
   const fail = checks.filter((item) => item.status === "FAIL").length;
+  const acceptanceStatus = fail === 0 && !fatalError ? "PASS" : fatalError ? "BLOCKED" : "FAIL";
   const report = {
+    schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     repoCommit: getRepoCommit(),
     database: "PostgreSQL",
+    module: "basic-config",
+    actionId: "entity-model-postgres-field-sync",
+    areaId: "configuration-physical-model-field",
+    status: acceptanceStatus,
     marker,
     route: pagePath,
     apiEndpoints: [
@@ -708,7 +714,7 @@ async function main() {
       pass,
       fail,
       blocked: fatalError ? 1 : 0,
-      status: fail === 0 && !fatalError ? "PASS" : fatalError ? "BLOCKED" : "FAIL",
+      status: acceptanceStatus,
     },
     checks,
     browser: browserEvidence,

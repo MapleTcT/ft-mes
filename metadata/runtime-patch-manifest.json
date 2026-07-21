@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T04:47:42+00:00",
-  "repoCommit": "13ee71e5a4b12ae10eb19e275a0c72fe45aa0bbe",
+  "generatedAt": "2026-07-21T05:51:13+00:00",
+  "repoCommit": "c1bbaae8888b15cb07a4a4b3460eb918d60af7a8",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 377,
-    "totalBytes": 55266647,
+    "totalFiles": 378,
+    "totalBytes": 55284010,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 196,
+      "postgres-init-sql": 197,
       "runtime-binary-patch": 8,
       "runtime-patch-source": 22,
       "runtime-script": 26,
@@ -19,10 +19,10 @@
     "bytesByCategory": {
       "nacos-config-template": 42353,
       "nginx-runtime-config": 27463,
-      "postgres-init-sql": 54239193,
-      "runtime-binary-patch": 123378,
+      "postgres-init-sql": 54239530,
+      "runtime-binary-patch": 139918,
       "runtime-patch-source": 88039,
-      "runtime-script": 278809,
+      "runtime-script": 279295,
       "runtime-static-override": 467412
     }
   },
@@ -1489,10 +1489,16 @@
       "sha256": "1bb82ec1d07c7c9b184826651e25cddf6335eb8a450784ada8e08c574bf5b532"
     },
     {
+      "path": "deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 337,
+      "sha256": "f583850af68305b41db7f314d874b8058f8890359cfaa0247676a0bde1caf3a2"
+    },
+    {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
       "category": "runtime-binary-patch",
-      "sizeBytes": 93390,
-      "sha256": "5e7ad915989f2e8d261beaa4c3b32e9f994f6d558a4160b87de73d971872ff5e"
+      "sizeBytes": 109930,
+      "sha256": "ca7b5f135a649110a504e92c87c3f1d526502800db252475168dcb22a7ffd97c"
     },
     {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
@@ -1695,8 +1701,8 @@
     {
       "path": "deploy/docker/scripts/patch-configuration-entity-model-runtime.py",
       "category": "runtime-script",
-      "sizeBytes": 5492,
-      "sha256": "8d5e56889b05c81e8f4fe89a074b725f196b0710d3b5b0bca670b0dc8295164d"
+      "sizeBytes": 5978,
+      "sha256": "5072f98b759f6977cbb5ed5c3dbd0168609fa6633d949c40261797f86b0f08e4"
     },
     {
       "path": "deploy/docker/scripts/patch-eam-patrol-runtime.py",

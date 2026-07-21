@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T04:33:34.652Z",
-  "repoCommit": "13ee71e5a4b12ae10eb19e275a0c72fe45aa0bbe",
+  "generatedAt": "2026-07-21T05:35:53.567Z",
+  "repoCommit": "c1bbaae8888b15cb07a4a4b3460eb918d60af7a8",
   "database": "PostgreSQL",
   "module": "basic-config",
   "goalId": "G-012",
   "overallStatus": "PARTIAL",
   "summary": {
-    "totalAreas": 6,
-    "pass": 4,
+    "totalAreas": 7,
+    "pass": 5,
     "partial": 2,
     "blocked": 0,
     "notRun": 0,
@@ -321,6 +321,52 @@
         "ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_ENTITY_MODEL_CONFIG_CRUD_OUTPUT=metadata/entity-model-config-crud-persistence-acceptance.json node deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js"
       ],
       "remainingGaps": []
+    },
+    {
+      "id": "configuration-physical-model-field",
+      "title": "实体/模型 PostgreSQL 自定义字段同步",
+      "status": "PASS",
+      "route": "/msService/ec/engine/msManage",
+      "requiresPersistence": true,
+      "acceptedOperations": [
+        "real browser page context and entity/model/field create requests returned HTTP 200",
+        "TEXT field created as varchar(64) with one PostgreSQL index",
+        "marker row written and read through the generated column",
+        "field rename and safe widening to varchar(256) preserved data",
+        "idempotent replay retained one column and one index",
+        "unsafe TEXT to INTEGER conversion returned expected HTTP 500 and rolled metadata plus DDL back",
+        "controlled cleanup left property/model/entity/physical table counts at zero"
+      ],
+      "apis": [
+        "POST /msService/ec/entity/save",
+        "POST /msService/ec/model/save",
+        "POST /msService/ec/property/save"
+      ],
+      "tables": [
+        "ec_property",
+        "information_schema.columns",
+        "pg_index",
+        "generated_model_physical_table"
+      ],
+      "evidenceRefs": [
+        "metadata/entity-model-field-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md",
+        "metadata/basic-config-action-matrix.json",
+        "docs/basic-config-action-matrix.md",
+        "docs/basic-config-coverage.md"
+      ],
+      "recheckCommands": [
+        "make acceptance-entity-model-field-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ENTITY_MODEL_FIELD_PERSISTENCE_OUTPUT=metadata/entity-model-field-persistence-acceptance.json",
+        "make basic-config-action-matrix-check",
+        "make basic-config-coverage-check"
+      ],
+      "remainingGaps": [],
+      "notes": [
+        "This PASS covers TEXT add/index/rename/safe widening/idempotency and incompatible conversion rollback. Automatic DROP COLUMN, index removal, unique/nullability constraint changes and the broader type matrix remain outside this area."
+      ]
     },
     {
       "id": "nacos-keycloak-production-config",

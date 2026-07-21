@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`196`。
-- 编号范围：`001` 到 `196`。
+- 脚本数量：`197`。
+- 编号范围：`001` 到 `197`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`76`。
+- 需关注语句：`78`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -23,7 +23,7 @@
 | auth-rbac-org | 37 |
 | business | 37 |
 | compatibility | 77 |
-| configuration | 44 |
+| configuration | 45 |
 | general | 34 |
 | notification | 9 |
 | platform | 55 |
@@ -47,7 +47,7 @@
 | --- | --- |
 | create-or-replace | 232 |
 | do-block | 395 |
-| if-exists | 119 |
+| if-exists | 121 |
 | if-not-exists | 13033 |
 | on-conflict | 10953 |
 | to-regclass | 219 |
@@ -253,6 +253,7 @@
 | 194 | 194-qcs-inspect-report-view-runtime-json.sql | platform, configuration, business | 46 | insert:3, update:3 | 4 | - |
 | 195 | 195-wom-source-compat.sql | compatibility | 120 | create-table:1, create-index:2, alter-table:2, insert:1 | 8 | - |
 | 196 | 196-qcs-manu-inspect-list-empty-column.sql | configuration, business | 114 | create-function:1, update:4 | 3 | watch:1 |
+| 197 | 197-configuration-app-owned-physical-schema-sync.sql | configuration | 4 | - | 2 | watch:2 |
 
 ## 规则
 

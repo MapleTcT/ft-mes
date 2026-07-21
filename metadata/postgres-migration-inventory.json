@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 196,
+  "migrationCount": 197,
   "firstNumber": 1,
-  "lastNumber": 196,
+  "lastNumber": 197,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 76,
+  "watchStatementCount": 78,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 10820,
@@ -23,7 +23,7 @@
   "idempotencySignalTotals": {
     "create-or-replace": 232,
     "do-block": 395,
-    "if-exists": 119,
+    "if-exists": 121,
     "if-not-exists": 13033,
     "on-conflict": 10953,
     "to-regclass": 219,
@@ -33,7 +33,7 @@
     "auth-rbac-org": 37,
     "business": 37,
     "compatibility": 77,
-    "configuration": 44,
+    "configuration": 45,
     "general": 34,
     "notification": 9,
     "platform": 55,
@@ -7414,6 +7414,60 @@
           "safety": "guarded-if-exists",
           "issue": "",
           "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql",
+      "name": "197-configuration-app-owned-physical-schema-sync.sql",
+      "number": 197,
+      "slug": "configuration-app-owned-physical-schema-sync",
+      "validName": true,
+      "tags": [
+        "configuration"
+      ],
+      "lineCount": 4,
+      "sha256": "f583850af68305b41db7f314d874b8058f8890359cfaa0247676a0bde1caf3a2",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 3,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS tr_adp_ec_model_physical_table_sync ON public.ec_model;",
+          "statement": "DROP TRIGGER IF EXISTS tr_adp_ec_model_physical_table_sync ON public.ec_model;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        },
+        {
+          "line": 4,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS tr_adp_ec_property_physical_column_sync ON public.ec_property;",
+          "statement": "DROP TRIGGER IF EXISTS tr_adp_ec_property_physical_column_sync ON public.ec_property;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
         }
       ],
       "unguardedStructuralStatements": []

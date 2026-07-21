@@ -24,6 +24,7 @@ PERSISTENCE_ACCEPTANCE_PATH = ROOT / "metadata/persistence-acceptance.json"
 BASIC_CONFIG_COVERAGE_PATH = ROOT / "metadata/basic-config-coverage.json"
 BASIC_CONFIG_ACTION_MATRIX_PATH = ROOT / "metadata/basic-config-action-matrix.json"
 ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persistence-acceptance.json"
+ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
 TEST_ENVIRONMENT_SMOKE_PATH = ROOT / "metadata/test-environment-smoke.json"
 POSTGRES_RUNTIME_SMOKE_PATH = ROOT / "metadata/postgres-runtime-smoke.json"
 NACOS_CONFIG_SMOKE_PATH = ROOT / "metadata/nacos-config-drift-smoke.json"
@@ -545,6 +546,7 @@ def check_oracle_evidence_text(
             "metadata/oracle-migration-audit.json currently has "
             f"{classified_count} classified references, {unclassified_count} unclassified references"
         ),
+        f"PostgreSQL migration count is {status_summary.get('postgresMigrationCount')}.",
         (
             f"{runtime_scan.get('scannedFiles')} config files and "
             f"{runtime_scan.get('scannedActiveLines')} active config lines scanned, "
@@ -555,6 +557,12 @@ def check_oracle_evidence_text(
     for fragment in required_fragments:
         if fragment not in evidence_text:
             fail(failures, f"G-003 currentEvidence must include current Oracle ledger value: {fragment}")
+
+    if DOC_PATH.exists():
+        row = markdown_table_row(DOC_PATH.read_text(encoding="utf-8"), "G-003")
+        fragment = f"PostgreSQL 迁移数为 `{status_summary.get('postgresMigrationCount')}`"
+        if fragment not in row:
+            fail(failures, f"goal acceptance document G-003 row must include current migration count: {fragment}")
 
 
 def check_oracle_alignment(items_by_id: dict[str, dict[str, Any]], failures: list[str]) -> None:
@@ -1050,6 +1058,25 @@ def check_production_alignment(items_by_id: dict[str, dict[str, Any]], failures:
     if isinstance(persistence_summary, dict):
         persistence_failed = summary_int(persistence_summary, "fail")
         persistence_blocked = summary_int(persistence_summary, "blocked")
+        if g018:
+            tested = summary_int(persistence_summary, "testedFeatures")
+            passed_persistence = summary_int(persistence_summary, "pass")
+            not_applicable = summary_int(persistence_summary, "notApplicable")
+            evidence_fragment = (
+                f"persistence acceptance ledger has {tested} tested features: "
+                f"{passed_persistence} PASS, {persistence_failed} FAIL, "
+                f"{persistence_blocked} BLOCKED, {not_applicable} NOT_APPLICABLE"
+            )
+            if evidence_fragment not in item_evidence_text(g018):
+                fail(failures, f"G-018 currentEvidence must include current persistence totals: {evidence_fragment}")
+            if DOC_PATH.exists():
+                row = markdown_table_row(DOC_PATH.read_text(encoding="utf-8"), "G-018")
+                doc_fragment = (
+                    f"落库总账当前 `{passed_persistence} PASS / {persistence_failed} FAIL / "
+                    f"{persistence_blocked} BLOCKED / {not_applicable} NOT_APPLICABLE`"
+                )
+                if doc_fragment not in row:
+                    fail(failures, f"goal acceptance document G-018 row must include current persistence totals: {doc_fragment}")
         if g018 and g018.get("status") == "READY" and (persistence_failed > 0 or persistence_blocked > 0):
             fail(failures, "G-018 READY requires persistence acceptance to have zero FAIL and zero BLOCKED")
 
@@ -1078,6 +1105,8 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
             "deploy/docker/postgres/init/169-custom-property-project-property-compat.sql",
             "deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js",
             "metadata/entity-model-config-crud-persistence-acceptance.json",
+            "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
+            "metadata/entity-model-field-persistence-acceptance.json",
             "metadata/persistence-acceptance.json",
             "metadata/systemconfig-persistence-acceptance.json",
             "docs/backend-table-audit/persistence-acceptance.md",
@@ -1113,9 +1142,27 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
             "完整实体/模型配置页面执行 marker",
             "PostgreSQL 物理模型表自动创建能力",
             "需要补齐 ModelSyncDBUtils PostgreSQL 分支",
+            "自定义业务字段物理列同步",
         ):
             if stale_fragment in stale_gap_text:
                 fail(failures, f"G-012 must not keep stale entity/model CRUD gap after PASS evidence: {stale_fragment}")
+    field_sync = read_json_file(
+        ENTITY_MODEL_FIELD_PERSISTENCE_PATH,
+        failures,
+        "entity/model PostgreSQL field persistence acceptance report",
+    )
+    if field_sync:
+        if field_sync.get("status") != "PASS" or field_sync.get("database") != "PostgreSQL":
+            fail(failures, "G-012 PostgreSQL field persistence acceptance must PASS")
+        marker = str(field_sync.get("marker", ""))
+        evidence_text = "\n".join(str(item) for item in as_list(g012.get("currentEvidence")))
+        if not marker or marker not in evidence_text:
+            fail(failures, "G-012 currentEvidence must include the PostgreSQL field marker")
+        if "metadata/entity-model-field-persistence-acceptance.json" not in evidence_text:
+            fail(failures, "G-012 currentEvidence must cite the PostgreSQL field acceptance report")
+        summary = field_sync.get("summary") if isinstance(field_sync.get("summary"), dict) else {}
+        if summary.get("testedChecks") != 9 or summary.get("pass") != 9 or summary.get("fail") != 0:
+            fail(failures, "G-012 PostgreSQL field acceptance must retain 9/9 PASS")
     if action_matrix:
         if action_matrix.get("database") != "PostgreSQL":
             fail(failures, "G-012 action matrix database must remain PostgreSQL")
@@ -1144,6 +1191,7 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
             "entity-model-edit",
             "entity-model-delete",
             "entity-model-postgres-physical-table-autocreate",
+            "entity-model-postgres-field-sync",
             "nacos-production-export-diff",
             "keycloak-production-realm-migration",
         }
@@ -1184,6 +1232,7 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
         "systemconfig-built-in-catalogs",
         "configuration-entity-runtime",
         "configuration-physical-model-table",
+        "configuration-physical-model-field",
         "nacos-keycloak-production-config",
     }
     seen_area_ids = {
