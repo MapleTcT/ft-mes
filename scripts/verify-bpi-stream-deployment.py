@@ -346,6 +346,8 @@ def main() -> int:
         "PASS_INTEGRATED_ROLLBACK_CONTROLLED_MARKER",
         "publishedRuleIsControlledFixture",
         "businessMutationStillRequiresBrowserConfirmation",
+        "adapterSubjectScopeRules",
+        "authenticated user scope includes rehearsal line",
         "--precheck-only",
         "watchdog.sh",
         "restore-all",

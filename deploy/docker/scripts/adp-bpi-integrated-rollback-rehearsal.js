@@ -21,7 +21,7 @@ const marker = process.env.BPI_INTEGRATED_ROLLBACK_MARKER
   || `ADP_BPI_INTEGRATED_ROLLBACK_${new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14)}`;
 const tenantId = process.env.BPI_ACCEPTANCE_TENANT_ID || "1000";
 const plantId = process.env.BPI_ACCEPTANCE_PLANT_ID || "PLANT-01";
-const lineId = process.env.BPI_ACCEPTANCE_LINE_ID || `LINE-IRB-${marker.slice(-14)}`;
+const lineId = process.env.BPI_ACCEPTANCE_LINE_ID || "LINE-S07-01";
 const topologyCode = `TOPO-${marker}`;
 const topologyVersion = "1";
 const ruleCode = `RULE-${marker}`;
@@ -358,6 +358,7 @@ emit_state() {
   printf 'adapterImage=%s\n' "$(docker inspect -f '{{.Config.Image}}' "$adapter_id")"
   printf 'adapterImageId=%s\n' "$(docker inspect -f '{{.Image}}' "$adapter_id")"
   printf 'adapterHealth=%s\n' "$(runtime_health "$selected_env" bpi-adapter)"
+  printf 'adapterSubjectScopeRules=%s\n' "$(docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$adapter_id" | sed -n 's/^BPI_ADAPTER_SUBJECT_SCOPE_RULES=//p' | tail -1)"
   printf 'jobJar=%s\n' "$jar"
   printf 'jobJarSha256=%s\n' "$(sha256sum "$jar" | awk '{print $1}')"
   printf 'flinkJob=%s\n' "$(stream_job)"
@@ -688,6 +689,19 @@ function parseDatabaseState(stage) {
   return JSON.parse(stage.databaseState || "{}");
 }
 
+function subjectScopeAllows(rules, subject, tenant, plant, line) {
+  return String(rules || "").split(";").some((rule) => {
+    const separator = rule.indexOf("=");
+    if (separator <= 0 || rule.slice(0, separator).trim() !== subject) return false;
+    const scope = rule.slice(separator + 1).split("|");
+    if (scope.length !== 3) return false;
+    return [tenant, plant, line].every((value, index) => {
+      const allowed = scope[index].split(",").map((item) => item.trim()).filter(Boolean);
+      return allowed.includes("*") || allowed.includes(value);
+    });
+  });
+}
+
 function stageReady(stage, serviceImage, adapterImage, jarSha256) {
   const job = String(stage.flinkJob || "").split("|");
   const database = parseDatabaseState(stage);
@@ -776,6 +790,19 @@ async function main() {
       stageReady(report.stages.precheck, currentService, currentAdapter, currentJarSha),
       report.stages.precheck,
     );
+    const acceptanceScopeAllowed = subjectScopeAllows(
+      report.stages.precheck.adapterSubjectScopeRules,
+      username,
+      tenantId,
+      plantId,
+      lineId,
+    );
+    check(
+      "authenticated user scope includes rehearsal line",
+      acceptanceScopeAllowed,
+      { username, tenantId, plantId, lineId },
+    );
+    assert(acceptanceScopeAllowed, "BPI adapter subject scope does not allow the rehearsal line");
     const preDatabase = parseDatabaseState(report.stages.precheck);
     check("unique marker starts clean", Object.entries(preDatabase)
       .filter(([key]) => key !== "flywayVersion").every(([, value]) => value === 0), preDatabase);
@@ -960,7 +987,16 @@ async function main() {
 if (printRemoteScript) {
   process.stdout.write(remoteScript);
 } else if (precheckOnly) {
-  process.stdout.write(`${JSON.stringify(runRemote("precheck"), null, 2)}\n`);
+  const precheck = runRemote("precheck");
+  precheck.acceptanceScopeAllowed = subjectScopeAllows(
+    precheck.adapterSubjectScopeRules,
+    username,
+    tenantId,
+    plantId,
+    lineId,
+  );
+  assert(precheck.acceptanceScopeAllowed, "BPI adapter subject scope does not allow the rehearsal line");
+  process.stdout.write(`${JSON.stringify(precheck, null, 2)}\n`);
 } else {
   main().catch((error) => {
     console.error(error?.stack || error);
