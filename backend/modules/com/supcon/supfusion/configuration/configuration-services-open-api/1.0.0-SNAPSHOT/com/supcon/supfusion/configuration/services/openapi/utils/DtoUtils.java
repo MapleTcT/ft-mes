@@ -398,13 +398,15 @@ public class DtoUtils {
             property.setAssociatedType(associatedType);
         }
 
-        Property associatedProperty = new Property();
-        if (!StringUtils.isEmpty("property.associatedProperty.code")) {
-            associatedProperty.setCode(request.getParameter("property.associatedProperty.code"));
-        } else {
-            associatedProperty.setCode(request.getParameter("property_associatedProperty_code"));
+        String associatedPropertyCode = request.getParameter("property.associatedProperty.code");
+        if (StringUtils.isEmpty(associatedPropertyCode)) {
+            associatedPropertyCode = request.getParameter("property_associatedProperty_code");
         }
-        property.setAssociatedProperty(associatedProperty);
+        if (!StringUtils.isEmpty(associatedPropertyCode)) {
+            Property associatedProperty = new Property();
+            associatedProperty.setCode(associatedPropertyCode);
+            property.setAssociatedProperty(associatedProperty);
+        }
 
         if (!StringUtils.isEmpty(request.getParameter("property.counterRuleId"))) {
             Long counterRuleId = Long.valueOf(request.getParameter("property.counterRuleId"));

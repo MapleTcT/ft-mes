@@ -27,6 +27,7 @@ PATCH_TARGETS = {
         "com/supcon/supfusion/configuration/services/utils/PostgresFieldSyncSupport$TypeFamily.class",
         "com/supcon/supfusion/configuration/services/utils/PostgresFieldSyncSupport$ColumnSpec.class",
         "com/supcon/supfusion/configuration/services/utils/PostgresFieldSyncSupport$ColumnState.class",
+        "com/supcon/supfusion/configuration/services/utils/PostgresFieldSyncSupport$1.class",
         "com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.class",
         "com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.class",
         "com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.class",

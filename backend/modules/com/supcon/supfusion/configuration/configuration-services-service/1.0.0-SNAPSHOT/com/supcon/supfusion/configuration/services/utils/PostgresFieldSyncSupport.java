@@ -606,16 +606,7 @@ public final class PostgresFieldSyncSupport {
             return ColumnSpec.simple(TypeFamily.BIGINT, "bigint");
         }
         if (type == DbColumnType.OBJECT) {
-            Property associated = property.getAssociatedProperty();
-            if (associated != null && associated.getType() == DbColumnType.BAPCODE) {
-                return ColumnSpec.varchar(4000);
-            }
-            if (associated != null && associated.getType() != null && associated.getType() != DbColumnType.LONG) {
-                int requested = associated.getMaxLength() == null || associated.getMaxLength().intValue() <= 0
-                        ? 255 : associated.getMaxLength().intValue();
-                return ColumnSpec.varchar((int) Math.min(4000L, (long) requested * 2L));
-            }
-            return ColumnSpec.simple(TypeFamily.BIGINT, "bigint");
+            return objectColumnSpec(property);
         }
         if (type == DbColumnType.PASSWORD || type == DbColumnType.PICTURE || type == DbColumnType.TAGNUMBER
                 || type == DbColumnType.ENUMERATE || type == DbColumnType.ITEMINDEX
@@ -626,6 +617,19 @@ public final class PostgresFieldSyncSupport {
             return ColumnSpec.simple(TypeFamily.BYTEA, "bytea");
         }
         throw new IllegalArgumentException("Unsupported PostgreSQL property type: " + type);
+    }
+
+    private static ColumnSpec objectColumnSpec(Property property) {
+        Property associated = property.getAssociatedProperty();
+        if (associated == null || associated.getType() == null || associated.getType() == DbColumnType.LONG) {
+            return ColumnSpec.simple(TypeFamily.BIGINT, "bigint");
+        }
+        if (associated.getType() == DbColumnType.BAPCODE) {
+            return ColumnSpec.varchar(4000);
+        }
+        int requested = associated.getMaxLength() == null || associated.getMaxLength().intValue() <= 0
+                ? 255 : associated.getMaxLength().intValue();
+        return ColumnSpec.varchar((int) Math.min(4000L, (long) requested * 2L));
     }
 
     private static String normalizedOptionalIdentifier(String value, String label) {

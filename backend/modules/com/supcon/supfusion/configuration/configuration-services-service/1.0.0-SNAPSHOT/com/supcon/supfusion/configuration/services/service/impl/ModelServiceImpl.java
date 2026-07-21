@@ -838,7 +838,11 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 				property.setModel(getModel(property.getModel().getCode()));
 				if(null == property.getIsCustom() || !property.getIsCustom()){
 					if (property.getAssociatedProperty() != null && property.getAssociatedProperty().getCode() != null) {
-						Property associated = getProperty(property.getAssociatedProperty().getCode());
+						String associatedPropertyCode = property.getAssociatedProperty().getCode();
+						Property associated = getProperty(associatedPropertyCode);
+						if (associated == null) {
+							throw new EcException(EcException.Code.ASS_PROPERTY_NOT_SELECTED, associatedPropertyCode);
+						}
 						property.setAssociatedProperty(associated);
 						if (associated != null && null != associated.getModel()) {
 							Model assoModel = getModel(associated.getModel().getCode());

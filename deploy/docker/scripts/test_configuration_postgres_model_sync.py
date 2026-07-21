@@ -23,9 +23,17 @@ POSTGRES_SUPPORT_PATH = MODEL_SYNC_PATH.with_name("PostgresModelSyncSupport.java
 FIELD_SYNC_PATH = MODEL_SYNC_PATH.with_name("FieldSyncDBUtils.java")
 POSTGRES_FIELD_SUPPORT_PATH = MODEL_SYNC_PATH.with_name("PostgresFieldSyncSupport.java")
 MODEL_SERVICE_PATH = MODEL_SYNC_PATH.parents[1] / "service/impl/ModelServiceImpl.java"
+DTO_UTILS_PATH = (
+    ROOT
+    / "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT"
+    / "com/supcon/supfusion/configuration/services/openapi/utils/DtoUtils.java"
+)
 FIELD_ACCEPTANCE_PATH = SCRIPT_DIR / "adp-entity-model-field-persistence-acceptance.js"
 FIELD_TYPE_MATRIX_ACCEPTANCE_PATH = (
     SCRIPT_DIR / "adp-entity-model-field-type-matrix-acceptance.js"
+)
+OBJECT_ASSOCIATION_ACCEPTANCE_PATH = (
+    SCRIPT_DIR / "adp-entity-model-object-association-acceptance.js"
 )
 MAKEFILE_PATH = ROOT / "Makefile"
 TRIGGER_RETIREMENT_PATH = ROOT / "deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql"
@@ -136,6 +144,10 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
             service_targets,
         )
         self.assertIn(
+            "com/supcon/supfusion/configuration/services/utils/PostgresFieldSyncSupport$1.class",
+            service_targets,
+        )
+        self.assertIn(
             "com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.class",
             service_targets,
         )
@@ -220,6 +232,51 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertIn("No automatic DROP COLUMN", acceptance)
         self.assertIn("acceptance-entity-model-field-type-matrix", makefile)
         self.assertIn("ADP_ENTITY_MODEL_FIELD_TYPE_MATRIX_OUTPUT", makefile)
+
+    def test_object_association_request_and_target_resolution_are_fail_closed(self) -> None:
+        dto_utils = DTO_UTILS_PATH.read_text(encoding="utf-8")
+        service = MODEL_SERVICE_PATH.read_text(encoding="utf-8")
+
+        self.assertIn(
+            'String associatedPropertyCode = request.getParameter("property.associatedProperty.code")',
+            dto_utils,
+        )
+        self.assertIn(
+            'associatedPropertyCode = request.getParameter("property_associatedProperty_code")',
+            dto_utils,
+        )
+        self.assertNotIn('StringUtils.isEmpty("property.associatedProperty.code")', dto_utils)
+        self.assertIn("if (!StringUtils.isEmpty(associatedPropertyCode))", dto_utils)
+        self.assertIn("if (associated == null)", service)
+        self.assertIn(
+            "EcException.Code.ASS_PROPERTY_NOT_SELECTED, associatedPropertyCode",
+            service,
+        )
+
+    def test_postgres_object_association_column_contract_matches_legacy_runtime(self) -> None:
+        support = POSTGRES_FIELD_SUPPORT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("return objectColumnSpec(property);", support)
+        self.assertIn("private static ColumnSpec objectColumnSpec(Property property)", support)
+        self.assertIn("associated.getType() == DbColumnType.BAPCODE", support)
+        self.assertIn("associated.getType() == DbColumnType.LONG", support)
+        self.assertIn("ColumnSpec.varchar(4000)", support)
+        self.assertIn("ColumnSpec.simple(TypeFamily.BIGINT, \"bigint\")", support)
+        self.assertIn("Math.min(4000L, (long) requested * 2L)", support)
+
+    def test_postgres_object_association_acceptance_is_end_to_end_and_reproducible(self) -> None:
+        acceptance = OBJECT_ASSOCIATION_ACCEPTANCE_PATH.read_text(encoding="utf-8")
+        makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("property.associatedProperty.code", acceptance)
+        self.assertIn("property_associatedProperty_code", acceptance)
+        self.assertIn("invalid-associated-property-rolls-back", acceptance)
+        self.assertIn("marker-row-round-trip-and-logical-association-joins", acceptance)
+        self.assertIn("legacy-object-storage-does-not-invent-physical-foreign-keys", acceptance)
+        self.assertIn("controlled-cleanup", acceptance)
+        self.assertIn("drop table if exists", acceptance)
+        self.assertIn("acceptance-entity-model-object-association", makefile)
+        self.assertIn("ADP_ENTITY_MODEL_OBJECT_ASSOCIATION_OUTPUT", makefile)
 
 
 if __name__ == "__main__":
