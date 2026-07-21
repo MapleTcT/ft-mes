@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-21T06:09:35+00:00` |
-| Repo Commit | `c1bbaae8888b15cb07a4a4b3460eb918d60af7a8` |
+| Generated At | `2026-07-21T06:39:24+00:00` |
+| Repo Commit | `c75ed6e4d1b948d009c9a0606fa426c306e8ce00` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -29,7 +29,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | --- | --- | --- | --- | --- |
 | `G-002` | `PARTIAL` | 当前内容迁移 | 业务动作级源码、页面、表关系仍需继续排查，不能视为完整 MES 产品形态已迁移。 | 后续业务包进入时先跑 module-intake-check，再补 smoke 和落库验收。 |
 | `G-003` | `PARTIAL` | Oracle 替换为 PostgreSQL 默认路径 | Oracle backlog still contains tracked references and recovered modules with direct Oracle dependencies. | 逐模块把 Oracle SQL、ojdbc 和方言差异迁移到 PostgreSQL 或保留在显式 legacy 路径。 |
-| `G-012` | `PARTIAL` | 基础配置 | QCS reportShowIndexRange、RM.MQ brokerUrl、BaseSet.isEnable、customProperty 模型映射、实体/模型元数据 CRUD、PostgreSQL 基础物理模型表生命周期和 TEXT 字段新增/索引/重命名/安全扩容/幂等/危险转换回滚均已完成 marker、回读、落库和回滚/清理；对应 QCS/RM/BaseSet 代表性业务回归已复跑 PASS。身份、授权、密钥、密码类配置仍禁止通用 smoke 改值；其他 BaseSet/RM/QCS 配置项、自动删列、索引删除、唯一/非空约束变更、更广字段类型矩阵、Nacos/Keycloak 生产 export/diff、realm 迁移、secret 轮换和回退演练仍需继续验收。 | 继续把 QCS/RM/BaseSet 当前地址报告链路证据纳入后续生产或 rehearsal 业务 smoke 签字，但不要把测试环境证据直接冒充生产签字。 |
+| `G-012` | `PARTIAL` | 基础配置 | QCS reportShowIndexRange、RM.MQ brokerUrl、BaseSet.isEnable、customProperty 模型映射、实体/模型元数据 CRUD、PostgreSQL 基础物理模型表生命周期，以及 TEXT 字段新增/托管普通索引创建停用重启用改名/外部唯一索引保护/安全扩容/幂等/危险转换回滚均已完成 marker、回读、落库和回滚/清理；对应 QCS/RM/BaseSet 代表性业务回归已复跑 PASS。身份、授权、密钥、密码类配置仍禁止通用 smoke 改值；其他 BaseSet/RM/QCS 配置项、自动删列、唯一/非空约束变更、更广字段类型矩阵、Nacos/Keycloak 生产 export/diff、realm 迁移、secret 轮换和回退演练仍需继续验收。 | 继续把 QCS/RM/BaseSet 当前地址报告链路证据纳入后续生产或 rehearsal 业务 smoke 签字，但不要把测试环境证据直接冒充生产签字。 |
 | `G-013` | `BLOCKED` | 生产模块完整功能 | 生产测试矩阵已无 BLOCKED 用例；G-013 仍保持 BLOCKED，因为 public produceTaskCreated 的产品边界尚未签署，真实现场 Batch/DCS 投递确认和生产业务签字仍是切换前置。 | 保持制造-质量-material/WMS-ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑和独立不良数量闭环回归；完成 public produceTaskCreated 产品决定，并把真实 Batch/DCS 投递确认作为生产切换前置单独验收。 |
 | `G-014` | `PARTIAL` | Nacos 配置链路 | 测试环境漂移 smoke 已完成，但生产 Nacos export/diff、漂移人工审阅、签名 patch 包和回退演练未完成。 | 导出生产 Nacos 配置，和 rendered 配置做差异账本。 |
 | `G-015` | `PARTIAL` | Keycloak/JWT 链路 | 测试环境 Keycloak/JWT runtime smoke 已完成，但生产 realm export/import、用户迁移、client secret 轮换、生产 JWT 同步后的登录 smoke 和数据库备份恢复演练未完成。 | 用 production-keycloak-source-export / production-keycloak-target-export 生成 source/target realm inventory。 |

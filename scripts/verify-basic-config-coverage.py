@@ -801,12 +801,19 @@ def check_physical_model_field_acceptance(area: dict[str, Any], failures: list[s
     if report.get("database") != "PostgreSQL":
         fail(failures, "field persistence report database must remain PostgreSQL")
     summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
-    if summary.get("testedChecks") != 9 or summary.get("pass") != 9 or summary.get("fail") != 0 or summary.get("blocked") != 0:
-        fail(failures, "field persistence report must retain 9/9 PASS with zero fail/blocked")
+    if summary.get("testedChecks") != 16 or summary.get("pass") != 16 or summary.get("fail") != 0 or summary.get("blocked") != 0:
+        fail(failures, "field persistence report must retain 16/16 PASS with zero fail/blocked")
     required_checks = {
         "postgres-column-created-and-indexed",
         "marker-row-written",
+        "managed-index-disabled-without-column-loss",
+        "managed-index-disable-idempotent",
+        "managed-index-reenabled",
         "field-renamed-widened-and-data-preserved",
+        "managed-index-renamed-with-column",
+        "external-unique-index-fixture-created",
+        "external-unique-index-protected-on-managed-disable",
+        "external-index-satisfies-reenable-without-duplicate",
         "field-idempotent-replay",
         "unsafe-type-change-rolled-back",
         "controlled-cleanup",

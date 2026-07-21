@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T05:35:53.567Z",
-  "repoCommit": "c1bbaae8888b15cb07a4a4b3460eb918d60af7a8",
+  "generatedAt": "2026-07-21T06:32:41.391Z",
+  "repoCommit": "c75ed6e4d1b948d009c9a0606fa426c306e8ce00",
   "database": "PostgreSQL",
   "module": "basic-config",
   "goalId": "G-012",
@@ -332,7 +332,10 @@
         "real browser page context and entity/model/field create requests returned HTTP 200",
         "TEXT field created as varchar(64) with one PostgreSQL index",
         "marker row written and read through the generated column",
+        "managed ordinary index disabled, disabled again idempotently and re-enabled while preserving marker data",
         "field rename and safe widening to varchar(256) preserved data",
+        "managed index renamed with the field",
+        "external unique index protected on managed disable and reused on re-enable without duplicate creation",
         "idempotent replay retained one column and one index",
         "unsafe TEXT to INTEGER conversion returned expected HTTP 500 and rolled metadata plus DDL back",
         "controlled cleanup left property/model/entity/physical table counts at zero"
@@ -365,7 +368,7 @@
       ],
       "remainingGaps": [],
       "notes": [
-        "This PASS covers TEXT add/index/rename/safe widening/idempotency and incompatible conversion rollback. Automatic DROP COLUMN, index removal, unique/nullability constraint changes and the broader type matrix remain outside this area."
+        "This PASS covers TEXT add, managed ordinary-index create/disable/idempotent disable/re-enable/rename, external unique-index protection, safe widening, idempotency and incompatible conversion rollback. Automatic DROP COLUMN, unique/nullability constraint changes and the broader type matrix remain outside this area."
       ]
     },
     {

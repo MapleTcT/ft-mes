@@ -860,7 +860,7 @@ def check_entity_model_field_acceptance(
     if not marker.startswith("ADP_E2E_") or "PG_FIELD" not in marker:
         fail(failures, "field persistence marker must be ADP_E2E_*_PG_FIELD")
     summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
-    for key, expected in (("testedChecks", 9), ("pass", 9), ("fail", 0), ("blocked", 0), ("status", "PASS")):
+    for key, expected in (("testedChecks", 16), ("pass", 16), ("fail", 0), ("blocked", 0), ("status", "PASS")):
         if summary.get(key) != expected:
             fail(failures, f"field persistence summary.{key} must be {expected}")
 
@@ -870,7 +870,14 @@ def check_entity_model_field_acceptance(
         "field-metadata-created",
         "postgres-column-created-and-indexed",
         "marker-row-written",
+        "managed-index-disabled-without-column-loss",
+        "managed-index-disable-idempotent",
+        "managed-index-reenabled",
         "field-renamed-widened-and-data-preserved",
+        "managed-index-renamed-with-column",
+        "external-unique-index-fixture-created",
+        "external-unique-index-protected-on-managed-disable",
+        "external-index-satisfies-reenable-without-duplicate",
         "field-idempotent-replay",
         "unsafe-type-change-rolled-back",
         "controlled-cleanup",
@@ -885,7 +892,18 @@ def check_entity_model_field_acceptance(
         fail(failures, "field persistence acceptance missing PASS checks: " + ", ".join(missing_checks))
 
     requests = report.get("requests") if isinstance(report.get("requests"), dict) else {}
-    for request_key in ("entityCreate", "modelCreate", "fieldCreate", "fieldRenameAndWiden", "fieldIdempotentReplay"):
+    for request_key in (
+        "entityCreate",
+        "modelCreate",
+        "fieldCreate",
+        "fieldIndexDisable",
+        "fieldIndexDisableReplay",
+        "fieldIndexEnable",
+        "fieldRenameAndWiden",
+        "fieldIndexDisableWithExternal",
+        "fieldIndexEnableWithExternal",
+        "fieldIdempotentReplay",
+    ):
         request = requests.get(request_key)
         if not isinstance(request, dict) or request.get("responseStatus") != 200:
             fail(failures, f"field persistence request {request_key} must return HTTP 200")
@@ -908,7 +926,14 @@ def check_entity_model_field_acceptance(
         fail(failures, "field persistence browser must not contain unexpected network errors")
 
     trace_text = json.dumps(report.get("backendTrace", {}), ensure_ascii=False)
-    for fragment in ("FieldSyncDBUtils", "PostgresFieldSyncSupport", "ALTER TABLE", "roll back"):
+    for fragment in (
+        "FieldSyncDBUtils",
+        "PostgresFieldSyncSupport",
+        "ALTER TABLE",
+        "ALTER INDEX",
+        "DROP INDEX",
+        "roll back",
+    ):
         if fragment not in trace_text:
             fail(failures, f"field persistence backendTrace missing {fragment}")
     sql_text = json.dumps(report.get("verificationSql", {}), ensure_ascii=False)

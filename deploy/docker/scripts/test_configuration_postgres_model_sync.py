@@ -23,6 +23,7 @@ POSTGRES_SUPPORT_PATH = MODEL_SYNC_PATH.with_name("PostgresModelSyncSupport.java
 FIELD_SYNC_PATH = MODEL_SYNC_PATH.with_name("FieldSyncDBUtils.java")
 POSTGRES_FIELD_SUPPORT_PATH = MODEL_SYNC_PATH.with_name("PostgresFieldSyncSupport.java")
 MODEL_SERVICE_PATH = MODEL_SYNC_PATH.parents[1] / "service/impl/ModelServiceImpl.java"
+FIELD_ACCEPTANCE_PATH = SCRIPT_DIR / "adp-entity-model-field-persistence-acceptance.js"
 TRIGGER_RETIREMENT_PATH = ROOT / "deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql"
 TRIGGER_ROLLBACK_PATH = ROOT / "deploy/docker/postgres/rollback/197-configuration-app-owned-physical-schema-sync.sql"
 
@@ -142,6 +143,14 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertNotIn("DROP FUNCTION", migration.upper())
         self.assertIn("CREATE TRIGGER tr_adp_ec_model_physical_table_sync", rollback)
         self.assertIn("CREATE TRIGGER tr_adp_ec_property_physical_column_sync", rollback)
+
+    def test_field_acceptance_normalizes_postgres_boolean_metadata(self) -> None:
+        acceptance = FIELD_ACCEPTANCE_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("function storedBooleanEquals", acceptance)
+        self.assertGreaterEqual(acceptance.count("storedBooleanEquals("), 6)
+        self.assertNotIn('.isIndex === "true"', acceptance)
+        self.assertNotIn('.isIndex === "false"', acceptance)
 
 
 if __name__ == "__main__":

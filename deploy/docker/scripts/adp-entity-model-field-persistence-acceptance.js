@@ -487,6 +487,13 @@ function hasIndex(state, indexName) {
   return state.indexes.some((row) => row.indexName.toLowerCase() === indexName.toLowerCase());
 }
 
+function storedBooleanEquals(value, expected) {
+  const normalized = String(value).trim().toLowerCase();
+  const trueValues = new Set(["1", "true", "t", "yes", "y"]);
+  const falseValues = new Set(["0", "false", "f", "no", "n"]);
+  return expected ? trueValues.has(normalized) : falseValues.has(normalized);
+}
+
 function check(name, passed, evidence) {
   return { name, status: passed ? "PASS" : "FAIL", evidence };
 }
@@ -724,7 +731,7 @@ async function main() {
       responseBusinessOk(requests.fieldIndexDisable) &&
         states.afterIndexDisable &&
         states.afterIndexDisable.metadata[0] &&
-        states.afterIndexDisable.metadata[0].isIndex === "false" &&
+        storedBooleanEquals(states.afterIndexDisable.metadata[0].isIndex, false) &&
         states.afterIndexDisable.indexes.length === 0 &&
         hasProbe(states.afterIndexDisable),
       `response=${requests.fieldIndexDisable && requests.fieldIndexDisable.responseStatus}; ` +
@@ -737,7 +744,7 @@ async function main() {
       responseBusinessOk(requests.fieldIndexDisableReplay) &&
         states.afterIndexDisableReplay &&
         states.afterIndexDisableReplay.metadata[0] &&
-        states.afterIndexDisableReplay.metadata[0].isIndex === "false" &&
+        storedBooleanEquals(states.afterIndexDisableReplay.metadata[0].isIndex, false) &&
         states.afterIndexDisableReplay.indexes.length === 0 &&
         hasProbe(states.afterIndexDisableReplay),
       `response=${requests.fieldIndexDisableReplay && requests.fieldIndexDisableReplay.responseStatus}; ` +
@@ -749,7 +756,7 @@ async function main() {
       responseBusinessOk(requests.fieldIndexEnable) &&
         states.afterIndexEnable &&
         states.afterIndexEnable.metadata[0] &&
-        states.afterIndexEnable.metadata[0].isIndex === "true" &&
+        storedBooleanEquals(states.afterIndexEnable.metadata[0].isIndex, true) &&
         states.afterIndexEnable.indexes.length === 1 &&
         hasIndex(states.afterIndexEnable, initialManagedIndex) &&
         hasProbe(states.afterIndexEnable),
@@ -795,7 +802,7 @@ async function main() {
       responseBusinessOk(requests.fieldIndexDisableWithExternal) &&
         states.afterExternalIndexDisable &&
         states.afterExternalIndexDisable.metadata[0] &&
-        states.afterExternalIndexDisable.metadata[0].isIndex === "false" &&
+        storedBooleanEquals(states.afterExternalIndexDisable.metadata[0].isIndex, false) &&
         states.afterExternalIndexDisable.indexes.length === 1 &&
         hasIndex(states.afterExternalIndexDisable, externalIndexName) &&
         !hasIndex(states.afterExternalIndexDisable, renamedManagedIndex) &&
@@ -808,7 +815,7 @@ async function main() {
       responseBusinessOk(requests.fieldIndexEnableWithExternal) &&
         states.afterExternalIndexEnable &&
         states.afterExternalIndexEnable.metadata[0] &&
-        states.afterExternalIndexEnable.metadata[0].isIndex === "true" &&
+        storedBooleanEquals(states.afterExternalIndexEnable.metadata[0].isIndex, true) &&
         states.afterExternalIndexEnable.indexes.length === 1 &&
         hasIndex(states.afterExternalIndexEnable, externalIndexName) &&
         !hasIndex(states.afterExternalIndexEnable, renamedManagedIndex) &&

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-21T05:35:53.567Z",
-  "repoCommit": "c1bbaae8888b15cb07a4a4b3460eb918d60af7a8",
+  "generatedAt": "2026-07-21T06:32:41.391Z",
+  "repoCommit": "c75ed6e4d1b948d009c9a0606fa426c306e8ce00",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
-    "generatedAt": "2026-07-21T05:35:53.567Z",
+    "generatedAt": "2026-07-21T06:32:41.391Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -157,9 +157,9 @@
     },
     "configurationFieldSync": {
       "status": "PASS_TARGET_POSTGRES_FIELD_LIFECYCLE_CLEANED",
-      "marker": "ADP_E2E_20260721053537_PG_FIELD",
+      "marker": "ADP_E2E_20260721063213_PG_FIELD",
       "evidence": "metadata/entity-model-field-persistence-acceptance.json",
-      "assertions": "real /msService/ec/engine/msManage page; entity/model/field create; TEXT varchar(64) plus index; marker row; rename and widen to varchar(256) preserving data; idempotent replay one column/one index; unsafe TEXT to INTEGER HTTP 500 with metadata and DDL rollback; cleanup 0/0/0/0"
+      "assertions": "16/16; real /msService/ec/engine/msManage page; entity/model/field create; TEXT varchar(64) plus managed index; marker row; managed index disable/idempotent disable/re-enable; rename and widen to varchar(256) preserving data and normalizing the managed index name; external unique index retained on disable and reused on re-enable without duplication; unsafe TEXT to INTEGER HTTP 500 with metadata and DDL rollback; cleanup 0/0/0/0"
     }
   },
   "summary": {
@@ -4417,7 +4417,7 @@
     {
       "module": "基础配置-实体模型字段",
       "route": "/msService/ec/engine/msManage",
-      "operation": "创建 TEXT 字段与索引、写入 marker 行、字段重命名与安全扩容、幂等重放、危险类型转换回滚和受控清理",
+      "operation": "创建 TEXT 字段与托管索引、停用/重复停用/重启用索引、字段重命名与安全扩容、保护外部唯一索引、幂等重放、危险类型转换回滚和受控清理",
       "api": "POST /msService/ec/entity/save; POST /msService/ec/model/save; POST /msService/ec/property/save",
       "method": "POST",
       "requiresPersistence": true,
@@ -4428,20 +4428,20 @@
         "public.ec_property",
         "information_schema.columns",
         "pg_index",
-        "public.ds_e2ef_053537"
+        "public.ds_e2ef_063213"
       ],
-      "marker": "ADP_E2E_20260721053537_PG_FIELD",
-      "verificationSql": "Query ec_property by property code; query information_schema.columns for E2E_TXT_053537/E2E_TEXT_053537; query pg_index for the generated field index; query public.ds_e2ef_053537 id=1784612137520 for ADP_E2E_20260721053537_PG_FIELD_ROW; after controlled cleanup verify property/model/entity/physical table counts are all 0.",
+      "marker": "ADP_E2E_20260721063213_PG_FIELD",
+      "verificationSql": "Query ec_property by property code; query information_schema.columns for E2E_TXT_063213/E2E_TEXT_063213; query pg_index for IDX_DS_E2EF_063213_E2E_TXT_063213, renamed managed index IDX_DS_E2EF_063213_E2E_TEXT_063213 and protected external unique index EXT_DS_E2EF_063213_E2E_TEXT_063213; query public.ds_e2ef_063213 id=1784615533973 for ADP_E2E_20260721063213_PG_FIELD_ROW; after controlled cleanup verify property/model/entity/physical table counts are all 0.",
       "status": "PASS",
-      "evidence": "metadata/entity-model-field-persistence-acceptance.json; 9/9 PASS on 10.11.100.17; browser navigation 200; create/rename/widen/replay requests 200; expected unsafe conversion 500 rolled metadata and DDL back; marker data preserved; cleanup property/model/entity/table=0/0/0/0",
+      "evidence": "metadata/entity-model-field-persistence-acceptance.json; 16/16 PASS on 10.11.100.17; browser navigation 200; create/disable/disable replay/re-enable/rename/external-index protection/replay requests 200; managed index renamed with the field; external unique index retained and reused without duplicate; expected unsafe conversion 500 rolled metadata and DDL back; marker data preserved; cleanup property/model/entity/table=0/0/0/0",
       "issues": []
     }
   ],
   "evidence": [
     {
-      "marker": "ADP_E2E_20260721053537_PG_FIELD",
+      "marker": "ADP_E2E_20260721063213_PG_FIELD",
       "artifact": "metadata/entity-model-field-persistence-acceptance.json",
-      "summary": "Real entity-model page, POST property lifecycle, PostgreSQL ec_property/column/index/marker-row verification, safe rename and widening, idempotent replay, expected unsafe-conversion rollback and four-category zero cleanup passed 9/9 on 10.11.100.17."
+      "summary": "Real entity-model page, POST property lifecycle, PostgreSQL ec_property/column/managed-index/external-unique-index/marker-row verification, safe managed-index disable and re-enable, rename and widening, external-index protection, idempotent replay, expected unsafe-conversion rollback and four-category zero cleanup passed 16/16 on 10.11.100.17."
     },
     {
       "marker": "ADP_E2E_20260721032432_QCS_QUAL",

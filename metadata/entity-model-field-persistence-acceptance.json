@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T05:35:53.567Z",
-  "repoCommit": "c1bbaae8888b15cb07a4a4b3460eb918d60af7a8",
+  "generatedAt": "2026-07-21T06:32:41.391Z",
+  "repoCommit": "c75ed6e4d1b948d009c9a0606fa426c306e8ce00",
   "database": "PostgreSQL",
   "module": "basic-config",
   "actionId": "entity-model-postgres-field-sync",
   "areaId": "configuration-physical-model-field",
   "status": "PASS",
-  "marker": "ADP_E2E_20260721053537_PG_FIELD",
+  "marker": "ADP_E2E_20260721063213_PG_FIELD",
   "route": "/msService/ec/engine/msManage",
   "apiEndpoints": [
     "POST /msService/ec/entity/save",
@@ -15,18 +15,21 @@
     "POST /msService/ec/property/save"
   ],
   "identifiers": {
-    "entityCode": "DataSet_1.0.0_E2eFldEnt053537",
-    "modelCode": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537",
-    "propertyCode": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537",
-    "tableName": "DS_E2EF_053537",
-    "initialColumn": "E2E_TXT_053537",
-    "renamedColumn": "E2E_TEXT_053537",
-    "probeId": 1784612137520,
-    "probeValue": "ADP_E2E_20260721053537_PG_FIELD_ROW"
+    "entityCode": "DataSet_1.0.0_E2eFldEnt063213",
+    "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+    "propertyCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+    "tableName": "DS_E2EF_063213",
+    "initialColumn": "E2E_TXT_063213",
+    "renamedColumn": "E2E_TEXT_063213",
+    "initialManagedIndex": "IDX_DS_E2EF_063213_E2E_TXT_063213",
+    "renamedManagedIndex": "IDX_DS_E2EF_063213_E2E_TEXT_063213",
+    "externalIndexName": "EXT_DS_E2EF_063213_E2E_TEXT_063213",
+    "probeId": 1784615533973,
+    "probeValue": "ADP_E2E_20260721063213_PG_FIELD_ROW"
   },
   "summary": {
-    "testedChecks": 9,
-    "pass": 9,
+    "testedChecks": 16,
+    "pass": 16,
     "fail": 0,
     "blocked": 0,
     "status": "PASS"
@@ -45,32 +48,67 @@
     {
       "name": "field-metadata-created",
       "status": "PASS",
-      "evidence": "rows=1; type=TEXT; column=E2E_TXT_053537"
+      "evidence": "rows=1; type=TEXT; column=E2E_TXT_063213"
     },
     {
       "name": "postgres-column-created-and-indexed",
       "status": "PASS",
-      "evidence": "column={\"columnName\":\"e2e_txt_053537\",\"dataType\":\"character varying\",\"characterLength\":\"64\",\"numericPrecision\":\"\",\"numericScale\":\"\",\"nullable\":\"YES\"}; indexes=[{\"indexName\":\"idx_ds_e2ef_053537_e2e_txt_053537\",\"columnName\":\"e2e_txt_053537\"}]"
+      "evidence": "column={\"columnName\":\"e2e_txt_063213\",\"dataType\":\"character varying\",\"characterLength\":\"64\",\"numericPrecision\":\"\",\"numericScale\":\"\",\"nullable\":\"YES\"}; indexes=[{\"indexName\":\"idx_ds_e2ef_063213_e2e_txt_063213\",\"columnName\":\"e2e_txt_063213\",\"isUnique\":\"false\"}]"
     },
     {
       "name": "marker-row-written",
       "status": "PASS",
-      "evidence": "probe=[{\"id\":\"1784612137520\",\"value\":\"ADP_E2E_20260721053537_PG_FIELD_ROW\"}]"
+      "evidence": "probe=[{\"id\":\"1784615533973\",\"value\":\"ADP_E2E_20260721063213_PG_FIELD_ROW\"}]"
+    },
+    {
+      "name": "managed-index-disabled-without-column-loss",
+      "status": "PASS",
+      "evidence": "response=200; metadata={\"code\":\"DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213\",\"version\":\"0\",\"valid\":\"1\",\"name\":\"e2eText063213\",\"displayName\":\"ADP_E2E_20260721063213_PG_FIELD field\",\"type\":\"TEXT\",\"columnName\":\"E2E_TXT_063213\",\"maxLength\":\"32\",\"isIndex\":\"0\",\"modelCode\":\"DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213\",\"description\":\"ADP_E2E_20260721063213_PG_FIELD_PROPERTY\"}; indexes=[]; probe=[{\"id\":\"1784615533973\",\"value\":\"ADP_E2E_20260721063213_PG_FIELD_ROW\"}]"
+    },
+    {
+      "name": "managed-index-disable-idempotent",
+      "status": "PASS",
+      "evidence": "response=200; indexes=[]; probe=[{\"id\":\"1784615533973\",\"value\":\"ADP_E2E_20260721063213_PG_FIELD_ROW\"}]"
+    },
+    {
+      "name": "managed-index-reenabled",
+      "status": "PASS",
+      "evidence": "response=200; indexes=[{\"indexName\":\"idx_ds_e2ef_063213_e2e_txt_063213\",\"columnName\":\"e2e_txt_063213\",\"isUnique\":\"false\"}]; probe=[{\"id\":\"1784615533973\",\"value\":\"ADP_E2E_20260721063213_PG_FIELD_ROW\"}]"
     },
     {
       "name": "field-renamed-widened-and-data-preserved",
       "status": "PASS",
-      "evidence": "response=200; column={\"columnName\":\"e2e_text_053537\",\"dataType\":\"character varying\",\"characterLength\":\"256\",\"numericPrecision\":\"\",\"numericScale\":\"\",\"nullable\":\"YES\"}; probe=[{\"id\":\"1784612137520\",\"value\":\"ADP_E2E_20260721053537_PG_FIELD_ROW\"}]"
+      "evidence": "response=200; column={\"columnName\":\"e2e_text_063213\",\"dataType\":\"character varying\",\"characterLength\":\"256\",\"numericPrecision\":\"\",\"numericScale\":\"\",\"nullable\":\"YES\"}; probe=[{\"id\":\"1784615533973\",\"value\":\"ADP_E2E_20260721063213_PG_FIELD_ROW\"}]"
+    },
+    {
+      "name": "managed-index-renamed-with-column",
+      "status": "PASS",
+      "evidence": "indexes=[{\"indexName\":\"idx_ds_e2ef_063213_e2e_text_063213\",\"columnName\":\"e2e_text_063213\",\"isUnique\":\"false\"}]; old=IDX_DS_E2EF_063213_E2E_TXT_063213; new=IDX_DS_E2EF_063213_E2E_TEXT_063213"
+    },
+    {
+      "name": "external-unique-index-fixture-created",
+      "status": "PASS",
+      "evidence": "indexes=[{\"indexName\":\"ext_ds_e2ef_063213_e2e_text_063213\",\"columnName\":\"e2e_text_063213\",\"isUnique\":\"true\"},{\"indexName\":\"idx_ds_e2ef_063213_e2e_text_063213\",\"columnName\":\"e2e_text_063213\",\"isUnique\":\"false\"}]"
+    },
+    {
+      "name": "external-unique-index-protected-on-managed-disable",
+      "status": "PASS",
+      "evidence": "response=200; indexes=[{\"indexName\":\"ext_ds_e2ef_063213_e2e_text_063213\",\"columnName\":\"e2e_text_063213\",\"isUnique\":\"true\"}]"
+    },
+    {
+      "name": "external-index-satisfies-reenable-without-duplicate",
+      "status": "PASS",
+      "evidence": "response=200; indexes=[{\"indexName\":\"ext_ds_e2ef_063213_e2e_text_063213\",\"columnName\":\"e2e_text_063213\",\"isUnique\":\"true\"}]"
     },
     {
       "name": "field-idempotent-replay",
       "status": "PASS",
-      "evidence": "response=200; columns=1; indexes=1; probe=[{\"id\":\"1784612137520\",\"value\":\"ADP_E2E_20260721053537_PG_FIELD_ROW\"}]"
+      "evidence": "response=200; columns=1; indexes=1; probe=[{\"id\":\"1784615533973\",\"value\":\"ADP_E2E_20260721063213_PG_FIELD_ROW\"}]"
     },
     {
       "name": "unsafe-type-change-rolled-back",
       "status": "PASS",
-      "evidence": "response=500; metadata={\"code\":\"DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537\",\"version\":\"0\",\"valid\":\"1\",\"name\":\"e2eText053537\",\"displayName\":\"ADP_E2E_20260721053537_PG_FIELD field\",\"type\":\"TEXT\",\"columnName\":\"E2E_TEXT_053537\",\"maxLength\":\"128\",\"isIndex\":\"1\",\"modelCode\":\"DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537\",\"description\":\"ADP_E2E_20260721053537_PG_FIELD_PROPERTY\"}; column={\"columnName\":\"e2e_text_053537\",\"dataType\":\"character varying\",\"characterLength\":\"256\",\"numericPrecision\":\"\",\"numericScale\":\"\",\"nullable\":\"YES\"}; probe=[{\"id\":\"1784612137520\",\"value\":\"ADP_E2E_20260721053537_PG_FIELD_ROW\"}]"
+      "evidence": "response=500; metadata={\"code\":\"DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213\",\"version\":\"0\",\"valid\":\"1\",\"name\":\"e2eText063213\",\"displayName\":\"ADP_E2E_20260721063213_PG_FIELD field\",\"type\":\"TEXT\",\"columnName\":\"E2E_TEXT_063213\",\"maxLength\":\"128\",\"isIndex\":\"1\",\"modelCode\":\"DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213\",\"description\":\"ADP_E2E_20260721063213_PG_FIELD_PROPERTY\"}; column={\"columnName\":\"e2e_text_063213\",\"dataType\":\"character varying\",\"characterLength\":\"256\",\"numericPrecision\":\"\",\"numericScale\":\"\",\"nullable\":\"YES\"}; probe=[{\"id\":\"1784615533973\",\"value\":\"ADP_E2E_20260721063213_PG_FIELD_ROW\"}]"
     },
     {
       "name": "controlled-cleanup",
@@ -104,7 +142,7 @@
       "url": "/msService/ec/entity/save",
       "requestPayload": {
         "entity.version": "0",
-        "entity.code": "DataSet_1.0.0_E2eFldEnt053537",
+        "entity.code": "DataSet_1.0.0_E2eFldEnt063213",
         "entity.module.code": "DataSet_1.0.0",
         "entity.isControl": "false",
         "entity.payCloseAttention": "false",
@@ -113,13 +151,13 @@
         "entity.enableRest": "false",
         "entity.enableWs": "false",
         "entity.enableFieldsPermissionConf": "false",
-        "entity.entityName": "E2eFldEnt053537",
+        "entity.entityName": "E2eFldEnt063213",
         "entity.prefix": "E2F",
-        "entity.name": "ADP_E2E_20260721053537_PG_FIELD entity",
+        "entity.name": "ADP_E2E_20260721063213_PG_FIELD entity",
         "entity.isBase": "true",
         "entity.groupEnabled": "false",
         "entity.workflowEnabled": "false",
-        "entity.description": "ADP_E2E_20260721053537_PG_FIELD_ENTITY"
+        "entity.description": "ADP_E2E_20260721063213_PG_FIELD_ENTITY"
       },
       "responseStatus": 200,
       "ok": true,
@@ -138,20 +176,20 @@
       "requestPayload": {
         "model.version": "0",
         "model.code": "",
-        "entity.code": "DataSet_1.0.0_E2eFldEnt053537",
-        "model.entity.code": "DataSet_1.0.0_E2eFldEnt053537",
+        "entity.code": "DataSet_1.0.0_E2eFldEnt063213",
+        "model.entity.code": "DataSet_1.0.0_E2eFldEnt063213",
         "model.moduleCode": "DataSet_1.0.0",
         "model.orgTableName": "",
-        "model.modelName": "E2eFldMod053537",
-        "model.tableName": "DS_E2EF_053537",
-        "model.name": "ADP_E2E_20260721053537_PG_FIELD model",
+        "model.modelName": "E2eFldMod063213",
+        "model.tableName": "DS_E2EF_063213",
+        "model.name": "ADP_E2E_20260721063213_PG_FIELD model",
         "model.dataType": "1",
         "model.isMain": "false",
         "model.isExtraCol": "false",
         "model.isCache": "false",
         "model.enableSync": "false",
         "model.type": "0",
-        "model.description": "ADP_E2E_20260721053537_PG_FIELD_MODEL"
+        "model.description": "ADP_E2E_20260721063213_PG_FIELD_MODEL"
       },
       "responseStatus": 200,
       "ok": true,
@@ -170,9 +208,9 @@
       "requestPayload": {
         "property.version": "0",
         "property.sort": "1",
-        "property.model.code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537",
+        "property.model.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
         "model.enableDataAudit": "false",
-        "property.entityCode": "DataSet_1.0.0_E2eFldEnt053537",
+        "property.entityCode": "DataSet_1.0.0_E2eFldEnt063213",
         "property.moduleCode": "DataSet_1.0.0",
         "property.code": "",
         "property.defaultValue": "",
@@ -199,15 +237,183 @@
         "property.noAnalyzer": "false",
         "property.isMainAssociated": "false",
         "property.isMainDisplay": "false",
-        "property.name": "e2eText053537",
-        "property.columnName": "E2E_TXT_053537",
-        "property.displayName": "ADP_E2E_20260721053537_PG_FIELD field",
+        "property.name": "e2eText063213",
+        "property.columnName": "E2E_TXT_063213",
+        "property.displayName": "ADP_E2E_20260721063213_PG_FIELD field",
         "property.type": "TEXT",
         "property.fieldType": "TEXTFIELD",
         "property.format": "TEXT",
         "property.maxLength": "32",
         "property.fetchMode": "SELECT",
-        "property.description": "ADP_E2E_20260721053537_PG_FIELD_PROPERTY"
+        "property.description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "fieldIndexDisable": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "1",
+        "property.model.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eFldEnt063213",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "E2E_TXT_063213",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eText063213",
+        "property.columnName": "E2E_TXT_063213",
+        "property.displayName": "ADP_E2E_20260721063213_PG_FIELD field",
+        "property.type": "TEXT",
+        "property.fieldType": "TEXTFIELD",
+        "property.format": "TEXT",
+        "property.maxLength": "32",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "fieldIndexDisableReplay": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "1",
+        "property.model.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eFldEnt063213",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "E2E_TXT_063213",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eText063213",
+        "property.columnName": "E2E_TXT_063213",
+        "property.displayName": "ADP_E2E_20260721063213_PG_FIELD field",
+        "property.type": "TEXT",
+        "property.fieldType": "TEXTFIELD",
+        "property.format": "TEXT",
+        "property.maxLength": "32",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "fieldIndexEnable": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "1",
+        "property.model.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eFldEnt063213",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "true",
+        "property.orgColumnName": "E2E_TXT_063213",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eText063213",
+        "property.columnName": "E2E_TXT_063213",
+        "property.displayName": "ADP_E2E_20260721063213_PG_FIELD field",
+        "property.type": "TEXT",
+        "property.fieldType": "TEXTFIELD",
+        "property.format": "TEXT",
+        "property.maxLength": "32",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
       },
       "responseStatus": 200,
       "ok": true,
@@ -226,11 +432,11 @@
       "requestPayload": {
         "property.version": "0",
         "property.sort": "1",
-        "property.model.code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537",
+        "property.model.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
         "model.enableDataAudit": "false",
-        "property.entityCode": "DataSet_1.0.0_E2eFldEnt053537",
+        "property.entityCode": "DataSet_1.0.0_E2eFldEnt063213",
         "property.moduleCode": "DataSet_1.0.0",
-        "property.code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537",
+        "property.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
         "property.defaultValue": "",
         "property.fillcontent": "",
         "property.attributes": "",
@@ -245,7 +451,7 @@
         "property.isBussinessKey": "false",
         "property.isUsedMneCode": "false",
         "property.isIndex": "true",
-        "property.orgColumnName": "E2E_TXT_053537",
+        "property.orgColumnName": "E2E_TXT_063213",
         "property.isGroupObject": "false",
         "property.onlyLeaf": "false",
         "property.isUsedForList": "true",
@@ -255,15 +461,127 @@
         "property.noAnalyzer": "false",
         "property.isMainAssociated": "false",
         "property.isMainDisplay": "false",
-        "property.name": "e2eText053537",
-        "property.columnName": "E2E_TEXT_053537",
-        "property.displayName": "ADP_E2E_20260721053537_PG_FIELD field",
+        "property.name": "e2eText063213",
+        "property.columnName": "E2E_TEXT_063213",
+        "property.displayName": "ADP_E2E_20260721063213_PG_FIELD field",
         "property.type": "TEXT",
         "property.fieldType": "TEXTFIELD",
         "property.format": "TEXT",
         "property.maxLength": "128",
         "property.fetchMode": "SELECT",
-        "property.description": "ADP_E2E_20260721053537_PG_FIELD_PROPERTY"
+        "property.description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "fieldIndexDisableWithExternal": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "1",
+        "property.model.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eFldEnt063213",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "E2E_TEXT_063213",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eText063213",
+        "property.columnName": "E2E_TEXT_063213",
+        "property.displayName": "ADP_E2E_20260721063213_PG_FIELD field",
+        "property.type": "TEXT",
+        "property.fieldType": "TEXTFIELD",
+        "property.format": "TEXT",
+        "property.maxLength": "128",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "fieldIndexEnableWithExternal": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "1",
+        "property.model.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eFldEnt063213",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "true",
+        "property.orgColumnName": "E2E_TEXT_063213",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eText063213",
+        "property.columnName": "E2E_TEXT_063213",
+        "property.displayName": "ADP_E2E_20260721063213_PG_FIELD field",
+        "property.type": "TEXT",
+        "property.fieldType": "TEXTFIELD",
+        "property.format": "TEXT",
+        "property.maxLength": "128",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
       },
       "responseStatus": 200,
       "ok": true,
@@ -282,11 +600,11 @@
       "requestPayload": {
         "property.version": "0",
         "property.sort": "1",
-        "property.model.code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537",
+        "property.model.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
         "model.enableDataAudit": "false",
-        "property.entityCode": "DataSet_1.0.0_E2eFldEnt053537",
+        "property.entityCode": "DataSet_1.0.0_E2eFldEnt063213",
         "property.moduleCode": "DataSet_1.0.0",
-        "property.code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537",
+        "property.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
         "property.defaultValue": "",
         "property.fillcontent": "",
         "property.attributes": "",
@@ -301,7 +619,7 @@
         "property.isBussinessKey": "false",
         "property.isUsedMneCode": "false",
         "property.isIndex": "true",
-        "property.orgColumnName": "E2E_TEXT_053537",
+        "property.orgColumnName": "E2E_TEXT_063213",
         "property.isGroupObject": "false",
         "property.onlyLeaf": "false",
         "property.isUsedForList": "true",
@@ -311,15 +629,15 @@
         "property.noAnalyzer": "false",
         "property.isMainAssociated": "false",
         "property.isMainDisplay": "false",
-        "property.name": "e2eText053537",
-        "property.columnName": "E2E_TEXT_053537",
-        "property.displayName": "ADP_E2E_20260721053537_PG_FIELD field",
+        "property.name": "e2eText063213",
+        "property.columnName": "E2E_TEXT_063213",
+        "property.displayName": "ADP_E2E_20260721063213_PG_FIELD field",
         "property.type": "TEXT",
         "property.fieldType": "TEXTFIELD",
         "property.format": "TEXT",
         "property.maxLength": "128",
         "property.fetchMode": "SELECT",
-        "property.description": "ADP_E2E_20260721053537_PG_FIELD_PROPERTY"
+        "property.description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
       },
       "responseStatus": 200,
       "ok": true,
@@ -338,11 +656,11 @@
       "requestPayload": {
         "property.version": "0",
         "property.sort": "1",
-        "property.model.code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537",
+        "property.model.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
         "model.enableDataAudit": "false",
-        "property.entityCode": "DataSet_1.0.0_E2eFldEnt053537",
+        "property.entityCode": "DataSet_1.0.0_E2eFldEnt063213",
         "property.moduleCode": "DataSet_1.0.0",
-        "property.code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537",
+        "property.code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
         "property.defaultValue": "",
         "property.fillcontent": "",
         "property.attributes": "",
@@ -357,7 +675,7 @@
         "property.isBussinessKey": "false",
         "property.isUsedMneCode": "false",
         "property.isIndex": "true",
-        "property.orgColumnName": "E2E_TEXT_053537",
+        "property.orgColumnName": "E2E_TEXT_063213",
         "property.isGroupObject": "false",
         "property.onlyLeaf": "false",
         "property.isUsedForList": "true",
@@ -367,15 +685,15 @@
         "property.noAnalyzer": "false",
         "property.isMainAssociated": "false",
         "property.isMainDisplay": "false",
-        "property.name": "e2eText053537",
-        "property.columnName": "E2E_TEXT_053537",
-        "property.displayName": "ADP_E2E_20260721053537_PG_FIELD field",
+        "property.name": "e2eText063213",
+        "property.columnName": "E2E_TEXT_063213",
+        "property.displayName": "ADP_E2E_20260721063213_PG_FIELD field",
         "property.type": "INTEGER",
         "property.fieldType": "TEXTFIELD",
         "property.format": "TEXT",
         "property.maxLength": "",
         "property.fetchMode": "SELECT",
-        "property.description": "ADP_E2E_20260721053537_PG_FIELD_PROPERTY"
+        "property.description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
       },
       "responseStatus": 500,
       "ok": false,
@@ -397,22 +715,22 @@
       "label": "afterCreate",
       "metadata": [
         {
-          "code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537",
+          "code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
           "version": "0",
           "valid": "1",
-          "name": "e2eText053537",
-          "displayName": "ADP_E2E_20260721053537_PG_FIELD field",
+          "name": "e2eText063213",
+          "displayName": "ADP_E2E_20260721063213_PG_FIELD field",
           "type": "TEXT",
-          "columnName": "E2E_TXT_053537",
+          "columnName": "E2E_TXT_063213",
           "maxLength": "32",
           "isIndex": "1",
-          "modelCode": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537",
-          "description": "ADP_E2E_20260721053537_PG_FIELD_PROPERTY"
+          "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+          "description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
         }
       ],
       "columns": [
         {
-          "columnName": "e2e_txt_053537",
+          "columnName": "e2e_txt_063213",
           "dataType": "character varying",
           "characterLength": "64",
           "numericPrecision": "",
@@ -422,8 +740,9 @@
       ],
       "indexes": [
         {
-          "indexName": "idx_ds_e2ef_053537_e2e_txt_053537",
-          "columnName": "e2e_txt_053537"
+          "indexName": "idx_ds_e2ef_063213_e2e_txt_063213",
+          "columnName": "e2e_txt_063213",
+          "isUnique": "false"
         }
       ],
       "probe": []
@@ -432,22 +751,22 @@
       "label": "afterProbeInsert",
       "metadata": [
         {
-          "code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537",
+          "code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
           "version": "0",
           "valid": "1",
-          "name": "e2eText053537",
-          "displayName": "ADP_E2E_20260721053537_PG_FIELD field",
+          "name": "e2eText063213",
+          "displayName": "ADP_E2E_20260721063213_PG_FIELD field",
           "type": "TEXT",
-          "columnName": "E2E_TXT_053537",
+          "columnName": "E2E_TXT_063213",
           "maxLength": "32",
           "isIndex": "1",
-          "modelCode": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537",
-          "description": "ADP_E2E_20260721053537_PG_FIELD_PROPERTY"
+          "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+          "description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
         }
       ],
       "columns": [
         {
-          "columnName": "e2e_txt_053537",
+          "columnName": "e2e_txt_063213",
           "dataType": "character varying",
           "characterLength": "64",
           "numericPrecision": "",
@@ -457,14 +776,126 @@
       ],
       "indexes": [
         {
-          "indexName": "idx_ds_e2ef_053537_e2e_txt_053537",
-          "columnName": "e2e_txt_053537"
+          "indexName": "idx_ds_e2ef_063213_e2e_txt_063213",
+          "columnName": "e2e_txt_063213",
+          "isUnique": "false"
         }
       ],
       "probe": [
         {
-          "id": "1784612137520",
-          "value": "ADP_E2E_20260721053537_PG_FIELD_ROW"
+          "id": "1784615533973",
+          "value": "ADP_E2E_20260721063213_PG_FIELD_ROW"
+        }
+      ]
+    },
+    "afterIndexDisable": {
+      "label": "afterIndexDisable",
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+          "version": "0",
+          "valid": "1",
+          "name": "e2eText063213",
+          "displayName": "ADP_E2E_20260721063213_PG_FIELD field",
+          "type": "TEXT",
+          "columnName": "E2E_TXT_063213",
+          "maxLength": "32",
+          "isIndex": "0",
+          "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+          "description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "e2e_txt_063213",
+          "dataType": "character varying",
+          "characterLength": "64",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "indexes": [],
+      "probe": [
+        {
+          "id": "1784615533973",
+          "value": "ADP_E2E_20260721063213_PG_FIELD_ROW"
+        }
+      ]
+    },
+    "afterIndexDisableReplay": {
+      "label": "afterIndexDisableReplay",
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+          "version": "0",
+          "valid": "1",
+          "name": "e2eText063213",
+          "displayName": "ADP_E2E_20260721063213_PG_FIELD field",
+          "type": "TEXT",
+          "columnName": "E2E_TXT_063213",
+          "maxLength": "32",
+          "isIndex": "0",
+          "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+          "description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "e2e_txt_063213",
+          "dataType": "character varying",
+          "characterLength": "64",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "indexes": [],
+      "probe": [
+        {
+          "id": "1784615533973",
+          "value": "ADP_E2E_20260721063213_PG_FIELD_ROW"
+        }
+      ]
+    },
+    "afterIndexEnable": {
+      "label": "afterIndexEnable",
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+          "version": "0",
+          "valid": "1",
+          "name": "e2eText063213",
+          "displayName": "ADP_E2E_20260721063213_PG_FIELD field",
+          "type": "TEXT",
+          "columnName": "E2E_TXT_063213",
+          "maxLength": "32",
+          "isIndex": "1",
+          "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+          "description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "e2e_txt_063213",
+          "dataType": "character varying",
+          "characterLength": "64",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "indexes": [
+        {
+          "indexName": "idx_ds_e2ef_063213_e2e_txt_063213",
+          "columnName": "e2e_txt_063213",
+          "isUnique": "false"
+        }
+      ],
+      "probe": [
+        {
+          "id": "1784615533973",
+          "value": "ADP_E2E_20260721063213_PG_FIELD_ROW"
         }
       ]
     },
@@ -472,22 +903,22 @@
       "label": "afterRename",
       "metadata": [
         {
-          "code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537",
+          "code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
           "version": "0",
           "valid": "1",
-          "name": "e2eText053537",
-          "displayName": "ADP_E2E_20260721053537_PG_FIELD field",
+          "name": "e2eText063213",
+          "displayName": "ADP_E2E_20260721063213_PG_FIELD field",
           "type": "TEXT",
-          "columnName": "E2E_TEXT_053537",
+          "columnName": "E2E_TEXT_063213",
           "maxLength": "128",
           "isIndex": "1",
-          "modelCode": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537",
-          "description": "ADP_E2E_20260721053537_PG_FIELD_PROPERTY"
+          "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+          "description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
         }
       ],
       "columns": [
         {
-          "columnName": "e2e_text_053537",
+          "columnName": "e2e_text_063213",
           "dataType": "character varying",
           "characterLength": "256",
           "numericPrecision": "",
@@ -497,14 +928,143 @@
       ],
       "indexes": [
         {
-          "indexName": "idx_ds_e2ef_053537_e2e_txt_053537",
-          "columnName": "e2e_text_053537"
+          "indexName": "idx_ds_e2ef_063213_e2e_text_063213",
+          "columnName": "e2e_text_063213",
+          "isUnique": "false"
         }
       ],
       "probe": [
         {
-          "id": "1784612137520",
-          "value": "ADP_E2E_20260721053537_PG_FIELD_ROW"
+          "id": "1784615533973",
+          "value": "ADP_E2E_20260721063213_PG_FIELD_ROW"
+        }
+      ]
+    },
+    "afterExternalIndexCreate": {
+      "label": "afterExternalIndexCreate",
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+          "version": "0",
+          "valid": "1",
+          "name": "e2eText063213",
+          "displayName": "ADP_E2E_20260721063213_PG_FIELD field",
+          "type": "TEXT",
+          "columnName": "E2E_TEXT_063213",
+          "maxLength": "128",
+          "isIndex": "1",
+          "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+          "description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "e2e_text_063213",
+          "dataType": "character varying",
+          "characterLength": "256",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "indexes": [
+        {
+          "indexName": "ext_ds_e2ef_063213_e2e_text_063213",
+          "columnName": "e2e_text_063213",
+          "isUnique": "true"
+        },
+        {
+          "indexName": "idx_ds_e2ef_063213_e2e_text_063213",
+          "columnName": "e2e_text_063213",
+          "isUnique": "false"
+        }
+      ],
+      "probe": [
+        {
+          "id": "1784615533973",
+          "value": "ADP_E2E_20260721063213_PG_FIELD_ROW"
+        }
+      ]
+    },
+    "afterExternalIndexDisable": {
+      "label": "afterExternalIndexDisable",
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+          "version": "0",
+          "valid": "1",
+          "name": "e2eText063213",
+          "displayName": "ADP_E2E_20260721063213_PG_FIELD field",
+          "type": "TEXT",
+          "columnName": "E2E_TEXT_063213",
+          "maxLength": "128",
+          "isIndex": "0",
+          "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+          "description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "e2e_text_063213",
+          "dataType": "character varying",
+          "characterLength": "256",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "indexes": [
+        {
+          "indexName": "ext_ds_e2ef_063213_e2e_text_063213",
+          "columnName": "e2e_text_063213",
+          "isUnique": "true"
+        }
+      ],
+      "probe": [
+        {
+          "id": "1784615533973",
+          "value": "ADP_E2E_20260721063213_PG_FIELD_ROW"
+        }
+      ]
+    },
+    "afterExternalIndexEnable": {
+      "label": "afterExternalIndexEnable",
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
+          "version": "0",
+          "valid": "1",
+          "name": "e2eText063213",
+          "displayName": "ADP_E2E_20260721063213_PG_FIELD field",
+          "type": "TEXT",
+          "columnName": "E2E_TEXT_063213",
+          "maxLength": "128",
+          "isIndex": "1",
+          "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+          "description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "e2e_text_063213",
+          "dataType": "character varying",
+          "characterLength": "256",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "indexes": [
+        {
+          "indexName": "ext_ds_e2ef_063213_e2e_text_063213",
+          "columnName": "e2e_text_063213",
+          "isUnique": "true"
+        }
+      ],
+      "probe": [
+        {
+          "id": "1784615533973",
+          "value": "ADP_E2E_20260721063213_PG_FIELD_ROW"
         }
       ]
     },
@@ -512,22 +1072,22 @@
       "label": "afterReplay",
       "metadata": [
         {
-          "code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537",
+          "code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
           "version": "0",
           "valid": "1",
-          "name": "e2eText053537",
-          "displayName": "ADP_E2E_20260721053537_PG_FIELD field",
+          "name": "e2eText063213",
+          "displayName": "ADP_E2E_20260721063213_PG_FIELD field",
           "type": "TEXT",
-          "columnName": "E2E_TEXT_053537",
+          "columnName": "E2E_TEXT_063213",
           "maxLength": "128",
           "isIndex": "1",
-          "modelCode": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537",
-          "description": "ADP_E2E_20260721053537_PG_FIELD_PROPERTY"
+          "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+          "description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
         }
       ],
       "columns": [
         {
-          "columnName": "e2e_text_053537",
+          "columnName": "e2e_text_063213",
           "dataType": "character varying",
           "characterLength": "256",
           "numericPrecision": "",
@@ -537,14 +1097,15 @@
       ],
       "indexes": [
         {
-          "indexName": "idx_ds_e2ef_053537_e2e_txt_053537",
-          "columnName": "e2e_text_053537"
+          "indexName": "ext_ds_e2ef_063213_e2e_text_063213",
+          "columnName": "e2e_text_063213",
+          "isUnique": "true"
         }
       ],
       "probe": [
         {
-          "id": "1784612137520",
-          "value": "ADP_E2E_20260721053537_PG_FIELD_ROW"
+          "id": "1784615533973",
+          "value": "ADP_E2E_20260721063213_PG_FIELD_ROW"
         }
       ]
     },
@@ -552,22 +1113,22 @@
       "label": "afterUnsafeChange",
       "metadata": [
         {
-          "code": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537",
+          "code": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213",
           "version": "0",
           "valid": "1",
-          "name": "e2eText053537",
-          "displayName": "ADP_E2E_20260721053537_PG_FIELD field",
+          "name": "e2eText063213",
+          "displayName": "ADP_E2E_20260721063213_PG_FIELD field",
           "type": "TEXT",
-          "columnName": "E2E_TEXT_053537",
+          "columnName": "E2E_TEXT_063213",
           "maxLength": "128",
           "isIndex": "1",
-          "modelCode": "DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537",
-          "description": "ADP_E2E_20260721053537_PG_FIELD_PROPERTY"
+          "modelCode": "DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213",
+          "description": "ADP_E2E_20260721063213_PG_FIELD_PROPERTY"
         }
       ],
       "columns": [
         {
-          "columnName": "e2e_text_053537",
+          "columnName": "e2e_text_063213",
           "dataType": "character varying",
           "characterLength": "256",
           "numericPrecision": "",
@@ -577,14 +1138,15 @@
       ],
       "indexes": [
         {
-          "indexName": "idx_ds_e2ef_053537_e2e_txt_053537",
-          "columnName": "e2e_text_053537"
+          "indexName": "ext_ds_e2ef_063213_e2e_text_063213",
+          "columnName": "e2e_text_063213",
+          "isUnique": "true"
         }
       ],
       "probe": [
         {
-          "id": "1784612137520",
-          "value": "ADP_E2E_20260721053537_PG_FIELD_ROW"
+          "id": "1784615533973",
+          "value": "ADP_E2E_20260721063213_PG_FIELD_ROW"
         }
       ]
     }
@@ -598,16 +1160,17 @@
   "backendTrace": {
     "endpoint": "PropertyController.save -> DtoUtils.getPropertyVO -> ModelServiceImpl.saveProperty",
     "metadataPersistence": "propertyDao.merge -> public.ec_property",
-    "physicalPersistence": "FieldSyncDBUtils.fieldSyncToDb -> PostgresFieldSyncSupport.sync -> ALTER TABLE/COMMENT/CREATE INDEX",
+    "physicalPersistence": "FieldSyncDBUtils.fieldSyncToDb -> PostgresFieldSyncSupport.sync -> ALTER TABLE/COMMENT/CREATE INDEX/ALTER INDEX/DROP INDEX",
     "transactionBoundary": "ModelServiceImpl.saveProperty propagates PostgreSQL DDL failures so ec_property and physical DDL roll back together",
-    "destructivePolicy": "No automatic DROP COLUMN. Incompatible type conversion is rejected and rolled back; this acceptance proves TEXT add, rename, widening and idempotent replay."
+    "destructivePolicy": "No automatic DROP COLUMN. Only deterministic single-column non-unique managed indexes may be renamed or dropped; incompatible type conversion is rejected and rolled back."
   },
   "verificationSql": {
-    "metadata": "select code::text, coalesce(version::text,'0'), coalesce(valid::text,''), coalesce(name::text,''), coalesce(display_name::text,''), coalesce(type::text,''), coalesce(column_name::text,''), coalesce(max_length::text,''), coalesce(is_index::text,''), coalesce(model_code::text,''), coalesce(description::text,'') from public.ec_property where code='DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537' order by modify_time desc nulls last, create_time desc nulls last;",
-    "columns": "select column_name::text, data_type::text, coalesce(character_maximum_length::text,''), coalesce(numeric_precision::text,''), coalesce(numeric_scale::text,''), is_nullable::text from information_schema.columns where table_schema='public' and lower(table_name)=lower('DS_E2EF_053537') and lower(column_name) in (lower('E2E_TXT_053537'), lower('E2E_TEXT_053537')) order by ordinal_position;",
-    "indexes": "select i.relname::text, a.attname::text from pg_index x join pg_class t on t.oid=x.indrelid join pg_namespace n on n.oid=t.relnamespace join pg_class i on i.oid=x.indexrelid join pg_attribute a on a.attrelid=t.oid and a.attnum=any(x.indkey) where n.nspname='public' and not x.indisprimary and lower(t.relname)=lower('DS_E2EF_053537') and lower(a.attname) in (lower('E2E_TXT_053537'), lower('E2E_TEXT_053537')) order by i.relname;",
-    "markerRow": "select id::text, coalesce(\"e2e_text_053537\"::text,'') from public.\"ds_e2ef_053537\" where id=1784612137520;",
-    "cleanup": "begin; delete from public.ec_property where code='DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537_e2eText053537' or model_code='DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537' or entity_code='DataSet_1.0.0_E2eFldEnt053537'; delete from public.ec_model where code='DataSet_1.0.0_E2eFldEnt053537_E2eFldMod053537' or entity_code='DataSet_1.0.0_E2eFldEnt053537'; delete from public.ec_entity where code='DataSet_1.0.0_E2eFldEnt053537'; drop table if exists public.\"ds_e2ef_053537\" cascade; commit;"
+    "metadata": "select code::text, coalesce(version::text,'0'), coalesce(valid::text,''), coalesce(name::text,''), coalesce(display_name::text,''), coalesce(type::text,''), coalesce(column_name::text,''), coalesce(max_length::text,''), coalesce(is_index::text,''), coalesce(model_code::text,''), coalesce(description::text,'') from public.ec_property where code='DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213' order by modify_time desc nulls last, create_time desc nulls last;",
+    "columns": "select column_name::text, data_type::text, coalesce(character_maximum_length::text,''), coalesce(numeric_precision::text,''), coalesce(numeric_scale::text,''), is_nullable::text from information_schema.columns where table_schema='public' and lower(table_name)=lower('DS_E2EF_063213') and lower(column_name) in (lower('E2E_TXT_063213'), lower('E2E_TEXT_063213')) order by ordinal_position;",
+    "indexes": "select i.relname::text, a.attname::text, x.indisunique::text from pg_index x join pg_class t on t.oid=x.indrelid join pg_namespace n on n.oid=t.relnamespace join pg_class i on i.oid=x.indexrelid join pg_attribute a on a.attrelid=t.oid and a.attnum=any(x.indkey) where n.nspname='public' and not x.indisprimary and lower(t.relname)=lower('DS_E2EF_063213') and lower(a.attname) in (lower('E2E_TXT_063213'), lower('E2E_TEXT_063213')) order by i.relname;",
+    "externalIndexFixture": "create unique index \"ext_ds_e2ef_063213_e2e_text_063213\" on public.\"ds_e2ef_063213\" (\"e2e_text_063213\");",
+    "markerRow": "select id::text, coalesce(\"e2e_text_063213\"::text,'') from public.\"ds_e2ef_063213\" where id=1784615533973;",
+    "cleanup": "begin; delete from public.ec_property where code='DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213_e2eText063213' or model_code='DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213' or entity_code='DataSet_1.0.0_E2eFldEnt063213'; delete from public.ec_model where code='DataSet_1.0.0_E2eFldEnt063213_E2eFldMod063213' or entity_code='DataSet_1.0.0_E2eFldEnt063213'; delete from public.ec_entity where code='DataSet_1.0.0_E2eFldEnt063213'; drop table if exists public.\"ds_e2ef_063213\" cascade; commit;"
   },
   "fatalError": null
 }
