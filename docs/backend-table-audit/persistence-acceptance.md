@@ -904,22 +904,23 @@ expand-only 迁移和备份升级，当前 material-wms JAR 再经备份、重�
 `docs/testing/bpi-formal-identity-wms-roundtrip-acceptance.md`。外部 ERP/WMS 实例仍未接入，不能把本节
 解释为外部系统生产验收。
 
-### BPI V26 数据集清单（本地 PostgreSQL）
+### BPI V26 数据集清单（目标页面/API/PostgreSQL）
 
-本节使用 Java 17、PostgreSQL 16.13 和 Flyway V26 验收真实 controller/service/worker/repository；
-页面交互由独立 Playwright 确定性模拟器覆盖。marker 为 `ADP_E2E_BPI_DATASET_<UUID>`，测试后
-definitions/snapshots/samples 复查为 `0/0/0`。
+本节先使用 Java 17、PostgreSQL 16.13 和 Flyway V26 验收真实 controller/service/worker/repository，
+再将 exact revision `e116580aa110fd9c6895a4bbd208b533d89e2dee` 部署到目标。marker
+`ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4` 由真实 ADP 页面创建；目标数据库为
+PostgreSQL 15.18/Flyway V26。取证后十类 marker 投影全部为 0。
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
 |---|---|---|---|---|---|---|---|
-| 创建受控不可变定义 | `/bpi/#/datasets` | `POST /bpi/v1/datasets` | `DatasetController -> DatasetService -> DatasetPostgresRepository.insertDefinition` | `bpi_dataset_definitions`、审计、幂等 | 按 tenant/code/version 查询 state/revision/checksum/refs；复查越权调用和同 key 重放 | `ACTIVE/r1`、64 位 checksum；viewer/其他产线 403；重放返回相同 id | PASS |
-| 冻结并生成时间点清单 | 同上 | `POST /bpi/v1/datasets/{id}/snapshots`；`GET /bpi/v1/dataset-snapshots/{id}` | `DatasetManifestProcessor -> DatasetManifestBuilder -> DatasetPostgresRepository.completeManifest` | `bpi_dataset_snapshots`、`bpi_dataset_snapshot_samples`、审计、幂等 | 统计 total/included/excluded/cutoff_safe/leaked，查询排除原因、完成审计和跨工厂同产线编码干扰行 | `MANIFEST_READY`；`3/1/2/3/0`；低置信度和标签延迟各排除 1；完成审计 2；`PLANT-02` 干扰样本 0 | PASS |
+| 创建受控不可变定义 | `/bpi/#/datasets` | `POST /bpi-api/datasets` | ADP gateway/Java 8 adapter -> `DatasetController -> DatasetService -> DatasetPostgresRepository.insertDefinition` | `bpi_dataset_definitions`、审计、幂等 | 按 tenant/code/version 查询 state/revision/checksum/refs；检查保存响应和幂等状态 | HTTP 200；`ACTIVE/r1`、64 位 checksum；幂等 `COMPLETED/200` | PASS_TARGET |
+| 冻结并生成时间点清单 | 同上 | `POST /bpi-api/datasets/{id}/snapshots`；`GET /bpi-api/dataset-snapshots/{id}` | `DatasetManifestProcessor -> DatasetManifestBuilder -> DatasetPostgresRepository.completeManifest` | `bpi_dataset_snapshots`、`bpi_dataset_snapshot_samples`、审计、幂等 | 统计 total/included/excluded/cutoff_safe/leaked，查询排除原因、完成审计和跨工厂同产线编码干扰行 | HTTP 202；`MANIFEST_READY/r3`；`3/1/2/3/0`；低置信度和标签延迟各排除 1；审计 3；`PLANT-02` 干扰样本 0；幂等 `COMPLETED/202` | PASS_TARGET |
 | 确定性、不可变和阶段边界 | 同上 | 两次 snapshot POST/GET；负向 UPDATE | builder checksum；PostgreSQL transition trigger | snapshot/sample 表 | 比较 checksum；尝试更新终态；查询 materialization/artifact/phaseBoundary | 两次 checksum 相同；UPDATE 被 immutable 触发器拒绝；`MANIFEST_ONLY/NOT_STARTED/null/false/false/false` | PASS |
-| marker 清理 | 不适用 | teardown SQL | `BpiDatasetManifestPostgresAcceptanceTest.cleanupMarker` | 本轮数据集表及依赖 fixture/audit/idempotency | 按 marker tenant 查询三张数据集表 | `0/0/0` | PASS_CLEANED |
+| marker 清理 | 不适用 | `bpi-dataset-manifest-target-cleanup.sql` | 受控定向 SQL | 本轮数据集表及依赖 fixture/audit/idempotency | definitions/snapshots/samples/shadowRuns/reviews/batches/rules/topologies/catalogs/idempotency | 十类投影全部为 0 | PASS_TARGET_CLEANED |
 
 机器证据：`metadata/bpi-dataset-manifest-acceptance.json`；表级报告：
-`docs/backend-table-audit/bpi-dataset-manifest.md`。目标 ADP 尚未升级，因此该 PASS 仅属于本地真实
-PostgreSQL，不代表目标浏览器到目标库已经验收；Iceberg、MLflow 和模型训练仍明确未开始。
+`docs/backend-table-audit/bpi-dataset-manifest.md`。目标页面、API 和 PostgreSQL 已整链闭合，但交付边界
+仍为 `MANIFEST_ONLY`；Iceberg、MLflow、模型训练/推断和生产激活明确未开始。
 
 ## 证据要求
 

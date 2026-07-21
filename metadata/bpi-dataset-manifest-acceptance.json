@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-22T04:45:13+08:00",
-  "repoBaseCommit": "8e13071e245cf06ae063d4fb26cd030d33cf52c4",
-  "status": "PASS_LOCAL_BROWSER_API_POSTGRES_MANIFEST_ONLY",
-  "database": "PostgreSQL 16.13",
-  "databaseName": "ft_mes_bpi_v26_dataset_20260722_0414",
+  "generatedAt": "2026-07-22T06:05:14+08:00",
+  "repoBaseCommit": "e116580aa110fd9c6895a4bbd208b533d89e2dee",
+  "status": "PASS_TARGET_BROWSER_API_POSTGRES_MANIFEST_ONLY_CLEANED",
+  "database": "PostgreSQL 15.18",
+  "databaseName": "ft_mes_bpi",
   "flywayVersion": 26,
   "phase": "3A_MANIFEST_ONLY",
   "productionActivationAllowed": false,
   "summary": {
     "testedFeatures": 10,
-    "pass": 9,
+    "pass": 10,
     "fail": 0,
-    "blocked": 1,
+    "blocked": 0,
     "browserTests": 20,
     "browserFailures": 0,
     "simulatorTests": 15,
@@ -22,7 +22,11 @@
     "unexpectedConsoleErrors": 0,
     "pageErrors": 0,
     "requestFailures": 0,
-    "horizontalOverflowFailures": 0
+    "horizontalOverflowFailures": 0,
+    "targetBrowserRuns": 1,
+    "targetBrowserFailures": 0,
+    "targetPostgresAcceptanceRuns": 1,
+    "targetPostgresAcceptanceFailures": 0
   },
   "items": [
     {
@@ -112,39 +116,166 @@
     },
     {
       "scenario": "target-adp-browser-api-postgres-acceptance",
+      "route": "http://10.11.100.17:18080/bpi/#/datasets",
+      "api": "POST /bpi-api/datasets; POST /bpi-api/datasets/{datasetId}/snapshots; GET /bpi-api/dataset-snapshots/{snapshotId}",
+      "backendEntry": "ADP gateway -> Java 8 BPI adapter -> DatasetController/DatasetService/DatasetManifestProcessor -> DatasetPostgresRepository",
+      "tables": [
+        "bpi.bpi_dataset_definitions",
+        "bpi.bpi_dataset_snapshots",
+        "bpi.bpi_dataset_snapshot_samples",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
       "requiresPersistence": true,
-      "status": "BLOCKED",
-      "evidence": "V26, the adapter route and the dataset workbench have not yet been deployed and accepted on 10.11.100.17"
+      "status": "PASS",
+      "evidence": "real ADP browser session created ACTIVE/r1 definition (HTTP 200), queued a snapshot (HTTP 202), observed MANIFEST_READY/r3 and 3 sample rows; target PostgreSQL returned total=3, included=1, excluded=2, cutoff_safe=3, leaked=0, cross_plant_rows=0, two completed idempotency records with statuses 200/202; ten marker projections were cleaned to zero"
     }
   ],
   "postgres": {
     "markerPattern": "ADP_E2E_BPI_DATASET_<UUID>",
-    "migrationHistory": "Flyway current version 26",
+    "targetMarker": "ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4",
+    "migrationHistory": "PostgreSQL 15.18; Flyway current version 26",
     "manifestProjection": "MANIFEST_READY|total=3|included=1|excluded=2|cutoff_safe=3|leaked=0|cross_plant_rows=0",
     "exclusionCounts": {
       "CONFIDENCE_BELOW_THRESHOLD": 1,
-      "LABEL_DELAY_EXCEEDED": 1
+      "LABEL_DELAY_EXCEEDED": 1,
+      "START_BOUNDARY_OUTSIDE_TOLERANCE": 1
     },
-    "completionAuditRows": 2,
+    "completionAuditRows": 3,
+    "idempotency": {
+      "rows": 2,
+      "completed": 2,
+      "responseStatuses": [
+        200,
+        202
+      ]
+    },
     "verificationSql": "SELECT state, manifest_checksum, included_count, excluded_count, materialization_state, artifact_uri FROM bpi.bpi_dataset_snapshots WHERE tenant_id=:tenant_id AND id=:snapshot_id; SELECT count(*) total, count(*) FILTER (WHERE included) included, count(*) FILTER (WHERE NOT included) excluded, count(*) FILTER (WHERE feature_cutoff=prediction_time) cutoff_safe FROM bpi.bpi_dataset_snapshot_samples WHERE tenant_id=:tenant_id AND snapshot_id=:snapshot_id"
   },
   "cleanup": {
     "datasetDefinitionRows": 0,
     "datasetSnapshotRows": 0,
-    "datasetSampleRows": 0
+    "datasetSampleRows": 0,
+    "shadowRunRows": 0,
+    "reviewRows": 0,
+    "batchRows": 0,
+    "ruleRows": 0,
+    "topologyRows": 0,
+    "catalogRows": 0,
+    "idempotencyRows": 0
   },
   "browser": {
+    "route": "http://10.11.100.17:18080/bpi/#/datasets",
+    "runnerStatus": "PASS_PENDING_DATABASE_VERIFICATION_AND_CLEANUP",
+    "combinedStatus": "PASS_TARGET_BROWSER_API_POSTGRES_MANIFEST_ONLY_CLEANED",
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "desktopSampleRows": 3,
+    "mobileSampleRows": 3,
+    "mobileWidths": "390/390/390",
     "desktopScreenshot": {
-      "path": "/tmp/bpi-dataset-manifest-desktop.png",
+      "path": "/tmp/ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4-desktop.png",
       "width": 1440,
       "height": 900,
-      "sha256": "131c362185672fab6062466cfa51b4c7b2350dca612b5dc84be40b159d788daa"
+      "sha256": "0cd9c37f1fd98d93f4d4a83ed20e23c154f6f1e1d8be889f51097aed1b8b4fcb"
     },
     "mobileScreenshot": {
-      "path": "/tmp/bpi-dataset-manifest-mobile.png",
+      "path": "/tmp/ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4-mobile.png",
       "width": 390,
       "height": 844,
-      "sha256": "837c4dcfece56537682673fb064cc7d8bd932690915b8fb53989176a79406929"
+      "sha256": "2b8842c9ffa3eab823481a158bc7252efd3d3b93db290333d07d643bbdd93f47"
+    }
+  },
+  "target": {
+    "sshHost": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "composeProject": "adp-mes-newbase",
+    "runtimeDirectory": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "releaseDirectory": "/home/v6/ft-mes-bpi-release-v26-e116580a",
+    "deployedRevision": "e116580aa110fd9c6895a4bbd208b533d89e2dee",
+    "flywayVersion": 26,
+    "postgresVersion": "15.18",
+    "health": {
+      "bpiService": "healthy",
+      "bpiAdapter": "healthy",
+      "bpiWmsAdapter": "healthy",
+      "bpiPageStatus": 200
+    },
+    "images": {
+      "bpiService": "ft-mes-bpi-service:20260721t213645z-e116580aa110",
+      "bpiAdapter": "ft-mes-bpi-adapter:20260721t213645z-e116580aa110",
+      "bpiWmsAdapter": "ft-mes-bpi-wms-adapter:20260721t213645z-e116580aa110"
+    },
+    "writeSwitches": {
+      "BPI_PHASE2_INTEGRATION_ENABLED": false,
+      "BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED": false,
+      "BPI_PHASE2_KAFKA_ENABLED": false,
+      "BPI_WMS_OUTBOX_ENABLED": false,
+      "BPI_WMS_ADAPTER_ENABLED": false,
+      "QCS_BPI_OUTBOX_ENABLED": false
+    }
+  },
+  "targetRun": {
+    "marker": "ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4",
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "definitionId": "adc587a0-117e-4b4b-834c-94ae4b4df39d",
+    "snapshotId": "522f11a1-9b51-4b38-99ce-d0f49aca6139",
+    "definition": "ACTIVE/r1",
+    "snapshot": "MANIFEST_READY/r3",
+    "definitionChecksum": "a63cd58aa05b4ca14e89c6f02e3acc3d0d9c8efef271a3d48222a0c813a18724",
+    "manifestChecksum": "4877203f7a9f3b306c0c65d2cc396b548ed13ef85cb275874aa74d4ca227e043",
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/bpi-api/datasets",
+        "status": 200,
+        "payloadMarker": "datasetCode"
+      },
+      {
+        "method": "POST",
+        "url": "/bpi-api/datasets/{datasetId}/snapshots",
+        "status": 202,
+        "payloadMarker": "reason"
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/{snapshotId}",
+        "status": 200
+      }
+    ],
+    "phaseBoundary": {
+      "deliveryState": "MANIFEST_ONLY",
+      "materializationState": "NOT_STARTED",
+      "artifactUri": null,
+      "icebergReady": false,
+      "mlflowRegistered": false,
+      "modelTrained": false
+    }
+  },
+  "deployment": {
+    "upgradeStatus": "PASS",
+    "upgradePhase": "COMPLETE",
+    "upgradeReport": "/home/v6/adp-backups/bpi-v26-e116580a-20260721T213644Z/bpi-integrated-upgrade-20260721T213645Z.json",
+    "deploymentLog": "/home/v6/adp-evidence/bpi-v26-deploy-e116580a-20260721T213644Z.log",
+    "backupDirectory": "/home/v6/adp-backups/bpi-v26-e116580a-20260721T213644Z",
+    "staticUiBackup": "/home/v6/adp-backups/bpi-v26-ui-before-title-wrap-20260721T220112Z.tar.gz",
+    "gitBundleSha256": "425ab8cf774a3928ade88b4b74b70501581bd006390a6fa4efa15b0ece30655a"
+  },
+  "evidence": {
+    "browserReport": {
+      "path": "/tmp/ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4-browser.json",
+      "sha256": "51e36569fddf33ded99a31b904739231ba73f567b0860aabb1e9db13e0fc2111"
+    },
+    "databaseVerification": {
+      "path": "/tmp/ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4-db-verification.txt",
+      "sha256": "1dd8e3dede2c92470167bf41daedeb0af5614a328520b5f8e1661ec13d58ff70"
+    },
+    "cleanupVerification": {
+      "path": "/tmp/ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4-cleanup.txt",
+      "sha256": "f45ec3d18d8841eeef157193dc6c49dc06384e721afae5aa9c24cfdb17dd2a25"
     }
   },
   "artifacts": [
@@ -156,16 +287,21 @@
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetController.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDatasetManifestPostgresAcceptanceTest.java",
     "frontend/apps/bpi/src/main.ts",
+    "frontend/apps/bpi/src/styles.css",
     "frontend/apps/bpi/tests/bpi-console.e2e.cjs",
     "simulation/bpi/server.js",
     "contracts/bpi-api/openapi.json",
     "docs/testing/bpi-dataset-manifest-acceptance.md",
-    "docs/backend-table-audit/bpi-dataset-manifest.md"
+    "docs/backend-table-audit/bpi-dataset-manifest.md",
+    "deploy/docker/scripts/adp-bpi-dataset-manifest-target-acceptance.js",
+    "deploy/docker/scripts/bpi-dataset-manifest-target-fixture.sql",
+    "deploy/docker/scripts/bpi-dataset-manifest-target-verification.sql",
+    "deploy/docker/scripts/bpi-dataset-manifest-target-cleanup.sql"
   ],
   "limitations": [
-    "Browser acceptance used the deterministic simulator; Java API and PostgreSQL persistence were accepted separately.",
-    "No target ADP browser-to-PostgreSQL acceptance has been claimed yet.",
+    "The target acceptance proves one controlled ADP browser-to-API-to-PostgreSQL run; it is not a production-volume or long-duration run.",
     "No Iceberg artifact, MLflow registration, model training, online inference or production activation was performed.",
-    "The manifest is a governed point-in-time training-data contract, not a trained model or a production dataset artifact."
+    "The manifest is a governed point-in-time training-data contract, not a trained model or a production dataset artifact.",
+    "Physical-device source sequencing, formal calibration, 7-14 day field operation and external ERP/WMS integration remain outside this acceptance."
   ]
 }

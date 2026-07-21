@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-22T04:45:13+08:00",
-  "repoCommit": "8e13071e245cf06ae063d4fb26cd030d33cf52c4+local-v26-dataset-manifest",
+  "generatedAt": "2026-07-22T06:05:14+08:00",
+  "repoCommit": "e116580aa110fd9c6895a4bbd208b533d89e2dee+target-v26-dataset-manifest",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -4840,10 +4840,10 @@
       "requiresPersistence": true,
       "backendEntry": "DatasetController.createDefinition -> DatasetService.createDefinition -> DatasetPostgresRepository.insertDefinition",
       "tables": ["bpi.bpi_dataset_definitions", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
-      "marker": "ADP_E2E_BPI_DATASET_<UUID>",
+      "marker": "ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4",
       "verificationSql": "Query definition state/revision/checksum/policies/refs by tenant and dataset id; replay the same Idempotency-Key and require the same id; invoke with viewer and another-line engineer and require HTTP 403 with no definition row.",
       "status": "PASS",
-      "evidence": "metadata/bpi-dataset-manifest-acceptance.json; PostgreSQL 16.13/Flyway V26 persisted ACTIVE/r1 and a 64-character checksum; both authorization negatives failed closed; replay preserved one identity",
+      "evidence": "metadata/bpi-dataset-manifest-acceptance.json; real target ADP page POST returned 200; PostgreSQL 15.18/Flyway V26 persisted ACTIVE/r1 and a 64-character checksum; target idempotency record is COMPLETED/200; local authorization and replay negatives remain green",
       "issues": []
     },
     {
@@ -4855,10 +4855,10 @@
       "requiresPersistence": true,
       "backendEntry": "DatasetService.createSnapshot -> DatasetManifestProcessor.processOne -> DatasetManifestBuilder.build -> DatasetPostgresRepository.completeManifest",
       "tables": ["bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_snapshot_samples", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
-      "marker": "ADP_E2E_BPI_DATASET_<UUID>",
-      "verificationSql": "Count total/included/excluded/cutoff_safe/leaked rows by tenant and snapshot; query exclusion_reasons and DATASET_MANIFEST_READY audit rows; compare manifest_checksum from two snapshots over the same frozen facts.",
+      "marker": "ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4",
+      "verificationSql": "deploy/docker/scripts/bpi-dataset-manifest-target-verification.sql; count total/included/excluded/cutoff_safe/leaked/cross_plant_rows by tenant and snapshot; query exclusion reasons, audits and idempotency statuses.",
       "status": "PASS",
-      "evidence": "metadata/bpi-dataset-manifest-acceptance.json; MANIFEST_READY with 3/1/2/3/0, CONFIDENCE_BELOW_THRESHOLD=1, LABEL_DELAY_EXCEEDED=1, two completion audits and identical 64-character checksums",
+      "evidence": "metadata/bpi-dataset-manifest-acceptance.json; real target page snapshot POST returned 202 and reached MANIFEST_READY/r3; PostgreSQL projection is 3/1/2/3/0 with cross_plant_rows=0, three definition/snapshot audits and two completed idempotency records; API exclusion summary is confidence=1, label-delay=1 and start-boundary=1, with the first and third reasons on the same excluded sample; local deterministic rebuild preserves the identical 64-character checksum",
       "issues": []
     },
     {
@@ -4870,10 +4870,10 @@
       "requiresPersistence": true,
       "backendEntry": "DatasetPostgresRepository projection and PostgreSQL dataset triggers",
       "tables": ["bpi.bpi_dataset_definitions", "bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_snapshot_samples"],
-      "marker": "ADP_E2E_BPI_DATASET_<UUID>",
-      "verificationSql": "Attempt to mutate MANIFEST_READY request_reason and require an immutable exception; query materialization_state/artifact_uri/phaseBoundary; after cleanup count all three dataset tables for marker tenants.",
+      "marker": "ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4",
+      "verificationSql": "Local negative UPDATE requires an immutable exception; target query requires MANIFEST_ONLY/NOT_STARTED/null/false/false/false; deploy/docker/scripts/bpi-dataset-manifest-target-cleanup.sql then counts ten marker projections.",
       "status": "PASS",
-      "evidence": "metadata/bpi-dataset-manifest-acceptance.json; mutation rejected; MANIFEST_ONLY/NOT_STARTED/null/false/false/false preserved; marker definitions/snapshots/samples returned 0/0/0",
+      "evidence": "metadata/bpi-dataset-manifest-acceptance.json; local mutation was rejected; target preserved MANIFEST_ONLY/NOT_STARTED/null/false/false/false; definitions/snapshots/samples/shadowRuns/reviews/batches/rules/topologies/catalogs/idempotency all returned zero after cleanup",
       "issues": []
     }
   ],

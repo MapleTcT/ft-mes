@@ -96,8 +96,10 @@ QCS/ERP-WMS 仍未完成，因此 G-021 保持 `PARTIAL`。
 2026-07-22 又完成 Phase 3A 数据集清单纵切：Flyway V26 新增不可变定义、快照与样本表，
 `/bpi/#/datasets` 支持受控特征/标签、freezeAt 和排除原因；Java worker 从批准影子复核生成时间点
 manifest。本地 PostgreSQL 验收为 3 个样本、1 included、2 excluded、3 个 cutoff-safe、0 个标签泄漏，
-相同冻结事实 checksum 一致；浏览器全套 20/20。该纵切明确停在 `MANIFEST_ONLY`，目标环境部署、
-Iceberg 物化、MLflow、模型训练与推断均未完成，不能据此改变 G-021 的 `PARTIAL` 状态。
+相同冻结事实 checksum 一致；浏览器全套 20/20。随后 exact revision `e116580a` expand-only 部署到
+`10.11.100.17`，marker `ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4` 又闭合真实 ADP 页面、
+API、PostgreSQL 15.18/Flyway V26、跨工厂隔离、幂等和十类零残留清理。该纵切明确停在
+`MANIFEST_ONLY`；Iceberg 物化、MLflow、模型训练与推断均未完成，不能据此改变 G-021 的 `PARTIAL` 状态。
 
 2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、

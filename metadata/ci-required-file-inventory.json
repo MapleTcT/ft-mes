@@ -3537,6 +3537,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-dataset-manifest-target-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-flink-data-quality-browser-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4042,6 +4048,24 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/audit-postgres-mappings.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-dataset-manifest-target-cleanup.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-dataset-manifest-target-fixture.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-dataset-manifest-target-verification.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -10046,7 +10070,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 625
+      "tracked": 629
     },
     "docs": {
       "tracked": 122
@@ -10079,8 +10103,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1670,
-    "tracked": 1670,
+    "totalFiles": 1674,
+    "tracked": 1674,
     "untracked": 0
   },
   "untrackedByDirectory": []

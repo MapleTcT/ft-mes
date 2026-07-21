@@ -184,6 +184,10 @@ REQUIRED_FILES = [
     "docs/testing/bpi-dataset-manifest-acceptance.md",
     "docs/backend-table-audit/bpi-dataset-manifest.md",
     "metadata/bpi-dataset-manifest-acceptance.json",
+    "deploy/docker/scripts/adp-bpi-dataset-manifest-target-acceptance.js",
+    "deploy/docker/scripts/bpi-dataset-manifest-target-fixture.sql",
+    "deploy/docker/scripts/bpi-dataset-manifest-target-verification.sql",
+    "deploy/docker/scripts/bpi-dataset-manifest-target-cleanup.sql",
     "docs/testing/bpi-formal-identity-wms-reversal-acceptance.md",
     "metadata/bpi-formal-identity-wms-reversal-acceptance.json",
     "metadata/bpi-formal-identity-wms-reversal-pending.png",
@@ -1768,8 +1772,8 @@ def main() -> int:
         )
     )
     if (dataset_acceptance.get("status")
-            != "PASS_LOCAL_BROWSER_API_POSTGRES_MANIFEST_ONLY"
-            or dataset_acceptance.get("database") != "PostgreSQL 16.13"
+            != "PASS_TARGET_BROWSER_API_POSTGRES_MANIFEST_ONLY_CLEANED"
+            or dataset_acceptance.get("database") != "PostgreSQL 15.18"
             or dataset_acceptance.get("flywayVersion") != 26
             or dataset_acceptance.get("phase") != "3A_MANIFEST_ONLY"
             or dataset_acceptance.get("productionActivationAllowed") is not False
@@ -1778,9 +1782,9 @@ def main() -> int:
     dataset_summary = dataset_acceptance.get("summary", {})
     expected_dataset_summary = {
         "testedFeatures": 10,
-        "pass": 9,
+        "pass": 10,
         "fail": 0,
-        "blocked": 1,
+        "blocked": 0,
         "browserTests": 20,
         "browserFailures": 0,
         "simulatorTests": 15,
@@ -1791,14 +1795,18 @@ def main() -> int:
         "pageErrors": 0,
         "requestFailures": 0,
         "horizontalOverflowFailures": 0,
+        "targetBrowserRuns": 1,
+        "targetBrowserFailures": 0,
+        "targetPostgresAcceptanceRuns": 1,
+        "targetPostgresAcceptanceFailures": 0,
     }
     if any(dataset_summary.get(key) != value
            for key, value in expected_dataset_summary.items()):
         fail("BPI dataset manifest automated evidence summary is incomplete", failures)
     dataset_items = dataset_acceptance.get("items", [])
     if (len(dataset_items) != 10
-            or sum(item.get("status") == "PASS" for item in dataset_items) != 9
-            or sum(item.get("status") == "BLOCKED" for item in dataset_items) != 1):
+            or sum(item.get("status") == "PASS" for item in dataset_items) != 10
+            or sum(item.get("status") == "BLOCKED" for item in dataset_items) != 0):
         fail("BPI dataset manifest item statuses do not match the summary", failures)
     dataset_postgres = dataset_acceptance.get("postgres", {})
     if ("MANIFEST_READY" not in dataset_postgres.get("manifestProjection", "")
@@ -1807,13 +1815,55 @@ def main() -> int:
             or dataset_postgres.get("exclusionCounts") != {
                 "CONFIDENCE_BELOW_THRESHOLD": 1,
                 "LABEL_DELAY_EXCEEDED": 1,
+                "START_BOUNDARY_OUTSIDE_TOLERANCE": 1,
             }
-            or dataset_postgres.get("completionAuditRows") != 2):
+            or dataset_postgres.get("completionAuditRows") != 3
+            or dataset_postgres.get("idempotency") != {
+                "rows": 2,
+                "completed": 2,
+                "responseStatuses": [200, 202],
+            }):
         fail("BPI dataset manifest PostgreSQL evidence is incomplete", failures)
     if any(dataset_acceptance.get("cleanup", {}).values()):
         fail("BPI dataset manifest cleanup must leave zero fixture rows", failures)
+    dataset_target = dataset_acceptance.get("target", {})
+    dataset_target_run = dataset_acceptance.get("targetRun", {})
+    dataset_phase_boundary = dataset_target_run.get("phaseBoundary", {})
+    if (dataset_target.get("sshHost") != "10.11.100.17"
+            or dataset_target.get("adpBaseUrl") != "http://10.11.100.17:18080"
+            or dataset_target.get("composeProject") != "adp-mes-newbase"
+            or dataset_target.get("deployedRevision")
+                != "e116580aa110fd9c6895a4bbd208b533d89e2dee"
+            or dataset_target.get("flywayVersion") != 26
+            or dataset_target.get("postgresVersion") != "15.18"
+            or any(dataset_target.get("writeSwitches", {}).values())
+            or not dataset_target_run.get("marker", "").startswith(
+                "ADP_E2E_BPI_DATASET_TARGET_")
+            or dataset_target_run.get("definition") != "ACTIVE/r1"
+            or dataset_target_run.get("snapshot") != "MANIFEST_READY/r3"
+            or len(dataset_target_run.get("manifestChecksum", "")) != 64
+            or dataset_phase_boundary != {
+                "deliveryState": "MANIFEST_ONLY",
+                "materializationState": "NOT_STARTED",
+                "artifactUri": None,
+                "icebergReady": False,
+                "mlflowRegistered": False,
+                "modelTrained": False,
+            }):
+        fail("BPI dataset manifest target evidence is incomplete", failures)
+    dataset_browser = dataset_acceptance.get("browser", {})
+    if (dataset_browser.get("combinedStatus")
+            != "PASS_TARGET_BROWSER_API_POSTGRES_MANIFEST_ONLY_CLEANED"
+            or dataset_browser.get("consoleErrors") != 0
+            or dataset_browser.get("pageErrors") != 0
+            or dataset_browser.get("requestFailures") != 0
+            or dataset_browser.get("desktopSampleRows") != 3
+            or dataset_browser.get("mobileSampleRows") != 3
+            or dataset_browser.get("mobileWidths") != "390/390/390"):
+        fail("BPI dataset manifest target browser evidence is incomplete", failures)
     dataset_limitations = " ".join(dataset_acceptance.get("limitations", [])).lower()
-    for boundary in ("target adp", "iceberg", "mlflow", "model training"):
+    for boundary in ("production-volume", "iceberg", "mlflow", "model training",
+                     "physical-device"):
         if boundary not in dataset_limitations:
             fail(f"BPI dataset manifest limitation is missing: {boundary}", failures)
 

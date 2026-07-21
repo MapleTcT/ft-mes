@@ -1,18 +1,22 @@
 # 前端功能测试报告
 
-## 2026-07-22 BPI 数据集清单工作台（本地 Phase 3A）
+## 2026-07-22 BPI 数据集清单工作台（Phase 3A 目标整链）
 
-本轮先在确定性模拟器上完成真实浏览器点击，再由独立 Java API/PostgreSQL 验收确认落表。
-浏览器全套 `20/20 PASS`，模拟 API `15/15 PASS`；目标环境尚未升级，因此本节不冒充
-`10.11.100.17` 的页面到数据库整链已经完成。
+本轮先在确定性模拟器完成 `20/20` 浏览器回归和 `15/15` API 回归，再部署 exact revision
+`e116580aa110fd9c6895a4bbd208b533d89e2dee` 到唯一目标栈。随后使用真实 ADP 会话访问
+`http://10.11.100.17:18080/bpi/#/datasets`，从页面创建 marker、等待异步 worker、捕获请求并直查
+PostgreSQL 15.18/Flyway V26。目标浏览器 console/page/request error 均为 0，取证后 marker 已清理。
 
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
 |---|---|---|---|---|---|---|---|---|
-| 数据集定义与时间点清单 | `/bpi/#/datasets` | 创建受控定义，按 freezeAt 排队快照，轮询并打开清单 | `GET/POST /bpi/v1/datasets`；`POST /bpi/v1/datasets/{id}/snapshots`；`GET /bpi/v1/dataset-snapshots/{id}` | 从 `QUEUED` 到 `MANIFEST_READY`；显示 3 个样本、1 included、2 excluded、checksum 和排除原因；console/page/request error 为 0 | Java API/worker/PostgreSQL 独立验证幂等、范围控制、`3 cutoff_safe/0 leaked`、相同冻结事实 checksum 一致、终态不可变；同 tenant/同产线编码的 `PLANT-02` 干扰样本落入清单为 0 | `bpi_dataset_definitions`、`bpi_dataset_snapshots`、`bpi_dataset_snapshot_samples`、审计/幂等表 | PASS_LOCAL | 待目标 ADP 整链复验 |
-| 清单阶段边界与响应式布局 | 同上，桌面 `1440x900`、移动 `390x844` | 打开定义/清单抽屉，检查下游状态和页面宽度 | snapshot GET | 明确显示 `MANIFEST ONLY`；桌面/移动均无页面级横向溢出 | `NOT_STARTED`、artifact null、Iceberg/MLflow/model 均 false | snapshot manifest | PASS | 物化、训练、推断不在 Phase 3A 范围 |
+| 数据集定义与时间点清单 | `/bpi/#/datasets` | 创建受控定义，按 freezeAt 排队快照，轮询并打开清单 | `GET/POST /bpi-api/datasets`；`POST /bpi-api/datasets/{id}/snapshots`；`GET /bpi-api/dataset-snapshots/{id}` | POST 分别返回 200/202；页面从 `QUEUED/r1` 到 `MANIFEST_READY/r3`，显示 3 个样本、1 included、2 excluded、checksum 和排除原因；三类浏览器错误为 0 | 目标库验证 `3 cutoff_safe/0 leaked/0 cross_plant_rows`、审计 3、幂等 `2 completed/200,202`；本地回归另证相同冻结事实 checksum 一致、终态不可变 | `bpi_dataset_definitions`、`bpi_dataset_snapshots`、`bpi_dataset_snapshot_samples`、审计/幂等表 | PASS_TARGET_CLEANED | 十类 marker 投影清理为 0 |
+| 清单阶段边界与响应式布局 | 同上，桌面 `1440x900`、移动 `390x844` | 打开定义/清单抽屉，检查下游状态和页面宽度 | snapshot GET | 明确显示 `MANIFEST ONLY`；桌面 3 行，移动 3 行；长标题换行，移动 viewport/body/document=`390/390/390` | `NOT_STARTED`、artifact null、Iceberg/MLflow/model 均 false | snapshot manifest | PASS_TARGET | 物化、训练、推断不在 Phase 3A 范围 |
 
 机器证据：`metadata/bpi-dataset-manifest-acceptance.json`；专项报告：
-`docs/testing/bpi-dataset-manifest-acceptance.md`。浏览器截图保存在 `/tmp`，不作为部署制品提交。
+`docs/testing/bpi-dataset-manifest-acceptance.md`。目标 marker 为
+`ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4`；浏览器报告 SHA-256 为
+`51e36569fddf33ded99a31b904739231ba73f567b0860aabb1e9db13e0fc2111`。截图保存在 `/tmp`，
+不作为部署制品提交。
 
 ## 2026-07-21 QCS 显示契约与合格/不合格双分支复验
 

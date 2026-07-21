@@ -124,15 +124,29 @@ def main() -> int:
                 failures.append(f"BPI quality/inventory UI limitations are missing {required!r}")
 
         dataset_acceptance = json.loads(DATASET_MANIFEST_ACCEPTANCE.read_text(encoding="utf-8"))
-        if dataset_acceptance.get("status") != "PASS_LOCAL_BROWSER_API_POSTGRES_MANIFEST_ONLY":
-            failures.append("BPI dataset acceptance must preserve the manifest-only local boundary")
+        if (dataset_acceptance.get("status")
+                != "PASS_TARGET_BROWSER_API_POSTGRES_MANIFEST_ONLY_CLEANED"):
+            failures.append("BPI dataset acceptance must preserve the manifest-only target boundary")
         dataset_summary = dataset_acceptance.get("summary", {})
         if (dataset_summary.get("browserTests") != 20
                 or dataset_summary.get("browserFailures") != 0
-                or dataset_summary.get("postgresAcceptanceFailures") != 0):
+                or dataset_summary.get("postgresAcceptanceFailures") != 0
+                or dataset_summary.get("targetBrowserRuns") != 1
+                or dataset_summary.get("targetBrowserFailures") != 0
+                or dataset_summary.get("targetPostgresAcceptanceRuns") != 1
+                or dataset_summary.get("targetPostgresAcceptanceFailures") != 0):
             failures.append("BPI dataset browser or PostgreSQL acceptance summary is incomplete")
+        dataset_target = dataset_acceptance.get("target", {})
+        dataset_browser = dataset_acceptance.get("browser", {})
+        if (dataset_target.get("adpBaseUrl") != "http://10.11.100.17:18080"
+                or dataset_target.get("flywayVersion") != 26
+                or dataset_browser.get("combinedStatus")
+                    != "PASS_TARGET_BROWSER_API_POSTGRES_MANIFEST_ONLY_CLEANED"
+                or any(dataset_browser.get(key) != 0
+                       for key in ("consoleErrors", "pageErrors", "requestFailures"))):
+            failures.append("BPI dataset target browser evidence is incomplete")
         dataset_limitations = " ".join(dataset_acceptance.get("limitations", []))
-        for required in ("simulator", "target ADP", "Iceberg", "MLflow", "model"):
+        for required in ("production-volume", "Iceberg", "MLflow", "model"):
             if required not in dataset_limitations:
                 failures.append(f"BPI dataset acceptance limitations are missing {required!r}")
 
