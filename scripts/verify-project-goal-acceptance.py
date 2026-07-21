@@ -1161,16 +1161,31 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
         if "metadata/entity-model-field-persistence-acceptance.json" not in evidence_text:
             fail(failures, "G-012 currentEvidence must cite the PostgreSQL field acceptance report")
         summary = field_sync.get("summary") if isinstance(field_sync.get("summary"), dict) else {}
-        if summary.get("testedChecks") != 16 or summary.get("pass") != 16 or summary.get("fail") != 0:
-            fail(failures, "G-012 PostgreSQL field acceptance must retain 16/16 PASS")
+        if summary.get("testedChecks") != 33 or summary.get("pass") != 33 or summary.get("fail") != 0:
+            fail(failures, "G-012 PostgreSQL field acceptance must retain 33/33 PASS")
         required_checks = {
             "managed-index-disabled-without-column-loss",
             "managed-index-disable-idempotent",
             "managed-index-reenabled",
             "managed-index-renamed-with-column",
+            "managed-unique-enabled-and-replaces-ordinary-index",
+            "managed-unique-enable-idempotent",
+            "managed-unique-rejects-duplicate-row",
+            "managed-unique-renamed-with-column",
+            "managed-unique-disabled-and-ordinary-index-restored",
+            "managed-unique-disable-idempotent",
             "external-unique-index-fixture-created",
             "external-unique-index-protected-on-managed-disable",
             "external-index-satisfies-reenable-without-duplicate",
+            "external-unique-index-satisfies-property-unique",
+            "external-unique-enable-idempotent",
+            "external-unique-index-protected-on-property-disable",
+            "not-null-enabled",
+            "not-null-enable-idempotent",
+            "not-null-rejects-null-row",
+            "nullable-restored",
+            "nullable-restore-idempotent",
+            "unsafe-not-null-change-rolled-back",
         }
         passed_checks = {
             str(check.get("name"))
@@ -1179,7 +1194,7 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
         }
         missing_checks = sorted(required_checks - passed_checks)
         if missing_checks:
-            fail(failures, "G-012 PostgreSQL field index lifecycle missing PASS checks: " + ", ".join(missing_checks))
+            fail(failures, "G-012 PostgreSQL field constraint lifecycle missing PASS checks: " + ", ".join(missing_checks))
     if action_matrix:
         if action_matrix.get("database") != "PostgreSQL":
             fail(failures, "G-012 action matrix database must remain PostgreSQL")

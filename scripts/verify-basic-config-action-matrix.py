@@ -835,7 +835,13 @@ def check_entity_model_field_acceptance(
         if required_ref not in refs:
             fail(failures, f"{action_id} evidenceRefs must include {required_ref}")
     tables = set(str(table) for table in as_list(action.get("tables")))
-    for required_table in ("ec_property", "information_schema.columns", "pg_index", "generated_model_physical_table"):
+    for required_table in (
+        "ec_property",
+        "information_schema.columns",
+        "pg_index",
+        "pg_constraint",
+        "generated_model_physical_table",
+    ):
         if required_table not in tables:
             fail(failures, f"{action_id} tables must include {required_table}")
 
@@ -860,7 +866,7 @@ def check_entity_model_field_acceptance(
     if not marker.startswith("ADP_E2E_") or "PG_FIELD" not in marker:
         fail(failures, "field persistence marker must be ADP_E2E_*_PG_FIELD")
     summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
-    for key, expected in (("testedChecks", 16), ("pass", 16), ("fail", 0), ("blocked", 0), ("status", "PASS")):
+    for key, expected in (("testedChecks", 33), ("pass", 33), ("fail", 0), ("blocked", 0), ("status", "PASS")):
         if summary.get(key) != expected:
             fail(failures, f"field persistence summary.{key} must be {expected}")
 
@@ -873,11 +879,28 @@ def check_entity_model_field_acceptance(
         "managed-index-disabled-without-column-loss",
         "managed-index-disable-idempotent",
         "managed-index-reenabled",
+        "managed-unique-enabled-and-replaces-ordinary-index",
+        "managed-unique-enable-idempotent",
+        "managed-unique-rejects-duplicate-row",
         "field-renamed-widened-and-data-preserved",
+        "managed-unique-renamed-with-column",
+        "managed-unique-disabled-and-ordinary-index-restored",
+        "managed-unique-disable-idempotent",
         "managed-index-renamed-with-column",
         "external-unique-index-fixture-created",
         "external-unique-index-protected-on-managed-disable",
         "external-index-satisfies-reenable-without-duplicate",
+        "external-unique-index-satisfies-property-unique",
+        "external-unique-enable-idempotent",
+        "external-unique-index-protected-on-property-disable",
+        "not-null-enabled",
+        "not-null-enable-idempotent",
+        "not-null-rejects-null-row",
+        "nullable-restored",
+        "nullable-restore-idempotent",
+        "null-fixture-written",
+        "unsafe-not-null-change-rolled-back",
+        "null-fixture-cleaned",
         "field-idempotent-replay",
         "unsafe-type-change-rolled-back",
         "controlled-cleanup",
@@ -899,9 +922,22 @@ def check_entity_model_field_acceptance(
         "fieldIndexDisable",
         "fieldIndexDisableReplay",
         "fieldIndexEnable",
+        "fieldUniqueEnable",
+        "fieldUniqueEnableReplay",
         "fieldRenameAndWiden",
+        "fieldUniqueDisable",
+        "fieldUniqueDisableReplay",
+        "fieldOrdinaryIndexRenameToInitial",
+        "fieldOrdinaryIndexRenameToFinal",
         "fieldIndexDisableWithExternal",
         "fieldIndexEnableWithExternal",
+        "fieldUniqueEnableWithExternal",
+        "fieldUniqueEnableWithExternalReplay",
+        "fieldUniqueDisableWithExternal",
+        "fieldNotNullEnable",
+        "fieldNotNullEnableReplay",
+        "fieldNullableEnable",
+        "fieldNullableEnableReplay",
         "fieldIdempotentReplay",
     ):
         request = requests.get(request_key)
@@ -910,6 +946,14 @@ def check_entity_model_field_acceptance(
     unsafe_request = requests.get("unsafeTypeChange")
     if not isinstance(unsafe_request, dict) or unsafe_request.get("responseStatus") != 500:
         fail(failures, "unsafe field type conversion must fail closed with HTTP 500")
+    unsafe_not_null = requests.get("unsafeNotNull")
+    if not isinstance(unsafe_not_null, dict) or unsafe_not_null.get("responseStatus") != 500:
+        fail(failures, "unsafe field NOT NULL change must fail closed with HTTP 500")
+    db_actions = report.get("dbActions") if isinstance(report.get("dbActions"), dict) else {}
+    for action_key in ("duplicateInsert", "nullInsertWhileNotNull"):
+        action_result = db_actions.get(action_key)
+        if not isinstance(action_result, dict) or action_result.get("rejected") is not True:
+            fail(failures, f"field persistence dbActions.{action_key} must prove PostgreSQL rejection")
 
     browser = report.get("browser") if isinstance(report.get("browser"), dict) else {}
     if browser.get("navigationStatus") != 200 or browser.get("visibleError"):
@@ -932,12 +976,17 @@ def check_entity_model_field_acceptance(
         "ALTER TABLE",
         "ALTER INDEX",
         "DROP INDEX",
+        "ADD CONSTRAINT",
+        "RENAME CONSTRAINT",
+        "DROP CONSTRAINT",
+        "SET NOT NULL",
+        "DROP NOT NULL",
         "roll back",
     ):
         if fragment not in trace_text:
             fail(failures, f"field persistence backendTrace missing {fragment}")
     sql_text = json.dumps(report.get("verificationSql", {}), ensure_ascii=False)
-    for fragment in ("ec_property", "information_schema.columns", "pg_index", "drop table"):
+    for fragment in ("ec_property", "information_schema.columns", "pg_index", "pg_constraint", "drop table"):
         if fragment not in sql_text:
             fail(failures, f"field persistence verificationSql missing {fragment}")
     cleanup = report.get("cleanup") if isinstance(report.get("cleanup"), dict) else {}

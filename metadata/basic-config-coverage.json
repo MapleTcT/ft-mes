@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T06:32:41.391Z",
-  "repoCommit": "c75ed6e4d1b948d009c9a0606fa426c306e8ce00",
+  "generatedAt": "2026-07-21T07:16:52.911Z",
+  "repoCommit": "49a909d790972ca957492f4d4fe59b37034841a8",
   "database": "PostgreSQL",
   "module": "basic-config",
   "goalId": "G-012",
@@ -333,9 +333,12 @@
         "TEXT field created as varchar(64) with one PostgreSQL index",
         "marker row written and read through the generated column",
         "managed ordinary index disabled, disabled again idempotently and re-enabled while preserving marker data",
+        "managed unique constraint enabled/replayed, rejected duplicates, followed field rename, and disabled/replayed while restoring the ordinary index",
         "field rename and safe widening to varchar(256) preserved data",
         "managed index renamed with the field",
         "external unique index protected on managed disable and reused on re-enable without duplicate creation",
+        "external unique index satisfied property uniqueness without duplicate managed constraint creation and remained protected on disable",
+        "NOT NULL and nullable transitions were idempotent; direct NULL writes were rejected and unsafe SET NOT NULL rolled metadata plus DDL back",
         "idempotent replay retained one column and one index",
         "unsafe TEXT to INTEGER conversion returned expected HTTP 500 and rolled metadata plus DDL back",
         "controlled cleanup left property/model/entity/physical table counts at zero"
@@ -349,6 +352,7 @@
         "ec_property",
         "information_schema.columns",
         "pg_index",
+        "pg_constraint",
         "generated_model_physical_table"
       ],
       "evidenceRefs": [
@@ -368,7 +372,7 @@
       ],
       "remainingGaps": [],
       "notes": [
-        "This PASS covers TEXT add, managed ordinary-index create/disable/idempotent disable/re-enable/rename, external unique-index protection, safe widening, idempotency and incompatible conversion rollback. Automatic DROP COLUMN, unique/nullability constraint changes and the broader type matrix remain outside this area."
+        "This PASS covers TEXT add, managed ordinary-index and unique-constraint create/disable/idempotent replay/rename, external unique-index protection, nullable/NOT NULL transitions, direct duplicate/NULL rejection, safe widening and transactional rollback for unsafe NOT NULL or incompatible type changes. Automatic DROP COLUMN and the broader type matrix remain outside this area."
       ]
     },
     {

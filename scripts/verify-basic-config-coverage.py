@@ -783,7 +783,13 @@ def check_physical_model_field_acceptance(area: dict[str, Any], failures: list[s
         if required_ref not in refs:
             fail(failures, f"{area_id} evidenceRefs must include {required_ref}")
     tables = set(str(table) for table in as_list(area.get("tables")))
-    for required_table in ("ec_property", "information_schema.columns", "pg_index", "generated_model_physical_table"):
+    for required_table in (
+        "ec_property",
+        "information_schema.columns",
+        "pg_index",
+        "pg_constraint",
+        "generated_model_physical_table",
+    ):
         if required_table not in tables:
             fail(failures, f"{area_id} tables must include {required_table}")
     if as_list(area.get("remainingGaps")):
@@ -801,19 +807,36 @@ def check_physical_model_field_acceptance(area: dict[str, Any], failures: list[s
     if report.get("database") != "PostgreSQL":
         fail(failures, "field persistence report database must remain PostgreSQL")
     summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
-    if summary.get("testedChecks") != 16 or summary.get("pass") != 16 or summary.get("fail") != 0 or summary.get("blocked") != 0:
-        fail(failures, "field persistence report must retain 16/16 PASS with zero fail/blocked")
+    if summary.get("testedChecks") != 33 or summary.get("pass") != 33 or summary.get("fail") != 0 or summary.get("blocked") != 0:
+        fail(failures, "field persistence report must retain 33/33 PASS with zero fail/blocked")
     required_checks = {
         "postgres-column-created-and-indexed",
         "marker-row-written",
         "managed-index-disabled-without-column-loss",
         "managed-index-disable-idempotent",
         "managed-index-reenabled",
+        "managed-unique-enabled-and-replaces-ordinary-index",
+        "managed-unique-enable-idempotent",
+        "managed-unique-rejects-duplicate-row",
         "field-renamed-widened-and-data-preserved",
+        "managed-unique-renamed-with-column",
+        "managed-unique-disabled-and-ordinary-index-restored",
+        "managed-unique-disable-idempotent",
         "managed-index-renamed-with-column",
         "external-unique-index-fixture-created",
         "external-unique-index-protected-on-managed-disable",
         "external-index-satisfies-reenable-without-duplicate",
+        "external-unique-index-satisfies-property-unique",
+        "external-unique-enable-idempotent",
+        "external-unique-index-protected-on-property-disable",
+        "not-null-enabled",
+        "not-null-enable-idempotent",
+        "not-null-rejects-null-row",
+        "nullable-restored",
+        "nullable-restore-idempotent",
+        "null-fixture-written",
+        "unsafe-not-null-change-rolled-back",
+        "null-fixture-cleaned",
         "field-idempotent-replay",
         "unsafe-type-change-rolled-back",
         "controlled-cleanup",
