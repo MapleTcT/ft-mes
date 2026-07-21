@@ -39,7 +39,7 @@ PostgreSQL 闭环。Marker `ADP_E2E_20260710074612_MATERIAL_WMS` 验证完工
 入库、重复幂等、质检合格释放、生产领料和清理；机器证据为
 `metadata/material-wms-persistence-acceptance.json`，浏览器截图为
 `metadata/material-wms-completion-inbound.png`。该 PASS 不代表当前包存在
-独立不良数量字段；后者仍按产品范围决定处理。
+独立不良数量字段；该能力后来已由 WOM/QCS 质量数量模块和 marker 验收补齐。
 
 ### ProcessAnalysis 最新验收
 

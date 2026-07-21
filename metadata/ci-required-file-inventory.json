@@ -6807,6 +6807,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/wom-public-produce-task-created-retirement-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/wom-qrcode-browser-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -9593,7 +9599,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 189
+      "tracked": 190
     },
     "package.json": {
       "tracked": 1
@@ -9617,8 +9623,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1593,
-    "tracked": 1593,
+    "totalFiles": 1594,
+    "tracked": 1594,
     "untracked": 0
   },
   "untrackedByDirectory": []

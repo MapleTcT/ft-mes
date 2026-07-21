@@ -353,8 +353,12 @@ def production_backlog_count(backlog_ledger: dict[str, Any], failures: list[str]
     summary = as_dict(backlog_ledger.get("summary"))
     if isinstance(summary.get("totalItems"), int) and summary["totalItems"] != count:
         fail(failures, "production backlog ledger summary.totalItems must match items length")
-    if backlog_ledger.get("overallStatus") != "OPEN":
-        fail(failures, "production backlog ledger overallStatus must remain OPEN while unresolved items exist")
+    expected_status = "OPEN" if count else "CLEAR"
+    if backlog_ledger.get("overallStatus") != expected_status:
+        fail(
+            failures,
+            f"production backlog ledger overallStatus must be {expected_status} for {count} unresolved item(s)",
+        )
     return count
 
 

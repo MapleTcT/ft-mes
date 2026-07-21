@@ -14,6 +14,8 @@ INDEX_PATH = ROOT / "docs/backend-table-audit/00-index.md"
 PERSISTENCE_DOC_PATH = ROOT / "docs/backend-table-audit/persistence-acceptance.md"
 PERSISTENCE_JSON_PATH = ROOT / "metadata/persistence-acceptance.json"
 FRONTEND_REPORT_PATH = ROOT / "docs/frontend-functional-test-report.md"
+WOM_PUBLIC_ANALYSIS_PATH = ROOT / "metadata/wom-public-produce-task-created-analysis.json"
+WOM_PUBLIC_RETIREMENT_PATH = ROOT / "metadata/wom-public-produce-task-created-retirement-acceptance.json"
 
 EXPECTED_CURRENT_HOST = "100.99.133.43"
 EXPECTED_DEFAULT_ACCOUNT = "admin / 123456"
@@ -73,6 +75,7 @@ ALLOWED_REPORT_STATUSES = {
     "模板已建立",
     "已恢复并验收",
     "核心主线已验收",
+    "已完成退役验收",
 }
 
 
@@ -154,6 +157,8 @@ def check_index(failures: list[str]) -> None:
             fail(failures, f"{report} is started/completed in the index but the report file is missing")
         if status != "待开始" and not row["description"]:
             fail(failures, f"{report} must include a handoff description")
+        if report == "wom-public-produce-task-created-analysis.md" and status != "已完成退役验收":
+            fail(failures, "WOM public endpoint analysis must remain in the completed-retirement state")
 
 
 def check_persistence_assets(failures: list[str]) -> None:
@@ -203,12 +208,35 @@ def check_special_reports(failures: list[str]) -> None:
             fail(failures, f"{report} must contain an explicit acceptance status")
 
 
+def check_wom_public_retirement(failures: list[str]) -> None:
+    analysis = read_json(WOM_PUBLIC_ANALYSIS_PATH, failures)
+    acceptance = read_json(WOM_PUBLIC_RETIREMENT_PATH, failures)
+    if analysis:
+        if analysis.get("status") != "PASS_DEPRECATED_EXPLICIT_REJECTION":
+            fail(failures, "WOM public endpoint analysis must record accepted retirement")
+        decision = analysis.get("contractDecision")
+        if not isinstance(decision, dict) or decision.get("status") != "DEPRECATED":
+            fail(failures, "WOM public endpoint analysis contractDecision must be DEPRECATED")
+        closed = analysis.get("closedDecision")
+        if not isinstance(closed, dict) or closed.get("id") != "PROD-ACTION-007" or closed.get("status") != "NOT_APPLICABLE":
+            fail(failures, "WOM public endpoint analysis must close PROD-ACTION-007 as NOT_APPLICABLE")
+    if acceptance:
+        if acceptance.get("status") != "PASS_DEPRECATED_EXPLICIT_REJECTION_NO_PERSISTENCE":
+            fail(failures, "WOM public endpoint retirement acceptance status is invalid")
+        response = acceptance.get("responseJson")
+        if acceptance.get("httpStatus") != 200 or not isinstance(response, dict) or response.get("code") != 400:
+            fail(failures, "WOM public endpoint retirement must prove HTTP 200/code=400")
+        if acceptance.get("beforeCount") != 0 or acceptance.get("afterCount") != 0:
+            fail(failures, "WOM public endpoint retirement marker count must remain 0 -> 0")
+
+
 def main() -> int:
     failures: list[str] = []
     check_handoff(failures)
     check_index(failures)
     check_persistence_assets(failures)
     check_special_reports(failures)
+    check_wom_public_retirement(failures)
     if failures:
         print(f"Backend table audit handoff verification failed: {len(failures)} issue(s).", file=sys.stderr)
         return 1

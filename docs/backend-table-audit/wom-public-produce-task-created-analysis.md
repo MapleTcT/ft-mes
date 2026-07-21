@@ -1,47 +1,43 @@
-# WOM public produceTaskCreated 专项分析
+# WOM public produceTaskCreated 退役决策与验收
 
 ## 结论
 
-`POST /msService/public/WOM/produceTask/produceTask/produceTaskCreated` 当前不能作为生产工单/制造指令单创建入口验收。测试机 `100.99.133.43` 的恢复源码中，原 `creatProTask` 创建主体被整段注释，旧运行态会返回 `HTTP 200/code=200/处理成功` 但 PostgreSQL `wom_produce_tasks` 前后 marker 计数均为 `0`。本轮已在测试运行包中把该 public 入口显式禁用，防止继续出现“成功但不落库”的假阳性。
+`POST /msService/public/WOM/produceTask/produceTask/produceTaskCreated` 已正式废弃，不再是受支持的生产工单/制造指令单创建入口。为了兼容旧调用方快速发现迁移问题，URL 继续保留，但固定返回 `HTTP 200/code=400` 和“已废弃”业务提示，且绝不落库。
 
-当前该风险已有可复跑探针：
+原恢复源码的 `WOMProduceTaskServiceImpl.creatProTask` 创建主体被整段注释，未打补丁时会返回“处理成功”，但 PostgreSQL `wom_produce_tasks` 没有任何变化。恢复可见 WOM 版本和当前维护仓库的全量字符串检索只找到服务端定义和历史分析，没有前端或业务模块调用方。旧代码还包含模拟登录、字符串拼接 SQL 和主工单/包装子工单的长事务，直接复活会带回越权、SQL 注入和半成功风险。
+
+受支持的产品入口为：
+
+- 认证后的日计划集成：`POST /msService/WOM/produceTask/produceTask/produceTaskCreated2`。
+- 认证后的前端人工录入：`makeTaskList -> 新建指令单 -> /msService/WOM/produceTask/manual-entry/page`。
+
+## 真实验收
+
+2026-07-21 在 `10.11.100.17` 执行 marker
+`ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED`，机器证据为
+`metadata/wom-public-produce-task-created-retirement-acceptance.json`。
+
+| 验收项 | 实际结果 |
+| --- | --- |
+| 旧 API | `HTTP 200/code=400`，提示“public produceTaskCreated 已废弃且不会创建制造指令单” |
+| PostgreSQL | 按 `table_no/produce_batch_num/day_plan_ids` 查 marker，前后均为 `0`，即 `0 -> 0` |
+| 真实浏览器 | `makeTaskList=200`，“新建指令单”可见，`manual-entry/page` 成功加载 2 个产品选项 |
+| 前端错误 | console/page/request/network error 均为 `0` |
+| 运行包 | SHA-256 `d8a6d32fc67ef861ad8355bd03b842727a75ece252410c0ab567223907b3514a` |
+| 实现提交 | `6fac3120734ec14a343cae9ccf232e440c3b1dc8` |
+| 回退点 | `/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar.bak-public-retirement-20260721184111` |
+
+复验命令：
 
 ```bash
-ADP_DB_SSH_PASSWORD=*** make probe-wom-public-produce-task-created-noop
+make acceptance-wom-public-produce-task-created-retirement \
+  ADP_BASE_URL=http://10.11.100.17:18080 \
+  ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 \
+  ADP_SSH_HOST=10.11.100.17
 ```
 
-最新机器证据见 `metadata/wom-public-produce-task-created-noop-probe.json`。本轮
-`generatedAt=2026-06-22T07:29:05.735Z`，marker
-`ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP` 确认接口返回
-`HTTP 200/code=400` 和“已禁用”业务消息，查库计数仍从 `0` 到 `0`，状态为
-`EXPLICIT_REJECTION_NO_PERSISTENCE`。
+`make probe-wom-public-produce-task-created-noop` 作为旧命令别名保留，但现在执行的也是退役合同验收。历史假成功证据仍保留在 `metadata/wom-public-produce-task-created-noop-probe.json`，不能用来宣称当前接口可创建任务。
 
-该问题不是 PostgreSQL 缺表、缺列、类型兼容或 Oracle 方言残留。WOM 源包 `WOM_6.1.3.4` 中 `WOMProduceTaskController.produceTaskCreated` 仍会调用 `WOMProduceTaskServiceImpl.creatProTask`，但 `creatProTask` 的主体创建逻辑整段被注释，最终直接 `return Result.success("处理成功")`。测试环境运行包补丁见 `deploy/docker/scripts/build-wom-public-produce-created-disabled-boot-jar.sh`，远端原包备份为 `/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar.bak-public-disabled-20260622152535`。
+## 产品边界
 
-当前已验收的生产指令单生成通道是 `POST /msService/WOM/produceTask/produceTask/produceTaskCreated2`。它经 `WOMFormCreatServiceImpl.creatProduceTask` 生成制造指令单、启动 `makeTaskFlow`，并已用 marker `ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6` 证明 `wom_produce_tasks`、DI、活动、质量、批次、待办、RBAC 流权限和 JBPM execution 真实落库。
-
-## 证据
-
-| 证据项 | 结果 |
-| --- | --- |
-| 前端/API 探针 | `POST /msService/public/WOM/produceTask/produceTask/produceTaskCreated` |
-| marker | `ADP_E2E_20260622011811_PUBLIC_PRODUCE_NOOP` |
-| HTTP 响应 | `200`，业务码 `400`，响应体为 `public produceTaskCreated 已禁用：当前恢复版本不会创建制造指令单，请使用 /msService/WOM/produceTask/produceTask/produceTaskCreated2 或恢复经产品确认的落库实现。` |
-| PostgreSQL 验证 | `wom_produce_tasks` 中按 `table_no/produce_batch_num/day_plan_ids` 查 marker，前后均为 `0` |
-| 证据文件 | `metadata/wom-public-produce-task-created-noop-probe.json` |
-| 源码入口 | `WOMProduceTaskController.produceTaskCreated -> WOMProduceTaskServiceImpl.creatProTask` |
-| 源码结论 | `creatProTask` 中从解析 payload 到 `save(...)` 的主体均被注释，最后直接返回成功；测试运行包已临时 patch 为显式禁用 |
-
-## 处理方向
-
-| 路径 | 要求 |
-| --- | --- |
-| 恢复为真实接口 | 恢复或重写 `creatProTask`，明确 payload 合同，复用 `produceTaskCreated2` 的工作流/表写入边界，重新跑 marker API、浏览器入口和 PostgreSQL 落库验收 |
-| 废弃兼容接口 | 不再返回假成功；改为明确失败、禁用或 410，并从产品文档/API 文档中说明制造指令单由 `produceTaskCreated2` 或上游日计划集成生成 |
-| 保持现状 | 只能作为 BLOCKED/backlog 保留，禁止用该接口作为任何创建能力的 PASS 证据 |
-
-## Backlog 条目
-
-| ID | 问题 | 处理方向 |
-| --- | --- | --- |
-| PROD-ACTION-007 | public `produceTaskCreated` 已显式禁用，等待产品确认是否仍是对外承诺接口；恢复源码中的创建主体仍是 no-op 风险 | 先运行 `make probe-wom-public-produce-task-created-noop` 刷新显式禁用证据；产品确认该接口是否仍对外承诺；若承诺则恢复实现并重测，若废弃则把禁用响应写入 API/产品说明 |
+`PROD-ACTION-007` 已按 `NOT_APPLICABLE` 关闭：这是“废弃契约验收 PASS”，不是“制造指令创建 PASS”。真实创建能力继续由 `produceTaskCreated2` 和“新建指令单”两条独立 marker 证据承担。如果未来重新提出对外公开创建 API，必须新建带认证、幂等键、请求账本、明确 payload schema 和 PostgreSQL 事务验收的 v2 契约，不允许把本旧实现去注释后直接启用。

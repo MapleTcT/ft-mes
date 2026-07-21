@@ -234,18 +234,6 @@
       "nextAction": "Run the plant Batch/DCS cutover rehearsal and attach signed acknowledgement, rollback and PostgreSQL evidence."
     },
     {
-      "id": "BUS-SIGNOFF-002",
-      "severity": "BLOCKER",
-      "description": "Production module backlog contains one unresolved action-level gap: the public produceTaskCreated product scope. WOM QR-code, visible manual production-task entry, RM Web formula editing and independent bad-quantity reporting are closed and are no longer part of this blocker.",
-      "source": "metadata/production-module-backlog.json",
-      "backlogItemIds": [
-        "PROD-ACTION-007"
-      ],
-      "owner": "production-business-owner",
-      "riskAcceptance": "TBD",
-      "nextAction": "Resolve the backlog items or attach signed risk acceptance before production business smoke signoff can become READY."
-    },
-    {
       "id": "BUS-SIGNOFF-003",
       "severity": "BLOCKER",
       "description": "Basic configuration coverage remains partial and cannot be silently carried into production signoff.",

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-21T10:13:00.755Z",
-  "repoCommit": "31baf5d01fc13f5fa917e6deb663d67118413cbe",
+  "generatedAt": "2026-07-21T10:47:47.562Z",
+  "repoCommit": "6fac3120734ec14a343cae9ccf232e440c3b1dc8",
   "database": "PostgreSQL",
-  "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
+  "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
-    "generatedAt": "2026-07-21T06:32:41.391Z",
+    "generatedAt": "2026-07-21T10:47:47.562Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -173,6 +173,12 @@
       "evidence": "metadata/entity-model-object-association-acceptance.json",
       "assertions": "10/10; real /msService/ec/engine/msManage page; one-to-one and many-to-one OBJECT fields; LONG/TEXT/BAPCODE target keys; dotted and legacy underscore request parameters; bigint/varchar(48)/varchar(4000) physical columns; four logical joins; idempotent replay; invalid target HTTP 500 with metadata/DDL rollback; no synthetic PostgreSQL foreign key; cleanup and independent query 0/0/0/0"
     },
+    "womPublicProduceTaskCreatedRetirement": {
+      "status": "PASS_DEPRECATED_EXPLICIT_REJECTION_NO_PERSISTENCE",
+      "marker": "ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED",
+      "evidence": "metadata/wom-public-produce-task-created-retirement-acceptance.json",
+      "assertions": "legacy endpoint HTTP 200/code=400 with explicit deprecated message; PostgreSQL marker 0->0; makeTaskList and manual-entry replacement browser path 200 with two product options; console/page/request/network errors 0"
+    },
     "configurationFieldDelete": {
       "status": "PASS_TARGET_POSTGRES_CONTROLLED_FIELD_DELETE_CLEANED",
       "marker": "ADP_E2E_20260721101217_PG_FIELD_DELETE",
@@ -184,8 +190,8 @@
     "testedFeatures": 204,
     "pass": 201,
     "fail": 0,
-    "blocked": 1,
-    "notApplicable": 2
+    "blocked": 0,
+    "notApplicable": 3
   },
   "items": [
     {
@@ -718,25 +724,17 @@
     {
       "module": "生产模块-WOM",
       "route": "/msService/public/WOM/produceTask/produceTask/produceTaskCreated",
-      "operation": "候选日计划生成制造指令单接口显式禁用探针",
+      "operation": "遗留 public 日计划创建接口退役契约验收",
       "api": "POST /msService/public/WOM/produceTask/produceTask/produceTaskCreated",
       "method": "POST",
-      "requiresPersistence": true,
-      "backendEntry": "WOMProduceTaskController.produceTaskCreated -> WOMProduceTaskServiceImpl.creatProTask",
-      "tables": [
-        "wom_produce_tasks"
-      ],
-      "marker": "ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP",
-      "verificationSql": "select count(*)\nFROM public.wom_produce_tasks\nWHERE coalesce(table_no::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(produce_batch_num::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(day_plan_ids::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%';",
-      "status": "BLOCKED",
-      "evidence": "2026-06-22 refreshed safe candidate API probe through public ingress http://222.88.185.146:18080 with marker ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP. Test runtime patched WOMProduceTaskController.produceTaskCreated using deploy/docker/scripts/build-wom-public-produce-created-disabled-boot-jar.sh because recovered WOMProduceTaskServiceImpl.creatProTask has the creation body commented out and would otherwise return false success. POST /msService/public/WOM/produceTask/produceTask/produceTaskCreated now returns HTTP 200/code=400/message=public produceTaskCreated 已禁用：当前恢复版本不会创建制造指令单，请使用 /msService/WOM/produceTask/produceTask/produceTaskCreated2 或恢复经产品确认的落库实现。; PostgreSQL marker count in wom_produce_tasks stayed 0 before and 0 after. Remote WOMMs runtime backup: /home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar.bak-public-disabled-20260622152535. Evidence JSON: metadata/wom-public-produce-task-created-noop-probe.json. Dedicated analysis: docs/backend-table-audit/wom-public-produce-task-created-analysis.md and metadata/wom-public-produce-task-created-analysis.json. This endpoint remains BLOCKED pending product decision: restore a real implementation if supported, or document it as deprecated/disabled.",
-      "issues": [
-        "Latest probe 2026-06-22T07:29:05.735Z marker ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP returned explicit disabled response HTTP 200/code=400; PostgreSQL marker count remained 0 -> 0.",
-        "The recovered source implementation is still a no-op if the runtime patch is removed: creatProTask has the creation body commented out.",
-        "The tested payload is a minimal marker probe, not a product-accepted daily-plan contract.",
-        "Product must decide whether this public endpoint is supported; if supported, restore/replace implementation and rerun marker persistence acceptance.",
-        "produceTaskCreated2 remains a separate accepted creation path and cannot be used to mark this public endpoint PASS."
-      ]
+      "requiresPersistence": false,
+      "backendEntry": "WOMProduceTaskController.produceTaskCreated -> explicit deprecated Result.fail; unsafe WOMProduceTaskServiceImpl.creatProTask is never invoked",
+      "tables": [],
+      "marker": "ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED",
+      "verificationSql": "SELECT count(*)::text FROM public.wom_produce_tasks WHERE coalesce(table_no::text, '') LIKE '%ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED%' OR coalesce(produce_batch_num::text, '') LIKE '%ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED%' OR coalesce(day_plan_ids::text, '') LIKE '%ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED%';",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The legacy endpoint is formally deprecated and is not a supported create operation. On 10.11.100.17 it returned HTTP 200/code=400 with an explicit 已废弃 message; PostgreSQL marker count stayed 0 -> 0. Real browser replacement-path smoke loaded makeTaskList=200, showed 新建指令单, opened manual-entry/page with two product options, and recorded zero console/page/request/network errors. Supported create evidence remains separate under authenticated produceTaskCreated2 and manual entry. Evidence: metadata/wom-public-produce-task-created-retirement-acceptance.json, metadata/wom-public-produce-task-created-analysis.json, and docs/backend-table-audit/wom-public-produce-task-created-analysis.md. Implementation commit: 6fac3120734ec14a343cae9ccf232e440c3b1dc8.",
+      "issues": []
     },
     {
       "module": "生产模块-WOM",

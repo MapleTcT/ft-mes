@@ -1,18 +1,18 @@
 # 业务模块接入验收要求
 
-本文件覆盖当前仍为 `BLOCKED` 的 1 个生产缺口。机器账本为
+本文件定义后续业务包、接口、外部客户端或产品决策进入时的统一验收要求。当前 `BLOCKED` 接入项为 0，机器账本为
 `metadata/business-module-intake-requirements.json`：
 
 ```bash
 make business-module-intake-requirements-check
 ```
 
-material/WMS、ProcessAnalysis 与独立不良数量均已完成，不再是待接入服务包或产品范围决定；
-当前只保留 public `produceTaskCreated` 的支持/废弃决定。
+material/WMS、ProcessAnalysis、独立不良数量和 public
+`produceTaskCreated` 产品边界均已关闭。后者已正式废弃，保留明确拒绝契约，不再等待新业务包。
 
 | 类型 | 数量 | 涉及项 |
 |---|---:|---|
-| 产品范围决定 | 1 | `PROD-ACTION-007` |
+| 产品范围决定 | 0 | 无 |
 | 缺 runtime endpoint | 0 | 无 |
 | 外部客户端 | 0 | 无 |
 | 缺服务包 | 0 | 无 |
@@ -32,7 +32,7 @@ material/WMS、ProcessAnalysis 与独立不良数量均已完成，不再是待�
 
 | ID | 类型 | 下一步 |
 |---|---|---|
-| `PROD-ACTION-007` | 产品范围决定 | 明确 public `produceTaskCreated` 是废弃还是恢复 |
+| 无 | - | 当前没有未闭合的业务模块接入要求 |
 
 `PROD-022` 完工入库已由 material/WMS marker 验收转为 PASS，证据为
 `metadata/material-wms-persistence-acceptance.json`，不再出现在接入需求中。
@@ -53,6 +53,11 @@ material/WMS、ProcessAnalysis 与独立不良数量均已完成，不再是待�
 WMS 合格/冻结数量分配、幂等、冲销和 PostgreSQL 清理均已通过。
 
 ## 本轮关闭
+
+`PROD-ACTION-007` 已于 2026-07-21 按 `NOT_APPLICABLE` 关闭：仓库与恢复包没有维护中的调用方，旧实现会假成功且含模拟登录/拼接 SQL 风险。当前运行包保留 URL 但明确返回 `code=400/已废弃`；marker
+`ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED` 证明 PostgreSQL
+`0 -> 0`，真实浏览器另行证明认证后的“新建指令单”仍可用。证据为
+`metadata/wom-public-produce-task-created-retirement-acceptance.json`。
 
 `PROD-ACTION-006` 已于 2026-07-17 关闭：`wom-production-entry` 源码模块、
 PostgreSQL 请求账本、网关路由和 `makeTaskList` 可见按钮已部署。真实浏览器完成

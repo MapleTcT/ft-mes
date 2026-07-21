@@ -16,6 +16,7 @@ BLOCKERS_PATH = ROOT / "metadata/production-module-blockers.json"
 BUSINESS_CONTRACTS_PATH = ROOT / "metadata/business-dependency-contracts.json"
 EXPORT_GAP_PATH = ROOT / "metadata/production-export-gap-breakdown.json"
 WOM_TOOLBAR_PATH = ROOT / "metadata/wom-toolbar-action-coverage.json"
+RETIREMENT_ACCEPTANCE_PATH = ROOT / "metadata/wom-public-produce-task-created-retirement-acceptance.json"
 
 ALLOWED_STATUS = {"BLOCKED"}
 INTAKE_TYPE_BY_CATEGORY = {
@@ -39,6 +40,7 @@ REQUIRED_TOP_LEVEL_KEYS = {
     "purpose",
     "sourceReports",
     "summary",
+    "closedRequirements",
     "requirements",
 }
 REQUIRED_ITEM_KEYS = {
@@ -145,6 +147,7 @@ def check_doc(expected_ids: set[str], failures: list[str]) -> None:
         "material",
         "ProcessAnalysis",
         "metadata/wom-qrcode-browser-acceptance.json",
+        "metadata/wom-public-produce-task-created-retirement-acceptance.json",
     ):
         if fragment not in text:
             fail(failures, f"business module intake document missing required text: {fragment}")
@@ -360,8 +363,10 @@ def check_report(data: dict[str, Any], failures: list[str]) -> None:
         fail(failures, "business module intake database must remain PostgreSQL")
     if data.get("module") != "production":
         fail(failures, "business module intake module must be production")
-    if data.get("overallStatus") != "BLOCKED":
-        fail(failures, "business module intake overallStatus must remain BLOCKED until all requirements pass")
+    raw_requirements = data.get("requirements")
+    expected_overall_status = "BLOCKED" if isinstance(raw_requirements, list) and raw_requirements else "READY"
+    if data.get("overallStatus") != expected_overall_status:
+        fail(failures, f"business module intake overallStatus must be {expected_overall_status}")
     for required_report in (
         "metadata/production-module-backlog.json",
         "metadata/production-module-blockers.json",
@@ -370,11 +375,11 @@ def check_report(data: dict[str, Any], failures: list[str]) -> None:
         "metadata/wom-toolbar-action-coverage.json",
         "metadata/wom-qrcode-browser-acceptance.json",
         "metadata/wom-qrcode-persistence-acceptance.json",
+        "metadata/wom-public-produce-task-created-retirement-acceptance.json",
     ):
         if required_report not in as_list(data.get("sourceReports")):
             fail(failures, f"sourceReports missing {required_report}")
 
-    raw_requirements = data.get("requirements")
     if not isinstance(raw_requirements, list):
         fail(failures, "requirements must be a list")
         return
@@ -388,6 +393,37 @@ def check_report(data: dict[str, Any], failures: list[str]) -> None:
             fail(failures, f"duplicate requirement id: {item_id}")
         seen.add(item_id)
         check_item_shape(requirement, failures)
+
+    closed_requirements = as_list(data.get("closedRequirements"))
+    closed_public = next(
+        (
+            item
+            for item in closed_requirements
+            if isinstance(item, dict) and item.get("id") == "PROD-ACTION-007"
+        ),
+        None,
+    )
+    if closed_public is None:
+        fail(failures, "closedRequirements must record retired PROD-ACTION-007")
+    else:
+        if closed_public.get("status") != "NOT_APPLICABLE":
+            fail(failures, "retired PROD-ACTION-007 intake requirement must close as NOT_APPLICABLE")
+        refs = {str(ref) for ref in as_list(closed_public.get("evidenceRefs"))}
+        for required_ref in (
+            "metadata/wom-public-produce-task-created-retirement-acceptance.json",
+            "metadata/wom-public-produce-task-created-analysis.json",
+            "docs/backend-table-audit/wom-public-produce-task-created-analysis.md",
+        ):
+            if required_ref not in refs:
+                fail(failures, f"retired PROD-ACTION-007 intake closure missing evidence: {required_ref}")
+    retirement = read_json(RETIREMENT_ACCEPTANCE_PATH, failures, "WOM public endpoint retirement acceptance")
+    if retirement:
+        if retirement.get("status") != "PASS_DEPRECATED_EXPLICIT_REJECTION_NO_PERSISTENCE":
+            fail(failures, "WOM public endpoint retirement acceptance status is invalid")
+        if retirement.get("contractDecision") != "DEPRECATED":
+            fail(failures, "WOM public endpoint retirement decision must be DEPRECATED")
+        if retirement.get("beforeCount") != 0 or retirement.get("afterCount") != 0:
+            fail(failures, "WOM public endpoint retirement marker count must remain 0 -> 0")
     check_summary(data, requirements, failures)
 
 

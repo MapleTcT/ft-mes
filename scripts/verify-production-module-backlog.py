@@ -13,6 +13,7 @@ DOC_PATH = ROOT / "docs/production-module-backlog.md"
 PERSISTENCE_PATH = ROOT / "metadata/persistence-acceptance.json"
 BLOCKERS_PATH = ROOT / "metadata/production-module-blockers.json"
 NOOP_ANALYSIS_PATH = ROOT / "metadata/wom-public-produce-task-created-analysis.json"
+RETIREMENT_ACCEPTANCE_PATH = ROOT / "metadata/wom-public-produce-task-created-retirement-acceptance.json"
 WOM_TOOLBAR_PATH = ROOT / "metadata/wom-toolbar-action-coverage.json"
 
 ALLOWED_STATUS = {"FAIL_BACKLOG", "BLOCKED"}
@@ -98,8 +99,9 @@ def check_doc(expected_ids: set[str], failures: list[str]) -> None:
         "# 生产模块 Backlog 账本",
         "make production-module-backlog-check",
         "FAIL_BACKLOG",
-        "public `produceTaskCreated` no-op",
-        "已显式禁用",
+        "当前未闭合 backlog 为 `0`",
+        "PROD-ACTION-007",
+        "已废弃",
     ):
         if fragment not in text:
             fail(failures, f"production backlog document missing required text: {fragment}")
@@ -238,6 +240,7 @@ def main() -> int:
     persistence = read_json(PERSISTENCE_PATH, failures)
     blockers = read_json(BLOCKERS_PATH, failures)
     noop_analysis = read_json(NOOP_ANALYSIS_PATH, failures)
+    retirement_acceptance = read_json(RETIREMENT_ACCEPTANCE_PATH, failures)
     wom_toolbar = read_json(WOM_TOOLBAR_PATH, failures)
 
     for key in REQUIRED_TOP_LEVEL_KEYS:
@@ -248,14 +251,13 @@ def main() -> int:
         fail(failures, "production module backlog database must remain PostgreSQL")
     if backlog.get("module") != "production":
         fail(failures, "production module backlog module must be production")
-    if backlog.get("overallStatus") != "OPEN":
-        fail(failures, "production module backlog must remain OPEN while items are unresolved")
-
     for required_report in (
         "metadata/persistence-acceptance.json",
         "metadata/production-module-test-cases.json",
         "metadata/production-module-blockers.json",
         "metadata/wom-toolbar-action-coverage.json",
+        "metadata/wom-public-produce-task-created-analysis.json",
+        "metadata/wom-public-produce-task-created-retirement-acceptance.json",
     ):
         if required_report not in as_list(backlog.get("sourceReports")):
             fail(failures, f"sourceReports missing {required_report}")
@@ -270,6 +272,12 @@ def main() -> int:
     covered_cases: set[str] = set()
     covered_toolbar_actions: set[str] = set()
     typed_items = [item for item in items if isinstance(item, dict)]
+    expected_overall_status = "OPEN" if typed_items else "CLEAR"
+    if backlog.get("overallStatus") != expected_overall_status:
+        fail(
+            failures,
+            f"production module backlog overallStatus must be {expected_overall_status} for {len(typed_items)} active item(s)",
+        )
     for index, item in enumerate(items):
         item_id, coverage, case_ids, toolbar_ids = check_item(index, item, failures)
         if not item_id:
@@ -316,23 +324,68 @@ def main() -> int:
     if missing_toolbar_actions:
         fail(failures, f"backlog missing WOM toolbar BLOCKED action coverage: {missing_toolbar_actions}")
 
-    noop_item = next((item for item in typed_items if item.get("id") == "PROD-ACTION-007"), None)
-    if noop_item is None:
-        fail(failures, "backlog must contain PROD-ACTION-007 for public produceTaskCreated product decision")
+    if any(item.get("id") == "PROD-ACTION-007" for item in typed_items):
+        fail(failures, "retired PROD-ACTION-007 must not remain in active backlog items")
+
+    closed_item = next(
+        (
+            item
+            for item in as_list(backlog.get("closedItems"))
+            if isinstance(item, dict) and item.get("id") == "PROD-ACTION-007"
+        ),
+        None,
+    )
+    if closed_item is None:
+        fail(failures, "closedItems must record retired PROD-ACTION-007")
     else:
-        if noop_item.get("status") != "BLOCKED":
-            fail(failures, "PROD-ACTION-007 must remain BLOCKED while product decision is pending")
-        if noop_item.get("category") != "product-scope-confirmation":
-            fail(failures, "PROD-ACTION-007 must remain category=product-scope-confirmation")
-        if noop_analysis.get("status") != "BLOCKED_EXPLICIT_DISABLED":
-            fail(failures, "wom public produceTaskCreated analysis must remain BLOCKED_EXPLICIT_DISABLED")
-        if noop_analysis.get("classification") != "explicit-disabled-pending-product-decision":
-            fail(failures, "wom public produceTaskCreated analysis must classify explicit disabled pending product decision")
-        if noop_analysis.get("isPostgresCompatibilityGap") is not False:
-            fail(failures, "wom public produceTaskCreated analysis must state this is not a PostgreSQL compatibility gap")
-        latest_probe = noop_item.get("latestProbe")
-        if not isinstance(latest_probe, dict) or latest_probe.get("status") != "EXPLICIT_REJECTION_NO_PERSISTENCE":
-            fail(failures, "PROD-ACTION-007 latestProbe must be EXPLICIT_REJECTION_NO_PERSISTENCE")
+        if closed_item.get("status") != "NOT_APPLICABLE":
+            fail(failures, "retired PROD-ACTION-007 must close as NOT_APPLICABLE")
+        closed_refs = {str(ref) for ref in as_list(closed_item.get("evidenceRefs"))}
+        for required_ref in (
+            "metadata/wom-public-produce-task-created-retirement-acceptance.json",
+            "metadata/wom-public-produce-task-created-analysis.json",
+            "docs/backend-table-audit/wom-public-produce-task-created-analysis.md",
+        ):
+            if required_ref not in closed_refs:
+                fail(failures, f"retired PROD-ACTION-007 missing closure evidence: {required_ref}")
+
+    if noop_analysis.get("status") != "PASS_DEPRECATED_EXPLICIT_REJECTION":
+        fail(failures, "wom public produceTaskCreated analysis must record the accepted retirement contract")
+    if noop_analysis.get("classification") != "deprecated-legacy-endpoint":
+        fail(failures, "wom public produceTaskCreated analysis must classify a deprecated legacy endpoint")
+    if noop_analysis.get("isPostgresCompatibilityGap") is not False:
+        fail(failures, "wom public produceTaskCreated retirement must not be a PostgreSQL compatibility gap")
+    contract_decision = noop_analysis.get("contractDecision")
+    if not isinstance(contract_decision, dict) or contract_decision.get("status") != "DEPRECATED":
+        fail(failures, "wom public produceTaskCreated contractDecision must be DEPRECATED")
+    if as_list(noop_analysis.get("backlog")):
+        fail(failures, "retired public produceTaskCreated analysis must have an empty backlog")
+    closed_decision = noop_analysis.get("closedDecision")
+    if not isinstance(closed_decision, dict) or closed_decision.get("id") != "PROD-ACTION-007" or closed_decision.get("status") != "NOT_APPLICABLE":
+        fail(failures, "wom public produceTaskCreated analysis must close PROD-ACTION-007 as NOT_APPLICABLE")
+
+    if retirement_acceptance.get("status") != "PASS_DEPRECATED_EXPLICIT_REJECTION_NO_PERSISTENCE":
+        fail(failures, "public produceTaskCreated retirement acceptance status is invalid")
+    if retirement_acceptance.get("contractDecision") != "DEPRECATED":
+        fail(failures, "public produceTaskCreated retirement acceptance must record DEPRECATED")
+    if retirement_acceptance.get("database") != "PostgreSQL":
+        fail(failures, "public produceTaskCreated retirement acceptance database must remain PostgreSQL")
+    response = retirement_acceptance.get("responseJson")
+    if retirement_acceptance.get("httpStatus") != 200 or not isinstance(response, dict) or response.get("code") != 400:
+        fail(failures, "public produceTaskCreated retirement must prove HTTP 200 with business code 400")
+    if not isinstance(response, dict) or "已废弃" not in str(response.get("message", "")):
+        fail(failures, "public produceTaskCreated retirement must return an explicit 已废弃 message")
+    if retirement_acceptance.get("beforeCount") != 0 or retirement_acceptance.get("afterCount") != 0:
+        fail(failures, "public produceTaskCreated retirement marker count must remain 0 -> 0")
+    browser = retirement_acceptance.get("browser")
+    if not isinstance(browser, dict):
+        fail(failures, "public produceTaskCreated retirement must include browser replacement-path evidence")
+    else:
+        if browser.get("listNavigationStatus") != 200 or browser.get("manualEntryButtonVisible") is not True:
+            fail(failures, "public produceTaskCreated replacement browser path must be reachable and visible")
+        for key in ("consoleErrors", "pageErrors", "requestFailures", "networkErrors"):
+            if as_list(browser.get(key)):
+                fail(failures, f"public produceTaskCreated replacement browser evidence has {key}")
 
     check_summary(backlog, typed_items, failures)
     check_doc(seen_ids, failures)

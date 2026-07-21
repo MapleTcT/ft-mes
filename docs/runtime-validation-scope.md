@@ -149,7 +149,7 @@ make smoke-menu
 
 生产模块的页面 smoke 已通过不等于业务动作通过。新增、编辑、删除、下发、审批、报工、退料、导入、质量回写、入库和状态流转，都必须按用例矩阵逐项补前端操作、接口捕获、后端链路和 PostgreSQL 查询证明。
 
-落库验收中出现 `FAIL` 或 `BLOCKED` 时，也必须进入生产模块 Backlog。典型例子是 public `produceTaskCreated`：旧恢复实现会返回 `200/处理成功` 但 `wom_produce_tasks` marker 计数仍为 0；测试运行包现已显式禁用，最新探针为 `HTTP 200/code=400` 且 marker 计数仍为 0，因此只能保留为 `BLOCKED` 产品契约确认项，不得被 `produceTaskCreated2` 的 PASS 证据替代。
+落库验收中出现 `FAIL` 或 `BLOCKED` 时，也必须进入生产模块 Backlog。public `produceTaskCreated` 是已关闭的反例：旧恢复实现会返回 `200/处理成功` 但 `wom_produce_tasks` marker 计数仍为 0；当前已正式废弃，真实验收为 `HTTP 200/code=400/已废弃` 且 marker `0 -> 0`，因此按 `NOT_APPLICABLE` 关闭。它不得被 `produceTaskCreated2` 的创建 PASS 证据替代，也不得重新冒充创建能力。
 
 当前生产矩阵里仍依赖外部业务包的 blocker 可以先用只读 readiness
 smoke 复验：

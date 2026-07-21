@@ -12,6 +12,7 @@ REPORT_PATH = ROOT / "metadata/production-module-test-cases.json"
 DOC_PATH = ROOT / "docs/production-module-functional-test-cases.md"
 AUDIT_PATH = ROOT / "docs/backend-table-audit/business-production.md"
 NOOP_ANALYSIS_JSON = ROOT / "metadata/wom-public-produce-task-created-analysis.json"
+RETIREMENT_ACCEPTANCE_JSON = ROOT / "metadata/wom-public-produce-task-created-retirement-acceptance.json"
 
 ALLOWED_STATUSES = {"PASS", "FAIL", "BLOCKED", "NOT_RUN"}
 ALLOWED_ROUTE_SMOKE_STATUSES = {"PASS", "FAIL", "BLOCKED", "NOT_RUN", "NOT_APPLICABLE"}
@@ -120,28 +121,41 @@ def as_list(value: Any) -> list[Any]:
 
 def check_public_produce_noop_contract(failures: list[str]) -> None:
     data = read_json_path(NOOP_ANALYSIS_JSON, failures)
+    acceptance = read_json_path(RETIREMENT_ACCEPTANCE_JSON, failures)
     if not data:
         return
-    if data.get("status") != "BLOCKED_EXPLICIT_DISABLED":
-        fail(failures, "public produceTaskCreated analysis must remain BLOCKED_EXPLICIT_DISABLED")
-    if data.get("classification") != "explicit-disabled-pending-product-decision":
-        fail(failures, "public produceTaskCreated analysis must classify the endpoint as explicitly disabled pending product decision")
+    if data.get("status") != "PASS_DEPRECATED_EXPLICIT_REJECTION":
+        fail(failures, "public produceTaskCreated analysis must record accepted endpoint retirement")
+    if data.get("classification") != "deprecated-legacy-endpoint":
+        fail(failures, "public produceTaskCreated analysis must classify a deprecated legacy endpoint")
     if data.get("isPostgresCompatibilityGap") is not False:
-        fail(failures, "public produceTaskCreated disabled path must not be treated as a PostgreSQL migration gap")
+        fail(failures, "public produceTaskCreated retirement must not be treated as a PostgreSQL migration gap")
     if "producetaskcreated2" not in str(data.get("acceptedReplacementEndpoint", "")).lower():
         fail(failures, "public produceTaskCreated analysis must name produceTaskCreated2 as accepted path")
-    if not any(entry.get("id") == "PROD-ACTION-007" for entry in as_list(data.get("backlog")) if isinstance(entry, dict)):
-        fail(failures, "public produceTaskCreated analysis must keep backlog id PROD-ACTION-007")
-    evidence = data.get("evidence") if isinstance(data.get("evidence"), dict) else {}
-    backlog_probe = {}
-    for entry in as_list(data.get("backlog")):
-        if isinstance(entry, dict) and entry.get("id") == "PROD-ACTION-007" and isinstance(entry.get("latestProbe"), dict):
-            backlog_probe = entry["latestProbe"]
-            break
-    if evidence.get("latestProbeStatus") != "EXPLICIT_REJECTION_NO_PERSISTENCE" or backlog_probe.get("status") != "EXPLICIT_REJECTION_NO_PERSISTENCE":
-        fail(failures, "public produceTaskCreated latest probe must prove explicit rejection without persistence")
-    if backlog_probe.get("responseCode") != 400:
-        fail(failures, "public produceTaskCreated latest probe must return code=400 instead of false success")
+    contract = data.get("contractDecision") if isinstance(data.get("contractDecision"), dict) else {}
+    if contract.get("status") != "DEPRECATED":
+        fail(failures, "public produceTaskCreated contractDecision must be DEPRECATED")
+    if as_list(data.get("backlog")):
+        fail(failures, "retired public produceTaskCreated analysis must not keep an active backlog")
+    closed = data.get("closedDecision") if isinstance(data.get("closedDecision"), dict) else {}
+    if closed.get("id") != "PROD-ACTION-007" or closed.get("status") != "NOT_APPLICABLE":
+        fail(failures, "public produceTaskCreated analysis must close PROD-ACTION-007 as NOT_APPLICABLE")
+    if acceptance:
+        if acceptance.get("status") != "PASS_DEPRECATED_EXPLICIT_REJECTION_NO_PERSISTENCE":
+            fail(failures, "public produceTaskCreated retirement acceptance status is invalid")
+        if acceptance.get("contractDecision") != "DEPRECATED":
+            fail(failures, "public produceTaskCreated retirement acceptance must record DEPRECATED")
+        response = acceptance.get("responseJson")
+        if acceptance.get("httpStatus") != 200 or not isinstance(response, dict) or response.get("code") != 400:
+            fail(failures, "public produceTaskCreated retirement must prove HTTP 200/code=400")
+        if acceptance.get("beforeCount") != 0 or acceptance.get("afterCount") != 0:
+            fail(failures, "public produceTaskCreated retirement marker count must remain 0 -> 0")
+        browser = acceptance.get("browser") if isinstance(acceptance.get("browser"), dict) else {}
+        if browser.get("manualEntryButtonVisible") is not True or browser.get("manualEntryOptionCount", 0) < 1:
+            fail(failures, "public produceTaskCreated retirement must smoke the visible manual replacement path")
+        for key in ("consoleErrors", "pageErrors", "requestFailures", "networkErrors"):
+            if as_list(browser.get(key)):
+                fail(failures, f"public produceTaskCreated replacement browser evidence has {key}")
 
 
 def check_case_public_produce_guard(case_id: str, case: dict[str, Any], failures: list[str]) -> None:
@@ -157,7 +171,7 @@ def check_case_public_produce_guard(case_id: str, case: dict[str, Any], failures
     if "producetaskcreated2" not in text:
         fail(failures, f"{case_id} mentions public produceTaskCreated but not the accepted produceTaskCreated2 path")
 
-    no_op_terms = ("no-op", "不落库", "not accepted", "不能作为", "查库为 0", "显式禁用", "已禁用", "code=400")
+    no_op_terms = ("no-op", "不落库", "not accepted", "不能作为", "查库为 0", "显式禁用", "已禁用", "已废弃", "deprecated", "retired", "code=400")
     if not any(term in text for term in no_op_terms):
         fail(failures, f"{case_id} mentions public produceTaskCreated without explicit no-op/not-accepted wording")
 

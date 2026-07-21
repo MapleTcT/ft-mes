@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 2,
+  "reportKind": "wom-public-produce-task-created-retirement-acceptance",
+  "generatedAt": "2026-07-21T10:47:47.562Z",
+  "repoCommit": "6fac3120734ec14a343cae9ccf232e440c3b1dc8",
+  "database": "PostgreSQL",
+  "baseUrl": "http://10.11.100.17:18080",
+  "endpoint": "http://10.11.100.17:18080/msService/public/WOM/produceTask/produceTask/produceTaskCreated",
+  "marker": "ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED",
+  "method": "POST",
+  "contractDecision": "DEPRECATED",
+  "requiresPersistence": false,
+  "replacementPaths": [
+    "POST /msService/WOM/produceTask/produceTask/produceTaskCreated2 (authenticated daily-plan integration)",
+    "/msService/WOM/produceTask/produceTask/makeTaskList -> 新建指令单 (authenticated manual entry)"
+  ],
+  "frontendApplicability": "The retired integration endpoint has no direct UI; the authenticated makeTaskList -> 新建指令单 replacement is browser-smoked without creating data.",
+  "browser": {
+    "baseUrl": "http://10.11.100.17:18080",
+    "listNavigationStatus": 200,
+    "manualEntryButtonVisible": true,
+    "manualEntryUrl": "http://10.11.100.17:18080/msService/WOM/produceTask/manual-entry/page",
+    "manualEntryTitle": "新建制造指令",
+    "manualEntryOptionCount": 2,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "networkErrors": []
+  },
+  "requestShape": "legacy daily-plan-like marker payload used only to prove explicit rejection",
+  "payload": [
+    {
+      "userName": "admin",
+      "companyCode": "default",
+      "orderInfos": {
+        "sourceIds": "ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED_SOURCE",
+        "sourceRatio": "1",
+        "sourceType": "1",
+        "creatStaffCode": "admin",
+        "prodCode": "ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED_PRODUCT",
+        "planNum": "1",
+        "batchcode": "ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED_BATCH",
+        "packageInfos": []
+      }
+    }
+  ],
+  "verificationSql": "SELECT count(*)::text\nFROM public.wom_produce_tasks\nWHERE coalesce(table_no::text, '') LIKE '%ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED%'\n   OR coalesce(produce_batch_num::text, '') LIKE '%ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED%'\n   OR coalesce(day_plan_ids::text, '') LIKE '%ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED%';",
+  "beforeCount": 0,
+  "httpStatus": 200,
+  "responseText": "{\"code\":400,\"data\":null,\"message\":\"public produceTaskCreated 已废弃且不会创建制造指令单；请使用需要认证的 /msService/WOM/produceTask/produceTask/produceTaskCreated2 或制造指令列表的“新建指令单”。\"}",
+  "responseJson": {
+    "code": 400,
+    "data": null,
+    "message": "public produceTaskCreated 已废弃且不会创建制造指令单；请使用需要认证的 /msService/WOM/produceTask/produceTask/produceTaskCreated2 或制造指令列表的“新建指令单”。"
+  },
+  "afterCount": 0,
+  "status": "PASS_DEPRECATED_EXPLICIT_REJECTION_NO_PERSISTENCE",
+  "conclusion": "Deprecated endpoint returned the documented business rejection and PostgreSQL marker count remained unchanged."
+}

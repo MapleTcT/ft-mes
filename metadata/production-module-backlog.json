@@ -1,16 +1,17 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T14:10:28Z",
-  "repoCommit": "WORKTREE",
+  "generatedAt": "2026-07-21T10:47:47.562Z",
+  "repoCommit": "6fac3120734ec14a343cae9ccf232e440c3b1dc8",
   "database": "PostgreSQL",
   "module": "production",
-  "overallStatus": "OPEN",
+  "overallStatus": "CLEAR",
   "sourceReports": [
     "metadata/persistence-acceptance.json",
     "metadata/production-module-test-cases.json",
     "metadata/production-module-blockers.json",
     "metadata/wom-toolbar-action-coverage.json",
     "metadata/wom-public-produce-task-created-analysis.json",
+    "metadata/wom-public-produce-task-created-retirement-acceptance.json",
     "metadata/wom-public-produce-task-created-noop-probe.json",
     "metadata/core-flow-acceptance-20260710.json",
     "metadata/core-flow-runtime-rollback-rehearsal.json",
@@ -29,10 +30,23 @@
   },
   "closedItems": [
     {
+      "id": "PROD-ACTION-007",
+      "status": "NOT_APPLICABLE",
+      "closedAt": "2026-07-21T10:47:47.562Z",
+      "reason": "The false-success public produceTaskCreated endpoint is formally deprecated. It remains as an explicit HTTP 200/code=400 compatibility rejection, never persists data, and has two separately accepted authenticated replacement paths.",
+      "evidenceRefs": [
+        "metadata/wom-public-produce-task-created-retirement-acceptance.json",
+        "metadata/wom-public-produce-task-created-analysis.json",
+        "docs/backend-table-audit/wom-public-produce-task-created-analysis.md",
+        "metadata/wom-manual-task-entry-acceptance.json",
+        "metadata/persistence-acceptance.json"
+      ]
+    },
+    {
       "id": "PROD-ACTION-008",
       "status": "PASS",
       "closedAt": "2026-07-17T07:41:25.887Z",
-      "reason": "Maintained wom-print source, PostgreSQL schema, normal gateway route and real makeTaskList toolbar flow are now implemented and accepted.",
+      "reason": "Maintained wom-print source, PostgreSQL schema, normal gateway route and real makeTaskList toolbar flow are implemented and accepted.",
       "evidenceRefs": [
         "metadata/wom-qrcode-persistence-acceptance.json",
         "metadata/wom-qrcode-browser-acceptance.json",
@@ -87,77 +101,18 @@
     }
   ],
   "summary": {
-    "totalItems": 1,
+    "totalItems": 0,
     "failBacklog": 0,
-    "blocked": 1,
+    "blocked": 0,
     "postgresCompatibilityGap": 0,
-    "moduleBacklog": 1,
+    "moduleBacklog": 0,
     "missingServicePackage": 0,
     "externalClientRequired": 0,
     "missingExportImplementation": 0,
     "compositeServiceAndScope": 0,
-    "productScopeConfirmation": 1,
+    "productScopeConfirmation": 0,
     "falseSuccessApi": 0,
     "missingRuntimeEndpoint": 0
   },
-  "items": [
-    {
-      "id": "PROD-ACTION-007",
-      "title": "public produceTaskCreated explicitly disabled pending product decision",
-      "status": "BLOCKED",
-      "category": "product-scope-confirmation",
-      "disposition": "module-backlog",
-      "isPostgresCompatibilityGap": false,
-      "sourceStatus": "BLOCKED",
-      "productionCaseIds": [],
-      "persistenceCoverage": [
-        {
-          "status": "BLOCKED",
-          "module": "生产模块-WOM",
-          "operation": "候选日计划生成制造指令单接口显式禁用探针",
-          "api": "POST /msService/public/WOM/produceTask/produceTask/produceTaskCreated"
-        }
-      ],
-      "evidenceRefs": [
-        "metadata/persistence-acceptance.json",
-        "docs/backend-table-audit/persistence-acceptance.md",
-        "metadata/wom-public-produce-task-created-analysis.json",
-        "docs/backend-table-audit/wom-public-produce-task-created-analysis.md",
-        "metadata/wom-public-produce-task-created-noop-probe.json"
-      ],
-      "recheckCommands": [
-        "make probe-wom-public-produce-task-created-noop",
-        "manual: after product decision or implementation recovery, call POST /msService/public/WOM/produceTask/produceTask/produceTaskCreated with a unique ADP_E2E marker and query wom_produce_tasks",
-        "make persistence-acceptance-check"
-      ],
-      "passCriteria": [
-        "Product owner confirms whether the public endpoint is still a supported contract.",
-        "If supported, WOMProduceTaskServiceImpl.creatProTask is restored or replaced and a marker request writes wom_produce_tasks plus required workflow tables.",
-        "If deprecated, the explicit disabled/failure response is documented as the supported behavior and the endpoint is removed from create acceptance scope.",
-        "The accepted replacement path produceTaskCreated2 remains separate and cannot be used to mark this public endpoint PASS."
-      ],
-      "nextActions": [
-        "Latest explicit-disabled evidence refreshed at 2026-06-22T07:29:05.735Z with marker ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP; endpoint returned HTTP 200/code=400 and PostgreSQL marker count 0 -> 0.",
-        "Decide supported-vs-deprecated product status for the public endpoint.",
-        "If supported, restore the real create implementation in source and rerun marker API/browser/PostgreSQL acceptance.",
-        "If deprecated, keep/document the disabled response and remove it from supported integration docs."
-      ],
-      "nonSolutions": [
-        "Do not mark this endpoint PASS from an explicit disabled response.",
-        "Do not accept HTTP 200 transport status without checking business code and PostgreSQL marker rows.",
-        "Do not count produceTaskCreated2 evidence as proof that the public endpoint works."
-      ],
-      "latestProbe": {
-        "generatedAt": "2026-06-22T07:29:05.735Z",
-        "marker": "ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP",
-        "status": "EXPLICIT_REJECTION_NO_PERSISTENCE",
-        "httpStatus": 200,
-        "responseCode": 400,
-        "beforeCount": 0,
-        "afterCount": 0,
-        "verificationSql": "SELECT count(*)::text\nFROM public.wom_produce_tasks\nWHERE coalesce(table_no::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(produce_batch_num::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(day_plan_ids::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%';",
-        "evidence": "metadata/wom-public-produce-task-created-noop-probe.json"
-      }
-    }
-  ]
+  "items": []
 }

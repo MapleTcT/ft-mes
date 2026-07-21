@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T10:25:48+00:00",
-  "repoCommit": "31baf5d01fc13f5fa917e6deb663d67118413cbe",
-  "findingCount": 1608,
+  "generatedAt": "2026-07-21T11:14:10+00:00",
+  "repoCommit": "6fac3120734ec14a343cae9ccf232e440c3b1dc8",
+  "findingCount": 1607,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 188,
+    "documentation-or-workflow": 187,
     "frontend-row-index-noise": 4,
     "java-row-index-noise": 77,
     "legacy-ojdbc-dependency": 6,
@@ -21,7 +21,7 @@
     "decode-sql": 2,
     "from-dual": 140,
     "ojdbc": 15,
-    "oracle-keyword": 638,
+    "oracle-keyword": 637,
     "rownum": 678,
     "sysdate": 135
   },
@@ -238,7 +238,7 @@
     },
     {
       "file": "Makefile",
-      "line": 158,
+      "line": 159,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -246,7 +246,7 @@
     },
     {
       "file": "Makefile",
-      "line": 295,
+      "line": 297,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -254,7 +254,7 @@
     },
     {
       "file": "Makefile",
-      "line": 296,
+      "line": 298,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -262,7 +262,7 @@
     },
     {
       "file": "Makefile",
-      "line": 299,
+      "line": 301,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -270,7 +270,7 @@
     },
     {
       "file": "Makefile",
-      "line": 300,
+      "line": 302,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -278,7 +278,7 @@
     },
     {
       "file": "Makefile",
-      "line": 400,
+      "line": 402,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -286,7 +286,7 @@
     },
     {
       "file": "Makefile",
-      "line": 995,
+      "line": 997,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -294,7 +294,7 @@
     },
     {
       "file": "Makefile",
-      "line": 996,
+      "line": 998,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -302,7 +302,7 @@
     },
     {
       "file": "Makefile",
-      "line": 998,
+      "line": 1000,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -310,7 +310,7 @@
     },
     {
       "file": "Makefile",
-      "line": 999,
+      "line": 1001,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -318,7 +318,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1007,
+      "line": 1009,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -326,7 +326,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1008,
+      "line": 1010,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -334,7 +334,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1010,
+      "line": 1012,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -342,7 +342,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1011,
+      "line": 1013,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -9565,14 +9565,6 @@
       "excerpt": "`ADP_E2E_20260616021612_WOM_ACTIVE` 的真实前端验收已经证明投入明细会落到 `wom_putin_details`，但不会自动生成 `wom_mat_consum_recods`。这不是本轮发现的 PostgreSQL 缺表、缺列或 Oracle 方言兼容问题，而是当前 WOM 源码路径的业务设计结果："
     },
     {
-      "file": "docs/backend-table-audit/wom-public-produce-task-created-analysis.md",
-      "line": 19,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "该问题不是 PostgreSQL 缺表、缺列、类型兼容或 Oracle 方言残留。WOM 源包 `WOM_6.1.3.4` 中 `WOMProduceTaskController.produceTaskCreated` 仍会调用 `WOMProduceTaskServiceImpl.creatProTask`，但 `creatProTask` 的主体创建逻辑整段被注释，最终直接 `return Result.success(\"处理成功\""
-    },
-    {
       "file": "docs/business-dependency-contracts.md",
       "line": 15,
       "pattern": "oracle-keyword",
@@ -9974,7 +9966,7 @@
     },
     {
       "file": "docs/production-migration-readiness.md",
-      "line": 71,
+      "line": 70,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -9982,7 +9974,7 @@
     },
     {
       "file": "docs/production-migration-readiness.md",
-      "line": 76,
+      "line": 75,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -9990,7 +9982,7 @@
     },
     {
       "file": "docs/production-migration-readiness.md",
-      "line": 106,
+      "line": 105,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -9998,7 +9990,7 @@
     },
     {
       "file": "docs/production-migration-readiness.md",
-      "line": 158,
+      "line": 157,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10006,7 +9998,7 @@
     },
     {
       "file": "docs/production-migration-readiness.md",
-      "line": 159,
+      "line": 158,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10014,7 +10006,7 @@
     },
     {
       "file": "docs/production-migration-readiness.md",
-      "line": 322,
+      "line": 321,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10022,7 +10014,7 @@
     },
     {
       "file": "docs/production-migration-readiness.md",
-      "line": 430,
+      "line": 429,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10054,7 +10046,7 @@
     },
     {
       "file": "docs/production-module-backlog.md",
-      "line": 58,
+      "line": 59,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10098,7 +10090,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `204` 项，其中 `201 PASS / 0 FAIL / 1 BLOCKED / 2 NOT_APPLICABLE`；"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `204` 项，其中 `201 PASS / 0 FAIL / 0 BLOCKED / 3 NOT_APPLICABLE`；"
     },
     {
       "file": "docs/project-objectives.md",

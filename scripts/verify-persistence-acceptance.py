@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REPORT_PATH = ROOT / "metadata/persistence-acceptance.json"
 NOOP_ANALYSIS_DOC = ROOT / "docs/backend-table-audit/wom-public-produce-task-created-analysis.md"
 NOOP_ANALYSIS_JSON = ROOT / "metadata/wom-public-produce-task-created-analysis.json"
+RETIREMENT_ACCEPTANCE_JSON = ROOT / "metadata/wom-public-produce-task-created-retirement-acceptance.json"
 BAD_QUANTITY_ANALYSIS_DOC = ROOT / "docs/backend-table-audit/wom-bad-quantity-analysis.md"
 BAD_QUANTITY_ANALYSIS_JSON = ROOT / "metadata/wom-bad-quantity-analysis.json"
 MATERIAL_ANALYSIS_DOC = ROOT / "docs/backend-table-audit/material-service-dependency-analysis.md"
@@ -101,6 +102,10 @@ def item_text(item: dict) -> str:
     return json.dumps(item, ensure_ascii=False, sort_keys=True).lower()
 
 
+def as_list(value: object) -> list:
+    return value if isinstance(value, list) else []
+
+
 def require_refs(index: int, text: str, paths: list[Path], failures: list[str]) -> None:
     for path in paths:
         rel = str(path.relative_to(ROOT)).lower()
@@ -123,44 +128,52 @@ def require_doc_phrases(path: Path, phrases: list[str], failures: list[str]) -> 
 
 def check_public_produce_noop(index: int, item: dict, failures: list[str]) -> None:
     text = item_text(item)
-    require_refs(index, text, [NOOP_ANALYSIS_DOC, NOOP_ANALYSIS_JSON], failures)
+    require_refs(index, text, [NOOP_ANALYSIS_DOC, NOOP_ANALYSIS_JSON, RETIREMENT_ACCEPTANCE_JSON], failures)
     require_doc_phrases(
         NOOP_ANALYSIS_DOC,
         [
-            "当前不能作为生产工单/制造指令单创建入口验收",
-            "但 PostgreSQL",
-            "前后 marker 计数均为 `0`",
-            "已禁用",
-            "禁止用该接口作为任何创建能力的 PASS 证据",
+            "已正式废弃",
+            "绝不落库",
+            "前后均为 `0`",
+            "PROD-ACTION-007",
+            "NOT_APPLICABLE",
         ],
         failures,
     )
 
     data = read_json_path(NOOP_ANALYSIS_JSON, failures)
+    acceptance = read_json_path(RETIREMENT_ACCEPTANCE_JSON, failures)
     if not data:
         return
-    if data.get("status") != "BLOCKED_EXPLICIT_DISABLED":
-        fail("public produceTaskCreated analysis must remain BLOCKED_EXPLICIT_DISABLED", failures)
-    if data.get("classification") != "explicit-disabled-pending-product-decision":
-        fail("public produceTaskCreated analysis must classify explicit disabled pending product decision", failures)
+    if item.get("status") != "NOT_APPLICABLE" or item.get("requiresPersistence") is not False:
+        fail("retired public produceTaskCreated item must be NOT_APPLICABLE and non-persistent", failures)
+    if item.get("tables") or item.get("issues"):
+        fail("retired public produceTaskCreated item must not declare tables or unresolved issues", failures)
+    if data.get("status") != "PASS_DEPRECATED_EXPLICIT_REJECTION":
+        fail("public produceTaskCreated analysis must record accepted endpoint retirement", failures)
+    if data.get("classification") != "deprecated-legacy-endpoint":
+        fail("public produceTaskCreated analysis must classify a deprecated legacy endpoint", failures)
     if data.get("isPostgresCompatibilityGap") is not False:
-        fail("public produceTaskCreated no-op must not be classified as a PostgreSQL gap", failures)
+        fail("public produceTaskCreated retirement must not be classified as a PostgreSQL gap", failures)
     if "producetaskcreated2" not in str(data.get("acceptedReplacementEndpoint", "")).lower():
         fail("public produceTaskCreated analysis must name produceTaskCreated2 as the accepted replacement", failures)
-    if not any(entry.get("id") == "PROD-ACTION-007" for entry in data.get("backlog", []) if isinstance(entry, dict)):
-        fail("public produceTaskCreated analysis must keep backlog id PROD-ACTION-007", failures)
-    evidence = data.get("evidence", {})
-    if isinstance(evidence, dict):
-        if evidence.get("httpStatus") != 200:
-            fail("public produceTaskCreated disabled evidence must record the gateway HTTP 200 transport", failures)
-        if "code=400" not in str(evidence.get("databaseResult", "")):
-            fail("public produceTaskCreated disabled evidence must record explicit business code=400", failures)
-        if "0" not in str(evidence.get("databaseResult", "")):
-            fail("public produceTaskCreated no-op evidence must record unchanged marker count", failures)
-        if evidence.get("latestProbeStatus") != "EXPLICIT_REJECTION_NO_PERSISTENCE":
-            fail("public produceTaskCreated latest probe must be EXPLICIT_REJECTION_NO_PERSISTENCE", failures)
-    else:
-        fail("public produceTaskCreated analysis must include evidence object", failures)
+    if as_list(data.get("backlog")):
+        fail("retired public produceTaskCreated analysis must have an empty backlog", failures)
+    closed = data.get("closedDecision") if isinstance(data.get("closedDecision"), dict) else {}
+    if closed.get("id") != "PROD-ACTION-007" or closed.get("status") != "NOT_APPLICABLE":
+        fail("public produceTaskCreated analysis must close PROD-ACTION-007 as NOT_APPLICABLE", failures)
+    if acceptance:
+        if acceptance.get("status") != "PASS_DEPRECATED_EXPLICIT_REJECTION_NO_PERSISTENCE":
+            fail("public produceTaskCreated retirement acceptance status is invalid", failures)
+        if acceptance.get("contractDecision") != "DEPRECATED":
+            fail("public produceTaskCreated retirement acceptance must record DEPRECATED", failures)
+        response = acceptance.get("responseJson")
+        if acceptance.get("httpStatus") != 200 or not isinstance(response, dict) or response.get("code") != 400:
+            fail("public produceTaskCreated retirement must prove HTTP 200/code=400", failures)
+        if not isinstance(response, dict) or "已废弃" not in str(response.get("message", "")):
+            fail("public produceTaskCreated retirement must return an explicit 已废弃 message", failures)
+        if acceptance.get("beforeCount") != 0 or acceptance.get("afterCount") != 0:
+            fail("public produceTaskCreated retirement marker count must remain 0 -> 0", failures)
 
 
 def check_bad_quantity_blocker(index: int, item: dict, failures: list[str]) -> None:
@@ -218,9 +231,6 @@ def check_unresolved_item(index: int, item: dict, status: str, failures: list[st
 
     text = item_text(item)
     matched = False
-    if status in {"FAIL", "BLOCKED"} and "public/wom/producetask/producetask/producetaskcreated" in text:
-        check_public_produce_noop(index, item, failures)
-        matched = True
     if status == "BLOCKED" and ("可见入口" in text or "visible manual" in text):
         check_visible_create_blocker(index, item, failures)
         matched = True
@@ -291,6 +301,9 @@ def check_item(index: int, item: object, failures: list[str]) -> str | None:
 
     if not isinstance(item.get("issues"), list):
         fail(f"items[{index}].issues must be a list", failures)
+
+    if "/public/wom/producetask/producetask/producetaskcreated" in item_text(item):
+        check_public_produce_noop(index, item, failures)
 
     if status == "PASS":
         for key in ("module", "route", "operation", "api", "method", "backendEntry", "evidence"):
