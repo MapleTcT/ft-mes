@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T07:28:21+00:00",
-  "repoCommit": "49a909d790972ca957492f4d4fe59b37034841a8",
+  "generatedAt": "2026-07-21T08:14:53+00:00",
+  "repoCommit": "20cbe0a8f1232e6edded4aec4843f93190553706",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -137,14 +137,15 @@
         "2026-07-21 entity/model config and PostgreSQL physical-table acceptance passed on 10.11.100.17: marker ADP_E2E_20260721_1240_ENTITY_MODEL_PHYSICAL_TABLE opened the real /msService/ec/engine/msManage page context with zero visible/console/page/request/network errors; seven entity/model requests returned HTTP 200/success=true; PostgreSQL verified ec_entity=1, ec_model=1, inherent ec_property=3, generated table DS_E2E_124000, rename to DS_E2E_124000_R, extra_col expansion, idempotent replay with 12 columns, soft-delete retention and controlled cleanup to zero. Evidence metadata/entity-model-config-crud-persistence-acceptance.json.",
         "Implementation commit 13ee71e5a4b12ae10eb19e275a0c72fe45aa0bbe adds the ModelSyncDBUtils PostgreSQL branch and PostgresModelSyncSupport, injects both classes into the runtime nested JAR, and keeps physical tables on soft delete until explicit marker cleanup. This acceptance closes action entity-model-postgres-physical-table-autocreate and area configuration-physical-model-table.",
         "2026-07-21 PostgreSQL field/index/constraint lifecycle acceptance passed 33/33 on 10.11.100.17: marker ADP_E2E_20260721071510_PG_FIELD opened the real /msService/ec/engine/msManage page, created and replayed a TEXT field plus managed ordinary index and unique constraint, rejected duplicate and NULL rows, renamed the field with both managed object types, restored the ordinary index after unique disable, retained an external unique index without taking ownership or creating duplicates, toggled nullable/NOT NULL idempotently, rejected unsafe SET NOT NULL and TEXT-to-INTEGER changes with transactional metadata/DDL rollback, and cleaned property/model/entity/table to 0/0/0/0. Evidence metadata/entity-model-field-persistence-acceptance.json; implementation commit 42064a8ba590ac81a90058f7909069a1eafda826; final acceptance script commit 49a909d790972ca957492f4d4fe59b37034841a8.",
+        "2026-07-21 PostgreSQL scalar field type matrix acceptance passed 36/36 on 10.11.100.17: marker ADP_E2E_20260721075749_PG_TYPE_MATRIX used the real /msService/ec/engine/msManage page and save APIs to create 24 field instances across all 23 scalar DbColumnTypes. PostgreSQL verified native varchar/integer/numeric/date/time/timestamp/bytea/boolean/text/bigint columns, PROPERTYATTACHMENT metadata without a physical column, a full marker-row round-trip, safe boolean/integer, integer/bigint, integer/numeric and date/timestamp conversions, HTTP 500 plus metadata/DDL rollback for invalid integer-to-boolean data and numeric capacity reduction, and cleanup 0/0/0/0. OBJECT remains explicitly excluded for a dedicated association fixture. Evidence metadata/entity-model-field-type-matrix-acceptance.json; implementation commit 1534818b656f7466ce83b63d4068aec0697ac3ac; acceptance commit 20cbe0a8f1232e6edded4aec4843f93190553706.",
         "Migration 197 retires only the unsourced PostgreSQL fallback DDL triggers that raced the application-owned FieldSyncDBUtils path; rollback re-enables them only when their functions and tables exist. The application-owned path remains the default and Oracle remains legacy-template-only."
       ],
       "blockingIssues": [
-        "QCS reportShowIndexRange、RM.MQ brokerUrl、BaseSet.isEnable、customProperty 模型映射、实体/模型元数据 CRUD、PostgreSQL 基础物理模型表生命周期，以及 TEXT 字段新增、普通索引/唯一约束/nullable 生命周期、外部唯一索引保护、安全扩容、幂等和危险变更回滚均已完成 marker、回读、落库和回滚/清理；对应 QCS/RM/BaseSet 代表性业务回归已复跑 PASS。身份、授权、密钥、密码类配置仍禁止通用 smoke 改值；其他 BaseSet/RM/QCS 配置项、自动删列、更广字段类型矩阵、Nacos/Keycloak 生产 export/diff、realm 迁移、secret 轮换和回退演练仍需继续验收。"
+        "QCS reportShowIndexRange、RM.MQ brokerUrl、BaseSet.isEnable、customProperty 模型映射、实体/模型元数据 CRUD、PostgreSQL 基础物理模型表生命周期，以及字段约束生命周期和 23 类标量类型矩阵均已完成 marker、回读、落库和回滚/清理；对应 QCS/RM/BaseSet 代表性业务回归已复跑 PASS。身份、授权、密钥、密码类配置仍禁止通用 smoke 改值；其他 BaseSet/RM/QCS 配置项、自动删列、OBJECT 关联字段、Nacos/Keycloak 生产 export/diff、realm 迁移、secret 轮换和回退演练仍需继续验收。"
       ],
       "nextActions": [
         "继续把 QCS/RM/BaseSet 当前地址报告链路证据纳入后续生产或 rehearsal 业务 smoke 签字，但不要把测试环境证据直接冒充生产签字。",
-        "在现有 FieldSyncDBUtils PostgreSQL 门禁上分批补齐更广字段类型矩阵和显式受控删列策略；每类继续使用独立 marker、before/after SQL、危险转换回滚和清理验收。",
+        "在现有 FieldSyncDBUtils PostgreSQL 门禁上补齐 OBJECT 关联字段目标模型 fixture，并单独设计显式受控删列策略；继续使用独立 marker、before/after SQL、危险转换回滚和清理验收。",
         "继续把 Nacos/Keycloak 生产配置链路按 G-020 生产迁移前置项补齐 export/diff、迁移、登录 smoke 和回退证据。",
         "保持 make acceptance-systemcode-persistence、make acceptance-systemconfig-persistence、make acceptance-entity-model-field-persistence、make basic-config-coverage-check、make basic-config-action-matrix-check 和实体/模型 CRUD persistence 报告作为基础配置回归入口。"
       ],
@@ -188,6 +189,8 @@
         "metadata/entity-model-config-crud-persistence-acceptance.json",
         "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
         "metadata/entity-model-field-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
+        "metadata/entity-model-field-type-matrix-acceptance.json",
         "deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql"
       ]
     },
@@ -422,7 +425,7 @@
         "production module test matrix has 44 cases: 44 PASS, 0 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks 0 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and currently tracks 1 unresolved public produceTaskCreated product-decision item; independent bad-quantity reporting, WOM QR, visible WOM manual production-task entry and RM Web formula editing are closed.",
-        "persistence acceptance ledger has 201 tested features: 198 PASS, 0 FAIL, 1 BLOCKED, 2 NOT_APPLICABLE",
+        "persistence acceptance ledger has 202 tested features: 199 PASS, 0 FAIL, 1 BLOCKED, 2 NOT_APPLICABLE",
         "BPI marker ADP_E2E_20260720193226_WMS_OUTAGE passed the real target material-wms stop, command DLQ, service recovery, browser original-command reconciliation, BPI/material PostgreSQL verification and zero-residue cleanup; this is an internal target recovery proof and does not close external ERP/WMS protocol compensation.",
         "business dependency contracts now define the required material-service and process-analysis intake evidence before blocked production cases can move to PASS: package candidate, PostgreSQL default runtime, Oracle legacy-only policy, rendered Nacos config, Docker/production service registration, runtime patch manifest, rollback/disable plan, Nacos health, endpoint probes, backend trace, runtime/menu/table evidence and PostgreSQL marker verification.",
         "production export readiness smoke was refreshed at 2026-07-17T04:53:37.777Z: API base 和 browser base 均为 http://10.11.100.17:18080; pagePass=6, visibleExportActions=6, runtimeExportActions=6, nonEmptyDownloads=1, backendQueryExportWorkbooks=6, backendQueryExportErrors=0, verifiedDataExports=6 and targetExportMatches=10. All 6 targets are READY with real browser file responses; RM returns RM_batchFormulaList.xlsx and reconciles 231 valid PostgreSQL rows to 232 worksheet rows including the header. Evidence: metadata/production-export-readiness-smoke.json.",
@@ -531,7 +534,7 @@
       "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 201 tested features: 198 PASS, 0 FAIL, 1 BLOCKED, 2 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 1 active backlog item, 0 FAIL_BACKLOG and 1 BLOCKED.",
+        "metadata/persistence-acceptance.json currently has 202 tested features: 199 PASS, 0 FAIL, 1 BLOCKED, 2 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 1 active backlog item, 0 FAIL_BACKLOG and 1 BLOCKED.",
         "Target marker ADP_E2E_20260720193226_WMS_OUTAGE directly verified the BPI and material PostgreSQL tables across a real internal material-wms outage and recovery: no material row during the outage, one durable document/line/transaction/stock after recovery, and zero marker residue after cleanup.",
         "metadata/postgres-migration-inventory.json currently has 197 scripts, highRiskStatementCount=0, watchStatementCount=78, watchSafetyIssueCount=0, with no missing, duplicate, invalid, or unguarded structural migration statements.",
         "PATROL migration 186 restores the hidden-danger/EAM risk projection and repairs supfusion_i18n_resource.modifier from the legacy varchar shape to the java.util.Date-compatible PostgreSQL timestamp shape; target migration, i18n restart, browser/API and PostgreSQL marker verification passed.",

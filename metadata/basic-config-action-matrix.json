@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T07:16:52.911Z",
-  "repoCommit": "49a909d790972ca957492f4d4fe59b37034841a8",
+  "generatedAt": "2026-07-21T07:58:23.203Z",
+  "repoCommit": "20cbe0a8f1232e6edded4aec4843f93190553706",
   "database": "PostgreSQL",
   "module": "basic-config",
   "goalId": "G-012",
@@ -780,7 +780,7 @@
       "riskLevel": "high",
       "route": "/msService/ec/engine/msManage",
       "requiresPersistence": true,
-      "markerPattern": "ADP_E2E_*_PG_FIELD",
+      "markerPattern": "ADP_E2E_*_PG_FIELD / ADP_E2E_*_PG_TYPE_MATRIX",
       "tables": [
         "ec_property",
         "information_schema.columns",
@@ -798,6 +798,8 @@
       "evidenceRefs": [
         "metadata/entity-model-field-persistence-acceptance.json",
         "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
+        "metadata/entity-model-field-type-matrix-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
         "metadata/persistence-acceptance.json",
         "docs/backend-table-audit/persistence-acceptance.md",
         "docs/frontend-functional-test-report.md",
@@ -818,11 +820,14 @@
         "NOT NULL and nullable transitions were idempotent, rejected direct NULL writes, and rolled metadata plus DDL back when existing NULL data blocked SET NOT NULL",
         "idempotent replay retained one physical column and one index",
         "unsafe TEXT to INTEGER conversion failed closed with HTTP 500 and rolled metadata plus DDL back",
+        "24 instances covered all 23 scalar DbColumnTypes with native PostgreSQL column types; PROPERTYATTACHMENT intentionally created metadata without a physical column",
+        "one marker row round-tripped all physical scalar values and safe boolean/integer, integer/bigint, integer/numeric and date/timestamp conversions",
+        "invalid integer-to-boolean and numeric capacity-reduction requests failed closed with HTTP 500 and rolled metadata plus DDL back",
         "controlled cleanup removed property/model/entity metadata and the generated physical table"
       ],
       "acceptanceContract": {
         "targetActionId": "entity-model-postgres-field-sync",
-        "scope": "create a dedicated TEXT field and verify PostgreSQL managed-index and managed-unique-constraint create/disable/idempotent replay/rename, external unique-index protection, nullable transitions, marker write, safe widening, failure rollback and controlled cleanup",
+        "scope": "verify PostgreSQL managed-index/unique/nullability lifecycle plus all 23 scalar DbColumnTypes, native physical types, marker round-trip, explicit safe conversions, failure rollback and controlled cleanup; OBJECT stays in a dedicated association fixture",
         "requiredTables": [
           "ec_property",
           "information_schema.columns",
@@ -834,7 +839,7 @@
         "apiEvidenceRequired": [
           "POST /msService/ec/property/save request payload",
           "HTTP status and response body",
-          "expected HTTP 500 for incompatible type conversion and unsafe SET NOT NULL"
+          "expected HTTP 500 for incompatible type conversion, unsafe SET NOT NULL, invalid integer-to-boolean data and numeric capacity reduction"
         ],
         "backendTraceRequired": [
           "PropertyController.save",
@@ -843,7 +848,7 @@
           "PostgresFieldSyncSupport",
           "ALTER TABLE, COMMENT, CREATE/ALTER/DROP INDEX, ADD/RENAME/DROP CONSTRAINT and SET/DROP NOT NULL"
         ],
-        "persistenceRequirement": "Use ADP_E2E_*_PG_FIELD and query ec_property, information_schema.columns, pg_index, pg_constraint and generated marker rows before cleanup.",
+        "persistenceRequirement": "Use ADP_E2E_*_PG_FIELD and ADP_E2E_*_PG_TYPE_MATRIX; query ec_property, information_schema.columns, pg_index, pg_constraint and generated marker rows before cleanup.",
         "minimumPassConditions": [
           "TEXT column and index exist in PostgreSQL",
           "managed index disable and re-enable are idempotent and preserve marker data",
@@ -855,6 +860,10 @@
           "NOT NULL and nullable transitions are idempotent and unsafe NOT NULL rolls metadata and DDL back together",
           "idempotent replay creates no duplicate column or index",
           "unsafe conversion rolls metadata and physical DDL back together",
+          "24 instances cover the 23 scalar DbColumnTypes with native PostgreSQL types and one complete marker-row round-trip",
+          "boolean/integer, integer/bigint, integer/numeric and date/timestamp safe conversions preserve values",
+          "invalid integer-to-boolean data and numeric capacity reduction roll metadata and DDL back together",
+          "OBJECT remains explicitly excluded until a target-model association fixture is accepted",
           "controlled cleanup leaves metadata and physical table counts at zero"
         ],
         "rollbackPlan": [
@@ -863,7 +872,8 @@
           "Verify metadata rows and information_schema table state are clean"
         ],
         "recheckCommands": [
-          "make acceptance-entity-model-field-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ENTITY_MODEL_FIELD_PERSISTENCE_OUTPUT=metadata/entity-model-field-persistence-acceptance.json",
+          "make acceptance-entity-model-field-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ENTITY_MODEL_FIELD_ACCEPTANCE_OUTPUT=metadata/entity-model-field-persistence-acceptance.json",
+          "make acceptance-entity-model-field-type-matrix ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17 ENTITY_MODEL_FIELD_TYPE_MATRIX_OUTPUT=metadata/entity-model-field-type-matrix-acceptance.json",
           "make basic-config-action-matrix-check",
           "make basic-config-coverage-check"
         ],

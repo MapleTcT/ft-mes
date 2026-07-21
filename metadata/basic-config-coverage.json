@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T07:16:52.911Z",
-  "repoCommit": "49a909d790972ca957492f4d4fe59b37034841a8",
+  "generatedAt": "2026-07-21T07:58:23.203Z",
+  "repoCommit": "20cbe0a8f1232e6edded4aec4843f93190553706",
   "database": "PostgreSQL",
   "module": "basic-config",
   "goalId": "G-012",
@@ -341,6 +341,9 @@
         "NOT NULL and nullable transitions were idempotent; direct NULL writes were rejected and unsafe SET NOT NULL rolled metadata plus DDL back",
         "idempotent replay retained one column and one index",
         "unsafe TEXT to INTEGER conversion returned expected HTTP 500 and rolled metadata plus DDL back",
+        "24 field instances covered all 23 scalar DbColumnTypes with native PostgreSQL physical types; OBJECT remains a dedicated association fixture",
+        "one marker row round-tripped every physical scalar type, including bytea, boolean, date, time and timestamp",
+        "boolean/integer, integer/bigint, integer/numeric and date/timestamp safe conversions preserved values; invalid boolean data and numeric capacity reduction rolled metadata plus DDL back",
         "controlled cleanup left property/model/entity/physical table counts at zero"
       ],
       "apis": [
@@ -358,6 +361,8 @@
       "evidenceRefs": [
         "metadata/entity-model-field-persistence-acceptance.json",
         "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
+        "metadata/entity-model-field-type-matrix-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
         "metadata/persistence-acceptance.json",
         "docs/backend-table-audit/persistence-acceptance.md",
         "docs/frontend-functional-test-report.md",
@@ -366,13 +371,14 @@
         "docs/basic-config-coverage.md"
       ],
       "recheckCommands": [
-        "make acceptance-entity-model-field-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ENTITY_MODEL_FIELD_PERSISTENCE_OUTPUT=metadata/entity-model-field-persistence-acceptance.json",
+        "make acceptance-entity-model-field-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ENTITY_MODEL_FIELD_ACCEPTANCE_OUTPUT=metadata/entity-model-field-persistence-acceptance.json",
+        "make acceptance-entity-model-field-type-matrix ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17 ENTITY_MODEL_FIELD_TYPE_MATRIX_OUTPUT=metadata/entity-model-field-type-matrix-acceptance.json",
         "make basic-config-action-matrix-check",
         "make basic-config-coverage-check"
       ],
       "remainingGaps": [],
       "notes": [
-        "This PASS covers TEXT add, managed ordinary-index and unique-constraint create/disable/idempotent replay/rename, external unique-index protection, nullable/NOT NULL transitions, direct duplicate/NULL rejection, safe widening and transactional rollback for unsafe NOT NULL or incompatible type changes. Automatic DROP COLUMN and the broader type matrix remain outside this area."
+        "This PASS covers TEXT constraints plus 24 instances across all 23 scalar DbColumnTypes, native PostgreSQL physical types, value round-trip, explicit safe conversions and transactional rejection. Automatic DROP COLUMN remains disabled, and OBJECT requires a dedicated association fixture."
       ]
     },
     {

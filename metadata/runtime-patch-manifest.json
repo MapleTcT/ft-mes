@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T07:28:52+00:00",
-  "repoCommit": "49a909d790972ca957492f4d4fe59b37034841a8",
+  "generatedAt": "2026-07-21T08:16:38+00:00",
+  "repoCommit": "20cbe0a8f1232e6edded4aec4843f93190553706",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
     "totalFiles": 378,
-    "totalBytes": 55285574,
+    "totalBytes": 55286391,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
@@ -20,7 +20,7 @@
       "nacos-config-template": 42353,
       "nginx-runtime-config": 27463,
       "postgres-init-sql": 54239530,
-      "runtime-binary-patch": 141482,
+      "runtime-binary-patch": 142299,
       "runtime-patch-source": 88039,
       "runtime-script": 279295,
       "runtime-static-override": 467412
@@ -1497,8 +1497,8 @@
     {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
       "category": "runtime-binary-patch",
-      "sizeBytes": 111494,
-      "sha256": "5868df61170992e0a01521cff94a837fdb2c87c6d2e97e520d7b27154fdb8204"
+      "sizeBytes": 112311,
+      "sha256": "06c2815d1147712759b36b9f1c54974a5e64975297fcfd2dfbba02dcb8819edb"
     },
     {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",

@@ -25,6 +25,7 @@ BASIC_CONFIG_COVERAGE_PATH = ROOT / "metadata/basic-config-coverage.json"
 BASIC_CONFIG_ACTION_MATRIX_PATH = ROOT / "metadata/basic-config-action-matrix.json"
 ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
+ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH = ROOT / "metadata/entity-model-field-type-matrix-acceptance.json"
 TEST_ENVIRONMENT_SMOKE_PATH = ROOT / "metadata/test-environment-smoke.json"
 POSTGRES_RUNTIME_SMOKE_PATH = ROOT / "metadata/postgres-runtime-smoke.json"
 NACOS_CONFIG_SMOKE_PATH = ROOT / "metadata/nacos-config-drift-smoke.json"
@@ -1107,6 +1108,8 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
             "metadata/entity-model-config-crud-persistence-acceptance.json",
             "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
             "metadata/entity-model-field-persistence-acceptance.json",
+            "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
+            "metadata/entity-model-field-type-matrix-acceptance.json",
             "metadata/persistence-acceptance.json",
             "metadata/systemconfig-persistence-acceptance.json",
             "docs/backend-table-audit/persistence-acceptance.md",
@@ -1195,6 +1198,38 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
         missing_checks = sorted(required_checks - passed_checks)
         if missing_checks:
             fail(failures, "G-012 PostgreSQL field constraint lifecycle missing PASS checks: " + ", ".join(missing_checks))
+    field_type_matrix = read_json_file(
+        ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH,
+        failures,
+        "entity/model PostgreSQL field type matrix acceptance report",
+    )
+    if field_type_matrix:
+        if field_type_matrix.get("status") != "PASS" or field_type_matrix.get("database") != "PostgreSQL":
+            fail(failures, "G-012 PostgreSQL field type matrix acceptance must PASS")
+        marker = str(field_type_matrix.get("marker", ""))
+        evidence_text = "\n".join(str(item) for item in as_list(g012.get("currentEvidence")))
+        if not marker or marker not in evidence_text:
+            fail(failures, "G-012 currentEvidence must include the PostgreSQL field type matrix marker")
+        if "metadata/entity-model-field-type-matrix-acceptance.json" not in evidence_text:
+            fail(failures, "G-012 currentEvidence must cite the PostgreSQL field type matrix report")
+        summary = field_type_matrix.get("summary") if isinstance(field_type_matrix.get("summary"), dict) else {}
+        if summary.get("testedChecks") != 36 or summary.get("pass") != 36 or summary.get("fail") != 0:
+            fail(failures, "G-012 PostgreSQL field type matrix acceptance must retain 36/36 PASS")
+        field_type_coverage = (
+            field_type_matrix.get("coverage")
+            if isinstance(field_type_matrix.get("coverage"), dict)
+            else {}
+        )
+        if field_type_coverage.get("scalarFieldInstances") != 24 or len(
+            as_list(field_type_coverage.get("distinctDbColumnTypes"))
+        ) != 23:
+            fail(failures, "G-012 field type matrix must retain 24 instances across 23 scalar DbColumnTypes")
+        excluded = as_list(field_type_coverage.get("excludedTypes"))
+        if len(excluded) != 1 or not isinstance(excluded[0], dict) or excluded[0].get("type") != "OBJECT":
+            fail(failures, "G-012 field type matrix must leave OBJECT for a dedicated association fixture")
+        cleanup = field_type_matrix.get("cleanup") if isinstance(field_type_matrix.get("cleanup"), dict) else {}
+        if any(cleanup.get(key) != 0 for key in ("property", "model", "entity", "physicalTable")):
+            fail(failures, "G-012 field type matrix cleanup must leave property/model/entity/table at zero")
     if action_matrix:
         if action_matrix.get("database") != "PostgreSQL":
             fail(failures, "G-012 action matrix database must remain PostgreSQL")

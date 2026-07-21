@@ -16,6 +16,7 @@ RUNTIME_CONFIG_PATH = ROOT / "metadata/runtime-configuration-readiness-smoke.jso
 CUSTOM_PROPERTY_PATH = ROOT / "metadata/custom-property-persistence-acceptance.json"
 ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
+ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH = ROOT / "metadata/entity-model-field-type-matrix-acceptance.json"
 PRODUCTION_MATRIX_PATH = ROOT / "metadata/production-module-test-cases.json"
 
 ALLOWED_STATUSES = {
@@ -214,6 +215,7 @@ def check_doc(failures: list[str]) -> None:
         "CONTROLLED_MARKER_REQUIRED",
         "ADP_E2E_*",
         "PostgreSQL",
+        "entity-model-field-type-matrix-acceptance.json",
         "Nacos",
         "Keycloak",
     ):
@@ -829,6 +831,8 @@ def check_entity_model_field_acceptance(
     for required_ref in (
         "metadata/entity-model-field-persistence-acceptance.json",
         "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
+        "metadata/entity-model-field-type-matrix-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
         "metadata/persistence-acceptance.json",
         "metadata/basic-config-coverage.json",
     ):
@@ -995,6 +999,83 @@ def check_entity_model_field_acceptance(
             fail(failures, f"field persistence cleanup.{key} must be 0")
     if report.get("fatalError") is not None:
         fail(failures, "field persistence acceptance fatalError must be null")
+
+    type_matrix = read_json(
+        ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH,
+        failures,
+        "entity/model PostgreSQL field type matrix acceptance report",
+    )
+    if not type_matrix:
+        return
+    for key, expected in (
+        ("database", "PostgreSQL"),
+        ("module", "basic-config"),
+        ("actionId", "entity-model-postgres-field-type-matrix"),
+        ("areaId", area_id),
+        ("status", "PASS"),
+        ("route", "/msService/ec/engine/msManage"),
+    ):
+        if type_matrix.get(key) != expected:
+            fail(failures, f"field type matrix report {key} must be {expected}")
+    marker = str(type_matrix.get("marker", ""))
+    if not marker.startswith("ADP_E2E_") or "PG_TYPE_MATRIX" not in marker:
+        fail(failures, "field type matrix marker must be ADP_E2E_*_PG_TYPE_MATRIX")
+    summary = type_matrix.get("summary") if isinstance(type_matrix.get("summary"), dict) else {}
+    for key, expected in (("testedChecks", 36), ("pass", 36), ("fail", 0), ("blocked", 0), ("status", "PASS")):
+        if summary.get(key) != expected:
+            fail(failures, f"field type matrix summary.{key} must be {expected}")
+    coverage = type_matrix.get("coverage") if isinstance(type_matrix.get("coverage"), dict) else {}
+    if coverage.get("scalarFieldInstances") != 24 or len(as_list(coverage.get("distinctDbColumnTypes"))) != 23:
+        fail(failures, "field type matrix must retain 24 field instances across 23 scalar DbColumnTypes")
+    if "OBJECT" in {str(item) for item in as_list(coverage.get("distinctDbColumnTypes"))}:
+        fail(failures, "field type matrix must not claim OBJECT as scalar coverage")
+    excluded = as_list(coverage.get("excludedTypes"))
+    if len(excluded) != 1 or not isinstance(excluded[0], dict) or excluded[0].get("type") != "OBJECT":
+        fail(failures, "field type matrix must preserve OBJECT as the dedicated association-fixture gap")
+    passed_matrix_checks = {
+        str(item.get("name"))
+        for item in as_list(type_matrix.get("checks"))
+        if isinstance(item, dict) and item.get("status") == "PASS"
+    }
+    for check_name in (
+        "scalar-marker-row-round-trip",
+        "invalid-integer-to-boolean-rolls-back",
+        "zero-one-integer-to-boolean-preserves-values",
+        "integer-to-bigint-safe-widening",
+        "integer-to-numeric-safe-widening",
+        "date-to-timestamp-safe-widening",
+        "numeric-capacity-reduction-rolls-back",
+        "controlled-cleanup",
+    ):
+        if check_name not in passed_matrix_checks:
+            fail(failures, f"field type matrix missing PASS check: {check_name}")
+    requests = type_matrix.get("requests") if isinstance(type_matrix.get("requests"), dict) else {}
+    for request_key in (
+        "entityCreate", "modelCreate", "booleanToInteger", "integerToBoolean", "booleanReplay",
+        "integerToLong", "integerToNumeric", "dateToDateTime",
+    ):
+        request = requests.get(request_key)
+        if not isinstance(request, dict) or request.get("responseStatus") != 200:
+            fail(failures, f"field type matrix request {request_key} must return HTTP 200")
+    for request_key in ("invalidIntegerToBoolean", "unsafeDecimalScale"):
+        request = requests.get(request_key)
+        if not isinstance(request, dict) or request.get("responseStatus") != 500:
+            fail(failures, f"field type matrix request {request_key} must fail closed with HTTP 500")
+    browser = type_matrix.get("browser") if isinstance(type_matrix.get("browser"), dict) else {}
+    if browser.get("navigationStatus") != 200 or browser.get("visibleError"):
+        fail(failures, "field type matrix browser evidence must load without a visible error")
+    unexpected_network = [
+        item
+        for item in as_list(browser.get("networkErrors"))
+        if not isinstance(item, dict) or item.get("expected") is not True
+    ]
+    if unexpected_network or as_list(browser.get("pageErrors")) or as_list(browser.get("requestFailures")):
+        fail(failures, "field type matrix browser evidence contains unexpected errors")
+    cleanup = type_matrix.get("cleanup") if isinstance(type_matrix.get("cleanup"), dict) else {}
+    if any(cleanup.get(key) != 0 for key in ("property", "model", "entity", "physicalTable")):
+        fail(failures, "field type matrix cleanup must leave all marker counts at 0")
+    if type_matrix.get("fatalError") is not None:
+        fail(failures, "field type matrix fatalError must be null")
 
 
 def production_case_statuses(failures: list[str]) -> dict[str, str]:

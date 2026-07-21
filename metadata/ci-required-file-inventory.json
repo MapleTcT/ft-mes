@@ -3657,6 +3657,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-home-todo-smoke.js",
       "state": "tracked",
       "tracked": true
@@ -6280,6 +6286,12 @@
     {
       "ignored": false,
       "path": "metadata/entity-model-field-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/entity-model-field-type-matrix-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -9548,7 +9560,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 608
+      "tracked": 609
     },
     "docs": {
       "tracked": 113
@@ -9557,7 +9569,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 186
+      "tracked": 187
     },
     "package.json": {
       "tracked": 1
@@ -9581,8 +9593,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1587,
-    "tracked": 1587,
+    "totalFiles": 1589,
+    "tracked": 1589,
     "untracked": 0
   },
   "untrackedByDirectory": []

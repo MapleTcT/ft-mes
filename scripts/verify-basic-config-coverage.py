@@ -17,6 +17,7 @@ RUNTIME_CONFIG_PATH = ROOT / "metadata/runtime-configuration-readiness-smoke.jso
 CUSTOM_PROPERTY_PATH = ROOT / "metadata/custom-property-persistence-acceptance.json"
 ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
+ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH = ROOT / "metadata/entity-model-field-type-matrix-acceptance.json"
 NACOS_CONFIG_PATH = ROOT / "metadata/nacos-config-drift-smoke.json"
 KEYCLOAK_JWT_PATH = ROOT / "metadata/keycloak-jwt-runtime-smoke.json"
 
@@ -106,6 +107,7 @@ def check_doc(failures: list[str]) -> None:
         "runtime-configuration-readiness-smoke.json",
         "entity-model-config-crud-persistence-acceptance.json",
         "entity-model-field-persistence-acceptance.json",
+        "entity-model-field-type-matrix-acceptance.json",
         "configuration-physical-model-table",
         "configuration-physical-model-field",
         "nacos-config-drift-smoke.json",
@@ -778,6 +780,8 @@ def check_physical_model_field_acceptance(area: dict[str, Any], failures: list[s
     for required_ref in (
         "metadata/entity-model-field-persistence-acceptance.json",
         "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
+        "metadata/entity-model-field-type-matrix-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
         "metadata/basic-config-action-matrix.json",
     ):
         if required_ref not in refs:
@@ -852,6 +856,76 @@ def check_physical_model_field_acceptance(area: dict[str, Any], failures: list[s
     cleanup = report.get("cleanup") if isinstance(report.get("cleanup"), dict) else {}
     if any(cleanup.get(key) != 0 for key in ("property", "model", "entity", "physicalTable")):
         fail(failures, "field persistence controlled cleanup must leave all marker counts at 0")
+
+    type_matrix = read_json(
+        ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH,
+        failures,
+        "entity/model PostgreSQL field type matrix acceptance report",
+    )
+    if not type_matrix:
+        return
+    for key, expected in (
+        ("database", "PostgreSQL"),
+        ("module", "basic-config"),
+        ("actionId", "entity-model-postgres-field-type-matrix"),
+        ("areaId", area_id),
+        ("status", "PASS"),
+        ("route", "/msService/ec/engine/msManage"),
+    ):
+        if type_matrix.get(key) != expected:
+            fail(failures, f"field type matrix report {key} must be {expected}")
+    marker = str(type_matrix.get("marker", ""))
+    if not marker.startswith("ADP_E2E_") or "PG_TYPE_MATRIX" not in marker:
+        fail(failures, "field type matrix marker must be ADP_E2E_*_PG_TYPE_MATRIX")
+    summary = type_matrix.get("summary") if isinstance(type_matrix.get("summary"), dict) else {}
+    for key, expected in (("testedChecks", 36), ("pass", 36), ("fail", 0), ("blocked", 0), ("status", "PASS")):
+        if summary.get(key) != expected:
+            fail(failures, f"field type matrix summary.{key} must be {expected}")
+    coverage = type_matrix.get("coverage") if isinstance(type_matrix.get("coverage"), dict) else {}
+    expected_types = {
+        "TEXT", "BAPCODE", "SUMMARY", "INTEGER", "DECIMAL", "DATE", "TIME", "DATETIME",
+        "BINARY", "BOOLEAN", "LONGTEXT", "LONG", "SYSTEMCODE", "ENUMERATE", "MONEY",
+        "PASSWORD", "PICTURE", "PROPERTYATTACHMENT", "OFFICE", "TAGNUMBER", "ITEMINDEX",
+        "COLOR", "LAYER",
+    }
+    if coverage.get("scalarFieldInstances") != 24:
+        fail(failures, "field type matrix must retain 24 scalar field instances")
+    if set(str(item) for item in as_list(coverage.get("distinctDbColumnTypes"))) != expected_types:
+        fail(failures, "field type matrix must retain the 23 supported scalar DbColumnTypes")
+    excluded = as_list(coverage.get("excludedTypes"))
+    if len(excluded) != 1 or not isinstance(excluded[0], dict) or excluded[0].get("type") != "OBJECT":
+        fail(failures, "field type matrix must explicitly exclude only OBJECT for a dedicated association fixture")
+    required_matrix_checks = {
+        "browser-page-context",
+        "entity-model-and-scalar-create-requests",
+        "scalar-marker-row-round-trip",
+        "boolean-to-integer-preserves-values",
+        "invalid-integer-to-boolean-rolls-back",
+        "zero-one-integer-to-boolean-preserves-values",
+        "boolean-idempotent-replay",
+        "integer-to-bigint-safe-widening",
+        "integer-to-numeric-safe-widening",
+        "date-to-timestamp-safe-widening",
+        "numeric-capacity-reduction-rolls-back",
+        "controlled-cleanup",
+    } | {f"scalar-type-{key}" for key in (
+        "text", "bapCode", "summary", "integerLong", "integerNumeric", "decimal", "date", "time",
+        "dateTime", "binary", "boolean", "longText", "long", "systemCode", "enumerate", "money",
+        "password", "picture", "propertyAttachment", "office", "tagNumber", "itemIndex", "color", "layer",
+    )}
+    passed_matrix_checks = {
+        str(item.get("name"))
+        for item in as_list(type_matrix.get("checks"))
+        if isinstance(item, dict) and item.get("status") == "PASS"
+    }
+    missing_matrix_checks = sorted(required_matrix_checks - passed_matrix_checks)
+    if missing_matrix_checks:
+        fail(failures, "field type matrix missing PASS checks: " + ", ".join(missing_matrix_checks))
+    matrix_cleanup = type_matrix.get("cleanup") if isinstance(type_matrix.get("cleanup"), dict) else {}
+    if any(matrix_cleanup.get(key) != 0 for key in ("property", "model", "entity", "physicalTable")):
+        fail(failures, "field type matrix controlled cleanup must leave all marker counts at 0")
+    if type_matrix.get("fatalError") is not None:
+        fail(failures, "field type matrix fatalError must be null")
 
 
 def check_coverage(data: dict[str, Any], failures: list[str]) -> None:

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-21T07:16:52.911Z",
-  "repoCommit": "49a909d790972ca957492f4d4fe59b37034841a8",
+  "generatedAt": "2026-07-21T07:58:23.203Z",
+  "repoCommit": "20cbe0a8f1232e6edded4aec4843f93190553706",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -160,11 +160,17 @@
       "marker": "ADP_E2E_20260721071510_PG_FIELD",
       "evidence": "metadata/entity-model-field-persistence-acceptance.json",
       "assertions": "33/33; real /msService/ec/engine/msManage page; entity/model/field create; TEXT varchar(64); managed ordinary-index and unique-constraint enable/disable/idempotent/rename lifecycle; external unique index protection; nullable/NOT NULL lifecycle; direct duplicate/NULL rejection; safe widening; unsafe NOT NULL and TEXT to INTEGER HTTP 500 with metadata/DDL rollback; cleanup 0/0/0/0"
+    },
+    "configurationFieldTypeMatrix": {
+      "status": "PASS_TARGET_POSTGRES_SCALAR_TYPE_MATRIX_CLEANED",
+      "marker": "ADP_E2E_20260721075749_PG_TYPE_MATRIX",
+      "evidence": "metadata/entity-model-field-type-matrix-acceptance.json",
+      "assertions": "36/36; real /msService/ec/engine/msManage page; 24 instances across 23 scalar DbColumnTypes; native PostgreSQL types and full marker-row round-trip; safe boolean/integer, integer/bigint, integer/numeric and date/timestamp conversions; invalid integer-to-boolean and numeric capacity reduction HTTP 500 with metadata/DDL rollback; OBJECT explicitly excluded for association fixture; cleanup 0/0/0/0"
     }
   },
   "summary": {
-    "testedFeatures": 201,
-    "pass": 198,
+    "testedFeatures": 202,
+    "pass": 199,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -4436,9 +4442,35 @@
       "status": "PASS",
       "evidence": "metadata/entity-model-field-persistence-acceptance.json; 33/33 PASS on 10.11.100.17; browser navigation 200 on first attempt; 23 normal write requests returned 200; managed ordinary index and unique constraint create/disable/idempotent/rename passed; external unique index remained protected; duplicate and NULL probes were rejected; expected unsafe NOT NULL and type-conversion requests returned 500 with metadata/DDL rollback; marker data preserved; cleanup property/model/entity/table=0/0/0/0",
       "issues": []
+    },
+    {
+      "module": "基础配置-实体模型字段类型矩阵",
+      "route": "/msService/ec/engine/msManage",
+      "operation": "创建 24 个字段实例覆盖 23 类标量 DbColumnType，验证 PostgreSQL 原生类型、整行 marker 回读、安全类型转换、失败回滚与受控清理",
+      "api": "POST /msService/ec/entity/save; POST /msService/ec/model/save; POST /msService/ec/property/save",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PropertyController.save -> DtoUtils.getPropertyVO -> ModelServiceImpl.saveProperty -> FieldSyncDBUtils.fieldSyncToDb -> PostgresFieldSyncSupport.sync",
+      "tables": [
+        "public.ec_entity",
+        "public.ec_model",
+        "public.ec_property",
+        "information_schema.columns",
+        "public.ds_e2tm_075749"
+      ],
+      "marker": "ADP_E2E_20260721075749_PG_TYPE_MATRIX",
+      "verificationSql": "Query public.ec_property by model_code for 24 metadata rows; query information_schema.columns for DS_E2TM_075749 native varchar/integer/numeric/date/time/timestamp/bytea/boolean/text/bigint columns and absence of a PROPERTYATTACHMENT column; insert and read one marker row across every physical scalar type; query invalid value 2 during rejected INTEGER-to-BOOLEAN conversion; after controlled cleanup verify property/model/entity/physical table counts and marker descriptions are all 0.",
+      "status": "PASS",
+      "evidence": "metadata/entity-model-field-type-matrix-acceptance.json; 36/36 PASS on 10.11.100.17 at commit 20cbe0a8; real page navigation 200; all entity/model/24 field create requests returned 200; PostgreSQL verified 24 instances across 23 scalar DbColumnTypes and a complete marker-row round-trip; safe BOOLEAN/INTEGER, INTEGER/BIGINT, INTEGER/NUMERIC and DATE/DATETIME conversions preserved values; invalid integer 2 and numeric capacity reduction each returned expected HTTP 500 with metadata/DDL rollback; PROPERTYATTACHMENT remained metadata-only; OBJECT was explicitly excluded for a dedicated association fixture; cleanup property/model/entity/table/marker=0/0/0/0/0",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260721075749_PG_TYPE_MATRIX",
+      "artifact": "metadata/entity-model-field-type-matrix-acceptance.json",
+      "summary": "Real entity-model page and save APIs, 24 instances across 23 scalar DbColumnTypes, native PostgreSQL physical columns, complete marker-row round-trip, four safe conversion paths, two expected transactional rejection paths and zero cleanup passed 36/36 on 10.11.100.17; OBJECT remains a dedicated association fixture."
+    },
     {
       "marker": "ADP_E2E_20260721071510_PG_FIELD",
       "artifact": "metadata/entity-model-field-persistence-acceptance.json",
