@@ -645,19 +645,31 @@ def check_runtime_configuration_readiness(area: dict[str, Any], failures: list[s
                 fail(failures, "entity/model CRUD persistence must verify one ec_entity row after create")
             if summary.get("modelRowsAfterCreate") != 1:
                 fail(failures, "entity/model CRUD persistence must verify one ec_model row after create")
+            if summary.get("physicalTablesAfterCreate") != 1:
+                fail(failures, "entity/model CRUD persistence must verify one physical table after create")
+            if summary.get("physicalTablesAfterRename") != 1:
+                fail(failures, "entity/model CRUD persistence must verify one physical table after rename")
+            if int(summary.get("physicalColumnsAfterReplay") or 0) < 12:
+                fail(failures, "entity/model CRUD persistence must verify at least 12 columns after idempotent replay")
             if int(summary.get("propertyRowsAfterCreate") or 0) < 3:
                 fail(failures, "entity/model CRUD persistence must verify inherent ec_property rows")
             for cleanup_key in ("cleanupEntityRows", "cleanupModelRows", "cleanupPropertyRows"):
                 if summary.get(cleanup_key) != 0:
                     fail(failures, f"entity/model CRUD controlled cleanup must leave {cleanup_key}=0")
+            if summary.get("cleanupPhysicalTables") != 0:
+                fail(failures, "entity/model CRUD controlled cleanup must leave cleanupPhysicalTables=0")
         checks = as_list(entity_model.get("checks"))
         required_checks = {
             "browser-page-context",
             "http-requests",
             "entity-created",
             "model-created-with-inherent-properties",
+            "postgres-physical-table-created",
             "entity-model-edited",
+            "postgres-physical-table-renamed-and-expanded",
+            "postgres-physical-table-idempotent-replay",
             "entity-model-deleted-or-disabled",
+            "physical-table-retained-until-controlled-cleanup",
             "controlled-cleanup",
         }
         seen_checks = {str(check.get("name")) for check in checks if isinstance(check, dict)}
@@ -668,16 +680,16 @@ def check_runtime_configuration_readiness(area: dict[str, Any], failures: list[s
             if isinstance(check, dict) and check.get("status") != "PASS":
                 fail(failures, f"entity/model CRUD persistence check must PASS: {check.get('name')}")
         sql_text = json.dumps(entity_model.get("verificationSql", {}), ensure_ascii=False)
-        for table in ("ec_entity", "ec_model", "ec_property", "information_schema.tables"):
+        for table in ("ec_entity", "ec_model", "ec_property", "information_schema.tables", "information_schema.columns"):
             if table not in sql_text:
                 fail(failures, f"entity/model CRUD verificationSql missing table {table}")
 
 
-def check_physical_model_table_gap(area: dict[str, Any], failures: list[str]) -> None:
+def check_physical_model_table_acceptance(area: dict[str, Any], failures: list[str]) -> None:
     if not area:
         return
-    if area.get("status") != "PARTIAL":
-        fail(failures, "configuration-physical-model-table must remain PARTIAL until physical table acceptance exists")
+    if area.get("status") != "PASS":
+        fail(failures, "configuration-physical-model-table must be PASS after physical-table acceptance")
     if area.get("route") != "/msService/ec/engine/msManage":
         fail(failures, "configuration-physical-model-table route must be /msService/ec/engine/msManage")
     if area.get("requiresPersistence") is not True:
@@ -694,24 +706,58 @@ def check_physical_model_table_gap(area: dict[str, Any], failures: list[str]) ->
     for required_table in ("ec_model", "ec_property", "information_schema.tables", "generated_model_physical_table"):
         if required_table not in tables:
             fail(failures, f"configuration-physical-model-table tables must include {required_table}")
-    if not as_list(area.get("remainingGaps")):
-        fail(failures, "configuration-physical-model-table must keep remainingGaps while PARTIAL")
+    if as_list(area.get("remainingGaps")):
+        fail(failures, "configuration-physical-model-table remainingGaps must be empty after PASS")
     area_text = json.dumps(area, ensure_ascii=False)
-    for fragment in ("information_schema.tables", "PostgreSQL", "物理模型表"):
+    for fragment in ("information_schema.tables", "PostgreSQL", "物理表"):
         if fragment not in area_text:
             fail(failures, f"configuration-physical-model-table missing explanatory fragment: {fragment}")
 
     report = read_json(ENTITY_MODEL_PERSISTENCE_PATH, failures, "entity/model CRUD persistence acceptance report")
     if not report:
         return
+    if int(report.get("schemaVersion") or 0) < 2:
+        fail(failures, "entity/model physical-table acceptance report schemaVersion must be at least 2")
+    if report.get("areaId") != "configuration-physical-model-table":
+        fail(failures, "entity/model physical-table acceptance report areaId must be configuration-physical-model-table")
     if report.get("status") != "PASS":
-        fail(failures, "entity/model CRUD persistence acceptance report must PASS before physical-table gap can be tracked")
+        fail(failures, "entity/model physical-table acceptance report must PASS")
+    marker = str(report.get("marker", ""))
+    if "ENTITY_MODEL_PHYSICAL_TABLE" not in marker:
+        fail(failures, "entity/model physical-table acceptance marker must include ENTITY_MODEL_PHYSICAL_TABLE")
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    for key, expected in (
+        ("physicalTablesAfterCreate", 1),
+        ("physicalTablesAfterRename", 1),
+        ("cleanupPhysicalTables", 0),
+    ):
+        if summary.get(key) != expected:
+            fail(failures, f"entity/model physical-table acceptance summary.{key} must be {expected}")
+    if int(summary.get("physicalColumnsAfterReplay") or 0) < 12:
+        fail(failures, "entity/model physical-table acceptance must retain at least 12 columns after idempotent replay")
+    required_checks = {
+        "postgres-physical-table-created",
+        "postgres-physical-table-renamed-and-expanded",
+        "postgres-physical-table-idempotent-replay",
+        "physical-table-retained-until-controlled-cleanup",
+        "controlled-cleanup",
+    }
+    passed_checks = {
+        str(check.get("name"))
+        for check in as_list(report.get("checks"))
+        if isinstance(check, dict) and check.get("status") == "PASS"
+    }
+    missing_checks = sorted(required_checks - passed_checks)
+    if missing_checks:
+        fail(failures, "entity/model physical-table acceptance missing PASS checks: " + ", ".join(missing_checks))
     trace_text = json.dumps(report.get("backendTrace", {}), ensure_ascii=False)
-    if "does not auto-create physical model tables" not in trace_text:
-        fail(failures, "entity/model CRUD report must explicitly record the physical-table non-claim")
+    for fragment in ("ModelSyncDBUtils", "PostgresModelSyncSupport"):
+        if fragment not in trace_text:
+            fail(failures, f"entity/model physical-table backendTrace missing {fragment}")
     sql_text = json.dumps(report.get("verificationSql", {}), ensure_ascii=False)
-    if "information_schema.tables" not in sql_text:
-        fail(failures, "entity/model CRUD report must include information_schema.tables verification SQL")
+    for fragment in ("information_schema.tables", "information_schema.columns"):
+        if fragment not in sql_text:
+            fail(failures, f"entity/model physical-table acceptance SQL missing {fragment}")
 
 
 def check_coverage(data: dict[str, Any], failures: list[str]) -> None:
@@ -783,7 +829,7 @@ def check_coverage(data: dict[str, Any], failures: list[str]) -> None:
 
     physical_model_table = area_by_id.get("configuration-physical-model-table", {})
     if physical_model_table:
-        check_physical_model_table_gap(physical_model_table, failures)
+        check_physical_model_table_acceptance(physical_model_table, failures)
 
     nacos_keycloak = area_by_id.get("nacos-keycloak-production-config", {})
     if nacos_keycloak:

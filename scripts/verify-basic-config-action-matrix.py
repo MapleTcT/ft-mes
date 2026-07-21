@@ -313,7 +313,7 @@ def check_coverage_alignment(matrix: dict[str, Any], failures: list[str]) -> Non
         "systemconfig-app-catalog-value": "PASS",
         "systemconfig-built-in-catalogs": "PARTIAL",
         "configuration-entity-runtime": "PASS",
-        "configuration-physical-model-table": "PARTIAL",
+        "configuration-physical-model-table": "PASS",
         "nacos-keycloak-production-config": "PARTIAL",
     }
     for area_id, expected_status in required_area_status.items():
@@ -596,15 +596,20 @@ def check_entity_model_persistence_acceptance(
         expected_counts = {
             "entityRowsAfterCreate": 1,
             "modelRowsAfterCreate": 1,
+            "physicalTablesAfterCreate": 1,
+            "physicalTablesAfterRename": 1,
             "cleanupEntityRows": 0,
             "cleanupModelRows": 0,
             "cleanupPropertyRows": 0,
+            "cleanupPhysicalTables": 0,
         }
         for key, expected in expected_counts.items():
             if summary.get(key) != expected:
                 fail(failures, f"entity/model CRUD acceptance summary.{key} must be {expected}")
         if int(summary.get("propertyRowsAfterCreate") or 0) < 3:
             fail(failures, "entity/model CRUD acceptance must prove inherent ec_property rows were created")
+        if int(summary.get("physicalColumnsAfterReplay") or 0) < 12:
+            fail(failures, "entity/model CRUD acceptance must prove idempotent replay retained at least 12 physical columns")
 
     checks = as_list(report.get("checks"))
     required_checks = {
@@ -612,8 +617,12 @@ def check_entity_model_persistence_acceptance(
         "http-requests",
         "entity-created",
         "model-created-with-inherent-properties",
+        "postgres-physical-table-created",
         "entity-model-edited",
+        "postgres-physical-table-renamed-and-expanded",
+        "postgres-physical-table-idempotent-replay",
         "entity-model-deleted-or-disabled",
+        "physical-table-retained-until-controlled-cleanup",
         "controlled-cleanup",
     }
     seen_checks = {str(check.get("name")) for check in checks if isinstance(check, dict)}
@@ -628,7 +637,18 @@ def check_entity_model_persistence_acceptance(
     if not isinstance(requests, dict):
         fail(failures, "entity/model CRUD acceptance requests must be an object")
     else:
-        for request_key in ("entityCreate", "modelCreate", "entityEdit", "modelEdit", "modelDelete", "entityDelete"):
+        identifiers = report.get("identifiers") if isinstance(report.get("identifiers"), dict) else {}
+        entity_code = str(identifiers.get("entityCode", ""))
+        model_code = str(identifiers.get("modelCode", ""))
+        for request_key in (
+            "entityCreate",
+            "modelCreate",
+            "entityEdit",
+            "modelEdit",
+            "modelIdempotentReplay",
+            "modelDelete",
+            "entityDelete",
+        ):
             request = requests.get(request_key)
             if not isinstance(request, dict):
                 fail(failures, f"entity/model CRUD acceptance missing request: {request_key}")
@@ -636,17 +656,29 @@ def check_entity_model_persistence_acceptance(
             if request.get("responseStatus") != 200 or request.get("ok") is not True:
                 fail(failures, f"entity/model CRUD request must be HTTP 200 and ok=true: {request_key}")
             payload_text = json.dumps(request.get("requestPayload", {}), ensure_ascii=False)
-            if request_key in {"entityCreate", "modelCreate", "entityEdit", "modelEdit"} and marker not in payload_text:
+            if request_key in {"entityCreate", "modelCreate", "entityEdit", "modelEdit", "modelIdempotentReplay"} and marker not in payload_text:
                 fail(failures, f"entity/model CRUD request payload must include marker for {request_key}")
-            if request_key in {"modelDelete", "entityDelete"} and "DataSet_1.0.0_E2eEnt063301" not in payload_text:
-                fail(failures, f"entity/model CRUD delete payload must include marker entity/model code for {request_key}")
+            expected_code = model_code if request_key == "modelDelete" else entity_code
+            if request_key in {"modelDelete", "entityDelete"} and (not expected_code or expected_code not in payload_text):
+                fail(failures, f"entity/model CRUD delete payload must include the report identifier for {request_key}")
 
     backend_trace = report.get("backendTrace")
     if not isinstance(backend_trace, dict):
         fail(failures, "entity/model CRUD acceptance backendTrace must be an object")
     else:
         trace_text = json.dumps(backend_trace, ensure_ascii=False)
-        for fragment in ("EntityController", "EntityServiceImpl", "ModelController", "ModelServiceImpl", "DtoUtils", "entityDao", "modelDao", "propertyDao"):
+        for fragment in (
+            "EntityController",
+            "EntityServiceImpl",
+            "ModelController",
+            "ModelServiceImpl",
+            "ModelSyncDBUtils",
+            "PostgresModelSyncSupport",
+            "DtoUtils",
+            "entityDao",
+            "modelDao",
+            "propertyDao",
+        ):
             if fragment not in trace_text:
                 fail(failures, f"entity/model CRUD backendTrace missing {fragment}")
 
@@ -655,7 +687,7 @@ def check_entity_model_persistence_acceptance(
         fail(failures, "entity/model CRUD acceptance verificationSql must be an object")
     else:
         sql_text = json.dumps(verification_sql, ensure_ascii=False)
-        for table in ("ec_entity", "ec_model", "ec_property", "information_schema.tables"):
+        for table in ("ec_entity", "ec_model", "ec_property", "information_schema.tables", "information_schema.columns"):
             if table not in sql_text:
                 fail(failures, f"entity/model CRUD verificationSql missing table {table}")
 
@@ -668,20 +700,30 @@ def check_entity_model_persistence_acceptance(
             fail(failures, "entity/model CRUD browser state must have navigationStatus=200")
         elif any(as_list(browser.get(key)) for key in ("consoleErrors", "pageErrors", "requestFailures", "networkErrors")) or browser.get("visibleError"):
             fail(failures, "entity/model CRUD browser state must not contain visible/console/page/request/network errors")
-        for state_key in ("before", "afterEntityCreate", "afterModelCreate", "afterEntityEdit", "afterModelEdit", "afterModelDelete", "afterEntityDelete"):
+        for state_key in (
+            "before",
+            "afterEntityCreate",
+            "afterModelCreate",
+            "afterEntityEdit",
+            "afterModelEdit",
+            "afterModelIdempotentReplay",
+            "afterModelDelete",
+            "afterEntityDelete",
+            "afterCleanup",
+        ):
             if state_key not in states:
                 fail(failures, f"entity/model CRUD states missing {state_key}")
 
 
-def check_entity_model_physical_table_gap(
+def check_entity_model_physical_table_acceptance(
     actions: dict[str, dict[str, Any]],
     failures: list[str],
 ) -> None:
     action = actions.get("entity-model-postgres-physical-table-autocreate")
     if not action:
         return
-    if action.get("status") != "PLANNED":
-        fail(failures, "entity-model-postgres-physical-table-autocreate must remain PLANNED until physical table acceptance exists")
+    if action.get("status") != "PASS":
+        fail(failures, "entity-model-postgres-physical-table-autocreate must be PASS after physical-table acceptance")
     if action.get("areaId") != "configuration-physical-model-table":
         fail(failures, "entity-model-postgres-physical-table-autocreate areaId must be configuration-physical-model-table")
     if action.get("requiresPersistence") is not True:
@@ -706,18 +748,60 @@ def check_entity_model_physical_table_gap(
         for fragment in ("ModelSyncDBUtils", "information_schema.tables", "ADP_E2E", "physical model table"):
             if fragment not in contract_text:
                 fail(failures, f"entity-model physical-table acceptanceContract missing {fragment}")
-        if not as_list(contract.get("currentGaps")):
-            fail(failures, "entity-model physical-table acceptanceContract.currentGaps must remain non-empty")
+        if as_list(contract.get("currentGaps")):
+            fail(failures, "entity-model physical-table acceptanceContract.currentGaps must be empty after PASS")
+    if as_list(action.get("remainingGaps")):
+        fail(failures, "entity-model physical-table action remainingGaps must be empty after PASS")
 
     report = read_json(ENTITY_MODEL_PERSISTENCE_PATH, failures, "entity/model CRUD persistence acceptance report")
     if not report:
         return
+    if int(report.get("schemaVersion") or 0) < 2:
+        fail(failures, "entity/model physical-table acceptance report schemaVersion must be at least 2")
+    if report.get("areaId") != "configuration-physical-model-table":
+        fail(failures, "entity/model physical-table acceptance report areaId must be configuration-physical-model-table")
+    if report.get("status") != "PASS":
+        fail(failures, "entity/model physical-table acceptance report must PASS")
+    marker = str(report.get("marker", ""))
+    if "ENTITY_MODEL_PHYSICAL_TABLE" not in marker:
+        fail(failures, "entity/model physical-table acceptance marker must include ENTITY_MODEL_PHYSICAL_TABLE")
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    for key, expected in (
+        ("physicalTablesAfterCreate", 1),
+        ("physicalTablesAfterRename", 1),
+        ("cleanupPhysicalTables", 0),
+    ):
+        if summary.get(key) != expected:
+            fail(failures, f"entity/model physical-table acceptance summary.{key} must be {expected}")
+    if int(summary.get("physicalColumnsAfterReplay") or 0) < 12:
+        fail(failures, "entity/model physical-table acceptance must retain at least 12 columns after idempotent replay")
+    required_checks = {
+        "postgres-physical-table-created",
+        "postgres-physical-table-renamed-and-expanded",
+        "postgres-physical-table-idempotent-replay",
+        "physical-table-retained-until-controlled-cleanup",
+        "controlled-cleanup",
+    }
+    seen_checks = {
+        str(check.get("name"))
+        for check in as_list(report.get("checks"))
+        if isinstance(check, dict) and check.get("status") == "PASS"
+    }
+    missing_checks = sorted(required_checks - seen_checks)
+    if missing_checks:
+        fail(failures, "entity/model physical-table acceptance missing PASS checks: " + ", ".join(missing_checks))
     trace_text = json.dumps(report.get("backendTrace", {}), ensure_ascii=False)
-    if "does not auto-create physical model tables" not in trace_text:
-        fail(failures, "entity/model CRUD report must keep the PostgreSQL physical-table non-claim note while this action is PLANNED")
+    for fragment in ("ModelSyncDBUtils", "PostgresModelSyncSupport"):
+        if fragment not in trace_text:
+            fail(failures, f"entity/model physical-table backendTrace missing {fragment}")
     sql_text = json.dumps(report.get("verificationSql", {}), ensure_ascii=False)
-    if "information_schema.tables" not in sql_text:
-        fail(failures, "entity/model CRUD report must include information_schema.tables verification SQL for the physical-table gap")
+    for fragment in ("information_schema.tables", "information_schema.columns"):
+        if fragment not in sql_text:
+            fail(failures, f"entity/model physical-table acceptance SQL missing {fragment}")
+    states = report.get("states") if isinstance(report.get("states"), dict) else {}
+    for state_key in ("afterModelCreate", "afterModelEdit", "afterModelIdempotentReplay", "afterCleanup"):
+        if state_key not in states:
+            fail(failures, f"entity/model physical-table acceptance states missing {state_key}")
 
 
 def production_case_statuses(failures: list[str]) -> dict[str, str]:
@@ -862,7 +946,7 @@ def check_matrix(matrix: dict[str, Any], failures: list[str]) -> None:
     check_runtime_alignment(actions_by_id, failures)
     check_custom_property_acceptance(actions_by_id, failures)
     check_entity_model_persistence_acceptance(actions_by_id, failures)
-    check_entity_model_physical_table_gap(actions_by_id, failures)
+    check_entity_model_physical_table_acceptance(actions_by_id, failures)
     production_statuses = production_case_statuses(failures)
     for action_id in (
         "builtin-qcs-runtime-config",

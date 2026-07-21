@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-21T03:27:00.000Z",
-  "repoCommit": "479dd7ba696ca1e5e4ff05df873220ff4bac4403",
+  "generatedAt": "2026-07-21T04:33:34.652Z",
+  "repoCommit": "13ee71e5a4b12ae10eb19e275a0c72fe45aa0bbe",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -2701,25 +2701,27 @@
     {
       "module": "基础配置-实体模型配置",
       "route": "/msService/ec/engine/msManage",
-      "operation": "实体和模型配置新增、编辑、软删除与内置属性清理",
+      "operation": "实体/模型新增编辑、PostgreSQL 物理表创建重命名扩列、幂等保存、软删除与受控清理",
       "api": "POST /msService/ec/entity/save; POST /msService/ec/model/save; POST /msService/ec/model/ordinaryDelete; POST /msService/ec/entity/ordinaryDelete",
       "method": "POST",
       "requiresPersistence": true,
-      "backendEntry": "EntityController.save/ordinaryDelete -> EntityServiceImpl; ModelController.save/ordinaryDelete -> ModelServiceImpl; DtoUtils entityType guard; runtime nested boot-jar patch patch-configuration-entity-model-runtime.py",
+      "backendEntry": "EntityController.save/ordinaryDelete -> EntityServiceImpl; ModelController.save/ordinaryDelete -> ModelServiceImpl -> ModelSyncDBUtils -> PostgresModelSyncSupport; runtime nested boot-jar patch patch-configuration-entity-model-runtime.py",
       "tables": [
         "ec_entity",
         "ec_model",
         "ec_property",
         "information_schema.tables",
+        "information_schema.columns",
+        "DS_E2E_124000_R",
         "base_rolepstaff",
         "base_rolepposition",
         "base_userpstaff",
         "base_userpposition"
       ],
-      "marker": "ADP_E2E_202606221433_ENTITY_MODEL",
-      "verificationSql": "entity: select code::text, coalesce(version::text,'0'), coalesce(valid::text,''), coalesce(name::text,''), coalesce(value_zh_cn::text,''), coalesce(entity_name::text,''), coalesce(module_code::text,''), coalesce(is_base::text,''), coalesce(workflow_enabled::text,''), coalesce(description::text,''), coalesce(delete_time::text,'') from public.ec_entity where code='DataSet_1.0.0_E2eEnt063301' order by modify_time desc nulls last, create_time desc nulls last;; model: select code::text, coalesce(version::text,'0'), coalesce(valid::text,''), coalesce(name::text,''), coalesce(value_zh_cn::text,''), coalesce(model_name::text,''), coalesce(entity_code::text,''), coalesce(module_code::text,''), coalesce(table_name::text,''), coalesce(is_main::text,''), coalesce(data_type::text,''), coalesce(type::text,''), coalesce(description::text,''), coalesce(delete_time::text,'') from public.ec_model where code='DataSet_1.0.0_E2eEnt063301_E2eMod063301' order by modify_time desc nulls last, create_time desc nulls last;; property: select code::text, coalesce(version::text,'0'), coalesce(valid::text,''), coalesce(model_code::text,''), coalesce(entity_code::text,''), coalesce(name::text,''), coalesce(display_name::text,''), coalesce(type::text,''), coalesce(column_name::text,''), coalesce(is_inherent::text,''), coalesce(delete_time::text,'') from public.ec_property where model_code='DataSet_1.0.0_E2eEnt063301_E2eMod063301' or entity_code='DataSet_1.0.0_E2eEnt063301' order by code::text;; physicalTable: select table_schema::text, table_name::text from information_schema.tables where table_schema='public' and lower(table_name)=lower('DS_E2E_063301') order by table_name;",
+      "marker": "ADP_E2E_20260721_1240_ENTITY_MODEL_PHYSICAL_TABLE",
+      "verificationSql": "entity/model/property: query public.ec_entity, public.ec_model and public.ec_property by DataSet_1.0.0_E2eEnt043259; physical table: select table_schema, table_name from information_schema.tables where table_schema='public' and lower(table_name) in (lower('DS_E2E_124000'), lower('DS_E2E_124000_R')); columns: select table_name, column_name, data_type, is_nullable, column_default from information_schema.columns where table_schema='public' and lower(table_name) in (lower('DS_E2E_124000'), lower('DS_E2E_124000_R'));",
       "status": "PASS",
-      "evidence": "Report metadata/entity-model-config-crud-persistence-acceptance.json. Real browser-page context opened http://222.88.185.146:18080/msService/ec/engine/msManage with navigationStatus=200 and no visible/console/page/request failure. Entity create, model create, entity edit, model edit, model ordinaryDelete and entity ordinaryDelete all returned HTTP 200/success=true. PostgreSQL evidence: after create ec_entity=1, ec_model=1, inherent ec_property=3; edit marker persisted to entity/model descriptions; delete path soft-deleted entity/model/property rows; controlled cleanup left entity/model/property/physical table counts at 0.",
+      "evidence": "Report metadata/entity-model-config-crud-persistence-acceptance.json at implementation commit 13ee71e5a4b12ae10eb19e275a0c72fe45aa0bbe. Real page context http://10.11.100.17:18080/msService/ec/engine/msManage returned 200 with zero visible/console/page/request/network errors. Seven entity/model requests returned HTTP 200/success=true. PostgreSQL verified ec_entity=1, ec_model=1, inherent ec_property=3, DS_E2E_124000 create, rename to DS_E2E_124000_R, extra_col expansion, idempotent replay with 12 columns, soft-delete retention, and controlled cleanup entity/model/property/physical table counts at 0.",
       "issues": []
     },
     {

@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T03:53:58+00:00",
-  "repoCommit": "479dd7ba696ca1e5e4ff05df873220ff4bac4403",
+  "generatedAt": "2026-07-21T04:47:42+00:00",
+  "repoCommit": "13ee71e5a4b12ae10eb19e275a0c72fe45aa0bbe",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 376,
-    "totalBytes": 55173081,
+    "totalFiles": 377,
+    "totalBytes": 55266647,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
       "postgres-init-sql": 196,
-      "runtime-binary-patch": 7,
+      "runtime-binary-patch": 8,
       "runtime-patch-source": 22,
       "runtime-script": 26,
       "runtime-static-override": 79
@@ -20,9 +20,9 @@
       "nacos-config-template": 42353,
       "nginx-runtime-config": 27463,
       "postgres-init-sql": 54239193,
-      "runtime-binary-patch": 29988,
+      "runtime-binary-patch": 123378,
       "runtime-patch-source": 88039,
-      "runtime-script": 278633,
+      "runtime-script": 278809,
       "runtime-static-override": 467412
     }
   },
@@ -1489,6 +1489,12 @@
       "sha256": "1bb82ec1d07c7c9b184826651e25cddf6335eb8a450784ada8e08c574bf5b532"
     },
     {
+      "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
+      "category": "runtime-binary-patch",
+      "sizeBytes": 93390,
+      "sha256": "5e7ad915989f2e8d261beaa4c3b32e9f994f6d558a4160b87de73d971872ff5e"
+    },
+    {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 2603,
@@ -1689,8 +1695,8 @@
     {
       "path": "deploy/docker/scripts/patch-configuration-entity-model-runtime.py",
       "category": "runtime-script",
-      "sizeBytes": 5316,
-      "sha256": "e270c32cf3f7c2ebbb2dc4ef5e4aaefea3dad754a0d74c81bb39f491eb179686"
+      "sizeBytes": 5492,
+      "sha256": "8d5e56889b05c81e8f4fe89a074b725f196b0710d3b5b0bca670b0dc8295164d"
     },
     {
       "path": "deploy/docker/scripts/patch-eam-patrol-runtime.py",

@@ -11,8 +11,8 @@ make basic-config-action-matrix-check
 make entity-model-config-crud-readiness-check
 ```
 
-当前结论：基础配置动作矩阵仍是 `PARTIAL`。系统编码、普通 app 系统配置、低代码自定义字段模型映射、实体/模型元数据新增编辑删除已完成写入验收；身份、授权、凭证和密码策略目录只能由只读 smoke 观察；QCS/RM/BaseSet
-运行配置后续新改动仍必须另做专用 marker、before/after SQL、回滚和业务回归；实体/模型 PostgreSQL 物理表自动创建与 Nacos/Keycloak 生产迁移仍是计划项。
+当前结论：基础配置动作矩阵仍是 `PARTIAL`。系统编码、普通 app 系统配置、低代码自定义字段模型映射、实体/模型元数据 CRUD，以及 PostgreSQL 基础物理模型表创建、重命名、扩列和幂等保存已完成写入验收；身份、授权、凭证和密码策略目录只能由只读 smoke 观察；QCS/RM/BaseSet
+运行配置后续新改动仍必须另做专用 marker、before/after SQL、回滚和业务回归；Nacos/Keycloak 生产迁移仍是计划项。
 
 | 动作 | 状态 | 写入策略 | 证据 | 完成前还需要 |
 |---|---|---|---|---|
@@ -26,29 +26,20 @@ make entity-model-config-crud-readiness-check
 | RM.ocd.RM | CONTROLLED_MARKER_REQUIRED | dedicated-business-marker-only | `metadata/systemconfig-builtins-readiness-smoke.json`、`metadata/systemconfig-controlled-runtime-config-rm-current.json`、`metadata/rm-runtime-config-batch-sync-regression.json`、`metadata/rm-web-formula-editor-acceptance.json`、`metadata/production-module-test-cases.json` | RM.MQ `brokerUrl` 单项 marker 保存/回读/回滚已完成；回滚后同步/删除复跑 PASS；PROD-010 Web 编辑已通过，真实现场 Batch/DCS 投递仍需切换审批和回滚演练 |
 | BaseSet.ocd.BaseSet | CONTROLLED_MARKER_REQUIRED | dedicated-business-marker-only | `metadata/systemconfig-builtins-readiness-smoke.json`、`metadata/systemconfig-controlled-runtime-config-baseset-current.json`、`metadata/baseset-runtime-config-wom-start-regression.json`、`metadata/baseset-runtime-config-wom-manu-inspect-regression.json`、`metadata/production-module-test-cases.json` | `isEnable` 已完成受控 typed mutation、回读、PostgreSQL before/after 和立即回滚；回滚后 WOM start 与 WOM/QCS 制造请检生成均复跑 PASS。后续其他 BaseSet 配置和 material 库存/入库边界仍需专用 marker。 |
 | 低代码自定义字段模型映射启用/编辑/禁用 | PASS | marker-allowed | `metadata/custom-property-persistence-acceptance.json`、`deploy/docker/scripts/adp-custom-property-persistence-acceptance.js`、`deploy/docker/postgres/init/169-custom-property-project-property-compat.sql` | 保持回归；该项覆盖 customProperty 模型映射与 `runtime_property`/`project_property` 同步，实体/模型元数据 CRUD 由独立报告验收 |
-| 实体/模型配置新增 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js`、`metadata/runtime-configuration-readiness-smoke.json` | marker `ADP_E2E_202606221433_ENTITY_MODEL` 已证明 `ec_entity=1`、`ec_model=1`、内置 `ec_property=3`；PostgreSQL 物理模型表自动创建未在本报告中声明完成 |
-| 实体/模型配置编辑 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js`、`metadata/runtime-configuration-readiness-smoke.json` | 6 个写请求均 `HTTP 200/success=true`，PostgreSQL 证明 entity/model 描述中的 marker 已更新 |
+| 实体/模型配置新增 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js`、`metadata/runtime-configuration-readiness-smoke.json` | marker `ADP_E2E_20260721_1240_ENTITY_MODEL_PHYSICAL_TABLE` 已证明 `ec_entity=1`、`ec_model=1`、内置 `ec_property=3` 和基础物理表创建 |
+| 实体/模型配置编辑 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js`、`metadata/runtime-configuration-readiness-smoke.json` | 7 个写请求均 `HTTP 200/success=true`，PostgreSQL 证明 entity/model marker、物理表重命名、`extra_col` 和幂等重复保存 |
 | 实体/模型配置删除/禁用 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js`、`metadata/entity-model-config-crud-readiness-probe.json` | model/entity `ordinaryDelete` 均 `HTTP 200/success=true`，PostgreSQL 证明 entity/model/property 软删并受控清理为 0 |
-| 实体/模型 PostgreSQL 物理表自动创建 | PLANNED | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`metadata/basic-config-coverage.json` | 当前报告只证明元数据 CRUD；必须补 `ModelSyncDBUtils` PostgreSQL 物理表创建路径或正式风险接受，并用 `information_schema.tables` before/after 验收 |
+| 实体/模型 PostgreSQL 物理表自动创建 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`metadata/basic-config-coverage.json` | `ModelSyncDBUtils -> PostgresModelSyncSupport` 已通过真实页面/API/PG 验证创建、重命名、`extra_col` 扩展、12 列幂等重复保存、软删保留和受控清理；任意自定义字段类型 DDL 另行验收 |
 | Nacos 生产配置 export/diff | PLANNED | production-evidence-required | `metadata/nacos-config-drift-smoke.json`、`deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json` | 生产 export/diff、漂移审阅、签名 patch、回退演练 |
 | Keycloak 生产 realm 迁移 | PLANNED | production-evidence-required | `metadata/keycloak-jwt-runtime-smoke.json`、`deploy/keycloak/production-migration/keycloak-migration-evidence.example.json` | realm inventory、数据库恢复演练、secret 轮换、JWT/Nacos 同步、登录 smoke、回滚 |
 
 ## 实体/模型动作验收
 
-实体、模型、字段、视图和 runtime 元数据会影响低代码页面渲染、菜单入口和按钮权限，不能把只读 readiness 当成写入验收。2026-06-22 已新增 `metadata/entity-model-config-crud-persistence-acceptance.json`，
-把实体/模型新增、编辑、删除/禁用从 `PLANNED` 升级为 `PASS`，并由 `make basic-config-action-matrix-check` 强制校验。
+实体、模型、字段、视图和 runtime 元数据会影响低代码页面渲染、菜单入口和按钮权限，不能把只读 readiness 当成写入验收。2026-07-21 已重跑 `metadata/entity-model-config-crud-persistence-acceptance.json`，把元数据 CRUD 和 PostgreSQL 基础物理表生命周期放在同一条可复验链路中，并由 `make basic-config-action-matrix-check` 强制校验。
 
-本次验收使用 marker `ADP_E2E_202606221433_ENTITY_MODEL`，在真实浏览器页面上下文打开
-`/msService/ec/engine/msManage`，记录 `entity/save`、`model/save`、`model/ordinaryDelete`、
-`entity/ordinaryDelete` 六个写请求，全部返回 `HTTP 200/success=true`。后端链路追踪到
-`EntityController`、`EntityServiceImpl`、`ModelController`、`ModelServiceImpl`、`DtoUtils`、
-`entityDao`、`modelDao` 和 `propertyDao`；PostgreSQL before/after SQL 证明 `ec_entity`、
-`ec_model`、内置 `ec_property` 新增、编辑 marker、软删除和受控清理均成立。
+验收使用 marker `ADP_E2E_20260721_1240_ENTITY_MODEL_PHYSICAL_TABLE`，在 `10.11.100.17` 真实页面上下文打开 `/msService/ec/engine/msManage`，记录实体新增、模型新增、实体编辑、模型重命名/扩列、模型幂等重复保存、模型删除、实体删除 7 个写请求，全部返回 `HTTP 200/success=true`。后端链路追踪到 `ModelSyncDBUtils -> PostgresModelSyncSupport`；PostgreSQL 证明 `DS_E2E_124000` 创建后重命名为 `DS_E2E_124000_R`，加入 `extra_col`，重复保存后仍为 1 张表和 12 个唯一列，软删除不误删物理表，受控 marker 清理后元数据和物理表均为 0。
 
-需要保留的技术事实：当前 PostgreSQL 路径没有在该报告中自动创建业务物理表
-`DS_E2E_063301`。报告明确记录 `ModelSyncDBUtils` 现有自动建表分支仍以 Oracle/SQLServer/MySQL/MariaDB
-为主；如果产品要求 PostgreSQL 下低代码模型自动生成物理业务表，需要另立修复和验收项，不能用这份元数据 CRUD 验收冒充完成。
-该缺口已经登记为动作 `entity-model-postgres-physical-table-autocreate`，状态固定为 `PLANNED`。关闭它前必须有真实前端 marker、后端 `ModelSyncDBUtils` 或替代路径追踪、`information_schema.tables` 物理表 before/after SQL、清理/回滚证据，以及 `make basic-config-action-matrix-check` 和 `make basic-config-coverage-check` 通过。
+边界仍要说清：这次关闭的是基础模型物理表创建/重命名/扩展与幂等路径，不代表 `FieldSyncDBUtils` 对任意自定义字段类型、索引、约束和字段删除都已完成 PostgreSQL 兼容；这些动作需另立 marker 验收，不能从本报告外推。
 
 2026-06-22 新增 `make smoke-entity-model-config-crud-readiness` 和
 `make entity-model-config-crud-readiness-check`。该 probe 会登录测试环境，打开
@@ -163,5 +154,5 @@ marker、回滚和业务回归。
 - 通用 smoke 不允许修改身份目录、打印授权、AK/SK、密码策略。
 - 所有会改业务运行配置的动作必须使用 `ADP_E2E_*` marker，并记录前端操作、API、后端入口、目标表和 PostgreSQL 查询。
 - 内置目录证据只能保存值的数量或 hash 摘要，不能提交明文密钥、token 或授权串。
-- 实体/模型/低代码配置的只读 readiness 只能证明页面/API/元数据可读；实体/模型元数据 CRUD 已有独立 marker 落库验收，但 PostgreSQL 物理模型表自动创建仍不能被默认视为完成。
+- 实体/模型/低代码配置的只读 readiness 只能证明页面/API/元数据可读；实体/模型元数据 CRUD 和基础 PostgreSQL 物理表生命周期已有独立 marker 落库验收，但任意自定义字段 DDL 仍不能从该结果外推。
 - Nacos/Keycloak 测试环境 smoke 不能替代生产 export/diff、realm 迁移、secret 轮换和回退演练。

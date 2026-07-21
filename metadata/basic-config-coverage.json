@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T09:08:53.723Z",
-  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "generatedAt": "2026-07-21T04:33:34.652Z",
+  "repoCommit": "13ee71e5a4b12ae10eb19e275a0c72fe45aa0bbe",
   "database": "PostgreSQL",
   "module": "basic-config",
   "goalId": "G-012",
   "overallStatus": "PARTIAL",
   "summary": {
     "totalAreas": 6,
-    "pass": 3,
-    "partial": 3,
+    "pass": 4,
+    "partial": 2,
     "blocked": 0,
     "notRun": 0,
     "notApplicable": 0
@@ -250,7 +250,7 @@
       ],
       "remainingGaps": [],
       "acceptanceEvidence": {
-        "marker": "ADP_E2E_202606221433_ENTITY_MODEL",
+        "marker": "ADP_E2E_20260721_1240_ENTITY_MODEL_PHYSICAL_TABLE",
         "report": "metadata/entity-model-config-crud-persistence-acceptance.json",
         "route": "/msService/ec/engine/msManage",
         "requests": [
@@ -258,38 +258,44 @@
           "POST /msService/ec/model/save modelCreate HTTP 200/success=true",
           "POST /msService/ec/entity/save entityEdit HTTP 200/success=true",
           "POST /msService/ec/model/save modelEdit HTTP 200/success=true",
+          "POST /msService/ec/model/save modelIdempotentReplay HTTP 200/success=true",
           "POST /msService/ec/model/ordinaryDelete HTTP 200/success=true",
           "POST /msService/ec/entity/ordinaryDelete HTTP 200/success=true"
         ],
         "backendTrace": [
           "EntityController.save/ordinaryDelete -> EntityServiceImpl -> entityDao",
-          "ModelController.save/ordinaryDelete -> ModelServiceImpl -> modelDao/propertyDao",
+          "ModelController.save/ordinaryDelete -> ModelServiceImpl -> ModelSyncDBUtils -> PostgresModelSyncSupport -> modelDao/propertyDao",
           "DtoUtils.getEntity/getModelVO request DTO parsing"
         ],
         "postgreSqlEvidence": [
           "after create ec_entity=1",
           "after create ec_model=1",
           "after create inherent ec_property=3",
+          "physical table created, renamed and expanded with extra_col",
+          "idempotent replay retained one table and twelve unique columns",
           "edit marker persisted to entity/model descriptions",
           "ordinaryDelete soft-deleted entity/model/property rows",
           "controlled cleanup left entity/model/property/physical table counts at 0"
         ],
-        "postgresNote": "The PostgreSQL branch currently records entity/model/property metadata; ModelSyncDBUtils does not auto-create the physical DS_E2E_063301 table for PostgreSQL in this report."
+        "postgresNote": "The PostgreSQL ModelSyncDBUtils branch now creates, renames and expands generated physical model tables idempotently; the dedicated physical-table area carries that acceptance."
       },
       "notes": [
-        "This PASS covers runtime/readiness metadata, customProperty mapping and entity/model metadata CRUD. It does not claim PostgreSQL physical model table auto-creation; the acceptance report records that the PostgreSQL branch did not create DS_E2E_063301."
+        "This PASS covers runtime/readiness metadata, customProperty mapping and entity/model metadata CRUD. PostgreSQL physical model table creation is accepted separately by area configuration-physical-model-table."
       ]
     },
     {
       "id": "configuration-physical-model-table",
       "title": "实体/模型 PostgreSQL 物理表自动创建",
-      "status": "PARTIAL",
+      "status": "PASS",
       "route": "/msService/ec/engine/msManage",
       "requiresPersistence": true,
       "acceptedOperations": [
-        "entity/model metadata CRUD acceptance observed",
-        "PostgreSQL information_schema physical-table verification SQL captured",
-        "current report explicitly records physical model table was not auto-created"
+        "real browser page context and seven model/entity requests returned HTTP 200/success=true",
+        "PostgreSQL physical model table created from the model save path",
+        "physical model table renamed and expanded with extra_col",
+        "idempotent model save replay retained one table and twelve unique columns",
+        "model/entity soft delete retained the physical table until controlled marker cleanup",
+        "controlled marker cleanup removed metadata rows and the generated physical table"
       ],
       "apis": [
         "POST /msService/ec/model/save",
@@ -299,6 +305,7 @@
         "ec_model",
         "ec_property",
         "information_schema.tables",
+        "information_schema.columns",
         "generated_model_physical_table"
       ],
       "evidenceRefs": [
@@ -311,12 +318,9 @@
       "recheckCommands": [
         "make basic-config-coverage-check",
         "make basic-config-action-matrix-check",
-        "ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 ADP_ENTITY_MODEL_CONFIG_CRUD_OUTPUT=metadata/entity-model-config-crud-persistence-acceptance.json node deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js"
+        "ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_ENTITY_MODEL_CONFIG_CRUD_OUTPUT=metadata/entity-model-config-crud-persistence-acceptance.json node deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js"
       ],
-      "remainingGaps": [
-        "当前 PostgreSQL 验收只证明 ec_entity/ec_model/ec_property 元数据 CRUD；information_schema.tables 未出现 marker 物理模型表。",
-        "需要补 ModelSyncDBUtils PostgreSQL 物理表创建分支或形成正式产品风险接受，并用真实前端 marker 与 PostgreSQL before/after SQL 复验。"
-      ]
+      "remainingGaps": []
     },
     {
       "id": "nacos-keycloak-production-config",

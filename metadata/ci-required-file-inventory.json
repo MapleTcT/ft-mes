@@ -4431,6 +4431,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/test_configuration_postgres_model_sync.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/test_foundation_simulated_login_patch.py",
       "state": "tracked",
       "tracked": true
@@ -9524,7 +9530,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 605
+      "tracked": 606
     },
     "docs": {
       "tracked": 113
@@ -9557,8 +9563,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1583,
-    "tracked": 1583,
+    "totalFiles": 1584,
+    "tracked": 1584,
     "untracked": 0
   },
   "untrackedByDirectory": []

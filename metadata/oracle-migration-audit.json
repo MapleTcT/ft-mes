@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T04:03:49+00:00",
-  "repoCommit": "479dd7ba696ca1e5e4ff05df873220ff4bac4403",
-  "findingCount": 1610,
+  "generatedAt": "2026-07-21T04:52:54+00:00",
+  "repoCommit": "13ee71e5a4b12ae10eb19e275a0c72fe45aa0bbe",
+  "findingCount": 1608,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 189,
+    "documentation-or-workflow": 188,
     "frontend-row-index-noise": 4,
     "java-row-index-noise": 77,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 575,
-    "postgres-conversion-tooling": 46,
+    "postgres-conversion-tooling": 45,
     "recovered-source-backlog": 253,
     "runtime-patch-backlog": 9,
     "tooling-or-audit-code": 269
@@ -21,7 +21,7 @@
     "decode-sql": 2,
     "from-dual": 140,
     "ojdbc": 15,
-    "oracle-keyword": 640,
+    "oracle-keyword": 638,
     "rownum": 678,
     "sysdate": 135
   },
@@ -286,7 +286,7 @@
     },
     {
       "file": "Makefile",
-      "line": 984,
+      "line": 985,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -294,7 +294,7 @@
     },
     {
       "file": "Makefile",
-      "line": 985,
+      "line": 986,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -302,7 +302,7 @@
     },
     {
       "file": "Makefile",
-      "line": 987,
+      "line": 988,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -310,7 +310,7 @@
     },
     {
       "file": "Makefile",
-      "line": 988,
+      "line": 989,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -318,7 +318,7 @@
     },
     {
       "file": "Makefile",
-      "line": 996,
+      "line": 997,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -326,7 +326,7 @@
     },
     {
       "file": "Makefile",
-      "line": 997,
+      "line": 998,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -334,7 +334,7 @@
     },
     {
       "file": "Makefile",
-      "line": 999,
+      "line": 1000,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -342,7 +342,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1000,
+      "line": 1001,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -734,7 +734,7 @@
     },
     {
       "file": "backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java",
-      "line": 1012,
+      "line": 1015,
       "pattern": "oracle-keyword",
       "category": "recovered-source-backlog",
       "note": "Recovered source contains Oracle-specific branch or keyword; verify during module promotion.",
@@ -742,7 +742,7 @@
     },
     {
       "file": "backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java",
-      "line": 1030,
+      "line": 1033,
       "pattern": "oracle-keyword",
       "category": "recovered-source-backlog",
       "note": "Recovered source contains Oracle-specific branch or keyword; verify during module promotion.",
@@ -750,7 +750,7 @@
     },
     {
       "file": "backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java",
-      "line": 1031,
+      "line": 1034,
       "pattern": "oracle-keyword",
       "category": "recovered-source-backlog",
       "note": "Recovered source contains Oracle-specific branch or keyword; verify during module promotion.",
@@ -910,7 +910,7 @@
     },
     {
       "file": "backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
-      "line": 45,
+      "line": 47,
       "pattern": "oracle-keyword",
       "category": "recovered-source-backlog",
       "note": "Recovered source contains Oracle-specific branch or keyword; verify during module promotion.",
@@ -918,7 +918,7 @@
     },
     {
       "file": "backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
-      "line": 882,
+      "line": 887,
       "pattern": "oracle-keyword",
       "category": "recovered-source-backlog",
       "note": "Recovered source contains Oracle-specific branch or keyword; verify during module promotion.",
@@ -8893,14 +8893,6 @@
       "excerpt": "-- report. The vendor initialization seeds wom_source on Oracle/MySQL/SQL"
     },
     {
-      "file": "deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js",
-      "line": 527,
-      "pattern": "oracle-keyword",
-      "category": "postgres-conversion-tooling",
-      "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",
-      "excerpt": "\"ModelSyncDBUtils.modelSyncToDb has oracle/sqlserver/mysql/mariadb branches only; PostgreSQL does not auto-create physical model tables in the current code path.\","
-    },
-    {
       "file": "deploy/docker/scripts/adp-nacos-config-drift-smoke.js",
       "line": 56,
       "pattern": "oracle-keyword",
@@ -9579,14 +9571,6 @@
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
       "excerpt": "该问题不是 PostgreSQL 缺表、缺列、类型兼容或 Oracle 方言残留。WOM 源包 `WOM_6.1.3.4` 中 `WOMProduceTaskController.produceTaskCreated` 仍会调用 `WOMProduceTaskServiceImpl.creatProTask`，但 `creatProTask` 的主体创建逻辑整段被注释，最终直接 `return Result.success(\"处理成功\""
-    },
-    {
-      "file": "docs/basic-config-action-matrix.md",
-      "line": 49,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "`DS_E2E_063301`。报告明确记录 `ModelSyncDBUtils` 现有自动建表分支仍以 Oracle/SQLServer/MySQL/MariaDB"
     },
     {
       "file": "docs/business-dependency-contracts.md",

@@ -1094,6 +1094,16 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
             fail(failures, "G-012 currentEvidence must include the entity/model CRUD marker")
         if "metadata/entity-model-config-crud-persistence-acceptance.json" not in g012_evidence_text:
             fail(failures, "G-012 currentEvidence must cite entity/model CRUD persistence report")
+        if "ENTITY_MODEL_PHYSICAL_TABLE" not in marker:
+            fail(failures, "G-012 entity/model persistence marker must prove the PostgreSQL physical-table path")
+        summary = entity_model.get("summary") if isinstance(entity_model.get("summary"), dict) else {}
+        for key, expected in (
+            ("physicalTablesAfterCreate", 1),
+            ("physicalTablesAfterRename", 1),
+            ("cleanupPhysicalTables", 0),
+        ):
+            if summary.get(key) != expected:
+                fail(failures, f"G-012 entity/model physical-table summary.{key} must be {expected}")
         stale_gap_text = "\n".join(
             str(item)
             for item in as_list(g012.get("blockingIssues")) + as_list(g012.get("nextActions"))
@@ -1101,6 +1111,8 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
         for stale_fragment in (
             "完整实体/模型新增/编辑/删除",
             "完整实体/模型配置页面执行 marker",
+            "PostgreSQL 物理模型表自动创建能力",
+            "需要补齐 ModelSyncDBUtils PostgreSQL 分支",
         ):
             if stale_fragment in stale_gap_text:
                 fail(failures, f"G-012 must not keep stale entity/model CRUD gap after PASS evidence: {stale_fragment}")

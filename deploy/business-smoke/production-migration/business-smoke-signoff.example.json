@@ -252,12 +252,11 @@
       "source": "metadata/basic-config-coverage.json",
       "basicConfigAreaIds": [
         "systemconfig-built-in-catalogs",
-        "configuration-physical-model-table",
         "nacos-keycloak-production-config"
       ],
       "owner": "platform-owner",
       "riskAcceptance": "TBD",
-      "nextAction": "Complete marker acceptance or signed risk acceptance for built-in systemconfig catalogs; finish PostgreSQL physical model table auto-create evidence or risk acceptance; finish or formally risk-accept production Nacos/Keycloak configuration evidence."
+      "nextAction": "Complete marker acceptance or signed risk acceptance for the remaining built-in systemconfig catalogs; finish or formally risk-accept production Nacos/Keycloak configuration evidence."
     }
   ],
   "signoffs": [
