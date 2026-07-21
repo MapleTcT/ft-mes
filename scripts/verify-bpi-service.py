@@ -20,6 +20,7 @@ REQUIRED_FILES = [
     "services/bpi-service/wms-adapter/Dockerfile.runtime",
     "services/bpi-service/wms-adapter/src/main/resources/application.yml",
     "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandProcessor.java",
+    "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsReversalCommandProcessor.java",
     "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsHttpClient.java",
     "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandProcessorTest.java",
     "deploy/docker/postgres/init/192-material-wms-bpi-idempotency.sql",
@@ -49,6 +50,7 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V22__bpi_source_sequence_evidence.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V23__bpi_quality_release_wms_inbound.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V24__bpi_batch_force_close_workflow.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V25__bpi_wms_inbound_reversal_workflow.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -116,6 +118,10 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiShadowRunPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiQualityReleaseWmsPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/BatchReleaseService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/WmsInboundReversalService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/WmsInboundReversalTaskView.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/WmsInboundReversalPostgresRepository.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/WmsInboundReversalCommand.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BatchReleasePostgresRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/Phase2IntegrationKafkaRecordProcessor.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/WmsInboundOutboxRepository.java",
@@ -163,6 +169,8 @@ REQUIRED_FILES = [
     "docs/backend-table-audit/bpi-quality-release-wms-inbound.md",
     "docs/testing/bpi-quality-release-wms-inbound-acceptance.md",
     "metadata/bpi-quality-release-wms-inbound-acceptance.json",
+    "docs/testing/bpi-wms-inbound-reversal-acceptance.md",
+    "metadata/bpi-wms-inbound-reversal-acceptance.json",
     "metadata/bpi-quality-release-wms-target-acceptance.json",
     "metadata/bpi-quality-release-wms-target.png",
     "metadata/bpi-quality-release-wms-live-target.png",
@@ -441,6 +449,22 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V25__bpi_wms_inbound_reversal_workflow.sql",
+        [
+            "bpi_wms_inbound_reversal_tasks",
+            "INBOUND_REVERSING",
+            "INBOUND_REVERSED",
+            "uq_bpi_wms_reversal_active_batch",
+            "WMS_COMPLETION_INBOUND_REVERSAL_COMMAND",
+            "original_document_id",
+            "reversal_document_id",
+            "reject_shadow_wms_command",
+            "DROP INDEX IF EXISTS bpi.uq_bpi_outbox_rule_lifecycle",
+            "WHERE aggregate_type = 'RULE_VERSION'",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/BatchReleaseService.java",
         [
             "BatchState.CLOSED_RAW",
@@ -453,6 +477,44 @@ def main() -> int:
             "Accepted WMS receipts require document_id.",
             "!batch.shadow()",
         ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/WmsInboundReversalService.java",
+        [
+            "Only an INBOUNDED batch can request completion-inbound reversal.",
+            "WMS reversal approval must be completed by a different administrator.",
+            "Original WMS command does not match the accepted batch and inbound link.",
+            "WMS reversal receipt cannot precede durable command publication.",
+            "BatchState.INBOUND_REVERSING",
+            "BatchState.INBOUND_REVERSED",
+            "outboxProperties.reversalTopic()",
+            "Idempotency-Key must not exceed 128 characters.",
+            "If-Match revision is outside the supported range.",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/BpiQualityReleaseWmsPostgresAcceptanceTest.java",
+        [
+            "approvedFourEyeReversalPersistsOneRedCommandAndOneDurableReceipt",
+            "rejectedReversalRestoresInboundStateAndAllowsANewRequest",
+            "bpi_wms_inbound_reversal_tasks",
+            "WMS_COMPLETION_INBOUND_REVERSAL_COMMAND",
+            "WMS-REVERSAL-SECOND-APPROVE-",
+            "INBOUND_REVERSING|9|ACCEPTED|REVERSAL_PENDING",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicy.java",
+        ["wms/reversal", "wms/(?:reconcile|reversal)"],
+        failures,
+    )
+    require_text(
+        ROOT / "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiProxyControllerTest.java",
+        ["forwardsWmsReversalReadAndCommandWithInternalIdentityAndConcurrencyHeaders",
+         "wms-reversal-request-1", "Idempotent-Replay"],
         failures,
     )
     require_text(
@@ -1503,6 +1565,80 @@ def main() -> int:
         fail("BPI QCS/WMS marker cleanup must leave zero fixture rows", failures)
     if len(quality_wms_acceptance.get("repoCommit", "")) != 40:
         fail("BPI QCS/WMS acceptance must point to the exact source commit", failures)
+
+    reversal_acceptance = json.loads(
+        (ROOT / "metadata/bpi-wms-inbound-reversal-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if reversal_acceptance.get("status") != (
+            "PASS_LOCAL_BROWSER_API_POSTGRES_PROTOCOL_ONLY"):
+        fail("BPI WMS reversal must retain its local protocol-only boundary", failures)
+    if (reversal_acceptance.get("database") != "PostgreSQL 16.13"
+            or reversal_acceptance.get("flywayVersion") != 25
+            or reversal_acceptance.get("phase1Mode") != "SHADOW_ONLY"
+            or reversal_acceptance.get("phase2Mode") != "DISABLED_BY_DEFAULT"
+            or reversal_acceptance.get("externalSystemParticipated") is not False
+            or reversal_acceptance.get("productionActivationAllowed") is not False):
+        fail("BPI WMS reversal runtime or activation boundary is incomplete", failures)
+    reversal_summary = reversal_acceptance.get("summary", {})
+    expected_reversal_summary = {
+        "testedFeatures": 11,
+        "pass": 9,
+        "fail": 0,
+        "blocked": 2,
+        "browserTests": 19,
+        "browserFailures": 0,
+        "simulatorTests": 14,
+        "simulatorFailures": 0,
+        "postgresAcceptanceTests": 10,
+        "postgresAcceptanceFailures": 0,
+        "focusedPostgresReversalTests": 2,
+        "java8AdapterTests": 32,
+        "java8AdapterFailures": 0,
+        "unexpectedConsoleErrors": 0,
+        "pageErrors": 0,
+        "requestFailures": 0,
+        "horizontalOverflowFailures": 0,
+    }
+    if any(reversal_summary.get(key) != value
+           for key, value in expected_reversal_summary.items()):
+        fail("BPI WMS reversal automated evidence summary is incomplete", failures)
+    reversal_items = reversal_acceptance.get("items", [])
+    if (len(reversal_items) != 11
+            or sum(item.get("status") == "PASS" for item in reversal_items) != 9
+            or sum(item.get("status") == "BLOCKED" for item in reversal_items) != 2):
+        fail("BPI WMS reversal item statuses do not match the summary", failures)
+    reversal_browser = reversal_acceptance.get("browser", {})
+    if (reversal_browser.get("operationId") != "commandWmsInboundReversal"
+            or reversal_browser.get("requestApprovalModes") != ["REQUEST", "APPROVE"]
+            or reversal_browser.get("ifMatchRevisions") != ["7", "8"]
+            or reversal_browser.get("originalDocumentId")
+                != "WMS-IN-ADP-E2E-0001"
+            or reversal_browser.get("reversalDocumentId")
+                != "WMS-RED-ADP-E2E-0001"
+            or reversal_browser.get("finalBatchState") != "INBOUND_REVERSED"
+            or reversal_browser.get("finalWmsStatus") != "REVERSED"):
+        fail("BPI WMS reversal browser evidence is incomplete", failures)
+    reversal_postgres = reversal_acceptance.get("postgres", {})
+    if (reversal_postgres.get("acceptedProjection")
+            != "INBOUND_REVERSED|7|ACCEPTED|REVERSED"
+            or reversal_postgres.get("rejectedProjectionBeforeRetry")
+                != "INBOUNDED|7|ACCEPTED|REVERSAL_FAILED"
+            or reversal_postgres.get("retryApprovedProjection")
+                != "INBOUND_REVERSING|9|ACCEPTED|REVERSAL_PENDING"
+            or reversal_postgres.get("retryReversalCommandCount") != 2
+            or reversal_postgres.get("acceptedCounts") != {
+                "reversalTasks": 1,
+                "inboxEvents": 3,
+                "stateEvents": 6,
+                "auditEvents": 6,
+            }):
+        fail("BPI WMS reversal PostgreSQL evidence is incomplete", failures)
+    if any(reversal_acceptance.get("defaults", {}).values()):
+        fail("BPI WMS reversal activation defaults must remain false", failures)
+    if any(reversal_acceptance.get("cleanup", {}).values()):
+        fail("BPI WMS reversal cleanup must leave zero fixture rows", failures)
 
     quality_wms_target = json.loads(
         (ROOT / "metadata/bpi-quality-release-wms-target-acceptance.json").read_text(

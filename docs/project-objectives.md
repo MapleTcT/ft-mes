@@ -269,6 +269,14 @@ marker `ADP_E2E_20260720_215500_BPI_WMS` 经 BPI 事务 outbox、目标三 broke
 外部 QCS 实例主动事件与真实检验记录所有权联接、外部 ERP/WMS 冲销/宕机补偿、物理设备与正式校准
 以及连续 7-14 天现场运行，目标状态继续为 `PARTIAL`，不能标记生产 READY。
 
+2026-07-21 又完成 Flyway V25 完工入库冲销软件链：`INBOUNDED` 批次经 REQUEST、不同管理员
+APPROVE、独立红单 outbox 和 WMS accepted/rejected receipt 迁移到 `INBOUND_REVERSED` 或恢复
+`INBOUNDED`，原蓝单始终只读保留。全新 PostgreSQL 16.13 从 V1-V25 迁移通过，定向 API/落库
+`10/10`、模拟 API `14/14`、浏览器 `19/19`，桌面/390px 移动端和清理均通过。由此 BPI 本地冲销
+审批/状态机缺口已关闭；V25 目标部署、正式双身份、真实 Kafka 与外部 ERP/WMS 联调仍未关闭，所有
+Phase 2/WMS 开关保持默认关闭。证据见
+[BPI 完工入库冲销验收](testing/bpi-wms-inbound-reversal-acceptance.md)。
+
 2026-07-21 又补齐两个异常治理基线。marker `ADP_E2E_20260721_015610_WMS_RECON` 证明管理员可在
 真实批次页核对并重新排队原 WMS event/key；marker `ADP_E2E_20260720193226_WMS_OUTAGE` 真实停止
 内部 `material-wms`，证明首次命令进入 DLQ 且零落单，恢复后重排原命令只生成一套 `12.345 kg`
@@ -320,6 +328,7 @@ ADP 双会话审批退出 G-021 缺口；现场物理来源、正式校准、连
 - [BPI 旧 MES 原生菜单开关目标验收](testing/bpi-shell-menu-gate-acceptance.md)
 - [BPI 批次质量与库存页面验收](testing/bpi-quality-inventory-ui-acceptance.md)
 - [BPI 质量放行与完工入库验收](testing/bpi-quality-release-wms-inbound-acceptance.md)
+- [BPI 完工入库冲销验收](testing/bpi-wms-inbound-reversal-acceptance.md)
 - [BPI 批次受控强制结束目标验收](testing/bpi-force-close-acceptance.md)
 - [BPI 正式身份双管理员强制结束验收](testing/bpi-formal-identity-force-close-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`

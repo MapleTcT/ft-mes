@@ -71,6 +71,15 @@ before the batch becomes `CLOSED_RAW`. Request, approval, state events, audit an
 PostgreSQL transactions. `GET /bpi/v1/batches/{batchId}/force-close` recovers the latest task after a
 page refresh or request timeout. The workflow does not emit QCS or WMS side effects.
 
+Flyway V25 adds governed completion-inbound reversal for a durable, non-shadow `INBOUNDED` batch.
+A shift lead or administrator requests reversal without mutating the original blue document; a
+different `BPI_ADMIN` approves the frozen original command facts before one append-only red command
+enters the WMS outbox. Only a published command can accept a durable red-document receipt. Accepted
+receipts move the batch to `INBOUND_REVERSED`; rejected receipts restore `INBOUNDED`, retain the
+failed task and allow a new independently approved attempt with a distinct command identity. The
+V15 rule-lifecycle outbox index is narrowed to rule publication events so legitimate red-command
+retries are not blocked. Phase 2, WMS outbox and WMS link gates remain disabled by default.
+
 ```bash
 make bpi-service-test
 ```
@@ -85,6 +94,16 @@ JAVA_HOME=/path/to/jdk17 BPI_TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/
   BPI_TEST_DATABASE_USER=bpi_test BPI_TEST_DATABASE_PASSWORD=... \
   mvn -f services/bpi-service/pom.xml -pl :bpi-service -am \
   -Dtest=BpiPostgresAcceptanceTest -Dsurefire.failIfNoSpecifiedTests=false test
+```
+
+The quality, inbound and V25 reversal contract uses the same real PostgreSQL boundary:
+
+```bash
+JAVA_HOME=/path/to/jdk17 BPI_TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/ft_mes_bpi_test \
+  BPI_TEST_DATABASE_USER=bpi_test BPI_TEST_DATABASE_PASSWORD=... \
+  mvn -f services/bpi-service/pom.xml -pl :bpi-service -am \
+  -Dtest=BpiQualityReleaseWmsPostgresAcceptanceTest \
+  -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
 The focused shadow-run lifecycle test uses a fresh PostgreSQL schema migrated through V20:

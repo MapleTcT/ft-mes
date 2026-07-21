@@ -12,5 +12,7 @@ public enum BatchState {
     DISPOSED,
     REWORK,
     RELEASED,
-    INBOUNDED
+    INBOUNDED,
+    INBOUND_REVERSING,
+    INBOUND_REVERSED
 }

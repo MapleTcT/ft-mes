@@ -6,11 +6,13 @@ import com.mapletct.ftmes.bpi.application.BatchCommandService;
 import com.mapletct.ftmes.bpi.application.BatchQueryService;
 import com.mapletct.ftmes.bpi.application.BatchReleaseService;
 import com.mapletct.ftmes.bpi.application.CommandResult;
+import com.mapletct.ftmes.bpi.application.WmsInboundReversalService;
 import com.mapletct.ftmes.bpi.domain.BatchInstance;
 import com.mapletct.ftmes.bpi.domain.BatchReleaseView;
 import com.mapletct.ftmes.bpi.domain.BatchStateEvent;
 import com.mapletct.ftmes.bpi.domain.EvidenceView;
 import com.mapletct.ftmes.bpi.domain.ForceCloseTaskView;
+import com.mapletct.ftmes.bpi.domain.WmsInboundReversalTaskView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -36,16 +38,19 @@ public class BatchController {
     private final BatchQueryService batchQueryService;
     private final BatchCommandService batchCommandService;
     private final BatchReleaseService batchReleaseService;
+    private final WmsInboundReversalService wmsInboundReversalService;
 
     public BatchController(
             ActorContextFactory actorContextFactory,
             BatchQueryService batchQueryService,
             BatchCommandService batchCommandService,
-            BatchReleaseService batchReleaseService) {
+            BatchReleaseService batchReleaseService,
+            WmsInboundReversalService wmsInboundReversalService) {
         this.actorContextFactory = actorContextFactory;
         this.batchQueryService = batchQueryService;
         this.batchCommandService = batchCommandService;
         this.batchReleaseService = batchReleaseService;
+        this.wmsInboundReversalService = wmsInboundReversalService;
     }
 
     @GetMapping("/bpi/v1/batches")
@@ -101,6 +106,17 @@ public class BatchController {
                 batchCommandService.latestForceCloseTask(actorContextFactory.from(jwt), batchId), request);
     }
 
+    @GetMapping("/bpi/v1/batches/{batchId}/wms/reversal")
+    public ApiResponse<WmsInboundReversalTaskView> wmsInboundReversalTask(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID batchId,
+            HttpServletRequest request) {
+        return ApiResponse.of(
+                wmsInboundReversalService.latest(
+                        actorContextFactory.from(jwt), batchId),
+                request);
+    }
+
     @PostMapping("/bpi/v1/batches/{batchId}/wms/reconcile")
     @PreAuthorize("hasRole('BPI_ADMIN')")
     public ResponseEntity<ApiResponse<BatchReleaseView>> reconcileWmsInbound(
@@ -114,6 +130,26 @@ public class BatchController {
                 actorContextFactory.from(jwt), batchId, idempotencyKey, ifMatch,
                 command, traceId(request));
         ResponseEntity.BodyBuilder response = ResponseEntity.ok();
+        if (result.replayed()) {
+            response.header("Idempotent-Replay", "true");
+        }
+        return response.body(ApiResponse.of(result.data(), request));
+    }
+
+    @PostMapping("/bpi/v1/batches/{batchId}/wms/reversal")
+    @PreAuthorize("hasAnyRole('BPI_SHIFT_LEAD', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<WmsInboundReversalTaskView>> wmsInboundReversal(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID batchId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody WmsInboundReversalCommand command,
+            HttpServletRequest request) {
+        CommandResult<WmsInboundReversalTaskView> result =
+                wmsInboundReversalService.command(
+                        actorContextFactory.from(jwt), batchId, idempotencyKey,
+                        ifMatch, command, traceId(request));
+        ResponseEntity.BodyBuilder response = ResponseEntity.accepted();
         if (result.replayed()) {
             response.header("Idempotent-Replay", "true");
         }

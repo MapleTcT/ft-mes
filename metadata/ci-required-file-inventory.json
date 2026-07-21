@@ -5661,6 +5661,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-wms-inbound-reversal-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-wms-outage-recovery-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -6298,6 +6304,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-ui-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-wms-inbound-reversal-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -7551,6 +7563,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/WmsInboundReversalService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/error/BpiConflictException.java",
       "state": "tracked",
       "tracked": true
@@ -7875,6 +7893,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/WmsInboundReversalOriginalTarget.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/WmsInboundReversalTaskView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/WmsInboundTarget.java",
       "state": "tracked",
       "tracked": true
@@ -8181,6 +8211,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/WmsInboundReversalPostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/security/BpiSecurityProperties.java",
       "state": "tracked",
       "tracked": true
@@ -8445,6 +8481,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/WmsInboundReversalApprovalMode.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/WmsInboundReversalCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/application.yml",
       "state": "tracked",
       "tracked": true
@@ -8542,6 +8590,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V24__bpi_batch_force_close_workflow.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V25__bpi_wms_inbound_reversal_workflow.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -9737,13 +9791,13 @@
       "tracked": 615
     },
     "docs": {
-      "tracked": 117
+      "tracked": 118
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 199
+      "tracked": 200
     },
     "package.json": {
       "tracked": 1
@@ -9755,7 +9809,7 @@
       "tracked": 55
     },
     "services": {
-      "tracked": 299
+      "tracked": 306
     },
     "simulation": {
       "tracked": 4
@@ -9767,8 +9821,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1618,
-    "tracked": 1618,
+    "totalFiles": 1627,
+    "tracked": 1627,
     "untracked": 0
   },
   "untrackedByDirectory": []

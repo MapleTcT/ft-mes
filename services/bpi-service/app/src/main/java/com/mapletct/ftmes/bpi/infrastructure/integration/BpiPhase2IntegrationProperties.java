@@ -24,6 +24,8 @@ public record BpiPhase2IntegrationProperties(
         @NotBlank String qcsDlqTopic,
         @NotBlank String wmsReceiptTopic,
         @NotBlank String wmsReceiptDlqTopic,
+        @NotBlank String wmsReversalReceiptTopic,
+        @NotBlank String wmsReversalReceiptDlqTopic,
         @NotBlank String groupId,
         @NotBlank String clientId,
         @NotBlank String qcsActorId,
@@ -36,12 +38,9 @@ public record BpiPhase2IntegrationProperties(
         @NotNull Duration retryBackoff) {
 
     public BpiPhase2IntegrationProperties {
-        if (qcsTopic != null && qcsTopic.equals(qcsDlqTopic)) {
-            throw new IllegalArgumentException("QCS source and DLQ topics must differ.");
-        }
-        if (wmsReceiptTopic != null && wmsReceiptTopic.equals(wmsReceiptDlqTopic)) {
-            throw new IllegalArgumentException("WMS receipt source and DLQ topics must differ.");
-        }
+        requireDistinctTopics(
+                qcsTopic, qcsDlqTopic, wmsReceiptTopic, wmsReceiptDlqTopic,
+                wmsReversalReceiptTopic, wmsReversalReceiptDlqTopic);
         allowedTenantIds = normalizedScope(allowedTenantIds, "tenant");
         allowedPlantIds = normalizedScope(allowedPlantIds, "plant");
         allowedLineIds = normalizedScope(allowedLineIds, "line");
@@ -75,5 +74,15 @@ public record BpiPhase2IntegrationProperties(
             throw new IllegalArgumentException("Phase 2 " + scope + " scope is required.");
         }
         return Set.copyOf(normalized);
+    }
+
+    private static void requireDistinctTopics(String... values) {
+        Set<String> topics = new LinkedHashSet<>();
+        for (String value : values) {
+            if (value != null && !topics.add(value)) {
+                throw new IllegalArgumentException(
+                        "Phase 2 source and DLQ topics must all differ.");
+            }
+        }
     }
 }

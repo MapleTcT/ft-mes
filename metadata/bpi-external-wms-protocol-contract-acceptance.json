@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T23:11:39+08:00",
+  "generatedAt": "2026-07-21T23:57:03+08:00",
   "repoBaseCommit": "4c370b03c4d70a7ebe0abe4f49cdbe52b2d622f3",
   "database": "NOT_APPLICABLE",
   "environment": "local-controlled-java17-maven3.9.3",
@@ -11,7 +11,7 @@
     "adapterTests": 28,
     "pass": 28,
     "fail": 0,
-    "blockedExternalScenarios": 2
+    "blockedExternalScenarios": 1
   },
   "items": [
     {
@@ -66,8 +66,8 @@
     },
     {
       "scenario": "completion-inbound-reversal-bpi-workflow",
-      "status": "BLOCKED",
-      "evidence": "BPI four-eye approval, transactional outbox, receipt inbox, batch state transitions, target PostgreSQL and page acceptance are not implemented yet"
+      "status": "PASS",
+      "evidence": "V25 BPI four-eye approval, transactional red outbox, receipt inbox, accepted/rejected batch transitions, deterministic browser flow and PostgreSQL 16.13 acceptance passed locally; see metadata/bpi-wms-inbound-reversal-acceptance.json"
     }
   ],
   "verification": {
@@ -83,6 +83,8 @@
     "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandProcessorTest.java",
     "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/WmsReversalCommandProcessorTest.java",
     "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsHttpClientTest.java",
-    "docs/testing/bpi-external-wms-protocol-contract-acceptance.md"
+    "docs/testing/bpi-external-wms-protocol-contract-acceptance.md",
+    "docs/testing/bpi-wms-inbound-reversal-acceptance.md",
+    "metadata/bpi-wms-inbound-reversal-acceptance.json"
   ]
 }

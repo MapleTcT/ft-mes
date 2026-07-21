@@ -102,6 +102,30 @@
       "messages": {"receipt": {"$ref": "#/components/messages/WmsCompletionInboundReceiptV1"}},
       "description": "Rejected or retry-exhausted WMS completion-inbound receipts"
     },
+    "wmsCompletionInboundReversalCommand": {
+      "address": "bpi.wms.completion-inbound-reversal-command.v1",
+      "messages": {"command": {"$ref": "#/components/messages/WmsCompletionInboundReversalCommandV1"}},
+      "description": "Separately approved append-only WMS red-document commands keyed by tenantId+plantId+batchId",
+      "x-phase": "2",
+      "x-default-enabled": false
+    },
+    "wmsCompletionInboundReversalCommandDlq": {
+      "address": "bpi.wms.completion-inbound-reversal-command.dlq.v1",
+      "messages": {"command": {"$ref": "#/components/messages/WmsCompletionInboundReversalCommandV1"}},
+      "description": "Rejected or retry-exhausted WMS completion-inbound reversal commands"
+    },
+    "wmsCompletionInboundReversalReceipt": {
+      "address": "wms.completion-inbound-reversal.receipt.v1",
+      "messages": {"receipt": {"$ref": "#/components/messages/WmsCompletionInboundReversalReceiptV1"}},
+      "description": "Durable WMS red-document receipts keyed by reversal commandEventId",
+      "x-phase": "2",
+      "x-default-enabled": false
+    },
+    "wmsCompletionInboundReversalReceiptDlq": {
+      "address": "wms.completion-inbound-reversal.receipt.dlq.v1",
+      "messages": {"receipt": {"$ref": "#/components/messages/WmsCompletionInboundReversalReceiptV1"}},
+      "description": "Rejected or retry-exhausted WMS completion-inbound reversal receipts"
+    },
     "trainingSnapshot": {
       "address": "bpi.training.snapshot.v1",
       "messages": {"snapshot": {"$ref": "#/components/messages/TrainingSnapshotV1"}},
@@ -129,6 +153,10 @@
     "publishWmsCompletionInboundCommand": {"action": "send", "channel": {"$ref": "#/channels/wmsCompletionInboundCommand"}, "messages": [{"$ref": "#/channels/wmsCompletionInboundCommand/messages/command"}]},
     "consumeWmsCompletionInboundReceipt": {"action": "receive", "channel": {"$ref": "#/channels/wmsCompletionInboundReceipt"}, "messages": [{"$ref": "#/channels/wmsCompletionInboundReceipt/messages/receipt"}]},
     "publishRejectedWmsCompletionInboundReceipt": {"action": "send", "channel": {"$ref": "#/channels/wmsCompletionInboundReceiptDlq"}, "messages": [{"$ref": "#/channels/wmsCompletionInboundReceiptDlq/messages/receipt"}]},
+    "publishWmsCompletionInboundReversalCommand": {"action": "send", "channel": {"$ref": "#/channels/wmsCompletionInboundReversalCommand"}, "messages": [{"$ref": "#/channels/wmsCompletionInboundReversalCommand/messages/command"}]},
+    "publishRejectedWmsCompletionInboundReversalCommand": {"action": "send", "channel": {"$ref": "#/channels/wmsCompletionInboundReversalCommandDlq"}, "messages": [{"$ref": "#/channels/wmsCompletionInboundReversalCommandDlq/messages/command"}]},
+    "consumeWmsCompletionInboundReversalReceipt": {"action": "receive", "channel": {"$ref": "#/channels/wmsCompletionInboundReversalReceipt"}, "messages": [{"$ref": "#/channels/wmsCompletionInboundReversalReceipt/messages/receipt"}]},
+    "publishRejectedWmsCompletionInboundReversalReceipt": {"action": "send", "channel": {"$ref": "#/channels/wmsCompletionInboundReversalReceiptDlq"}, "messages": [{"$ref": "#/channels/wmsCompletionInboundReversalReceiptDlq/messages/receipt"}]},
     "publishTrainingSnapshot": {"action": "send", "channel": {"$ref": "#/channels/trainingSnapshot"}, "messages": [{"$ref": "#/channels/trainingSnapshot/messages/snapshot"}]}
   },
   "components": {
@@ -144,6 +172,8 @@
       "QcsQualityGateV1": {"name": "QcsQualityGateV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/IntegrationKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.QcsQualityGateV1"}}},
       "WmsCompletionInboundCommandV1": {"name": "WmsCompletionInboundCommandV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/IntegrationKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.WmsCompletionInboundCommandV1"}}},
       "WmsCompletionInboundReceiptV1": {"name": "WmsCompletionInboundReceiptV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/IntegrationKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.WmsCompletionInboundReceiptV1"}}},
+      "WmsCompletionInboundReversalCommandV1": {"name": "WmsCompletionInboundReversalCommandV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/IntegrationKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.WmsCompletionInboundReversalCommandV1"}}},
+      "WmsCompletionInboundReversalReceiptV1": {"name": "WmsCompletionInboundReversalReceiptV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/IntegrationKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.WmsCompletionInboundReversalReceiptV1"}}},
       "BatchFactV1": {"name": "BatchFactV1", "contentType": "application/x-protobuf", "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-phase": "2", "x-status": "RESERVED_NOT_IMPLEMENTED"}}},
       "TrainingSnapshotV1": {"name": "TrainingSnapshotV1", "contentType": "application/x-protobuf", "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-phase": "3", "x-status": "RESERVED_NOT_IMPLEMENTED"}}}
     },

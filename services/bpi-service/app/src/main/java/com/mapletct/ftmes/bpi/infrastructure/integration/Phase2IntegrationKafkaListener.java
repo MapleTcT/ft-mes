@@ -30,4 +30,13 @@ public class Phase2IntegrationKafkaListener {
         processor.processWmsReceipt(record);
         acknowledgment.acknowledge();
     }
+
+    @KafkaListener(
+            topics = "${bpi.phase2-integration.wms-reversal-receipt-topic}",
+            containerFactory = "bpiPhase2IntegrationKafkaListenerContainerFactory")
+    public void onWmsReversalReceipt(
+            ConsumerRecord<byte[], byte[]> record, Acknowledgment acknowledgment) {
+        processor.processWmsReversalReceipt(record);
+        acknowledgment.acknowledge();
+    }
 }

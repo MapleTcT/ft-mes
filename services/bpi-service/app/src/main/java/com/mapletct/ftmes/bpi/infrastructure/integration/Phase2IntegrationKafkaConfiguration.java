@@ -62,8 +62,7 @@ public class Phase2IntegrationKafkaConfiguration {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
                 kafkaTemplate,
                 (record, error) -> new TopicPartition(
-                        record.topic().equals(properties.qcsTopic())
-                                ? properties.qcsDlqTopic() : properties.wmsReceiptDlqTopic(),
+                        deadLetterTopic(properties, record.topic()),
                         record.partition()));
         recoverer.setFailIfSendResultIsError(true);
         recoverer.setWaitForSendResultTimeout(Duration.ofSeconds(30));
@@ -103,5 +102,20 @@ public class Phase2IntegrationKafkaConfiguration {
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         factory.getContainerProperties().setSyncCommits(true);
         return factory;
+    }
+
+    private static String deadLetterTopic(
+            BpiPhase2IntegrationProperties properties, String sourceTopic) {
+        if (properties.qcsTopic().equals(sourceTopic)) {
+            return properties.qcsDlqTopic();
+        }
+        if (properties.wmsReceiptTopic().equals(sourceTopic)) {
+            return properties.wmsReceiptDlqTopic();
+        }
+        if (properties.wmsReversalReceiptTopic().equals(sourceTopic)) {
+            return properties.wmsReversalReceiptDlqTopic();
+        }
+        throw new IllegalArgumentException(
+                "Phase 2 integration received an unconfigured source topic: " + sourceTopic);
     }
 }

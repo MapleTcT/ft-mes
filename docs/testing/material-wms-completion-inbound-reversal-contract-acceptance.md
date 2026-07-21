@@ -10,8 +10,9 @@ make material-wms-test
 
 `material-wms` 共 `12/12 PASS`，其中集成测试 `11/11`、服务测试 `1/1`。
 状态为 `PASS_LOCAL_PERSISTENCE_CONTRACT_ONLY`：内部库存服务已经具备追加式完工入库冲销、
-精确幂等、原单关联和库存不足整事务回滚，但本轮没有经过真实 PostgreSQL、BPI 页面、Kafka、
-审批工作流或外部 ERP/WMS，不允许据此开启生产集成。
+精确幂等、原单关联和库存不足整事务回滚。后续 BPI 四眼审批、红单 outbox/inbox、真实
+PostgreSQL 16.13 和产品页已经在独立验收中闭合，但本合同本身仍没有调用外部 ERP/WMS，不能据此
+开启生产集成。后续证据见 `docs/testing/bpi-wms-inbound-reversal-acceptance.md`。
 
 ## 不变量
 
@@ -66,7 +67,6 @@ WHERE tenant_id = :tenant_id;
 
 ## 未关闭门槛
 
-1. BPI 侧独立冲销任务、申请人/审批人分离、事务 outbox 和状态机尚未实现。
-2. 冲销 command/receipt Protobuf、Kafka topic、adapter query-first 和响应丢失恢复尚未实现。
-3. 真实 PostgreSQL、目标 ADP 页面和 marker 清理尚未执行。
-4. 外部 ERP/WMS 实例没有参与，`G-021` 继续保持 `PARTIAL`，所有 Phase 2/WMS 开关保持关闭。
+1. V25、四个红单 topic/ACL、前端静态包和 adapter 尚未部署到目标 ADP 环境。
+2. 目标正式双身份、真实 Kafka 和 BPI/material 双库 marker 清理尚未联跑。
+3. 外部 ERP/WMS 实例没有参与，`G-021` 继续保持 `PARTIAL`，所有 Phase 2/WMS 开关保持关闭。

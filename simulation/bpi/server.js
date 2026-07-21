@@ -318,6 +318,7 @@ function prepareShadowRunAcceptance(state) {
   state.batchEventsById = new Map();
   state.batchEvidenceById = new Map();
   state.batchReleases = new Map();
+  state.wmsInboundReversalTasks = new Map();
   state.forceCloseTasks = new Map();
   state.idempotency = new Map();
   return { ruleId: state.rule.id, preparedBatchCount: state.batches.length };
@@ -415,7 +416,7 @@ function prepareBatchReleaseAcceptance(state) {
         reconciliationBlockedReason: spec.inbound === 'PENDING' ? null : 'WMS_RECEIPT_TERMINAL',
       };
     }
-    releases.set(id, { batch, qualityGate, wmsInbound: inbound });
+    releases.set(id, { batch, qualityGate, wmsInbound: inbound, wmsInboundReversal: null });
     const timeline = [
       { revision: 1, action: 'START_BOUNDARY_CONFIRMED', at: start.toISOString(), actor: 'simulated.batch.engine', reason: '多信号边界证据达到启动阈值', fromState: null, toState: 'ACTIVE' },
       { revision: 2, action: 'END_BOUNDARY_CONFIRMED', at: end.toISOString(), actor: 'simulated.batch.engine', reason: '流量归零且目标累计量完成', fromState: 'ACTIVE', toState: 'CLOSED_RAW' },
@@ -456,6 +457,7 @@ function prepareBatchReleaseAcceptance(state) {
   state.batchEventsById = timelines;
   state.batchEvidenceById = evidenceById;
   state.batchReleases = releases;
+  state.wmsInboundReversalTasks = new Map();
   state.forceCloseTasks = new Map();
   state.shadowRuns = [];
   state.shadowRunReviews = [];
@@ -846,6 +848,46 @@ function createHandler(state) {
         const prepared = prepareBatchReleaseAcceptance(state);
         return send(res, 200, { status: 'BATCH_RELEASE_READY', ...prepared }, 'simulationPrepareBatchRelease');
       }
+      if (req.method === 'POST' && path === '/__simulation/complete-wms-inbound-reversal') {
+        const operationId = 'simulationCompleteWmsInboundReversal';
+        const body = await readJson(req);
+        const batch = state.batches.find((item) => item.id === body.batchId);
+        const task = batch ? state.wmsInboundReversalTasks.get(batch.id) : null;
+        if (!batch || !task) {
+          return send(res, 404, { status: 'REVERSAL_TASK_NOT_FOUND' }, operationId);
+        }
+        if (task.state !== 'PENDING_WMS' || batch.state !== 'INBOUND_REVERSING') {
+          return send(res, 409, { status: 'REVERSAL_NOT_PENDING_WMS' }, operationId);
+        }
+        const accepted = String(body.status || 'ACCEPTED').toUpperCase() === 'ACCEPTED';
+        task.state = accepted ? 'COMPLETED' : 'FAILED';
+        task.revision += 1;
+        task.reversalReceiptEventId = stableUuid(`wms-reversal-receipt-${batch.id}-${task.revision}`);
+        task.reversalDocumentId = accepted ? body.reversalDocumentId || 'WMS-RED-ADP-E2E-0001' : null;
+        task.errorCode = accepted ? null : body.errorCode || 'WMS_REVERSAL_REJECTED';
+        task.detail = accepted ? 'WMS durable reversal document persisted.' : body.detail || 'WMS rejected the simulated reversal command.';
+        task.observedAt = FIXED_TIME;
+        task.outboxStatus = 'PUBLISHED';
+        task.deliveryAttemptCount = 1;
+        batch.revision += 1;
+        batch.state = accepted ? 'INBOUND_REVERSED' : 'INBOUNDED';
+        batch.wmsStatus = accepted ? 'REVERSED' : 'REVERSAL_FAILED';
+        task.batchRevision = batch.revision;
+        const release = state.batchReleases.get(batch.id);
+        release.wmsInboundReversal = task;
+        const timeline = state.batchEventsById.get(batch.id) || [];
+        timeline.push({
+          revision: batch.revision,
+          action: accepted ? 'WMS_INBOUND_REVERSAL_ACCEPTED' : 'WMS_INBOUND_REVERSAL_REJECTED',
+          at: FIXED_TIME,
+          actor: 'wms.integration',
+          reason: task.detail,
+          fromState: 'INBOUND_REVERSING',
+          toState: batch.state,
+        });
+        state.batchEventsById.set(batch.id, timeline);
+        return send(res, 200, envelope(operationId, release), operationId);
+      }
       if (req.method === 'POST' && path === '/__simulation/fail-rule-publication') {
         if (!['PUBLISHED', 'RETIRED'].includes(state.rule.state)
             || !['PENDING', 'DISPATCHING'].includes(state.rule.publicationStatus)) {
@@ -1146,8 +1188,122 @@ function createHandler(state) {
       if (req.method === 'GET' && ids) {
         const batch = state.batches.find((item) => item.id === ids[0]);
         if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', 'getBatchRelease'), 'getBatchRelease');
-        const release = state.batchReleases.get(batch.id) || { batch, qualityGate: null, wmsInbound: null };
+        const release = state.batchReleases.get(batch.id) || {
+          batch, qualityGate: null, wmsInbound: null, wmsInboundReversal: null,
+        };
         return send(res, 200, envelope('getBatchRelease', release), 'getBatchRelease');
+      }
+      ids = match(path, /^\/bpi\/v1\/batches\/([^/]+)\/wms\/reversal$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getWmsInboundReversalTask';
+        const batch = state.batches.find((item) => item.id === ids[0]);
+        if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', operationId), operationId);
+        return send(res, 200, envelope(operationId, state.wmsInboundReversalTasks.get(batch.id) || null), operationId);
+      }
+      if (req.method === 'POST' && ids) {
+        const operationId = 'commandWmsInboundReversal';
+        const batch = state.batches.find((item) => item.id === ids[0]);
+        if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, batch.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (!body.reason || String(body.reason).trim().length < 3
+            || !['REQUEST', 'APPROVE'].includes(body.approvalMode)) {
+          const response = problem(422, 'Validation Failed', 'reason and approvalMode are required.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        const release = state.batchReleases.get(batch.id);
+        const inbound = release?.wmsInbound;
+        if (batch.shadow || batch.state !== 'INBOUNDED' || inbound?.status !== 'ACCEPTED'
+            || !inbound.documentId || inbound.outboxStatus !== 'PUBLISHED') {
+          const response = problem(409, 'Invalid Batch State', 'Only a durable INBOUNDED batch can enter reversal approval.', operationId, batch.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const current = state.wmsInboundReversalTasks.get(batch.id);
+        const timeline = state.batchEventsById.get(batch.id) || [];
+        if (body.approvalMode === 'REQUEST') {
+          if (current && ['PENDING_APPROVAL', 'PENDING_WMS'].includes(current.state)) {
+            const response = problem(409, 'Reversal Pending', 'Batch already has an active WMS reversal task.', operationId, batch.revision);
+            return rememberAndSend(state, context, res, 409, response, operationId);
+          }
+          batch.revision += 1;
+          const task = {
+            taskId: stableUuid(`${batch.id}|wms-reversal|${batch.revision}`),
+            batchId: batch.id,
+            state: 'PENDING_APPROVAL',
+            revision: 1,
+            batchRevision: batch.revision,
+            originalInboundLinkId: inbound.id,
+            originalCommandEventId: inbound.commandEventId,
+            originalIdempotencyKey: inbound.idempotencyKey,
+            originalDocumentId: inbound.documentId,
+            requestedBy: 'simulated.shift.lead',
+            requestedAt: FIXED_TIME,
+            requestReason: body.reason,
+            requestComment: body.comment || null,
+            decidedBy: null,
+            decidedAt: null,
+            decisionReason: null,
+            decisionComment: null,
+            reversalCommandEventId: null,
+            reversalIdempotencyKey: null,
+            reversalReceiptEventId: null,
+            reversalDocumentId: null,
+            errorCode: null,
+            detail: null,
+            observedAt: null,
+            outboxStatus: null,
+            deliveryAttemptCount: 0,
+          };
+          state.wmsInboundReversalTasks.set(batch.id, task);
+          release.wmsInboundReversal = task;
+          timeline.push({
+            revision: batch.revision,
+            action: 'WMS_INBOUND_REVERSAL_REQUESTED',
+            at: FIXED_TIME,
+            actor: task.requestedBy,
+            reason: body.reason,
+            fromState: 'INBOUNDED',
+            toState: 'INBOUNDED',
+          });
+          state.batchEventsById.set(batch.id, timeline);
+          return rememberAndSend(state, context, res, 202, envelope(operationId, task), operationId);
+        }
+        if (!current || current.state !== 'PENDING_APPROVAL') {
+          const response = problem(409, 'Reversal Missing', 'Batch has no pending WMS reversal approval.', operationId, batch.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        if (current.originalDocumentId !== inbound.documentId
+            || current.originalCommandEventId !== inbound.commandEventId
+            || current.originalIdempotencyKey !== inbound.idempotencyKey) {
+          const response = problem(409, 'Original Inbound Changed', 'Accepted WMS inbound facts changed after reversal submission.', operationId, batch.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        batch.revision += 1;
+        batch.state = 'INBOUND_REVERSING';
+        batch.wmsStatus = 'REVERSAL_PENDING';
+        current.state = 'PENDING_WMS';
+        current.revision += 1;
+        current.batchRevision = batch.revision;
+        current.decidedBy = 'simulated.bpi.admin';
+        current.decidedAt = FIXED_TIME;
+        current.decisionReason = body.reason;
+        current.decisionComment = body.comment || null;
+        current.reversalCommandEventId = stableUuid(`${current.taskId}|red-command`);
+        current.reversalIdempotencyKey = `WMS_COMPLETION_INBOUND_REVERSAL|TENANT-01|${batch.id}|${current.taskId}|1`;
+        current.outboxStatus = 'PENDING';
+        release.wmsInboundReversal = current;
+        timeline.push({
+          revision: batch.revision,
+          action: 'WMS_INBOUND_REVERSAL_APPROVED',
+          at: FIXED_TIME,
+          actor: current.decidedBy,
+          reason: body.reason,
+          fromState: 'INBOUNDED',
+          toState: 'INBOUND_REVERSING',
+        });
+        state.batchEventsById.set(batch.id, timeline);
+        return rememberAndSend(state, context, res, 202, envelope(operationId, current), operationId);
       }
       ids = match(path, /^\/bpi\/v1\/batches\/([^/]+)\/wms\/reconcile$/);
       if (req.method === 'POST' && ids) {

@@ -848,6 +848,20 @@ marker：`ADP_E2E_20260721021607_QCS_BPI`。机器证据：
 `metadata/qcs-bpi-quality-gate-target-report.png`；详细报告：
 `docs/testing/qcs-bpi-quality-gate-target-acceptance.md`。本轮使用影子批次，因此 WMS 不应被请求。
 
+### BPI V25 完工入库冲销工作台（2026-07-21）
+
+本节是 V25 新功能的本地受控验收。浏览器通过确定性 simulator 操作真实构建后的页面；Java 17
+controller/service/repository 则单独连接 PostgreSQL 16.13/Flyway V25 验证落库。两段证据相互补充，
+但不声明已部署到 `10.11.100.17`，也不声明外部 ERP/WMS 已生成真实红字单据。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 完工入库冲销 | `/bpi/#/batches` | 打开 durable `INBOUNDED` 批次，点击申请冲销，填写原因，再由不同管理员点击批准 | `GET/POST /bpi-api/batches/{batchId}/wms/reversal` | 真实 Playwright 点击形成 `REQUEST`、`APPROVE`；请求携带 `If-Match: 7/8` 和唯一幂等键；待审批、冲销中、完成态均正确，桌面/移动无溢出，unexpected console/page/request error 为 0 | simulator 合同返回 `PENDING_APPROVAL -> PENDING_WMS -> COMPLETED`；原蓝字单号 `WMS-IN-ADP-E2E-0001` 始终保留，最终显示独立红字单号 `WMS-RED-ADP-E2E-0001` | 本行不主张浏览器落库；落库由下一行独立验收 | PASS_LOCAL_BROWSER_PROTOCOL | 目标 ADP 尚未部署 V25；外部 ERP/WMS 未参与 |
+| BPI 完工入库冲销 | 同一产品入口；Java 接口验收 | 申请、同人审批反证、独立审批、发布前回执反证、accepted/rejected 回执、重放和失败后再次申请/批准 | `POST /bpi/v1/batches/{batchId}/wms/reversal`；`POST /internal/bpi/v1/wms-inbound-reversal-receipts` | 前端状态和命令合同由上一行覆盖 | PostgreSQL 10/10 测试通过；申请后无红 outbox，同人批准 403；独立批准生成唯一红命令；accepted 后 `INBOUND_REVERSED/r7`；rejected 后恢复 `INBOUNDED/r7`，第二次申请/独立批准形成第二条红命令并进入 `INBOUND_REVERSING/r9`；原蓝字投影逐字段不变；清理五类 marker 行均为 0 | `bpi_batch_instances`、`bpi_wms_inbound_reversal_tasks`、`bpi_outbox_events`、`bpi_inbox_events`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency` | PASS_LOCAL_POSTGRES | 只关闭本地软件合同；生产开关保持 false |
+
+机器证据：`metadata/bpi-wms-inbound-reversal-acceptance.json`；桌面/移动截图哈希、API 操作、
+PostgreSQL SQL 与边界见 `docs/testing/bpi-wms-inbound-reversal-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

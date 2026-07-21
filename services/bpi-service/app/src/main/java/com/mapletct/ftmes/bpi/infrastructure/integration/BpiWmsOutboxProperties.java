@@ -15,6 +15,7 @@ public record BpiWmsOutboxProperties(
         boolean enabled,
         @NotBlank String bootstrapServers,
         @NotBlank String topic,
+        @NotBlank String reversalTopic,
         @NotBlank String clientId,
         @Min(1) @Max(500) int batchSize,
         @Min(1) @Max(100) int maxAttempts,
@@ -24,6 +25,10 @@ public record BpiWmsOutboxProperties(
         @NotNull Duration reconciliationDelay) {
 
     public BpiWmsOutboxProperties {
+        if (topic != null && topic.equals(reversalTopic)) {
+            throw new IllegalArgumentException(
+                    "WMS inbound and reversal outbox topics must differ.");
+        }
         positive(pollDelay, "pollDelay");
         positive(claimTimeout, "claimTimeout");
         positive(retryBackoff, "retryBackoff");

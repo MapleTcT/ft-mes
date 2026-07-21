@@ -16,10 +16,11 @@ make bpi-wms-adapter-test
 响应不确定窗口：外部 WMS 已提交创建、但 HTTP 响应丢失时，adapter 会在同一次 Kafka
 投递中按原幂等键精确查单；只有查到业务事实完全一致的耐久单据才发送 accepted receipt。
 
-状态为 `PASS_SOFTWARE_PROTOCOL_ONLY`。内部 `material-wms` 的追加式红字单持久化合同和
-Protobuf/Kafka query-first adapter 已通过本地测试，但 BPI 四眼审批、事务 outbox、回执落库与
-真实外部 ERP/WMS 仍未接通；这不是外部实例联调，也不代表生产开关已经完成，`G-021` 继续保持
-`PARTIAL`。
+状态为 `PASS_SOFTWARE_PROTOCOL_ONLY`。内部 `material-wms` 的追加式红字单持久化合同、
+Protobuf/Kafka query-first adapter，以及 BPI 四眼审批、事务 outbox、回执 inbox、批次状态机和
+产品页均已通过本地软件验收，后续证据见
+`docs/testing/bpi-wms-inbound-reversal-acceptance.md`。真实外部 ERP/WMS 仍未接通；这不是外部实例
+联调，也不代表生产开关已经完成，`G-021` 继续保持 `PARTIAL`。
 
 ## 验收矩阵
 
@@ -59,6 +60,6 @@ Protobuf/Kafka query-first adapter 已通过本地测试，但 BPI 四眼审批�
 ## 剩余生产门槛
 
 1. 用真实外部 ERP/WMS 测试实例执行同一 marker 的查询、超时、4xx、5xx 和响应丢失演练。
-2. 将已实现的红字 Protobuf/Kafka adapter 接入 BPI 独立任务、四眼审批、事务 outbox、回执 inbox 和批次状态机。
-3. 在真实页面、Kafka、BPI PostgreSQL 与外部 WMS 数据库之间完成 before/after 查询和清理。
+2. 将已通过本地验收的 V25、红字 topic/ACL、静态包和 adapter 部署到目标环境，以正式 ADP 双身份重跑。
+3. 在目标真实页面、Kafka、BPI PostgreSQL 与外部 WMS 数据库之间完成 before/after 查询和清理。
 4. 在上述证据闭合前保持 Phase 2、WMS outbox、WMS adapter 和 scope feature flag 关闭。

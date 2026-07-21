@@ -30,10 +30,17 @@ REQUIRED_TOPICS = {
     "bpi.wms.completion-inbound-command.v1": "WmsCompletionInboundCommandV1",
     "wms.completion-inbound.receipt.v1": "WmsCompletionInboundReceiptV1",
     "wms.completion-inbound.receipt.dlq.v1": "WmsCompletionInboundReceiptV1",
+    "bpi.wms.completion-inbound-reversal-command.v1": "WmsCompletionInboundReversalCommandV1",
+    "bpi.wms.completion-inbound-reversal-command.dlq.v1": "WmsCompletionInboundReversalCommandV1",
+    "wms.completion-inbound-reversal.receipt.v1": "WmsCompletionInboundReversalReceiptV1",
+    "wms.completion-inbound-reversal.receipt.dlq.v1": "WmsCompletionInboundReversalReceiptV1",
     "bpi.batch.fact.v1": "BatchFactV1",
     "bpi.training.snapshot.v1": "TrainingSnapshotV1",
 }
 RESERVED_MESSAGES = {"BatchFactV1": "2", "TrainingSnapshotV1": "3"}
+INTERNAL_PROTOBUF_POSTS = {
+    "/internal/bpi/v1/wms-inbound-reversal-receipts",
+}
 
 
 def load_json(path: Path) -> dict:
@@ -77,7 +84,7 @@ def main() -> int:
             if operation_id in operations:
                 failures.append(f"duplicate operationId: {operation_id}")
             operations[operation_id] = (method.upper(), path, operation)
-            if method.lower() == "post":
+            if method.lower() == "post" and path not in INTERNAL_PROTOBUF_POSTS:
                 refs = parameter_refs(operation)
                 for required in (
                     "#/components/parameters/IdempotencyKey",
@@ -141,6 +148,17 @@ def main() -> int:
             "service Phase 2 profile references unknown read operations: "
             + ", ".join(unknown_phase2_reads)
         )
+    phase2_commands = phase2_profile.get("commandOperationIds", [])
+    if len(phase2_commands) != len(set(phase2_commands)):
+        failures.append("service-phase2-profile.json contains duplicate commandOperationIds")
+    unknown_phase2_commands = sorted(set(phase2_commands) - set(operations))
+    if unknown_phase2_commands:
+        failures.append(
+            "service Phase 2 profile references unknown command operations: "
+            + ", ".join(unknown_phase2_commands)
+        )
+    if set(phase2_commands) != {"commandWmsInboundReversal"}:
+        failures.append("service Phase 2 command operations changed unexpectedly")
     if phase2_profile.get("mode") != "DISABLED_BY_DEFAULT":
         failures.append("service-phase2-profile.json must remain DISABLED_BY_DEFAULT")
     phase2_endpoints = {
@@ -152,9 +170,16 @@ def main() -> int:
         ("GET", "/internal/bpi/v1/batches/resolve", None),
         ("POST", "/internal/bpi/v1/qcs-quality-gates", "QcsQualityGateV1"),
         ("POST", "/internal/bpi/v1/wms-inbound-receipts", "WmsCompletionInboundReceiptV1"),
+        (
+            "POST",
+            "/internal/bpi/v1/wms-inbound-reversal-receipts",
+            "WmsCompletionInboundReversalReceiptV1",
+        ),
     }
     if phase2_endpoints != required_phase2_endpoints:
-        failures.append("service Phase 2 profile must expose only the approved batch resolver, QCS and WMS bridges")
+        failures.append(
+            "service Phase 2 profile must expose only the approved batch resolver, QCS, WMS blue and WMS red bridges"
+        )
     phase2_topics = {
         (item.get("topic"), item.get("message"))
         for field in ("inboundTopics", "outboundTopics")
@@ -165,6 +190,14 @@ def main() -> int:
         ("qcs.batch.quality-gate.v1", "QcsQualityGateV1"),
         ("bpi.wms.completion-inbound-command.v1", "WmsCompletionInboundCommandV1"),
         ("wms.completion-inbound.receipt.v1", "WmsCompletionInboundReceiptV1"),
+        (
+            "bpi.wms.completion-inbound-reversal-command.v1",
+            "WmsCompletionInboundReversalCommandV1",
+        ),
+        (
+            "wms.completion-inbound-reversal.receipt.v1",
+            "WmsCompletionInboundReversalReceiptV1",
+        ),
     }
     if phase2_topics != required_phase2_topics:
         failures.append("service Phase 2 profile topic/message bindings changed unexpectedly")
@@ -185,6 +218,11 @@ def main() -> int:
         "Batch transition, integration projection, outbox and audit rows share one PostgreSQL transaction",
         "A WMS receipt cannot precede durable outbox publication",
         "Only an accepted WMS receipt with document_id can transition RELEASED to INBOUNDED",
+        "A WMS reversal requester cannot approve the same task",
+        "A WMS reversal command copies exact facts from the durable original blue command and uses a new event and idempotency identity",
+        "The original completion-inbound link and document remain immutable during reversal",
+        "A WMS reversal receipt cannot precede durable red-command outbox publication",
+        "Only an accepted WMS reversal receipt with reversal_document_id can transition INBOUND_REVERSING to INBOUND_REVERSED",
     }
     if set(phase2_profile.get("safetyInvariants", [])) != required_phase2_invariants:
         failures.append("service Phase 2 safety invariants changed unexpectedly")
@@ -234,6 +272,7 @@ def main() -> int:
         "BPI API contract verification passed "
         f"(operations={len(operations)}, simulated={len(simulated)}, "
         f"implemented={len(implemented)}, phase2Reads={len(phase2_reads)}, "
+        f"phase2Commands={len(phase2_commands)}, "
         f"topics={len(REQUIRED_TOPICS)})."
     )
     return 0

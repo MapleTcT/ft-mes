@@ -396,6 +396,77 @@ test('batch release projection distinguishes quality and WMS business states', a
   assert.equal(simulatorState.batchReleases.size, 6);
 });
 
+test('completion inbound reversal preserves the blue document and closes through an append-only red command', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+  result = await request('POST', '/__simulation/prepare-batch-release');
+  assert.equal(result.response.status, 200);
+  const batchId = result.json.batchIds.inbounded;
+  const release = simulatorState.batchReleases.get(batchId);
+  const originalBlue = structuredClone(release.wmsInbound);
+
+  result = await request('GET', `/bpi/v1/batches/${batchId}/wms/reversal`);
+  assert.equal(result.response.status, 200);
+  assert.equal(result.response.headers.get('x-bpi-operation-id'), 'getWmsInboundReversalTask');
+  assert.equal(result.json.data, null);
+
+  const requestHeaders = commandHeaders('wms-reversal-request-0001', release.batch.revision);
+  const requestBody = { reason: '原完工入库业务单据录入错误，申请红单冲销', approvalMode: 'REQUEST' };
+  result = await request('POST', `/bpi/v1/batches/${batchId}/wms/reversal`, {
+    headers: requestHeaders,
+    body: requestBody,
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.response.headers.get('x-bpi-operation-id'), 'commandWmsInboundReversal');
+  assert.equal(result.json.data.state, 'PENDING_APPROVAL');
+  assert.equal(result.json.data.originalDocumentId, originalBlue.documentId);
+  assert.equal(result.json.data.originalCommandEventId, originalBlue.commandEventId);
+  assert.equal(result.json.data.requestedBy, 'simulated.shift.lead');
+  const requestSnapshot = result.json;
+
+  result = await request('POST', `/bpi/v1/batches/${batchId}/wms/reversal`, {
+    headers: requestHeaders,
+    body: requestBody,
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, requestSnapshot);
+
+  result = await request('POST', `/bpi/v1/batches/${batchId}/wms/reversal`, {
+    headers: commandHeaders('wms-reversal-approve-0002', release.batch.revision),
+    body: { reason: '独立复核原蓝单、物料、数量和申请依据一致', approvalMode: 'APPROVE' },
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'PENDING_WMS');
+  assert.equal(result.json.data.decidedBy, 'simulated.bpi.admin');
+  assert.notEqual(result.json.data.requestedBy, result.json.data.decidedBy);
+  assert.notEqual(result.json.data.reversalCommandEventId, originalBlue.commandEventId);
+  assert.notEqual(result.json.data.reversalIdempotencyKey, originalBlue.idempotencyKey);
+  assert.equal(release.batch.state, 'INBOUND_REVERSING');
+  assert.equal(release.batch.wmsStatus, 'REVERSAL_PENDING');
+  assert.deepEqual(release.wmsInbound, originalBlue);
+
+  result = await request('POST', '/__simulation/complete-wms-inbound-reversal', {
+    body: { batchId, status: 'ACCEPTED', reversalDocumentId: 'WMS-RED-ADP-E2E-0001' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.batch.state, 'INBOUND_REVERSED');
+  assert.equal(result.json.data.batch.wmsStatus, 'REVERSED');
+  assert.equal(result.json.data.wmsInboundReversal.state, 'COMPLETED');
+  assert.equal(result.json.data.wmsInboundReversal.reversalDocumentId, 'WMS-RED-ADP-E2E-0001');
+  assert.deepEqual(result.json.data.wmsInbound, originalBlue);
+
+  result = await request('GET', `/bpi/v1/batches/${batchId}/release`);
+  assert.equal(result.json.data.wmsInbound.documentId, originalBlue.documentId);
+  assert.equal(result.json.data.wmsInboundReversal.originalDocumentId, originalBlue.documentId);
+  assert.equal(result.json.data.wmsInboundReversal.state, 'COMPLETED');
+  assert.deepEqual(simulatorState.batchEventsById.get(batchId).slice(-3).map((item) => item.action), [
+    'WMS_INBOUND_REVERSAL_REQUESTED',
+    'WMS_INBOUND_REVERSAL_APPROVED',
+    'WMS_INBOUND_REVERSAL_ACCEPTED',
+  ]);
+});
+
 test('end candidate closes the matching shadow batch as CLOSED_RAW', async () => {
   let result = await request('POST', '/__simulation/reset');
   assert.equal(result.response.status, 200);

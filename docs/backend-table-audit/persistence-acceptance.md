@@ -852,6 +852,23 @@ Kafka。首发成功后将同一 outbox 定向重排，验证终态批次只接�
 回滚边界见 `docs/testing/qcs-bpi-quality-gate-target-acceptance.md`。当前批次是 `SHADOW`，所以 WMS
 outbox 为 0 是正确结果；该结论不能外推为外部 QCS/WMS 已投产。
 
+### BPI V25 完工入库冲销（本地 PostgreSQL）
+
+本节使用 Java 17、Maven 3.9.3 和 PostgreSQL 16.13/Flyway V25，直接调用真实
+controller/service/repository。浏览器交互由独立 Playwright simulator 合同覆盖；本节只对 Java API
+和 PostgreSQL 事务事实负责，不外推为目标部署或外部 ERP/WMS 红字单据联调。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 申请完工入库冲销并验证同人不可审批 | `/bpi/#/batches` 质量与库存详情 | `POST /bpi/v1/batches/{batchId}/wms/reversal`，`approvalMode=REQUEST/APPROVE` | `BatchController.wmsInboundReversal -> WmsInboundReversalService.command/request/approve` | `bpi_batch_instances`、`bpi_wms_inbound_reversal_tasks`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency`、`bpi_outbox_events` | 按 tenant/batch 查询 batch state/revision、active task、event/audit/idempotency/outbox count | durable 非影子 `INBOUNDED/r4 -> INBOUNDED/r5`，task 为 `PENDING_APPROVAL`；同申请人审批返回 403，红 outbox 仍为 0；相同幂等键重放不增行 | PASS |
+| 独立管理员审批并追加唯一红字命令 | 同上 | 同一 POST，`approvalMode=APPROVE` | `WmsInboundReversalService.approve -> WmsInboundReversalPostgresRepository.approveAndInsertCommand` | `bpi_wms_inbound_reversal_tasks`、`bpi_outbox_events`、`bpi_batch_instances`、`bpi_batch_state_events`、`bpi_audit_events` | 查询 requester/decided_by、task state、outbox aggregate/event/payload、batch state/revision；对比原入库 link 和原 command 投影 | 不同 `BPI_ADMIN` 批准后 task `PENDING_WMS`、batch `INBOUND_REVERSING/r6`；恰好一条独立红 outbox，tenant/plant/line/order/material/batch/quantity/unit 与原蓝命令完全一致，event/key/document identity 独立 | PASS |
+| accepted durable 红字回执和精确重放 | 同上 | `POST /internal/bpi/v1/wms-inbound-reversal-receipts` | `InternalPhase2IntegrationController -> WmsInboundReversalService.applyReceipt -> WmsInboundReversalPostgresRepository.updateReceipt` | `bpi_wms_inbound_reversal_tasks`、`bpi_inbox_events`、`bpi_batch_instances`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_outbox_events` | 查询 task reversal_document_id/state、batch state/revision/wms_status、inbox checksum 和原蓝 link；比较重放前后计数 | outbox 未 PUBLISHED 时回执 409 且 inbox 回滚；发布后 accepted 回执使 task `COMPLETED`、batch `INBOUND_REVERSED/r7`、wms status `REVERSED`；重放不重复，原蓝 document/link 逐字段不变 | PASS |
+| rejected 红字回执、重新申请/批准与 marker 清理 | 同上 | 同一 internal receipt；随后新 `REQUEST/APPROVE` | `WmsInboundReversalService.applyReceipt/request/approve` | 上述表 | 查询 error_code/detail、batch state/wms_status、旧 task 终态、新 active task 和 reversal outbox count；测试后按 tenant/batch 清理并复查五类计数 | `WMS_REVERSAL_PERIOD_CLOSED` 使旧 task `FAILED`、batch 恢复 `INBOUNDED/r7`、wms status `REVERSAL_FAILED`；新申请与独立批准生成第二条不同红命令并进入 `INBOUND_REVERSING/r9`，活动任务仍只有一个；最终 batch/task/outbox/inbox/audit 均为 0 | PASS_CLEANED |
+
+机器证据：`metadata/bpi-wms-inbound-reversal-acceptance.json`；完整 SQL、测试命令、截图哈希、开关
+默认值和未完成边界见 `docs/testing/bpi-wms-inbound-reversal-acceptance.md`。目标 ADP V25 部署与外部
+ERP/WMS 红字单据联合验收仍未执行。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

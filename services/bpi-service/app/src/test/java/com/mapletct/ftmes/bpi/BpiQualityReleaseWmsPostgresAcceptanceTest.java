@@ -10,6 +10,9 @@ import com.mapletct.ftmes.bpi.contract.v1.QcsInspectionResultV1;
 import com.mapletct.ftmes.bpi.contract.v1.QcsQualityGateV1;
 import com.mapletct.ftmes.bpi.contract.v1.WmsCompletionInboundCommandV1;
 import com.mapletct.ftmes.bpi.contract.v1.WmsCompletionInboundReceiptV1;
+import com.mapletct.ftmes.bpi.contract.v1.WmsCompletionInboundReversalCommandV1;
+import com.mapletct.ftmes.bpi.contract.v1.WmsCompletionInboundReversalReceiptV1;
+import com.mapletct.ftmes.bpi.contract.v1.WmsCompletionInboundReversalStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.WmsCompletionInboundStatusV1;
 import com.mapletct.ftmes.bpi.domain.OutboxEventClaim;
 import com.mapletct.ftmes.bpi.infrastructure.integration.WmsInboundOutboxRepository;
@@ -79,6 +82,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
     private String integrationToken;
     private String viewerToken;
     private String adminToken;
+    private String secondAdminToken;
 
     @BeforeEach
     void seedClosedRawBatchAndPhase2Flags() throws Exception {
@@ -114,6 +118,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
         integrationToken = token(List.of("BPI_INTEGRATION_INGEST"));
         viewerToken = token(List.of("BPI_VIEWER"));
         adminToken = token(List.of("BPI_ADMIN"));
+        secondAdminToken = token(List.of("BPI_ADMIN"), "phase2-reversal-approver");
         System.out.printf("BPI_PHASE2_ACCEPTANCE_MARKER tenant=%s batchId=%s%n", tenantId, batchId);
     }
 
@@ -188,6 +193,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
     void cleanupMarker() {
         if (tenantId == null) return;
         jdbc.update("DELETE FROM bpi.bpi_quality_links WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_wms_inbound_reversal_tasks WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_wms_inbound_links WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_quality_gates WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_outbox_events WHERE tenant_id = ?", tenantId);
@@ -200,6 +206,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
         long residual = count("bpi_quality_links")
+                + count("bpi_wms_inbound_reversal_tasks")
                 + count("bpi_wms_inbound_links")
                 + count("bpi_quality_gates")
                 + count("bpi_outbox_events")
@@ -592,6 +599,190 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                 .isEqualTo("REJECTED|WMS_STORAGE_LOCATION_UNAVAILABLE");
     }
 
+    @Test
+    void approvedFourEyeReversalPersistsOneRedCommandAndOneDurableReceipt() throws Exception {
+        String originalDocumentId = "WMS-IN-REVERSAL-" + batchId;
+        WmsCompletionInboundCommandV1 originalCommand = completeInbound(originalDocumentId);
+        String originalLinkProjection = originalInboundProjection();
+
+        mockMvc.perform(get("/bpi/v1/batches/{id}/wms/reversal", batchId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        postWmsReversal(
+                adminToken, "X".repeat(129), 4, "REQUEST",
+                "reject an idempotency key that exceeds the public contract")
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.detail").value(
+                        org.hamcrest.Matchers.containsString("128")));
+
+        String requestKey = "WMS-REVERSAL-REQUEST-" + batchId;
+        postWmsReversal(
+                adminToken, requestKey, 4, "REQUEST",
+                "ADP_E2E reverse the accepted inbound document")
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("PENDING_APPROVAL"))
+                .andExpect(jsonPath("$.data.batchRevision").value(5))
+                .andExpect(jsonPath("$.data.originalDocumentId").value(originalDocumentId))
+                .andExpect(jsonPath("$.data.requestedBy").value("phase2-acceptance-user"));
+
+        postWmsReversal(
+                adminToken, requestKey, 4, "REQUEST",
+                "ADP_E2E reverse the accepted inbound document")
+                .andExpect(status().isAccepted())
+                .andExpect(result -> assertThat(
+                        result.getResponse().getHeader("Idempotent-Replay")).isEqualTo("true"))
+                .andExpect(jsonPath("$.data.state").value("PENDING_APPROVAL"));
+        assertThat(count("bpi_wms_inbound_reversal_tasks")).isEqualTo(1);
+        assertThat(batchProjection()).isEqualTo("INBOUNDED|5|ACCEPTED|INBOUNDED");
+
+        postWmsReversal(
+                adminToken, "WMS-REVERSAL-SELF-APPROVE-" + batchId, 5, "APPROVE",
+                "the requester must not approve the same reversal")
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.detail").value(
+                        org.hamcrest.Matchers.containsString("different administrator")));
+        assertThat(count("bpi_outbox_events")).isEqualTo(1);
+        assertThat(batchProjection()).isEqualTo("INBOUNDED|5|ACCEPTED|INBOUNDED");
+
+        postWmsReversal(
+                secondAdminToken, "WMS-REVERSAL-APPROVE-" + batchId, 5, "APPROVE",
+                "independent administrator approved the durable red document")
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("PENDING_WMS"))
+                .andExpect(jsonPath("$.data.batchRevision").value(6))
+                .andExpect(jsonPath("$.data.decidedBy").value("phase2-reversal-approver"))
+                .andExpect(jsonPath("$.data.outboxStatus").value("PENDING"));
+        assertThat(batchProjection()).isEqualTo("INBOUND_REVERSING|6|ACCEPTED|REVERSAL_PENDING");
+        assertThat(count("bpi_outbox_events")).isEqualTo(2);
+
+        byte[] reversalPayload = jdbc.queryForObject("""
+                SELECT payload FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ?
+                   AND event_type = 'WMS_COMPLETION_INBOUND_REVERSAL_COMMAND'
+                """, byte[].class, tenantId);
+        WmsCompletionInboundReversalCommandV1 reversalCommand =
+                WmsCompletionInboundReversalCommandV1.parseFrom(reversalPayload);
+        assertThat(reversalCommand.getOriginalCommandEventId()).isEqualTo(originalCommand.getEventId());
+        assertThat(reversalCommand.getOriginalIdempotencyKey()).isEqualTo(originalCommand.getIdempotencyKey());
+        assertThat(reversalCommand.getOriginalDocumentId()).isEqualTo(originalDocumentId);
+        assertThat(reversalCommand.getBatchNo()).isEqualTo(originalCommand.getBatchNo());
+        assertThat(reversalCommand.getOrderId()).isEqualTo(originalCommand.getOrderId());
+        assertThat(reversalCommand.getMaterialCode()).isEqualTo(originalCommand.getMaterialCode());
+        assertThat(reversalCommand.getQuantityDecimal()).isEqualTo(originalCommand.getQuantityDecimal());
+        assertThat(reversalCommand.getQuantityUnit()).isEqualTo(originalCommand.getQuantityUnit());
+        assertThat(reversalCommand.getRequestedBy()).isEqualTo("phase2-acceptance-user");
+        assertThat(reversalCommand.getApprovedBy()).isEqualTo("phase2-reversal-approver");
+
+        WmsCompletionInboundReversalReceiptV1 accepted = reversalReceipt(
+                reversalCommand, "WMS-REVERSAL-ACCEPTED-" + batchId,
+                WmsCompletionInboundReversalStatusV1.WMS_COMPLETION_INBOUND_REVERSAL_ACCEPTED,
+                "WMS-RED-ADP-E2E-" + batchId, "");
+        postWmsReversalReceipt(accepted)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(
+                        org.hamcrest.Matchers.containsString("publication")));
+        assertThat(count("bpi_inbox_events")).isEqualTo(2);
+
+        List<OutboxEventClaim> claims = wmsOutboxRepository.claimPending(10, Duration.ofMinutes(1));
+        assertThat(claims).hasSize(1);
+        assertThat(claims.get(0).id()).isEqualTo(UUID.fromString(reversalCommand.getEventId()));
+        assertThat(claims.get(0).topic()).isEqualTo("bpi.wms.completion-inbound-reversal-command.v1");
+        assertThat(wmsOutboxRepository.markPublished(
+                claims.get(0).id(), claims.get(0).claimToken())).isTrue();
+
+        postWmsReversalReceipt(accepted)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.state").value("COMPLETED"))
+                .andExpect(jsonPath("$.data.reversalDocumentId")
+                        .value("WMS-RED-ADP-E2E-" + batchId))
+                .andExpect(jsonPath("$.data.outboxStatus").value("PUBLISHED"));
+        postWmsReversalReceipt(accepted)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.state").value("COMPLETED"));
+
+        mockMvc.perform(get("/bpi/v1/batches/{id}/release", batchId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.batch.state").value("INBOUND_REVERSED"))
+                .andExpect(jsonPath("$.data.batch.wmsStatus").value("REVERSED"))
+                .andExpect(jsonPath("$.data.wmsInbound.documentId").value(originalDocumentId))
+                .andExpect(jsonPath("$.data.wmsInboundReversal.state").value("COMPLETED"));
+        assertThat(batchProjection()).isEqualTo("INBOUND_REVERSED|7|ACCEPTED|REVERSED");
+        assertThat(originalInboundProjection()).isEqualTo(originalLinkProjection);
+        assertThat(count("bpi_wms_inbound_reversal_tasks")).isEqualTo(1);
+        assertThat(count("bpi_inbox_events")).isEqualTo(3);
+        assertThat(count("bpi_batch_state_events")).isEqualTo(6);
+        assertThat(count("bpi_audit_events")).isEqualTo(6);
+    }
+
+    @Test
+    void rejectedReversalRestoresInboundStateAndAllowsANewRequest() throws Exception {
+        String originalDocumentId = "WMS-IN-REVERSAL-RETRY-" + batchId;
+        completeInbound(originalDocumentId);
+        String originalLinkProjection = originalInboundProjection();
+        postWmsReversal(
+                adminToken, "WMS-REVERSAL-REJECT-REQUEST-" + batchId, 4, "REQUEST",
+                "ADP_E2E request reversal before simulated WMS rejection")
+                .andExpect(status().isAccepted());
+        postWmsReversal(
+                secondAdminToken, "WMS-REVERSAL-REJECT-APPROVE-" + batchId, 5, "APPROVE",
+                "independent approval before simulated WMS rejection")
+                .andExpect(status().isAccepted());
+
+        OutboxEventClaim reversalClaim = wmsOutboxRepository
+                .claimPending(10, Duration.ofMinutes(1)).get(0);
+        WmsCompletionInboundReversalCommandV1 reversalCommand =
+                WmsCompletionInboundReversalCommandV1.parseFrom(reversalClaim.payload());
+        assertThat(wmsOutboxRepository.markPublished(
+                reversalClaim.id(), reversalClaim.claimToken())).isTrue();
+
+        postWmsReversalReceipt(reversalReceipt(
+                reversalCommand, "WMS-REVERSAL-REJECTED-" + batchId,
+                WmsCompletionInboundReversalStatusV1.WMS_COMPLETION_INBOUND_REVERSAL_REJECTED,
+                "", "WMS_REVERSAL_PERIOD_CLOSED"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.state").value("FAILED"))
+                .andExpect(jsonPath("$.data.errorCode").value("WMS_REVERSAL_PERIOD_CLOSED"))
+                .andExpect(jsonPath("$.data.reversalDocumentId").doesNotExist());
+
+        assertThat(batchProjection()).isEqualTo("INBOUNDED|7|ACCEPTED|REVERSAL_FAILED");
+        assertThat(originalInboundProjection()).contains("|" + originalDocumentId + "|ACCEPTED|");
+        postWmsReversal(
+                adminToken, "WMS-REVERSAL-SECOND-REQUEST-" + batchId, 7, "REQUEST",
+                "retry after correcting the WMS accounting period")
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("PENDING_APPROVAL"))
+                .andExpect(jsonPath("$.data.batchRevision").value(8));
+
+        assertThat(batchProjection()).isEqualTo("INBOUNDED|8|ACCEPTED|REVERSAL_FAILED");
+        assertThat(count("bpi_wms_inbound_reversal_tasks")).isEqualTo(2);
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM bpi.bpi_wms_inbound_reversal_tasks
+                 WHERE tenant_id = ? AND batch_id = ? AND state = 'PENDING_APPROVAL'
+                """, Long.class, tenantId, batchId)).isEqualTo(1L);
+
+        postWmsReversal(
+                secondAdminToken, "WMS-REVERSAL-SECOND-APPROVE-" + batchId, 8, "APPROVE",
+                "approve the corrected second red-document attempt")
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("PENDING_WMS"))
+                .andExpect(jsonPath("$.data.batchRevision").value(9));
+
+        assertThat(batchProjection()).isEqualTo("INBOUND_REVERSING|9|ACCEPTED|REVERSAL_PENDING");
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM bpi.bpi_wms_inbound_reversal_tasks
+                 WHERE tenant_id = ? AND batch_id = ? AND state = 'PENDING_WMS'
+                """, Long.class, tenantId, batchId)).isEqualTo(1L);
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ? AND aggregate_id = ?
+                   AND event_type = 'WMS_COMPLETION_INBOUND_REVERSAL_COMMAND'
+                """, Long.class, tenantId, batchId)).isEqualTo(2L);
+        assertThat(originalInboundProjection()).isEqualTo(originalLinkProjection);
+    }
+
     private ResultActions postQcs(QcsQualityGateV1 event) throws Exception {
         return mockMvc.perform(post("/internal/bpi/v1/qcs-quality-gates")
                 .header("Authorization", "Bearer " + integrationToken)
@@ -604,6 +795,29 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                 .header("Authorization", "Bearer " + integrationToken)
                 .contentType(PROTOBUF)
                 .content(event.toByteArray()));
+    }
+
+    private ResultActions postWmsReversalReceipt(
+            WmsCompletionInboundReversalReceiptV1 event) throws Exception {
+        return mockMvc.perform(post("/internal/bpi/v1/wms-inbound-reversal-receipts")
+                .header("Authorization", "Bearer " + integrationToken)
+                .contentType(PROTOBUF)
+                .content(event.toByteArray()));
+    }
+
+    private ResultActions postWmsReversal(
+            String token,
+            String idempotencyKey,
+            long revision,
+            String approvalMode,
+            String reason) throws Exception {
+        return mockMvc.perform(post("/bpi/v1/batches/{id}/wms/reversal", batchId)
+                .header("Authorization", "Bearer " + token)
+                .header("Idempotency-Key", idempotencyKey)
+                .header("If-Match", Long.toString(revision))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"reason\":\"" + reason + "\",\"approvalMode\":\""
+                        + approvalMode + "\"}"));
     }
 
     private ResultActions postWmsReconciliation(
@@ -690,6 +904,55 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                 .build();
     }
 
+    private WmsCompletionInboundCommandV1 completeInbound(String documentId) throws Exception {
+        postQcs(qualityGate(
+                "ADP_E2E_GATE_REVERSAL_" + batchId, 1,
+                "QCS-REVERSAL-ACCEPTED-" + batchId,
+                QcsInspectionDispositionV1.QCS_INSPECTION_ACCEPTED, true))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.batch.state").value("RELEASED"));
+        List<OutboxEventClaim> claims = wmsOutboxRepository.claimPending(10, Duration.ofMinutes(1));
+        assertThat(claims).hasSize(1);
+        OutboxEventClaim claim = claims.get(0);
+        WmsCompletionInboundCommandV1 command = WmsCompletionInboundCommandV1.parseFrom(claim.payload());
+        assertThat(wmsOutboxRepository.markPublished(claim.id(), claim.claimToken())).isTrue();
+        postWmsReceipt(receipt(
+                claim.id(), "WMS-INBOUND-REVERSAL-READY-" + batchId,
+                WmsCompletionInboundStatusV1.WMS_COMPLETION_INBOUND_ACCEPTED,
+                documentId, ""))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.batch.state").value("INBOUNDED"));
+        assertThat(batchProjection()).isEqualTo("INBOUNDED|4|ACCEPTED|INBOUNDED");
+        return command;
+    }
+
+    private WmsCompletionInboundReversalReceiptV1 reversalReceipt(
+            WmsCompletionInboundReversalCommandV1 command,
+            String eventId,
+            WmsCompletionInboundReversalStatusV1 status,
+            String reversalDocumentId,
+            String errorCode) {
+        return WmsCompletionInboundReversalReceiptV1.newBuilder()
+                .setEventId(eventId)
+                .setIdempotencyKey(command.getIdempotencyKey())
+                .setCommandEventId(command.getEventId())
+                .setTenantId(tenantId)
+                .setPlantId(PLANT_ID)
+                .setLineId(LINE_ID)
+                .setBatchId(batchId.toString())
+                .setStatus(status)
+                .setReversalDocumentId(reversalDocumentId)
+                .setOriginalDocumentId(command.getOriginalDocumentId())
+                .setErrorCode(errorCode)
+                .setDetail(status == WmsCompletionInboundReversalStatusV1
+                        .WMS_COMPLETION_INBOUND_REVERSAL_ACCEPTED
+                        ? "WMS durable red document committed"
+                        : "WMS rejected the reversal command")
+                .setObservedAtMs(Instant.now().toEpochMilli())
+                .putHeaders("trace_id", "TRACE-" + eventId)
+                .build();
+    }
+
     private String commandIdempotency(UUID commandEventId) {
         return jdbc.queryForObject("""
                 SELECT idempotency_key
@@ -720,6 +983,15 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                 """, String.class, tenantId, batchId);
     }
 
+    private String originalInboundProjection() {
+        return jdbc.queryForObject("""
+                SELECT command_event_id || '|' || idempotency_key || '|' || document_id
+                       || '|' || status || '|' || revision
+                  FROM bpi.bpi_wms_inbound_links
+                 WHERE tenant_id = ? AND batch_id = ?
+                """, String.class, tenantId, batchId);
+    }
+
     private String outboxStatus(UUID eventId) {
         return jdbc.queryForObject(
                 "SELECT status FROM bpi.bpi_outbox_events WHERE tenant_id = ? AND id = ?",
@@ -727,11 +999,15 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
     }
 
     private String token(List<String> roles) throws Exception {
+        return token(roles, "phase2-acceptance-user");
+    }
+
+    private String token(List<String> roles, String subject) throws Exception {
         Instant now = Instant.now();
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .issuer("ft-mes-adapter")
                 .audience("bpi-service")
-                .subject("phase2-acceptance-user")
+                .subject(subject)
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .claim("tenant_id", tenantId)

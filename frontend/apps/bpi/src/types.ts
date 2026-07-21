@@ -260,10 +260,48 @@ export interface WmsInbound {
     | 'WMS_LINK_DISABLED' | 'OUTBOX_BUSY' | 'SAFETY_DELAY_ACTIVE' | null;
 }
 
+export type WmsInboundReversalState = 'PENDING_APPROVAL' | 'PENDING_WMS' | 'COMPLETED' | 'FAILED';
+
+export interface WmsInboundReversalTask {
+  taskId: string;
+  batchId: string;
+  state: WmsInboundReversalState;
+  revision: number;
+  batchRevision: number;
+  originalInboundLinkId: string;
+  originalCommandEventId: string;
+  originalIdempotencyKey: string;
+  originalDocumentId: string;
+  requestedBy: string;
+  requestedAt: string;
+  requestReason: string;
+  requestComment?: string | null;
+  decidedBy?: string | null;
+  decidedAt?: string | null;
+  decisionReason?: string | null;
+  decisionComment?: string | null;
+  reversalCommandEventId?: string | null;
+  reversalIdempotencyKey?: string | null;
+  reversalReceiptEventId?: string | null;
+  reversalDocumentId?: string | null;
+  errorCode?: string | null;
+  detail?: string | null;
+  observedAt?: string | null;
+  outboxStatus?: 'NOT_CREATED' | 'PENDING' | 'DISPATCHING' | 'PUBLISHED' | 'FAILED' | null;
+  deliveryAttemptCount: number;
+}
+
+export interface WmsInboundReversalCommand {
+  reason: string;
+  comment?: string;
+  approvalMode: 'REQUEST' | 'APPROVE';
+}
+
 export interface BatchRelease {
   batch: Batch;
   qualityGate: QualityGate | null;
   wmsInbound: WmsInbound | null;
+  wmsInboundReversal: WmsInboundReversalTask | null;
 }
 
 export type ShadowRunState = 'DRAFT' | 'RUNNING' | 'EVALUATING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';

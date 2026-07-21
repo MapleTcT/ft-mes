@@ -34,6 +34,8 @@ import type {
   TopologyVersion,
   TopologyDraftCommand,
   VersionComparison,
+  WmsInboundReversalCommand,
+  WmsInboundReversalTask,
 } from './types';
 
 const API_ROOT = '/bpi-api';
@@ -107,6 +109,17 @@ export const bpiApi = {
     request<Batch[]>(`/batches?plantId=${encodeURIComponent(plantId)}&limit=100`),
   batch: (id: string) => request<Batch>(`/batches/${encodeURIComponent(id)}`),
   batchRelease: (id: string) => request<BatchRelease>(`/batches/${encodeURIComponent(id)}/release`),
+  wmsInboundReversalTask: (id: string) =>
+    request<WmsInboundReversalTask | null>(`/batches/${encodeURIComponent(id)}/wms/reversal`),
+  commandWmsInboundReversal: (
+    batch: Batch,
+    command: WmsInboundReversalCommand,
+    key: string,
+  ) => request<WmsInboundReversalTask>(`/batches/${encodeURIComponent(batch.id)}/wms/reversal`, {
+    method: 'POST',
+    headers: { 'Idempotency-Key': key, 'If-Match': String(batch.revision) },
+    body: JSON.stringify(command),
+  }),
   reconcileWmsInbound: (release: BatchRelease, reason: string, key: string) => {
     if (!release.wmsInbound) throw new Error('当前批次没有可核对的 WMS 入库命令。');
     return request<BatchRelease>(`/batches/${encodeURIComponent(release.batch.id)}/wms/reconcile`, {

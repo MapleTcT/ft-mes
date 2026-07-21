@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-22T00:33:02+08:00",
+  "repoBaseCommit": "c7286a825be56bd0922f6d388c69c8ba3ccfe8a7",
+  "status": "PASS_LOCAL_BROWSER_API_POSTGRES_PROTOCOL_ONLY",
+  "database": "PostgreSQL 16.13",
+  "databaseName": "ft_mes_bpi_v25_reversal_retry",
+  "flywayVersion": 25,
+  "environment": "local-controlled-java8-java17-maven3.9.3-node-playwright",
+  "phase1Mode": "SHADOW_ONLY",
+  "phase2Mode": "DISABLED_BY_DEFAULT",
+  "externalSystemParticipated": false,
+  "productionActivationAllowed": false,
+  "summary": {
+    "testedFeatures": 11,
+    "pass": 9,
+    "fail": 0,
+    "blocked": 2,
+    "browserTests": 19,
+    "browserFailures": 0,
+    "simulatorTests": 14,
+    "simulatorFailures": 0,
+    "postgresAcceptanceTests": 10,
+    "postgresAcceptanceFailures": 0,
+    "focusedPostgresReversalTests": 2,
+    "java8AdapterTests": 32,
+    "java8AdapterFailures": 0,
+    "unexpectedConsoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "horizontalOverflowFailures": 0
+  },
+  "items": [
+    {
+      "scenario": "request-reversal-from-durable-inbound",
+      "route": "/bpi/#/batches",
+      "api": "POST /bpi/v1/batches/{batchId}/wms/reversal",
+      "backendEntry": "BatchController#wmsInboundReversal -> WmsInboundReversalService#command -> request",
+      "tables": ["bpi_batch_instances", "bpi_wms_inbound_reversal_tasks", "bpi_batch_state_events", "bpi_audit_events", "bpi_api_idempotency"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "INBOUNDED/r4 -> INBOUNDED/r5 plus one PENDING_APPROVAL task; no red outbox created"
+    },
+    {
+      "scenario": "request-idempotency-and-active-task-guard",
+      "api": "POST /bpi/v1/batches/{batchId}/wms/reversal",
+      "backendEntry": "BpiPostgresRepository#reserveIdempotency and WmsInboundReversalPostgresRepository#hasActiveTask",
+      "tables": ["bpi_api_idempotency", "bpi_wms_inbound_reversal_tasks"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "same key replays the original 202 response; active-task uniqueness prevents duplicate pending work"
+    },
+    {
+      "scenario": "four-eye-self-approval-rejected",
+      "api": "POST /bpi/v1/batches/{batchId}/wms/reversal approvalMode=APPROVE",
+      "backendEntry": "WmsInboundReversalService#approve",
+      "tables": ["bpi_wms_inbound_reversal_tasks", "bpi_outbox_events"],
+      "requiresPersistence": false,
+      "status": "PASS",
+      "evidence": "same requester received HTTP 403 and red outbox count remained zero"
+    },
+    {
+      "scenario": "independent-approval-appends-red-command",
+      "api": "POST /bpi/v1/batches/{batchId}/wms/reversal approvalMode=APPROVE",
+      "backendEntry": "WmsInboundReversalService#approve -> WmsInboundReversalPostgresRepository#approveAndInsertCommand",
+      "tables": ["bpi_wms_inbound_reversal_tasks", "bpi_outbox_events", "bpi_batch_instances", "bpi_batch_state_events", "bpi_audit_events"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "requester phase2-acceptance-user and approver phase2-reversal-approver differ; one independent red command preserves exact original facts"
+    },
+    {
+      "scenario": "receipt-before-red-command-publication",
+      "api": "POST /internal/bpi/v1/wms-inbound-reversal-receipts",
+      "backendEntry": "WmsInboundReversalService#applyReceipt",
+      "tables": ["bpi_outbox_events", "bpi_inbox_events", "bpi_wms_inbound_reversal_tasks"],
+      "requiresPersistence": false,
+      "status": "PASS",
+      "evidence": "HTTP 409 and attempted inbox insert rolled back while outbox was not PUBLISHED"
+    },
+    {
+      "scenario": "accepted-durable-red-receipt",
+      "api": "POST /internal/bpi/v1/wms-inbound-reversal-receipts",
+      "backendEntry": "WmsInboundReversalService#applyReceipt -> WmsInboundReversalPostgresRepository#updateReceipt",
+      "tables": ["bpi_wms_inbound_reversal_tasks", "bpi_inbox_events", "bpi_batch_instances", "bpi_batch_state_events", "bpi_audit_events"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "INBOUND_REVERSING/r6 -> INBOUND_REVERSED/r7 with durable red document; replay remains single and original blue projection is byte-for-byte unchanged"
+    },
+    {
+      "scenario": "rejected-red-receipt-and-retry",
+      "api": "POST /internal/bpi/v1/wms-inbound-reversal-receipts then a new REQUEST",
+      "backendEntry": "WmsInboundReversalService#applyReceipt and #request",
+      "tables": ["bpi_wms_inbound_reversal_tasks", "bpi_batch_instances", "bpi_batch_state_events", "bpi_audit_events"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "WMS_REVERSAL_PERIOD_CLOSED restores INBOUNDED with REVERSAL_FAILED; one new request and independent approval create a second distinct red command and INBOUND_REVERSING/r9"
+    },
+    {
+      "scenario": "marker-cleanup",
+      "api": "JUnit cleanup plus direct PostgreSQL count",
+      "backendEntry": "BpiQualityReleaseWmsPostgresAcceptanceTest#cleanup",
+      "tables": ["bpi_batch_instances", "bpi_wms_inbound_reversal_tasks", "bpi_outbox_events", "bpi_inbox_events", "bpi_audit_events"],
+      "requiresPersistence": true,
+      "status": "PASS",
+      "evidence": "batch=0, reversal_tasks=0, outbox=0, inbox=0, audit=0"
+    },
+    {
+      "scenario": "java8-adapter-exact-reversal-route",
+      "route": "/bpi-api/batches/{batchId}/wms/reversal",
+      "api": "GET/POST /bpi/v1/batches/{batchId}/wms/reversal",
+      "backendEntry": "BpiProxyController -> BpiRoutePolicy -> internal JWT -> BPI service",
+      "tables": [],
+      "requiresPersistence": false,
+      "status": "PASS",
+      "evidence": "Java 8 adapter tests 32/32 passed; exact GET/POST route allowed, nested export/approve paths denied, legacy token replaced, Idempotency-Key/If-Match and Idempotent-Replay preserved"
+    },
+    {
+      "scenario": "target-adp-two-identity-deployment",
+      "requiresPersistence": true,
+      "status": "BLOCKED",
+      "evidence": "V25 and the new UI have not yet been deployed to the target ADP environment"
+    },
+    {
+      "scenario": "external-erp-wms-red-document-joint-test",
+      "requiresPersistence": true,
+      "status": "BLOCKED",
+      "evidence": "No external ERP/WMS endpoint, database or maintenance window participated"
+    }
+  ],
+  "browser": {
+    "route": "/bpi/#/batches",
+    "operationId": "commandWmsInboundReversal",
+    "requestApprovalModes": ["REQUEST", "APPROVE"],
+    "ifMatchRevisions": ["7", "8"],
+    "originalDocumentId": "WMS-IN-ADP-E2E-0001",
+    "reversalDocumentId": "WMS-RED-ADP-E2E-0001",
+    "finalBatchState": "INBOUND_REVERSED",
+    "finalWmsStatus": "REVERSED",
+    "desktopScreenshot": {
+      "path": "/tmp/bpi-console-wms-inbound-reversal.png",
+      "width": 639,
+      "height": 397,
+      "sha256": "e55c9c085463ced1c9e247ea7f1c7a386392d04701664116644bcb89dc43e77c"
+    },
+    "mobileScreenshot": {
+      "path": "/tmp/bpi-console-wms-inbound-reversal-mobile.png",
+      "width": 349,
+      "height": 581,
+      "sha256": "575906c919f19ff6b0c646ce8a9d0c8511f7fbc10462afac3298fed0568ee606"
+    }
+  },
+  "postgres": {
+    "markerPattern": "ADP_E2E_20260720_BPI_QW_<UUID>",
+    "migrationHistory": "25 versioned migrations through V25",
+    "acceptedProjection": "INBOUND_REVERSED|7|ACCEPTED|REVERSED",
+    "rejectedProjectionBeforeRetry": "INBOUNDED|7|ACCEPTED|REVERSAL_FAILED",
+    "retryApprovedProjection": "INBOUND_REVERSING|9|ACCEPTED|REVERSAL_PENDING",
+    "retryReversalCommandCount": 2,
+    "acceptedCounts": {
+      "reversalTasks": 1,
+      "inboxEvents": 3,
+      "stateEvents": 6,
+      "auditEvents": 6
+    },
+    "verificationSql": "SELECT state, revision, quality_gate, wms_status FROM bpi.bpi_batch_instances WHERE tenant_id=:tenant_id AND id=:batch_id; SELECT state, requested_by, decided_by, original_document_id, reversal_document_id FROM bpi.bpi_wms_inbound_reversal_tasks WHERE tenant_id=:tenant_id AND batch_id=:batch_id ORDER BY requested_at"
+  },
+  "defaults": {
+    "BPI_PHASE2_INTEGRATION_ENABLED": false,
+    "BPI_WMS_OUTBOX_ENABLED": false,
+    "BPI_WMS_ADAPTER_ENABLED": false,
+    "bpi.qcs-link": false,
+    "bpi.wms-link": false
+  },
+  "cleanup": {
+    "batchRows": 0,
+    "reversalTaskRows": 0,
+    "outboxRows": 0,
+    "inboxRows": 0,
+    "auditRows": 0
+  },
+  "artifacts": [
+    "services/bpi-service/app/src/main/resources/db/migration/V25__bpi_wms_inbound_reversal_workflow.sql",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/WmsInboundReversalService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/WmsInboundReversalPostgresRepository.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiQualityReleaseWmsPostgresAcceptanceTest.java",
+    "frontend/apps/bpi/src/main.ts",
+    "frontend/apps/bpi/src/api.ts",
+    "frontend/apps/bpi/tests/bpi-console.e2e.cjs",
+    "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicy.java",
+    "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicyTest.java",
+    "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiProxyControllerTest.java",
+    "simulation/bpi/server.js",
+    "simulation/bpi/bpi-simulation.test.js",
+    "docs/testing/bpi-wms-inbound-reversal-acceptance.md"
+  ],
+  "limitations": [
+    "The browser suite used the deterministic simulator; Java API and persistence were accepted separately against PostgreSQL 16.13.",
+    "No real external ERP/WMS instance or target ADP deployment participated.",
+    "No production feature flag, adapter or outbox dispatcher was enabled.",
+    "G-021 remains PARTIAL until physical-source, 7-14 day shadow and external WMS evidence are complete."
+  ]
+}

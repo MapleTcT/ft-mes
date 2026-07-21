@@ -50,8 +50,10 @@
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/balance` | `getBatchBalance` | SIMULATED |
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/genealogy` | `getBatchGenealogy` | SIMULATED |
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/timeline` | `getBatchTimeline` | SERVICE_IMPLEMENTED |
-| 批次档案 | GET | `/bpi/v1/batches/{batchId}/release` | `getBatchRelease` | SERVICE_IMPLEMENTED；读取 QCS gate/inspection snapshot 与 WMS command/receipt projection，Phase 2 写入口仍默认关闭 |
+| 批次档案 | GET | `/bpi/v1/batches/{batchId}/release` | `getBatchRelease` | SERVICE_IMPLEMENTED；读取 QCS gate/inspection、WMS 蓝单与最近冲销任务 projection，Phase 2 写入口仍默认关闭 |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/wms/reconcile` | `reconcileWmsInbound` | SERVICE_IMPLEMENTED；仅 BPI_ADMIN，可对超出安全等待期的 PENDING 原命令执行 query-first 同指令重排，event/payload/WMS 幂等键不可变 |
+| 批次档案 | GET | `/bpi/v1/batches/{batchId}/wms/reversal` | `getWmsInboundReversalTask` | SERVICE_IMPLEMENTED；返回最近一次追加式完工入库冲销任务或 null |
+| 批次档案 | POST | `/bpi/v1/batches/{batchId}/wms/reversal` | `commandWmsInboundReversal` | SERVICE_IMPLEMENTED；班长/管理员先 REQUEST，另一名 BPI_ADMIN APPROVE 后才追加独立红单 outbox |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/suspend` | `suspendBatch` | SERVICE_IMPLEMENTED |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/resume` | `resumeBatch` | SERVICE_IMPLEMENTED |
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/force-close` | `getBatchForceCloseTask` | SERVICE_IMPLEMENTED；恢复最近一次申请/审批任务，供刷新和请求超时后确认真实结果 |
@@ -193,8 +195,7 @@ WMS adapter 的 query-first 合同还要求“创建响应不确定”后立即�
 明细、物料、批次、仓库、库位、数量、单位和质量状态全部一致才发送 accepted receipt；查无或查单失败
 继续抛 transient 交给 Kafka 重试，不能转换成业务拒绝。4xx 业务错误也必须先查单，排除外部已提交但
 返回冲突后才能发送 rejected receipt。普通入库与红字冲销软件协议矩阵已通过 `28/28` adapter
-测试，证据见 `docs/testing/bpi-external-wms-protocol-contract-acceptance.md`；真实外部实例和完整
-BPI 补偿流程仍未验收。
+测试，证据见 `docs/testing/bpi-external-wms-protocol-contract-acceptance.md`；真实外部实例仍未验收。
 
 内部 `material-wms` 已补充追加式完工入库冲销持久化合同。adapter 只允许通过
 `POST /material/wms/completion-inbound-reversals` 创建 BPI 红字单，并通过
@@ -202,8 +203,9 @@ BPI 补偿流程仍未验收。
 event、独立 idempotency key、原入库单号以及与原单完全一致的物料、批次、仓库、库位、数量和单位；
 库存已消耗或事实冲突时整事务失败，原蓝字单仍为 `POSTED`。本地持久化合同为 `12/12 PASS`，证据见
 `docs/testing/material-wms-completion-inbound-reversal-contract-acceptance.md`。独立 Protobuf command/receipt、
-query-first adapter 和四个隔离主题已完成本地软件协议验收；BPI 四眼审批、事务 outbox、回执落库与
-外部 WMS 仍未闭合，因此不改变 Phase 2 默认关闭和 `G-021 PARTIAL` 结论。
+query-first adapter、四个隔离主题、BPI 四眼审批、V25 事务 outbox、接受/拒绝回执与 PostgreSQL 状态机
+均已完成本地验收。真实页面、目标 Kafka 和外部 WMS 红单仍未闭合，因此不改变 Phase 2 默认关闭和
+`G-021 PARTIAL` 结论。
 
 ## 3. 内部受信接入 API
 
@@ -215,6 +217,7 @@ query-first adapter 和四个隔离主题已完成本地软件协议验收；BPI
 | POST | `/internal/bpi/v1/telemetry` | 仅受控 replay/验收工具 | `BPI_EVENT_INGEST` + tenant/plant/line scope + 显式启用 | `201` 接收；幂等重放 `200`；隔离 `202`；身份冲突 `409` | 短期 staging：event、point、point reject、source state、quarantine |
 | POST | `/internal/bpi/v1/qcs-quality-gates` | QCS adapter 的受控 Protobuf bridge | `BPI_INTEGRATION_INGEST` + tenant/plant/line scope + Phase 2/QCS 双门禁 | `201` projection；非法 snapshot `422`；重放冲突 `409`；未启用 `403` | inbox、quality gate/link、batch state、audit、可选 WMS outbox |
 | POST | `/internal/bpi/v1/wms-inbound-receipts` | WMS adapter 的受控 Protobuf bridge | `BPI_INTEGRATION_INGEST` + tenant/plant/line scope + Phase 2 门禁 | `201` projection；PUBLISHED 前回执 `409`；未知状态或 accepted 缺 document id `422` | inbox、WMS link、batch state、audit |
+| POST | `/internal/bpi/v1/wms-inbound-reversal-receipts` | WMS adapter 的受控红单 Protobuf bridge | `BPI_INTEGRATION_INGEST` + tenant/plant/line scope + Phase 2 门禁 | `201` task；红单 PUBLISHED 前回执 `409`；accepted 缺 red document id 或 rejected 缺 error code 返回 `422` | inbox、reversal task、batch state、audit；原蓝单不变 |
 
 候选 Protobuf 入口消费 `BatchCandidateV1` wire bytes，并要求 v1 兼容新增的完整 `CandidateEvidenceV1`
 快照。它默认关闭，只有设置 `BPI_CANDIDATE_PROTOBUF_HTTP_INGRESS_ENABLED=true` 才能用于 Flink 输出到
@@ -248,6 +251,10 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 | `bpi.wms.completion-inbound-command.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundCommandV1` bytes + DLT headers | WMS adapter -> 运维处置 | TARGET_TOPIC_CREATED_DISABLED_BY_DEFAULT |
 | `wms.completion-inbound.receipt.v1` | `commandEventId` | `WmsCompletionInboundReceiptV1` | WMS adapter -> BPI inbox/PostgreSQL | TARGET_CONTROLLED_KAFKA_POSTGRES_ACCEPTED_DISABLED_BY_DEFAULT |
 | `wms.completion-inbound.receipt.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundReceiptV1` bytes + DLT headers | BPI consumer -> 运维处置 | TARGET_TOPIC_CREATED_DISABLED_BY_DEFAULT |
+| `bpi.wms.completion-inbound-reversal-command.v1` | `tenantId|plantId|batchId` | `WmsCompletionInboundReversalCommandV1` | BPI transactional outbox -> WMS adapter | LOCAL_API_POSTGRES_ACCEPTED_DISABLED_BY_DEFAULT |
+| `bpi.wms.completion-inbound-reversal-command.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundReversalCommandV1` bytes + DLT headers | WMS adapter -> 运维处置 | LOCAL_PROTOCOL_ACCEPTED_DISABLED_BY_DEFAULT |
+| `wms.completion-inbound-reversal.receipt.v1` | `commandEventId` | `WmsCompletionInboundReversalReceiptV1` | WMS adapter -> BPI inbox/PostgreSQL | LOCAL_API_POSTGRES_ACCEPTED_DISABLED_BY_DEFAULT |
+| `wms.completion-inbound-reversal.receipt.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundReversalReceiptV1` bytes + DLT headers | BPI consumer -> 运维处置 | LOCAL_PROTOCOL_ACCEPTED_DISABLED_BY_DEFAULT |
 | `bpi.batch.fact.v1` | `batchId` | `BatchFactV1` | BPI -> downstream | PHASE_2_RESERVED |
 | `bpi.training.snapshot.v1` | `datasetId` | `TrainingSnapshotV1` | BPI -> ML pipeline | PHASE_3_RESERVED |
 

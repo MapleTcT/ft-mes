@@ -125,7 +125,7 @@ const state = {
   selectedDataQualityDetail: null as DataQualityIncidentDetail | null,
   selectedFeatureFlag: null as FeatureFlag | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
-  batchCommand: null as 'suspend' | 'resume' | 'reconcileWms' | 'forceCloseRequest' | 'forceCloseApprove' | null,
+  batchCommand: null as 'suspend' | 'resume' | 'reconcileWms' | 'forceCloseRequest' | 'forceCloseApprove' | 'requestWmsReversal' | 'approveWmsReversal' | null,
   shadowRunCommand: null as 'start' | 'complete' | 'approve' | 'reject' | 'cancel' | null,
   ruleCommand: null as 'submit' | 'approve' | 'reject' | 'retry' | 'retire' | null,
   topologyCommand: null as 'validate' | 'publish' | null,
@@ -218,9 +218,9 @@ function dataQualityCategoryCount(patterns: string[]): number {
 }
 
 function statusTone(status: string): string {
-  if (['RUNNING', 'ACTIVE', 'READY', 'PASS', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED', 'QUALIFIED'].includes(status)) return 'ok';
-  if (['PENDING', 'EVALUATING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING'].includes(status)) return 'warn';
-  if (['FAILED', 'FAIL', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED', 'OPEN', 'CRITICAL', 'ERROR', 'MISSING', 'DISABLED'].includes(status)) return 'danger';
+  if (['RUNNING', 'ACTIVE', 'READY', 'PASS', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED', 'QUALIFIED', 'COMPLETED', 'INBOUNDED', 'INBOUND_REVERSED', 'REVERSED'].includes(status)) return 'ok';
+  if (['PENDING', 'PENDING_APPROVAL', 'PENDING_WMS', 'INBOUND_REVERSING', 'REVERSAL_PENDING', 'EVALUATING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING'].includes(status)) return 'warn';
+  if (['FAILED', 'REVERSAL_FAILED', 'FAIL', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED', 'OPEN', 'CRITICAL', 'ERROR', 'MISSING', 'DISABLED'].includes(status)) return 'danger';
   return 'neutral';
 }
 
@@ -2842,6 +2842,45 @@ function wmsReleaseHtml(release: BatchRelease): string {
   </div>`;
 }
 
+function wmsReversalHtml(release: BatchRelease): string {
+  const task = release.wmsInboundReversal;
+  if (!task) {
+    if (release.batch.state !== 'INBOUNDED') return '';
+    return `<div class="release-status-block release-reversal" data-release-reversal="AVAILABLE">
+      <div class="release-summary"><i data-lucide="rotate-ccw"></i><div><span>完工入库冲销</span><strong>原入库单可申请冲销</strong><p>冲销采用申请、独立审批和 WMS 红单回执三段闭环；原蓝单及其命令事实只读保留。</p></div>${statusChip('AVAILABLE')}</div>
+      <div class="release-reversal-action"><div><strong>原蓝单不可覆盖</strong><span>当前持久化单据 ${escapeHtml(release.wmsInbound?.documentId || '-')}，批准后将追加独立红单命令。</span></div><button class="button button--danger button--compact" id="open-wms-reversal-request"><i data-lucide="rotate-ccw"></i>申请入库冲销</button></div>
+    </div>`;
+  }
+
+  const pendingApproval = task.state === 'PENDING_APPROVAL';
+  const pendingWms = task.state === 'PENDING_WMS';
+  const completed = task.state === 'COMPLETED';
+  const title = pendingApproval ? '等待独立管理员审批'
+    : pendingWms ? '红单命令等待 WMS 回执'
+      : completed ? '完工入库已冲销' : 'WMS 拒绝冲销';
+  const detail = pendingApproval
+    ? '原入库事实保持不变，申请人不能批准自己的冲销申请。'
+    : pendingWms
+      ? '独立红单命令已持久化；只有 WMS 返回持久化红单号后，系统才会标记冲销完成。'
+      : completed
+        ? `WMS 红单 ${task.reversalDocumentId || '-'} 已落回，原蓝单仍保留供审计和追溯。`
+        : (task.detail || 'WMS 未接受本次红单命令，批次已恢复为可重新申请状态。');
+  const businessStatus = completed ? 'INBOUND_REVERSED'
+    : task.state === 'FAILED' ? 'REVERSAL_FAILED' : task.state;
+  const action = pendingApproval
+    ? `<div class="release-reversal-action"><div><strong>四眼审批待办</strong><span>请由不同于 ${escapeHtml(task.requestedBy)} 的 BPI 管理员核对原单和申请依据。</span></div><button class="button button--danger button--compact" id="open-wms-reversal-approve"><i data-lucide="shield-check"></i>独立审批冲销</button></div>`
+    : task.state === 'FAILED' && release.batch.state === 'INBOUNDED'
+      ? `<div class="release-reversal-action"><div><strong>冲销失败可重新申请</strong><span>先处理 WMS 错误 ${escapeHtml(task.errorCode || '-')}，新申请会生成新的审批任务。</span></div><button class="button button--danger button--compact" id="open-wms-reversal-request"><i data-lucide="rotate-ccw"></i>重新申请冲销</button></div>`
+      : `<div class="release-reversal-assurance"><i data-lucide="lock-keyhole"></i><span>原蓝单 ${escapeHtml(task.originalDocumentId)} 及原命令 ${escapeHtml(task.originalCommandEventId)} 始终只读保留。</span></div>`;
+
+  return `<div class="release-status-block release-reversal" data-release-reversal="${escapeHtml(task.state)}">
+    <div class="release-summary release-summary--${statusTone(businessStatus)}"><i data-lucide="rotate-ccw"></i><div><span>完工入库冲销</span><strong>${escapeHtml(title)}</strong><p>${escapeHtml(detail)}</p></div>${statusChip(businessStatus)}</div>
+    <div class="release-facts"><div><span>原蓝单</span><b data-original-document>${escapeHtml(task.originalDocumentId)}</b></div><div><span>冲销红单</span><b>${escapeHtml(task.reversalDocumentId || '-')}</b></div><div><span>申请人 / 时间</span><b>${escapeHtml(task.requestedBy)} · ${formatTime(task.requestedAt)}</b></div><div><span>审批人 / 时间</span><b>${escapeHtml(task.decidedBy || '-')} · ${formatTime(task.decidedAt)}</b></div><div><span>申请依据</span><b>${escapeHtml(task.requestReason)}</b></div><div><span>红单消息状态</span><b>${escapeHtml(task.outboxStatus || 'NOT_CREATED')} · ${task.deliveryAttemptCount} 次</b></div></div>
+    <dl class="release-technical"><div><dt>冲销任务</dt><dd>${escapeHtml(task.taskId)}</dd></div><div><dt>红单命令</dt><dd>${escapeHtml(task.reversalCommandEventId || '-')}</dd></div><div><dt>红单幂等键</dt><dd>${escapeHtml(task.reversalIdempotencyKey || '-')}</dd></div><div><dt>红单回执</dt><dd>${escapeHtml(task.reversalReceiptEventId || '-')}</dd></div></dl>
+    ${action}
+  </div>`;
+}
+
 function batchReleaseSectionHtml(): string {
   if (state.batchReleaseLoading) {
     return `<div class="drawer-section batch-release-section"><div class="section-title"><h3>质量与库存</h3><span>正在核对权威投影</span></div><div class="batch-detail-loading" role="status"><i data-lucide="refresh-cw"></i><div><strong>正在读取质量门和入库回执</strong><span>批次核心事实已保留，等待独立投影返回。</span></div></div></div>`;
@@ -2855,7 +2894,7 @@ function batchReleaseSectionHtml(): string {
   return `<div class="drawer-section batch-release-section" data-batch-release>
     <div class="section-title"><h3>质量与库存</h3><span>QCS/LIMS → BPI → WMS</span></div>
     ${batchReleaseProgressHtml(release)}
-    <div class="release-status-flow">${qualityReleaseHtml(release)}${wmsReleaseHtml(release)}</div>
+    <div class="release-status-flow">${qualityReleaseHtml(release)}${wmsReleaseHtml(release)}${wmsReversalHtml(release)}</div>
   </div>`;
 }
 
@@ -2895,6 +2934,8 @@ function renderBatchDrawer(): void {
   document.querySelector('#open-force-close-request')?.addEventListener('click', () => openBatchCommandDialog('forceCloseRequest'));
   document.querySelector('#open-force-close-approve')?.addEventListener('click', () => openBatchCommandDialog('forceCloseApprove'));
   document.querySelector('#open-wms-reconcile')?.addEventListener('click', () => openBatchCommandDialog('reconcileWms'));
+  document.querySelector('#open-wms-reversal-request')?.addEventListener('click', () => openBatchCommandDialog('requestWmsReversal'));
+  document.querySelector('#open-wms-reversal-approve')?.addEventListener('click', () => openBatchCommandDialog('approveWmsReversal'));
   document.querySelector('#retry-batch-release')?.addEventListener('click', () => void reloadBatchRelease(batch.id));
 }
 
@@ -2970,7 +3011,7 @@ async function openBatch(batchId: string): Promise<void> {
   }
 }
 
-function openBatchCommandDialog(command: 'suspend' | 'resume' | 'reconcileWms' | 'forceCloseRequest' | 'forceCloseApprove'): void {
+function openBatchCommandDialog(command: 'suspend' | 'resume' | 'reconcileWms' | 'forceCloseRequest' | 'forceCloseApprove' | 'requestWmsReversal' | 'approveWmsReversal'): void {
   const batch = state.selectedBatch;
   if (!batch) return;
   const isSuspend = command === 'suspend';
@@ -2978,32 +3019,46 @@ function openBatchCommandDialog(command: 'suspend' | 'resume' | 'reconcileWms' |
   const isForceCloseRequest = command === 'forceCloseRequest';
   const isForceCloseApprove = command === 'forceCloseApprove';
   const isForceClose = isForceCloseRequest || isForceCloseApprove;
-  const inbound = state.selectedBatchRelease?.wmsInbound;
+  const isReversalRequest = command === 'requestWmsReversal';
+  const isReversalApprove = command === 'approveWmsReversal';
+  const isReversal = isReversalRequest || isReversalApprove;
+  const release = state.selectedBatchRelease;
+  const inbound = release?.wmsInbound;
+  const reversal = release?.wmsInboundReversal;
   const forceCloseTask = state.selectedForceCloseTask;
   if (isReconciliation && (!inbound || !inbound.reconciliationAllowed)) return;
   if (isForceCloseApprove && forceCloseTask?.state !== 'PENDING_APPROVAL') return;
+  if (isReversalRequest && (batch.state !== 'INBOUNDED'
+      || !inbound?.documentId || (reversal && reversal.state !== 'FAILED'))) return;
+  if (isReversalApprove && reversal?.state !== 'PENDING_APPROVAL') return;
   state.candidateCommand = null;
   state.batchCommand = command;
   state.ruleCommand = null;
   state.topologyCommand = null;
   state.calibrationCommand = null;
   document.querySelector('#command-kicker')!.textContent = isReconciliation
-    ? '完工入库核对' : isForceClose ? '高风险批次命令' : '批次运行控制';
+    ? '完工入库核对' : isReversal ? '完工入库冲销' : isForceClose ? '高风险批次命令' : '批次运行控制';
   document.querySelector('#command-title')!.textContent = isReconciliation
     ? '重新核对原 WMS 单据'
-    : isForceCloseRequest ? '申请强制结束批次'
-      : isForceCloseApprove ? '批准强制结束批次'
-        : isSuspend ? '暂停批次自动处理' : '恢复批次自动处理';
+    : isReversalRequest ? '申请完工入库冲销'
+      : isReversalApprove ? '批准完工入库冲销'
+        : isForceCloseRequest ? '申请强制结束批次'
+          : isForceCloseApprove ? '批准强制结束批次'
+            : isSuspend ? '暂停批次自动处理' : '恢复批次自动处理';
   document.querySelector('#command-reason-label')!.textContent = isReconciliation
     ? '核对原因'
-    : isForceCloseRequest ? '申请依据'
-      : isForceCloseApprove ? '独立审批依据'
-        : isSuspend ? '暂停原因' : '恢复原因';
+    : isReversalRequest ? '冲销申请依据'
+      : isReversalApprove ? '独立审批依据'
+        : isForceCloseRequest ? '申请依据'
+          : isForceCloseApprove ? '独立审批依据'
+            : isSuspend ? '暂停原因' : '恢复原因';
   document.querySelector('#command-summary')!.innerHTML = isReconciliation && inbound
     ? `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>命令事件</span><b>${escapeHtml(inbound.commandEventId)}</b></div><div><span>处理策略</span><b>先查原单 · 同一幂等键</b></div><div><span>入库投影版本</span><b>r${inbound.revision}</b></div>`
-    : isForceClose
-      ? `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>产线</span><b>${escapeHtml(batch.lineId)}</b></div><div><span>处理阶段</span><b>${isForceCloseRequest ? `${escapeHtml(batch.state)} → 待独立审批` : `${escapeHtml(batch.state)} → CLOSED_RAW`}</b></div><div><span>批次版本</span><b>r${batch.revision}</b></div>`
-      : `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>产线</span><b>${escapeHtml(batch.lineId)}</b></div><div><span>状态变化</span><b>${isSuspend ? 'ACTIVE → SUSPENDED' : 'SUSPENDED → ACTIVE'}</b></div><div><span>版本</span><b>r${batch.revision}</b></div>`;
+    : isReversal
+      ? `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>原蓝单</span><b>${escapeHtml(reversal?.originalDocumentId || inbound?.documentId || '-')}</b></div><div><span>${isReversalRequest ? '处理阶段' : '申请人'}</span><b>${isReversalRequest ? 'INBOUNDED → 待独立审批' : escapeHtml(reversal?.requestedBy || '-')}</b></div><div><span>${isReversalRequest ? '批次版本' : '申请依据'}</span><b>${isReversalRequest ? `r${batch.revision}` : escapeHtml(reversal?.requestReason || '-')}</b></div>`
+      : isForceClose
+        ? `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>产线</span><b>${escapeHtml(batch.lineId)}</b></div><div><span>处理阶段</span><b>${isForceCloseRequest ? `${escapeHtml(batch.state)} → 待独立审批` : `${escapeHtml(batch.state)} → CLOSED_RAW`}</b></div><div><span>批次版本</span><b>r${batch.revision}</b></div>`
+        : `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>产线</span><b>${escapeHtml(batch.lineId)}</b></div><div><span>状态变化</span><b>${isSuspend ? 'ACTIVE → SUSPENDED' : 'SUSPENDED → ACTIVE'}</b></div><div><span>版本</span><b>r${batch.revision}</b></div>`;
   setCommandBoundaryVisible(
     isForceClose,
     isForceCloseApprove && forceCloseTask
@@ -3014,15 +3069,19 @@ function openBatchCommandDialog(command: 'suspend' | 'resume' | 'reconcileWms' |
   reason.value = '';
   reason.placeholder = isReconciliation
     ? '填写回执超时、消息失败或人工查单依据'
-    : isForceCloseRequest ? '填写停产、切罐、设备故障或现场异常依据'
-      : isForceCloseApprove ? '填写独立核对边界时间和现场事实的依据'
-        : isSuspend ? '填写上下文过期、数据冲突或现场处置依据' : '填写上下文恢复或人工复核依据';
+    : isReversalRequest ? '填写退库、错单或业务纠正依据，至少 3 个字符'
+      : isReversalApprove ? '填写独立核对原蓝单、物料和数量后的审批依据'
+        : isForceCloseRequest ? '填写停产、切罐、设备故障或现场异常依据'
+          : isForceCloseApprove ? '填写独立核对边界时间和现场事实的依据'
+            : isSuspend ? '填写上下文过期、数据冲突或现场处置依据' : '填写上下文恢复或人工复核依据';
   const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
-  button.className = `button ${isSuspend || isForceClose ? 'button--danger' : 'button--primary'}`;
+  button.className = `button ${isSuspend || isForceClose || isReversal ? 'button--danger' : 'button--primary'}`;
   button.textContent = isReconciliation ? '确认核对原单'
-    : isForceCloseRequest ? '提交独立审批'
-      : isForceCloseApprove ? '批准并关闭批次'
-        : isSuspend ? '确认暂停' : '确认恢复';
+    : isReversalRequest ? '提交独立审批'
+      : isReversalApprove ? '批准并生成红单'
+        : isForceCloseRequest ? '提交独立审批'
+          : isForceCloseApprove ? '批准并关闭批次'
+            : isSuspend ? '确认暂停' : '确认恢复';
   document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
   reason.focus();
 }
@@ -3034,23 +3093,35 @@ async function handleBatchCommand(): Promise<void> {
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
   const forceCloseTask = state.selectedForceCloseTask;
   const isForceClose = command === 'forceCloseRequest' || command === 'forceCloseApprove';
+  const isReversal = command === 'requestWmsReversal' || command === 'approveWmsReversal';
+  const reversalTask = release?.wmsInboundReversal;
   const boundaryValue = document.querySelector<HTMLInputElement>('#command-boundary-time')!.value;
   const boundaryTime = boundaryValue ? new Date(boundaryValue).toISOString() : '';
   if (!batch || !command || reason.length < 3 || (command === 'reconcileWms' && !release)
       || (command === 'forceCloseApprove' && forceCloseTask?.state !== 'PENDING_APPROVAL')
+      || (command === 'requestWmsReversal' && (batch.state !== 'INBOUNDED'
+        || !release?.wmsInbound?.documentId || (reversalTask && reversalTask.state !== 'FAILED')))
+      || (command === 'approveWmsReversal' && reversalTask?.state !== 'PENDING_APPROVAL')
       || (isForceClose && !boundaryTime)) return;
   const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
   button.disabled = true;
   button.textContent = command === 'reconcileWms' ? '核对排队中...'
-    : command === 'forceCloseRequest' ? '提交审批中...'
-      : command === 'forceCloseApprove' ? '审批关闭中...'
-        : command === 'suspend' ? '暂停中...' : '恢复中...';
+    : command === 'requestWmsReversal' ? '提交冲销审批中...'
+      : command === 'approveWmsReversal' ? '生成红单中...'
+        : command === 'forceCloseRequest' ? '提交审批中...'
+          : command === 'forceCloseApprove' ? '审批关闭中...'
+            : command === 'suspend' ? '暂停中...' : '恢复中...';
   try {
     if (command === 'reconcileWms') {
       const response = await bpiApi.reconcileWmsInbound(release!, reason, commandId());
       state.selectedBatchRelease = response.data;
       state.selectedBatch = response.data.batch;
       state.batches = state.batches.map((item) => item.id === response.data.batch.id ? response.data.batch : item);
+    } else if (isReversal) {
+      await bpiApi.commandWmsInboundReversal(batch, {
+        reason,
+        approvalMode: command === 'requestWmsReversal' ? 'REQUEST' : 'APPROVE',
+      }, commandId());
     } else if (isForceClose) {
       const response = await bpiApi.forceCloseBatch(batch, {
         reason,
@@ -3069,25 +3140,30 @@ async function handleBatchCommand(): Promise<void> {
         : line);
     }
     document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
+    state.batchCommand = null;
     showToast(command === 'reconcileWms'
       ? '原入库命令已进入重新核对队列'
-      : command === 'forceCloseRequest' ? '强制结束申请已提交，等待独立管理员审批'
-        : command === 'forceCloseApprove' ? '强制结束已批准，批次已关闭为 CLOSED_RAW'
-          : command === 'suspend' ? '批次自动处理已暂停' : '批次自动处理已恢复');
+      : command === 'requestWmsReversal' ? '入库冲销申请已提交，等待独立管理员审批'
+        : command === 'approveWmsReversal' ? '冲销已批准，红单命令已进入 WMS 队列'
+          : command === 'forceCloseRequest' ? '强制结束申请已提交，等待独立管理员审批'
+            : command === 'forceCloseApprove' ? '强制结束已批准，批次已关闭为 CLOSED_RAW'
+              : command === 'suspend' ? '批次自动处理已暂停' : '批次自动处理已恢复');
     await loadView(true);
     await openBatch(batch.id);
   } catch (error) {
     if (error instanceof ApiProblem && error.problem.status === 409) {
-      showToast(`${command === 'reconcileWms' ? '入库投影' : '批次'}已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
+      showToast(`${command === 'reconcileWms' ? '入库投影' : isReversal ? '冲销批次' : '批次'}已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
       await openBatch(batch.id);
     } else showToast(error instanceof Error ? error.message : String(error), true);
   } finally {
     button.disabled = false;
-    button.className = `button ${command === 'suspend' || isForceClose ? 'button--danger' : 'button--primary'}`;
+    button.className = `button ${command === 'suspend' || isForceClose || isReversal ? 'button--danger' : 'button--primary'}`;
     button.textContent = command === 'reconcileWms' ? '确认核对原单'
-      : command === 'forceCloseRequest' ? '提交独立审批'
-        : command === 'forceCloseApprove' ? '批准并关闭批次'
-          : command === 'suspend' ? '确认暂停' : '确认恢复';
+      : command === 'requestWmsReversal' ? '提交独立审批'
+        : command === 'approveWmsReversal' ? '批准并生成红单'
+          : command === 'forceCloseRequest' ? '提交独立审批'
+            : command === 'forceCloseApprove' ? '批准并关闭批次'
+              : command === 'suspend' ? '确认暂停' : '确认恢复';
   }
 }
 

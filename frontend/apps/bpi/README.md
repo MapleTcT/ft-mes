@@ -11,6 +11,9 @@ The batch archive now reads the independent `GET /bpi/v1/batches/{batchId}/relea
 presents quality-gate revisions, required inspection results, WMS command identity, idempotency key,
 rejection detail, and durable inbound document identity. A slow or failed release projection remains
 local to the quality/inventory section, so batch facts, boundary evidence, and timeline stay usable.
+For a durable non-shadow inbound batch, the same drawer now also drives the governed WMS reversal
+workflow: request, four-eye approval, red-command wait, durable red-document completion, rejection,
+and retry. The original blue inbound document remains visible and immutable throughout the flow.
 
 The browser calls only the same-origin `/bpi-api` boundary. In the MES shell it forwards the existing
 `localStorage.ticket` bearer token to the Java 8 adapter; it never receives or signs the internal BPI
@@ -29,6 +32,9 @@ rejection without batch creation, batch suspend/resume, rule replay/publication,
 It also exercises six release states (`CLOSED_RAW`, `WAIT_QA`, quality rejection, WMS pending,
 WMS rejection, and `INBOUNDED`), proves that HTTP success is not treated as a durable inbound receipt,
 and recovers a controlled 503 through a local retry without reopening a drawer the operator closed.
+The reversal scenario uses real browser clicks for `REQUEST` and `APPROVE`, checks `If-Match`
+revisions and operation IDs, verifies desktop/mobile layout, and proves that the final red document does
+not replace the original blue document.
 It also closes a data-quality incident through acknowledge, reassignment and resolution while
 asserting that raw events and append-only audit history remain available.
 The shadow-run scenario reviews ten closed batches, proves one 61-second deviation yields exactly 95%
@@ -38,4 +44,6 @@ Screenshots are written to `/tmp`, not committed as product assets. Rule browser
 deterministic simulator; real PostgreSQL evidence is recorded separately in
 `metadata/bpi-rule-management-acceptance.json` and
 `metadata/bpi-quality-release-wms-inbound-acceptance.json`. The focused browser evidence is recorded
-in `metadata/bpi-quality-inventory-ui-acceptance.json`.
+in `metadata/bpi-quality-inventory-ui-acceptance.json`. WMS reversal browser/API/PostgreSQL evidence
+and its target/external limitations are recorded in
+`metadata/bpi-wms-inbound-reversal-acceptance.json`.

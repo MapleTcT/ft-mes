@@ -1,8 +1,9 @@
 {
   "profile": "phase-2-quality-release-wms-inbound",
-  "description": "Dormant-by-default QCS quality-gate and WMS completion-inbound integration implemented behind independent code, scope and feature gates.",
+  "description": "Dormant-by-default QCS quality-gate, WMS completion-inbound and separately approved append-only reversal integration implemented behind independent code, scope and feature gates.",
   "mode": "DISABLED_BY_DEFAULT",
-  "readOperationIds": ["getBatchRelease", "resolveIntegrationBatch"],
+  "readOperationIds": ["getBatchRelease", "resolveIntegrationBatch", "getWmsInboundReversalTask"],
+  "commandOperationIds": ["commandWmsInboundReversal"],
   "internalEndpoints": [
     {
       "method": "GET",
@@ -21,14 +22,22 @@
       "path": "/internal/bpi/v1/wms-inbound-receipts",
       "message": "WmsCompletionInboundReceiptV1",
       "purpose": "Controlled Protobuf bridge for WMS receipt acceptance; Kafka is the production path"
+    },
+    {
+      "method": "POST",
+      "path": "/internal/bpi/v1/wms-inbound-reversal-receipts",
+      "message": "WmsCompletionInboundReversalReceiptV1",
+      "purpose": "Controlled Protobuf bridge for separately approved WMS red-document receipts; Kafka is the production path"
     }
   ],
   "inboundTopics": [
     {"topic": "qcs.batch.quality-gate.v1", "message": "QcsQualityGateV1"},
-    {"topic": "wms.completion-inbound.receipt.v1", "message": "WmsCompletionInboundReceiptV1"}
+    {"topic": "wms.completion-inbound.receipt.v1", "message": "WmsCompletionInboundReceiptV1"},
+    {"topic": "wms.completion-inbound-reversal.receipt.v1", "message": "WmsCompletionInboundReversalReceiptV1"}
   ],
   "outboundTopics": [
-    {"topic": "bpi.wms.completion-inbound-command.v1", "message": "WmsCompletionInboundCommandV1"}
+    {"topic": "bpi.wms.completion-inbound-command.v1", "message": "WmsCompletionInboundCommandV1"},
+    {"topic": "bpi.wms.completion-inbound-reversal-command.v1", "message": "WmsCompletionInboundReversalCommandV1"}
   ],
   "activationGates": [
     "BPI_PHASE2_INTEGRATION_ENABLED=true",
@@ -44,6 +53,11 @@
     "External order resolution requires bpi.qcs-link and exactly one batch in the trusted tenant/plant/line scope",
     "Batch transition, integration projection, outbox and audit rows share one PostgreSQL transaction",
     "A WMS receipt cannot precede durable outbox publication",
-    "Only an accepted WMS receipt with document_id can transition RELEASED to INBOUNDED"
+    "Only an accepted WMS receipt with document_id can transition RELEASED to INBOUNDED",
+    "A WMS reversal requester cannot approve the same task",
+    "A WMS reversal command copies exact facts from the durable original blue command and uses a new event and idempotency identity",
+    "The original completion-inbound link and document remain immutable during reversal",
+    "A WMS reversal receipt cannot precede durable red-command outbox publication",
+    "Only an accepted WMS reversal receipt with reversal_document_id can transition INBOUND_REVERSING to INBOUND_REVERSED"
   ]
 }

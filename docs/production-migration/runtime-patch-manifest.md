@@ -7,11 +7,11 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-21T10:25:36+00:00` |
-| Repo Commit | `31baf5d01fc13f5fa917e6deb663d67118413cbe` |
+| Generated At | `2026-07-21T16:44:03+00:00` |
+| Repo Commit | `c7286a825be56bd0922f6d388c69c8ba3ccfe8a7` |
 | Database Target | `PostgreSQL` |
-| Total Files | `378` |
-| Total Bytes | `55302332` |
+| Total Files | `379` |
+| Total Bytes | `55303737` |
 
 ## Categories
 
@@ -19,7 +19,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | --- | ---: | ---: | --- |
 | `nacos-config-template` | 44 | 42353 | Sanitized Nacos configuration templates used by render-nacos-configs.py. |
 | `nginx-runtime-config` | 2 | 27463 | Nginx runtime configuration used by the Docker frontend gateway. |
-| `postgres-init-sql` | 197 | 54239530 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
+| `postgres-init-sql` | 198 | 54240935 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
 | `runtime-binary-patch` | 8 | 158036 | Compiled runtime patch payloads copied into the recovered Windows package at deploy time. |
 | `runtime-patch-source` | 22 | 88039 | Source or template files used to rebuild runtime patch payloads. |
 | `runtime-script` | 26 | 279499 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
@@ -272,6 +272,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `postgres-init-sql` | `deploy/docker/postgres/init/195-wom-source-compat.sql` | 4030 | `e4e9e15c5e256e10989bc0b53867ffa14cd6e9d9d87f1424964668087db72580` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/196-qcs-manu-inspect-list-empty-column.sql` | 4093 | `1bb82ec1d07c7c9b184826651e25cddf6335eb8a450784ada8e08c574bf5b532` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql` | 337 | `f583850af68305b41db7f314d874b8058f8890359cfaa0247676a0bde1caf3a2` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/198-material-wms-completion-inbound-reversal.sql` | 1405 | `d2250c397acd24059ab687ca6dad42c6aae26e83789da9d61e30dc2bb2ddc2b4` |
 | `runtime-binary-patch` | `deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar` | 128048 | `809c3ba11b3959c6eaa8d6faab39736517ac3c0574049dcbda3f7b2725ce20c1` |
 | `runtime-binary-patch` | `deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar` | 2603 | `4af609b0f58221eb3b9794437cecc5cd9ca6ee159d90a90739bfab01a9675eca` |
 | `runtime-binary-patch` | `deploy/docker/patches/notification-dynamic-templates/notification-dynamic-templates.jar` | 2056 | `929fad64e9dc57463ab4ba54d1274c8a7ee49d5f1af2a0b44a5734b2611bf058` |

@@ -202,6 +202,53 @@ public class BpiProxyControllerTest {
     }
 
     @Test
+    public void forwardsWmsReversalReadAndCommandWithInternalIdentityAndConcurrencyHeaders() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        String id = "9c392d57-7502-4cd8-bc37-e72961bb08b4";
+        String upstreamUrl = "http://bpi-service:19091/bpi/v1/batches/" + id + "/wms/reversal";
+        upstream.expect(requestTo(upstreamUrl))
+                .andExpect(method(org.springframework.http.HttpMethod.GET))
+                .andExpect(header(HttpHeaders.AUTHORIZATION,
+                        allOf(startsWith("Bearer "), not(startsWith("Bearer legacy-token")))))
+                .andRespond(withSuccess("{\"data\":null}", MediaType.APPLICATION_JSON));
+        HttpHeaders upstreamResponseHeaders = new HttpHeaders();
+        upstreamResponseHeaders.add("Idempotent-Replay", "true");
+        upstream.expect(requestTo(upstreamUrl))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "wms-reversal-request-1"))
+                .andExpect(header("If-Match", "4"))
+                .andExpect(header(HttpHeaders.AUTHORIZATION,
+                        allOf(startsWith("Bearer "), not(startsWith("Bearer legacy-token")))))
+                .andRespond(org.springframework.test.web.client.response.MockRestResponseCreators
+                        .withStatus(HttpStatus.ACCEPTED)
+                        .body("{\"data\":{\"state\":\"PENDING_APPROVAL\"}}")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .headers(upstreamResponseHeaders));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest read = new MockHttpServletRequest(
+                "GET", "/bpi-api/batches/" + id + "/wms/reversal");
+        read.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        assertEquals(HttpStatus.OK, controller.proxy(jwt(), read, null).getStatusCode());
+
+        MockHttpServletRequest command = new MockHttpServletRequest(
+                "POST", "/bpi-api/batches/" + id + "/wms/reversal");
+        command.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        command.addHeader("Idempotency-Key", "wms-reversal-request-1");
+        command.addHeader("If-Match", "4");
+        ResponseEntity<byte[]> response = controller.proxy(jwt(), command,
+                "{\"reason\":\"reverse durable inbound\",\"approvalMode\":\"REQUEST\"}"
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        assertEquals("true", response.getHeaders().getFirst("Idempotent-Replay"));
+        upstream.verify();
+    }
+
+    @Test
     public void forwardsShadowRunListQueryOnlyToTheFixedUpstream() {
         BpiAdapterProperties properties = properties();
         RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();

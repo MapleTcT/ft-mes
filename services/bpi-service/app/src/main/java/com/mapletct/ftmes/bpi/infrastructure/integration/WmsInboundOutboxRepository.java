@@ -36,7 +36,10 @@ public class WmsInboundOutboxRepository {
                        last_error = 'Recovered stale WMS dispatcher claim', revision = revision + 1
                  WHERE status = 'DISPATCHING'
                    AND aggregate_type = 'BATCH_INSTANCE'
-                   AND event_type = 'WMS_COMPLETION_INBOUND_COMMAND'
+                   AND event_type IN (
+                        'WMS_COMPLETION_INBOUND_COMMAND',
+                        'WMS_COMPLETION_INBOUND_REVERSAL_COMMAND'
+                   )
                    AND (claimed_at IS NULL
                         OR claimed_at < now() - (:claimTimeoutMs * interval '1 millisecond'))
                 """, timeout);
@@ -47,7 +50,10 @@ public class WmsInboundOutboxRepository {
                       FROM bpi.bpi_outbox_events
                      WHERE status = 'PENDING'
                        AND aggregate_type = 'BATCH_INSTANCE'
-                       AND event_type = 'WMS_COMPLETION_INBOUND_COMMAND'
+                       AND event_type IN (
+                            'WMS_COMPLETION_INBOUND_COMMAND',
+                            'WMS_COMPLETION_INBOUND_REVERSAL_COMMAND'
+                       )
                        AND next_attempt_at <= now()
                      ORDER BY created_at, id
                      FOR UPDATE SKIP LOCKED
@@ -85,7 +91,10 @@ public class WmsInboundOutboxRepository {
                    AND claim_token = :claimToken
                    AND status = 'DISPATCHING'
                    AND aggregate_type = 'BATCH_INSTANCE'
-                   AND event_type = 'WMS_COMPLETION_INBOUND_COMMAND'
+                   AND event_type IN (
+                        'WMS_COMPLETION_INBOUND_COMMAND',
+                        'WMS_COMPLETION_INBOUND_REVERSAL_COMMAND'
+                   )
                 """, new MapSqlParameterSource()
                 .addValue("id", id)
                 .addValue("claimToken", claimToken)) == 1;
@@ -112,7 +121,10 @@ public class WmsInboundOutboxRepository {
                    AND claim_token = :claimToken
                    AND status = 'DISPATCHING'
                    AND aggregate_type = 'BATCH_INSTANCE'
-                   AND event_type = 'WMS_COMPLETION_INBOUND_COMMAND'
+                   AND event_type IN (
+                        'WMS_COMPLETION_INBOUND_COMMAND',
+                        'WMS_COMPLETION_INBOUND_REVERSAL_COMMAND'
+                   )
                 """, new MapSqlParameterSource()
                 .addValue("status", terminal ? "FAILED" : "PENDING")
                 .addValue("retryDelayMs", delay)

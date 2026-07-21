@@ -4,9 +4,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.mapletct.ftmes.bpi.application.ActorContext;
 import com.mapletct.ftmes.bpi.application.BatchReleaseService;
 import com.mapletct.ftmes.bpi.application.Checksums;
+import com.mapletct.ftmes.bpi.application.WmsInboundReversalService;
 import com.mapletct.ftmes.bpi.contract.v1.QcsQualityGateV1;
 import com.mapletct.ftmes.bpi.contract.v1.WmsCompletionInboundReceiptV1;
+import com.mapletct.ftmes.bpi.contract.v1.WmsCompletionInboundReversalReceiptV1;
 import com.mapletct.ftmes.bpi.domain.BatchReleaseView;
+import com.mapletct.ftmes.bpi.domain.WmsInboundReversalTaskView;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 import org.springframework.stereotype.Component;
@@ -26,12 +29,15 @@ public class Phase2IntegrationKafkaRecordProcessor {
     private static final String SCHEMA_VERSION = "schema_version";
 
     private final BatchReleaseService service;
+    private final WmsInboundReversalService reversalService;
     private final BpiPhase2IntegrationProperties properties;
 
     public Phase2IntegrationKafkaRecordProcessor(
             BatchReleaseService service,
+            WmsInboundReversalService reversalService,
             BpiPhase2IntegrationProperties properties) {
         this.service = service;
+        this.reversalService = reversalService;
         this.properties = properties;
     }
 
@@ -69,6 +75,28 @@ public class Phase2IntegrationKafkaRecordProcessor {
         assertKey(record, event.getCommandEventId());
         return service.applyWmsReceipt(
                 actor(event.getTenantId(), event.getPlantId(), event.getLineId(), properties.wmsActorId()),
+                event, Checksums.sha256(payload));
+    }
+
+    public WmsInboundReversalTaskView processWmsReversalReceipt(
+            ConsumerRecord<byte[], byte[]> record) {
+        assertTopic(record, properties.wmsReversalReceiptTopic());
+        byte[] payload = payload(record);
+        WmsCompletionInboundReversalReceiptV1 event;
+        try {
+            event = WmsCompletionInboundReversalReceiptV1.parseFrom(payload);
+        } catch (InvalidProtocolBufferException error) {
+            throw rejected(
+                    "WMS Kafka payload is not valid WmsCompletionInboundReversalReceiptV1 Protobuf.",
+                    error);
+        }
+        assertScopeAndHeaders(
+                record, event.getTenantId(), event.getPlantId(), event.getLineId(),
+                event.getEventId(), event.getIdempotencyKey());
+        assertKey(record, event.getCommandEventId());
+        return reversalService.applyReceipt(
+                actor(event.getTenantId(), event.getPlantId(), event.getLineId(),
+                        properties.wmsActorId()),
                 event, Checksums.sha256(payload));
     }
 

@@ -26,6 +26,7 @@ import com.mapletct.ftmes.bpi.infrastructure.integration.BpiWmsOutboxProperties;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.BatchReleasePostgresRepository;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.BpiPostgresRepository;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.IdempotencyRecord;
+import com.mapletct.ftmes.bpi.infrastructure.postgres.WmsInboundReversalPostgresRepository;
 import com.mapletct.ftmes.bpi.interfaces.rest.ReasonCommand;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,7 @@ public class BatchReleaseService {
 
     private final BpiPostgresRepository repository;
     private final BatchReleasePostgresRepository releaseRepository;
+    private final WmsInboundReversalPostgresRepository reversalRepository;
     private final BpiPhase2IntegrationProperties integrationProperties;
     private final BpiWmsOutboxProperties wmsOutboxProperties;
     private final ObjectMapper objectMapper;
@@ -66,11 +68,13 @@ public class BatchReleaseService {
     public BatchReleaseService(
             BpiPostgresRepository repository,
             BatchReleasePostgresRepository releaseRepository,
+            WmsInboundReversalPostgresRepository reversalRepository,
             BpiPhase2IntegrationProperties integrationProperties,
             BpiWmsOutboxProperties wmsOutboxProperties,
             ObjectMapper objectMapper) {
         this.repository = repository;
         this.releaseRepository = releaseRepository;
+        this.reversalRepository = reversalRepository;
         this.integrationProperties = integrationProperties;
         this.wmsOutboxProperties = wmsOutboxProperties;
         this.objectMapper = objectMapper;
@@ -511,7 +515,8 @@ public class BatchReleaseService {
         return new BatchReleaseView(
                 batch,
                 releaseRepository.findQualityGate(actor, batch.id()),
-                decorateWmsInbound(actor, batch, inbound));
+                decorateWmsInbound(actor, batch, inbound),
+                reversalRepository.findLatestTask(actor, batch.id()));
     }
 
     private WmsInboundView decorateWmsInbound(

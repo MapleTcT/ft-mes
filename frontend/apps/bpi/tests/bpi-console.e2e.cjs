@@ -376,6 +376,101 @@ test('batch detail presents quality release and WMS truth without inferring succ
   await context.close();
 });
 
+test('batch detail completes four-eye WMS reversal and keeps the original blue document visible', async () => {
+  const batchIds = await prepareBatchReleaseScenario();
+  const batchId = batchIds.inbounded;
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await context.newPage();
+  const errors = observe(page);
+  const reversalRequests = [];
+  const reversalOperations = [];
+  page.on('request', (request) => {
+    if (request.method() === 'POST' && request.url().endsWith(`/batches/${batchId}/wms/reversal`)) {
+      reversalRequests.push({
+        method: request.method(),
+        headers: request.headers(),
+        body: request.postDataJSON(),
+      });
+    }
+  });
+  page.on('response', (response) => {
+    if (response.request().method() === 'POST' && response.url().endsWith(`/batches/${batchId}/wms/reversal`)) {
+      reversalOperations.push(response.headers()['x-bpi-operation-id'] || null);
+    }
+  });
+
+  await page.goto(`${APP_URL}/#/batches`, { waitUntil: 'networkidle' });
+  await page.getByRole('heading', { name: '批次档案' }).waitFor();
+  const drawer = page.locator('#detail-drawer');
+  await page.locator(`[data-batch-id="${batchId}"]`).click();
+  await drawer.locator('[data-release-reversal="AVAILABLE"]').waitFor();
+  await drawer.getByText('原入库单可申请冲销', { exact: true }).waitFor();
+  await drawer.getByRole('button', { name: '申请入库冲销' }).click();
+  await page.getByRole('heading', { name: '申请完工入库冲销' }).waitFor();
+  await page.getByText('INBOUNDED → 待独立审批', { exact: true }).waitFor();
+  await page.locator('#confirm-reason').fill('原完工入库业务单据录入错误，申请红单冲销');
+  await page.getByRole('button', { name: '提交独立审批' }).click();
+  await page.locator('#toast').getByText('入库冲销申请已提交，等待独立管理员审批', { exact: true }).waitFor();
+  await drawer.locator('[data-release-reversal="PENDING_APPROVAL"]').waitFor();
+  await drawer.getByText('等待独立管理员审批', { exact: true }).waitFor();
+  assert.equal(await drawer.locator('[data-original-document]').textContent(), 'WMS-IN-ADP-E2E-0001');
+
+  await drawer.getByRole('button', { name: '独立审批冲销' }).click();
+  await page.getByRole('heading', { name: '批准完工入库冲销' }).waitFor();
+  await page.getByText('simulated.shift.lead', { exact: true }).waitFor();
+  await page.locator('#confirm-reason').fill('独立复核原蓝单、物料、数量和申请依据一致');
+  await page.getByRole('button', { name: '批准并生成红单' }).click();
+  await page.locator('#toast').getByText('冲销已批准，红单命令已进入 WMS 队列', { exact: true }).waitFor();
+  await drawer.locator('[data-release-reversal="PENDING_WMS"]').waitFor();
+  await drawer.getByText('红单命令等待 WMS 回执', { exact: true }).waitFor();
+  assert.equal(await drawer.locator('[data-original-document]').textContent(), 'WMS-IN-ADP-E2E-0001');
+
+  let release = await fetch(`${simulatorUrl}/bpi/v1/batches/${batchId}/release`).then((response) => response.json());
+  assert.equal(release.data.batch.state, 'INBOUND_REVERSING');
+  assert.equal(release.data.wmsInbound.documentId, 'WMS-IN-ADP-E2E-0001');
+  assert.equal(release.data.wmsInboundReversal.state, 'PENDING_WMS');
+  assert.notEqual(release.data.wmsInboundReversal.reversalCommandEventId, release.data.wmsInbound.commandEventId);
+
+  let response = await fetch(`${simulatorUrl}/__simulation/complete-wms-inbound-reversal`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ batchId, status: 'ACCEPTED', reversalDocumentId: 'WMS-RED-ADP-E2E-0001' }),
+  });
+  assert.equal(response.status, 200);
+  await drawer.locator('[data-close-drawer]').first().click();
+  await page.locator(`[data-batch-id="${batchId}"]`).click();
+  await drawer.locator('[data-release-reversal="COMPLETED"]').waitFor();
+  await drawer.getByText('完工入库已冲销', { exact: true }).waitFor();
+  await drawer.getByText('WMS-RED-ADP-E2E-0001', { exact: true }).waitFor();
+  assert.equal(await drawer.locator('[data-original-document]').textContent(), 'WMS-IN-ADP-E2E-0001');
+  await drawer.getByText(/原蓝单 WMS-IN-ADP-E2E-0001.*始终只读保留/).waitFor();
+  await assertDrawerSettled(page);
+  const completedReversal = drawer.locator('[data-release-reversal="COMPLETED"]');
+  await completedReversal.screenshot({ path: '/tmp/bpi-console-wms-inbound-reversal.png' });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await completedReversal.scrollIntoViewIfNeeded();
+  const mobileBox = await completedReversal.boundingBox();
+  assert.ok(mobileBox && mobileBox.x >= 0 && mobileBox.x + mobileBox.width <= 391,
+    `reversal block must fit the mobile viewport: ${JSON.stringify(mobileBox)}`);
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
+  await completedReversal.screenshot({ path: '/tmp/bpi-console-wms-inbound-reversal-mobile.png' });
+
+  release = await fetch(`${simulatorUrl}/bpi/v1/batches/${batchId}/release`).then((item) => item.json());
+  assert.equal(release.data.batch.state, 'INBOUND_REVERSED');
+  assert.equal(release.data.batch.wmsStatus, 'REVERSED');
+  assert.equal(release.data.wmsInbound.documentId, 'WMS-IN-ADP-E2E-0001');
+  assert.equal(release.data.wmsInboundReversal.reversalDocumentId, 'WMS-RED-ADP-E2E-0001');
+  assert.equal(reversalRequests.length, 2);
+  assert.deepEqual(reversalRequests.map((item) => item.method), ['POST', 'POST']);
+  assert.deepEqual(reversalRequests.map((item) => item.body.approvalMode), ['REQUEST', 'APPROVE']);
+  assert.ok(reversalRequests.every((item) => item.headers['idempotency-key']));
+  assert.deepEqual(reversalRequests.map((item) => item.headers['if-match']), ['7', '8']);
+  assert.deepEqual(reversalOperations, ['commandWmsInboundReversal', 'commandWmsInboundReversal']);
+  assert.deepEqual(errors, []);
+  await context.close();
+});
+
 test('mobile batch detail keeps core facts visible when the release projection fails and recovers locally', async () => {
   const batchIds = await prepareBatchReleaseScenario();
   const context = await browser.newContext({

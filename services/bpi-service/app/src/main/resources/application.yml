@@ -115,6 +115,8 @@ bpi:
     qcs-dlq-topic: ${BPI_PHASE2_QCS_DLQ_TOPIC:qcs.batch.quality-gate.dlq.v1}
     wms-receipt-topic: ${BPI_PHASE2_WMS_RECEIPT_TOPIC:wms.completion-inbound.receipt.v1}
     wms-receipt-dlq-topic: ${BPI_PHASE2_WMS_RECEIPT_DLQ_TOPIC:wms.completion-inbound.receipt.dlq.v1}
+    wms-reversal-receipt-topic: ${BPI_PHASE2_WMS_REVERSAL_RECEIPT_TOPIC:wms.completion-inbound-reversal.receipt.v1}
+    wms-reversal-receipt-dlq-topic: ${BPI_PHASE2_WMS_REVERSAL_RECEIPT_DLQ_TOPIC:wms.completion-inbound-reversal.receipt.dlq.v1}
     group-id: ${BPI_PHASE2_KAFKA_GROUP_ID:ft-mes-bpi-phase2-integrations-v1}
     client-id: ${BPI_PHASE2_KAFKA_CLIENT_ID:ft-mes-bpi-phase2-integrations}
     qcs-actor-id: ${BPI_PHASE2_QCS_ACTOR_ID:qcs-adapter}
@@ -129,6 +131,7 @@ bpi:
     enabled: ${BPI_WMS_OUTBOX_ENABLED:false}
     bootstrap-servers: ${BPI_WMS_OUTBOX_BOOTSTRAP_SERVERS:127.0.0.1:29092}
     topic: ${BPI_WMS_OUTBOX_TOPIC:bpi.wms.completion-inbound-command.v1}
+    reversal-topic: ${BPI_WMS_REVERSAL_OUTBOX_TOPIC:bpi.wms.completion-inbound-reversal-command.v1}
     client-id: ${BPI_WMS_OUTBOX_CLIENT_ID:ft-mes-bpi-wms-outbox}
     batch-size: ${BPI_WMS_OUTBOX_BATCH_SIZE:50}
     max-attempts: ${BPI_WMS_OUTBOX_MAX_ATTEMPTS:20}
