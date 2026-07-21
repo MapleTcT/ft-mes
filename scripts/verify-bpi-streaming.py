@@ -238,6 +238,10 @@ def main() -> int:
         "candidateCount != 1",
         "matchesIssue",
         "inactivePublication",
+        "awaitReadiness",
+        "BoundaryRuleRuntimeReadinessStatusV1.READY",
+        "awaitApplication",
+        "typed inactive cleanup publication and application are required",
     ):
         if marker not in replay_source:
             failures.append(f"BPI Kafka acceptance replay is missing marker {marker!r}")

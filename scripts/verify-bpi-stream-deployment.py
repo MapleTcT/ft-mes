@@ -29,8 +29,10 @@ REQUIRED_FILES = [
     "deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js",
     "deploy/bpi-runtime/scripts/upgrade-expand-only.sh",
     "deploy/bpi-runtime/sql/joint-acceptance-seed.sql",
+    "deploy/bpi-runtime/sql/integrated-rollback-seed.sql",
     "deploy/bpi-runtime/sql/joint-acceptance-verify.sql",
     "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql",
+    "deploy/docker/scripts/adp-bpi-integrated-rollback-rehearsal.js",
     "deploy/bpi-runtime/sql/live-batch-rule-simulation-seed.sql",
     "deploy/bpi-runtime/sql/live-batch-rule-simulation-cleanup.sql",
     "docs/testing/bpi-test-environment-deployment-readiness.md",
@@ -318,6 +320,44 @@ def main() -> int:
         if marker not in joint_seed:
             failures.append(f"BPI joint seed is missing non-overwrite marker: {marker}")
 
+    integrated_seed = (
+        ROOT / "deploy/bpi-runtime/sql/integrated-rollback-seed.sql"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "clean_marker_guard",
+        "SEEDED_PUBLISHED_FIXTURE",
+        "CONTROLLED_INTEGRATED_ROLLBACK_ONLY",
+        "'PUBLISHED'",
+        "'bpi.commands'",
+        "COMMIT;",
+    ):
+        if marker not in integrated_seed:
+            failures.append(f"BPI integrated rollback seed is missing safety marker: {marker}")
+
+    integrated_rollback = (
+        ROOT / "deploy/docker/scripts/adp-bpi-integrated-rollback-rehearsal.js"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "BPI_INTEGRATED_ROLLBACK_CONFIRM",
+        "ROLLBACK_BPI_SERVICE_ADAPTER_FLINK_AND_RESTORE",
+        "BPI_LOAD_CLIENT_JOB_JAR",
+        "BPI_REPLAY_POINT_CATALOG_SOURCE_INSTANCE",
+        "cleanup?.application?.status",
+        "PASS_INTEGRATED_ROLLBACK_CONTROLLED_MARKER",
+        "publishedRuleIsControlledFixture",
+        "businessMutationStillRequiresBrowserConfirmation",
+        "--precheck-only",
+        "watchdog.sh",
+        "restore-all",
+    ):
+        if marker not in integrated_rollback:
+            failures.append(f"BPI integrated rollback script is missing safety marker: {marker}")
+    for forbidden in ("docker compose down", "docker volume", "rm -rf"):
+        if forbidden in integrated_rollback:
+            failures.append(
+                f"BPI integrated rollback script contains destructive marker: {forbidden}"
+            )
+
     deactivation = (
         ROOT / "deploy/bpi-streaming/scripts/run-rule-deactivation.sh"
     ).read_text(encoding="utf-8")
@@ -386,10 +426,12 @@ def main() -> int:
         ROOT / "deploy/bpi-runtime/scripts/browser-joint-acceptance.js"
     ).read_text(encoding="utf-8")
     for marker in (
-        'new Set(["publish", "confirm", "read", "rule-read", "candidate-read", "candidate-absent"])',
+        'new Set(["publish", "confirm", "read", "rule-read", "candidate-read", "candidate-absent", "batch-read"])',
         "BPI_ACCEPTANCE_LINE_ID",
         "readCandidate",
         "readCandidateAbsence",
+        "readBatch",
+        "BPI_ACCEPTANCE_BATCH_ID",
         "drawerBounds",
         "candidate drawer did not expose one actionable PENDING candidate",
         "BPI_ACCEPTANCE_EXPECTED_RUNTIME_STATUS",

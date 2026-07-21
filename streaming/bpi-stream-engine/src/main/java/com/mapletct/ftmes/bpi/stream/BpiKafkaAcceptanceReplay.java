@@ -3,7 +3,11 @@ package com.mapletct.ftmes.bpi.stream;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mapletct.ftmes.bpi.contract.validation.BpiContractValidator;
 import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1;
 import com.mapletct.ftmes.bpi.contract.v1.DataQualityEventV1;
 import com.mapletct.ftmes.bpi.contract.v1.TelemetryEnvelopeV1;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -39,7 +43,7 @@ public final class BpiKafkaAcceptanceReplay {
         BpiKafkaAcceptanceReplayConfig config = BpiKafkaAcceptanceReplayConfig
                 .fromEnvironment(System.getenv());
         BpiKafkaAcceptanceScenario.Scenario scenario = BpiKafkaAcceptanceScenario
-                .create(config.marker(), Instant.now().minusSeconds(10));
+                .create(config, Instant.now().minusSeconds(10));
         try {
             ReplayResult result = execute(config, scenario);
             writeReport(config, scenario, result, "PASS", null);
@@ -62,6 +66,7 @@ public final class BpiKafkaAcceptanceReplay {
             boolean rulePublished = false;
             ReplayResult result;
             InputOffset cleanup = null;
+            LocatedApplication cleanupApplication = null;
             try {
                 inputs.add(send(
                         producer,
@@ -89,6 +94,8 @@ public final class BpiKafkaAcceptanceReplay {
                         scenario.tenantId(),
                         scenario.context().toByteArray()));
                 producer.flush();
+                LocatedReadiness readiness = awaitReadiness(
+                        consumer, config, scenario, scenario.publication().getEventId());
                 sleep(config.ruleSettle());
 
                 for (int index = 0; index < scenario.telemetry().size(); index++) {
@@ -106,7 +113,8 @@ public final class BpiKafkaAcceptanceReplay {
                     }
                 }
                 producer.flush();
-                result = awaitResult(consumer, config, scenario, List.copyOf(inputs));
+                result = awaitResult(consumer, config, scenario, List.copyOf(inputs))
+                        .withReadiness(readiness);
             } finally {
                 if (rulePublished) {
                     BoundaryRulePublicationV1 inactive = scenario.inactivePublication(Instant.now());
@@ -119,9 +127,11 @@ public final class BpiKafkaAcceptanceReplay {
                             scenario.tenantId(),
                             inactive.toByteArray());
                     producer.flush();
+                    cleanupApplication = awaitApplication(
+                            consumer, config, scenario, inactive.getEventId());
                 }
             }
-            return result.withCleanup(cleanup);
+            return result.withCleanup(cleanup, cleanupApplication);
         }
     }
 
@@ -193,10 +203,86 @@ public final class BpiKafkaAcceptanceReplay {
         return new ReplayResult(inputs, matched, candidateOffset, candidateCount, List.copyOf(qualityIssues));
     }
 
+    private static LocatedApplication awaitApplication(
+            KafkaConsumer<byte[], byte[]> consumer,
+            BpiKafkaAcceptanceReplayConfig config,
+            BpiKafkaAcceptanceScenario.Scenario scenario,
+            String publicationEventId) throws InvalidProtocolBufferException {
+        Instant deadline = Instant.now().plus(config.timeout());
+        while (Instant.now().isBefore(deadline)) {
+            ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofSeconds(1));
+            for (ConsumerRecord<byte[], byte[]> record : records) {
+                if (!record.topic().equals(config.ruleApplicationTopic()) || record.value() == null) {
+                    continue;
+                }
+                BoundaryRuleApplicationV1 application =
+                        BoundaryRuleApplicationV1.parseFrom(record.value());
+                if (!application.getPublicationEventId().equals(publicationEventId)
+                        || !application.getTenantId().equals(scenario.tenantId())
+                        || !application.getPlantId().equals(scenario.plantId())
+                        || !application.getLineId().equals(scenario.lineId())
+                        || !application.getRuleCode().equals(scenario.ruleCode())
+                        || !application.getRuleVersion().equals(scenario.ruleVersion())) {
+                    continue;
+                }
+                if (application.getStatus() != BoundaryRuleApplicationStatusV1.APPLIED) {
+                    throw new IllegalStateException(
+                            "typed inactive rule was not applied: "
+                                    + application.getErrorCode() + ":" + application.getDetail());
+                }
+                return new LocatedApplication(
+                        application,
+                        new OutputOffset(record.topic(), record.partition(), record.offset()));
+            }
+        }
+        throw new IllegalStateException("Flink did not commit the typed inactive rule before timeout");
+    }
+
+    private static LocatedReadiness awaitReadiness(
+            KafkaConsumer<byte[], byte[]> consumer,
+            BpiKafkaAcceptanceReplayConfig config,
+            BpiKafkaAcceptanceScenario.Scenario scenario,
+            String publicationEventId) throws InvalidProtocolBufferException {
+        Instant deadline = Instant.now().plus(config.timeout());
+        List<String> degradedReasons = new ArrayList<>();
+        while (Instant.now().isBefore(deadline)) {
+            ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofSeconds(1));
+            for (ConsumerRecord<byte[], byte[]> record : records) {
+                if (!record.topic().equals(config.ruleRuntimeReadinessTopic())
+                        || record.value() == null) {
+                    continue;
+                }
+                BoundaryRuleRuntimeReadinessV1 readiness =
+                        BoundaryRuleRuntimeReadinessV1.parseFrom(record.value());
+                if (!readiness.getPublicationEventId().equals(publicationEventId)
+                        || !readiness.getTenantId().equals(scenario.tenantId())
+                        || !readiness.getPlantId().equals(scenario.plantId())
+                        || !readiness.getLineId().equals(scenario.lineId())
+                        || !readiness.getRuleCode().equals(scenario.ruleCode())
+                        || !readiness.getRuleVersion().equals(scenario.ruleVersion())) {
+                    continue;
+                }
+                if (readiness.getStatus() == BoundaryRuleRuntimeReadinessStatusV1.READY) {
+                    return new LocatedReadiness(
+                            readiness,
+                            new OutputOffset(record.topic(), record.partition(), record.offset()));
+                }
+                degradedReasons.add(readiness.getReasonCode() + ":" + readiness.getDetail());
+            }
+        }
+        throw new IllegalStateException(
+                "Flink rule runtime did not become READY before timeout; observations="
+                        + degradedReasons);
+    }
+
     private static void positionAtEnd(
             KafkaConsumer<byte[], byte[]> consumer,
             BpiKafkaAcceptanceReplayConfig config) {
-        consumer.subscribe(List.of(config.candidateTopic(), config.dataQualityTopic()));
+        consumer.subscribe(List.of(
+                config.candidateTopic(),
+                config.dataQualityTopic(),
+                config.ruleApplicationTopic(),
+                config.ruleRuntimeReadinessTopic()));
         Instant deadline = Instant.now().plusSeconds(20);
         while (consumer.assignment().isEmpty() && Instant.now().isBefore(deadline)) {
             consumer.poll(Duration.ofMillis(250));
@@ -276,12 +362,25 @@ public final class BpiKafkaAcceptanceReplay {
                 .append("  \"generatedAt\": ").append(quote(Instant.now().toString())).append(",\n")
                 .append("  \"status\": ").append(quote(status)).append(",\n")
                 .append("  \"marker\": ").append(quote(scenario.marker())).append(",\n")
+                .append("  \"scope\": {\"tenantId\": ").append(quote(scenario.tenantId()))
+                .append(", \"plantId\": ").append(quote(scenario.plantId()))
+                .append(", \"lineId\": ").append(quote(scenario.lineId()))
+                .append(", \"topology\": ")
+                .append(quote(scenario.publication().getTopologyCode() + "@"
+                        + scenario.publication().getTopologyVersion()))
+                .append(", \"rule\": ")
+                .append(quote(scenario.ruleCode() + "@" + scenario.ruleVersion()))
+                .append(", \"orderId\": ").append(quote(scenario.orderId()))
+                .append("},\n")
                 .append("  \"clusterSmokeRequired\": true,\n")
                 .append("  \"topics\": {\n")
                 .append("    \"telemetry\": ").append(quote(config.telemetryTopic())).append(",\n")
                 .append("    \"pointCatalog\": ").append(quote(config.pointCatalogTopic())).append(",\n")
                 .append("    \"context\": ").append(quote(config.contextTopic())).append(",\n")
                 .append("    \"rule\": ").append(quote(config.ruleTopic())).append(",\n")
+                .append("    \"ruleApplication\": ").append(quote(config.ruleApplicationTopic())).append(",\n")
+                .append("    \"ruleRuntimeReadiness\": ")
+                .append(quote(config.ruleRuntimeReadinessTopic())).append(",\n")
                 .append("    \"candidate\": ").append(quote(config.candidateTopic())).append(",\n")
                 .append("    \"dataQuality\": ").append(quote(config.dataQualityTopic())).append("\n")
                 .append("  },\n");
@@ -296,10 +395,37 @@ public final class BpiKafkaAcceptanceReplay {
                 json.append(index + 1 == result.inputs().size() ? "\n" : ",\n");
             }
             json.append("  ],\n")
-                    .append("  \"cleanup\": {\"topic\": ").append(quote(result.cleanup().topic()))
+                    .append("  \"activeReadiness\": {\"topic\": ")
+                    .append(quote(result.readiness().offset().topic()))
+                    .append(", \"partition\": ").append(result.readiness().offset().partition())
+                    .append(", \"offset\": ").append(result.readiness().offset().offset())
+                    .append(", \"eventId\": ")
+                    .append(quote(result.readiness().readiness().getEventId()))
+                    .append(", \"publicationEventId\": ")
+                    .append(quote(result.readiness().readiness().getPublicationEventId()))
+                    .append(", \"pointCatalogEventId\": ")
+                    .append(quote(result.readiness().readiness().getPointCatalogEventId()))
+                    .append(", \"status\": ")
+                    .append(quote(result.readiness().readiness().getStatus().name()))
+                    .append("},\n")
+                    .append("  \"cleanup\": {\n")
+                    .append("    \"publication\": {\"topic\": ").append(quote(result.cleanup().topic()))
                     .append(", \"partition\": ").append(result.cleanup().partition())
                     .append(", \"offset\": ").append(result.cleanup().offset())
                     .append(", \"eventId\": ").append(quote(result.cleanup().eventId())).append("},\n")
+                    .append("    \"application\": {\"topic\": ")
+                    .append(quote(result.cleanupApplication().offset().topic()))
+                    .append(", \"partition\": ").append(result.cleanupApplication().offset().partition())
+                    .append(", \"offset\": ").append(result.cleanupApplication().offset().offset())
+                    .append(", \"eventId\": ")
+                    .append(quote(result.cleanupApplication().application().getEventId()))
+                    .append(", \"publicationEventId\": ")
+                    .append(quote(result.cleanupApplication().application().getPublicationEventId()))
+                    .append(", \"deploymentId\": ")
+                    .append(quote(result.cleanupApplication().application().getDeploymentId()))
+                    .append(", \"status\": ")
+                    .append(quote(result.cleanupApplication().application().getStatus().name()))
+                    .append("}\n  },\n")
                     .append("  \"candidate\": {\n")
                     .append("    \"candidateKey\": ").append(quote(result.candidate().getCandidateKey())).append(",\n")
                     .append("    \"eventId\": ").append(quote(result.candidate().getEventId())).append(",\n")
@@ -349,7 +475,9 @@ public final class BpiKafkaAcceptanceReplay {
             OutputOffset candidateOffset,
             int candidateCount,
             List<String> qualityIssues,
-            InputOffset cleanup) {
+            LocatedReadiness readiness,
+            InputOffset cleanup,
+            LocatedApplication cleanupApplication) {
 
         ReplayResult(
                 List<InputOffset> inputs,
@@ -357,14 +485,35 @@ public final class BpiKafkaAcceptanceReplay {
                 OutputOffset candidateOffset,
                 int candidateCount,
                 List<String> qualityIssues) {
-            this(inputs, candidate, candidateOffset, candidateCount, qualityIssues, null);
+            this(inputs, candidate, candidateOffset, candidateCount, qualityIssues, null, null, null);
         }
 
-        ReplayResult withCleanup(InputOffset cleanup) {
-            if (cleanup == null) {
-                throw new IllegalStateException("typed inactive cleanup offset is required");
+        ReplayResult withReadiness(LocatedReadiness readiness) {
+            if (readiness == null) {
+                throw new IllegalStateException("active runtime readiness receipt is required");
             }
-            return new ReplayResult(inputs, candidate, candidateOffset, candidateCount, qualityIssues, cleanup);
+            return new ReplayResult(
+                    inputs, candidate, candidateOffset, candidateCount, qualityIssues,
+                    readiness, cleanup, cleanupApplication);
         }
+
+        ReplayResult withCleanup(InputOffset cleanup, LocatedApplication cleanupApplication) {
+            if (cleanup == null || cleanupApplication == null) {
+                throw new IllegalStateException("typed inactive cleanup publication and application are required");
+            }
+            return new ReplayResult(
+                    inputs, candidate, candidateOffset, candidateCount, qualityIssues,
+                    readiness, cleanup, cleanupApplication);
+        }
+    }
+
+    record LocatedApplication(
+            BoundaryRuleApplicationV1 application,
+            OutputOffset offset) {
+    }
+
+    record LocatedReadiness(
+            BoundaryRuleRuntimeReadinessV1 readiness,
+            OutputOffset offset) {
     }
 }

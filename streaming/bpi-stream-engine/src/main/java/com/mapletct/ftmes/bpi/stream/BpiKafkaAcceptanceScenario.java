@@ -27,18 +27,42 @@ final class BpiKafkaAcceptanceScenario {
     }
 
     static Scenario create(String marker, Instant baseTime) {
+        return create(Scope.defaults(marker), baseTime);
+    }
+
+    static Scenario create(BpiKafkaAcceptanceReplayConfig config, Instant baseTime) {
+        if (config == null) {
+            throw new IllegalArgumentException("replay config is required");
+        }
+        return create(new Scope(
+                config.marker(),
+                config.tenantId(),
+                config.plantId(),
+                config.lineId(),
+                config.topologyCode(),
+                config.topologyVersion(),
+                config.ruleCode(),
+                config.ruleVersion(),
+                config.orderId(),
+                config.productId(),
+                config.deviceId(),
+                config.pointCatalogSourceInstance()), baseTime);
+    }
+
+    private static Scenario create(Scope scope, Instant baseTime) {
+        String marker = scope.marker();
         if (marker == null || !SAFE_MARKER.matcher(marker).matches()) {
             throw new IllegalArgumentException("replay marker must be 8-80 safe token characters");
         }
         if (baseTime == null || baseTime.toEpochMilli() <= 0) {
             throw new IllegalArgumentException("baseTime must be positive");
         }
-        String tenantId = "TENANT-E2E";
-        String plantId = "PLANT-E2E";
-        String lineId = "LINE-" + marker;
-        String ruleCode = "START-" + marker;
-        String orderId = "MO-" + marker;
-        String deviceId = "DEVICE-" + marker;
+        String tenantId = scope.tenantId();
+        String plantId = scope.plantId();
+        String lineId = scope.lineId();
+        String ruleCode = scope.ruleCode();
+        String orderId = scope.orderId();
+        String deviceId = scope.deviceId();
 
         BoundaryRulePublicationV1 publication = BoundaryRulePublicationV1.newBuilder()
                 .setEventId(marker + "-RULE-ACTIVE")
@@ -46,10 +70,10 @@ final class BpiKafkaAcceptanceScenario {
                 .setPlantId(plantId)
                 .setLineId(lineId)
                 .setLocalityGroup("FEED")
-                .setTopologyCode("TOPO-E2E")
-                .setTopologyVersion("1")
+                .setTopologyCode(scope.topologyCode())
+                .setTopologyVersion(scope.topologyVersion())
                 .setRuleCode(ruleCode)
-                .setRuleVersion("1")
+                .setRuleVersion(scope.ruleVersion())
                 .setBoundaryType(BoundaryType.START)
                 .setQuorumMinimum(1)
                 .setMinimumConfidence(1.0)
@@ -66,7 +90,7 @@ final class BpiKafkaAcceptanceScenario {
                         .setClassification(BoundaryEvidenceClassV1.QUORUM)
                         .setWeight(100))
                 .addSignalBindings(BoundarySignalBindingV1.newBuilder()
-                        .setProductId("PRODUCT-E2E")
+                        .setProductId(scope.productId())
                         .setDeviceId(deviceId)
                         .setPropertyId("flow")
                         .setSignal("feed.flow")
@@ -94,13 +118,16 @@ final class BpiKafkaAcceptanceScenario {
                 .build();
 
         List<TelemetryEnvelopeV1> telemetry = List.of(
-                telemetry(marker, tenantId, plantId, lineId, deviceId, baseTime.plusSeconds(1), 1),
-                telemetry(marker, tenantId, plantId, lineId, deviceId, baseTime.plusSeconds(2), 2),
-                telemetry(marker, tenantId, plantId, lineId, deviceId, baseTime.plusSeconds(3), 3));
+                telemetry(marker, tenantId, plantId, lineId, scope.productId(), deviceId,
+                        baseTime.plusSeconds(1), 1),
+                telemetry(marker, tenantId, plantId, lineId, scope.productId(), deviceId,
+                        baseTime.plusSeconds(2), 2),
+                telemetry(marker, tenantId, plantId, lineId, scope.productId(), deviceId,
+                        baseTime.plusSeconds(3), 3));
         PointCatalogSnapshotV1 pointCatalog = PointCatalogSnapshotV1.newBuilder()
                 .setEventId(marker + "-POINT-CATALOG")
                 .setSource("ACCEPTANCE")
-                .setSourceInstance("LOCAL-KAFKA")
+                .setSourceInstance(scope.pointCatalogSourceInstance())
                 .setSourceRevision("sha256:" + marker)
                 .setTenantId(tenantId)
                 .setPlantId(plantId)
@@ -108,7 +135,7 @@ final class BpiKafkaAcceptanceScenario {
                 .setObservedAtMs(baseTime.minusSeconds(1).toEpochMilli())
                 .setReason("Controlled local Kafka acceptance")
                 .addPoints(PointCatalogPointV1.newBuilder()
-                        .setProductId("PRODUCT-E2E")
+                        .setProductId(scope.productId())
                         .setDeviceId(deviceId)
                         .setPropertyId("flow")
                         .setUnit("m3/h")
@@ -121,7 +148,7 @@ final class BpiKafkaAcceptanceScenario {
                         .setSourceSequenceEnabled(true))
                 .build();
         return new Scenario(marker, tenantId, plantId, lineId, ruleCode, orderId, deviceId,
-                publication, pointCatalog, context, telemetry);
+                scope.ruleVersion(), publication, pointCatalog, context, telemetry);
     }
 
     private static TelemetryEnvelopeV1 telemetry(
@@ -129,6 +156,7 @@ final class BpiKafkaAcceptanceScenario {
             String tenantId,
             String plantId,
             String lineId,
+            String productId,
             String deviceId,
             Instant eventTime,
             long sequence) {
@@ -139,7 +167,7 @@ final class BpiKafkaAcceptanceScenario {
                 .setPlantId(plantId)
                 .setLineId(lineId)
                 .setGatewayId("GATEWAY-E2E")
-                .setProductId("PRODUCT-E2E")
+                .setProductId(productId)
                 .setDeviceId(deviceId)
                 .setEventTimeMs(eventTime.toEpochMilli())
                 .setIngestTimeMs(Instant.now().toEpochMilli())
@@ -157,6 +185,37 @@ final class BpiKafkaAcceptanceScenario {
                 .build();
     }
 
+    private record Scope(
+            String marker,
+            String tenantId,
+            String plantId,
+            String lineId,
+            String topologyCode,
+            String topologyVersion,
+            String ruleCode,
+            String ruleVersion,
+            String orderId,
+            String productId,
+            String deviceId,
+            String pointCatalogSourceInstance) {
+
+        private static Scope defaults(String marker) {
+            return new Scope(
+                    marker,
+                    "TENANT-E2E",
+                    "PLANT-E2E",
+                    "LINE-" + marker,
+                    "TOPO-E2E",
+                    "1",
+                    "START-" + marker,
+                    "1",
+                    "MO-" + marker,
+                    "PRODUCT-E2E",
+                    "DEVICE-" + marker,
+                    "LOCAL-KAFKA");
+        }
+    }
+
     record Scenario(
             String marker,
             String tenantId,
@@ -165,6 +224,7 @@ final class BpiKafkaAcceptanceScenario {
             String ruleCode,
             String orderId,
             String deviceId,
+            String ruleVersion,
             BoundaryRulePublicationV1 publication,
             PointCatalogSnapshotV1 pointCatalog,
             ProductionContextEventV1 context,
@@ -179,7 +239,7 @@ final class BpiKafkaAcceptanceScenario {
         }
 
         String ruleKey() {
-            return tenantId + "|" + plantId + "|" + lineId + "|" + ruleCode + "|1";
+            return tenantId + "|" + plantId + "|" + lineId + "|" + ruleCode + "|" + ruleVersion;
         }
 
         String contextKey() {

@@ -43,12 +43,22 @@ SELECT id
         )
    );
 
+CREATE TEMP TABLE bpi_joint_point_catalog_ids ON COMMIT DROP AS
+SELECT id
+  FROM bpi.bpi_point_catalog_snapshots
+ WHERE tenant_id = :'tenant_id'
+   AND plant_id = :'plant_id'
+   AND line_id = :'line_id'
+   AND source = 'ACCEPTANCE'
+   AND source_instance = 'BPI-JOINT-' || :'marker';
+
 DELETE FROM bpi.bpi_audit_events
  WHERE tenant_id = :'tenant_id'
    AND (
         object_id IN (SELECT rule_id FROM bpi_joint_acceptance_ids)
      OR object_id IN (SELECT id FROM bpi_joint_candidate_ids)
      OR object_id IN (SELECT id FROM bpi_joint_batch_ids)
+     OR object_id IN (SELECT id FROM bpi_joint_point_catalog_ids)
    );
 
 DELETE FROM bpi.bpi_boundary_evidence
@@ -96,6 +106,7 @@ DELETE FROM bpi.bpi_inbox_events
                  WHERE outbox_id IS NOT NULL
             )
         )
+     OR event_id = :'marker' || '-POINT-CATALOG'
    );
 
 DELETE FROM bpi.bpi_batch_candidates
@@ -136,6 +147,14 @@ DELETE FROM bpi.bpi_feature_flags
  WHERE tenant_id = :'tenant_id'
    AND updated_by = :'marker';
 
+DELETE FROM bpi.bpi_point_catalog_entries
+ WHERE tenant_id = :'tenant_id'
+   AND snapshot_id IN (SELECT id FROM bpi_joint_point_catalog_ids);
+
+DELETE FROM bpi.bpi_point_catalog_snapshots
+ WHERE tenant_id = :'tenant_id'
+   AND id IN (SELECT id FROM bpi_joint_point_catalog_ids);
+
 DELETE FROM bpi.bpi_rule_versions
  WHERE id IN (SELECT rule_id FROM bpi_joint_acceptance_ids);
 
@@ -149,7 +168,30 @@ SELECT json_build_object(
         'topologies', (SELECT count(*) FROM bpi.bpi_topology_versions WHERE tenant_id = :'tenant_id' AND created_by = :'marker'),
         'rules', (SELECT count(*) FROM bpi.bpi_rule_versions WHERE tenant_id = :'tenant_id' AND created_by = :'marker'),
         'candidates', (SELECT count(*) FROM bpi.bpi_batch_candidates WHERE tenant_id = :'tenant_id' AND order_id = :'order_id'),
-        'batches', (SELECT count(*) FROM bpi.bpi_batch_instances WHERE tenant_id = :'tenant_id' AND order_id = :'order_id')
+        'batches', (SELECT count(*) FROM bpi.bpi_batch_instances WHERE tenant_id = :'tenant_id' AND order_id = :'order_id'),
+        'inboxEvents', (SELECT count(*) FROM bpi.bpi_inbox_events
+                         WHERE tenant_id = :'tenant_id'
+                           AND (
+                                idempotency_key IN (SELECT candidate_key::text FROM bpi_joint_candidate_ids)
+                             OR event_id = :'marker' || '-POINT-CATALOG'
+                           )),
+        'featureFlags', (SELECT count(*) FROM bpi.bpi_feature_flags
+                          WHERE tenant_id = :'tenant_id'
+                            AND updated_by = :'marker'),
+        'auditEvents', (SELECT count(*) FROM bpi.bpi_audit_events
+                         WHERE tenant_id = :'tenant_id'
+                           AND (
+                                object_id IN (SELECT rule_id FROM bpi_joint_acceptance_ids)
+                             OR object_id IN (SELECT id FROM bpi_joint_candidate_ids)
+                             OR object_id IN (SELECT id FROM bpi_joint_batch_ids)
+                             OR object_id IN (SELECT id FROM bpi_joint_point_catalog_ids)
+                           )),
+        'pointCatalogSnapshots', (SELECT count(*) FROM bpi.bpi_point_catalog_snapshots
+                                   WHERE tenant_id = :'tenant_id'
+                                     AND plant_id = :'plant_id'
+                                     AND line_id = :'line_id'
+                                     AND source = 'ACCEPTANCE'
+                                     AND source_instance = 'BPI-JOINT-' || :'marker')
     )
 );
 

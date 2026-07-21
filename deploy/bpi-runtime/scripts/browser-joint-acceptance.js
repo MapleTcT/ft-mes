@@ -16,6 +16,10 @@ const goldenSetId = process.env.BPI_ACCEPTANCE_GOLDEN_SET_ID || "";
 const boundaryTime = process.env.BPI_ACCEPTANCE_BOUNDARY_TIME || "";
 const orderId = process.env.BPI_ACCEPTANCE_ORDER_ID || `MO-${marker}`;
 const expectedLineId = process.env.BPI_ACCEPTANCE_LINE_ID || "";
+const expectedBatchId = process.env.BPI_ACCEPTANCE_BATCH_ID || "";
+const expectedBatchState = (process.env.BPI_ACCEPTANCE_BATCH_STATE || "ACTIVE")
+  .trim()
+  .toUpperCase();
 const expectedBoundaryType = (process.env.BPI_ACCEPTANCE_BOUNDARY_TYPE || "START")
   .trim()
   .toUpperCase();
@@ -30,8 +34,8 @@ const screenshotPath = path.resolve(process.env.BPI_BROWSER_SCREENSHOT || `/tmp/
 const headless = process.env.BPI_HEADLESS !== "false";
 const timeoutMs = Number(process.env.BPI_BROWSER_TIMEOUT_MS || 120_000);
 
-if (!new Set(["publish", "confirm", "read", "rule-read", "candidate-read", "candidate-absent"]).has(action)) {
-  throw new Error("BPI_BROWSER_ACTION must be publish, confirm, read, rule-read, candidate-read or candidate-absent");
+if (!new Set(["publish", "confirm", "read", "rule-read", "candidate-read", "candidate-absent", "batch-read"]).has(action)) {
+  throw new Error("BPI_BROWSER_ACTION must be publish, confirm, read, rule-read, candidate-read, candidate-absent or batch-read");
 }
 if (action === "publish" && (!ruleCode || !goldenSetId || !boundaryTime)) {
   throw new Error("publish requires rule code, golden set ID and boundary time");
@@ -50,6 +54,9 @@ if (!new Set(["START", "END"]).has(expectedBoundaryType)) {
 }
 if (action === "rule-read" && (!ruleCode || !expectedRuntimeStatus)) {
   throw new Error("rule-read requires a rule code and expected runtime status");
+}
+if (action === "batch-read" && !expectedBatchId) {
+  throw new Error("batch-read requires BPI_ACCEPTANCE_BATCH_ID");
 }
 
 function required(key) {
@@ -307,6 +314,40 @@ async function readCandidateAbsence(page, evidence) {
   await page.screenshot({ path: screenshotPath, fullPage: true });
 }
 
+async function readBatch(page, evidence) {
+  await page.goto(`${bpiBaseUrl}/#/batches`, { waitUntil: "networkidle", timeout: timeoutMs });
+  await page.getByRole("heading", { name: "批次档案" }).waitFor({ timeout: timeoutMs });
+  const row = page.locator(`[data-batch-id="${expectedBatchId}"]`);
+  if (await row.count() !== 1) throw new Error(`expected one batch row for ${expectedBatchId}`);
+  evidence.batchId = expectedBatchId;
+  evidence.batchRowText = (await row.innerText()).trim();
+  await row.click();
+  const drawer = page.locator("#detail-drawer");
+  await drawer.waitFor({ state: "visible", timeout: timeoutMs });
+  await drawer.getByText(orderId, { exact: true }).waitFor({ timeout: timeoutMs });
+  if (expectedLineId) {
+    await drawer.getByText(new RegExp(`^${escapeRegExp(expectedLineId)}\\s*/`)).waitFor({ timeout: timeoutMs });
+  }
+  await drawer.getByText(expectedBatchState, { exact: true }).waitFor({ timeout: timeoutMs });
+  await drawer.getByText("SHADOW", { exact: true }).waitFor({ timeout: timeoutMs });
+  evidence.batchState = expectedBatchState;
+  evidence.shadow = true;
+  evidence.batchDrawerText = (await drawer.innerText()).trim();
+  evidence.drawerBounds = await drawer.evaluate((current) => {
+    const bounds = current.getBoundingClientRect();
+    return {
+      left: bounds.left,
+      right: bounds.right,
+      width: bounds.width,
+      viewportWidth: window.innerWidth,
+    };
+  });
+  if (evidence.drawerBounds.left < -1 || evidence.drawerBounds.right > evidence.drawerBounds.viewportWidth + 1) {
+    throw new Error("batch drawer extends outside the viewport");
+  }
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+}
+
 async function readOverview(page, evidence) {
   await page.goto(`${bpiBaseUrl}/#/overview`, { waitUntil: "networkidle", timeout: timeoutMs });
   await page.getByRole("heading", { name: "实时生产态势" }).waitFor({ timeout: timeoutMs });
@@ -331,6 +372,8 @@ async function main() {
     action,
     marker,
     orderId,
+    expectedBatchId: expectedBatchId || null,
+    expectedBatchState,
     expectedBoundaryType,
     expectedRuntimeStatus: expectedRuntimeStatus || null,
     expectedPublishStatus,
@@ -414,6 +457,7 @@ async function main() {
     else if (action === "confirm") await confirmCandidate(page, report.evidence);
     else if (action === "candidate-read") await readCandidate(page, report.evidence);
     else if (action === "candidate-absent") await readCandidateAbsence(page, report.evidence);
+    else if (action === "batch-read") await readBatch(page, report.evidence);
     else if (action === "rule-read") await readRuleRuntime(page, report.evidence);
     else await readOverview(page, report.evidence);
     report.page = { url: page.url(), title: await page.title() };

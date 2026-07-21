@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mapletct.ftmes.bpi.contract.validation.BpiContractValidator;
 import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1;
 import com.mapletct.ftmes.bpi.contract.v1.DataQualityEventV1;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -77,12 +81,49 @@ class BpiKafkaAcceptanceScenarioTest {
 
         assertEquals("ft-mes-bpi-acceptance-" + MARKER, config.consumerGroup());
         assertEquals(Path.of("/tmp/replay.json"), config.reportPath());
+        assertEquals("TENANT-E2E", config.tenantId());
+        assertEquals("LINE-" + MARKER, config.lineId());
         assertThrows(IllegalArgumentException.class, () ->
                 BpiKafkaAcceptanceReplayConfig.fromEnvironment(Map.of(
                         "BPI_REPLAY_MARKER", MARKER,
                         "BPI_REPLAY_REPORT", "/tmp/replay.json")));
         assertThrows(IllegalArgumentException.class, () ->
                 BpiKafkaAcceptanceScenario.create("bad marker", T0));
+    }
+
+    @Test
+    void configuredScenarioUsesTheRealAcceptanceScopeWithoutChangingDefaults() {
+        BpiKafkaAcceptanceReplayConfig config = BpiKafkaAcceptanceReplayConfig.fromEnvironment(Map.ofEntries(
+                Map.entry("BPI_KAFKA_BOOTSTRAP_SERVERS", "kafka-1:19092"),
+                Map.entry("BPI_REPLAY_MARKER", MARKER),
+                Map.entry("BPI_REPLAY_REPORT", "/tmp/replay.json"),
+                Map.entry("BPI_REPLAY_TENANT_ID", "1000"),
+                Map.entry("BPI_REPLAY_PLANT_ID", "PLANT-01"),
+                Map.entry("BPI_REPLAY_LINE_ID", "LINE-IRB-01"),
+                Map.entry("BPI_REPLAY_TOPOLOGY_CODE", "TOPO-IRB-01"),
+                Map.entry("BPI_REPLAY_TOPOLOGY_VERSION", "7"),
+                Map.entry("BPI_REPLAY_RULE_CODE", "RULE-IRB-01"),
+                Map.entry("BPI_REPLAY_RULE_VERSION", "3"),
+                Map.entry("BPI_REPLAY_ORDER_ID", "MO-IRB-01"),
+                Map.entry("BPI_REPLAY_PRODUCT_ID", "PRODUCT-IRB-01"),
+                Map.entry("BPI_REPLAY_DEVICE_ID", "DEVICE-IRB-01"),
+                Map.entry("BPI_REPLAY_POINT_CATALOG_SOURCE_INSTANCE", "BPI-JOINT-" + MARKER)));
+
+        BpiKafkaAcceptanceScenario.Scenario scenario =
+                BpiKafkaAcceptanceScenario.create(config, T0);
+
+        assertEquals("1000", scenario.tenantId());
+        assertEquals("PLANT-01", scenario.plantId());
+        assertEquals("LINE-IRB-01", scenario.lineId());
+        assertEquals("TOPO-IRB-01", scenario.publication().getTopologyCode());
+        assertEquals("7", scenario.publication().getTopologyVersion());
+        assertEquals("RULE-IRB-01", scenario.ruleCode());
+        assertEquals("3", scenario.ruleVersion());
+        assertEquals("MO-IRB-01", scenario.orderId());
+        assertEquals("PRODUCT-IRB-01", scenario.pointCatalog().getPoints(0).getProductId());
+        assertEquals("DEVICE-IRB-01", scenario.deviceId());
+        assertEquals("BPI-JOINT-" + MARKER, scenario.pointCatalog().getSourceInstance());
+        assertTrue(scenario.ruleKey().endsWith("|RULE-IRB-01|3"));
     }
 
     @Test
@@ -105,8 +146,26 @@ class BpiKafkaAcceptanceScenarioTest {
                 new BpiKafkaAcceptanceReplay.OutputOffset(config.candidateTopic(), 2, 84),
                 1,
                 java.util.List.of(),
+                new BpiKafkaAcceptanceReplay.LocatedReadiness(
+                        BoundaryRuleRuntimeReadinessV1.newBuilder()
+                                .setEventId(MARKER + "-RULE-READY")
+                                .setPublicationEventId(MARKER + "-RULE-ACTIVE")
+                                .setPointCatalogEventId(MARKER + "-POINT-CATALOG")
+                                .setStatus(BoundaryRuleRuntimeReadinessStatusV1.READY)
+                                .build(),
+                        new BpiKafkaAcceptanceReplay.OutputOffset(
+                                config.ruleRuntimeReadinessTopic(), 0, 83)),
                 new BpiKafkaAcceptanceReplay.InputOffset(
-                        config.ruleTopic(), 0, 85, MARKER + "-RULE-INACTIVE"));
+                        config.ruleTopic(), 0, 85, MARKER + "-RULE-INACTIVE"),
+                new BpiKafkaAcceptanceReplay.LocatedApplication(
+                        BoundaryRuleApplicationV1.newBuilder()
+                                .setEventId(MARKER + "-RULE-INACTIVE-APPLIED")
+                                .setPublicationEventId(MARKER + "-RULE-INACTIVE")
+                                .setDeploymentId("test-deployment")
+                                .setStatus(BoundaryRuleApplicationStatusV1.APPLIED)
+                                .build(),
+                        new BpiKafkaAcceptanceReplay.OutputOffset(
+                                config.ruleApplicationTopic(), 0, 86)));
 
         BpiKafkaAcceptanceReplay.writeReport(config, scenario, result, "PASS", null);
 
@@ -115,7 +174,10 @@ class BpiKafkaAcceptanceScenarioTest {
         assertEquals(MARKER, json.path("marker").asText());
         assertEquals(42, json.path("inputs").get(0).path("offset").asLong());
         assertEquals(84, json.path("candidate").path("offset").asLong());
-        assertEquals(85, json.path("cleanup").path("offset").asLong());
+        assertEquals("READY", json.path("activeReadiness").path("status").asText());
+        assertEquals(85, json.path("cleanup").path("publication").path("offset").asLong());
+        assertEquals(86, json.path("cleanup").path("application").path("offset").asLong());
+        assertEquals("APPLIED", json.path("cleanup").path("application").path("status").asText());
         assertTrue(json.path("error").isNull());
     }
 }
