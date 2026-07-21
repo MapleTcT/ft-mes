@@ -3663,6 +3663,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-entity-model-object-association-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-home-todo-smoke.js",
       "state": "tracked",
       "tracked": true
@@ -6292,6 +6298,12 @@
     {
       "ignored": false,
       "path": "metadata/entity-model-field-type-matrix-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/entity-model-object-association-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -9560,7 +9572,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 609
+      "tracked": 610
     },
     "docs": {
       "tracked": 113
@@ -9569,7 +9581,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 187
+      "tracked": 188
     },
     "package.json": {
       "tracked": 1
@@ -9593,8 +9605,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1589,
-    "tracked": 1589,
+    "totalFiles": 1591,
+    "tracked": 1591,
     "untracked": 0
   },
   "untrackedByDirectory": []

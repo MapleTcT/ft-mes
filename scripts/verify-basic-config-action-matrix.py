@@ -17,6 +17,7 @@ CUSTOM_PROPERTY_PATH = ROOT / "metadata/custom-property-persistence-acceptance.j
 ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH = ROOT / "metadata/entity-model-field-type-matrix-acceptance.json"
+ENTITY_MODEL_OBJECT_ASSOCIATION_PATH = ROOT / "metadata/entity-model-object-association-acceptance.json"
 PRODUCTION_MATRIX_PATH = ROOT / "metadata/production-module-test-cases.json"
 
 ALLOWED_STATUSES = {
@@ -833,6 +834,8 @@ def check_entity_model_field_acceptance(
         "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
         "metadata/entity-model-field-type-matrix-acceptance.json",
         "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
+        "metadata/entity-model-object-association-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-object-association-acceptance.js",
         "metadata/persistence-acceptance.json",
         "metadata/basic-config-coverage.json",
     ):
@@ -1076,6 +1079,104 @@ def check_entity_model_field_acceptance(
         fail(failures, "field type matrix cleanup must leave all marker counts at 0")
     if type_matrix.get("fatalError") is not None:
         fail(failures, "field type matrix fatalError must be null")
+
+    object_association = read_json(
+        ENTITY_MODEL_OBJECT_ASSOCIATION_PATH,
+        failures,
+        "entity/model PostgreSQL OBJECT association acceptance report",
+    )
+    if not object_association:
+        return
+    for key, expected in (
+        ("database", "PostgreSQL"),
+        ("module", "basic-config"),
+        ("actionId", "entity-model-postgres-object-association"),
+        ("areaId", area_id),
+        ("status", "PASS"),
+        ("route", "/msService/ec/engine/msManage"),
+    ):
+        if object_association.get(key) != expected:
+            fail(failures, f"OBJECT association report {key} must be {expected}")
+    marker = str(object_association.get("marker", ""))
+    if not marker.startswith("ADP_E2E_") or "PG_OBJECT_ASSOC" not in marker:
+        fail(failures, "OBJECT association marker must be ADP_E2E_*_PG_OBJECT_ASSOC")
+    summary = object_association.get("summary") if isinstance(object_association.get("summary"), dict) else {}
+    for key, expected in (("testedChecks", 10), ("pass", 10), ("fail", 0), ("blocked", 0), ("status", "PASS")):
+        if summary.get(key) != expected:
+            fail(failures, f"OBJECT association summary.{key} must be {expected}")
+    coverage = object_association.get("coverage") if isinstance(object_association.get("coverage"), dict) else {}
+    if set(str(item) for item in as_list(coverage.get("associationTypes"))) != {"ONE_TO_ONE", "MANY_TO_ONE"}:
+        fail(failures, "OBJECT association coverage must retain ONE_TO_ONE and MANY_TO_ONE")
+    if set(str(item) for item in as_list(coverage.get("targetKeyTypes"))) != {"LONG", "TEXT", "BAPCODE"}:
+        fail(failures, "OBJECT association coverage must retain LONG, TEXT and BAPCODE targets")
+    required_object_checks = {
+        "browser-page-context",
+        "entity-model-target-and-object-create-requests",
+        "object-association-metadata-persistence",
+        "postgres-object-physical-column-types",
+        "legacy-underscore-association-parameter",
+        "marker-row-round-trip-and-logical-association-joins",
+        "object-property-replay-is-idempotent",
+        "invalid-associated-property-rolls-back",
+        "legacy-object-storage-does-not-invent-physical-foreign-keys",
+        "controlled-cleanup",
+    }
+    passed_object_checks = {
+        str(item.get("name"))
+        for item in as_list(object_association.get("checks"))
+        if isinstance(item, dict) and item.get("status") == "PASS"
+    }
+    missing_object_checks = sorted(required_object_checks - passed_object_checks)
+    if missing_object_checks:
+        fail(failures, "OBJECT association missing PASS checks: " + ", ".join(missing_object_checks))
+    requests = object_association.get("requests") if isinstance(object_association.get("requests"), dict) else {}
+    normal_request_keys = {
+        "targetEntityCreate",
+        "targetModelCreate",
+        "createTarget_longKey",
+        "createTarget_textKey",
+        "createTarget_bapCodeKey",
+        "sourceEntityCreate",
+        "sourceModelCreate",
+        "createObject_oneToOneLong",
+        "createObject_manyToOneLong",
+        "createObject_oneToOneText",
+        "createObject_manyToOneBapCode",
+        "objectReplay",
+    }
+    missing_requests = sorted((normal_request_keys | {"invalidTarget"}) - set(requests))
+    if missing_requests:
+        fail(failures, "OBJECT association missing requests: " + ", ".join(missing_requests))
+    for request_key in sorted(normal_request_keys):
+        request = requests.get(request_key)
+        if not isinstance(request, dict) or request.get("responseStatus") != 200:
+            fail(failures, f"OBJECT association request {request_key} must return HTTP 200")
+    invalid_request = requests.get("invalidTarget")
+    if not isinstance(invalid_request, dict) or invalid_request.get("responseStatus") != 500:
+        fail(failures, "OBJECT association invalidTarget request must fail closed with HTTP 500")
+    states = object_association.get("states") if isinstance(object_association.get("states"), dict) else {}
+    after_marker = states.get("afterMarkerInsert") if isinstance(states.get("afterMarkerInsert"), dict) else {}
+    if as_list(after_marker.get("joinCounts")) != [1, 1, 1, 1]:
+        fail(failures, "OBJECT association must retain four successful logical marker joins")
+    if after_marker.get("foreignKeyCount") != 0:
+        fail(failures, "OBJECT association must not invent a synthetic PostgreSQL foreign key")
+    browser = object_association.get("browser") if isinstance(object_association.get("browser"), dict) else {}
+    if browser.get("navigationStatus") != 200 or browser.get("visibleError"):
+        fail(failures, "OBJECT association browser evidence must load without a visible error")
+    unexpected_network = [
+        item
+        for item in as_list(browser.get("networkErrors"))
+        if not isinstance(item, dict) or item.get("expected") is not True
+    ]
+    if unexpected_network or as_list(browser.get("pageErrors")) or as_list(browser.get("requestFailures")):
+        fail(failures, "OBJECT association browser evidence contains unexpected errors")
+    if as_list(object_association.get("invalidResidual")) != [0, 0]:
+        fail(failures, "OBJECT association invalid target must leave metadata and column residuals at zero")
+    cleanup = object_association.get("cleanup") if isinstance(object_association.get("cleanup"), dict) else {}
+    if any(cleanup.get(key) != 0 for key in ("property", "model", "entity", "physicalTable")):
+        fail(failures, "OBJECT association cleanup must leave all marker counts at 0")
+    if object_association.get("fatalError") is not None:
+        fail(failures, "OBJECT association fatalError must be null")
 
 
 def production_case_statuses(failures: list[str]) -> dict[str, str]:

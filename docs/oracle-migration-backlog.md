@@ -6,8 +6,8 @@
 
 ## 摘要
 
-- Generated At：`2026-07-21T08:19:03+00:00`。
-- Repo Commit：`20cbe0a8f1232e6edded4aec4843f93190553706`。
+- Generated At：`2026-07-21T09:03:32+00:00`。
+- Repo Commit：`3650f817f5510c6cfe3a756cd8d4fc410676b287`。
 - 总引用数：`1608`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
@@ -116,9 +116,9 @@
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/META-INF/keyFile/keyfile-db.txt | 6 | recovered-source-backlog | rownum | RAW ,RENAME ,RESOURCE, REVOKE, ROW, ROWID ,ROWNUM, ROWS ,SELECT ,SESSION, SET, SHARE ,SIZE ,SMALLINT, START , |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/META-INF/keyFile/keyfile-db.txt | 7 | recovered-source-backlog | sysdate | SUCCESSFUL ,SYNONYM ,SYSDATE, TABLE, THEN ,TO ,TRIGGER, UID ,UNION, UNIQUE, UPDATE, USER, VALIDATE, VALUES ,VARCHAR, |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.java | 557 | recovered-source-backlog | oracle-keyword | } else if (entityDao.getDBType() == IBaseDao.DBTYPE.ORACLE) { |
-| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1024 | recovered-source-backlog | oracle-keyword | } else if (dbName.startsWith("oracle")) { |
-| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1042 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) |
-| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1043 | recovered-source-backlog | oracle-keyword | dbName = "oracle"; |
+| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1028 | recovered-source-backlog | oracle-keyword | } else if (dbName.startsWith("oracle")) { |
+| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1046 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) |
+| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1047 | recovered-source-backlog | oracle-keyword | dbName = "oracle"; |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/SqlModelServiceImpl.java | 78 | recovered-source-backlog | oracle-keyword | } else if ("oracle".equals(sqlModel.getCurrentDbType())) { |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/SqlModelServiceImpl.java | 94 | recovered-source-backlog | oracle-keyword | sqlModel.setOracleView(getDbViewSql(sqlModel.getCurrentDbSql(), "oracle", tableName, inherents, isMain)); |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/SqlModelServiceImpl.java | 99 | recovered-source-backlog | oracle-keyword | sqlModel.setOracleView(getDbViewSql(sqlModel.getOracleSql(), "oracle", tableName, inherents, isMain)); |

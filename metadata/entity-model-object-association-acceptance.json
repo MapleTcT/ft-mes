@@ -1,0 +1,1843 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-21T08:47:33.358Z",
+  "repoCommit": "3650f817f5510c6cfe3a756cd8d4fc410676b287",
+  "database": "PostgreSQL",
+  "module": "basic-config",
+  "actionId": "entity-model-postgres-object-association",
+  "areaId": "configuration-physical-model-field",
+  "status": "PASS",
+  "marker": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC",
+  "route": "/msService/ec/engine/msManage",
+  "operation": "Create target key fields and OBJECT association fields, replay, reject missing target, verify and clean",
+  "expectedResult": "One-to-one and many-to-one metadata point to real target properties; PostgreSQL columns mirror legacy key storage and all marker joins resolve",
+  "actualResult": "PASS",
+  "apiEndpoints": [
+    "POST /msService/ec/entity/save",
+    "POST /msService/ec/model/save",
+    "POST /msService/ec/property/save"
+  ],
+  "identifiers": {
+    "targetEntityCode": "DataSet_1.0.0_E2eObjTgt084718",
+    "sourceEntityCode": "DataSet_1.0.0_E2eObjSrc084718",
+    "targetModelCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718",
+    "sourceModelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+    "targetTableName": "DS_EOT_084718",
+    "sourceTableName": "DS_EOS_084718",
+    "targetProbeId": 1784623638989,
+    "sourceProbeId": 1784623638990,
+    "targetProperties": [
+      {
+        "key": "longKey",
+        "name": "e2eObjLong084718",
+        "columnName": "OT_LONG_084718",
+        "type": "LONG",
+        "fieldType": "TEXTFIELD",
+        "format": "TEXT",
+        "expected": {
+          "dataType": "bigint"
+        },
+        "sqlValue": "1784623639089",
+        "sort": 1,
+        "propertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718"
+      },
+      {
+        "key": "textKey",
+        "name": "e2eObjText084718",
+        "columnName": "OT_TEXT_084718",
+        "type": "TEXT",
+        "fieldType": "TEXTFIELD",
+        "format": "TEXT",
+        "maxLength": "24",
+        "expected": {
+          "dataType": "character varying",
+          "characterLength": "48"
+        },
+        "sqlValue": "'ADP_E2E_20260721084718_PG_OBJECT_ASSOC_TEXT'",
+        "sort": 2,
+        "propertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjText084718"
+      },
+      {
+        "key": "bapCodeKey",
+        "name": "e2eObjCode084718",
+        "columnName": "OT_CODE_084718",
+        "type": "BAPCODE",
+        "fieldType": "TEXTFIELD",
+        "format": "TEXT",
+        "expected": {
+          "dataType": "character varying",
+          "characterLength": "4000"
+        },
+        "sqlValue": "'ADP_E2E_20260721084718_PG_OBJECT_ASSOC_CODE'",
+        "sort": 3,
+        "propertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjCode084718"
+      }
+    ],
+    "objectProperties": [
+      {
+        "key": "oneToOneLong",
+        "name": "e2eOneLong084718",
+        "columnName": "OS_O1L_084718",
+        "associatedType": "1",
+        "targetKey": "longKey",
+        "expected": {
+          "dataType": "bigint"
+        },
+        "sqlValue": "1784623639089",
+        "parameterStyle": "dotted",
+        "sort": 1,
+        "propertyCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneLong084718"
+      },
+      {
+        "key": "manyToOneLong",
+        "name": "e2eManyLong084718",
+        "columnName": "OS_M1L_084718",
+        "associatedType": "2",
+        "targetKey": "longKey",
+        "expected": {
+          "dataType": "bigint"
+        },
+        "sqlValue": "1784623639089",
+        "parameterStyle": "legacyUnderscore",
+        "sort": 2,
+        "propertyCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyLong084718"
+      },
+      {
+        "key": "oneToOneText",
+        "name": "e2eOneText084718",
+        "columnName": "OS_O1T_084718",
+        "associatedType": "1",
+        "targetKey": "textKey",
+        "expected": {
+          "dataType": "character varying",
+          "characterLength": "48"
+        },
+        "sqlValue": "'ADP_E2E_20260721084718_PG_OBJECT_ASSOC_TEXT'",
+        "parameterStyle": "dotted",
+        "sort": 3,
+        "propertyCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneText084718"
+      },
+      {
+        "key": "manyToOneBapCode",
+        "name": "e2eManyCode084718",
+        "columnName": "OS_M1C_084718",
+        "associatedType": "2",
+        "targetKey": "bapCodeKey",
+        "expected": {
+          "dataType": "character varying",
+          "characterLength": "4000"
+        },
+        "sqlValue": "'ADP_E2E_20260721084718_PG_OBJECT_ASSOC_CODE'",
+        "parameterStyle": "dotted",
+        "sort": 4,
+        "propertyCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyCode084718"
+      }
+    ],
+    "invalidObject": {
+      "key": "invalidTarget",
+      "name": "e2eBadObj084718",
+      "columnName": "OS_BAD_084718",
+      "sort": 5,
+      "propertyCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eBadObj084718",
+      "missingAssociatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_missing084718"
+    }
+  },
+  "coverage": {
+    "associationTypes": [
+      "ONE_TO_ONE",
+      "MANY_TO_ONE"
+    ],
+    "targetKeyTypes": [
+      "LONG",
+      "TEXT",
+      "BAPCODE"
+    ],
+    "requestParameterStyles": [
+      "property.associatedProperty.code",
+      "property_associatedProperty_code"
+    ],
+    "persistenceLayers": [
+      "ec_property",
+      "information_schema.columns",
+      "DS_EOT_084718",
+      "DS_EOS_084718"
+    ]
+  },
+  "summary": {
+    "testedChecks": 10,
+    "pass": 10,
+    "fail": 0,
+    "blocked": 0,
+    "status": "PASS"
+  },
+  "checks": [
+    {
+      "name": "browser-page-context",
+      "status": "PASS",
+      "evidence": "status=200; visibleError=none; unexpectedConsole=0; expectedConsole=1; page=0; request=0; unexpectedNetwork=0"
+    },
+    {
+      "name": "entity-model-target-and-object-create-requests",
+      "status": "PASS",
+      "evidence": "{\"targetEntityCreate\":200,\"targetModelCreate\":200,\"createTarget_longKey\":200,\"createTarget_textKey\":200,\"createTarget_bapCodeKey\":200,\"sourceEntityCreate\":200,\"sourceModelCreate\":200,\"createObject_oneToOneLong\":200,\"createObject_manyToOneLong\":200,\"createObject_oneToOneText\":200,\"createObject_manyToOneBapCode\":200}"
+    },
+    {
+      "name": "object-association-metadata-persistence",
+      "status": "PASS",
+      "evidence": "[{\"code\":\"DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyCode084718\",\"version\":\"0\",\"name\":\"e2eManyCode084718\",\"columnName\":\"OS_M1C_084718\",\"associatedType\":\"2\",\"associatedPropertyCode\":\"DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjCode084718\",\"associatedPropertyType\":\"BAPCODE\",\"associatedMaxLength\":\"\",\"modelCode\":\"DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718\",\"description\":\"ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneBapCode\"},{\"code\":\"DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyLong084718\",\"version\":\"0\",\"name\":\"e2eManyLong084718\",\"columnName\":\"OS_M1L_084718\",\"associatedType\":\"2\",\"associatedPropertyCode\":\"DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718\",\"associatedPropertyType\":\"LONG\",\"associatedMaxLength\":\"\",\"modelCode\":\"DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718\",\"description\":\"ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneLong\"},{\"code\":\"DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneLong084718\",\"version\":\"0\",\"name\":\"e2eOneLong084718\",\"columnName\":\"OS_O1L_084718\",\"associatedType\":\"1\",\"associatedPropertyCode\":\"DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718\",\"associatedPropertyType\":\"LONG\",\"associatedMaxLength\":\"\",\"modelCode\":\"DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718\",\"description\":\"ADP_E2E_20260721084718_PG_OBJECT_ASSOC_oneToOneLong\"},{\"code\":\"DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneText084718\",\"version\":\"0\",\"name\":\"e2eOneText084718\",\"columnName\":\"OS_O1T_084718\",\"associatedType\":\"1\",\"associatedPropertyCode\":\"DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjText084718\",\"associatedPropertyType\":\"TEXT\",\"associatedMaxLength\":\"24\",\"modelCode\":\"DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718\",\"description\":\"ADP_E2E_20260721084718_PG_OBJECT_ASSOC_oneToOneText\"}]"
+    },
+    {
+      "name": "postgres-object-physical-column-types",
+      "status": "PASS",
+      "evidence": "[{\"key\":\"oneToOneLong\",\"column\":{\"columnName\":\"os_o1l_084718\",\"dataType\":\"bigint\",\"characterLength\":\"\",\"numericPrecision\":\"64\",\"numericScale\":\"0\",\"nullable\":\"YES\"}},{\"key\":\"manyToOneLong\",\"column\":{\"columnName\":\"os_m1l_084718\",\"dataType\":\"bigint\",\"characterLength\":\"\",\"numericPrecision\":\"64\",\"numericScale\":\"0\",\"nullable\":\"YES\"}},{\"key\":\"oneToOneText\",\"column\":{\"columnName\":\"os_o1t_084718\",\"dataType\":\"character varying\",\"characterLength\":\"48\",\"numericPrecision\":\"\",\"numericScale\":\"\",\"nullable\":\"YES\"}},{\"key\":\"manyToOneBapCode\",\"column\":{\"columnName\":\"os_m1c_084718\",\"dataType\":\"character varying\",\"characterLength\":\"4000\",\"numericPrecision\":\"\",\"numericScale\":\"\",\"nullable\":\"YES\"}}]"
+    },
+    {
+      "name": "legacy-underscore-association-parameter",
+      "status": "PASS",
+      "evidence": "{\"property.version\":\"0\",\"property.sort\":\"2\",\"property.model.code\":\"DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718\",\"model.enableDataAudit\":\"false\",\"property.entityCode\":\"DataSet_1.0.0_E2eObjSrc084718\",\"property.moduleCode\":\"DataSet_1.0.0\",\"property.code\":\"\",\"property.defaultValue\":\"\",\"property.fillcontent\":\"\",\"property.attributes\":\"\",\"property.isControl\":\"false\",\"property.isUnique\":\"false\",\"property.isHidden\":\"false\",\"property.nullable\":\"true\",\"property.multable\":\"false\",\"property.seniorSystemCode\":\"false\",\"property.sensitive\":\"false\",\"property.stretch\":\"false\",\"property.isBussinessKey\":\"false\",\"property.isUsedMneCode\":\"false\",\"property.isIndex\":\"false\",\"property.orgColumnName\":\"\",\"property.isGroupObject\":\"false\",\"property.onlyLeaf\":\"false\",\"property.isUsedForList\":\"true\",\"property.isCustom\":\"false\",\"property.isUsedForSearch\":\"false\",\"property.isIgnoreAudit\":\"false\",\"property.noAnalyzer\":\"false\",\"property.isMainAssociated\":\"false\",\"property.isMainDisplay\":\"false\",\"property.name\":\"e2eManyLong084718\",\"property.columnName\":\"OS_M1L_084718\",\"property.displayName\":\"ADP_E2E_20260721084718_PG_OBJECT_ASSOC manyToOneLong\",\"property.fetchMode\":\"SELECT\",\"property.description\":\"ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneLong\",\"property.type\":\"OBJECT\",\"property.fieldType\":\"SELECTCOMP\",\"property.format\":\"SELECTCOMP\",\"property.maxLength\":\"\",\"property.decimalNum\":\"\",\"property.associatedType\":\"2\",\"property_associatedProperty_code\":\"DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718\"}"
+    },
+    {
+      "name": "marker-row-round-trip-and-logical-association-joins",
+      "status": "PASS",
+      "evidence": "probe=[{\"id\":\"1784623638990\",\"oneToOneLong\":\"1784623639089\",\"manyToOneLong\":\"1784623639089\",\"oneToOneText\":\"ADP_E2E_20260721084718_PG_OBJECT_ASSOC_TEXT\",\"manyToOneBapCode\":\"ADP_E2E_20260721084718_PG_OBJECT_ASSOC_CODE\"}]; joins=[1,1,1,1]"
+    },
+    {
+      "name": "object-property-replay-is-idempotent",
+      "status": "PASS",
+      "evidence": "response=200; metadata=4; joins=[1,1,1,1]"
+    },
+    {
+      "name": "invalid-associated-property-rolls-back",
+      "status": "PASS",
+      "evidence": "response=500; body={\"exceptionMsg\":\"编码为DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_missing084718的目标字段未选中！\",\"actionErrors\":[],\"success\":false,\"items\":[]}; residual=[0,0]"
+    },
+    {
+      "name": "legacy-object-storage-does-not-invent-physical-foreign-keys",
+      "status": "PASS",
+      "evidence": "foreignKeyCount=0"
+    },
+    {
+      "name": "controlled-cleanup",
+      "status": "PASS",
+      "evidence": "cleanup={\"property\":0,\"model\":0,\"entity\":0,\"physicalTable\":0}"
+    }
+  ],
+  "browser": {
+    "url": "http://10.11.100.17:18080/msService/ec/engine/msManage",
+    "navigationStatus": 200,
+    "navigationAttempts": 1,
+    "navigationTransientErrors": [],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    ],
+    "expectedConsoleErrors": [
+      "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    ],
+    "pageErrors": [],
+    "requestFailures": [],
+    "networkErrors": [
+      {
+        "status": 500,
+        "url": "http://10.11.100.17:18080/msService/ec/property/save",
+        "expected": true
+      }
+    ],
+    "visibleError": null
+  },
+  "requests": {
+    "targetEntityCreate": {
+      "method": "POST",
+      "url": "/msService/ec/entity/save",
+      "requestPayload": {
+        "entity.version": "0",
+        "entity.code": "DataSet_1.0.0_E2eObjTgt084718",
+        "entity.module.code": "DataSet_1.0.0",
+        "entity.isControl": "false",
+        "entity.payCloseAttention": "false",
+        "entity.crossCompanyFlag": "false",
+        "entity.mobile": "false",
+        "entity.enableRest": "false",
+        "entity.enableWs": "false",
+        "entity.enableFieldsPermissionConf": "false",
+        "entity.entityName": "E2eObjTgt084718",
+        "entity.prefix": "EOT",
+        "entity.name": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC E2eObjTgt084718",
+        "entity.isBase": "true",
+        "entity.groupEnabled": "false",
+        "entity.workflowEnabled": "false",
+        "entity.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_E2eObjTgt084718"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "targetModelCreate": {
+      "method": "POST",
+      "url": "/msService/ec/model/save",
+      "requestPayload": {
+        "model.version": "0",
+        "model.code": "",
+        "entity.code": "DataSet_1.0.0_E2eObjTgt084718",
+        "model.entity.code": "DataSet_1.0.0_E2eObjTgt084718",
+        "model.moduleCode": "DataSet_1.0.0",
+        "model.orgTableName": "",
+        "model.modelName": "E2eObjTgtM084718",
+        "model.tableName": "DS_EOT_084718",
+        "model.name": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC E2eObjTgtM084718",
+        "model.dataType": "1",
+        "model.isMain": "false",
+        "model.isExtraCol": "false",
+        "model.isCache": "false",
+        "model.enableSync": "false",
+        "model.type": "0",
+        "model.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_E2eObjTgtM084718"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "createTarget_longKey": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "1",
+        "property.model.code": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eObjTgt084718",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eObjLong084718",
+        "property.columnName": "OT_LONG_084718",
+        "property.displayName": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC longKey",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_longKey",
+        "property.type": "LONG",
+        "property.fieldType": "TEXTFIELD",
+        "property.format": "TEXT",
+        "property.maxLength": "",
+        "property.decimalNum": ""
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "createTarget_textKey": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "2",
+        "property.model.code": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eObjTgt084718",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eObjText084718",
+        "property.columnName": "OT_TEXT_084718",
+        "property.displayName": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC textKey",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_textKey",
+        "property.type": "TEXT",
+        "property.fieldType": "TEXTFIELD",
+        "property.format": "TEXT",
+        "property.maxLength": "24",
+        "property.decimalNum": ""
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "createTarget_bapCodeKey": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "3",
+        "property.model.code": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eObjTgt084718",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eObjCode084718",
+        "property.columnName": "OT_CODE_084718",
+        "property.displayName": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC bapCodeKey",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_bapCodeKey",
+        "property.type": "BAPCODE",
+        "property.fieldType": "TEXTFIELD",
+        "property.format": "TEXT",
+        "property.maxLength": "",
+        "property.decimalNum": ""
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "sourceEntityCreate": {
+      "method": "POST",
+      "url": "/msService/ec/entity/save",
+      "requestPayload": {
+        "entity.version": "0",
+        "entity.code": "DataSet_1.0.0_E2eObjSrc084718",
+        "entity.module.code": "DataSet_1.0.0",
+        "entity.isControl": "false",
+        "entity.payCloseAttention": "false",
+        "entity.crossCompanyFlag": "false",
+        "entity.mobile": "false",
+        "entity.enableRest": "false",
+        "entity.enableWs": "false",
+        "entity.enableFieldsPermissionConf": "false",
+        "entity.entityName": "E2eObjSrc084718",
+        "entity.prefix": "EOS",
+        "entity.name": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC E2eObjSrc084718",
+        "entity.isBase": "true",
+        "entity.groupEnabled": "false",
+        "entity.workflowEnabled": "false",
+        "entity.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_E2eObjSrc084718"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "sourceModelCreate": {
+      "method": "POST",
+      "url": "/msService/ec/model/save",
+      "requestPayload": {
+        "model.version": "0",
+        "model.code": "",
+        "entity.code": "DataSet_1.0.0_E2eObjSrc084718",
+        "model.entity.code": "DataSet_1.0.0_E2eObjSrc084718",
+        "model.moduleCode": "DataSet_1.0.0",
+        "model.orgTableName": "",
+        "model.modelName": "E2eObjSrcM084718",
+        "model.tableName": "DS_EOS_084718",
+        "model.name": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC E2eObjSrcM084718",
+        "model.dataType": "1",
+        "model.isMain": "false",
+        "model.isExtraCol": "false",
+        "model.isCache": "false",
+        "model.enableSync": "false",
+        "model.type": "0",
+        "model.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_E2eObjSrcM084718"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "createObject_oneToOneLong": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "1",
+        "property.model.code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eObjSrc084718",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eOneLong084718",
+        "property.columnName": "OS_O1L_084718",
+        "property.displayName": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC oneToOneLong",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_oneToOneLong",
+        "property.type": "OBJECT",
+        "property.fieldType": "SELECTCOMP",
+        "property.format": "SELECTCOMP",
+        "property.maxLength": "",
+        "property.decimalNum": "",
+        "property.associatedType": "1",
+        "property.associatedProperty.code": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "createObject_manyToOneLong": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "2",
+        "property.model.code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eObjSrc084718",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eManyLong084718",
+        "property.columnName": "OS_M1L_084718",
+        "property.displayName": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC manyToOneLong",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneLong",
+        "property.type": "OBJECT",
+        "property.fieldType": "SELECTCOMP",
+        "property.format": "SELECTCOMP",
+        "property.maxLength": "",
+        "property.decimalNum": "",
+        "property.associatedType": "2",
+        "property_associatedProperty_code": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "createObject_oneToOneText": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "3",
+        "property.model.code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eObjSrc084718",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eOneText084718",
+        "property.columnName": "OS_O1T_084718",
+        "property.displayName": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC oneToOneText",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_oneToOneText",
+        "property.type": "OBJECT",
+        "property.fieldType": "SELECTCOMP",
+        "property.format": "SELECTCOMP",
+        "property.maxLength": "",
+        "property.decimalNum": "",
+        "property.associatedType": "1",
+        "property.associatedProperty.code": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjText084718"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "createObject_manyToOneBapCode": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "4",
+        "property.model.code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eObjSrc084718",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eManyCode084718",
+        "property.columnName": "OS_M1C_084718",
+        "property.displayName": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC manyToOneBapCode",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneBapCode",
+        "property.type": "OBJECT",
+        "property.fieldType": "SELECTCOMP",
+        "property.format": "SELECTCOMP",
+        "property.maxLength": "",
+        "property.decimalNum": "",
+        "property.associatedType": "2",
+        "property.associatedProperty.code": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjCode084718"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "objectReplay": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "2",
+        "property.model.code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eObjSrc084718",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyLong084718",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "OS_M1L_084718",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eManyLong084718",
+        "property.columnName": "OS_M1L_084718",
+        "property.displayName": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC manyToOneLong",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneLong",
+        "property.type": "OBJECT",
+        "property.fieldType": "SELECTCOMP",
+        "property.format": "SELECTCOMP",
+        "property.maxLength": "",
+        "property.decimalNum": "",
+        "property.associatedType": "2",
+        "property_associatedProperty_code": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "invalidTarget": {
+      "method": "POST",
+      "url": "/msService/ec/property/save",
+      "requestPayload": {
+        "property.version": "0",
+        "property.sort": "5",
+        "property.model.code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+        "model.enableDataAudit": "false",
+        "property.entityCode": "DataSet_1.0.0_E2eObjSrc084718",
+        "property.moduleCode": "DataSet_1.0.0",
+        "property.code": "",
+        "property.defaultValue": "",
+        "property.fillcontent": "",
+        "property.attributes": "",
+        "property.isControl": "false",
+        "property.isUnique": "false",
+        "property.isHidden": "false",
+        "property.nullable": "true",
+        "property.multable": "false",
+        "property.seniorSystemCode": "false",
+        "property.sensitive": "false",
+        "property.stretch": "false",
+        "property.isBussinessKey": "false",
+        "property.isUsedMneCode": "false",
+        "property.isIndex": "false",
+        "property.orgColumnName": "",
+        "property.isGroupObject": "false",
+        "property.onlyLeaf": "false",
+        "property.isUsedForList": "true",
+        "property.isCustom": "false",
+        "property.isUsedForSearch": "false",
+        "property.isIgnoreAudit": "false",
+        "property.noAnalyzer": "false",
+        "property.isMainAssociated": "false",
+        "property.isMainDisplay": "false",
+        "property.name": "e2eBadObj084718",
+        "property.columnName": "OS_BAD_084718",
+        "property.displayName": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC invalidTarget",
+        "property.fetchMode": "SELECT",
+        "property.description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_invalidTarget",
+        "property.type": "OBJECT",
+        "property.fieldType": "SELECTCOMP",
+        "property.format": "SELECTCOMP",
+        "property.maxLength": "",
+        "property.decimalNum": "",
+        "property.associatedType": "2",
+        "property.associatedProperty.code": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_missing084718"
+      },
+      "responseStatus": 500,
+      "ok": false,
+      "text": "{\"exceptionMsg\":\"编码为DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_missing084718的目标字段未选中！\",\"actionErrors\":[],\"success\":false,\"items\":[]}",
+      "json": {
+        "exceptionMsg": "编码为DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_missing084718的目标字段未选中！",
+        "actionErrors": [],
+        "success": false,
+        "items": []
+      }
+    }
+  },
+  "states": {
+    "before": {
+      "property": 0,
+      "model": 0,
+      "entity": 0,
+      "physicalTable": 0
+    },
+    "afterCreate": {
+      "label": "afterCreate",
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyCode084718",
+          "version": "0",
+          "name": "e2eManyCode084718",
+          "columnName": "OS_M1C_084718",
+          "associatedType": "2",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjCode084718",
+          "associatedPropertyType": "BAPCODE",
+          "associatedMaxLength": "",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneBapCode"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyLong084718",
+          "version": "0",
+          "name": "e2eManyLong084718",
+          "columnName": "OS_M1L_084718",
+          "associatedType": "2",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718",
+          "associatedPropertyType": "LONG",
+          "associatedMaxLength": "",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneLong"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneLong084718",
+          "version": "0",
+          "name": "e2eOneLong084718",
+          "columnName": "OS_O1L_084718",
+          "associatedType": "1",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718",
+          "associatedPropertyType": "LONG",
+          "associatedMaxLength": "",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_oneToOneLong"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneText084718",
+          "version": "0",
+          "name": "e2eOneText084718",
+          "columnName": "OS_O1T_084718",
+          "associatedType": "1",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjText084718",
+          "associatedPropertyType": "TEXT",
+          "associatedMaxLength": "24",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_oneToOneText"
+        }
+      ],
+      "sourceColumns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "NO"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_o1l_084718",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_m1l_084718",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_o1t_084718",
+          "dataType": "character varying",
+          "characterLength": "48",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_m1c_084718",
+          "dataType": "character varying",
+          "characterLength": "4000",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "targetColumns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "NO"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "ot_long_084718",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "ot_text_084718",
+          "dataType": "character varying",
+          "characterLength": "48",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "ot_code_084718",
+          "dataType": "character varying",
+          "characterLength": "4000",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "sourceProbe": [],
+      "joinCounts": [],
+      "foreignKeyCount": 0
+    },
+    "afterMarkerInsert": {
+      "label": "afterMarkerInsert",
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyCode084718",
+          "version": "0",
+          "name": "e2eManyCode084718",
+          "columnName": "OS_M1C_084718",
+          "associatedType": "2",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjCode084718",
+          "associatedPropertyType": "BAPCODE",
+          "associatedMaxLength": "",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneBapCode"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyLong084718",
+          "version": "0",
+          "name": "e2eManyLong084718",
+          "columnName": "OS_M1L_084718",
+          "associatedType": "2",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718",
+          "associatedPropertyType": "LONG",
+          "associatedMaxLength": "",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneLong"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneLong084718",
+          "version": "0",
+          "name": "e2eOneLong084718",
+          "columnName": "OS_O1L_084718",
+          "associatedType": "1",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718",
+          "associatedPropertyType": "LONG",
+          "associatedMaxLength": "",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_oneToOneLong"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneText084718",
+          "version": "0",
+          "name": "e2eOneText084718",
+          "columnName": "OS_O1T_084718",
+          "associatedType": "1",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjText084718",
+          "associatedPropertyType": "TEXT",
+          "associatedMaxLength": "24",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_oneToOneText"
+        }
+      ],
+      "sourceColumns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "NO"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_o1l_084718",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_m1l_084718",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_o1t_084718",
+          "dataType": "character varying",
+          "characterLength": "48",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_m1c_084718",
+          "dataType": "character varying",
+          "characterLength": "4000",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "targetColumns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "NO"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "ot_long_084718",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "ot_text_084718",
+          "dataType": "character varying",
+          "characterLength": "48",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "ot_code_084718",
+          "dataType": "character varying",
+          "characterLength": "4000",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "sourceProbe": [
+        {
+          "id": "1784623638990",
+          "oneToOneLong": "1784623639089",
+          "manyToOneLong": "1784623639089",
+          "oneToOneText": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_TEXT",
+          "manyToOneBapCode": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_CODE"
+        }
+      ],
+      "joinCounts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "foreignKeyCount": 0
+    },
+    "afterReplay": {
+      "label": "afterReplay",
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyCode084718",
+          "version": "0",
+          "name": "e2eManyCode084718",
+          "columnName": "OS_M1C_084718",
+          "associatedType": "2",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjCode084718",
+          "associatedPropertyType": "BAPCODE",
+          "associatedMaxLength": "",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneBapCode"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyLong084718",
+          "version": "0",
+          "name": "e2eManyLong084718",
+          "columnName": "OS_M1L_084718",
+          "associatedType": "2",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718",
+          "associatedPropertyType": "LONG",
+          "associatedMaxLength": "",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_manyToOneLong"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneLong084718",
+          "version": "0",
+          "name": "e2eOneLong084718",
+          "columnName": "OS_O1L_084718",
+          "associatedType": "1",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjLong084718",
+          "associatedPropertyType": "LONG",
+          "associatedMaxLength": "",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_oneToOneLong"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneText084718",
+          "version": "0",
+          "name": "e2eOneText084718",
+          "columnName": "OS_O1T_084718",
+          "associatedType": "1",
+          "associatedPropertyCode": "DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718_e2eObjText084718",
+          "associatedPropertyType": "TEXT",
+          "associatedMaxLength": "24",
+          "modelCode": "DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718",
+          "description": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_oneToOneText"
+        }
+      ],
+      "sourceColumns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "NO"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_o1l_084718",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_m1l_084718",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_o1t_084718",
+          "dataType": "character varying",
+          "characterLength": "48",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "os_m1c_084718",
+          "dataType": "character varying",
+          "characterLength": "4000",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "targetColumns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "NO"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone",
+          "characterLength": "",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer",
+          "characterLength": "",
+          "numericPrecision": "32",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "ot_long_084718",
+          "dataType": "bigint",
+          "characterLength": "",
+          "numericPrecision": "64",
+          "numericScale": "0",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "ot_text_084718",
+          "dataType": "character varying",
+          "characterLength": "48",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        },
+        {
+          "columnName": "ot_code_084718",
+          "dataType": "character varying",
+          "characterLength": "4000",
+          "numericPrecision": "",
+          "numericScale": "",
+          "nullable": "YES"
+        }
+      ],
+      "sourceProbe": [
+        {
+          "id": "1784623638990",
+          "oneToOneLong": "1784623639089",
+          "manyToOneLong": "1784623639089",
+          "oneToOneText": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_TEXT",
+          "manyToOneBapCode": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC_CODE"
+        }
+      ],
+      "joinCounts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "foreignKeyCount": 0
+    }
+  },
+  "invalidResidual": [
+    0,
+    0
+  ],
+  "cleanup": {
+    "property": 0,
+    "model": 0,
+    "entity": 0,
+    "physicalTable": 0
+  },
+  "backendTrace": {
+    "endpoint": "PropertyController.save -> DtoUtils.getPropertyVO -> ModelServiceImpl.saveProperty",
+    "targetResolution": "ModelServiceImpl.getProperty resolves the submitted associated property code and rejects missing targets inside the transaction",
+    "metadataPersistence": "propertyDao.merge -> public.ec_property.associated_property_code / associated_type",
+    "physicalPersistence": "FieldSyncDBUtils.fieldSyncToDb -> PostgresFieldSyncSupport.objectColumnSpec -> ALTER TABLE",
+    "storagePolicy": "LONG target keys use bigint; BAPCODE uses varchar(4000); legacy character-key associations use bounded varchar. No synthetic PostgreSQL FK is added because legacy runtime associations are metadata-driven.",
+    "transactionBoundary": "Invalid associated-property resolution returns HTTP 500 and leaves neither ec_property metadata nor a physical column"
+  },
+  "verificationSql": {
+    "metadata": "select p.code::text, coalesce(p.version::text,'0'), p.name::text, p.column_name::text, p.associated_type::text, p.associated_property_code::text, ap.type::text, coalesce(ap.max_length::text,''), p.model_code::text, p.description::text from public.ec_property p join public.ec_property ap on ap.code=p.associated_property_code where p.model_code='DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718' and p.code in ('DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneLong084718','DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyLong084718','DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eOneText084718','DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eManyCode084718') order by p.code;",
+    "sourceColumns": "select column_name::text, data_type::text, coalesce(character_maximum_length::text,''), coalesce(numeric_precision::text,''), coalesce(numeric_scale::text,''), is_nullable::text from information_schema.columns where table_schema='public' and lower(table_name)=lower('DS_EOS_084718') order by ordinal_position;",
+    "targetColumns": "select column_name::text, data_type::text, coalesce(character_maximum_length::text,''), coalesce(numeric_precision::text,''), coalesce(numeric_scale::text,''), is_nullable::text from information_schema.columns where table_schema='public' and lower(table_name)=lower('DS_EOT_084718') order by ordinal_position;",
+    "markerInsert": "begin; insert into public.\"ds_eot_084718\" (id,valid,\"ot_long_084718\",\"ot_text_084718\",\"ot_code_084718\") values (1784623638989,1,1784623639089,'ADP_E2E_20260721084718_PG_OBJECT_ASSOC_TEXT','ADP_E2E_20260721084718_PG_OBJECT_ASSOC_CODE'); insert into public.\"ds_eos_084718\" (id,valid,\"os_o1l_084718\",\"os_m1l_084718\",\"os_o1t_084718\",\"os_m1c_084718\") values (1784623638990,1,1784623639089,1784623639089,'ADP_E2E_20260721084718_PG_OBJECT_ASSOC_TEXT','ADP_E2E_20260721084718_PG_OBJECT_ASSOC_CODE'); commit;",
+    "markerReadback": "select id::text, coalesce(\"os_o1l_084718\"::text,'<NULL>'), coalesce(\"os_m1l_084718\"::text,'<NULL>'), coalesce(\"os_o1t_084718\"::text,'<NULL>'), coalesce(\"os_m1c_084718\"::text,'<NULL>') from public.\"ds_eos_084718\" where id=1784623638990;",
+    "logicalJoins": "select (select count(*) from public.\"ds_eos_084718\" s join public.\"ds_eot_084718\" t on s.\"os_o1l_084718\"=t.\"ot_long_084718\" where s.id=1784623638990),(select count(*) from public.\"ds_eos_084718\" s join public.\"ds_eot_084718\" t on s.\"os_m1l_084718\"=t.\"ot_long_084718\" where s.id=1784623638990),(select count(*) from public.\"ds_eos_084718\" s join public.\"ds_eot_084718\" t on s.\"os_o1t_084718\"=t.\"ot_text_084718\" where s.id=1784623638990),(select count(*) from public.\"ds_eos_084718\" s join public.\"ds_eot_084718\" t on s.\"os_m1c_084718\"=t.\"ot_code_084718\" where s.id=1784623638990);",
+    "invalidResidual": "select (select count(*) from public.ec_property where code='DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718_e2eBadObj084718'), (select count(*) from information_schema.columns where table_schema='public' and lower(table_name)=lower('DS_EOS_084718') and lower(column_name)=lower('OS_BAD_084718'));",
+    "foreignKeyCount": "select count(*) from pg_constraint c join pg_class t on t.oid=c.conrelid join pg_namespace n on n.oid=t.relnamespace where n.nspname='public' and lower(t.relname)=lower('DS_EOS_084718') and c.contype='f';",
+    "cleanup": "begin; delete from public.ec_property where model_code='DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718' or entity_code='DataSet_1.0.0_E2eObjSrc084718'; delete from public.ec_property where model_code='DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718' or entity_code='DataSet_1.0.0_E2eObjTgt084718'; delete from public.ec_model where code='DataSet_1.0.0_E2eObjSrc084718_E2eObjSrcM084718' or entity_code='DataSet_1.0.0_E2eObjSrc084718'; delete from public.ec_model where code='DataSet_1.0.0_E2eObjTgt084718_E2eObjTgtM084718' or entity_code='DataSet_1.0.0_E2eObjTgt084718'; delete from public.ec_entity where code in ('DataSet_1.0.0_E2eObjSrc084718','DataSet_1.0.0_E2eObjTgt084718'); drop table if exists public.\"ds_eos_084718\" cascade; drop table if exists public.\"ds_eot_084718\" cascade; commit;"
+  },
+  "fatalError": null
+}

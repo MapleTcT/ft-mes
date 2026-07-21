@@ -18,6 +18,7 @@ CUSTOM_PROPERTY_PATH = ROOT / "metadata/custom-property-persistence-acceptance.j
 ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH = ROOT / "metadata/entity-model-field-type-matrix-acceptance.json"
+ENTITY_MODEL_OBJECT_ASSOCIATION_PATH = ROOT / "metadata/entity-model-object-association-acceptance.json"
 NACOS_CONFIG_PATH = ROOT / "metadata/nacos-config-drift-smoke.json"
 KEYCLOAK_JWT_PATH = ROOT / "metadata/keycloak-jwt-runtime-smoke.json"
 
@@ -108,6 +109,7 @@ def check_doc(failures: list[str]) -> None:
         "entity-model-config-crud-persistence-acceptance.json",
         "entity-model-field-persistence-acceptance.json",
         "entity-model-field-type-matrix-acceptance.json",
+        "entity-model-object-association-acceptance.json",
         "configuration-physical-model-table",
         "configuration-physical-model-field",
         "nacos-config-drift-smoke.json",
@@ -782,6 +784,8 @@ def check_physical_model_field_acceptance(area: dict[str, Any], failures: list[s
         "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
         "metadata/entity-model-field-type-matrix-acceptance.json",
         "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
+        "metadata/entity-model-object-association-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-object-association-acceptance.js",
         "metadata/basic-config-action-matrix.json",
     ):
         if required_ref not in refs:
@@ -926,6 +930,78 @@ def check_physical_model_field_acceptance(area: dict[str, Any], failures: list[s
         fail(failures, "field type matrix controlled cleanup must leave all marker counts at 0")
     if type_matrix.get("fatalError") is not None:
         fail(failures, "field type matrix fatalError must be null")
+
+    object_association = read_json(
+        ENTITY_MODEL_OBJECT_ASSOCIATION_PATH,
+        failures,
+        "entity/model PostgreSQL OBJECT association acceptance report",
+    )
+    if not object_association:
+        return
+    for key, expected in (
+        ("database", "PostgreSQL"),
+        ("module", "basic-config"),
+        ("actionId", "entity-model-postgres-object-association"),
+        ("areaId", area_id),
+        ("status", "PASS"),
+        ("route", "/msService/ec/engine/msManage"),
+    ):
+        if object_association.get(key) != expected:
+            fail(failures, f"OBJECT association report {key} must be {expected}")
+    marker = str(object_association.get("marker", ""))
+    if not marker.startswith("ADP_E2E_") or "PG_OBJECT_ASSOC" not in marker:
+        fail(failures, "OBJECT association marker must be ADP_E2E_*_PG_OBJECT_ASSOC")
+    summary = object_association.get("summary") if isinstance(object_association.get("summary"), dict) else {}
+    for key, expected in (("testedChecks", 10), ("pass", 10), ("fail", 0), ("blocked", 0), ("status", "PASS")):
+        if summary.get(key) != expected:
+            fail(failures, f"OBJECT association summary.{key} must be {expected}")
+    coverage = object_association.get("coverage") if isinstance(object_association.get("coverage"), dict) else {}
+    if set(str(item) for item in as_list(coverage.get("associationTypes"))) != {"ONE_TO_ONE", "MANY_TO_ONE"}:
+        fail(failures, "OBJECT association coverage must retain ONE_TO_ONE and MANY_TO_ONE")
+    if set(str(item) for item in as_list(coverage.get("targetKeyTypes"))) != {"LONG", "TEXT", "BAPCODE"}:
+        fail(failures, "OBJECT association coverage must retain LONG, TEXT and BAPCODE targets")
+    if set(str(item) for item in as_list(coverage.get("requestParameterStyles"))) != {
+        "property.associatedProperty.code",
+        "property_associatedProperty_code",
+    }:
+        fail(failures, "OBJECT association coverage must retain dotted and legacy underscore request parameters")
+    required_object_checks = {
+        "browser-page-context",
+        "entity-model-target-and-object-create-requests",
+        "object-association-metadata-persistence",
+        "postgres-object-physical-column-types",
+        "legacy-underscore-association-parameter",
+        "marker-row-round-trip-and-logical-association-joins",
+        "object-property-replay-is-idempotent",
+        "invalid-associated-property-rolls-back",
+        "legacy-object-storage-does-not-invent-physical-foreign-keys",
+        "controlled-cleanup",
+    }
+    passed_object_checks = {
+        str(item.get("name"))
+        for item in as_list(object_association.get("checks"))
+        if isinstance(item, dict) and item.get("status") == "PASS"
+    }
+    missing_object_checks = sorted(required_object_checks - passed_object_checks)
+    if missing_object_checks:
+        fail(failures, "OBJECT association missing PASS checks: " + ", ".join(missing_object_checks))
+    if as_list(object_association.get("invalidResidual")) != [0, 0]:
+        fail(failures, "OBJECT association invalid target must leave metadata and column residuals at zero")
+    object_cleanup = object_association.get("cleanup") if isinstance(object_association.get("cleanup"), dict) else {}
+    if any(object_cleanup.get(key) != 0 for key in ("property", "model", "entity", "physicalTable")):
+        fail(failures, "OBJECT association cleanup must leave all marker counts at 0")
+    browser = object_association.get("browser") if isinstance(object_association.get("browser"), dict) else {}
+    unexpected_network = [
+        item
+        for item in as_list(browser.get("networkErrors"))
+        if not isinstance(item, dict) or item.get("expected") is not True
+    ]
+    if browser.get("navigationStatus") != 200 or browser.get("visibleError"):
+        fail(failures, "OBJECT association browser evidence must load without a visible error")
+    if unexpected_network or as_list(browser.get("pageErrors")) or as_list(browser.get("requestFailures")):
+        fail(failures, "OBJECT association browser evidence contains unexpected errors")
+    if object_association.get("fatalError") is not None:
+        fail(failures, "OBJECT association fatalError must be null")
 
 
 def check_coverage(data: dict[str, Any], failures: list[str]) -> None:

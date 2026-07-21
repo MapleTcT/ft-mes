@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-21T07:58:23.203Z",
-  "repoCommit": "20cbe0a8f1232e6edded4aec4843f93190553706",
+  "generatedAt": "2026-07-21T08:47:33.358Z",
+  "repoCommit": "3650f817f5510c6cfe3a756cd8d4fc410676b287",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -165,12 +165,18 @@
       "status": "PASS_TARGET_POSTGRES_SCALAR_TYPE_MATRIX_CLEANED",
       "marker": "ADP_E2E_20260721075749_PG_TYPE_MATRIX",
       "evidence": "metadata/entity-model-field-type-matrix-acceptance.json",
-      "assertions": "36/36; real /msService/ec/engine/msManage page; 24 instances across 23 scalar DbColumnTypes; native PostgreSQL types and full marker-row round-trip; safe boolean/integer, integer/bigint, integer/numeric and date/timestamp conversions; invalid integer-to-boolean and numeric capacity reduction HTTP 500 with metadata/DDL rollback; OBJECT explicitly excluded for association fixture; cleanup 0/0/0/0"
+      "assertions": "36/36; real /msService/ec/engine/msManage page; 24 instances across 23 scalar DbColumnTypes; native PostgreSQL types and full marker-row round-trip; safe boolean/integer, integer/bigint, integer/numeric and date/timestamp conversions; invalid integer-to-boolean and numeric capacity reduction HTTP 500 with metadata/DDL rollback; OBJECT isolated from this scalar fixture; cleanup 0/0/0/0"
+    },
+    "configurationObjectAssociation": {
+      "status": "PASS_TARGET_POSTGRES_OBJECT_ASSOCIATION_CLEANED",
+      "marker": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC",
+      "evidence": "metadata/entity-model-object-association-acceptance.json",
+      "assertions": "10/10; real /msService/ec/engine/msManage page; one-to-one and many-to-one OBJECT fields; LONG/TEXT/BAPCODE target keys; dotted and legacy underscore request parameters; bigint/varchar(48)/varchar(4000) physical columns; four logical joins; idempotent replay; invalid target HTTP 500 with metadata/DDL rollback; no synthetic PostgreSQL foreign key; cleanup and independent query 0/0/0/0"
     }
   },
   "summary": {
-    "testedFeatures": 202,
-    "pass": 199,
+    "testedFeatures": 203,
+    "pass": 200,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -4461,15 +4467,43 @@
       "marker": "ADP_E2E_20260721075749_PG_TYPE_MATRIX",
       "verificationSql": "Query public.ec_property by model_code for 24 metadata rows; query information_schema.columns for DS_E2TM_075749 native varchar/integer/numeric/date/time/timestamp/bytea/boolean/text/bigint columns and absence of a PROPERTYATTACHMENT column; insert and read one marker row across every physical scalar type; query invalid value 2 during rejected INTEGER-to-BOOLEAN conversion; after controlled cleanup verify property/model/entity/physical table counts and marker descriptions are all 0.",
       "status": "PASS",
-      "evidence": "metadata/entity-model-field-type-matrix-acceptance.json; 36/36 PASS on 10.11.100.17 at commit 20cbe0a8; real page navigation 200; all entity/model/24 field create requests returned 200; PostgreSQL verified 24 instances across 23 scalar DbColumnTypes and a complete marker-row round-trip; safe BOOLEAN/INTEGER, INTEGER/BIGINT, INTEGER/NUMERIC and DATE/DATETIME conversions preserved values; invalid integer 2 and numeric capacity reduction each returned expected HTTP 500 with metadata/DDL rollback; PROPERTYATTACHMENT remained metadata-only; OBJECT was explicitly excluded for a dedicated association fixture; cleanup property/model/entity/table/marker=0/0/0/0/0",
+      "evidence": "metadata/entity-model-field-type-matrix-acceptance.json; 36/36 PASS on 10.11.100.17 at commit 20cbe0a8; real page navigation 200; all entity/model/24 field create requests returned 200; PostgreSQL verified 24 instances across 23 scalar DbColumnTypes and a complete marker-row round-trip; safe BOOLEAN/INTEGER, INTEGER/BIGINT, INTEGER/NUMERIC and DATE/DATETIME conversions preserved values; invalid integer 2 and numeric capacity reduction each returned expected HTTP 500 with metadata/DDL rollback; PROPERTYATTACHMENT remained metadata-only; OBJECT was isolated for the dedicated association fixture recorded in the next item; cleanup property/model/entity/table/marker=0/0/0/0/0",
+      "issues": []
+    },
+    {
+      "module": "基础配置-实体模型 OBJECT 关联字段",
+      "route": "/msService/ec/engine/msManage",
+      "operation": "创建目标/来源双模型和一对一/多对一 OBJECT 字段，验证 LONG/TEXT/BAPCODE 目标键、两种参数格式、marker join、幂等、非法目标回滚和受控清理",
+      "api": "POST /msService/ec/entity/save; POST /msService/ec/model/save; POST /msService/ec/property/save",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PropertyController.save -> DtoUtils.getPropertyVO -> ModelServiceImpl.saveProperty -> FieldSyncDBUtils.fieldSyncToDb -> PostgresFieldSyncSupport.objectColumnSpec",
+      "tables": [
+        "public.ec_entity",
+        "public.ec_model",
+        "public.ec_property",
+        "information_schema.columns",
+        "pg_constraint",
+        "public.ds_eot_084718",
+        "public.ds_eos_084718"
+      ],
+      "marker": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC",
+      "verificationSql": "Join public.ec_property to its associated target by associated_property_code and verify associated_type; query information_schema.columns for DS_EOT_084718 and DS_EOS_084718; insert one target and one source marker row; execute four LONG/TEXT/BAPCODE logical joins; verify invalid target metadata/column residuals are 0/0; query pg_constraint to prove no synthetic FK; after controlled cleanup verify property/model/entity/physical table counts are 0/0/0/0.",
+      "status": "PASS",
+      "evidence": "metadata/entity-model-object-association-acceptance.json; 10/10 PASS on 10.11.100.17 at implementation commit 3650f817; real page navigation 200; all normal entity/model/target/object/replay requests returned 200; PostgreSQL verified one-to-one and many-to-one OBJECT metadata, LONG bigint, TEXT varchar(48), BAPCODE varchar(4000), dotted and legacy underscore parameters, four logical joins and idempotent replay; invalid target returned expected HTTP 500 with metadata/DDL rollback; no synthetic physical FK; cleanup and independent remote query property/model/entity/table=0/0/0/0",
       "issues": []
     }
   ],
   "evidence": [
     {
+      "marker": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC",
+      "artifact": "metadata/entity-model-object-association-acceptance.json",
+      "summary": "Real entity-model page and save APIs, one-to-one/many-to-one OBJECT metadata, LONG/TEXT/BAPCODE PostgreSQL columns, dotted/legacy request parameters, four logical joins, idempotent replay, expected invalid-target rollback, no synthetic FK and zero cleanup passed 10/10 on 10.11.100.17."
+    },
+    {
       "marker": "ADP_E2E_20260721075749_PG_TYPE_MATRIX",
       "artifact": "metadata/entity-model-field-type-matrix-acceptance.json",
-      "summary": "Real entity-model page and save APIs, 24 instances across 23 scalar DbColumnTypes, native PostgreSQL physical columns, complete marker-row round-trip, four safe conversion paths, two expected transactional rejection paths and zero cleanup passed 36/36 on 10.11.100.17; OBJECT remains a dedicated association fixture."
+      "summary": "Real entity-model page and save APIs, 24 instances across 23 scalar DbColumnTypes, native PostgreSQL physical columns, complete marker-row round-trip, four safe conversion paths, two expected transactional rejection paths and zero cleanup passed 36/36 on 10.11.100.17; OBJECT was isolated for its dedicated accepted association fixture."
     },
     {
       "marker": "ADP_E2E_20260721071510_PG_FIELD",

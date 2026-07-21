@@ -26,6 +26,7 @@ BASIC_CONFIG_ACTION_MATRIX_PATH = ROOT / "metadata/basic-config-action-matrix.js
 ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH = ROOT / "metadata/entity-model-field-type-matrix-acceptance.json"
+ENTITY_MODEL_OBJECT_ASSOCIATION_PATH = ROOT / "metadata/entity-model-object-association-acceptance.json"
 TEST_ENVIRONMENT_SMOKE_PATH = ROOT / "metadata/test-environment-smoke.json"
 POSTGRES_RUNTIME_SMOKE_PATH = ROOT / "metadata/postgres-runtime-smoke.json"
 NACOS_CONFIG_SMOKE_PATH = ROOT / "metadata/nacos-config-drift-smoke.json"
@@ -1230,6 +1231,37 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
         cleanup = field_type_matrix.get("cleanup") if isinstance(field_type_matrix.get("cleanup"), dict) else {}
         if any(cleanup.get(key) != 0 for key in ("property", "model", "entity", "physicalTable")):
             fail(failures, "G-012 field type matrix cleanup must leave property/model/entity/table at zero")
+    object_association = read_json_file(
+        ENTITY_MODEL_OBJECT_ASSOCIATION_PATH,
+        failures,
+        "entity/model PostgreSQL OBJECT association acceptance report",
+    )
+    if object_association:
+        if object_association.get("status") != "PASS" or object_association.get("database") != "PostgreSQL":
+            fail(failures, "G-012 PostgreSQL OBJECT association acceptance must PASS")
+        marker = str(object_association.get("marker", ""))
+        evidence_text = "\n".join(str(item) for item in as_list(g012.get("currentEvidence")))
+        if not marker or marker not in evidence_text:
+            fail(failures, "G-012 currentEvidence must include the PostgreSQL OBJECT association marker")
+        if "metadata/entity-model-object-association-acceptance.json" not in evidence_text:
+            fail(failures, "G-012 currentEvidence must cite the PostgreSQL OBJECT association report")
+        summary = object_association.get("summary") if isinstance(object_association.get("summary"), dict) else {}
+        if summary.get("testedChecks") != 10 or summary.get("pass") != 10 or summary.get("fail") != 0:
+            fail(failures, "G-012 PostgreSQL OBJECT association acceptance must retain 10/10 PASS")
+        object_coverage = (
+            object_association.get("coverage")
+            if isinstance(object_association.get("coverage"), dict)
+            else {}
+        )
+        if set(str(item) for item in as_list(object_coverage.get("associationTypes"))) != {"ONE_TO_ONE", "MANY_TO_ONE"}:
+            fail(failures, "G-012 OBJECT association must retain ONE_TO_ONE and MANY_TO_ONE coverage")
+        if set(str(item) for item in as_list(object_coverage.get("targetKeyTypes"))) != {"LONG", "TEXT", "BAPCODE"}:
+            fail(failures, "G-012 OBJECT association must retain LONG, TEXT and BAPCODE target coverage")
+        if as_list(object_association.get("invalidResidual")) != [0, 0]:
+            fail(failures, "G-012 OBJECT association invalid target must roll metadata and DDL back")
+        cleanup = object_association.get("cleanup") if isinstance(object_association.get("cleanup"), dict) else {}
+        if any(cleanup.get(key) != 0 for key in ("property", "model", "entity", "physicalTable")):
+            fail(failures, "G-012 OBJECT association cleanup must leave property/model/entity/table at zero")
     if action_matrix:
         if action_matrix.get("database") != "PostgreSQL":
             fail(failures, "G-012 action matrix database must remain PostgreSQL")
