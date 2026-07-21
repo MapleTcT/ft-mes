@@ -423,3 +423,54 @@ enum WmsCompletionInboundStatusV1 {
   WMS_COMPLETION_INBOUND_ACCEPTED = 1;
   WMS_COMPLETION_INBOUND_REJECTED = 2;
 }
+
+// A separately approved BPI task requests one append-only red document for the
+// exact durable completion-inbound document. It never mutates or reuses the
+// original command identity.
+message WmsCompletionInboundReversalCommandV1 {
+  string event_id = 1;
+  string idempotency_key = 2;
+  string tenant_id = 3;
+  string plant_id = 4;
+  string line_id = 5;
+  string batch_id = 6;
+  string original_command_event_id = 7;
+  string original_idempotency_key = 8;
+  string original_document_id = 9;
+  string batch_no = 10;
+  string order_id = 11;
+  string material_code = 12;
+  string quantity_decimal = 13;
+  string quantity_unit = 14;
+  string reason = 15;
+  string requested_by = 16;
+  string approved_by = 17;
+  int64 approved_at_ms = 18;
+  int64 requested_at_ms = 19;
+  map<string, string> headers = 20;
+}
+
+// WMS returns both the new red document and the original blue document identity.
+// BPI may only finish a reversal after an accepted durable receipt.
+message WmsCompletionInboundReversalReceiptV1 {
+  string event_id = 1;
+  string idempotency_key = 2;
+  string command_event_id = 3;
+  string tenant_id = 4;
+  string plant_id = 5;
+  string line_id = 6;
+  string batch_id = 7;
+  WmsCompletionInboundReversalStatusV1 status = 8;
+  string reversal_document_id = 9;
+  string original_document_id = 10;
+  string error_code = 11;
+  string detail = 12;
+  int64 observed_at_ms = 13;
+  map<string, string> headers = 14;
+}
+
+enum WmsCompletionInboundReversalStatusV1 {
+  WMS_COMPLETION_INBOUND_REVERSAL_STATUS_UNSPECIFIED = 0;
+  WMS_COMPLETION_INBOUND_REVERSAL_ACCEPTED = 1;
+  WMS_COMPLETION_INBOUND_REVERSAL_REJECTED = 2;
+}

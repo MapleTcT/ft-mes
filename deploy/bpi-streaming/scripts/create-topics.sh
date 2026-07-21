@@ -78,6 +78,14 @@ create_topic "${BPI_WMS_RECEIPT_TOPIC:-wms.completion-inbound.receipt.v1}" "$CON
     --config retention.ms=2592000000
 create_topic "${BPI_WMS_RECEIPT_DLQ_TOPIC:-wms.completion-inbound.receipt.dlq.v1}" "$CONTROL_PARTITIONS" \
     --config retention.ms=2592000000
+create_topic "${BPI_WMS_REVERSAL_COMMAND_TOPIC:-bpi.wms.completion-inbound-reversal-command.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
+create_topic "${BPI_WMS_REVERSAL_COMMAND_DLQ_TOPIC:-bpi.wms.completion-inbound-reversal-command.dlq.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
+create_topic "${BPI_WMS_REVERSAL_RECEIPT_TOPIC:-wms.completion-inbound-reversal.receipt.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
+create_topic "${BPI_WMS_REVERSAL_RECEIPT_DLQ_TOPIC:-wms.completion-inbound-reversal.receipt.dlq.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
 
 # kafka-topics --if-not-exists does not reconcile configuration on existing topics.
 alter_topic_config \

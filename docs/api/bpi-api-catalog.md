@@ -192,16 +192,18 @@ resolver 同时返回当前质量门的外部 ID、revision 和 source event ID�
 WMS adapter 的 query-first 合同还要求“创建响应不确定”后立即以原幂等键再查一次：查到且单据头、
 明细、物料、批次、仓库、库位、数量、单位和质量状态全部一致才发送 accepted receipt；查无或查单失败
 继续抛 transient 交给 Kafka 重试，不能转换成业务拒绝。4xx 业务错误也必须先查单，排除外部已提交但
-返回冲突后才能发送 rejected receipt。该软件协议矩阵已通过 `16/16` adapter 测试，证据见
-`docs/testing/bpi-external-wms-protocol-contract-acceptance.md`；真实外部实例和冲销/补偿仍未验收。
+返回冲突后才能发送 rejected receipt。普通入库与红字冲销软件协议矩阵已通过 `28/28` adapter
+测试，证据见 `docs/testing/bpi-external-wms-protocol-contract-acceptance.md`；真实外部实例和完整
+BPI 补偿流程仍未验收。
 
-内部 `material-wms` 已补充追加式完工入库冲销持久化合同。adapter 后续只允许通过
+内部 `material-wms` 已补充追加式完工入库冲销持久化合同。adapter 只允许通过
 `POST /material/wms/completion-inbound-reversals` 创建 BPI 红字单，并通过
 `GET /material/wms/completion-inbound-reversals/by-idempotency` 精确查单。请求必须携带新的 command
 event、独立 idempotency key、原入库单号以及与原单完全一致的物料、批次、仓库、库位、数量和单位；
 库存已消耗或事实冲突时整事务失败，原蓝字单仍为 `POSTED`。本地持久化合同为 `12/12 PASS`，证据见
-`docs/testing/material-wms-completion-inbound-reversal-contract-acceptance.md`。该合同尚未接入 BPI 四眼审批、
-Protobuf/Kafka 或外部 WMS，因此不改变 Phase 2 默认关闭和 `G-021 PARTIAL` 结论。
+`docs/testing/material-wms-completion-inbound-reversal-contract-acceptance.md`。独立 Protobuf command/receipt、
+query-first adapter 和四个隔离主题已完成本地软件协议验收；BPI 四眼审批、事务 outbox、回执落库与
+外部 WMS 仍未闭合，因此不改变 Phase 2 默认关闭和 `G-021 PARTIAL` 结论。
 
 ## 3. 内部受信接入 API
 

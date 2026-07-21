@@ -726,6 +726,9 @@ services:
       BPI_WMS_ADAPTER_COMMAND_TOPIC: ${BPI_WMS_ADAPTER_COMMAND_TOPIC:-bpi.wms.completion-inbound-command.v1}
       BPI_WMS_ADAPTER_COMMAND_DLQ_TOPIC: ${BPI_WMS_ADAPTER_COMMAND_DLQ_TOPIC:-bpi.wms.completion-inbound-command.dlq.v1}
       BPI_WMS_ADAPTER_RECEIPT_TOPIC: ${BPI_WMS_ADAPTER_RECEIPT_TOPIC:-wms.completion-inbound.receipt.v1}
+      BPI_WMS_ADAPTER_REVERSAL_COMMAND_TOPIC: ${BPI_WMS_ADAPTER_REVERSAL_COMMAND_TOPIC:-bpi.wms.completion-inbound-reversal-command.v1}
+      BPI_WMS_ADAPTER_REVERSAL_COMMAND_DLQ_TOPIC: ${BPI_WMS_ADAPTER_REVERSAL_COMMAND_DLQ_TOPIC:-bpi.wms.completion-inbound-reversal-command.dlq.v1}
+      BPI_WMS_ADAPTER_REVERSAL_RECEIPT_TOPIC: ${BPI_WMS_ADAPTER_REVERSAL_RECEIPT_TOPIC:-wms.completion-inbound-reversal.receipt.v1}
       BPI_WMS_ADAPTER_GROUP_ID: ${BPI_WMS_ADAPTER_GROUP_ID:-ft-mes-bpi-wms-adapter-v1}
       BPI_WMS_ADAPTER_CLIENT_ID: ${BPI_WMS_ADAPTER_CLIENT_ID:-ft-mes-bpi-wms-adapter}
       BPI_WMS_ADAPTER_MATERIAL_BASE_URL: ${BPI_WMS_ADAPTER_MATERIAL_BASE_URL:-http://material:8080}

@@ -254,6 +254,18 @@ def main() -> int:
             "BPI_WMS_ADAPTER_MATERIAL_API_KEY:_DISABLED_",
             "BPI_WMS_ADAPTER_ROUTES:_DENY_ALL_",
             "bpi.wms.completion-inbound-command.dlq.v1",
+            "bpi.wms.completion-inbound-reversal-command.dlq.v1",
+            "wms.completion-inbound-reversal.receipt.v1",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsReversalCommandProcessor.java",
+        [
+            "findReversalByIdempotency",
+            "createCompletionInboundReversal",
+            "WMS_REVERSAL_IDEMPOTENCY_CONFLICT",
+            "material-wms acknowledged reversal creation but exact lookup did not find the red document",
         ],
         failures,
     )

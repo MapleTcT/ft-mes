@@ -141,9 +141,76 @@ class MaterialWmsHttpClientTest {
         server.verify();
     }
 
+    @Test
+    void exactReversalLookupParsesRedDocumentAndOriginalRelation() {
+        String key = "WMS_COMPLETION_INBOUND_REVERSAL|TENANT|BATCH|TASK|1";
+        server.expect(requestTo("http://material:8080/material/wms/"
+                        + "completion-inbound-reversals/by-idempotency"
+                        + "?sourceSystem=BPI&idempotencyKey="
+                        + "WMS_COMPLETION_INBOUND_REVERSAL%7CTENANT%7CBATCH%7CTASK%7C1"))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header("X-Tenant-Id", "TENANT"))
+                .andExpect(header("X-BPI-WMS-Key", "test-key"))
+                .andRespond(withSuccess(reversalFoundBody(key), MediaType.APPLICATION_JSON));
+
+        MaterialWmsReversalDocument document =
+                client.findReversalByIdempotency("TENANT", key).orElseThrow();
+
+        assertThat(document.documentNo()).isEqualTo("CIR-001");
+        assertThat(document.originalInternalId()).isEqualTo(101L);
+        assertThat(document.originalDocument().documentNo()).isEqualTo("CIN-001");
+        assertThat(document.originalDocument().status()).isEqualTo("REVERSED");
+        assertThat(document.lines()).singleElement()
+                .extracting(MaterialWmsDocument.Line::unitCode)
+                .isEqualTo("kg");
+        server.verify();
+    }
+
+    @Test
+    void reversalCreateUsesIndependentRedDocumentContract() {
+        server.expect(requestTo(
+                        "http://material:8080/material/wms/completion-inbound-reversals"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("X-Tenant-Id", "TENANT"))
+                .andExpect(header("X-BPI-WMS-Key", "test-key"))
+                .andExpect(content().json("""
+                        {
+                          "sourceSystem":"BPI",
+                          "idempotencyKey":"REVERSAL-KEY-1",
+                          "srcID":"REVERSAL-EVENT-1",
+                          "originalDocumentNo":"CIN-001",
+                          "srcTableNo":"BATCH-1",
+                          "directiveNo":"ORDER-1",
+                          "companyCode":"COMP",
+                          "wareCode":"WARE",
+                          "storageDate":"2026-07-21",
+                          "comeType":"produceIn",
+                          "redBlue":"red",
+                          "detailList":[{
+                            "srcPartId":"REVERSAL-EVENT-1:1",
+                            "goodCode":"MAT",
+                            "batchText":"BATCH-1",
+                            "produceBatchNum":"BATCH-1",
+                            "placeSetCode":"LOC",
+                            "quantity":10.000000,
+                            "unitCode":"kg",
+                            "checkResult":"BaseSet_checkResult/qualified"
+                          }]
+                        }
+                        """, false))
+                .andRespond(withSuccess(
+                        "{\"code\":200,\"message\":\"accepted\",\"data\":{\"queued\":true}}",
+                        MediaType.APPLICATION_JSON));
+
+        client.createCompletionInboundReversal(reversalRequest());
+
+        server.verify();
+    }
+
     private BpiWmsAdapterProperties properties() {
         return new BpiWmsAdapterProperties(
                 true, "kafka:9092", "command", "command-dlq", "receipt",
+                "reversal-command", "reversal-command-dlq", "reversal-receipt",
                 "group", "client", "http://material:8080", "test-key", "Asia/Shanghai",
                 65_536, 5, 1, Duration.ofSeconds(1), Duration.ofSeconds(1),
                 Duration.ofSeconds(1), List.of("TENANT|PLANT|LINE|WARE|LOC|COMP|kg"));
@@ -156,6 +223,14 @@ class MaterialWmsHttpClientTest {
                 new BigDecimal("10.000000"), "kg", "protocol acceptance");
     }
 
+    private MaterialWmsReversalRequest reversalRequest() {
+        return new MaterialWmsReversalRequest(
+                "TENANT", "REVERSAL-EVENT-1", "REVERSAL-KEY-1", "CIN-001",
+                "BATCH-1", "ORDER-1", "COMP", "WARE", LocalDate.of(2026, 7, 21),
+                "REVERSAL-EVENT-1:1", "MAT", "BATCH-1", "BATCH-1", "LOC",
+                new BigDecimal("10.000000"), "kg", "approved reversal");
+    }
+
     private String foundBody(String key) {
         return "{\"code\":200,\"message\":\"success\",\"data\":{"
                 + "\"document\":{\"id\":101,\"document_no\":\"CI-001\","
@@ -166,6 +241,27 @@ class MaterialWmsHttpClientTest {
                 + "\"material_code\":\"MAT\",\"batch_no\":\"BATCH\","
                 + "\"production_batch_no\":\"BATCH\",\"warehouse_code\":\"WARE\","
                 + "\"location_code\":\"LOC\",\"quantity\":10,\"unit_code\":\"kg\","
+                + "\"quality_status\":\"QUALIFIED\"}],\"transactions\":[]}}";
+    }
+
+    private String reversalFoundBody(String key) {
+        return "{\"code\":200,\"message\":\"success\",\"data\":{"
+                + "\"document\":{\"id\":202,\"document_no\":\"CIR-001\","
+                + "\"document_type\":\"COMPLETION_INBOUND_REVERSAL\","
+                + "\"source_system\":\"BPI\",\"source_document_id\":\"REVERSAL-EVENT-1\","
+                + "\"idempotency_key\":\"" + key + "\",\"warehouse_code\":\"WARE\","
+                + "\"status\":\"POSTED\",\"quality_status\":\"QUALIFIED\","
+                + "\"reversal_of_document_id\":101},"
+                + "\"originalDocument\":{\"id\":101,\"document_no\":\"CIN-001\","
+                + "\"document_type\":\"COMPLETION_INBOUND\",\"source_system\":\"BPI\","
+                + "\"source_document_id\":\"ORIGINAL-EVENT-1\","
+                + "\"idempotency_key\":\"ORIGINAL-KEY-1\",\"warehouse_code\":\"WARE\","
+                + "\"status\":\"REVERSED\",\"quality_status\":\"QUALIFIED\"},"
+                + "\"lines\":[{\"source_system\":\"BPI\","
+                + "\"source_line_id\":\"REVERSAL-EVENT-1:1\",\"material_code\":\"MAT\","
+                + "\"batch_no\":\"BATCH-1\",\"production_batch_no\":\"BATCH-1\","
+                + "\"warehouse_code\":\"WARE\",\"location_code\":\"LOC\","
+                + "\"quantity\":10,\"unit_code\":\"kg\","
                 + "\"quality_status\":\"QUALIFIED\"}],\"transactions\":[]}}";
     }
 }

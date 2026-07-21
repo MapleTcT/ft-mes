@@ -21,6 +21,9 @@ bpi:
     command-topic: ${BPI_WMS_ADAPTER_COMMAND_TOPIC:bpi.wms.completion-inbound-command.v1}
     command-dlq-topic: ${BPI_WMS_ADAPTER_COMMAND_DLQ_TOPIC:bpi.wms.completion-inbound-command.dlq.v1}
     receipt-topic: ${BPI_WMS_ADAPTER_RECEIPT_TOPIC:wms.completion-inbound.receipt.v1}
+    reversal-command-topic: ${BPI_WMS_ADAPTER_REVERSAL_COMMAND_TOPIC:bpi.wms.completion-inbound-reversal-command.v1}
+    reversal-command-dlq-topic: ${BPI_WMS_ADAPTER_REVERSAL_COMMAND_DLQ_TOPIC:bpi.wms.completion-inbound-reversal-command.dlq.v1}
+    reversal-receipt-topic: ${BPI_WMS_ADAPTER_REVERSAL_RECEIPT_TOPIC:wms.completion-inbound-reversal.receipt.v1}
     group-id: ${BPI_WMS_ADAPTER_GROUP_ID:ft-mes-bpi-wms-adapter-v1}
     client-id: ${BPI_WMS_ADAPTER_CLIENT_ID:ft-mes-bpi-wms-adapter}
     material-base-url: ${BPI_WMS_ADAPTER_MATERIAL_BASE_URL:http://material:8080}

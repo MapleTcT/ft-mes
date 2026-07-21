@@ -10,8 +10,10 @@ import org.springframework.validation.annotation.Validated;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Validated
 @ConfigurationProperties(prefix = "bpi.wms-adapter")
@@ -21,6 +23,9 @@ public record BpiWmsAdapterProperties(
         @NotBlank String commandTopic,
         @NotBlank String commandDlqTopic,
         @NotBlank String receiptTopic,
+        @NotBlank String reversalCommandTopic,
+        @NotBlank String reversalCommandDlqTopic,
+        @NotBlank String reversalReceiptTopic,
         @NotBlank String groupId,
         @NotBlank String clientId,
         @NotBlank String materialBaseUrl,
@@ -38,12 +43,13 @@ public record BpiWmsAdapterProperties(
     private static final String DISABLED_KEY = "_DISABLED_";
 
     public BpiWmsAdapterProperties {
-        if (commandTopic != null && commandTopic.equals(commandDlqTopic)) {
-            throw new IllegalArgumentException("BPI WMS command and DLQ topics must differ.");
-        }
-        if (commandTopic != null && commandTopic.equals(receiptTopic)) {
-            throw new IllegalArgumentException("BPI WMS command and receipt topics must differ.");
-        }
+        requireDistinctTopics(
+                commandTopic,
+                commandDlqTopic,
+                receiptTopic,
+                reversalCommandTopic,
+                reversalCommandDlqTopic,
+                reversalReceiptTopic);
         requirePositive(retryBackoff, "retry backoff");
         requirePositive(requestTimeout, "request timeout");
         requirePositive(publishTimeout, "publish timeout");
@@ -90,6 +96,16 @@ public record BpiWmsAdapterProperties(
     private static void requirePositive(Duration value, String name) {
         if (value == null || value.isZero() || value.isNegative()) {
             throw new IllegalArgumentException("BPI WMS " + name + " must be positive.");
+        }
+    }
+
+    private static void requireDistinctTopics(String... values) {
+        Set<String> topics = new HashSet<>();
+        for (String value : values) {
+            if (value != null && !topics.add(value)) {
+                throw new IllegalArgumentException(
+                        "BPI WMS command, receipt and DLQ topics must all differ.");
+            }
         }
     }
 }

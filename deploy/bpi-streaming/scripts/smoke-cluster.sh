@@ -59,7 +59,11 @@ ${BPI_QCS_DLQ_TOPIC:-qcs.batch.quality-gate.dlq.v1}
 ${BPI_WMS_COMMAND_TOPIC:-bpi.wms.completion-inbound-command.v1}
 ${BPI_WMS_COMMAND_DLQ_TOPIC:-bpi.wms.completion-inbound-command.dlq.v1}
 ${BPI_WMS_RECEIPT_TOPIC:-wms.completion-inbound.receipt.v1}
-${BPI_WMS_RECEIPT_DLQ_TOPIC:-wms.completion-inbound.receipt.dlq.v1}"
+${BPI_WMS_RECEIPT_DLQ_TOPIC:-wms.completion-inbound.receipt.dlq.v1}
+${BPI_WMS_REVERSAL_COMMAND_TOPIC:-bpi.wms.completion-inbound-reversal-command.v1}
+${BPI_WMS_REVERSAL_COMMAND_DLQ_TOPIC:-bpi.wms.completion-inbound-reversal-command.dlq.v1}
+${BPI_WMS_REVERSAL_RECEIPT_TOPIC:-wms.completion-inbound-reversal.receipt.v1}
+${BPI_WMS_REVERSAL_RECEIPT_DLQ_TOPIC:-wms.completion-inbound-reversal.receipt.dlq.v1}"
 
 DESCRIBE=/tmp/bpi-streaming-topics.$$.txt
 POINT_CATALOG_CONFIGS=/tmp/bpi-point-catalog-topic-configs.$$.txt
@@ -73,11 +77,11 @@ printf '%s\n' "$TOPICS" | while IFS= read -r topic; do
         --topic "$topic" </dev/null
 done >"$DESCRIBE"
 
-if [ "$(grep -c 'ReplicationFactor: 3' "$DESCRIBE")" -ne 20 ]; then
+if [ "$(grep -c 'ReplicationFactor: 3' "$DESCRIBE")" -ne 24 ]; then
     printf 'ERROR: one or more BPI topics do not have replication factor 3\n' >&2
     exit 1
 fi
-if [ "$(grep -c 'min.insync.replicas=2' "$DESCRIBE")" -ne 20 ]; then
+if [ "$(grep -c 'min.insync.replicas=2' "$DESCRIBE")" -ne 24 ]; then
     printf 'ERROR: one or more BPI topics do not have min.insync.replicas=2\n' >&2
     exit 1
 fi
@@ -169,7 +173,7 @@ report = {
     "status": "PASS",
     "kafka": {
         "brokers": 3,
-        "topics": 20,
+        "topics": 24,
         "replicationFactor": 3,
         "minInSyncReplicas": 2,
         "pointCatalogMaxMessageBytes": int(os.environ.get("BPI_POINT_CATALOG_MAX_MESSAGE_BYTES", "6291456")),

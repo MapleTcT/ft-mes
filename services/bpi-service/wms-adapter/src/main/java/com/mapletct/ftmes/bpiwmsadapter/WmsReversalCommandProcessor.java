@@ -1,0 +1,323 @@
+package com.mapletct.ftmes.bpiwmsadapter;
+
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.mapletct.ftmes.bpi.contract.v1.WmsCompletionInboundReversalCommandV1;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.header.Header;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.UUID;
+
+@Component
+@ConditionalOnProperty(prefix = "bpi.wms-adapter", name = "enabled", havingValue = "true")
+public class WmsReversalCommandProcessor {
+
+    private static final String EVENT_ID = "event_id";
+    private static final String IDEMPOTENCY_KEY = "idempotency_key";
+    private static final String TENANT_ID = "tenant_id";
+    private static final String SCHEMA_VERSION = "schema_version";
+
+    private final BpiWmsAdapterProperties properties;
+    private final MaterialWmsGateway materialWms;
+    private final WmsReversalReceiptPublisher receipts;
+
+    public WmsReversalCommandProcessor(
+            BpiWmsAdapterProperties properties,
+            MaterialWmsGateway materialWms,
+            WmsReversalReceiptPublisher receipts) {
+        this.properties = properties;
+        this.materialWms = materialWms;
+        this.receipts = receipts;
+    }
+
+    public WmsReversalProcessingResult process(ConsumerRecord<byte[], byte[]> record) {
+        WmsCompletionInboundReversalCommandV1 command = decodeAndValidate(record);
+        WmsRoute route = properties.routeFor(
+                        command.getTenantId(), command.getPlantId(), command.getLineId())
+                .orElseThrow(() -> rejected(
+                        "BPI WMS reversal command is outside the exact configured route scope."));
+        BigDecimal quantity = quantity(command.getQuantityDecimal());
+        if (!route.baseUnit().equals(command.getQuantityUnit())) {
+            receipts.rejected(command, "WMS_REVERSAL_UNIT_MISMATCH",
+                    "Command unit " + command.getQuantityUnit()
+                            + " does not match inventory base unit " + route.baseUnit() + ".");
+            return new WmsReversalProcessingResult("REJECTED", null, false);
+        }
+
+        Optional<MaterialWmsReversalDocument> existing =
+                materialWms.findReversalByIdempotency(
+                        command.getTenantId(), command.getIdempotencyKey());
+        if (existing.isPresent()) {
+            return acceptExisting(command, route, quantity, existing.get(), false);
+        }
+
+        MaterialWmsReversalRequest createRequest = createRequest(command, route, quantity);
+        try {
+            materialWms.createCompletionInboundReversal(createRequest);
+        } catch (MaterialWmsTransientException error) {
+            return recoverAmbiguousCreate(command, route, quantity, error);
+        } catch (MaterialWmsBusinessException error) {
+            Optional<MaterialWmsReversalDocument> raced =
+                    materialWms.findReversalByIdempotency(
+                            command.getTenantId(), command.getIdempotencyKey());
+            if (raced.isPresent()) {
+                return acceptExisting(command, route, quantity, raced.get(), false);
+            }
+            receipts.rejected(command, error.code(), error.getMessage());
+            return new WmsReversalProcessingResult("REJECTED", null, false);
+        }
+
+        MaterialWmsReversalDocument created = materialWms.findReversalByIdempotency(
+                        command.getTenantId(), command.getIdempotencyKey())
+                .orElseThrow(() -> new MaterialWmsTransientException(
+                        "material-wms acknowledged reversal creation but exact lookup did not find the red document."));
+        return acceptExisting(command, route, quantity, created, true);
+    }
+
+    private WmsReversalProcessingResult recoverAmbiguousCreate(
+            WmsCompletionInboundReversalCommandV1 command,
+            WmsRoute route,
+            BigDecimal quantity,
+            MaterialWmsTransientException createError) {
+        try {
+            Optional<MaterialWmsReversalDocument> committed =
+                    materialWms.findReversalByIdempotency(
+                            command.getTenantId(), command.getIdempotencyKey());
+            if (committed.isPresent()) {
+                return acceptExisting(command, route, quantity, committed.get(), true);
+            }
+        } catch (MaterialWmsTransientException lookupError) {
+            createError.addSuppressed(lookupError);
+        }
+        throw createError;
+    }
+
+    private WmsReversalProcessingResult acceptExisting(
+            WmsCompletionInboundReversalCommandV1 command,
+            WmsRoute route,
+            BigDecimal quantity,
+            MaterialWmsReversalDocument document,
+            boolean created) {
+        String mismatch = mismatch(command, route, quantity, document);
+        if (mismatch != null) {
+            receipts.rejected(command, "WMS_REVERSAL_IDEMPOTENCY_CONFLICT", mismatch);
+            return new WmsReversalProcessingResult(
+                    "REJECTED", document.documentNo(), created);
+        }
+        receipts.accepted(command, document,
+                (created ? "Created" : "Found")
+                        + " durable material-wms red document " + document.documentNo()
+                        + " for original " + document.originalDocument().documentNo() + ".");
+        return new WmsReversalProcessingResult(
+                "ACCEPTED", document.documentNo(), created);
+    }
+
+    private String mismatch(
+            WmsCompletionInboundReversalCommandV1 command,
+            WmsRoute route,
+            BigDecimal quantity,
+            MaterialWmsReversalDocument document) {
+        if (!"COMPLETION_INBOUND_REVERSAL".equals(document.documentType())
+                || !"BPI".equals(document.sourceSystem())
+                || !command.getEventId().equals(document.sourceDocumentId())
+                || !command.getIdempotencyKey().equals(document.idempotencyKey())
+                || !route.warehouseCode().equals(document.warehouseCode())
+                || !"POSTED".equals(document.status())
+                || !"QUALIFIED".equals(document.qualityStatus())) {
+            return "The reversal idempotency key resolves to a different red document identity or state.";
+        }
+        MaterialWmsReversalDocument.OriginalDocument original = document.originalDocument();
+        if (original == null
+                || document.originalInternalId() != original.internalId()
+                || !command.getOriginalDocumentId().equals(original.documentNo())
+                || !"COMPLETION_INBOUND".equals(original.documentType())
+                || !"BPI".equals(original.sourceSystem())
+                || !command.getOriginalCommandEventId().equals(original.sourceDocumentId())
+                || !command.getOriginalIdempotencyKey().equals(original.idempotencyKey())
+                || !route.warehouseCode().equals(original.warehouseCode())
+                || !"REVERSED".equals(original.status())
+                || !"QUALIFIED".equals(original.qualityStatus())) {
+            return "The red document does not reference the exact original BPI completion-inbound document.";
+        }
+        if (document.lines().size() != 1) {
+            return "The BPI completion-inbound reversal must contain exactly one line.";
+        }
+        MaterialWmsDocument.Line line = document.lines().get(0);
+        if (!"BPI".equals(line.sourceSystem())
+                || !(command.getEventId() + ":1").equals(line.sourceLineId())
+                || !command.getMaterialCode().equals(line.materialCode())
+                || !command.getBatchNo().equals(line.batchNo())
+                || !command.getBatchNo().equals(line.productionBatchNo())
+                || !route.warehouseCode().equals(line.warehouseCode())
+                || !route.locationCode().equals(line.locationCode())
+                || quantity.compareTo(line.quantity()) != 0
+                || !route.baseUnit().equals(line.unitCode())
+                || !"QUALIFIED".equals(line.qualityStatus())) {
+            return "The red document line has different material, batch, quantity, unit or location.";
+        }
+        return null;
+    }
+
+    private MaterialWmsReversalRequest createRequest(
+            WmsCompletionInboundReversalCommandV1 command,
+            WmsRoute route,
+            BigDecimal quantity) {
+        LocalDate storageDate = Instant.ofEpochMilli(command.getApprovedAtMs())
+                .atZone(properties.zoneId())
+                .toLocalDate();
+        return new MaterialWmsReversalRequest(
+                command.getTenantId(),
+                command.getEventId(),
+                command.getIdempotencyKey(),
+                command.getOriginalDocumentId(),
+                command.getBatchNo(),
+                command.getOrderId(),
+                route.companyCode(),
+                route.warehouseCode(),
+                storageDate,
+                command.getEventId() + ":1",
+                command.getMaterialCode(),
+                command.getBatchNo(),
+                command.getBatchNo(),
+                route.locationCode(),
+                quantity,
+                route.baseUnit(),
+                "BPI reversal batch=" + command.getBatchId()
+                        + ", requestedBy=" + command.getRequestedBy()
+                        + ", approvedBy=" + command.getApprovedBy()
+                        + ", reason=" + command.getReason());
+    }
+
+    private WmsCompletionInboundReversalCommandV1 decodeAndValidate(
+            ConsumerRecord<byte[], byte[]> record) {
+        if (!properties.reversalCommandTopic().equals(record.topic())) {
+            throw rejected("BPI WMS reversal command arrived from an untrusted topic.");
+        }
+        byte[] payload = record.value();
+        if (payload == null || payload.length == 0 || payload.length > properties.maxPayloadBytes()) {
+            throw rejected("BPI WMS reversal command payload size is invalid.");
+        }
+        WmsCompletionInboundReversalCommandV1 command;
+        try {
+            command = WmsCompletionInboundReversalCommandV1.parseFrom(payload);
+        } catch (InvalidProtocolBufferException error) {
+            throw rejected(
+                    "BPI WMS payload is not valid WmsCompletionInboundReversalCommandV1 Protobuf.",
+                    error);
+        }
+        requiredUuid(command.getEventId(), "event_id");
+        requiredUuid(command.getBatchId(), "batch_id");
+        requiredUuid(command.getOriginalCommandEventId(), "original_command_event_id");
+        required(command.getIdempotencyKey(), "idempotency_key", 256);
+        required(command.getOriginalIdempotencyKey(), "original_idempotency_key", 256);
+        required(command.getOriginalDocumentId(), "original_document_id", 96);
+        required(command.getTenantId(), "tenant_id", 64);
+        required(command.getPlantId(), "plant_id", 128);
+        required(command.getLineId(), "line_id", 128);
+        required(command.getBatchNo(), "batch_no", 128);
+        required(command.getOrderId(), "order_id", 128);
+        required(command.getMaterialCode(), "material_code", 128);
+        required(command.getQuantityUnit(), "quantity_unit", 64);
+        required(command.getReason(), "reason", 500);
+        required(command.getRequestedBy(), "requested_by", 128);
+        required(command.getApprovedBy(), "approved_by", 128);
+        if (command.getRequestedBy().equals(command.getApprovedBy())) {
+            throw rejected("BPI WMS reversal requester and approver must differ.");
+        }
+        if (command.getRequestedAtMs() <= 0
+                || command.getApprovedAtMs() < command.getRequestedAtMs()) {
+            throw rejected(
+                    "BPI WMS reversal request and approval times are invalid.");
+        }
+        requireHeader(record, EVENT_ID, command.getEventId());
+        requireHeader(record, IDEMPOTENCY_KEY, command.getIdempotencyKey());
+        requireHeader(record, TENANT_ID, command.getTenantId());
+        requireHeader(record, SCHEMA_VERSION, "v1");
+        String expectedKey = command.getTenantId() + "|" + command.getPlantId()
+                + "|" + command.getBatchId();
+        if (!expectedKey.equals(decode(record.key(), "Kafka record key"))) {
+            throw rejected("BPI WMS Kafka key does not match the reversal command scope.");
+        }
+        return command;
+    }
+
+    private static BigDecimal quantity(String value) {
+        try {
+            BigDecimal quantity = new BigDecimal(value);
+            if (quantity.signum() <= 0 || quantity.precision() > 20 || quantity.scale() > 6) {
+                throw rejected(
+                        "BPI WMS reversal quantity must be positive with precision 20 and scale 6 or less.");
+            }
+            return quantity;
+        } catch (NumberFormatException error) {
+            throw rejected("BPI WMS reversal quantity is not a decimal number.", error);
+        }
+    }
+
+    private static String required(String value, String field, int maximum) {
+        if (value == null || value.isBlank() || value.length() > maximum) {
+            throw rejected("BPI WMS reversal " + field
+                    + " is required and must not exceed " + maximum + " characters.");
+        }
+        return value;
+    }
+
+    private static void requiredUuid(String value, String field) {
+        required(value, field, 64);
+        try {
+            UUID.fromString(value);
+        } catch (IllegalArgumentException error) {
+            throw rejected("BPI WMS reversal " + field + " must be a UUID.", error);
+        }
+    }
+
+    private static void requireHeader(
+            ConsumerRecord<byte[], byte[]> record, String name, String expected) {
+        Iterator<Header> headers = record.headers().headers(name).iterator();
+        if (!headers.hasNext()) {
+            throw rejected("BPI WMS Kafka header " + name + " is required.");
+        }
+        String actual = decode(headers.next().value(), "Kafka header " + name);
+        if (headers.hasNext() || !expected.equals(actual)) {
+            throw rejected(
+                    "BPI WMS Kafka header " + name + " must match the command exactly once.");
+        }
+    }
+
+    private static String decode(byte[] value, String field) {
+        if (value == null || value.length == 0) {
+            throw rejected(field + " is required.");
+        }
+        try {
+            return StandardCharsets.UTF_8.newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(CodingErrorAction.REPORT)
+                    .decode(ByteBuffer.wrap(value))
+                    .toString();
+        } catch (CharacterCodingException error) {
+            throw rejected(field + " is not valid UTF-8.", error);
+        }
+    }
+
+    private static WmsCommandRejectedException rejected(String message) {
+        return new WmsCommandRejectedException(message);
+    }
+
+    private static WmsCommandRejectedException rejected(String message, Throwable cause) {
+        return new WmsCommandRejectedException(message, cause);
+    }
+
+    public record WmsReversalProcessingResult(
+            String status, String documentId, boolean created) {
+    }
+}

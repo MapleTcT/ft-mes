@@ -8955,6 +8955,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/KafkaWmsReversalReceiptPublisher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsBusinessException.java",
       "state": "tracked",
       "tracked": true
@@ -8980,6 +8986,18 @@
     {
       "ignored": false,
       "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsHttpClient.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsReversalDocument.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsReversalRequest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -9021,6 +9039,24 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsReversalCommandKafkaListener.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsReversalCommandProcessor.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsReversalReceiptPublisher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsRoute.java",
       "state": "tracked",
       "tracked": true
@@ -9046,6 +9082,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandProcessorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/WmsReversalCommandProcessorTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -9713,7 +9755,7 @@
       "tracked": 55
     },
     "services": {
-      "tracked": 292
+      "tracked": 299
     },
     "simulation": {
       "tracked": 4
@@ -9725,8 +9767,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1611,
-    "tracked": 1611,
+    "totalFiles": 1618,
+    "tracked": 1618,
     "untracked": 0
   },
   "untrackedByDirectory": []

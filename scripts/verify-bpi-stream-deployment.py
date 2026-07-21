@@ -248,8 +248,8 @@ def main() -> int:
         failures.append(
             "BPI cluster smoke must isolate kafka-topics stdin so every configured topic is checked"
         )
-    if '"topics": 20' not in smoke_script:
-        failures.append("BPI cluster smoke must report all twenty configured topics")
+    if '"topics": 24' not in smoke_script:
+        failures.append("BPI cluster smoke must report all twenty-four configured topics")
     for marker in (
         "qcs.batch.quality-gate.v1",
         "qcs.batch.quality-gate.dlq.v1",
@@ -257,6 +257,10 @@ def main() -> int:
         "bpi.wms.completion-inbound-command.dlq.v1",
         "wms.completion-inbound.receipt.v1",
         "wms.completion-inbound.receipt.dlq.v1",
+        "bpi.wms.completion-inbound-reversal-command.v1",
+        "bpi.wms.completion-inbound-reversal-command.dlq.v1",
+        "wms.completion-inbound-reversal.receipt.v1",
+        "wms.completion-inbound-reversal.receipt.dlq.v1",
     ):
         if marker not in topic_script or marker not in smoke_script:
             failures.append(f"BPI Phase 2 topic is not initialized and smoked: {marker}")

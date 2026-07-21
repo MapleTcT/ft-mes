@@ -10,14 +10,16 @@ MVN=/Users/zhangchu/.m2/wrapper/dists/apache-maven-3.9.3-bin/6actqn1ngkbj8g7k704
 make bpi-wms-adapter-test
 ```
 
-`bpi-wms-adapter` 共 `16/16 PASS`，其中 `WmsCommandProcessorTest` 为 `10/10`，
-`MaterialWmsHttpClientTest` 为 `5/5`，应用上下文为 `1/1`。本轮修复了一个明确的
+`bpi-wms-adapter` 共 `28/28 PASS`，其中普通入库 `WmsCommandProcessorTest` 为 `10/10`、
+红字冲销 `WmsReversalCommandProcessorTest` 为 `10/10`、`MaterialWmsHttpClientTest` 为
+`7/7`，应用上下文为 `1/1`。本轮修复了一个明确的
 响应不确定窗口：外部 WMS 已提交创建、但 HTTP 响应丢失时，adapter 会在同一次 Kafka
 投递中按原幂等键精确查单；只有查到业务事实完全一致的耐久单据才发送 accepted receipt。
 
-状态为 `PASS_SOFTWARE_PROTOCOL_ONLY`。内部 `material-wms` 的追加式红字单持久化合同随后已通过
-本地测试，但 BPI 冲销命令、补偿审批和外部 ERP/WMS 仍未接通；这不是外部实例联调，也不代表
-生产开关已经完成，`G-021` 继续保持 `PARTIAL`。
+状态为 `PASS_SOFTWARE_PROTOCOL_ONLY`。内部 `material-wms` 的追加式红字单持久化合同和
+Protobuf/Kafka query-first adapter 已通过本地测试，但 BPI 四眼审批、事务 outbox、回执落库与
+真实外部 ERP/WMS 仍未接通；这不是外部实例联调，也不代表生产开关已经完成，`G-021` 继续保持
+`PARTIAL`。
 
 ## 验收矩阵
 
@@ -33,6 +35,12 @@ make bpi-wms-adapter-test
 | 幂等事实冲突 | 同 key 对应数量或库存维度不一致 | fail closed，禁止接受或再次创建 | `WMS_IDEMPOTENCY_CONFLICT` | PASS |
 | 单位不一致 | 命令单位与精确 route 基础单位不符 | WMS 调用前拒绝 | `WMS_UNIT_MISMATCH` | PASS |
 | Kafka 身份冲突 | topic/key/header 与 payload 不一致 | 不调用 WMS，进入既有 DLQ 路径 | fail closed | PASS |
+| 红字原单查到 | 新冲销 key 第一次查询命中 | 不再创建，核对红单、原蓝单和明细全部事实后发 accepted receipt | 未调用 reversal create | PASS |
+| 红字正常创建 | 红单查无，创建成功 | 创建后必须再次精确查到红单及原单关系 | 两次 query、一次 create | PASS |
+| 红字响应丢失 | reversal create 抛 transient | 立即按新 key 回查；查到则 accepted，查无/查询失败则重试 | 未把不确定结果转成业务拒绝 | PASS |
+| 红字业务拒绝 | 库存已消耗或原单不可冲销 | 再查红单排除已提交；仍无红单才发 rejected receipt | terminal rejection | PASS |
+| 红字事实冲突 | 红单未精确关联命令指定的原蓝单 | fail closed，不接受冲突单据 | `WMS_REVERSAL_IDEMPOTENCY_CONFLICT` | PASS |
+| 红字四眼身份 | requester 与 approver 相同 | WMS 调用前拒绝 | 未调用 query/create | PASS |
 
 ## HTTP 合同
 
@@ -44,10 +52,13 @@ make bpi-wms-adapter-test
 - 成功门槛：HTTP 成功本身不成立，必须随后通过原幂等键查到且全部事实一致
 - 不确定失败：不得生成 rejected receipt；继续由 Kafka 固定重试和 DLQ 保护
 - 业务拒绝：先查单排除“已提交但返回冲突”，确认无单后才生成 rejected receipt
+- 红字查询：`GET /material/wms/completion-inbound-reversals/by-idempotency?sourceSystem=BPI&idempotencyKey=...`
+- 红字创建：`POST /material/wms/completion-inbound-reversals`，携带独立 event/key 和原蓝字单号
+- 红字主题：命令、命令 DLQ、回执、回执 DLQ 四个主题与普通入库完全隔离，均保留 30 天
 
 ## 剩余生产门槛
 
 1. 用真实外部 ERP/WMS 测试实例执行同一 marker 的查询、超时、4xx、5xx 和响应丢失演练。
-2. 将已实现的内部耐久红字单合同接入 BPI 独立命令、四眼审批、Protobuf/Kafka adapter 和补偿回执。
+2. 将已实现的红字 Protobuf/Kafka adapter 接入 BPI 独立任务、四眼审批、事务 outbox、回执 inbox 和批次状态机。
 3. 在真实页面、Kafka、BPI PostgreSQL 与外部 WMS 数据库之间完成 before/after 查询和清理。
 4. 在上述证据闭合前保持 Phase 2、WMS outbox、WMS adapter 和 scope feature flag 关闭。

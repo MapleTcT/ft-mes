@@ -58,7 +58,7 @@ public class WmsAdapterKafkaConfiguration {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
                 kafkaTemplate,
                 (record, error) -> new TopicPartition(
-                        properties.commandDlqTopic(), record.partition()));
+                        deadLetterTopic(properties, record.topic()), record.partition()));
         recoverer.setFailIfSendResultIsError(true);
         recoverer.setWaitForSendResultTimeout(properties.publishTimeout());
         DefaultErrorHandler handler = new DefaultErrorHandler(
@@ -94,5 +94,17 @@ public class WmsAdapterKafkaConfiguration {
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         factory.getContainerProperties().setSyncCommits(true);
         return factory;
+    }
+
+    private static String deadLetterTopic(
+            BpiWmsAdapterProperties properties, String sourceTopic) {
+        if (properties.commandTopic().equals(sourceTopic)) {
+            return properties.commandDlqTopic();
+        }
+        if (properties.reversalCommandTopic().equals(sourceTopic)) {
+            return properties.reversalCommandDlqTopic();
+        }
+        throw new IllegalArgumentException(
+                "BPI WMS adapter received an unconfigured source topic: " + sourceTopic);
     }
 }

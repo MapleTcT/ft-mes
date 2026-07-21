@@ -74,24 +74,6 @@ public class MaterialWmsHttpClient implements MaterialWmsGateway {
             return Optional.empty();
         }
         JsonNode document = requiredObject(envelope.data(), "document");
-        List<MaterialWmsDocument.Line> lines = new ArrayList<>();
-        JsonNode lineNodes = envelope.data().path("lines");
-        if (!lineNodes.isArray()) {
-            throw new MaterialWmsTransientException("material-wms lookup did not return a lines array.");
-        }
-        for (JsonNode line : lineNodes) {
-            lines.add(new MaterialWmsDocument.Line(
-                    text(line, "source_system"),
-                    text(line, "source_line_id"),
-                    text(line, "material_code"),
-                    text(line, "batch_no"),
-                    text(line, "production_batch_no"),
-                    text(line, "warehouse_code"),
-                    text(line, "location_code"),
-                    decimal(line, "quantity"),
-                    text(line, "unit_code"),
-                    text(line, "quality_status")));
-        }
         return Optional.of(new MaterialWmsDocument(
                 longValue(document, "id"),
                 text(document, "document_no"),
@@ -101,7 +83,7 @@ public class MaterialWmsHttpClient implements MaterialWmsGateway {
                 text(document, "warehouse_code"),
                 text(document, "status"),
                 text(document, "quality_status"),
-                List.copyOf(lines)));
+                lines(envelope.data())));
     }
 
     @Override
@@ -137,6 +119,92 @@ public class MaterialWmsHttpClient implements MaterialWmsGateway {
         exchange(
                 HttpMethod.POST,
                 "/material/produceInSingles/produceInSingl/generateProductInSingle",
+                request.tenantId(),
+                new HttpEntity<Map<String, Object>>(payload, headers),
+                false);
+    }
+
+    @Override
+    public Optional<MaterialWmsReversalDocument> findReversalByIdempotency(
+            String tenantId, String idempotencyKey) {
+        String path = UriComponentsBuilder
+                .fromPath("/material/wms/completion-inbound-reversals/by-idempotency")
+                .queryParam("sourceSystem", SOURCE_SYSTEM)
+                .queryParam("idempotencyKey", idempotencyKey)
+                .build()
+                .toUriString();
+        Envelope envelope = exchange(
+                HttpMethod.GET, path, tenantId, new HttpEntity<Void>(headers(tenantId)), true);
+        if (envelope.code() == 404) {
+            return Optional.empty();
+        }
+        JsonNode document = requiredObject(envelope.data(), "document");
+        JsonNode original = requiredObject(envelope.data(), "originalDocument");
+        long originalInternalId = longValue(document, "reversal_of_document_id");
+        MaterialWmsReversalDocument.OriginalDocument originalDocument =
+                new MaterialWmsReversalDocument.OriginalDocument(
+                        longValue(original, "id"),
+                        text(original, "document_no"),
+                        text(original, "document_type"),
+                        text(original, "source_system"),
+                        text(original, "source_document_id"),
+                        text(original, "idempotency_key"),
+                        text(original, "warehouse_code"),
+                        text(original, "status"),
+                        text(original, "quality_status"));
+        if (originalInternalId != originalDocument.internalId()) {
+            throw new MaterialWmsTransientException(
+                    "material-wms reversal lookup returned a mismatched original document relation.");
+        }
+        return Optional.of(new MaterialWmsReversalDocument(
+                longValue(document, "id"),
+                text(document, "document_no"),
+                text(document, "document_type"),
+                text(document, "source_system"),
+                text(document, "source_document_id"),
+                text(document, "idempotency_key"),
+                text(document, "warehouse_code"),
+                text(document, "status"),
+                text(document, "quality_status"),
+                originalInternalId,
+                originalDocument,
+                lines(envelope.data())));
+    }
+
+    @Override
+    public void createCompletionInboundReversal(MaterialWmsReversalRequest request) {
+        Map<String, Object> line = new LinkedHashMap<>();
+        line.put("srcPartId", request.sourceLineId());
+        line.put("goodCode", request.materialCode());
+        line.put("batchText", request.batchNo());
+        line.put("produceBatchNum", request.productionBatchNo());
+        line.put("placeSetCode", request.locationCode());
+        line.put("quantity", request.quantity());
+        line.put("unitCode", request.unitCode());
+        line.put("checkResult", "BaseSet_checkResult/qualified");
+        line.put("detailMemo", request.memo());
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("sourceSystem", SOURCE_SYSTEM);
+        payload.put("idempotencyKey", request.idempotencyKey());
+        payload.put("srcID", request.sourceDocumentId());
+        payload.put("originalDocumentNo", request.originalDocumentNo());
+        payload.put("srcTableNo", request.sourceDocumentNo());
+        payload.put("directiveNo", request.directiveNo());
+        payload.put("companyCode", request.companyCode());
+        payload.put("userName", "bpi-wms-adapter");
+        payload.put("wareCode", request.warehouseCode());
+        payload.put("storageDate", request.storageDate().toString());
+        payload.put("comeType", "produceIn");
+        payload.put("redBlue", "red");
+        payload.put("handRemarks", request.memo());
+        payload.put("detailList", List.of(line));
+
+        HttpHeaders headers = headers(request.tenantId());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        exchange(
+                HttpMethod.POST,
+                "/material/wms/completion-inbound-reversals",
                 request.tenantId(),
                 new HttpEntity<Map<String, Object>>(payload, headers),
                 false);
@@ -203,6 +271,29 @@ public class MaterialWmsHttpClient implements MaterialWmsGateway {
         headers.set(TENANT_HEADER, tenantId);
         headers.set(API_KEY_HEADER, properties.materialApiKey());
         return headers;
+    }
+
+    private static List<MaterialWmsDocument.Line> lines(JsonNode data) {
+        List<MaterialWmsDocument.Line> lines = new ArrayList<>();
+        JsonNode lineNodes = data.path("lines");
+        if (!lineNodes.isArray()) {
+            throw new MaterialWmsTransientException(
+                    "material-wms lookup did not return a lines array.");
+        }
+        for (JsonNode line : lineNodes) {
+            lines.add(new MaterialWmsDocument.Line(
+                    text(line, "source_system"),
+                    text(line, "source_line_id"),
+                    text(line, "material_code"),
+                    text(line, "batch_no"),
+                    text(line, "production_batch_no"),
+                    text(line, "warehouse_code"),
+                    text(line, "location_code"),
+                    decimal(line, "quantity"),
+                    text(line, "unit_code"),
+                    text(line, "quality_status")));
+        }
+        return List.copyOf(lines);
     }
 
     private static JsonNode requiredObject(JsonNode parent, String field) {
