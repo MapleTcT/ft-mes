@@ -188,8 +188,10 @@ QCS report -> inspect -> WOM task -> 受控 BPI binding 获取唯一 scope，通
 Kafka/BPI/PostgreSQL 的 marker 首发与同事件重放验收已经完成，取证后开关恢复关闭且双库 marker 残留为 0。
 resolver 同时返回当前质量门的外部 ID、revision 和 source event ID，
 仅当三者与待发布 outbox 完全一致时，sidecar 才允许终态批次重放；终态上的新事件仍进入 DEAD，不能据此宣称
-外部 QCS 主动事件已投产。当前目标验收使用影子批次，按设计没有生成 WMS command；外部 ERP/WMS 冲销与
-真实宕机补偿验收也仍未激活。完整证据见 `docs/testing/qcs-bpi-quality-gate-target-acceptance.md`。
+外部 QCS 主动事件已投产。该次 QCS 目标验收使用影子批次，按设计没有生成 WMS command；后续受控批次已
+补齐内部 `material-wms` 正向入库、服务停机/DLQ/恢复和蓝单/红单整链。外部 ERP/WMS 冲销与外部实例
+故障补偿仍未激活。QCS 证据见 `docs/testing/qcs-bpi-quality-gate-target-acceptance.md`，内部 WMS 整链见
+`docs/testing/bpi-formal-identity-wms-roundtrip-acceptance.md`。
 
 WMS adapter 的 query-first 合同还要求“创建响应不确定”后立即以原幂等键再查一次：查到且单据头、
 明细、物料、批次、仓库、库位、数量、单位和质量状态全部一致才发送 accepted receipt；查无或查单失败
@@ -204,8 +206,12 @@ event、独立 idempotency key、原入库单号以及与原单完全一致的�
 库存已消耗或事实冲突时整事务失败，原蓝字单仍为 `POSTED`。本地持久化合同为 `12/12 PASS`，证据见
 `docs/testing/material-wms-completion-inbound-reversal-contract-acceptance.md`。独立 Protobuf command/receipt、
 query-first adapter、四个隔离主题、BPI 四眼审批、V25 事务 outbox、接受/拒绝回执与 PostgreSQL 状态机
-均已完成本地验收。真实页面、目标 Kafka 和外部 WMS 红单仍未闭合，因此不改变 Phase 2 默认关闭和
-`G-021 PARTIAL` 结论。
+均已完成本地验收。目标 marker `ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630` 又通过两个真实 ADP
+会话、隔离 Kafka、目标 WMS adapter、目标 `material-wms` 和 BPI/material 两个 PostgreSQL 库，闭合
+蓝单 `INBOUNDED/r4`、申请/职责分离审批、红单 durable receipt、`INBOUND_REVERSED/r7`、净库存归零、
+浏览器终态与定向清理。完整证据见
+`docs/testing/bpi-formal-identity-wms-roundtrip-acceptance.md`。该结论只代表内部 `material-wms`，
+外部 ERP/WMS 端点仍未联调，因此不改变 Phase 2 默认关闭和 `G-021 PARTIAL` 结论。
 
 ## 3. 内部受信接入 API
 
@@ -251,10 +257,10 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 | `bpi.wms.completion-inbound-command.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundCommandV1` bytes + DLT headers | WMS adapter -> 运维处置 | TARGET_TOPIC_CREATED_DISABLED_BY_DEFAULT |
 | `wms.completion-inbound.receipt.v1` | `commandEventId` | `WmsCompletionInboundReceiptV1` | WMS adapter -> BPI inbox/PostgreSQL | TARGET_CONTROLLED_KAFKA_POSTGRES_ACCEPTED_DISABLED_BY_DEFAULT |
 | `wms.completion-inbound.receipt.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundReceiptV1` bytes + DLT headers | BPI consumer -> 运维处置 | TARGET_TOPIC_CREATED_DISABLED_BY_DEFAULT |
-| `bpi.wms.completion-inbound-reversal-command.v1` | `tenantId|plantId|batchId` | `WmsCompletionInboundReversalCommandV1` | BPI transactional outbox -> WMS adapter | LOCAL_API_POSTGRES_ACCEPTED_DISABLED_BY_DEFAULT |
-| `bpi.wms.completion-inbound-reversal-command.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundReversalCommandV1` bytes + DLT headers | WMS adapter -> 运维处置 | LOCAL_PROTOCOL_ACCEPTED_DISABLED_BY_DEFAULT |
-| `wms.completion-inbound-reversal.receipt.v1` | `commandEventId` | `WmsCompletionInboundReversalReceiptV1` | WMS adapter -> BPI inbox/PostgreSQL | LOCAL_API_POSTGRES_ACCEPTED_DISABLED_BY_DEFAULT |
-| `wms.completion-inbound-reversal.receipt.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundReversalReceiptV1` bytes + DLT headers | BPI consumer -> 运维处置 | LOCAL_PROTOCOL_ACCEPTED_DISABLED_BY_DEFAULT |
+| `bpi.wms.completion-inbound-reversal-command.v1` | `tenantId|plantId|batchId` | `WmsCompletionInboundReversalCommandV1` | BPI transactional outbox -> WMS adapter | TARGET_INTERNAL_MATERIAL_WMS_KAFKA_ACCEPTED_DISABLED_BY_DEFAULT |
+| `bpi.wms.completion-inbound-reversal-command.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundReversalCommandV1` bytes + DLT headers | WMS adapter -> 运维处置 | TARGET_ISOLATED_ZERO_DLQ_ACCEPTED_DISABLED_BY_DEFAULT |
+| `wms.completion-inbound-reversal.receipt.v1` | `commandEventId` | `WmsCompletionInboundReversalReceiptV1` | WMS adapter -> BPI inbox/PostgreSQL | TARGET_INTERNAL_MATERIAL_WMS_DURABLE_RECEIPT_ACCEPTED_DISABLED_BY_DEFAULT |
+| `wms.completion-inbound-reversal.receipt.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundReversalReceiptV1` bytes + DLT headers | BPI consumer -> 运维处置 | TARGET_ISOLATED_ZERO_DLQ_ACCEPTED_DISABLED_BY_DEFAULT |
 | `bpi.batch.fact.v1` | `batchId` | `BatchFactV1` | BPI -> downstream | PHASE_2_RESERVED |
 | `bpi.training.snapshot.v1` | `datasetId` | `TrainingSnapshotV1` | BPI -> ML pipeline | PHASE_3_RESERVED |
 

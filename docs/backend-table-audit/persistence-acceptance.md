@@ -885,6 +885,25 @@ ERP/WMS 红字单据联合验收仍未执行。
 `docs/testing/bpi-formal-identity-wms-reversal-acceptance.md`。外部 ERP/WMS 未启用，故本轮正确终态为
 `PENDING_WMS`；外部红单消费、查单、响应丢失、拒绝、补偿和 durable receipt 仍是开放验收边界。
 
+### BPI 正式身份内部 WMS 蓝单/红单整链（目标双 PostgreSQL）
+
+本节使用 marker `ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630`。material schema 先经受保护的
+expand-only 迁移和备份升级，当前 material-wms JAR 再经备份、重启、健康和鉴权门禁验证。随后以
+两个真实 ADP 会话执行冲销，并对 BPI PostgreSQL 与 material-wms PostgreSQL 分别查库。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 蓝单经内部 material-wms 完工入库 | `/bpi/#/batches` 的同一 durable 批次 | Kafka blue command；`POST /material/wms/completion-inbounds`；query-first GET；Kafka blue receipt | `BpiOutboxPublisher -> WmsCommandKafkaListener -> WmsCommandProcessor -> MaterialWmsController/Service/Repository -> WmsReceiptKafkaListener` | BPI batch/link/outbox/inbox/state；material `wms_stock_documents`、`wms_stock_document_lines`、`wms_inventory_transactions`、`wms_batch_stocks` | `bpi-wms-formal-roundtrip-verification.sql` 与 `bpi-wms-formal-roundtrip-material-verification.sql` | 蓝 command/receipt 各 1、DLQ/lag 0；BPI `INBOUNDED/r4`，link `ACCEPTED/r2`；material 蓝单 `POSTED`，1 行与 1 条 `+12.345 kg` 事务，库存 `12.345` | PASS_TARGET_INTERNAL_WMS |
+| 正式双会话申请与批准 | `/bpi/#/batches`；`admin` 和独立 reviewer 会话 | `POST /bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal` | `BpiProxyController -> LegacyTicketVerifier -> BatchController -> WmsInboundReversalService -> WmsInboundReversalPostgresRepository` | `bpi_batch_instances`、`bpi_wms_inbound_reversal_tasks`、`bpi_outbox_events`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency`、`bpi_wms_inbound_links` | BPI verification SQL 比较 pending/approved；核对 actor、revision、原蓝 projection、红 outbox event/topic/SHA | REQUEST 202；同人 APPROVE 403 且回滚；独立 APPROVE 202；`INBOUND_REVERSING/r6`、`PENDING_WMS/r2`，一条红 outbox `PUBLISHED/r3`；原蓝 event/document/SHA 不变 | PASS_SECURITY_AND_PERSISTENCE |
+| 红单 durable receipt 与库存净额归零 | 同一页面最终读取 | `POST /material/wms/completion-inbound-reversals`；`GET .../by-idempotency`；Kafka reversal receipt；`POST /internal/bpi/v1/wms-inbound-reversal-receipts` | `MaterialWmsController -> MaterialInventoryService -> MaterialWmsRepository -> WmsReversalReceiptKafkaListener -> WmsInboundReversalService` | 上述 BPI 表与 material 四表 | 两份 roundtrip verification SQL；核对 red document/reversal FK、两条事务、最终 stock、四条 BPI state event | 红 command/receipt 各 1、DLQ/lag 0；红单 `CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E` 为 `POSTED` 并引用蓝单 31；事务 `+12.345/-12.345`，库存 `0/0/0`；BPI `INBOUND_REVERSED/r7`、task `COMPLETED/r3` | PASS_TARGET_DURABLE_RECEIPT |
+| 双库、身份、Kafka 与运行覆盖清理 | 不适用 | 双库 cleanup SQL；ADP identity DELETE API；隔离 Compose restore | 受保护 runner `finally` 与 1200 秒 watchdog | 双库 marker 表、身份/RBAC 表、临时 feature flag | `bpi-wms-formal-roundtrip-material-cleanup.sql`、`bpi-wms-inbound-reversal-acceptance-cleanup.sql` 及终态复查 | BPI/material residual 0，临时身份 active binding 0，隔离 topic/group 已删除；scope/镜像精确恢复；六开关 false，基础 `.env` 未编辑，watchdog 未触发 | PASS_CLEANED |
+
+机器证据：`metadata/bpi-formal-identity-wms-roundtrip-acceptance.json`；schema 与 JAR 证据分别为
+`metadata/bpi-material-wms-reversal-schema-upgrade.json` 和
+`metadata/bpi-material-wms-target-deployment.json`。完整边界见
+`docs/testing/bpi-formal-identity-wms-roundtrip-acceptance.md`。外部 ERP/WMS 实例仍未接入，不能把本节
+解释为外部系统生产验收。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

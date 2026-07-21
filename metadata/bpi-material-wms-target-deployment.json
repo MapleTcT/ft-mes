@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-21T19:05:03.956Z",
+  "status": "PASS_BACKUP_RESTART_VERIFIED",
+  "target": {
+    "host": "10.11.100.17",
+    "runtimeRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "composeProject": "adp-mes-newbase",
+    "jar": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/material/manual/material-wms.jar"
+  },
+  "artifact": {
+    "localPath": "backend/source-modules/material-wms/target/material-wms-0.1.0-SNAPSHOT.jar",
+    "sha256": "de4cac373b620cddfb9a6eeefcbaebc931a706b4566bb19692f6ad68e17c01e3",
+    "sizeBytes": 36070288
+  },
+  "backup": {
+    "directory": "/data/docker/bpi-upgrade-backups/material-wms-runtime-20260721190451",
+    "previousJar": "/data/docker/bpi-upgrade-backups/material-wms-runtime-20260721190451/material-wms.previous.jar",
+    "previousSha256": "8cf50c382f0021dde8a93f33aa764d11a9f87b7b0b154404b0799fac9a35a8f0"
+  },
+  "deployedSha256": "de4cac373b620cddfb9a6eeefcbaebc931a706b4566bb19692f6ad68e17c01e3",
+  "routeProbe": "PASS_AUTH_GATE",
+  "rollbackRestored": false,
+  "issues": []
+}

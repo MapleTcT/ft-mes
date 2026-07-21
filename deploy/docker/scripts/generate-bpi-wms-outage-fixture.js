@@ -14,12 +14,17 @@ const protoPath = path.join(
 );
 const messageType = "ftmes.bpi.contract.v1.WmsCompletionInboundCommandV1";
 const marker = required("BPI_ACCEPTANCE_MARKER");
+const commandTopic = process.env.BPI_WMS_COMMAND_TOPIC?.trim()
+  || "bpi.wms.completion-inbound-command.v1";
 const outputPath = path.resolve(
   process.env.BPI_FIXTURE_OUTPUT || `/tmp/${marker}-wms-outage-fixture.json`,
 );
 
 if (!/^[A-Za-z0-9_-]{8,100}$/.test(marker)) {
   throw new Error("BPI_ACCEPTANCE_MARKER must use 8-100 letters, digits, underscores or hyphens");
+}
+if (!/^[A-Za-z0-9._-]{1,249}$/.test(commandTopic)) {
+  throw new Error("BPI_WMS_COMMAND_TOPIC is not a safe Kafka topic name");
 }
 
 function required(key) {
@@ -167,7 +172,7 @@ function main() {
     scope: { tenantId, plantId, lineId },
     ids,
     command: {
-      topic: "bpi.wms.completion-inbound-command.v1",
+      topic: commandTopic,
       partitionKey: `${tenantId}|${plantId}|${ids.batchId}`,
       idempotencyKey,
       traceId,
@@ -190,6 +195,7 @@ function main() {
       partition_key: `${tenantId}|${plantId}|${ids.batchId}`,
       payload_base64: payload.toString("base64"),
       headers_json: JSON.stringify(headers),
+      command_topic: commandTopic,
     },
   };
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });

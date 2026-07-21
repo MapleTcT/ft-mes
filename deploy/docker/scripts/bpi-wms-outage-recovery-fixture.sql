@@ -55,7 +55,7 @@ INSERT INTO bpi.bpi_outbox_events
 VALUES
     (:'outbox_id'::uuid, '1000', 'PLANT-01', 'LINE-S07-01',
      'BATCH_INSTANCE', :'batch_id'::uuid, 'WMS_COMPLETION_INBOUND_COMMAND',
-     'bpi.wms.completion-inbound-command.v1', :'partition_key',
+     :'command_topic', :'partition_key',
      decode(:'payload_base64', 'base64'), CAST(:'headers_json' AS jsonb),
      'PENDING', 0, 0, 0, now(), 1, now(), now());
 

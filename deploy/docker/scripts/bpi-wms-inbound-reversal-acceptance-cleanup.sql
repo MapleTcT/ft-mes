@@ -8,6 +8,10 @@ DELETE FROM bpi.bpi_api_idempotency
 DELETE FROM bpi.bpi_inbox_events
  WHERE tenant_id = '1000'
    AND idempotency_key LIKE 'WMS_COMPLETION_INBOUND_REVERSAL|1000|' || :'batch_id' || '|%';
+DELETE FROM bpi.bpi_inbox_events
+ WHERE tenant_id = '1000'
+   AND source = 'wms.completion-inbound.receipt.v1'
+   AND idempotency_key = :'marker' || '|WMS|1';
 DELETE FROM bpi.bpi_batch_state_events
  WHERE tenant_id = '1000' AND batch_id = :'batch_id'::uuid;
 DELETE FROM bpi.bpi_audit_events
@@ -41,6 +45,10 @@ SELECT (
   + (SELECT count(*) FROM bpi.bpi_inbox_events
       WHERE tenant_id = '1000'
         AND idempotency_key LIKE 'WMS_COMPLETION_INBOUND_REVERSAL|1000|' || :'batch_id' || '|%')
+  + (SELECT count(*) FROM bpi.bpi_inbox_events
+      WHERE tenant_id = '1000'
+        AND source = 'wms.completion-inbound.receipt.v1'
+        AND idempotency_key = :'marker' || '|WMS|1')
   + (SELECT count(*) FROM bpi.bpi_batch_state_events
       WHERE tenant_id = '1000' AND batch_id = :'batch_id'::uuid)
   + (SELECT count(*) FROM bpi.bpi_audit_events

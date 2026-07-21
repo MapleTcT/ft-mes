@@ -4035,6 +4035,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/apply-material-wms-reversal-expand-only-target.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/audit-postgres-mappings.py",
       "state": "tracked",
       "tracked": true
@@ -4096,6 +4102,24 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-wms-formal-roundtrip-material-cleanup.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-wms-formal-roundtrip-material-verification.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-wms-formal-roundtrip-verification.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -4228,6 +4252,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/convert-source-postgres-mappings.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/deploy-material-wms-target.js",
       "state": "tracked",
       "tracked": true
     },
@@ -5523,6 +5553,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-formal-identity-wms-roundtrip-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-integrated-rollback-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -6003,6 +6039,30 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-formal-identity-wms-roundtrip-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-formal-identity-wms-roundtrip-approved.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-formal-identity-wms-roundtrip-completed.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-formal-identity-wms-roundtrip-pending.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-integrated-rollback-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -6070,6 +6130,18 @@
     {
       "ignored": false,
       "path": "metadata/bpi-live-mqtt-wom-unit-mismatch-resolved.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-material-wms-reversal-schema-upgrade.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-material-wms-target-deployment.json",
       "state": "tracked",
       "tracked": true
     },
@@ -9842,16 +9914,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 620
+      "tracked": 625
     },
     "docs": {
-      "tracked": 119
+      "tracked": 120
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 203
+      "tracked": 209
     },
     "package.json": {
       "tracked": 1
@@ -9875,8 +9947,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1636,
-    "tracked": 1636,
+    "totalFiles": 1648,
+    "tracked": 1648,
     "untracked": 0
   },
   "untrackedByDirectory": []

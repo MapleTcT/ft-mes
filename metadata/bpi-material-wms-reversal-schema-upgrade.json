@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-21T19:00:03.881Z",
+  "status": "PASS_APPLIED_EXPAND_ONLY",
+  "strategy": "EXPAND_ONLY",
+  "target": {
+    "host": "10.11.100.17",
+    "postgresContainer": "adp-mes-newbase-postgres-1",
+    "database": "adp"
+  },
+  "migration": {
+    "path": "deploy/docker/postgres/init/198-material-wms-completion-inbound-reversal.sql",
+    "sha256": "d2250c397acd24059ab687ca6dad42c6aae26e83789da9d61e30dc2bb2ddc2b4"
+  },
+  "backup": {
+    "path": "/data/docker/bpi-upgrade-backups/material-wms-reversal-20260721190000/adp-material-wms-before-reversal-20260721190000.dump",
+    "sha256": "b37200f5cb2a1234c06bc378d0959728bbd0ca68d920c9771c4c549c45f0e622"
+  },
+  "before": {
+    "reversalColumn": false,
+    "documentTypeConstraint": false,
+    "transactionTypeConstraint": false,
+    "reversalForeignKey": false,
+    "reversalUniqueIndex": false,
+    "unsupportedDocumentTypes": [],
+    "unsupportedTransactionTypes": []
+  },
+  "after": {
+    "reversalColumn": true,
+    "documentTypeConstraint": true,
+    "transactionTypeConstraint": true,
+    "reversalForeignKey": true,
+    "reversalUniqueIndex": true,
+    "unsupportedDocumentTypes": [],
+    "unsupportedTransactionTypes": []
+  },
+  "issues": []
+}

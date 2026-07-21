@@ -879,6 +879,23 @@ Java 8 adapter、Java 17 service 和 PostgreSQL 15.18/Flyway V25。marker、临�
 `metadata/bpi-formal-identity-wms-reversal-approved.png`；详细报告：
 `docs/testing/bpi-formal-identity-wms-reversal-acceptance.md`。
 
+### BPI 正式身份内部 WMS 蓝单/红单整链（2026-07-22）
+
+本节在同一目标环境继续启用显式受保护的整链模式。测试 topic 和 consumer group 与基础运行 topic
+隔离，基础 `.env` 未编辑；取证结束后集成开关、身份、scope、topic 和双库 marker 全部恢复/清理。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI / material-wms 完工入库 | `/bpi/#/batches` | 隔离蓝单经 Kafka 与真实 WMS adapter 创建内部入库单，再从页面读取 durable 结果 | Kafka blue command/receipt；`POST /material/wms/completion-inbounds`；`GET .../by-idempotency` | 页面可读取蓝单和 `INBOUNDED`；后续冲销申请前无 page/request error | 蓝 command/receipt 各 1、DLQ 0、lag 0；BPI `INBOUNDED/r4`，material 蓝单 `POSTED`，库存 `12.345 kg` | BPI batch/link/outbox/inbox/state；material `wms_stock_documents`、`wms_stock_document_lines`、`wms_inventory_transactions`、`wms_batch_stocks` | PASS | 仅内部 material-wms |
+| BPI 入库冲销四眼审批 | 同上；两个独立 ADP 浏览器会话 | `admin` 申请；同人审批反证；`bpi_reviewer_20260721190630` 独立批准 | `POST /bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal` | REQUEST 202；同人 APPROVE 403；独立 APPROVE 202；页面正确显示申请人、审批人和红命令；预期 403 之外无非预期错误 | `INBOUNDED/r5/PENDING_APPROVAL/r1 -> INBOUND_REVERSING/r6/PENDING_WMS/r2`；一条红 outbox `PUBLISHED/r3`；原蓝单不变 | `bpi_wms_inbound_reversal_tasks`、`bpi_outbox_events`、`bpi_batch_instances`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency` | PASS | 无 |
+| BPI / material-wms 红单完成 | 同上 | 恢复 WMS adapter，消费隔离红单并在页面复核最终状态 | `POST /material/wms/completion-inbound-reversals`；`GET /material/wms/completion-inbound-reversals/by-idempotency`；Kafka red receipt | 页面显示 `完工入库已冲销`、`INBOUND_REVERSED`、原蓝/红单号；console/page/request/BPI HTTP error 均为 0，1600px 无溢出 | 红 command/receipt 各 1、四个 DLQ 0；BPI `INBOUND_REVERSED/r7`、task `COMPLETED/r3`；material 蓝单 `REVERSED`、红单 `POSTED`，库存净额 0 | 上述 BPI 表；material 单据/明细/事务/批次库存四表 | PASS | 外部 ERP/WMS 未参与 |
+| 验收退场 | 不适用 | 定向清理 marker、临时身份、隔离 Kafka，并恢复 scope/开关 | cleanup SQL；ADP identity DELETE API；Compose restore | 清理后 marker 不再可见 | BPI residual 0、material residual 0、活动 identity binding 0；六开关 false；隔离 topic/group 已删除；watchdog 未触发 | 上述双库表及 `org_person`、`auth_user`、`rbac_roleuser`、`auth_user_role` | PASS | 无 |
+
+机器证据：`metadata/bpi-formal-identity-wms-roundtrip-acceptance.json`；终态截图：
+`metadata/bpi-formal-identity-wms-roundtrip-completed.png`；完整迁移、部署、Kafka、页面、双 PostgreSQL
+SQL 与清理证据见 `docs/testing/bpi-formal-identity-wms-roundtrip-acceptance.md`。本项关闭内部
+`material-wms` 整链，不关闭外部 ERP/WMS、物理来源、正式校准或 7-14 天现场运行。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

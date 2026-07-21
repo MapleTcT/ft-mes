@@ -20,6 +20,7 @@ test("generates a round-tripped WMS command fixture without secrets", () => {
         ...process.env,
         BPI_ACCEPTANCE_MARKER: "ADP_E2E_WMS_OUTAGE_FIXTURE",
         BPI_FIXTURE_OUTPUT: output,
+        BPI_WMS_COMMAND_TOPIC: "bpi.acceptance.fixture.blue-command",
       },
       stdio: "pipe",
     });
@@ -32,6 +33,8 @@ test("generates a round-tripped WMS command fixture without secrets", () => {
     assert.equal(fixture.command.headers.idempotency_key, fixture.command.idempotencyKey);
     assert.equal(fixture.command.partitionKey,
       `1000|PLANT-01|${fixture.ids.batchId}`);
+    assert.equal(fixture.command.topic, "bpi.acceptance.fixture.blue-command");
+    assert.equal(fixture.sqlVariables.command_topic, fixture.command.topic);
     assert.equal(crypto.createHash("sha256").update(payload).digest("hex"),
       fixture.command.payloadSha256);
     for (const key of Object.keys(fixture.sqlVariables)) {

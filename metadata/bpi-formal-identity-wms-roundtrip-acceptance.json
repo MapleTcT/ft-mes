@@ -1,0 +1,2004 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-21T19:12:28.177Z",
+  "repoCommit": "341745bab543060e2c437beb08a4c87b0acc85ea",
+  "database": "PostgreSQL",
+  "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+  "mode": "TARGET_INTERNAL_WMS_ROUNDTRIP",
+  "status": "PASS_TARGET_FORMAL_IDENTITY_INTERNAL_WMS_ROUNDTRIP_CLEANED",
+  "target": {
+    "sshHost": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "remoteRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "backupDir": "/data/docker/bpi-upgrade-backups/ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630"
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "identity": {
+    "requesterLogin": "admin",
+    "requesterSubject": "legacy-ticket:admin",
+    "approverLogin": "bpi_reviewer_20260721190630",
+    "approverSubject": "legacy-ticket:bpi_reviewer_20260721190630",
+    "roleCode": "systemRole",
+    "personCode": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_PERSON",
+    "password": "REDACTED",
+    "currentUser": {
+      "loginStatus": 200,
+      "currentUserStatus": 200,
+      "username": "bpi_reviewer_20260721190630",
+      "cid": 1000,
+      "roles": [
+        "systemRole",
+        "管理员角色",
+        "管理员角色"
+      ],
+      "ticketMode": "LEGACY_UUID"
+    }
+  },
+  "safety": {
+    "temporaryFormalIdentity": true,
+    "adapterScopeUsesIsolatedComposeOverride": true,
+    "baseRuntimeEnvEdited": false,
+    "adapterImageMustRemainExact": true,
+    "watchdogSeconds": 1200,
+    "phase2BaseExpectedEnabled": false,
+    "phase2CommandGateTemporarilyEnabled": true,
+    "kafkaIngressExpectedEnabled": true,
+    "wmsOutboxExpectedEnabled": true,
+    "internalMaterialWmsRoundTripExpected": true,
+    "externalWmsReceiptExpected": false,
+    "isolatedKafkaResources": true,
+    "cleanupByMarkerAndIdentityOnly": true
+  },
+  "fixture": {
+    "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+    "qualityGateId": "119fff96-e523-4435-9aa1-fc1aa1c4f344",
+    "qualityLinkId": "2905bf11-4d30-486c-b585-65215af72cd1",
+    "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+    "wmsInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+    "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+    "originalPayloadSha256": "ffaa30680f1c3ce9938b6e72b00176c133f4d8653e9c8a2e8836171c17e6bf9d",
+    "commandTopic": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.blue-command"
+  },
+  "stages": {
+    "adapterPrecheck": {
+      "adapterImage": "ft-mes-bpi-adapter:20260721t171320z-80cf094a415c",
+      "adapterImageId": "sha256:a9966324864eaa166543bc6c5e3879ba2cd56a38a18855a93ac29a71fba0330f",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+      "serviceImage": "ft-mes-bpi-service:20260721t171320z-80cf094a415c",
+      "serviceImageId": "sha256:5ef251f3c2b038c67b9965f6bafaf421f3d6297e0e27ce0c488b0e572fdf56c8",
+      "serviceHealth": "healthy",
+      "wmsAdapterImage": "ft-mes-bpi-wms-adapter:20260721t171320z-80cf094a415c",
+      "wmsAdapterImageId": "sha256:70d0a80779a9cc124a9c35d3c3b5f6ec234ef376d814a544ff704a4f1c176bdd",
+      "wmsAdapterHealth": "healthy",
+      "materialApiKeyConfigured": "true",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    },
+    "adapterActivated": {
+      "adapterImage": "ft-mes-bpi-adapter:20260721t171320z-80cf094a415c",
+      "adapterImageId": "sha256:a9966324864eaa166543bc6c5e3879ba2cd56a38a18855a93ac29a71fba0330f",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01;bpi_reviewer_20260721190630=1000|PLANT-01|LINE-S07-01",
+      "serviceImage": "ft-mes-bpi-service:20260721t171320z-80cf094a415c",
+      "serviceImageId": "sha256:5ef251f3c2b038c67b9965f6bafaf421f3d6297e0e27ce0c488b0e572fdf56c8",
+      "serviceHealth": "healthy",
+      "wmsAdapterImage": "ft-mes-bpi-wms-adapter:20260721t171320z-80cf094a415c",
+      "wmsAdapterImageId": "sha256:70d0a80779a9cc124a9c35d3c3b5f6ec234ef376d814a544ff704a4f1c176bdd",
+      "wmsAdapterHealth": "healthy",
+      "materialApiKeyConfigured": "true",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:true,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:true,BPI_WMS_OUTBOX_ENABLED:true,BPI_WMS_ADAPTER_ENABLED:true,QCS_BPI_OUTBOX_ENABLED:false,",
+      "watchdogPid": "685932"
+    },
+    "wmsPaused": {
+      "wmsAdapterHealth": "exited"
+    },
+    "wmsResumed": {
+      "adapterImage": "ft-mes-bpi-adapter:20260721t171320z-80cf094a415c",
+      "adapterImageId": "sha256:a9966324864eaa166543bc6c5e3879ba2cd56a38a18855a93ac29a71fba0330f",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01;bpi_reviewer_20260721190630=1000|PLANT-01|LINE-S07-01",
+      "serviceImage": "ft-mes-bpi-service:20260721t171320z-80cf094a415c",
+      "serviceImageId": "sha256:5ef251f3c2b038c67b9965f6bafaf421f3d6297e0e27ce0c488b0e572fdf56c8",
+      "serviceHealth": "healthy",
+      "wmsAdapterImage": "ft-mes-bpi-wms-adapter:20260721t171320z-80cf094a415c",
+      "wmsAdapterImageId": "sha256:70d0a80779a9cc124a9c35d3c3b5f6ec234ef376d814a544ff704a4f1c176bdd",
+      "wmsAdapterHealth": "healthy",
+      "materialApiKeyConfigured": "true"
+    },
+    "adapterRestored": {
+      "adapterImage": "ft-mes-bpi-adapter:20260721t171320z-80cf094a415c",
+      "adapterImageId": "sha256:a9966324864eaa166543bc6c5e3879ba2cd56a38a18855a93ac29a71fba0330f",
+      "adapterHealth": "healthy",
+      "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+      "serviceImage": "ft-mes-bpi-service:20260721t171320z-80cf094a415c",
+      "serviceImageId": "sha256:5ef251f3c2b038c67b9965f6bafaf421f3d6297e0e27ce0c488b0e572fdf56c8",
+      "serviceHealth": "healthy",
+      "wmsAdapterImage": "ft-mes-bpi-wms-adapter:20260721t171320z-80cf094a415c",
+      "wmsAdapterImageId": "sha256:70d0a80779a9cc124a9c35d3c3b5f6ec234ef376d814a544ff704a4f1c176bdd",
+      "wmsAdapterHealth": "healthy",
+      "materialApiKeyConfigured": "true",
+      "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    }
+  },
+  "operations": {
+    "identityProvisioning": {
+      "person": {
+        "method": "POST",
+        "endpoint": "/inter-api/organization/v1/person",
+        "status": 200
+      },
+      "user": {
+        "method": "POST",
+        "endpoint": "/inter-api/auth/v1/user",
+        "status": 200,
+        "password": "REDACTED"
+      },
+      "role": {
+        "method": "POST",
+        "endpoint": "/inter-api/rbac/v1/roleUser",
+        "status": 200
+      }
+    },
+    "reversal": {
+      "unauthenticatedRead": {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+        "status": 401
+      },
+      "request": {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+        "request": {
+          "payload": {
+            "reason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+            "approvalMode": "REQUEST"
+          },
+          "idempotencyKey": "ac22bee8-64e0-424d-bc4a-d29609d4746c",
+          "ifMatch": "4"
+        },
+        "status": 202,
+        "response": {
+          "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+          "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+          "state": "PENDING_APPROVAL",
+          "revision": 1,
+          "batchRevision": 5,
+          "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-21T19:09:14.878152Z",
+          "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+          "deliveryAttemptCount": 0
+        }
+      },
+      "sameActorRejection": {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+        "request": {
+          "payload": {
+            "reason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 requester self approval must fail",
+            "approvalMode": "APPROVE"
+          },
+          "idempotencyKey": "997fbf9a-da4e-4c0e-b5ad-7f1ef2bdd160",
+          "ifMatch": "5"
+        },
+        "status": 403,
+        "response": {
+          "type": "about:blank",
+          "title": "Forbidden",
+          "status": 403,
+          "detail": "WMS reversal approval must be completed by a different administrator.",
+          "instance": "/bpi/v1/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+          "traceId": "19c01e8a-8d7b-4e33-a700-25458be37770"
+        }
+      },
+      "approval": {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+        "request": {
+          "payload": {
+            "reason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+            "approvalMode": "APPROVE"
+          },
+          "idempotencyKey": "30be0abe-979a-4802-9ae7-96c18ad0bb32",
+          "ifMatch": "5"
+        },
+        "status": 202,
+        "response": {
+          "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+          "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+          "state": "PENDING_WMS",
+          "revision": 2,
+          "batchRevision": 6,
+          "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-21T19:09:14.878152Z",
+          "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+          "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+          "decidedAt": "2026-07-21T19:09:17.657738Z",
+          "decisionReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+          "reversalCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+          "reversalIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+          "outboxStatus": "PENDING",
+          "deliveryAttemptCount": 0
+        }
+      }
+    }
+  },
+  "browser": {
+    "schemaVersion": 1,
+    "generatedAt": "2026-07-21T19:09:18.287Z",
+    "status": "PASS",
+    "database": "PostgreSQL",
+    "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+    "route": "/bpi/#/batches",
+    "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+    "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+    "actors": {
+      "requesterLogin": "admin",
+      "requesterSubject": "legacy-ticket:admin",
+      "approverLogin": "bpi_reviewer_20260721190630",
+      "approverSubject": "legacy-ticket:bpi_reviewer_20260721190630"
+    },
+    "loginStatus": 200,
+    "approverLoginStatus": 200,
+    "operations": {
+      "unauthenticatedRead": {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+        "status": 401
+      },
+      "request": {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+        "request": {
+          "payload": {
+            "reason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+            "approvalMode": "REQUEST"
+          },
+          "idempotencyKey": "ac22bee8-64e0-424d-bc4a-d29609d4746c",
+          "ifMatch": "4"
+        },
+        "status": 202,
+        "response": {
+          "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+          "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+          "state": "PENDING_APPROVAL",
+          "revision": 1,
+          "batchRevision": 5,
+          "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-21T19:09:14.878152Z",
+          "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+          "deliveryAttemptCount": 0
+        }
+      },
+      "sameActorRejection": {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+        "request": {
+          "payload": {
+            "reason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 requester self approval must fail",
+            "approvalMode": "APPROVE"
+          },
+          "idempotencyKey": "997fbf9a-da4e-4c0e-b5ad-7f1ef2bdd160",
+          "ifMatch": "5"
+        },
+        "status": 403,
+        "response": {
+          "type": "about:blank",
+          "title": "Forbidden",
+          "status": 403,
+          "detail": "WMS reversal approval must be completed by a different administrator.",
+          "instance": "/bpi/v1/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+          "traceId": "19c01e8a-8d7b-4e33-a700-25458be37770"
+        }
+      },
+      "approval": {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+        "request": {
+          "payload": {
+            "reason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+            "approvalMode": "APPROVE"
+          },
+          "idempotencyKey": "30be0abe-979a-4802-9ae7-96c18ad0bb32",
+          "ifMatch": "5"
+        },
+        "status": 202,
+        "response": {
+          "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+          "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+          "state": "PENDING_WMS",
+          "revision": 2,
+          "batchRevision": 6,
+          "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-21T19:09:14.878152Z",
+          "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+          "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+          "decidedAt": "2026-07-21T19:09:17.657738Z",
+          "decisionReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+          "reversalCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+          "reversalIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+          "outboxStatus": "PENDING",
+          "deliveryAttemptCount": 0
+        }
+      }
+    },
+    "final": {
+      "release": {
+        "batch": {
+          "id": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+          "batchNo": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+          "tenantId": "1000",
+          "plantId": "PLANT-01",
+          "lineId": "LINE-S07-01",
+          "stageCode": "PACKING",
+          "orderId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_ORDER",
+          "materialCode": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_MATERIAL",
+          "state": "INBOUND_REVERSING",
+          "revision": 6,
+          "shadow": false,
+          "startTime": "2026-07-21T17:08:36.773457Z",
+          "endTime": "2026-07-21T18:08:36.773457Z",
+          "quantity": 12.345,
+          "quantityUnit": "kg",
+          "qualityGate": "ACCEPTED",
+          "wmsStatus": "REVERSAL_PENDING",
+          "ruleVersion": "BPI_LIVE_20260720_123058_START@1.0.0",
+          "topologyVersion": "BPI_LIVE_20260720_123058_TOPOLOGY@1.0.0"
+        },
+        "qualityGate": {
+          "id": "119fff96-e523-4435-9aa1-fc1aa1c4f344",
+          "externalGateId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_GATE",
+          "externalRevision": 1,
+          "sourceEventId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_QUALITY_EVENT",
+          "state": "ACCEPTED",
+          "releaseQuantity": 12.345,
+          "quantityUnit": "kg",
+          "materialCode": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_MATERIAL",
+          "observedAt": "2026-07-21T18:48:36.773457Z",
+          "inspections": [
+            {
+              "inspectionCode": "FINAL_RELEASE",
+              "inspectionRecordId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_INSPECTION",
+              "required": true,
+              "disposition": "ACCEPTED",
+              "finalResult": true,
+              "observedAt": "2026-07-21T18:48:36.773457Z"
+            }
+          ]
+        },
+        "wmsInbound": {
+          "id": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "status": "ACCEPTED",
+          "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+          "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "detail": "Created durable material-wms document CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E (internal id 31).",
+          "observedAt": "2026-07-21T19:08:38.325Z",
+          "revision": 2,
+          "outboxStatus": "PUBLISHED",
+          "deliveryAttemptCount": 1,
+          "reconciliationCount": 0,
+          "commandPublishedAt": "2026-07-21T19:08:37.625387Z",
+          "reconcileAfter": "2026-07-21T19:08:40.565678Z",
+          "reconciliationAllowed": false,
+          "reconciliationBlockedReason": "BATCH_NOT_RELEASED"
+        },
+        "wmsInboundReversal": {
+          "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+          "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+          "state": "PENDING_WMS",
+          "revision": 2,
+          "batchRevision": 6,
+          "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-21T19:09:14.878152Z",
+          "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+          "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+          "decidedAt": "2026-07-21T19:09:17.657738Z",
+          "decisionReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+          "reversalCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+          "reversalIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+          "outboxStatus": "PUBLISHED",
+          "deliveryAttemptCount": 1
+        }
+      },
+      "task": {
+        "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+        "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+        "state": "PENDING_WMS",
+        "revision": 2,
+        "batchRevision": 6,
+        "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+        "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "requestedBy": "legacy-ticket:admin",
+        "requestedAt": "2026-07-21T19:09:14.878152Z",
+        "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+        "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+        "decidedAt": "2026-07-21T19:09:17.657738Z",
+        "decisionReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+        "reversalCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+        "reversalIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+        "outboxStatus": "PUBLISHED",
+        "deliveryAttemptCount": 1
+      },
+      "timeline": [
+        {
+          "revision": 4,
+          "action": "WMS_INBOUND_ACCEPTED",
+          "at": "2026-07-21T19:08:38.604284Z",
+          "actor": "wms-adapter",
+          "reason": "WMS durable inbound document received"
+        },
+        {
+          "revision": 5,
+          "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+          "at": "2026-07-21T19:09:14.878152Z",
+          "actor": "legacy-ticket:admin",
+          "reason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal"
+        },
+        {
+          "revision": 6,
+          "action": "WMS_INBOUND_REVERSAL_APPROVED",
+          "at": "2026-07-21T19:09:17.657738Z",
+          "actor": "legacy-ticket:bpi_reviewer_20260721190630",
+          "reason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity"
+        }
+      ]
+    },
+    "browser": {
+      "url": "http://10.11.100.17:18080/bpi/#/batches",
+      "title": "智能批次",
+      "consoleErrors": [
+        {
+          "session": "requester",
+          "text": "Failed to load resource: the server responded with a status of 403 ()",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal"
+        }
+      ],
+      "pageErrors": [],
+      "requestFailures": [],
+      "bpiHttpErrors": [
+        {
+          "session": "requester",
+          "method": "POST",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+          "status": 403
+        }
+      ],
+      "unexpectedBpiHttpErrors": [],
+      "geometry": {
+        "viewportWidth": 1600,
+        "documentWidth": 1600,
+        "viewportHeight": 1000,
+        "documentHeight": 1000,
+        "drawerWidth": 680
+      }
+    },
+    "screenshots": {
+      "pending": {
+        "path": "metadata/bpi-formal-identity-wms-roundtrip-pending.png",
+        "sha256": "553628d6cde411a8cff0ddc648c62bbba5f2625d4990372f4a23d6b19141fd84"
+      },
+      "approved": {
+        "path": "metadata/bpi-formal-identity-wms-roundtrip-approved.png",
+        "sha256": "2c0a837781548fdb41b0ad8dc13a1536d0e5e57a43920bcaf02ea5fa975f2460"
+      }
+    },
+    "error": null
+  },
+  "completedBrowser": {
+    "status": "PASS",
+    "route": "/bpi/#/batches",
+    "url": "http://10.11.100.17:18080/bpi/#/batches",
+    "title": "智能批次",
+    "geometry": {
+      "viewportWidth": 1600,
+      "documentWidth": 1600,
+      "viewportHeight": 1000,
+      "documentHeight": 1000,
+      "drawerWidth": 680
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "bpiHttpErrors": [],
+    "release": {
+      "batch": {
+        "id": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+        "batchNo": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+        "tenantId": "1000",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-S07-01",
+        "stageCode": "PACKING",
+        "orderId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_ORDER",
+        "materialCode": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_MATERIAL",
+        "state": "INBOUND_REVERSED",
+        "revision": 7,
+        "shadow": false,
+        "startTime": "2026-07-21T17:08:36.773457Z",
+        "endTime": "2026-07-21T18:08:36.773457Z",
+        "quantity": 12.345,
+        "quantityUnit": "kg",
+        "qualityGate": "ACCEPTED",
+        "wmsStatus": "REVERSED",
+        "ruleVersion": "BPI_LIVE_20260720_123058_START@1.0.0",
+        "topologyVersion": "BPI_LIVE_20260720_123058_TOPOLOGY@1.0.0"
+      },
+      "qualityGate": {
+        "id": "119fff96-e523-4435-9aa1-fc1aa1c4f344",
+        "externalGateId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_GATE",
+        "externalRevision": 1,
+        "sourceEventId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_QUALITY_EVENT",
+        "state": "ACCEPTED",
+        "releaseQuantity": 12.345,
+        "quantityUnit": "kg",
+        "materialCode": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_MATERIAL",
+        "observedAt": "2026-07-21T18:48:36.773457Z",
+        "inspections": [
+          {
+            "inspectionCode": "FINAL_RELEASE",
+            "inspectionRecordId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_INSPECTION",
+            "required": true,
+            "disposition": "ACCEPTED",
+            "finalResult": true,
+            "observedAt": "2026-07-21T18:48:36.773457Z"
+          }
+        ]
+      },
+      "wmsInbound": {
+        "id": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+        "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "status": "ACCEPTED",
+        "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+        "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "detail": "Created durable material-wms document CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E (internal id 31).",
+        "observedAt": "2026-07-21T19:08:38.325Z",
+        "revision": 2,
+        "outboxStatus": "PUBLISHED",
+        "deliveryAttemptCount": 1,
+        "reconciliationCount": 0,
+        "commandPublishedAt": "2026-07-21T19:08:37.625387Z",
+        "reconcileAfter": "2026-07-21T19:08:40.565678Z",
+        "reconciliationAllowed": false,
+        "reconciliationBlockedReason": "BATCH_NOT_RELEASED"
+      },
+      "wmsInboundReversal": {
+        "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+        "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+        "state": "COMPLETED",
+        "revision": 3,
+        "batchRevision": 7,
+        "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+        "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "requestedBy": "legacy-ticket:admin",
+        "requestedAt": "2026-07-21T19:09:14.878152Z",
+        "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+        "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+        "decidedAt": "2026-07-21T19:09:17.657738Z",
+        "decisionReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+        "reversalCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+        "reversalIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+        "reversalReceiptEventId": "b7de879a-aeea-5cab-8cd5-1357546a22ef",
+        "reversalDocumentId": "CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E",
+        "detail": "Created durable material-wms red document CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E for original CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E.",
+        "observedAt": "2026-07-21T19:09:55.265Z",
+        "outboxStatus": "PUBLISHED",
+        "deliveryAttemptCount": 1
+      }
+    },
+    "task": {
+      "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+      "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+      "state": "COMPLETED",
+      "revision": 3,
+      "batchRevision": 7,
+      "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+      "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+      "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+      "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+      "requestedBy": "legacy-ticket:admin",
+      "requestedAt": "2026-07-21T19:09:14.878152Z",
+      "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+      "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+      "decidedAt": "2026-07-21T19:09:17.657738Z",
+      "decisionReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+      "reversalCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+      "reversalIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+      "reversalReceiptEventId": "b7de879a-aeea-5cab-8cd5-1357546a22ef",
+      "reversalDocumentId": "CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E",
+      "detail": "Created durable material-wms red document CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E for original CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E.",
+      "observedAt": "2026-07-21T19:09:55.265Z",
+      "outboxStatus": "PUBLISHED",
+      "deliveryAttemptCount": 1
+    },
+    "screenshot": {
+      "path": "metadata/bpi-formal-identity-wms-roundtrip-completed.png",
+      "sha256": "993d7da20350ed57aee4d271b5ab0531183d5af73e5ecf3d1629c938cf3bb896"
+    }
+  },
+  "kafka": {
+    "topics": {
+      "blueCommand": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.blue-command",
+      "blueCommandDlq": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.blue-command-dlq",
+      "blueReceipt": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.blue-receipt",
+      "blueReceiptDlq": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.blue-receipt-dlq",
+      "redCommand": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.red-command",
+      "redCommandDlq": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.red-command-dlq",
+      "redReceipt": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.red-receipt",
+      "redReceiptDlq": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.red-receipt-dlq",
+      "qcs": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.qcs",
+      "qcsDlq": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.qcs-dlq",
+      "wmsGroup": "bpi-acceptance-adp-bpi-formal-wms-reversal-20260721190630-wms",
+      "receiptGroup": "bpi-acceptance-adp-bpi-formal-wms-reversal-20260721190630-receipt"
+    },
+    "afterBlue": {
+      "blueCommand": "1",
+      "blueCommandDlq": "0",
+      "blueReceipt": "1",
+      "blueReceiptDlq": "0",
+      "redCommand": "0",
+      "redCommandDlq": "0",
+      "redReceipt": "0",
+      "redReceiptDlq": "0",
+      "qcs": "0",
+      "qcsDlq": "0",
+      "wmsLag": "0",
+      "receiptLag": "0"
+    },
+    "afterApproval": {
+      "blueCommand": "1",
+      "blueCommandDlq": "0",
+      "blueReceipt": "1",
+      "blueReceiptDlq": "0",
+      "redCommand": "1",
+      "redCommandDlq": "0",
+      "redReceipt": "0",
+      "redReceiptDlq": "0",
+      "qcs": "0",
+      "qcsDlq": "0",
+      "wmsLag": "0",
+      "receiptLag": "0"
+    },
+    "final": {
+      "blueCommand": "1",
+      "blueCommandDlq": "0",
+      "blueReceipt": "1",
+      "blueReceiptDlq": "0",
+      "redCommand": "1",
+      "redCommandDlq": "0",
+      "redReceipt": "1",
+      "redReceiptDlq": "0",
+      "qcs": "0",
+      "qcsDlq": "0",
+      "wmsLag": "0",
+      "receiptLag": "0"
+    }
+  },
+  "postgres": {
+    "identityPrecheck": {
+      "roleId": 1,
+      "positionId": 1,
+      "activeUsers": 0,
+      "activePersons": 0
+    },
+    "bpiPrecheck": {
+      "batchRows": 0,
+      "taskRows": 0,
+      "qualityGateRows": 0,
+      "qualityLinkRows": 0,
+      "wmsLinkRows": 0,
+      "outboxRows": 0,
+      "stateEventRows": 0,
+      "auditRows": 0,
+      "idempotencyRows": 0,
+      "inboxRows": 0,
+      "commandsFlagRows": 0,
+      "wmsFlagRows": 0,
+      "plantCommandsOverrides": 0,
+      "plantWmsOverrides": 0
+    },
+    "materialSchemaPrecheck": {
+      "reversalColumn": true,
+      "documentConstraint": true,
+      "transactionConstraint": true,
+      "foreignKey": true,
+      "uniqueIndex": true
+    },
+    "materialPrecheck": {
+      "documentRows": 0,
+      "lineRows": 0,
+      "transactionRows": 0,
+      "stockRows": 0
+    },
+    "identityProvisioned": {
+      "person": {
+        "id": 6690387627884880,
+        "valid": 1,
+        "userId": 6690387649118544,
+        "userName": "bpi_reviewer_20260721190630"
+      },
+      "user": {
+        "id": 6690387649118544,
+        "valid": 1,
+        "userName": "bpi_reviewer_20260721190630",
+        "personId": 6690387627884880,
+        "personCode": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_PERSON",
+        "passwordEncoded": true
+      },
+      "roleUser": {
+        "id": 6690387670450512,
+        "valid": true,
+        "roleCode": "systemRole",
+        "userId": 6690387649118544,
+        "userName": "bpi_reviewer_20260721190630"
+      },
+      "authRoles": [
+        {
+          "roleCode": "systemRole",
+          "roleName": "管理员角色"
+        }
+      ]
+    },
+    "fixture": {
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+      "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+      "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+      "wmsIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+      "batchRows": 1,
+      "outboxRows": 1,
+      "wmsLinkRows": 1,
+      "payloadBytes": 585
+    },
+    "blueRoundTrip": {
+      "bpi": {
+        "batchState": "INBOUNDED",
+        "batchRevision": 4,
+        "wmsStatus": "INBOUNDED",
+        "linkStatus": "ACCEPTED",
+        "linkRevision": 2,
+        "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+        "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "outboxStatus": "PUBLISHED",
+        "outboxRevision": 3,
+        "topic": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.blue-command",
+        "payloadSha256": "ffaa30680f1c3ce9938b6e72b00176c133f4d8653e9c8a2e8836171c17e6bf9d"
+      },
+      "material": {
+        "documents": 1,
+        "documentNo": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "status": "POSTED",
+        "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "lineRows": 1
+      }
+    },
+    "pending": {
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+      "batch": {
+        "id": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+        "batchNo": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+        "state": "INBOUNDED",
+        "revision": 5,
+        "qualityGate": "ACCEPTED",
+        "wmsStatus": "INBOUNDED",
+        "isShadow": false,
+        "quantity": 12.345,
+        "quantityUnit": "kg",
+        "updatedAt": "2026-07-22T03:09:14.842264+08:00"
+      },
+      "reversalTask": {
+        "id": "97085076-f945-4b1d-9a88-a168864f2b3b",
+        "state": "PENDING_APPROVAL",
+        "revision": 1,
+        "requestedBy": "legacy-ticket:admin",
+        "requestedAt": "2026-07-22T03:09:14.878152+08:00",
+        "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+        "decidedBy": null,
+        "decidedAt": null,
+        "decisionReason": null,
+        "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+        "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "reversalCommandEventId": null,
+        "reversalIdempotencyKey": null
+      },
+      "originalInbound": {
+        "id": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+        "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "status": "ACCEPTED",
+        "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+        "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "revision": 2,
+        "payloadSha256": "ffaa30680f1c3ce9938b6e72b00176c133f4d8653e9c8a2e8836171c17e6bf9d",
+        "outboxStatus": "PUBLISHED",
+        "outboxRevision": 3,
+        "publishedAt": "2026-07-22T03:08:37.625387+08:00"
+      },
+      "reversalOutbox": null,
+      "stateEvents": [
+        {
+          "revision": 4,
+          "action": "WMS_INBOUND_ACCEPTED",
+          "fromState": "RELEASED",
+          "toState": "INBOUNDED",
+          "actorId": "wms-adapter",
+          "traceId": "91b582cc-80ce-49a2-8e29-5d980a3722a1"
+        },
+        {
+          "revision": 5,
+          "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+          "fromState": "INBOUNDED",
+          "toState": "INBOUNDED",
+          "actorId": "legacy-ticket:admin",
+          "traceId": "e89f1735-5f11-46b6-8d62-942a8ebf07a3"
+        }
+      ],
+      "auditEvents": [
+        {
+          "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+          "actorId": "legacy-ticket:admin",
+          "beforeRevision": 4,
+          "afterRevision": 5,
+          "traceId": "e89f1735-5f11-46b6-8d62-942a8ebf07a3"
+        }
+      ],
+      "idempotencyRows": 1,
+      "reversalOutboxRows": 0,
+      "reversalInboxRows": 0
+    },
+    "approved": {
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+      "batch": {
+        "id": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+        "batchNo": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+        "state": "INBOUND_REVERSING",
+        "revision": 6,
+        "qualityGate": "ACCEPTED",
+        "wmsStatus": "REVERSAL_PENDING",
+        "isShadow": false,
+        "quantity": 12.345,
+        "quantityUnit": "kg",
+        "updatedAt": "2026-07-22T03:09:17.625604+08:00"
+      },
+      "reversalTask": {
+        "id": "97085076-f945-4b1d-9a88-a168864f2b3b",
+        "state": "PENDING_WMS",
+        "revision": 2,
+        "requestedBy": "legacy-ticket:admin",
+        "requestedAt": "2026-07-22T03:09:14.878152+08:00",
+        "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+        "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+        "decidedAt": "2026-07-22T03:09:17.657738+08:00",
+        "decisionReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+        "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+        "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "reversalCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+        "reversalIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1"
+      },
+      "originalInbound": {
+        "id": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+        "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "status": "ACCEPTED",
+        "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+        "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "revision": 2,
+        "payloadSha256": "ffaa30680f1c3ce9938b6e72b00176c133f4d8653e9c8a2e8836171c17e6bf9d",
+        "outboxStatus": "PUBLISHED",
+        "outboxRevision": 3,
+        "publishedAt": "2026-07-22T03:08:37.625387+08:00"
+      },
+      "reversalOutbox": {
+        "id": "a760f905-8028-5779-a345-5a0b37971a4e",
+        "eventType": "WMS_COMPLETION_INBOUND_REVERSAL_COMMAND",
+        "topic": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.red-command",
+        "partitionKey": "1000|PLANT-01|5844c3a5-c324-467d-9b95-afa4be810b0b",
+        "status": "PUBLISHED",
+        "revision": 3,
+        "attemptCount": 1,
+        "payloadBytes": 992,
+        "payloadSha256": "b929d452fd86e0f47926e2e4c1c265e6b2470d29a1709b493685b0b14c2ee782",
+        "headers": {
+          "event_id": "a760f905-8028-5779-a345-5a0b37971a4e",
+          "trace_id": "d88a0740-c3f8-463c-b16c-92498052405f",
+          "tenant_id": "1000",
+          "schema_version": "v1",
+          "idempotency_key": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1"
+        }
+      },
+      "stateEvents": [
+        {
+          "revision": 4,
+          "action": "WMS_INBOUND_ACCEPTED",
+          "fromState": "RELEASED",
+          "toState": "INBOUNDED",
+          "actorId": "wms-adapter",
+          "traceId": "91b582cc-80ce-49a2-8e29-5d980a3722a1"
+        },
+        {
+          "revision": 5,
+          "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+          "fromState": "INBOUNDED",
+          "toState": "INBOUNDED",
+          "actorId": "legacy-ticket:admin",
+          "traceId": "e89f1735-5f11-46b6-8d62-942a8ebf07a3"
+        },
+        {
+          "revision": 6,
+          "action": "WMS_INBOUND_REVERSAL_APPROVED",
+          "fromState": "INBOUNDED",
+          "toState": "INBOUND_REVERSING",
+          "actorId": "legacy-ticket:bpi_reviewer_20260721190630",
+          "traceId": "d88a0740-c3f8-463c-b16c-92498052405f"
+        }
+      ],
+      "auditEvents": [
+        {
+          "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+          "actorId": "legacy-ticket:admin",
+          "beforeRevision": 4,
+          "afterRevision": 5,
+          "traceId": "e89f1735-5f11-46b6-8d62-942a8ebf07a3"
+        },
+        {
+          "action": "WMS_INBOUND_REVERSAL_APPROVED",
+          "actorId": "legacy-ticket:bpi_reviewer_20260721190630",
+          "beforeRevision": 5,
+          "afterRevision": 6,
+          "traceId": "d88a0740-c3f8-463c-b16c-92498052405f"
+        }
+      ],
+      "idempotencyRows": 2,
+      "reversalOutboxRows": 1,
+      "reversalInboxRows": 0
+    },
+    "redRoundTrip": {
+      "batchState": "INBOUND_REVERSED",
+      "batchRevision": 7,
+      "wmsStatus": "REVERSED",
+      "taskState": "COMPLETED",
+      "taskRevision": 3,
+      "redCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+      "redIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+      "redReceiptEventId": "b7de879a-aeea-5cab-8cd5-1357546a22ef",
+      "redDocumentId": "CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E",
+      "errorCode": null,
+      "redOutboxStatus": "PUBLISHED",
+      "redOutboxTopic": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.red-command"
+    },
+    "roundTrip": {
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+      "batch": {
+        "id": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+        "state": "INBOUND_REVERSED",
+        "revision": 7,
+        "qualityGate": "ACCEPTED",
+        "wmsStatus": "REVERSED",
+        "quantity": 12.345,
+        "quantityUnit": "kg",
+        "isShadow": false
+      },
+      "blue": {
+        "linkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+        "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "status": "ACCEPTED",
+        "revision": 2,
+        "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+        "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "outboxStatus": "PUBLISHED",
+        "outboxRevision": 3,
+        "topic": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.blue-command",
+        "payloadSha256": "ffaa30680f1c3ce9938b6e72b00176c133f4d8653e9c8a2e8836171c17e6bf9d"
+      },
+      "red": {
+        "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+        "state": "COMPLETED",
+        "revision": 3,
+        "requestedBy": "legacy-ticket:admin",
+        "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+        "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "commandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+        "idempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+        "receiptEventId": "b7de879a-aeea-5cab-8cd5-1357546a22ef",
+        "documentId": "CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E",
+        "errorCode": null,
+        "outboxStatus": "PUBLISHED",
+        "outboxRevision": 3,
+        "topic": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.red-command",
+        "payloadSha256": "b929d452fd86e0f47926e2e4c1c265e6b2470d29a1709b493685b0b14c2ee782"
+      },
+      "stateEvents": [
+        {
+          "revision": 4,
+          "action": "WMS_INBOUND_ACCEPTED",
+          "fromState": "RELEASED",
+          "toState": "INBOUNDED",
+          "actorId": "wms-adapter"
+        },
+        {
+          "revision": 5,
+          "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+          "fromState": "INBOUNDED",
+          "toState": "INBOUNDED",
+          "actorId": "legacy-ticket:admin"
+        },
+        {
+          "revision": 6,
+          "action": "WMS_INBOUND_REVERSAL_APPROVED",
+          "fromState": "INBOUNDED",
+          "toState": "INBOUND_REVERSING",
+          "actorId": "legacy-ticket:bpi_reviewer_20260721190630"
+        },
+        {
+          "revision": 7,
+          "action": "WMS_INBOUND_REVERSAL_ACCEPTED",
+          "fromState": "INBOUND_REVERSING",
+          "toState": "INBOUND_REVERSED",
+          "actorId": "wms-adapter"
+        }
+      ],
+      "auditActions": [
+        "WMS_INBOUND_ACCEPTED",
+        "WMS_INBOUND_REVERSAL_REQUESTED",
+        "WMS_INBOUND_REVERSAL_APPROVED",
+        "WMS_INBOUND_REVERSAL_ACCEPTED"
+      ],
+      "blueInboxRows": 1,
+      "redInboxRows": 1,
+      "reversalApiIdempotencyRows": 2
+    },
+    "materialRoundTrip": {
+      "blue": {
+        "id": 31,
+        "documentNo": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "status": "REVERSED",
+        "sourceDocumentId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "warehouseCode": "WARE-E2E",
+        "qualityStatus": "QUALIFIED"
+      },
+      "red": {
+        "id": 32,
+        "documentNo": "CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E",
+        "status": "POSTED",
+        "sourceDocumentId": "a760f905-8028-5779-a345-5a0b37971a4e",
+        "idempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+        "warehouseCode": "WARE-E2E",
+        "qualityStatus": "QUALIFIED",
+        "reversalOfDocumentId": 31
+      },
+      "transactions": [
+        {
+          "type": "COMPLETION_INBOUND",
+          "sourceDocumentId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "onHandDelta": 12.345,
+          "availableDelta": 12.345,
+          "balanceOnHand": 12.345,
+          "balanceAvailable": 12.345
+        },
+        {
+          "type": "COMPLETION_INBOUND_REVERSAL",
+          "sourceDocumentId": "a760f905-8028-5779-a345-5a0b37971a4e",
+          "onHandDelta": -12.345,
+          "availableDelta": -12.345,
+          "balanceOnHand": 0,
+          "balanceAvailable": 0
+        }
+      ],
+      "stock": {
+        "onHand": 0,
+        "available": 0,
+        "hold": 0
+      }
+    },
+    "identityFinal": {
+      "person": {
+        "id": 6690387627884880,
+        "valid": 0,
+        "userId": null,
+        "userName": null
+      },
+      "user": {
+        "id": 6690387649118544,
+        "valid": 0,
+        "userName": "bpi_reviewer_20260721190630",
+        "personId": 6690387627884880,
+        "personCode": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_PERSON",
+        "passwordEncoded": true
+      },
+      "roleUser": null,
+      "authRoles": []
+    },
+    "bpiFinal": {
+      "batchRows": 0,
+      "taskRows": 0,
+      "qualityGateRows": 0,
+      "qualityLinkRows": 0,
+      "wmsLinkRows": 0,
+      "outboxRows": 0,
+      "stateEventRows": 0,
+      "auditRows": 0,
+      "idempotencyRows": 0,
+      "inboxRows": 0,
+      "commandsFlagRows": 0,
+      "wmsFlagRows": 0,
+      "plantCommandsOverrides": 0,
+      "plantWmsOverrides": 0
+    },
+    "materialFinal": {
+      "documentRows": 0,
+      "lineRows": 0,
+      "transactionRows": 0,
+      "stockRows": 0
+    }
+  },
+  "cleanup": {
+    "material": [
+      "DELETE 1",
+      "COMMIT",
+      "Formal WMS roundtrip material cleanup residualRows=0"
+    ],
+    "bpi": [
+      "DELETE 2",
+      "COMMIT",
+      "BPI WMS inbound reversal acceptance cleanup residualRows=0"
+    ],
+    "adapter": {
+      "isolatedKafkaCleaned": "true",
+      "watchdogRestored": "false"
+    }
+  },
+  "checks": [
+    {
+      "name": "formal role and position exist",
+      "passed": true,
+      "detail": {
+        "roleId": 1,
+        "positionId": 1,
+        "activeUsers": 0,
+        "activePersons": 0
+      }
+    },
+    {
+      "name": "formal identity marker starts clean",
+      "passed": true,
+      "detail": {
+        "roleId": 1,
+        "positionId": 1,
+        "activeUsers": 0,
+        "activePersons": 0
+      }
+    },
+    {
+      "name": "BPI marker and plant command/WMS overrides start clean",
+      "passed": true,
+      "detail": {
+        "batchRows": 0,
+        "taskRows": 0,
+        "qualityGateRows": 0,
+        "qualityLinkRows": 0,
+        "wmsLinkRows": 0,
+        "outboxRows": 0,
+        "stateEventRows": 0,
+        "auditRows": 0,
+        "idempotencyRows": 0,
+        "inboxRows": 0,
+        "commandsFlagRows": 0,
+        "wmsFlagRows": 0,
+        "plantCommandsOverrides": 0,
+        "plantWmsOverrides": 0
+      }
+    },
+    {
+      "name": "Phase 2 and write-back switches start disabled",
+      "passed": true,
+      "detail": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    },
+    {
+      "name": "material-wms reversal expand-only schema is present",
+      "passed": true,
+      "detail": {
+        "reversalColumn": true,
+        "documentConstraint": true,
+        "transactionConstraint": true,
+        "foreignKey": true,
+        "uniqueIndex": true
+      }
+    },
+    {
+      "name": "material-wms marker starts clean",
+      "passed": true,
+      "detail": {
+        "documentRows": 0,
+        "lineRows": 0,
+        "transactionRows": 0,
+        "stockRows": 0
+      }
+    },
+    {
+      "name": "target material-wms API key is configured without disclosure",
+      "passed": true,
+      "detail": {
+        "configured": "true"
+      }
+    },
+    {
+      "name": "formal identity persisted through organization, auth, and RBAC APIs",
+      "passed": true,
+      "detail": {
+        "person": {
+          "id": 6690387627884880,
+          "valid": 1,
+          "userId": 6690387649118544,
+          "userName": "bpi_reviewer_20260721190630"
+        },
+        "user": {
+          "id": 6690387649118544,
+          "valid": 1,
+          "userName": "bpi_reviewer_20260721190630",
+          "personId": 6690387627884880,
+          "personCode": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_PERSON",
+          "passwordEncoded": true
+        },
+        "roleUser": {
+          "id": 6690387670450512,
+          "valid": true,
+          "roleCode": "systemRole",
+          "userId": 6690387649118544,
+          "userName": "bpi_reviewer_20260721190630"
+        },
+        "authRoles": [
+          {
+            "roleCode": "systemRole",
+            "roleName": "管理员角色"
+          }
+        ]
+      }
+    },
+    {
+      "name": "second administrator has a real ADP identity session",
+      "passed": true,
+      "detail": {
+        "loginStatus": 200,
+        "currentUserStatus": 200,
+        "username": "bpi_reviewer_20260721190630",
+        "cid": 1000,
+        "roles": [
+          "systemRole",
+          "管理员角色",
+          "管理员角色"
+        ],
+        "ticketMode": "LEGACY_UUID"
+      }
+    },
+    {
+      "name": "adapter exposes the explicit formal reviewer scope",
+      "passed": true,
+      "detail": "admin=1000|PLANT-01|LINE-S07-01;bpi_reviewer_20260721190630=1000|PLANT-01|LINE-S07-01"
+    },
+    {
+      "name": "adapter image is unchanged while scope is active",
+      "passed": true,
+      "detail": {
+        "adapterBefore": "sha256:a9966324864eaa166543bc6c5e3879ba2cd56a38a18855a93ac29a71fba0330f",
+        "adapterActive": "sha256:a9966324864eaa166543bc6c5e3879ba2cd56a38a18855a93ac29a71fba0330f",
+        "serviceBefore": "sha256:5ef251f3c2b038c67b9965f6bafaf421f3d6297e0e27ce0c488b0e572fdf56c8",
+        "serviceActive": "sha256:5ef251f3c2b038c67b9965f6bafaf421f3d6297e0e27ce0c488b0e572fdf56c8",
+        "wmsAdapterBefore": "sha256:70d0a80779a9cc124a9c35d3c3b5f6ec234ef376d814a544ff704a4f1c176bdd",
+        "wmsAdapterActive": "sha256:70d0a80779a9cc124a9c35d3c3b5f6ec234ef376d814a544ff704a4f1c176bdd"
+      }
+    },
+    {
+      "name": "only the guarded internal WMS roundtrip switches are temporarily enabled",
+      "passed": true,
+      "detail": "BPI_PHASE2_INTEGRATION_ENABLED:true,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:true,BPI_WMS_OUTBOX_ENABLED:true,BPI_WMS_ADAPTER_ENABLED:true,QCS_BPI_OUTBOX_ENABLED:false,"
+    },
+    {
+      "name": "controlled released batch and blue command were seeded",
+      "passed": true,
+      "detail": {
+        "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+        "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+        "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "wmsIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "batchRows": 1,
+        "outboxRows": 1,
+        "wmsLinkRows": 1,
+        "payloadBytes": 585
+      }
+    },
+    {
+      "name": "blue document completed through isolated Kafka and real material-wms",
+      "passed": true,
+      "detail": {
+        "bpi": {
+          "batchState": "INBOUNDED",
+          "batchRevision": 4,
+          "wmsStatus": "INBOUNDED",
+          "linkStatus": "ACCEPTED",
+          "linkRevision": 2,
+          "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+          "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "outboxStatus": "PUBLISHED",
+          "outboxRevision": 3,
+          "topic": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.blue-command",
+          "payloadSha256": "ffaa30680f1c3ce9938b6e72b00176c133f4d8653e9c8a2e8836171c17e6bf9d"
+        },
+        "material": {
+          "documents": 1,
+          "documentNo": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "status": "POSTED",
+          "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "lineRows": 1
+        }
+      }
+    },
+    {
+      "name": "isolated blue command and receipt each have one durable record and zero DLQ",
+      "passed": true,
+      "detail": {
+        "blueCommand": "1",
+        "blueCommandDlq": "0",
+        "blueReceipt": "1",
+        "blueReceiptDlq": "0",
+        "redCommand": "0",
+        "redCommandDlq": "0",
+        "redReceipt": "0",
+        "redReceiptDlq": "0",
+        "qcs": "0",
+        "qcsDlq": "0",
+        "wmsLag": "0",
+        "receiptLag": "0"
+      }
+    },
+    {
+      "name": "requester persisted a pending reversal without creating a red command",
+      "passed": true,
+      "detail": {
+        "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+        "batch": {
+          "id": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+          "batchNo": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+          "state": "INBOUNDED",
+          "revision": 5,
+          "qualityGate": "ACCEPTED",
+          "wmsStatus": "INBOUNDED",
+          "isShadow": false,
+          "quantity": 12.345,
+          "quantityUnit": "kg",
+          "updatedAt": "2026-07-22T03:09:14.842264+08:00"
+        },
+        "reversalTask": {
+          "id": "97085076-f945-4b1d-9a88-a168864f2b3b",
+          "state": "PENDING_APPROVAL",
+          "revision": 1,
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-22T03:09:14.878152+08:00",
+          "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+          "decidedBy": null,
+          "decidedAt": null,
+          "decisionReason": null,
+          "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "reversalCommandEventId": null,
+          "reversalIdempotencyKey": null
+        },
+        "originalInbound": {
+          "id": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "status": "ACCEPTED",
+          "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+          "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "revision": 2,
+          "payloadSha256": "ffaa30680f1c3ce9938b6e72b00176c133f4d8653e9c8a2e8836171c17e6bf9d",
+          "outboxStatus": "PUBLISHED",
+          "outboxRevision": 3,
+          "publishedAt": "2026-07-22T03:08:37.625387+08:00"
+        },
+        "reversalOutbox": null,
+        "stateEvents": [
+          {
+            "revision": 4,
+            "action": "WMS_INBOUND_ACCEPTED",
+            "fromState": "RELEASED",
+            "toState": "INBOUNDED",
+            "actorId": "wms-adapter",
+            "traceId": "91b582cc-80ce-49a2-8e29-5d980a3722a1"
+          },
+          {
+            "revision": 5,
+            "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+            "fromState": "INBOUNDED",
+            "toState": "INBOUNDED",
+            "actorId": "legacy-ticket:admin",
+            "traceId": "e89f1735-5f11-46b6-8d62-942a8ebf07a3"
+          }
+        ],
+        "auditEvents": [
+          {
+            "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+            "actorId": "legacy-ticket:admin",
+            "beforeRevision": 4,
+            "afterRevision": 5,
+            "traceId": "e89f1735-5f11-46b6-8d62-942a8ebf07a3"
+          }
+        ],
+        "idempotencyRows": 1,
+        "reversalOutboxRows": 0,
+        "reversalInboxRows": 0
+      }
+    },
+    {
+      "name": "pending state preserves the accepted blue document byte-for-byte",
+      "passed": true,
+      "detail": {
+        "id": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+        "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+        "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+        "status": "ACCEPTED",
+        "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+        "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+        "revision": 2,
+        "payloadSha256": "ffaa30680f1c3ce9938b6e72b00176c133f4d8653e9c8a2e8836171c17e6bf9d",
+        "outboxStatus": "PUBLISHED",
+        "outboxRevision": 3,
+        "publishedAt": "2026-07-22T03:08:37.625387+08:00"
+      }
+    },
+    {
+      "name": "formal approver used a separate ADP browser session through the adapter",
+      "passed": true,
+      "detail": {
+        "status": "PASS",
+        "loginStatus": 200,
+        "approverLoginStatus": 200,
+        "approval": {
+          "method": "POST",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+          "request": {
+            "payload": {
+              "reason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+              "approvalMode": "APPROVE"
+            },
+            "idempotencyKey": "30be0abe-979a-4802-9ae7-96c18ad0bb32",
+            "ifMatch": "5"
+          },
+          "status": 202,
+          "response": {
+            "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+            "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+            "state": "PENDING_WMS",
+            "revision": 2,
+            "batchRevision": 6,
+            "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+            "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+            "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+            "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+            "requestedBy": "legacy-ticket:admin",
+            "requestedAt": "2026-07-21T19:09:14.878152Z",
+            "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+            "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+            "decidedAt": "2026-07-21T19:09:17.657738Z",
+            "decisionReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+            "reversalCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+            "reversalIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+            "outboxStatus": "PENDING",
+            "deliveryAttemptCount": 0
+          }
+        },
+        "sameActorRejection": {
+          "method": "POST",
+          "url": "http://10.11.100.17:18080/bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+          "request": {
+            "payload": {
+              "reason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 requester self approval must fail",
+              "approvalMode": "APPROVE"
+            },
+            "idempotencyKey": "997fbf9a-da4e-4c0e-b5ad-7f1ef2bdd160",
+            "ifMatch": "5"
+          },
+          "status": 403,
+          "response": {
+            "type": "about:blank",
+            "title": "Forbidden",
+            "status": 403,
+            "detail": "WMS reversal approval must be completed by a different administrator.",
+            "instance": "/bpi/v1/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal",
+            "traceId": "19c01e8a-8d7b-4e33-a700-25458be37770"
+          }
+        }
+      }
+    },
+    {
+      "name": "PostgreSQL records distinct requester and approver identities",
+      "passed": true,
+      "detail": {
+        "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+        "batch": {
+          "id": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+          "batchNo": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+          "state": "INBOUND_REVERSING",
+          "revision": 6,
+          "qualityGate": "ACCEPTED",
+          "wmsStatus": "REVERSAL_PENDING",
+          "isShadow": false,
+          "quantity": 12.345,
+          "quantityUnit": "kg",
+          "updatedAt": "2026-07-22T03:09:17.625604+08:00"
+        },
+        "reversalTask": {
+          "id": "97085076-f945-4b1d-9a88-a168864f2b3b",
+          "state": "PENDING_WMS",
+          "revision": 2,
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-22T03:09:14.878152+08:00",
+          "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+          "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+          "decidedAt": "2026-07-22T03:09:17.657738+08:00",
+          "decisionReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+          "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "reversalCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+          "reversalIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1"
+        },
+        "originalInbound": {
+          "id": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "status": "ACCEPTED",
+          "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+          "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "revision": 2,
+          "payloadSha256": "ffaa30680f1c3ce9938b6e72b00176c133f4d8653e9c8a2e8836171c17e6bf9d",
+          "outboxStatus": "PUBLISHED",
+          "outboxRevision": 3,
+          "publishedAt": "2026-07-22T03:08:37.625387+08:00"
+        },
+        "reversalOutbox": {
+          "id": "a760f905-8028-5779-a345-5a0b37971a4e",
+          "eventType": "WMS_COMPLETION_INBOUND_REVERSAL_COMMAND",
+          "topic": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.red-command",
+          "partitionKey": "1000|PLANT-01|5844c3a5-c324-467d-9b95-afa4be810b0b",
+          "status": "PUBLISHED",
+          "revision": 3,
+          "attemptCount": 1,
+          "payloadBytes": 992,
+          "payloadSha256": "b929d452fd86e0f47926e2e4c1c265e6b2470d29a1709b493685b0b14c2ee782",
+          "headers": {
+            "event_id": "a760f905-8028-5779-a345-5a0b37971a4e",
+            "trace_id": "d88a0740-c3f8-463c-b16c-92498052405f",
+            "tenant_id": "1000",
+            "schema_version": "v1",
+            "idempotency_key": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1"
+          }
+        },
+        "stateEvents": [
+          {
+            "revision": 4,
+            "action": "WMS_INBOUND_ACCEPTED",
+            "fromState": "RELEASED",
+            "toState": "INBOUNDED",
+            "actorId": "wms-adapter",
+            "traceId": "91b582cc-80ce-49a2-8e29-5d980a3722a1"
+          },
+          {
+            "revision": 5,
+            "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+            "fromState": "INBOUNDED",
+            "toState": "INBOUNDED",
+            "actorId": "legacy-ticket:admin",
+            "traceId": "e89f1735-5f11-46b6-8d62-942a8ebf07a3"
+          },
+          {
+            "revision": 6,
+            "action": "WMS_INBOUND_REVERSAL_APPROVED",
+            "fromState": "INBOUNDED",
+            "toState": "INBOUND_REVERSING",
+            "actorId": "legacy-ticket:bpi_reviewer_20260721190630",
+            "traceId": "d88a0740-c3f8-463c-b16c-92498052405f"
+          }
+        ],
+        "auditEvents": [
+          {
+            "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+            "actorId": "legacy-ticket:admin",
+            "beforeRevision": 4,
+            "afterRevision": 5,
+            "traceId": "e89f1735-5f11-46b6-8d62-942a8ebf07a3"
+          },
+          {
+            "action": "WMS_INBOUND_REVERSAL_APPROVED",
+            "actorId": "legacy-ticket:bpi_reviewer_20260721190630",
+            "beforeRevision": 5,
+            "afterRevision": 6,
+            "traceId": "d88a0740-c3f8-463c-b16c-92498052405f"
+          }
+        ],
+        "idempotencyRows": 2,
+        "reversalOutboxRows": 1,
+        "reversalInboxRows": 0
+      }
+    },
+    {
+      "name": "approval appends one durable red command without mutating the blue document",
+      "passed": true,
+      "detail": {
+        "blue": {
+          "id": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "status": "ACCEPTED",
+          "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+          "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "revision": 2,
+          "payloadSha256": "ffaa30680f1c3ce9938b6e72b00176c133f4d8653e9c8a2e8836171c17e6bf9d",
+          "outboxStatus": "PUBLISHED",
+          "outboxRevision": 3,
+          "publishedAt": "2026-07-22T03:08:37.625387+08:00"
+        },
+        "red": {
+          "id": "a760f905-8028-5779-a345-5a0b37971a4e",
+          "eventType": "WMS_COMPLETION_INBOUND_REVERSAL_COMMAND",
+          "topic": "bpi.acceptance.adp-bpi-formal-wms-reversal-20260721190630.red-command",
+          "partitionKey": "1000|PLANT-01|5844c3a5-c324-467d-9b95-afa4be810b0b",
+          "status": "PUBLISHED",
+          "revision": 3,
+          "attemptCount": 1,
+          "payloadBytes": 992,
+          "payloadSha256": "b929d452fd86e0f47926e2e4c1c265e6b2470d29a1709b493685b0b14c2ee782",
+          "headers": {
+            "event_id": "a760f905-8028-5779-a345-5a0b37971a4e",
+            "trace_id": "d88a0740-c3f8-463c-b16c-92498052405f",
+            "tenant_id": "1000",
+            "schema_version": "v1",
+            "idempotency_key": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1"
+          }
+        }
+      }
+    },
+    {
+      "name": "reversal lifecycle has durable state, audit, and idempotency evidence",
+      "passed": true,
+      "detail": {
+        "stateEvents": [
+          {
+            "revision": 4,
+            "action": "WMS_INBOUND_ACCEPTED",
+            "fromState": "RELEASED",
+            "toState": "INBOUNDED",
+            "actorId": "wms-adapter",
+            "traceId": "91b582cc-80ce-49a2-8e29-5d980a3722a1"
+          },
+          {
+            "revision": 5,
+            "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+            "fromState": "INBOUNDED",
+            "toState": "INBOUNDED",
+            "actorId": "legacy-ticket:admin",
+            "traceId": "e89f1735-5f11-46b6-8d62-942a8ebf07a3"
+          },
+          {
+            "revision": 6,
+            "action": "WMS_INBOUND_REVERSAL_APPROVED",
+            "fromState": "INBOUNDED",
+            "toState": "INBOUND_REVERSING",
+            "actorId": "legacy-ticket:bpi_reviewer_20260721190630",
+            "traceId": "d88a0740-c3f8-463c-b16c-92498052405f"
+          }
+        ],
+        "auditEvents": [
+          {
+            "action": "WMS_INBOUND_REVERSAL_REQUESTED",
+            "actorId": "legacy-ticket:admin",
+            "beforeRevision": 4,
+            "afterRevision": 5,
+            "traceId": "e89f1735-5f11-46b6-8d62-942a8ebf07a3"
+          },
+          {
+            "action": "WMS_INBOUND_REVERSAL_APPROVED",
+            "actorId": "legacy-ticket:bpi_reviewer_20260721190630",
+            "beforeRevision": 5,
+            "afterRevision": 6,
+            "traceId": "d88a0740-c3f8-463c-b16c-92498052405f"
+          }
+        ],
+        "idempotencyRows": 2,
+        "reversalInboxRows": 0
+      }
+    },
+    {
+      "name": "isolated Kafka chain has one blue and one red command/receipt with zero DLQ and lag",
+      "passed": true,
+      "detail": {
+        "blueCommand": "1",
+        "blueCommandDlq": "0",
+        "blueReceipt": "1",
+        "blueReceiptDlq": "0",
+        "redCommand": "1",
+        "redCommandDlq": "0",
+        "redReceipt": "1",
+        "redReceiptDlq": "0",
+        "qcs": "0",
+        "qcsDlq": "0",
+        "wmsLag": "0",
+        "receiptLag": "0"
+      }
+    },
+    {
+      "name": "completed INBOUND_REVERSED state is visible in a real formal ADP browser session",
+      "passed": true,
+      "detail": {
+        "status": "PASS",
+        "route": "/bpi/#/batches",
+        "url": "http://10.11.100.17:18080/bpi/#/batches",
+        "title": "智能批次",
+        "geometry": {
+          "viewportWidth": 1600,
+          "documentWidth": 1600,
+          "viewportHeight": 1000,
+          "documentHeight": 1000,
+          "drawerWidth": 680
+        },
+        "consoleErrors": [],
+        "pageErrors": [],
+        "requestFailures": [],
+        "bpiHttpErrors": [],
+        "release": {
+          "batch": {
+            "id": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+            "batchNo": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+            "tenantId": "1000",
+            "plantId": "PLANT-01",
+            "lineId": "LINE-S07-01",
+            "stageCode": "PACKING",
+            "orderId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_ORDER",
+            "materialCode": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_MATERIAL",
+            "state": "INBOUND_REVERSED",
+            "revision": 7,
+            "shadow": false,
+            "startTime": "2026-07-21T17:08:36.773457Z",
+            "endTime": "2026-07-21T18:08:36.773457Z",
+            "quantity": 12.345,
+            "quantityUnit": "kg",
+            "qualityGate": "ACCEPTED",
+            "wmsStatus": "REVERSED",
+            "ruleVersion": "BPI_LIVE_20260720_123058_START@1.0.0",
+            "topologyVersion": "BPI_LIVE_20260720_123058_TOPOLOGY@1.0.0"
+          },
+          "qualityGate": {
+            "id": "119fff96-e523-4435-9aa1-fc1aa1c4f344",
+            "externalGateId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_GATE",
+            "externalRevision": 1,
+            "sourceEventId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_QUALITY_EVENT",
+            "state": "ACCEPTED",
+            "releaseQuantity": 12.345,
+            "quantityUnit": "kg",
+            "materialCode": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_MATERIAL",
+            "observedAt": "2026-07-21T18:48:36.773457Z",
+            "inspections": [
+              {
+                "inspectionCode": "FINAL_RELEASE",
+                "inspectionRecordId": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_INSPECTION",
+                "required": true,
+                "disposition": "ACCEPTED",
+                "finalResult": true,
+                "observedAt": "2026-07-21T18:48:36.773457Z"
+              }
+            ]
+          },
+          "wmsInbound": {
+            "id": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+            "commandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+            "idempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+            "status": "ACCEPTED",
+            "receiptEventId": "1d862b5a-c672-5646-86d2-031334cad3d5",
+            "documentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+            "detail": "Created durable material-wms document CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E (internal id 31).",
+            "observedAt": "2026-07-21T19:08:38.325Z",
+            "revision": 2,
+            "outboxStatus": "PUBLISHED",
+            "deliveryAttemptCount": 1,
+            "reconciliationCount": 0,
+            "commandPublishedAt": "2026-07-21T19:08:37.625387Z",
+            "reconcileAfter": "2026-07-21T19:08:40.565678Z",
+            "reconciliationAllowed": false,
+            "reconciliationBlockedReason": "BATCH_NOT_RELEASED"
+          },
+          "wmsInboundReversal": {
+            "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+            "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+            "state": "COMPLETED",
+            "revision": 3,
+            "batchRevision": 7,
+            "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+            "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+            "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+            "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+            "requestedBy": "legacy-ticket:admin",
+            "requestedAt": "2026-07-21T19:09:14.878152Z",
+            "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+            "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+            "decidedAt": "2026-07-21T19:09:17.657738Z",
+            "decisionReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+            "reversalCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+            "reversalIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+            "reversalReceiptEventId": "b7de879a-aeea-5cab-8cd5-1357546a22ef",
+            "reversalDocumentId": "CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E",
+            "detail": "Created durable material-wms red document CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E for original CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E.",
+            "observedAt": "2026-07-21T19:09:55.265Z",
+            "outboxStatus": "PUBLISHED",
+            "deliveryAttemptCount": 1
+          }
+        },
+        "task": {
+          "taskId": "97085076-f945-4b1d-9a88-a168864f2b3b",
+          "batchId": "5844c3a5-c324-467d-9b95-afa4be810b0b",
+          "state": "COMPLETED",
+          "revision": 3,
+          "batchRevision": 7,
+          "originalInboundLinkId": "1b0fb5c6-f171-44a3-8fa6-679f4ebe2272",
+          "originalCommandEventId": "8b87d452-8085-4174-82f8-bc009035ec74",
+          "originalIdempotencyKey": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630|WMS|1",
+          "originalDocumentId": "CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E",
+          "requestedBy": "legacy-ticket:admin",
+          "requestedAt": "2026-07-21T19:09:14.878152Z",
+          "requestReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 original completion inbound document requires controlled reversal",
+          "decidedBy": "legacy-ticket:bpi_reviewer_20260721190630",
+          "decidedAt": "2026-07-21T19:09:17.657738Z",
+          "decisionReason": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630 independent administrator verified blue document and quantity",
+          "reversalCommandEventId": "a760f905-8028-5779-a345-5a0b37971a4e",
+          "reversalIdempotencyKey": "WMS_COMPLETION_INBOUND_REVERSAL|1000|5844c3a5-c324-467d-9b95-afa4be810b0b|97085076-f945-4b1d-9a88-a168864f2b3b|1",
+          "reversalReceiptEventId": "b7de879a-aeea-5cab-8cd5-1357546a22ef",
+          "reversalDocumentId": "CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E",
+          "detail": "Created durable material-wms red document CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E for original CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E.",
+          "observedAt": "2026-07-21T19:09:55.265Z",
+          "outboxStatus": "PUBLISHED",
+          "deliveryAttemptCount": 1
+        },
+        "screenshot": {
+          "path": "metadata/bpi-formal-identity-wms-roundtrip-completed.png",
+          "sha256": "993d7da20350ed57aee4d271b5ab0531183d5af73e5ecf3d1629c938cf3bb896"
+        }
+      }
+    },
+    {
+      "name": "temporary formal identity has no active residual binding",
+      "passed": true,
+      "detail": {
+        "person": {
+          "id": 6690387627884880,
+          "valid": 0,
+          "userId": null,
+          "userName": null
+        },
+        "user": {
+          "id": 6690387649118544,
+          "valid": 0,
+          "userName": "bpi_reviewer_20260721190630",
+          "personId": 6690387627884880,
+          "personCode": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630_PERSON",
+          "passwordEncoded": true
+        },
+        "roleUser": null,
+        "authRoles": []
+      }
+    },
+    {
+      "name": "BPI marker cleanup has zero residual rows",
+      "passed": true,
+      "detail": {
+        "batchRows": 0,
+        "taskRows": 0,
+        "qualityGateRows": 0,
+        "qualityLinkRows": 0,
+        "wmsLinkRows": 0,
+        "outboxRows": 0,
+        "stateEventRows": 0,
+        "auditRows": 0,
+        "idempotencyRows": 0,
+        "inboxRows": 0,
+        "commandsFlagRows": 0,
+        "wmsFlagRows": 0,
+        "plantCommandsOverrides": 0,
+        "plantWmsOverrides": 0
+      }
+    },
+    {
+      "name": "material-wms marker cleanup has zero residual rows",
+      "passed": true,
+      "detail": {
+        "documentRows": 0,
+        "lineRows": 0,
+        "transactionRows": 0,
+        "stockRows": 0
+      }
+    },
+    {
+      "name": "adapter scope and image restored exactly",
+      "passed": true,
+      "detail": {
+        "before": {
+          "adapterImage": "ft-mes-bpi-adapter:20260721t171320z-80cf094a415c",
+          "adapterImageId": "sha256:a9966324864eaa166543bc6c5e3879ba2cd56a38a18855a93ac29a71fba0330f",
+          "adapterHealth": "healthy",
+          "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+          "serviceImage": "ft-mes-bpi-service:20260721t171320z-80cf094a415c",
+          "serviceImageId": "sha256:5ef251f3c2b038c67b9965f6bafaf421f3d6297e0e27ce0c488b0e572fdf56c8",
+          "serviceHealth": "healthy",
+          "wmsAdapterImage": "ft-mes-bpi-wms-adapter:20260721t171320z-80cf094a415c",
+          "wmsAdapterImageId": "sha256:70d0a80779a9cc124a9c35d3c3b5f6ec234ef376d814a544ff704a4f1c176bdd",
+          "wmsAdapterHealth": "healthy",
+          "materialApiKeyConfigured": "true",
+          "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+        },
+        "restored": {
+          "adapterImage": "ft-mes-bpi-adapter:20260721t171320z-80cf094a415c",
+          "adapterImageId": "sha256:a9966324864eaa166543bc6c5e3879ba2cd56a38a18855a93ac29a71fba0330f",
+          "adapterHealth": "healthy",
+          "adapterSubjectScopeRules": "admin=1000|PLANT-01|LINE-S07-01",
+          "serviceImage": "ft-mes-bpi-service:20260721t171320z-80cf094a415c",
+          "serviceImageId": "sha256:5ef251f3c2b038c67b9965f6bafaf421f3d6297e0e27ce0c488b0e572fdf56c8",
+          "serviceHealth": "healthy",
+          "wmsAdapterImage": "ft-mes-bpi-wms-adapter:20260721t171320z-80cf094a415c",
+          "wmsAdapterImageId": "sha256:70d0a80779a9cc124a9c35d3c3b5f6ec234ef376d814a544ff704a4f1c176bdd",
+          "wmsAdapterHealth": "healthy",
+          "materialApiKeyConfigured": "true",
+          "phase2State": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+        }
+      }
+    },
+    {
+      "name": "Phase 2 and write-back switches remain disabled",
+      "passed": true,
+      "detail": "BPI_PHASE2_INTEGRATION_ENABLED:false,BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,BPI_PHASE2_KAFKA_ENABLED:false,BPI_WMS_OUTBOX_ENABLED:false,BPI_WMS_ADAPTER_ENABLED:false,QCS_BPI_OUTBOX_ENABLED:false,"
+    },
+    {
+      "name": "isolated Kafka topics and consumer groups were removed",
+      "passed": true,
+      "detail": {
+        "isolatedKafkaCleaned": "true",
+        "watchdogRestored": "false"
+      }
+    }
+  ],
+  "issues": []
+}

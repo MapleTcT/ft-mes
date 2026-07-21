@@ -180,6 +180,18 @@ REQUIRED_FILES = [
     "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-fixture.sql",
     "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-verification.sql",
     "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-cleanup.sql",
+    "docs/testing/bpi-formal-identity-wms-roundtrip-acceptance.md",
+    "metadata/bpi-formal-identity-wms-roundtrip-acceptance.json",
+    "metadata/bpi-formal-identity-wms-roundtrip-pending.png",
+    "metadata/bpi-formal-identity-wms-roundtrip-approved.png",
+    "metadata/bpi-formal-identity-wms-roundtrip-completed.png",
+    "metadata/bpi-material-wms-reversal-schema-upgrade.json",
+    "metadata/bpi-material-wms-target-deployment.json",
+    "deploy/docker/scripts/apply-material-wms-reversal-expand-only-target.js",
+    "deploy/docker/scripts/deploy-material-wms-target.js",
+    "deploy/docker/scripts/bpi-wms-formal-roundtrip-verification.sql",
+    "deploy/docker/scripts/bpi-wms-formal-roundtrip-material-verification.sql",
+    "deploy/docker/scripts/bpi-wms-formal-roundtrip-material-cleanup.sql",
     "metadata/bpi-quality-release-wms-target-acceptance.json",
     "metadata/bpi-quality-release-wms-target.png",
     "metadata/bpi-quality-release-wms-live-target.png",
@@ -1911,6 +1923,231 @@ def main() -> int:
             fail(f"BPI formal WMS reversal screenshot is missing: {screenshot.get('path', '')}", failures)
         elif hashlib.sha256(screenshot_path.read_bytes()).hexdigest() != screenshot.get("sha256"):
             fail(f"BPI formal WMS reversal screenshot hash does not match: {screenshot.get('path', '')}", failures)
+
+    material_schema_upgrade = json.loads(
+        (ROOT / "metadata/bpi-material-wms-reversal-schema-upgrade.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    schema_before = material_schema_upgrade.get("before", {})
+    schema_after = material_schema_upgrade.get("after", {})
+    schema_flags = (
+        "reversalColumn",
+        "documentTypeConstraint",
+        "transactionTypeConstraint",
+        "reversalForeignKey",
+        "reversalUniqueIndex",
+    )
+    if (material_schema_upgrade.get("status") != "PASS_APPLIED_EXPAND_ONLY"
+            or material_schema_upgrade.get("strategy") != "EXPAND_ONLY"
+            or material_schema_upgrade.get("target", {}).get("host") != "10.11.100.17"
+            or material_schema_upgrade.get("target", {}).get("database") != "adp"
+            or len(material_schema_upgrade.get("migration", {}).get("sha256", "")) != 64
+            or len(material_schema_upgrade.get("backup", {}).get("sha256", "")) != 64
+            or any(schema_before.get(key) is not False for key in schema_flags)
+            or any(schema_after.get(key) is not True for key in schema_flags)
+            or schema_before.get("unsupportedDocumentTypes") != []
+            or schema_before.get("unsupportedTransactionTypes") != []
+            or schema_after.get("unsupportedDocumentTypes") != []
+            or schema_after.get("unsupportedTransactionTypes") != []
+            or material_schema_upgrade.get("issues") != []):
+        fail("material-wms reversal expand-only target schema evidence is incomplete", failures)
+
+    material_deployment = json.loads(
+        (ROOT / "metadata/bpi-material-wms-target-deployment.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    material_artifact = material_deployment.get("artifact", {})
+    material_deploy_target = material_deployment.get("target", {})
+    if (material_deployment.get("status") != "PASS_BACKUP_RESTART_VERIFIED"
+            or material_deploy_target.get("host") != "10.11.100.17"
+            or material_deploy_target.get("composeProject") != "adp-mes-newbase"
+            or material_artifact.get("sha256") != material_deployment.get("deployedSha256")
+            or len(material_artifact.get("sha256", "")) != 64
+            or material_artifact.get("sizeBytes", 0) <= 0
+            or len(material_deployment.get("backup", {}).get("previousSha256", "")) != 64
+            or material_deployment.get("routeProbe") != "PASS_AUTH_GATE"
+            or material_deployment.get("rollbackRestored") is not False
+            or material_deployment.get("issues") != []):
+        fail("material-wms target JAR backup, deployment, or route evidence is incomplete", failures)
+
+    formal_roundtrip = json.loads(
+        (ROOT / "metadata/bpi-formal-identity-wms-roundtrip-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    roundtrip_target = formal_roundtrip.get("target", {})
+    roundtrip_scope = formal_roundtrip.get("scope", {})
+    roundtrip_identity = formal_roundtrip.get("identity", {})
+    roundtrip_safety = formal_roundtrip.get("safety", {})
+    expected_roundtrip_phase2 = (
+        "BPI_PHASE2_INTEGRATION_ENABLED:true,"
+        "BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,"
+        "BPI_PHASE2_KAFKA_ENABLED:true,"
+        "BPI_WMS_OUTBOX_ENABLED:true,"
+        "BPI_WMS_ADAPTER_ENABLED:true,"
+        "QCS_BPI_OUTBOX_ENABLED:false,"
+    )
+    if (formal_roundtrip.get("status")
+            != "PASS_TARGET_FORMAL_IDENTITY_INTERNAL_WMS_ROUNDTRIP_CLEANED"
+            or formal_roundtrip.get("database") != "PostgreSQL"
+            or formal_roundtrip.get("mode") != "TARGET_INTERNAL_WMS_ROUNDTRIP"
+            or not formal_roundtrip.get("marker", "").startswith(
+                "ADP_BPI_FORMAL_WMS_REVERSAL_")
+            or roundtrip_target.get("sshHost") != "10.11.100.17"
+            or roundtrip_target.get("adpBaseUrl") != "http://10.11.100.17:18080"
+            or roundtrip_scope != {
+                "tenantId": "1000",
+                "plantId": "PLANT-01",
+                "lineId": "LINE-S07-01",
+            }
+            or roundtrip_identity.get("requesterSubject") != "legacy-ticket:admin"
+            or roundtrip_identity.get("approverSubject")
+                == roundtrip_identity.get("requesterSubject")
+            or roundtrip_identity.get("password") != "REDACTED"
+            or roundtrip_safety.get("internalMaterialWmsRoundTripExpected") is not True
+            or roundtrip_safety.get("externalWmsReceiptExpected") is not False
+            or roundtrip_safety.get("isolatedKafkaResources") is not True
+            or roundtrip_safety.get("baseRuntimeEnvEdited") is not False
+            or roundtrip_safety.get("cleanupByMarkerAndIdentityOnly") is not True):
+        fail("BPI formal internal WMS roundtrip boundary or identity evidence is incomplete", failures)
+
+    roundtrip_stages = formal_roundtrip.get("stages", {})
+    roundtrip_precheck = roundtrip_stages.get("adapterPrecheck", {})
+    roundtrip_active = roundtrip_stages.get("adapterActivated", {})
+    roundtrip_restored = roundtrip_stages.get("adapterRestored", {})
+    if (roundtrip_precheck != roundtrip_restored
+            or roundtrip_precheck.get("phase2State") != expected_disabled_phase2
+            or roundtrip_active.get("phase2State") != expected_roundtrip_phase2
+            or any(roundtrip_precheck.get(key) != "healthy" for key in (
+                "adapterHealth", "serviceHealth", "wmsAdapterHealth"))
+            or roundtrip_stages.get("wmsPaused", {}).get("wmsAdapterHealth") != "exited"
+            or roundtrip_stages.get("wmsResumed", {}).get("wmsAdapterHealth") != "healthy"):
+        fail("BPI formal internal WMS isolated activation or exact restoration is incomplete", failures)
+
+    roundtrip_operations = formal_roundtrip.get("operations", {}).get("reversal", {})
+    roundtrip_request = roundtrip_operations.get("request", {})
+    roundtrip_rejection = roundtrip_operations.get("sameActorRejection", {})
+    roundtrip_approval = roundtrip_operations.get("approval", {})
+    if (roundtrip_operations.get("unauthenticatedRead", {}).get("status") != 401
+            or roundtrip_request.get("status") != 202
+            or roundtrip_request.get("response", {}).get("state") != "PENDING_APPROVAL"
+            or roundtrip_request.get("response", {}).get("batchRevision") != 5
+            or roundtrip_rejection.get("status") != 403
+            or roundtrip_approval.get("status") != 202
+            or roundtrip_approval.get("response", {}).get("state") != "PENDING_WMS"
+            or roundtrip_approval.get("response", {}).get("batchRevision") != 6
+            or roundtrip_approval.get("response", {}).get("requestedBy")
+                == roundtrip_approval.get("response", {}).get("decidedBy")):
+        fail("BPI formal internal WMS request, separation, or approval evidence is incomplete", failures)
+
+    expected_kafka_final = {
+        "blueCommand": "1",
+        "blueCommandDlq": "0",
+        "blueReceipt": "1",
+        "blueReceiptDlq": "0",
+        "redCommand": "1",
+        "redCommandDlq": "0",
+        "redReceipt": "1",
+        "redReceiptDlq": "0",
+        "qcs": "0",
+        "qcsDlq": "0",
+        "wmsLag": "0",
+        "receiptLag": "0",
+    }
+    if formal_roundtrip.get("kafka", {}).get("final") != expected_kafka_final:
+        fail("BPI formal internal WMS Kafka counts, DLQ, or lag evidence is incomplete", failures)
+
+    roundtrip_postgres = formal_roundtrip.get("postgres", {})
+    bpi_roundtrip = roundtrip_postgres.get("roundTrip", {})
+    bpi_roundtrip_batch = bpi_roundtrip.get("batch", {})
+    bpi_roundtrip_blue = bpi_roundtrip.get("blue", {})
+    bpi_roundtrip_red = bpi_roundtrip.get("red", {})
+    expected_roundtrip_actions = [
+        "WMS_INBOUND_ACCEPTED",
+        "WMS_INBOUND_REVERSAL_REQUESTED",
+        "WMS_INBOUND_REVERSAL_APPROVED",
+        "WMS_INBOUND_REVERSAL_ACCEPTED",
+    ]
+    if (bpi_roundtrip_batch.get("state") != "INBOUND_REVERSED"
+            or bpi_roundtrip_batch.get("revision") != 7
+            or bpi_roundtrip_batch.get("wmsStatus") != "REVERSED"
+            or bpi_roundtrip_blue.get("status") != "ACCEPTED"
+            or bpi_roundtrip_blue.get("outboxStatus") != "PUBLISHED"
+            or bpi_roundtrip_red.get("state") != "COMPLETED"
+            or bpi_roundtrip_red.get("revision") != 3
+            or bpi_roundtrip_red.get("outboxStatus") != "PUBLISHED"
+            or bpi_roundtrip_red.get("originalCommandEventId")
+                != bpi_roundtrip_blue.get("commandEventId")
+            or [event.get("action") for event in bpi_roundtrip.get("stateEvents", [])]
+                != expected_roundtrip_actions
+            or bpi_roundtrip.get("auditActions") != expected_roundtrip_actions
+            or bpi_roundtrip.get("blueInboxRows") != 1
+            or bpi_roundtrip.get("redInboxRows") != 1
+            or bpi_roundtrip.get("reversalApiIdempotencyRows") != 2):
+        fail("BPI formal internal WMS PostgreSQL terminal projection is incomplete", failures)
+
+    material_roundtrip = roundtrip_postgres.get("materialRoundTrip", {})
+    material_blue = material_roundtrip.get("blue", {})
+    material_red = material_roundtrip.get("red", {})
+    material_transactions = material_roundtrip.get("transactions", [])
+    material_stock = material_roundtrip.get("stock", {})
+    if (material_blue.get("status") != "REVERSED"
+            or material_red.get("status") != "POSTED"
+            or material_red.get("reversalOfDocumentId") != material_blue.get("id")
+            or [item.get("type") for item in material_transactions] != [
+                "COMPLETION_INBOUND", "COMPLETION_INBOUND_REVERSAL"]
+            or [item.get("onHandDelta") for item in material_transactions]
+                != [12.345, -12.345]
+            or material_stock != {"onHand": 0, "available": 0, "hold": 0}):
+        fail("material-wms blue/red document, transaction, or net-stock evidence is incomplete", failures)
+
+    completed_browser = formal_roundtrip.get("completedBrowser", {})
+    completed_geometry = completed_browser.get("geometry", {})
+    completed_task = completed_browser.get("task", {})
+    completed_screenshot = completed_browser.get("screenshot", {})
+    if (completed_browser.get("status") != "PASS"
+            or completed_browser.get("route") != "/bpi/#/batches"
+            or completed_browser.get("release", {}).get("batch", {}).get("state")
+                != "INBOUND_REVERSED"
+            or completed_task.get("state") != "COMPLETED"
+            or completed_task.get("reversalDocumentId") != bpi_roundtrip_red.get("documentId")
+            or any(completed_browser.get(key) for key in (
+                "consoleErrors", "pageErrors", "requestFailures", "bpiHttpErrors"))
+            or completed_geometry.get("viewportWidth")
+                != completed_geometry.get("documentWidth")
+            or completed_geometry.get("drawerWidth") != 680):
+        fail("BPI formal internal WMS completed browser evidence is incomplete", failures)
+    completed_screenshot_path = ROOT / completed_screenshot.get("path", "")
+    if not completed_screenshot_path.is_file():
+        fail("BPI formal internal WMS completed screenshot is missing", failures)
+    elif hashlib.sha256(completed_screenshot_path.read_bytes()).hexdigest() != (
+            completed_screenshot.get("sha256")):
+        fail("BPI formal internal WMS completed screenshot hash does not match", failures)
+    for screenshot in formal_roundtrip.get("browser", {}).get("screenshots", {}).values():
+        screenshot_path = ROOT / screenshot.get("path", "")
+        if not screenshot_path.is_file():
+            fail(f"BPI formal internal WMS screenshot is missing: {screenshot.get('path', '')}", failures)
+        elif hashlib.sha256(screenshot_path.read_bytes()).hexdigest() != screenshot.get("sha256"):
+            fail(f"BPI formal internal WMS screenshot hash does not match: {screenshot.get('path', '')}", failures)
+
+    roundtrip_cleanup = formal_roundtrip.get("cleanup", {})
+    if (len(formal_roundtrip.get("checks", [])) != 29
+            or any(check.get("passed") is not True
+                   for check in formal_roundtrip.get("checks", []))
+            or any(value != 0 for value in roundtrip_postgres.get("bpiFinal", {}).values())
+            or any(value != 0 for value in roundtrip_postgres.get("materialFinal", {}).values())
+            or roundtrip_postgres.get("identityFinal", {}).get("person", {}).get("valid") != 0
+            or roundtrip_postgres.get("identityFinal", {}).get("user", {}).get("valid") != 0
+            or roundtrip_postgres.get("identityFinal", {}).get("roleUser") is not None
+            or roundtrip_postgres.get("identityFinal", {}).get("authRoles") != []
+            or not any("residualRows=0" in line for line in roundtrip_cleanup.get("bpi", []))
+            or not any("residualRows=0" in line for line in roundtrip_cleanup.get("material", []))
+            or roundtrip_cleanup.get("adapter", {}).get("isolatedKafkaCleaned") != "true"
+            or roundtrip_cleanup.get("adapter", {}).get("watchdogRestored") != "false"
+            or formal_roundtrip.get("issues") != []):
+        fail("BPI formal internal WMS cleanup or final checks are incomplete", failures)
 
     quality_wms_target = json.loads(
         (ROOT / "metadata/bpi-quality-release-wms-target-acceptance.json").read_text(

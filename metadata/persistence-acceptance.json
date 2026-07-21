@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-21T17:57:08.442Z",
-  "repoCommit": "80cf094a415c4ae33541f08da8b640fc15c52098+target-formal-wms-reversal-acceptance",
+  "generatedAt": "2026-07-21T19:12:28.177Z",
+  "repoCommit": "341745bab543060e2c437beb08a4c87b0acc85ea+target-internal-wms-roundtrip-acceptance",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -32,10 +32,10 @@
       "evidence": "metadata/core-flow-regression-20260712.json"
     },
     "bpiWmsInboundReversal": {
-      "status": "PASS_TARGET_FORMAL_IDENTITY_PENDING_EXTERNAL_WMS",
-      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721175536",
-      "evidence": "metadata/bpi-formal-identity-wms-reversal-acceptance.json",
-      "assertions": "target PostgreSQL 15.18/Flyway V25, two real ADP sessions, REQUEST 202, same-actor 403, independent APPROVE 202, immutable blue document, one 994-byte PENDING red outbox, exact identity/marker/runtime cleanup and six restored false switches passed; external ERP/WMS receipt remains open"
+      "status": "PASS_TARGET_INTERNAL_MATERIAL_WMS_ROUNDTRIP_EXTERNAL_WMS_OPEN",
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+      "evidence": "metadata/bpi-formal-identity-wms-roundtrip-acceptance.json",
+      "assertions": "target PostgreSQL 15.18/Flyway V25 plus target material-wms PostgreSQL, two real ADP sessions, blue command/receipt and red command/receipt each exactly one with zero DLQ/lag, REQUEST 202, same-actor 403, independent APPROVE 202, INBOUND_REVERSED/r7, COMPLETED/r3, durable red document, net stock zero, browser errors zero, exact double-database/identity/Kafka/runtime cleanup and six restored false switches passed; external ERP/WMS remains open"
     },
     "bpiPointCatalogReadiness": {
       "status": "PASS_CONTROL_WITH_BLOCKED_SOURCE",
@@ -199,8 +199,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 213,
-    "pass": 210,
+    "testedFeatures": 217,
+    "pass": 214,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -4731,6 +4731,104 @@
       "verificationSql": "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-cleanup.sql plus final marker, identity, image, scope and environment-switch queries require zero active residual bindings, zero BPI marker/flag rows and exact runtime restoration.",
       "status": "PASS",
       "evidence": "metadata/bpi-formal-identity-wms-reversal-acceptance.json; BPI cleanup residualRows=0, person/user soft-deleted, active RBAC/auth bindings 0, service/adapter image IDs and base scope restored exactly, all six integration/write-back switches false, watchdog did not fire",
+      "issues": []
+    },
+    {
+      "module": "BPI 内部 material-wms 蓝单完工入库整链",
+      "route": "/bpi/#/batches",
+      "operation": "通过隔离 Kafka、真实 WMS adapter 和目标 material-wms 创建蓝单、库存事务与 durable receipt，并从 BPI 页面读取 INBOUNDED 终态",
+      "api": "Kafka blue command/receipt; POST /material/wms/completion-inbounds; GET /material/wms/completion-inbounds/by-idempotency",
+      "method": "KAFKA/POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "BpiOutboxPublisher -> WmsCommandKafkaListener -> WmsCommandProcessor -> MaterialWmsController/MaterialInventoryService/MaterialWmsRepository -> WmsReceiptKafkaListener",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_wms_inbound_links",
+        "bpi.bpi_outbox_events",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_batch_state_events",
+        "public.wms_stock_documents",
+        "public.wms_stock_document_lines",
+        "public.wms_inventory_transactions",
+        "public.wms_batch_stocks"
+      ],
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+      "verificationSql": "deploy/docker/scripts/bpi-wms-formal-roundtrip-verification.sql and bpi-wms-formal-roundtrip-material-verification.sql require BPI INBOUNDED/r4, ACCEPTED/r2, PUBLISHED/r3, one blue command and receipt, zero DLQ/lag, one POSTED blue document/line/+12.345 kg transaction and 12.345 kg stock.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-formal-identity-wms-roundtrip-acceptance.json; blue command=1, blue receipt=1, blue DLQs=0, both consumer lags=0; BPI document CIN-8b87d452-8085-4174-82f8-bc009035ec74-WARE-E2E and material document/line/transaction/stock all persisted exactly once",
+      "issues": []
+    },
+    {
+      "module": "BPI 目标正式身份内部 WMS 冲销职责分离",
+      "route": "/bpi/#/batches",
+      "operation": "admin 申请内部入库冲销，同人审批失败关闭，再由独立真实 ADP 会话批准并发布唯一红单",
+      "api": "POST /bpi-api/batches/5844c3a5-c324-467d-9b95-afa4be810b0b/wms/reversal approvalMode=REQUEST/APPROVE",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "BpiProxyController -> LegacyTicketVerifier -> BatchController.wmsInboundReversal -> WmsInboundReversalService -> WmsInboundReversalPostgresRepository",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_wms_inbound_reversal_tasks",
+        "bpi.bpi_outbox_events",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_wms_inbound_links"
+      ],
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+      "verificationSql": "Compare pending and approved output from deploy/docker/scripts/bpi-wms-formal-roundtrip-verification.sql: REQUEST requires INBOUNDED/r5 and PENDING_APPROVAL/r1 with zero red outbox; same-actor APPROVE 403 must not change revisions; independent APPROVE requires INBOUND_REVERSING/r6, PENDING_WMS/r2 and one PUBLISHED red outbox while the original blue projection remains byte-for-byte unchanged.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-formal-identity-wms-roundtrip-acceptance.json and pending/approved screenshots; requester legacy-ticket:admin and approver legacy-ticket:bpi_reviewer_20260721190630 are distinct; REQUEST 202, self-approval 403, independent approval 202, one red command a760f905-8028-5779-a345-5a0b37971a4e",
+      "issues": []
+    },
+    {
+      "module": "BPI 内部 material-wms 红单 durable receipt",
+      "route": "/bpi/#/batches",
+      "operation": "消费红单命令，创建追加式 material-wms 冲销单与负库存事务，发布 durable receipt，并在真实页面确认 INBOUND_REVERSED",
+      "api": "POST /material/wms/completion-inbound-reversals; GET /material/wms/completion-inbound-reversals/by-idempotency; POST /internal/bpi/v1/wms-inbound-reversal-receipts",
+      "method": "KAFKA/POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "WmsReversalCommandKafkaListener -> WmsCommandProcessor -> MaterialWmsController/MaterialInventoryService/MaterialWmsRepository -> WmsReversalReceiptKafkaListener -> WmsInboundReversalService",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_wms_inbound_reversal_tasks",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_audit_events",
+        "public.wms_stock_documents",
+        "public.wms_stock_document_lines",
+        "public.wms_inventory_transactions",
+        "public.wms_batch_stocks"
+      ],
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+      "verificationSql": "The two formal-roundtrip verification SQL files require red document CIR-a760f905-8028-5779-a345-5a0b37971a4e-WARE-E2E POSTED and linked to blue document id 31, +12.345/-12.345 transactions, stock 0/0/0, BPI INBOUND_REVERSED/r7, COMPLETED/r3, four exact state events, one red command/receipt and zero DLQ/lag.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-formal-identity-wms-roundtrip-acceptance.json and completed screenshot; red command=1, red receipt=1, all four WMS DLQs=0, final browser console/page/request/BPI HTTP errors=0, durable red receipt b7de879a-aeea-5cab-8cd5-1357546a22ef and net stock zero",
+      "issues": []
+    },
+    {
+      "module": "BPI 内部 WMS 整链验收退场",
+      "route": "/bpi/#/batches",
+      "operation": "定向清理 BPI/material 双库 marker、临时正式身份和隔离 Kafka，并精确恢复 Adapter scope、镜像与六个集成开关",
+      "api": "double-database cleanup SQL; ADP identity DELETE APIs; isolated Kafka deletion; Compose restore",
+      "method": "DELETE/SQL/KAFKA/COMPOSE",
+      "requiresPersistence": true,
+      "backendEntry": "protected acceptance runner finally block and 1200-second watchdog",
+      "tables": [
+        "bpi marker tables",
+        "public.wms_stock_documents",
+        "public.wms_stock_document_lines",
+        "public.wms_inventory_transactions",
+        "public.wms_batch_stocks",
+        "public.org_person",
+        "public.auth_user",
+        "public.rbac_roleuser",
+        "public.auth_user_role"
+      ],
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630",
+      "verificationSql": "deploy/docker/scripts/bpi-wms-formal-roundtrip-material-cleanup.sql and bpi-wms-inbound-reversal-acceptance-cleanup.sql plus final identity, image, scope, switch and isolated Kafka queries require BPI/material residual 0, zero active identity binding, exact runtime restoration and deleted topics/groups.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-formal-identity-wms-roundtrip-acceptance.json; BPI residual 0, material residual 0, active identity binding 0, isolatedKafkaCleaned=true, baseRuntimeEnvEdited=false, six switches false, image IDs and scope restored, watchdogRestored=false",
       "issues": []
     }
   ],
