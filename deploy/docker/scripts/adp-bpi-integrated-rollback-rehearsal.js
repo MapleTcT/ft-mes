@@ -21,7 +21,7 @@ const marker = process.env.BPI_INTEGRATED_ROLLBACK_MARKER
   || `ADP_BPI_INTEGRATED_ROLLBACK_${new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14)}`;
 const tenantId = process.env.BPI_ACCEPTANCE_TENANT_ID || "1000";
 const plantId = process.env.BPI_ACCEPTANCE_PLANT_ID || "PLANT-01";
-const lineId = process.env.BPI_ACCEPTANCE_LINE_ID || "LINE-S07-01";
+const lineId = process.env.BPI_ACCEPTANCE_LINE_ID || `LINE-IRB-${marker.slice(-14)}`;
 const topologyCode = `TOPO-${marker}`;
 const topologyVersion = "1";
 const ruleCode = `RULE-${marker}`;
@@ -451,7 +451,7 @@ case "$action" in
     cp "$base_env" "$current_env"
     cp "$base_env" "$rollback_env"
     chmod 600 "$current_env" "$rollback_env"
-    allowlist_updates="BPI_POINT_CATALOG_KAFKA_ENABLED=true BPI_POINT_CATALOG_KAFKA_ALLOWED_TENANT_IDS=$tenant_id BPI_POINT_CATALOG_KAFKA_ALLOWED_PLANT_IDS=$plant_id BPI_POINT_CATALOG_KAFKA_ALLOWED_LINE_IDS=$line_id BPI_RULE_PUBLICATION_OUTBOX_ENABLED=false BPI_RULE_APPLICATION_KAFKA_ENABLED=false BPI_CANDIDATE_KAFKA_ENABLED=true BPI_CANDIDATE_KAFKA_ALLOWED_TENANT_IDS=$tenant_id BPI_CANDIDATE_KAFKA_ALLOWED_PLANT_IDS=$plant_id BPI_CANDIDATE_KAFKA_ALLOWED_LINE_IDS=$line_id BPI_DATA_QUALITY_KAFKA_ENABLED=true BPI_DATA_QUALITY_KAFKA_ALLOWED_TENANT_IDS=$tenant_id BPI_DATA_QUALITY_KAFKA_ALLOWED_PLANT_IDS=$plant_id BPI_DATA_QUALITY_KAFKA_ALLOWED_LINE_IDS=$line_id BPI_PHASE2_INTEGRATION_ENABLED=false BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED=false BPI_PHASE2_KAFKA_ENABLED=false BPI_WMS_OUTBOX_ENABLED=false BPI_WMS_ADAPTER_ENABLED=false QCS_BPI_OUTBOX_ENABLED=false"
+    allowlist_updates="BPI_POINT_CATALOG_KAFKA_ENABLED=true BPI_POINT_CATALOG_KAFKA_ALLOWED_TENANT_IDS=$tenant_id BPI_POINT_CATALOG_KAFKA_ALLOWED_PLANT_IDS=$plant_id BPI_POINT_CATALOG_KAFKA_ALLOWED_LINE_IDS=$line_id BPI_RULE_PUBLICATION_OUTBOX_ENABLED=false BPI_RULE_APPLICATION_KAFKA_ENABLED=false BPI_CANDIDATE_KAFKA_ENABLED=true BPI_CANDIDATE_KAFKA_ALLOWED_TENANT_IDS=$tenant_id BPI_CANDIDATE_KAFKA_ALLOWED_PLANT_IDS=$plant_id BPI_CANDIDATE_KAFKA_ALLOWED_LINE_IDS=$line_id BPI_DATA_QUALITY_KAFKA_ENABLED=true BPI_DATA_QUALITY_KAFKA_ALLOWED_TENANT_IDS=$tenant_id BPI_DATA_QUALITY_KAFKA_ALLOWED_PLANT_IDS=$plant_id BPI_DATA_QUALITY_KAFKA_ALLOWED_LINE_IDS=$line_id BPI_ADAPTER_SCOPE_TENANT_ID=$tenant_id BPI_ADAPTER_SCOPE_PLANT_ID=$plant_id BPI_ADAPTER_SCOPE_LINE_ID=$line_id BPI_PHASE2_INTEGRATION_ENABLED=false BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED=false BPI_PHASE2_KAFKA_ENABLED=false BPI_WMS_OUTBOX_ENABLED=false BPI_WMS_ADAPTER_ENABLED=false QCS_BPI_OUTBOX_ENABLED=false"
     update_env "$current_env" $allowlist_updates
     update_env "$rollback_env" $allowlist_updates "BPI_SERVICE_IMAGE=$rollback_service_image" "BPI_ADAPTER_IMAGE=$rollback_adapter_image"
     current_jar=$(env_value BPI_JOB_JAR '' "$stream_env")
@@ -515,8 +515,8 @@ case "$action" in
     emit_state "$rollback_env"
     ;;
   restore-runtime)
-    restart_runtime "$base_env"
-    emit_state "$base_env"
+    restart_runtime "$current_env"
+    emit_state "$current_env"
     ;;
   restore-all)
     restart_runtime "$base_env"
@@ -545,6 +545,7 @@ case "$action" in
     printf 'watchdogRestored=%s\n' "$(if [ -f "$backup_dir/WATCHDOG_RESTORED" ]; then printf true; else printf false; fi)"
     ;;
   state-base)
+    restart_runtime "$base_env"
     emit_state "$base_env"
     ;;
   *) printf 'ERROR: unsupported action: %s\n' "$action" >&2; exit 2 ;;
@@ -689,13 +690,14 @@ function parseDatabaseState(stage) {
   return JSON.parse(stage.databaseState || "{}");
 }
 
-function subjectScopeAllows(rules, subject, tenant, plant, line) {
+function subjectScopeAllows(rules, subject, tenant, plant, line = null) {
   return String(rules || "").split(";").some((rule) => {
     const separator = rule.indexOf("=");
     if (separator <= 0 || rule.slice(0, separator).trim() !== subject) return false;
     const scope = rule.slice(separator + 1).split("|");
     if (scope.length !== 3) return false;
     return [tenant, plant, line].every((value, index) => {
+      if (value === null) return true;
       const allowed = scope[index].split(",").map((item) => item.trim()).filter(Boolean);
       return allowed.includes("*") || allowed.includes(value);
     });
@@ -790,19 +792,18 @@ async function main() {
       stageReady(report.stages.precheck, currentService, currentAdapter, currentJarSha),
       report.stages.precheck,
     );
-    const acceptanceScopeAllowed = subjectScopeAllows(
+    const acceptanceScopeCanBeExtended = subjectScopeAllows(
       report.stages.precheck.adapterSubjectScopeRules,
       username,
       tenantId,
       plantId,
-      lineId,
     );
     check(
-      "authenticated user scope includes rehearsal line",
-      acceptanceScopeAllowed,
+      "authenticated user tenant and plant can be isolated to rehearsal line",
+      acceptanceScopeCanBeExtended,
       { username, tenantId, plantId, lineId },
     );
-    assert(acceptanceScopeAllowed, "BPI adapter subject scope does not allow the rehearsal line");
+    assert(acceptanceScopeCanBeExtended, "BPI adapter subject scope cannot be isolated to the rehearsal line");
     const preDatabase = parseDatabaseState(report.stages.precheck);
     check("unique marker starts clean", Object.entries(preDatabase)
       .filter(([key]) => key !== "flywayVersion").every(([, value]) => value === 0), preDatabase);
@@ -822,6 +823,18 @@ async function main() {
       ),
       report.stages.rollback,
     );
+    const rollbackScopeAllowed = subjectScopeAllows(
+      report.stages.rollback.adapterSubjectScopeRules,
+      username,
+      tenantId,
+      plantId,
+      lineId,
+    );
+    check("rollback adapter exposes isolated rehearsal line", rollbackScopeAllowed, {
+      username,
+      adapterSubjectScopeRules: report.stages.rollback.adapterSubjectScopeRules,
+    });
+    assert(rollbackScopeAllowed, "Rollback adapter did not expose the isolated rehearsal line");
 
     report.postgres.seed = psqlFile(seedFile, {
       marker,
@@ -884,12 +897,18 @@ async function main() {
     report.stages.rollbackSavepoint = runRemote("capture-rollback");
     report.stages.restoredFlink = runRemote("restore-flink");
     report.stages.restored = runRemote("restore-runtime");
-    restored = true;
     check(
       "current stack restored exactly",
       stageReady(report.stages.restored, currentService, currentAdapter, currentJarSha)
         && report.stages.restored.serviceImageId === report.stages.precheck.serviceImageId
-        && report.stages.restored.adapterImageId === report.stages.precheck.adapterImageId,
+        && report.stages.restored.adapterImageId === report.stages.precheck.adapterImageId
+        && subjectScopeAllows(
+          report.stages.restored.adapterSubjectScopeRules,
+          username,
+          tenantId,
+          plantId,
+          lineId,
+        ),
       report.stages.restored,
     );
 
@@ -941,9 +960,12 @@ async function main() {
       cleanupScreenshot,
     );
     report.stages.final = runRemote("state-base");
+    restored = true;
     check(
       "final current stack remains ready",
-      stageReady(report.stages.final, currentService, currentAdapter, currentJarSha),
+      stageReady(report.stages.final, currentService, currentAdapter, currentJarSha)
+        && report.stages.final.adapterSubjectScopeRules
+          === report.stages.precheck.adapterSubjectScopeRules,
       report.stages.final,
     );
     report.recovery = runRemote("complete");
@@ -988,14 +1010,16 @@ if (printRemoteScript) {
   process.stdout.write(remoteScript);
 } else if (precheckOnly) {
   const precheck = runRemote("precheck");
-  precheck.acceptanceScopeAllowed = subjectScopeAllows(
+  precheck.acceptanceScopeCanBeExtended = subjectScopeAllows(
     precheck.adapterSubjectScopeRules,
     username,
     tenantId,
     plantId,
-    lineId,
   );
-  assert(precheck.acceptanceScopeAllowed, "BPI adapter subject scope does not allow the rehearsal line");
+  assert(
+    precheck.acceptanceScopeCanBeExtended,
+    "BPI adapter subject scope cannot be isolated to the rehearsal line",
+  );
   process.stdout.write(`${JSON.stringify(precheck, null, 2)}\n`);
 } else {
   main().catch((error) => {
