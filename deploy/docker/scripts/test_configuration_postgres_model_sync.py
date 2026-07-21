@@ -70,6 +70,26 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertIn("ALTER TABLE public.", field_support)
         self.assertIn("information_schema.columns", field_support)
         self.assertIn("Unsafe PostgreSQL property type change", field_support)
+        self.assertIn("synchronizeManagedIndex", field_support)
+        self.assertIn("managedIndexExists", field_support)
+        self.assertIn("hasEquivalentIndexForColumn", field_support)
+        self.assertIn("ALTER INDEX public.", field_support)
+        self.assertIn("DROP INDEX IF EXISTS public.", field_support)
+        self.assertIn("i.indnatts=1", field_support)
+        managed_index_method = field_support[
+            field_support.index("private static boolean managedIndexExists") : field_support.index(
+                "private static boolean hasEquivalentIndexForColumn"
+            )
+        ]
+        equivalent_index_method = field_support[
+            field_support.index("private static boolean hasEquivalentIndexForColumn") : field_support.index(
+                "private static boolean indexRelationExists"
+            )
+        ]
+        self.assertIn("not i.indisprimary and not i.indisunique", managed_index_method)
+        self.assertIn("i.indisvalid and i.indisready", managed_index_method)
+        self.assertIn("not i.indisprimary", equivalent_index_method)
+        self.assertNotIn("not i.indisunique", equivalent_index_method)
         self.assertNotIn("DROP COLUMN", field_support.upper())
         self.assertIn("PostgreSQL physical field synchronization failed", service)
 

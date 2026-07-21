@@ -319,6 +319,7 @@ function propertyPayload({
   orgColumnName = "",
   type = "TEXT",
   maxLength = "32",
+  isIndex = true,
   isNew = false,
 }) {
   return {
@@ -342,7 +343,7 @@ function propertyPayload({
     "property.stretch": "false",
     "property.isBussinessKey": "false",
     "property.isUsedMneCode": "false",
-    "property.isIndex": "true",
+    "property.isIndex": String(isIndex),
     "property.orgColumnName": orgColumnName,
     "property.isGroupObject": "false",
     "property.onlyLeaf": "false",
@@ -391,7 +392,7 @@ function columnSql() {
 
 function indexSql() {
   return [
-    "select i.relname::text, a.attname::text",
+    "select i.relname::text, a.attname::text, x.indisunique::text",
     "from pg_index x",
     "join pg_class t on t.oid=x.indrelid",
     "join pg_namespace n on n.oid=t.relnamespace",
@@ -436,7 +437,7 @@ function queryState(label, probeColumn) {
       "numericScale",
       "nullable",
     ]),
-    indexes: parseRows(runSql(indexSql()), ["indexName", "columnName"]),
+    indexes: parseRows(runSql(indexSql()), ["indexName", "columnName", "isUnique"]),
     probe: probeColumn ? parseRows(runSql(probeSql(probeColumn)), ["id", "value"]) : [],
   };
 }
@@ -482,6 +483,10 @@ function hasProbe(state) {
   return state.probe.length === 1 && state.probe[0].value === probeValue;
 }
 
+function hasIndex(state, indexName) {
+  return state.indexes.some((row) => row.indexName.toLowerCase() === indexName.toLowerCase());
+}
+
 function check(name, passed, evidence) {
   return { name, status: passed ? "PASS" : "FAIL", evidence };
 }
@@ -516,11 +521,50 @@ async function main() {
     states.afterProbeInsert = queryState("afterProbeInsert", initialColumn);
 
     const created = states.afterProbeInsert.metadata[0] || {};
-    requests.fieldRenameAndWiden = await pageFormFetch(
+    requests.fieldIndexDisable = await pageFormFetch(
       page,
       "/msService/ec/property/save",
       propertyPayload({
         version: created.version || "0",
+        columnName: initialColumn,
+        orgColumnName: initialColumn,
+        isIndex: false,
+      })
+    );
+    states.afterIndexDisable = queryState("afterIndexDisable", initialColumn);
+
+    const indexDisabled = states.afterIndexDisable.metadata[0] || {};
+    requests.fieldIndexDisableReplay = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: indexDisabled.version || "0",
+        columnName: initialColumn,
+        orgColumnName: initialColumn,
+        isIndex: false,
+      })
+    );
+    states.afterIndexDisableReplay = queryState("afterIndexDisableReplay", initialColumn);
+
+    const indexDisableReplayed = states.afterIndexDisableReplay.metadata[0] || {};
+    requests.fieldIndexEnable = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: indexDisableReplayed.version || "0",
+        columnName: initialColumn,
+        orgColumnName: initialColumn,
+        isIndex: true,
+      })
+    );
+    states.afterIndexEnable = queryState("afterIndexEnable", initialColumn);
+
+    const indexEnabled = states.afterIndexEnable.metadata[0] || {};
+    requests.fieldRenameAndWiden = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: indexEnabled.version || "0",
         columnName: renamedColumn,
         orgColumnName: initialColumn,
         maxLength: "128",
@@ -528,12 +572,47 @@ async function main() {
     );
     states.afterRename = queryState("afterRename", renamedColumn);
 
-    const renamed = states.afterRename.metadata[0] || {};
-    requests.fieldIdempotentReplay = await pageFormFetch(
+    const externalIndexName = `EXT_${tableName}_${renamedColumn}`;
+    runSql(
+      `create unique index ${sqlIdentifier(externalIndexName)} on public.${sqlIdentifier(tableName)} ` +
+        `(${sqlIdentifier(renamedColumn)});`
+    );
+    states.afterExternalIndexCreate = queryState("afterExternalIndexCreate", renamedColumn);
+
+    const renamed = states.afterExternalIndexCreate.metadata[0] || {};
+    requests.fieldIndexDisableWithExternal = await pageFormFetch(
       page,
       "/msService/ec/property/save",
       propertyPayload({
         version: renamed.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        isIndex: false,
+      })
+    );
+    states.afterExternalIndexDisable = queryState("afterExternalIndexDisable", renamedColumn);
+
+    const externalIndexDisabled = states.afterExternalIndexDisable.metadata[0] || {};
+    requests.fieldIndexEnableWithExternal = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: externalIndexDisabled.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        isIndex: true,
+      })
+    );
+    states.afterExternalIndexEnable = queryState("afterExternalIndexEnable", renamedColumn);
+
+    const externalIndexEnabled = states.afterExternalIndexEnable.metadata[0] || {};
+    requests.fieldIdempotentReplay = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: externalIndexEnabled.version || "0",
         columnName: renamedColumn,
         orgColumnName: renamedColumn,
         maxLength: "128",
@@ -580,6 +659,9 @@ async function main() {
   const createdColumn = states.afterCreate && columnByName(states.afterCreate, initialColumn);
   const renamedPhysical = states.afterRename && columnByName(states.afterRename, renamedColumn);
   const replayColumns = states.afterReplay ? states.afterReplay.columns : [];
+  const initialManagedIndex = `IDX_${tableName}_${initialColumn}`;
+  const renamedManagedIndex = `IDX_${tableName}_${renamedColumn}`;
+  const externalIndexName = `EXT_${tableName}_${renamedColumn}`;
   const afterUnsafeMetadata = states.afterUnsafeChange && states.afterUnsafeChange.metadata[0];
   const afterUnsafeColumn = states.afterUnsafeChange && columnByName(states.afterUnsafeChange, renamedColumn);
   const unexpectedNetworkErrors = browserEvidence.networkErrors.filter((item) => !item.expected);
@@ -626,7 +708,8 @@ async function main() {
       createdColumn &&
         createdColumn.dataType === "character varying" &&
         createdColumn.characterLength === "64" &&
-        states.afterCreate.indexes.length >= 1,
+        states.afterCreate.indexes.length === 1 &&
+        hasIndex(states.afterCreate, initialManagedIndex),
       `column=${JSON.stringify(createdColumn || null)}; indexes=${JSON.stringify(
         (states.afterCreate && states.afterCreate.indexes) || []
       )}`
@@ -635,6 +718,44 @@ async function main() {
       "marker-row-written",
       states.afterProbeInsert && hasProbe(states.afterProbeInsert),
       `probe=${JSON.stringify((states.afterProbeInsert && states.afterProbeInsert.probe) || [])}`
+    ),
+    check(
+      "managed-index-disabled-without-column-loss",
+      responseBusinessOk(requests.fieldIndexDisable) &&
+        states.afterIndexDisable &&
+        states.afterIndexDisable.metadata[0] &&
+        states.afterIndexDisable.metadata[0].isIndex === "false" &&
+        states.afterIndexDisable.indexes.length === 0 &&
+        hasProbe(states.afterIndexDisable),
+      `response=${requests.fieldIndexDisable && requests.fieldIndexDisable.responseStatus}; ` +
+        `metadata=${JSON.stringify(states.afterIndexDisable && states.afterIndexDisable.metadata[0])}; ` +
+        `indexes=${JSON.stringify((states.afterIndexDisable && states.afterIndexDisable.indexes) || [])}; ` +
+        `probe=${JSON.stringify((states.afterIndexDisable && states.afterIndexDisable.probe) || [])}`
+    ),
+    check(
+      "managed-index-disable-idempotent",
+      responseBusinessOk(requests.fieldIndexDisableReplay) &&
+        states.afterIndexDisableReplay &&
+        states.afterIndexDisableReplay.metadata[0] &&
+        states.afterIndexDisableReplay.metadata[0].isIndex === "false" &&
+        states.afterIndexDisableReplay.indexes.length === 0 &&
+        hasProbe(states.afterIndexDisableReplay),
+      `response=${requests.fieldIndexDisableReplay && requests.fieldIndexDisableReplay.responseStatus}; ` +
+        `indexes=${JSON.stringify((states.afterIndexDisableReplay && states.afterIndexDisableReplay.indexes) || [])}; ` +
+        `probe=${JSON.stringify((states.afterIndexDisableReplay && states.afterIndexDisableReplay.probe) || [])}`
+    ),
+    check(
+      "managed-index-reenabled",
+      responseBusinessOk(requests.fieldIndexEnable) &&
+        states.afterIndexEnable &&
+        states.afterIndexEnable.metadata[0] &&
+        states.afterIndexEnable.metadata[0].isIndex === "true" &&
+        states.afterIndexEnable.indexes.length === 1 &&
+        hasIndex(states.afterIndexEnable, initialManagedIndex) &&
+        hasProbe(states.afterIndexEnable),
+      `response=${requests.fieldIndexEnable && requests.fieldIndexEnable.responseStatus}; ` +
+        `indexes=${JSON.stringify((states.afterIndexEnable && states.afterIndexEnable.indexes) || [])}; ` +
+        `probe=${JSON.stringify((states.afterIndexEnable && states.afterIndexEnable.probe) || [])}`
     ),
     check(
       "field-renamed-widened-and-data-preserved",
@@ -650,10 +771,58 @@ async function main() {
         )}`
     ),
     check(
+      "managed-index-renamed-with-column",
+      states.afterRename &&
+        states.afterRename.indexes.length === 1 &&
+        hasIndex(states.afterRename, renamedManagedIndex) &&
+        !hasIndex(states.afterRename, initialManagedIndex),
+      `indexes=${JSON.stringify((states.afterRename && states.afterRename.indexes) || [])}; ` +
+        `old=${initialManagedIndex}; new=${renamedManagedIndex}`
+    ),
+    check(
+      "external-unique-index-fixture-created",
+      states.afterExternalIndexCreate &&
+        states.afterExternalIndexCreate.indexes.length === 2 &&
+        hasIndex(states.afterExternalIndexCreate, renamedManagedIndex) &&
+        hasIndex(states.afterExternalIndexCreate, externalIndexName) &&
+        states.afterExternalIndexCreate.indexes.some(
+          (row) => row.indexName.toLowerCase() === externalIndexName.toLowerCase() && row.isUnique === "true"
+        ),
+      `indexes=${JSON.stringify((states.afterExternalIndexCreate && states.afterExternalIndexCreate.indexes) || [])}`
+    ),
+    check(
+      "external-unique-index-protected-on-managed-disable",
+      responseBusinessOk(requests.fieldIndexDisableWithExternal) &&
+        states.afterExternalIndexDisable &&
+        states.afterExternalIndexDisable.metadata[0] &&
+        states.afterExternalIndexDisable.metadata[0].isIndex === "false" &&
+        states.afterExternalIndexDisable.indexes.length === 1 &&
+        hasIndex(states.afterExternalIndexDisable, externalIndexName) &&
+        !hasIndex(states.afterExternalIndexDisable, renamedManagedIndex) &&
+        hasProbe(states.afterExternalIndexDisable),
+      `response=${requests.fieldIndexDisableWithExternal && requests.fieldIndexDisableWithExternal.responseStatus}; ` +
+        `indexes=${JSON.stringify((states.afterExternalIndexDisable && states.afterExternalIndexDisable.indexes) || [])}`
+    ),
+    check(
+      "external-index-satisfies-reenable-without-duplicate",
+      responseBusinessOk(requests.fieldIndexEnableWithExternal) &&
+        states.afterExternalIndexEnable &&
+        states.afterExternalIndexEnable.metadata[0] &&
+        states.afterExternalIndexEnable.metadata[0].isIndex === "true" &&
+        states.afterExternalIndexEnable.indexes.length === 1 &&
+        hasIndex(states.afterExternalIndexEnable, externalIndexName) &&
+        !hasIndex(states.afterExternalIndexEnable, renamedManagedIndex) &&
+        hasProbe(states.afterExternalIndexEnable),
+      `response=${requests.fieldIndexEnableWithExternal && requests.fieldIndexEnableWithExternal.responseStatus}; ` +
+        `indexes=${JSON.stringify((states.afterExternalIndexEnable && states.afterExternalIndexEnable.indexes) || [])}`
+    ),
+    check(
       "field-idempotent-replay",
       responseBusinessOk(requests.fieldIdempotentReplay) &&
         replayColumns.length === 1 &&
-        states.afterReplay.indexes.length >= 1 &&
+        states.afterReplay.indexes.length === 1 &&
+        hasIndex(states.afterReplay, externalIndexName) &&
+        !hasIndex(states.afterReplay, renamedManagedIndex) &&
         hasProbe(states.afterReplay),
       `response=${requests.fieldIdempotentReplay && requests.fieldIdempotentReplay.responseStatus}; ` +
         `columns=${replayColumns.length}; indexes=${states.afterReplay ? states.afterReplay.indexes.length : 0}; ` +
@@ -706,6 +875,9 @@ async function main() {
       tableName,
       initialColumn,
       renamedColumn,
+      initialManagedIndex,
+      renamedManagedIndex,
+      externalIndexName,
       probeId,
       probeValue,
     },
@@ -725,16 +897,19 @@ async function main() {
       endpoint: "PropertyController.save -> DtoUtils.getPropertyVO -> ModelServiceImpl.saveProperty",
       metadataPersistence: "propertyDao.merge -> public.ec_property",
       physicalPersistence:
-        "FieldSyncDBUtils.fieldSyncToDb -> PostgresFieldSyncSupport.sync -> ALTER TABLE/COMMENT/CREATE INDEX",
+        "FieldSyncDBUtils.fieldSyncToDb -> PostgresFieldSyncSupport.sync -> ALTER TABLE/COMMENT/CREATE INDEX/ALTER INDEX/DROP INDEX",
       transactionBoundary:
         "ModelServiceImpl.saveProperty propagates PostgreSQL DDL failures so ec_property and physical DDL roll back together",
       destructivePolicy:
-        "No automatic DROP COLUMN. Incompatible type conversion is rejected and rolled back; this acceptance proves TEXT add, rename, widening and idempotent replay.",
+        "No automatic DROP COLUMN. Only deterministic single-column non-unique managed indexes may be renamed or dropped; incompatible type conversion is rejected and rolled back.",
     },
     verificationSql: {
       metadata: metadataSql(),
       columns: columnSql(),
       indexes: indexSql(),
+      externalIndexFixture:
+        `create unique index ${sqlIdentifier(externalIndexName)} on public.${sqlIdentifier(tableName)} ` +
+        `(${sqlIdentifier(renamedColumn)});`,
       markerRow: probeSql(renamedColumn),
       cleanup: cleanupSql(),
     },

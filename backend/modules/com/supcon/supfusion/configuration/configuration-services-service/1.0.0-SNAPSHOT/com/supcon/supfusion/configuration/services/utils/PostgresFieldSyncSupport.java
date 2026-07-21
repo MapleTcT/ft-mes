@@ -54,7 +54,7 @@ public final class PostgresFieldSyncSupport {
         }
 
         updateColumnComment(template, tableName, columnName, property);
-        ensureIndex(template, tableName, columnName, property);
+        synchronizeManagedIndex(template, tableName, columnName, oldColumnName, property);
     }
 
     public static synchronized void syncCustom(List<Property> properties, JdbcTemplate template) {
@@ -215,30 +215,105 @@ public final class PostgresFieldSyncSupport {
         }
     }
 
-    private static void ensureIndex(
+    private static void synchronizeManagedIndex(
             JdbcTemplate template,
             String tableName,
             String columnName,
+            String oldColumnName,
             Property property) {
-        if (!Boolean.TRUE.equals(property.getIsIndex()) || hasIndexForColumn(template, tableName, columnName)) {
+        boolean indexRequested = Boolean.TRUE.equals(property.getIsIndex());
+        String targetIndexName = indexName(tableName, columnName);
+        String oldIndexName = oldColumnName == null ? null : indexName(tableName, oldColumnName);
+
+        if (oldIndexName != null
+                && !oldIndexName.equals(targetIndexName)
+                && managedIndexExists(template, tableName, columnName, oldIndexName)) {
+            if (!indexRequested || managedIndexExists(template, tableName, columnName, targetIndexName)) {
+                dropManagedIndex(template, oldIndexName);
+            } else if (indexRelationExists(template, targetIndexName)) {
+                throw new IllegalStateException(
+                        "PostgreSQL managed property index name is already in use: " + targetIndexName);
+            } else {
+                renameManagedIndex(template, oldIndexName, targetIndexName);
+            }
+        }
+
+        if (!indexRequested) {
+            if (managedIndexExists(template, tableName, columnName, targetIndexName)) {
+                dropManagedIndex(template, targetIndexName);
+            }
             return;
         }
-        String indexName = indexName(tableName, columnName);
+
+        if (managedIndexExists(template, tableName, columnName, targetIndexName)
+                || hasEquivalentIndexForColumn(template, tableName, columnName)) {
+            return;
+        }
+        if (indexRelationExists(template, targetIndexName)) {
+            throw new IllegalStateException(
+                    "PostgreSQL managed property index name is already in use: " + targetIndexName);
+        }
         execute(
                 template,
-                "CREATE INDEX IF NOT EXISTS " + indexName + " ON public." + tableName + " (" + columnName + ")");
+                "CREATE INDEX IF NOT EXISTS " + targetIndexName + " ON public." + tableName + " (" + columnName + ")");
     }
 
-    private static boolean hasIndexForColumn(JdbcTemplate template, String tableName, String columnName) {
+    private static boolean managedIndexExists(
+            JdbcTemplate template,
+            String tableName,
+            String columnName,
+            String indexName) {
+        Integer count = template.queryForObject(
+                "select count(1) from pg_index i "
+                        + "join pg_class t on t.oid=i.indrelid "
+                        + "join pg_namespace n on n.oid=t.relnamespace "
+                        + "join pg_class x on x.oid=i.indexrelid "
+                        + "join pg_attribute a on a.attrelid=t.oid and a.attnum=any(i.indkey) "
+                        + "where n.nspname='public' and lower(t.relname)=? and lower(a.attname)=? "
+                        + "and lower(x.relname)=? and i.indnatts=1 and not i.indisprimary and not i.indisunique "
+                        + "and i.indisvalid and i.indisready",
+                new Object[]{
+                        tableName.toLowerCase(Locale.ROOT),
+                        columnName.toLowerCase(Locale.ROOT),
+                        indexName.toLowerCase(Locale.ROOT)},
+                Integer.class);
+        return count != null && count.intValue() > 0;
+    }
+
+    private static boolean hasEquivalentIndexForColumn(
+            JdbcTemplate template,
+            String tableName,
+            String columnName) {
         Integer count = template.queryForObject(
                 "select count(1) from pg_index i "
                         + "join pg_class t on t.oid=i.indrelid "
                         + "join pg_namespace n on n.oid=t.relnamespace "
                         + "join pg_attribute a on a.attrelid=t.oid and a.attnum=any(i.indkey) "
-                        + "where n.nspname='public' and lower(t.relname)=? and lower(a.attname)=? and not i.indisprimary",
+                        + "where n.nspname='public' and lower(t.relname)=? and lower(a.attname)=? "
+                        + "and i.indnatts=1 and not i.indisprimary and i.indisvalid and i.indisready",
                 new Object[]{tableName.toLowerCase(Locale.ROOT), columnName.toLowerCase(Locale.ROOT)},
                 Integer.class);
         return count != null && count.intValue() > 0;
+    }
+
+    private static boolean indexRelationExists(JdbcTemplate template, String indexName) {
+        Integer count = template.queryForObject(
+                "select count(1) from pg_class x join pg_namespace n on n.oid=x.relnamespace "
+                        + "where n.nspname='public' and x.relkind in ('i','I') and lower(x.relname)=?",
+                new Object[]{indexName.toLowerCase(Locale.ROOT)},
+                Integer.class);
+        return count != null && count.intValue() > 0;
+    }
+
+    private static void renameManagedIndex(
+            JdbcTemplate template,
+            String oldIndexName,
+            String newIndexName) {
+        execute(template, "ALTER INDEX public." + oldIndexName + " RENAME TO " + newIndexName);
+    }
+
+    private static void dropManagedIndex(JdbcTemplate template, String indexName) {
+        execute(template, "DROP INDEX IF EXISTS public." + indexName);
     }
 
     private static String indexName(String tableName, String columnName) {
