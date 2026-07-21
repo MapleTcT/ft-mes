@@ -82,6 +82,61 @@ class WmsCommandProcessorTest {
     }
 
     @Test
+    void createResponseLossIsRecoveredByImmediateExactLookup() {
+        WmsCompletionInboundCommandV1 command = command("kg");
+        MaterialWmsDocument document = document(command, "10");
+        when(materialWms.findByIdempotency(command.getTenantId(), command.getIdempotencyKey()))
+                .thenReturn(Optional.empty(), Optional.of(document));
+        org.mockito.Mockito.doThrow(new MaterialWmsTransientException("response lost after commit"))
+                .when(materialWms).createCompletionInbound(any());
+
+        WmsCommandProcessor.WmsProcessingResult result = processor.process(record(command));
+
+        assertThat(result.status()).isEqualTo("ACCEPTED");
+        assertThat(result.created()).isTrue();
+        verify(materialWms, times(2)).findByIdempotency(
+                command.getTenantId(), command.getIdempotencyKey());
+        verify(receipts).accepted(any(), any(), any());
+        verify(receipts, never()).rejected(any(), any(), any());
+    }
+
+    @Test
+    void ambiguousCreateWithoutDurableDocumentRemainsRetryable() {
+        WmsCompletionInboundCommandV1 command = command("kg");
+        when(materialWms.findByIdempotency(command.getTenantId(), command.getIdempotencyKey()))
+                .thenReturn(Optional.empty(), Optional.empty());
+        org.mockito.Mockito.doThrow(new MaterialWmsTransientException("response lost"))
+                .when(materialWms).createCompletionInbound(any());
+
+        assertThatThrownBy(() -> processor.process(record(command)))
+                .isInstanceOf(MaterialWmsTransientException.class)
+                .hasMessage("response lost");
+        verify(materialWms, times(2)).findByIdempotency(
+                command.getTenantId(), command.getIdempotencyKey());
+        verify(receipts, never()).accepted(any(), any(), any());
+        verify(receipts, never()).rejected(any(), any(), any());
+    }
+
+    @Test
+    void failedRecoveryLookupPreservesAmbiguousCreateForKafkaRetry() {
+        WmsCompletionInboundCommandV1 command = command("kg");
+        MaterialWmsTransientException createError =
+                new MaterialWmsTransientException("response lost");
+        MaterialWmsTransientException lookupError =
+                new MaterialWmsTransientException("lookup unavailable");
+        when(materialWms.findByIdempotency(command.getTenantId(), command.getIdempotencyKey()))
+                .thenReturn(Optional.empty())
+                .thenThrow(lookupError);
+        org.mockito.Mockito.doThrow(createError).when(materialWms).createCompletionInbound(any());
+
+        assertThatThrownBy(() -> processor.process(record(command)))
+                .isSameAs(createError)
+                .satisfies(error -> assertThat(error.getSuppressed()).containsExactly(lookupError));
+        verify(receipts, never()).accepted(any(), any(), any());
+        verify(receipts, never()).rejected(any(), any(), any());
+    }
+
+    @Test
     void businessCreateFailureIsRequeriedBeforeRejectedReceipt() {
         WmsCompletionInboundCommandV1 command = command("kg");
         when(materialWms.findByIdempotency(command.getTenantId(), command.getIdempotencyKey()))
@@ -95,6 +150,25 @@ class WmsCommandProcessorTest {
         verify(materialWms, times(2)).findByIdempotency(
                 command.getTenantId(), command.getIdempotencyKey());
         verify(receipts).rejected(command, "MATERIAL_WMS_409", "conflict");
+    }
+
+    @Test
+    void idempotencyLookupWithDifferentBusinessFactsFailsClosed() {
+        WmsCompletionInboundCommandV1 command = command("kg");
+        MaterialWmsDocument conflicting = document(command, "9.999999");
+        when(materialWms.findByIdempotency(command.getTenantId(), command.getIdempotencyKey()))
+                .thenReturn(Optional.of(conflicting));
+
+        WmsCommandProcessor.WmsProcessingResult result = processor.process(record(command));
+
+        assertThat(result.status()).isEqualTo("REJECTED");
+        assertThat(result.documentId()).isEqualTo(conflicting.documentNo());
+        verify(materialWms, never()).createCompletionInbound(any());
+        verify(receipts).rejected(
+                command,
+                "WMS_IDEMPOTENCY_CONFLICT",
+                "The idempotency key resolves to a WMS line with different material, batch, quantity, unit or location.");
+        verify(receipts, never()).accepted(any(), any(), any());
     }
 
     @Test

@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-21T22:27:49+08:00",
+  "repoBaseCommit": "7907ad3fc7e4bac609128759c621cb95a6ab9e50",
+  "database": "NOT_APPLICABLE",
+  "environment": "local-controlled-java17-maven3.9.3",
+  "status": "PASS_SOFTWARE_PROTOCOL_ONLY",
+  "externalSystemParticipated": false,
+  "productionActivationAllowed": false,
+  "summary": {
+    "adapterTests": 16,
+    "pass": 16,
+    "fail": 0,
+    "blockedExternalScenarios": 2
+  },
+  "items": [
+    {
+      "scenario": "query-first-existing-document",
+      "status": "PASS",
+      "evidence": "findsExistingDocumentBeforeAnyCreateAttempt"
+    },
+    {
+      "scenario": "create-then-durable-query",
+      "status": "PASS",
+      "evidence": "createsThenRequiresExactDurableLookupBeforeReceipt"
+    },
+    {
+      "scenario": "response-lost-after-commit",
+      "status": "PASS",
+      "evidence": "createResponseLossIsRecoveredByImmediateExactLookup"
+    },
+    {
+      "scenario": "ambiguous-create-without-document",
+      "status": "PASS",
+      "evidence": "ambiguousCreateWithoutDurableDocumentRemainsRetryable"
+    },
+    {
+      "scenario": "ambiguous-create-and-query-unavailable",
+      "status": "PASS",
+      "evidence": "failedRecoveryLookupPreservesAmbiguousCreateForKafkaRetry"
+    },
+    {
+      "scenario": "external-business-rejection",
+      "status": "PASS",
+      "evidence": "businessCreateFailureIsRequeriedBeforeRejectedReceipt and createClassifiesExternalBusinessRejectionAsTerminal"
+    },
+    {
+      "scenario": "external-server-failure",
+      "status": "PASS",
+      "evidence": "createClassifiesExternalServerFailureAsRetryable"
+    },
+    {
+      "scenario": "idempotency-business-fact-conflict",
+      "status": "PASS",
+      "evidence": "idempotencyLookupWithDifferentBusinessFactsFailsClosed"
+    },
+    {
+      "scenario": "real-external-wms-joint-test",
+      "status": "BLOCKED",
+      "evidence": "No external ERP/WMS endpoint or maintenance window participated"
+    },
+    {
+      "scenario": "completion-inbound-reversal-compensation",
+      "status": "BLOCKED",
+      "evidence": "Append-only reversal contract and durable external reversal document are not implemented yet"
+    }
+  ],
+  "verification": {
+    "command": "JAVA_HOME=<jdk17> MVN=<maven3.9.3> make bpi-wms-adapter-test",
+    "processorTests": "10/10 PASS",
+    "httpClientTests": "5/5 PASS",
+    "contextTests": "1/1 PASS"
+  },
+  "artifacts": [
+    "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandProcessor.java",
+    "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandProcessorTest.java",
+    "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsHttpClientTest.java",
+    "docs/testing/bpi-external-wms-protocol-contract-acceptance.md"
+  ]
+}

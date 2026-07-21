@@ -189,6 +189,12 @@ resolver 同时返回当前质量门的外部 ID、revision 和 source event ID�
 外部 QCS 主动事件已投产。当前目标验收使用影子批次，按设计没有生成 WMS command；外部 ERP/WMS 冲销与
 真实宕机补偿验收也仍未激活。完整证据见 `docs/testing/qcs-bpi-quality-gate-target-acceptance.md`。
 
+WMS adapter 的 query-first 合同还要求“创建响应不确定”后立即以原幂等键再查一次：查到且单据头、
+明细、物料、批次、仓库、库位、数量、单位和质量状态全部一致才发送 accepted receipt；查无或查单失败
+继续抛 transient 交给 Kafka 重试，不能转换成业务拒绝。4xx 业务错误也必须先查单，排除外部已提交但
+返回冲突后才能发送 rejected receipt。该软件协议矩阵已通过 `16/16` adapter 测试，证据见
+`docs/testing/bpi-external-wms-protocol-contract-acceptance.md`；真实外部实例和冲销/补偿仍未验收。
+
 ## 3. 内部受信接入 API
 
 | Method | Path | 调用方 | 权限 | 成功/隔离结果 | 持久化 |

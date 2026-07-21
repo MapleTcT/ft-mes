@@ -63,6 +63,8 @@ public class WmsCommandProcessor {
         MaterialWmsCreateRequest createRequest = createRequest(command, route, quantity);
         try {
             materialWms.createCompletionInbound(createRequest);
+        } catch (MaterialWmsTransientException error) {
+            return recoverAmbiguousCreate(command, route, quantity, error);
         } catch (MaterialWmsBusinessException error) {
             Optional<MaterialWmsDocument> raced = materialWms.findByIdempotency(
                     command.getTenantId(), command.getIdempotencyKey());
@@ -78,6 +80,23 @@ public class WmsCommandProcessor {
                 .orElseThrow(() -> new MaterialWmsTransientException(
                         "material-wms acknowledged creation but exact lookup did not find the document."));
         return acceptExisting(command, route, quantity, created, true);
+    }
+
+    private WmsProcessingResult recoverAmbiguousCreate(
+            WmsCompletionInboundCommandV1 command,
+            WmsRoute route,
+            BigDecimal quantity,
+            MaterialWmsTransientException createError) {
+        try {
+            Optional<MaterialWmsDocument> committed = materialWms.findByIdempotency(
+                    command.getTenantId(), command.getIdempotencyKey());
+            if (committed.isPresent()) {
+                return acceptExisting(command, route, quantity, committed.get(), true);
+            }
+        } catch (MaterialWmsTransientException lookupError) {
+            createError.addSuppressed(lookupError);
+        }
+        throw createError;
     }
 
     private WmsProcessingResult acceptExisting(

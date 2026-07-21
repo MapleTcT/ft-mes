@@ -5445,6 +5445,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-external-wms-protocol-contract-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-feature-flag-governance-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5836,6 +5842,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-data-quality-workbench-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-external-wms-protocol-contract-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -9665,13 +9677,13 @@
       "tracked": 614
     },
     "docs": {
-      "tracked": 115
+      "tracked": 116
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 197
+      "tracked": 198
     },
     "package.json": {
       "tracked": 1
@@ -9695,8 +9707,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1606,
-    "tracked": 1606,
+    "totalFiles": 1608,
+    "tracked": 1608,
     "untracked": 0
   },
   "untrackedByDirectory": []
