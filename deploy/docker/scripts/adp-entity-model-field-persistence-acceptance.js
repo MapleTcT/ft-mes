@@ -36,6 +36,8 @@ const tableName = process.env.ADP_ENTITY_MODEL_TABLE_NAME || `DS_E2EF_${suffix}`
 const initialColumn = process.env.ADP_ENTITY_MODEL_FIELD_COLUMN || `E2E_TXT_${suffix}`;
 const renamedColumn = process.env.ADP_ENTITY_MODEL_RENAMED_FIELD_COLUMN || `E2E_TEXT_${suffix}`;
 const probeId = Number(`${Date.now()}`.slice(-14));
+const duplicateProbeId = probeId + 1;
+const nullProbeId = probeId + 2;
 const probeValue = `${marker}_ROW`;
 const pagePath = "/msService/ec/engine/msManage";
 const visibleErrorPattern =
@@ -90,6 +92,20 @@ function runSql(sql) {
     ["-o", "BatchMode=yes", "-o", `ConnectTimeout=${sshConnectTimeout}`, dbSshTarget, remoteCommand],
     { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], timeout: dbQueryTimeoutMs }
   ).trim();
+}
+
+function runSqlExpectFailure(sql) {
+  try {
+    const output = runSql(sql);
+    return { rejected: false, output, error: "" };
+  } catch (error) {
+    const stderr = error && error.stderr ? String(error.stderr) : "";
+    return {
+      rejected: true,
+      output: error && error.stdout ? String(error.stdout).trim() : "",
+      error: (stderr || (error && error.message) || String(error)).trim().slice(0, 2000),
+    };
+  }
 }
 
 function parseRows(output, columns) {
@@ -320,6 +336,8 @@ function propertyPayload({
   type = "TEXT",
   maxLength = "32",
   isIndex = true,
+  isUnique = false,
+  nullable = true,
   isNew = false,
 }) {
   return {
@@ -334,9 +352,9 @@ function propertyPayload({
     "property.fillcontent": "",
     "property.attributes": "",
     "property.isControl": "false",
-    "property.isUnique": "false",
+    "property.isUnique": String(isUnique),
     "property.isHidden": "false",
-    "property.nullable": "true",
+    "property.nullable": String(nullable),
     "property.multable": "false",
     "property.seniorSystemCode": "false",
     "property.sensitive": "false",
@@ -371,6 +389,7 @@ function metadataSql() {
     "select code::text, coalesce(version::text,'0'), coalesce(valid::text,''),",
     "coalesce(name::text,''), coalesce(display_name::text,''), coalesce(type::text,''),",
     "coalesce(column_name::text,''), coalesce(max_length::text,''), coalesce(is_index::text,''),",
+    "coalesce(is_unique::text,''), coalesce(nullable::text,''),",
     "coalesce(model_code::text,''), coalesce(description::text,'')",
     "from public.ec_property",
     `where code=${sqlLiteral(propertyCode)}`,
@@ -405,11 +424,43 @@ function indexSql() {
   ].join(" ");
 }
 
+function constraintSql() {
+  return [
+    "select c.conname::text, i.relname::text, a.attname::text,",
+    "c.convalidated::text, c.condeferrable::text",
+    "from pg_constraint c",
+    "join pg_class t on t.oid=c.conrelid",
+    "join pg_namespace n on n.oid=t.relnamespace",
+    "join pg_class i on i.oid=c.conindid",
+    "join pg_attribute a on a.attrelid=t.oid and a.attnum=any(c.conkey)",
+    "where n.nspname='public' and c.contype='u' and cardinality(c.conkey)=1",
+    `and lower(t.relname)=lower(${sqlLiteral(tableName)})`,
+    `and lower(a.attname) in (lower(${sqlLiteral(initialColumn)}), lower(${sqlLiteral(renamedColumn)}))`,
+    "order by c.conname;",
+  ].join(" ");
+}
+
 function probeSql(columnName) {
   return [
     `select id::text, coalesce(${sqlIdentifier(columnName)}::text,'')`,
     `from public.${sqlIdentifier(tableName)}`,
     `where id=${probeId};`,
+  ].join(" ");
+}
+
+function nullProbeSql(columnName) {
+  return [
+    "select id::text",
+    `from public.${sqlIdentifier(tableName)}`,
+    `where id=${nullProbeId} and ${sqlIdentifier(columnName)} is null;`,
+  ].join(" ");
+}
+
+function duplicateProbeSql(columnName) {
+  return [
+    `select id::text, coalesce(${sqlIdentifier(columnName)}::text,'')`,
+    `from public.${sqlIdentifier(tableName)}`,
+    `where id=${duplicateProbeId};`,
   ].join(" ");
 }
 
@@ -426,6 +477,8 @@ function queryState(label, probeColumn) {
       "columnName",
       "maxLength",
       "isIndex",
+      "isUnique",
+      "nullable",
       "modelCode",
       "description",
     ]),
@@ -438,7 +491,18 @@ function queryState(label, probeColumn) {
       "nullable",
     ]),
     indexes: parseRows(runSql(indexSql()), ["indexName", "columnName", "isUnique"]),
+    constraints: parseRows(runSql(constraintSql()), [
+      "constraintName",
+      "indexName",
+      "columnName",
+      "validated",
+      "deferrable",
+    ]),
     probe: probeColumn ? parseRows(runSql(probeSql(probeColumn)), ["id", "value"]) : [],
+    duplicateProbe: probeColumn
+      ? parseRows(runSql(duplicateProbeSql(probeColumn)), ["id", "value"])
+      : [],
+    nullProbe: probeColumn ? parseRows(runSql(nullProbeSql(probeColumn)), ["id"]) : [],
   };
 }
 
@@ -487,6 +551,21 @@ function hasIndex(state, indexName) {
   return state.indexes.some((row) => row.indexName.toLowerCase() === indexName.toLowerCase());
 }
 
+function hasConstraint(state, constraintName) {
+  return state.constraints.some(
+    (row) => row.constraintName.toLowerCase() === constraintName.toLowerCase()
+  );
+}
+
+function metadataValue(state, key) {
+  return state && state.metadata && state.metadata[0] ? state.metadata[0][key] : "";
+}
+
+function columnNullable(state, columnName) {
+  const column = state && state.columns ? columnByName(state, columnName) : null;
+  return column ? column.nullable : "";
+}
+
 function storedBooleanEquals(value, expected) {
   const normalized = String(value).trim().toLowerCase();
   const trueValues = new Set(["1", "true", "t", "yes", "y"]);
@@ -508,6 +587,7 @@ async function main() {
   const before = stateCounts();
   const { browser, context, page, evidence: browserEvidence } = await openPage(ticket);
   const requests = {};
+  const dbActions = {};
   const states = { before };
   let cleanup = null;
   let fatalError = null;
@@ -567,17 +647,82 @@ async function main() {
     states.afterIndexEnable = queryState("afterIndexEnable", initialColumn);
 
     const indexEnabled = states.afterIndexEnable.metadata[0] || {};
-    requests.fieldRenameAndWiden = await pageFormFetch(
+    requests.fieldUniqueEnable = await pageFormFetch(
       page,
       "/msService/ec/property/save",
       propertyPayload({
         version: indexEnabled.version || "0",
+        columnName: initialColumn,
+        orgColumnName: initialColumn,
+        isIndex: true,
+        isUnique: true,
+      })
+    );
+    states.afterUniqueEnable = queryState("afterUniqueEnable", initialColumn);
+
+    const uniqueEnabled = states.afterUniqueEnable.metadata[0] || {};
+    requests.fieldUniqueEnableReplay = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: uniqueEnabled.version || "0",
+        columnName: initialColumn,
+        orgColumnName: initialColumn,
+        isIndex: true,
+        isUnique: true,
+      })
+    );
+    states.afterUniqueEnableReplay = queryState("afterUniqueEnableReplay", initialColumn);
+
+    dbActions.duplicateInsert = runSqlExpectFailure(
+      `insert into public.${sqlIdentifier(tableName)} (id, ${sqlIdentifier(initialColumn)}, valid) values (` +
+        `${duplicateProbeId}, ${sqlLiteral(probeValue)}, 1);`
+    );
+    states.afterDuplicateReject = queryState("afterDuplicateReject", initialColumn);
+
+    const uniqueReplayed = states.afterDuplicateReject.metadata[0] || {};
+    requests.fieldRenameAndWiden = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: uniqueReplayed.version || "0",
         columnName: renamedColumn,
         orgColumnName: initialColumn,
         maxLength: "128",
+        isUnique: true,
       })
     );
     states.afterRename = queryState("afterRename", renamedColumn);
+
+    const renamedUnique = states.afterRename.metadata[0] || {};
+    requests.fieldUniqueDisable = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: renamedUnique.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        isIndex: true,
+        isUnique: false,
+      })
+    );
+    states.afterUniqueDisable = queryState("afterUniqueDisable", renamedColumn);
+
+    const uniqueDisabled = states.afterUniqueDisable.metadata[0] || {};
+    requests.fieldUniqueDisableReplay = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: uniqueDisabled.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        isIndex: true,
+        isUnique: false,
+      })
+    );
+    states.afterUniqueDisableReplay = queryState("afterUniqueDisableReplay", renamedColumn);
 
     const externalIndexName = `EXT_${tableName}_${renamedColumn}`;
     runSql(
@@ -615,11 +760,139 @@ async function main() {
     states.afterExternalIndexEnable = queryState("afterExternalIndexEnable", renamedColumn);
 
     const externalIndexEnabled = states.afterExternalIndexEnable.metadata[0] || {};
-    requests.fieldIdempotentReplay = await pageFormFetch(
+    requests.fieldUniqueEnableWithExternal = await pageFormFetch(
       page,
       "/msService/ec/property/save",
       propertyPayload({
         version: externalIndexEnabled.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        isIndex: true,
+        isUnique: true,
+      })
+    );
+    states.afterExternalUniqueEnable = queryState("afterExternalUniqueEnable", renamedColumn);
+
+    const externalUniqueEnabled = states.afterExternalUniqueEnable.metadata[0] || {};
+    requests.fieldUniqueEnableWithExternalReplay = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: externalUniqueEnabled.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        isIndex: true,
+        isUnique: true,
+      })
+    );
+    states.afterExternalUniqueEnableReplay = queryState("afterExternalUniqueEnableReplay", renamedColumn);
+
+    const externalUniqueReplayed = states.afterExternalUniqueEnableReplay.metadata[0] || {};
+    requests.fieldUniqueDisableWithExternal = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: externalUniqueReplayed.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        isIndex: true,
+        isUnique: false,
+      })
+    );
+    states.afterExternalUniqueDisable = queryState("afterExternalUniqueDisable", renamedColumn);
+
+    const externalUniqueDisabled = states.afterExternalUniqueDisable.metadata[0] || {};
+    requests.fieldNotNullEnable = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: externalUniqueDisabled.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        nullable: false,
+      })
+    );
+    states.afterNotNullEnable = queryState("afterNotNullEnable", renamedColumn);
+
+    const notNullEnabled = states.afterNotNullEnable.metadata[0] || {};
+    requests.fieldNotNullEnableReplay = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: notNullEnabled.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        nullable: false,
+      })
+    );
+    states.afterNotNullEnableReplay = queryState("afterNotNullEnableReplay", renamedColumn);
+
+    dbActions.nullInsertWhileNotNull = runSqlExpectFailure(
+      `insert into public.${sqlIdentifier(tableName)} (id, valid) values (${nullProbeId}, 1);`
+    );
+    states.afterNullReject = queryState("afterNullReject", renamedColumn);
+
+    const notNullReplayed = states.afterNullReject.metadata[0] || {};
+    requests.fieldNullableEnable = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: notNullReplayed.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        nullable: true,
+      })
+    );
+    states.afterNullableEnable = queryState("afterNullableEnable", renamedColumn);
+
+    const nullableEnabled = states.afterNullableEnable.metadata[0] || {};
+    requests.fieldNullableEnableReplay = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: nullableEnabled.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        nullable: true,
+      })
+    );
+    states.afterNullableEnableReplay = queryState("afterNullableEnableReplay", renamedColumn);
+
+    runSql(
+      `insert into public.${sqlIdentifier(tableName)} (id, valid) values (${nullProbeId}, 1);`
+    );
+    states.afterNullFixtureInsert = queryState("afterNullFixtureInsert", renamedColumn);
+
+    const nullableReplayed = states.afterNullFixtureInsert.metadata[0] || {};
+    requests.unsafeNotNull = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: nullableReplayed.version || "0",
+        columnName: renamedColumn,
+        orgColumnName: renamedColumn,
+        maxLength: "128",
+        nullable: false,
+      })
+    );
+    states.afterUnsafeNotNull = queryState("afterUnsafeNotNull", renamedColumn);
+
+    runSql(`delete from public.${sqlIdentifier(tableName)} where id=${nullProbeId};`);
+    states.afterNullFixtureDelete = queryState("afterNullFixtureDelete", renamedColumn);
+
+    const afterNullCleanup = states.afterNullFixtureDelete.metadata[0] || {};
+    requests.fieldIdempotentReplay = await pageFormFetch(
+      page,
+      "/msService/ec/property/save",
+      propertyPayload({
+        version: afterNullCleanup.version || "0",
         columnName: renamedColumn,
         orgColumnName: renamedColumn,
         maxLength: "128",
@@ -639,12 +912,15 @@ async function main() {
         maxLength: "",
       })
     );
-    browserEvidence.networkErrors.forEach((item) => {
-      if (item.url.includes("/msService/ec/property/save") && item.status >= 400) {
-        item.expected = true;
-      }
-    });
-    if (requests.unsafeTypeChange && requests.unsafeTypeChange.responseStatus >= 400) {
+    const expectedFailureRequests = [requests.unsafeNotNull, requests.unsafeTypeChange].filter(
+      (item) => item && item.responseStatus >= 400
+    );
+    if (expectedFailureRequests.length > 0) {
+      browserEvidence.networkErrors.forEach((item) => {
+        if (item.url.includes("/msService/ec/property/save") && item.status >= 400) {
+          item.expected = true;
+        }
+      });
       browserEvidence.expectedConsoleErrors = browserEvidence.consoleErrors.filter((message) =>
         /Failed to load resource: the server responded with a status of [45]\d\d/i.test(message)
       );
@@ -668,7 +944,14 @@ async function main() {
   const replayColumns = states.afterReplay ? states.afterReplay.columns : [];
   const initialManagedIndex = `IDX_${tableName}_${initialColumn}`;
   const renamedManagedIndex = `IDX_${tableName}_${renamedColumn}`;
+  const initialManagedUnique = `UQ_${tableName}_${initialColumn}`;
+  const renamedManagedUnique = `UQ_${tableName}_${renamedColumn}`;
   const externalIndexName = `EXT_${tableName}_${renamedColumn}`;
+  const beforeUnsafeNotNullMetadata =
+    states.afterNullFixtureInsert && states.afterNullFixtureInsert.metadata[0];
+  const afterUnsafeNotNullMetadata = states.afterUnsafeNotNull && states.afterUnsafeNotNull.metadata[0];
+  const afterUnsafeNotNullColumn =
+    states.afterUnsafeNotNull && columnByName(states.afterUnsafeNotNull, renamedColumn);
   const afterUnsafeMetadata = states.afterUnsafeChange && states.afterUnsafeChange.metadata[0];
   const afterUnsafeColumn = states.afterUnsafeChange && columnByName(states.afterUnsafeChange, renamedColumn);
   const unexpectedNetworkErrors = browserEvidence.networkErrors.filter((item) => !item.expected);
@@ -679,22 +962,17 @@ async function main() {
   const checks = [
     check(
       "browser-page-context",
-      browserEvidence.navigationStatus &&
-        browserEvidence.navigationStatus < 400 &&
-        !browserEvidence.visibleError &&
-        unexpectedConsoleErrors.length === 0 &&
-        browserEvidence.pageErrors.length === 0 &&
-        browserEvidence.requestFailures.length === 0 &&
-        unexpectedNetworkErrors.length === 0,
+      browserEvidence.navigationStatus && browserEvidence.navigationStatus < 400 && !browserEvidence.visibleError &&
+        unexpectedConsoleErrors.length === 0 && browserEvidence.pageErrors.length === 0 &&
+        browserEvidence.requestFailures.length === 0 && unexpectedNetworkErrors.length === 0,
       `status=${browserEvidence.navigationStatus}; visibleError=${browserEvidence.visibleError || "none"}; ` +
         `unexpectedConsole=${unexpectedConsoleErrors.length}; expectedConsole=${expectedConsoleErrors.length}; ` +
-        `page=${browserEvidence.pageErrors.length}; ` +
-        `request=${browserEvidence.requestFailures.length}; unexpectedNetwork=${unexpectedNetworkErrors.length}`
+        `page=${browserEvidence.pageErrors.length}; request=${browserEvidence.requestFailures.length}; ` +
+        `unexpectedNetwork=${unexpectedNetworkErrors.length}`
     ),
     check(
       "create-requests",
-      responseBusinessOk(requests.entityCreate) &&
-        responseBusinessOk(requests.modelCreate) &&
+      responseBusinessOk(requests.entityCreate) && responseBusinessOk(requests.modelCreate) &&
         responseBusinessOk(requests.fieldCreate),
       `entity=${requests.entityCreate && requests.entityCreate.responseStatus}; ` +
         `model=${requests.modelCreate && requests.modelCreate.responseStatus}; ` +
@@ -702,21 +980,19 @@ async function main() {
     ),
     check(
       "field-metadata-created",
-      states.afterCreate &&
-        states.afterCreate.metadata.length === 1 &&
+      states.afterCreate && states.afterCreate.metadata.length === 1 &&
         states.afterCreate.metadata[0].type === "TEXT" &&
-        states.afterCreate.metadata[0].columnName.toLowerCase() === initialColumn.toLowerCase(),
-      `rows=${states.afterCreate ? states.afterCreate.metadata.length : 0}; ` +
-        `type=${states.afterCreate && states.afterCreate.metadata[0] && states.afterCreate.metadata[0].type}; ` +
-        `column=${states.afterCreate && states.afterCreate.metadata[0] && states.afterCreate.metadata[0].columnName}`
+        states.afterCreate.metadata[0].columnName.toLowerCase() === initialColumn.toLowerCase() &&
+        storedBooleanEquals(metadataValue(states.afterCreate, "isIndex"), true) &&
+        storedBooleanEquals(metadataValue(states.afterCreate, "isUnique"), false) &&
+        storedBooleanEquals(metadataValue(states.afterCreate, "nullable"), true),
+      `metadata=${JSON.stringify(states.afterCreate && states.afterCreate.metadata[0])}`
     ),
     check(
       "postgres-column-created-and-indexed",
-      createdColumn &&
-        createdColumn.dataType === "character varying" &&
-        createdColumn.characterLength === "64" &&
-        states.afterCreate.indexes.length === 1 &&
-        hasIndex(states.afterCreate, initialManagedIndex),
+      createdColumn && createdColumn.dataType === "character varying" && createdColumn.characterLength === "64" &&
+        createdColumn.nullable === "YES" && states.afterCreate.indexes.length === 1 &&
+        hasIndex(states.afterCreate, initialManagedIndex) && states.afterCreate.constraints.length === 0,
       `column=${JSON.stringify(createdColumn || null)}; indexes=${JSON.stringify(
         (states.afterCreate && states.afterCreate.indexes) || []
       )}`
@@ -728,49 +1004,64 @@ async function main() {
     ),
     check(
       "managed-index-disabled-without-column-loss",
-      responseBusinessOk(requests.fieldIndexDisable) &&
-        states.afterIndexDisable &&
-        states.afterIndexDisable.metadata[0] &&
-        storedBooleanEquals(states.afterIndexDisable.metadata[0].isIndex, false) &&
-        states.afterIndexDisable.indexes.length === 0 &&
-        hasProbe(states.afterIndexDisable),
+      responseBusinessOk(requests.fieldIndexDisable) && states.afterIndexDisable &&
+        storedBooleanEquals(metadataValue(states.afterIndexDisable, "isIndex"), false) &&
+        states.afterIndexDisable.indexes.length === 0 && hasProbe(states.afterIndexDisable),
       `response=${requests.fieldIndexDisable && requests.fieldIndexDisable.responseStatus}; ` +
-        `metadata=${JSON.stringify(states.afterIndexDisable && states.afterIndexDisable.metadata[0])}; ` +
-        `indexes=${JSON.stringify((states.afterIndexDisable && states.afterIndexDisable.indexes) || [])}; ` +
-        `probe=${JSON.stringify((states.afterIndexDisable && states.afterIndexDisable.probe) || [])}`
+        `indexes=${JSON.stringify((states.afterIndexDisable && states.afterIndexDisable.indexes) || [])}`
     ),
     check(
       "managed-index-disable-idempotent",
-      responseBusinessOk(requests.fieldIndexDisableReplay) &&
-        states.afterIndexDisableReplay &&
-        states.afterIndexDisableReplay.metadata[0] &&
-        storedBooleanEquals(states.afterIndexDisableReplay.metadata[0].isIndex, false) &&
-        states.afterIndexDisableReplay.indexes.length === 0 &&
-        hasProbe(states.afterIndexDisableReplay),
+      responseBusinessOk(requests.fieldIndexDisableReplay) && states.afterIndexDisableReplay &&
+        storedBooleanEquals(metadataValue(states.afterIndexDisableReplay, "isIndex"), false) &&
+        states.afterIndexDisableReplay.indexes.length === 0 && hasProbe(states.afterIndexDisableReplay),
       `response=${requests.fieldIndexDisableReplay && requests.fieldIndexDisableReplay.responseStatus}; ` +
-        `indexes=${JSON.stringify((states.afterIndexDisableReplay && states.afterIndexDisableReplay.indexes) || [])}; ` +
-        `probe=${JSON.stringify((states.afterIndexDisableReplay && states.afterIndexDisableReplay.probe) || [])}`
+        `indexes=${JSON.stringify((states.afterIndexDisableReplay && states.afterIndexDisableReplay.indexes) || [])}`
     ),
     check(
       "managed-index-reenabled",
-      responseBusinessOk(requests.fieldIndexEnable) &&
-        states.afterIndexEnable &&
-        states.afterIndexEnable.metadata[0] &&
-        storedBooleanEquals(states.afterIndexEnable.metadata[0].isIndex, true) &&
-        states.afterIndexEnable.indexes.length === 1 &&
-        hasIndex(states.afterIndexEnable, initialManagedIndex) &&
+      responseBusinessOk(requests.fieldIndexEnable) && states.afterIndexEnable &&
+        storedBooleanEquals(metadataValue(states.afterIndexEnable, "isIndex"), true) &&
+        states.afterIndexEnable.indexes.length === 1 && hasIndex(states.afterIndexEnable, initialManagedIndex) &&
         hasProbe(states.afterIndexEnable),
       `response=${requests.fieldIndexEnable && requests.fieldIndexEnable.responseStatus}; ` +
-        `indexes=${JSON.stringify((states.afterIndexEnable && states.afterIndexEnable.indexes) || [])}; ` +
-        `probe=${JSON.stringify((states.afterIndexEnable && states.afterIndexEnable.probe) || [])}`
+        `indexes=${JSON.stringify((states.afterIndexEnable && states.afterIndexEnable.indexes) || [])}`
+    ),
+    check(
+      "managed-unique-enabled-and-replaces-ordinary-index",
+      responseBusinessOk(requests.fieldUniqueEnable) && states.afterUniqueEnable &&
+        storedBooleanEquals(metadataValue(states.afterUniqueEnable, "isUnique"), true) &&
+        states.afterUniqueEnable.constraints.length === 1 && hasConstraint(states.afterUniqueEnable, initialManagedUnique) &&
+        states.afterUniqueEnable.indexes.length === 1 && hasIndex(states.afterUniqueEnable, initialManagedUnique) &&
+        !hasIndex(states.afterUniqueEnable, initialManagedIndex) && hasProbe(states.afterUniqueEnable),
+      `response=${requests.fieldUniqueEnable && requests.fieldUniqueEnable.responseStatus}; ` +
+        `constraints=${JSON.stringify((states.afterUniqueEnable && states.afterUniqueEnable.constraints) || [])}; ` +
+        `indexes=${JSON.stringify((states.afterUniqueEnable && states.afterUniqueEnable.indexes) || [])}`
+    ),
+    check(
+      "managed-unique-enable-idempotent",
+      responseBusinessOk(requests.fieldUniqueEnableReplay) && states.afterUniqueEnableReplay &&
+        states.afterUniqueEnableReplay.constraints.length === 1 &&
+        hasConstraint(states.afterUniqueEnableReplay, initialManagedUnique) &&
+        states.afterUniqueEnableReplay.indexes.length === 1 &&
+        hasIndex(states.afterUniqueEnableReplay, initialManagedUnique),
+      `response=${requests.fieldUniqueEnableReplay && requests.fieldUniqueEnableReplay.responseStatus}; ` +
+        `constraints=${JSON.stringify((states.afterUniqueEnableReplay && states.afterUniqueEnableReplay.constraints) || [])}`
+    ),
+    check(
+      "managed-unique-rejects-duplicate-row",
+      dbActions.duplicateInsert && dbActions.duplicateInsert.rejected &&
+        /duplicate key|unique constraint/i.test(dbActions.duplicateInsert.error) &&
+        states.afterDuplicateReject && states.afterDuplicateReject.duplicateProbe.length === 0 &&
+        hasProbe(states.afterDuplicateReject),
+      `dbAction=${JSON.stringify(dbActions.duplicateInsert || null)}; ` +
+        `duplicateProbe=${JSON.stringify((states.afterDuplicateReject && states.afterDuplicateReject.duplicateProbe) || [])}`
     ),
     check(
       "field-renamed-widened-and-data-preserved",
-      responseBusinessOk(requests.fieldRenameAndWiden) &&
-        renamedPhysical &&
-        renamedPhysical.dataType === "character varying" &&
-        renamedPhysical.characterLength === "256" &&
-        !columnByName(states.afterRename, initialColumn) &&
+      responseBusinessOk(requests.fieldRenameAndWiden) && renamedPhysical &&
+        renamedPhysical.dataType === "character varying" && renamedPhysical.characterLength === "256" &&
+        renamedPhysical.nullable === "YES" && !columnByName(states.afterRename, initialColumn) &&
         hasProbe(states.afterRename),
       `response=${requests.fieldRenameAndWiden && requests.fieldRenameAndWiden.responseStatus}; ` +
         `column=${JSON.stringify(renamedPhysical || null)}; probe=${JSON.stringify(
@@ -778,18 +1069,36 @@ async function main() {
         )}`
     ),
     check(
-      "managed-index-renamed-with-column",
-      states.afterRename &&
-        states.afterRename.indexes.length === 1 &&
-        hasIndex(states.afterRename, renamedManagedIndex) &&
-        !hasIndex(states.afterRename, initialManagedIndex),
-      `indexes=${JSON.stringify((states.afterRename && states.afterRename.indexes) || [])}; ` +
-        `old=${initialManagedIndex}; new=${renamedManagedIndex}`
+      "managed-unique-renamed-with-column",
+      states.afterRename && states.afterRename.constraints.length === 1 &&
+        hasConstraint(states.afterRename, renamedManagedUnique) && !hasConstraint(states.afterRename, initialManagedUnique) &&
+        states.afterRename.indexes.length === 1 && hasIndex(states.afterRename, renamedManagedUnique) &&
+        !hasIndex(states.afterRename, initialManagedUnique),
+      `constraints=${JSON.stringify((states.afterRename && states.afterRename.constraints) || [])}; ` +
+        `indexes=${JSON.stringify((states.afterRename && states.afterRename.indexes) || [])}`
+    ),
+    check(
+      "managed-unique-disabled-and-ordinary-index-restored",
+      responseBusinessOk(requests.fieldUniqueDisable) && states.afterUniqueDisable &&
+        storedBooleanEquals(metadataValue(states.afterUniqueDisable, "isUnique"), false) &&
+        states.afterUniqueDisable.constraints.length === 0 && states.afterUniqueDisable.indexes.length === 1 &&
+        hasIndex(states.afterUniqueDisable, renamedManagedIndex) && !hasIndex(states.afterUniqueDisable, renamedManagedUnique),
+      `response=${requests.fieldUniqueDisable && requests.fieldUniqueDisable.responseStatus}; ` +
+        `constraints=${JSON.stringify((states.afterUniqueDisable && states.afterUniqueDisable.constraints) || [])}; ` +
+        `indexes=${JSON.stringify((states.afterUniqueDisable && states.afterUniqueDisable.indexes) || [])}`
+    ),
+    check(
+      "managed-unique-disable-idempotent",
+      responseBusinessOk(requests.fieldUniqueDisableReplay) && states.afterUniqueDisableReplay &&
+        states.afterUniqueDisableReplay.constraints.length === 0 &&
+        states.afterUniqueDisableReplay.indexes.length === 1 &&
+        hasIndex(states.afterUniqueDisableReplay, renamedManagedIndex),
+      `response=${requests.fieldUniqueDisableReplay && requests.fieldUniqueDisableReplay.responseStatus}; ` +
+        `indexes=${JSON.stringify((states.afterUniqueDisableReplay && states.afterUniqueDisableReplay.indexes) || [])}`
     ),
     check(
       "external-unique-index-fixture-created",
-      states.afterExternalIndexCreate &&
-        states.afterExternalIndexCreate.indexes.length === 2 &&
+      states.afterExternalIndexCreate && states.afterExternalIndexCreate.indexes.length === 2 &&
         hasIndex(states.afterExternalIndexCreate, renamedManagedIndex) &&
         hasIndex(states.afterExternalIndexCreate, externalIndexName) &&
         states.afterExternalIndexCreate.indexes.some(
@@ -799,37 +1108,127 @@ async function main() {
     ),
     check(
       "external-unique-index-protected-on-managed-disable",
-      responseBusinessOk(requests.fieldIndexDisableWithExternal) &&
-        states.afterExternalIndexDisable &&
-        states.afterExternalIndexDisable.metadata[0] &&
-        storedBooleanEquals(states.afterExternalIndexDisable.metadata[0].isIndex, false) &&
+      responseBusinessOk(requests.fieldIndexDisableWithExternal) && states.afterExternalIndexDisable &&
+        storedBooleanEquals(metadataValue(states.afterExternalIndexDisable, "isIndex"), false) &&
         states.afterExternalIndexDisable.indexes.length === 1 &&
         hasIndex(states.afterExternalIndexDisable, externalIndexName) &&
-        !hasIndex(states.afterExternalIndexDisable, renamedManagedIndex) &&
-        hasProbe(states.afterExternalIndexDisable),
+        !hasIndex(states.afterExternalIndexDisable, renamedManagedIndex) && hasProbe(states.afterExternalIndexDisable),
       `response=${requests.fieldIndexDisableWithExternal && requests.fieldIndexDisableWithExternal.responseStatus}; ` +
         `indexes=${JSON.stringify((states.afterExternalIndexDisable && states.afterExternalIndexDisable.indexes) || [])}`
     ),
     check(
       "external-index-satisfies-reenable-without-duplicate",
-      responseBusinessOk(requests.fieldIndexEnableWithExternal) &&
-        states.afterExternalIndexEnable &&
-        states.afterExternalIndexEnable.metadata[0] &&
-        storedBooleanEquals(states.afterExternalIndexEnable.metadata[0].isIndex, true) &&
-        states.afterExternalIndexEnable.indexes.length === 1 &&
-        hasIndex(states.afterExternalIndexEnable, externalIndexName) &&
-        !hasIndex(states.afterExternalIndexEnable, renamedManagedIndex) &&
-        hasProbe(states.afterExternalIndexEnable),
+      responseBusinessOk(requests.fieldIndexEnableWithExternal) && states.afterExternalIndexEnable &&
+        storedBooleanEquals(metadataValue(states.afterExternalIndexEnable, "isIndex"), true) &&
+        states.afterExternalIndexEnable.indexes.length === 1 && hasIndex(states.afterExternalIndexEnable, externalIndexName) &&
+        !hasIndex(states.afterExternalIndexEnable, renamedManagedIndex) && hasProbe(states.afterExternalIndexEnable),
       `response=${requests.fieldIndexEnableWithExternal && requests.fieldIndexEnableWithExternal.responseStatus}; ` +
         `indexes=${JSON.stringify((states.afterExternalIndexEnable && states.afterExternalIndexEnable.indexes) || [])}`
     ),
     check(
+      "external-unique-index-satisfies-property-unique",
+      responseBusinessOk(requests.fieldUniqueEnableWithExternal) && states.afterExternalUniqueEnable &&
+        storedBooleanEquals(metadataValue(states.afterExternalUniqueEnable, "isUnique"), true) &&
+        states.afterExternalUniqueEnable.constraints.length === 0 &&
+        states.afterExternalUniqueEnable.indexes.length === 1 &&
+        hasIndex(states.afterExternalUniqueEnable, externalIndexName) &&
+        !hasIndex(states.afterExternalUniqueEnable, renamedManagedUnique),
+      `response=${requests.fieldUniqueEnableWithExternal && requests.fieldUniqueEnableWithExternal.responseStatus}; ` +
+        `constraints=${JSON.stringify((states.afterExternalUniqueEnable && states.afterExternalUniqueEnable.constraints) || [])}; ` +
+        `indexes=${JSON.stringify((states.afterExternalUniqueEnable && states.afterExternalUniqueEnable.indexes) || [])}`
+    ),
+    check(
+      "external-unique-enable-idempotent",
+      responseBusinessOk(requests.fieldUniqueEnableWithExternalReplay) && states.afterExternalUniqueEnableReplay &&
+        states.afterExternalUniqueEnableReplay.constraints.length === 0 &&
+        states.afterExternalUniqueEnableReplay.indexes.length === 1 &&
+        hasIndex(states.afterExternalUniqueEnableReplay, externalIndexName),
+      `response=${requests.fieldUniqueEnableWithExternalReplay && requests.fieldUniqueEnableWithExternalReplay.responseStatus}; ` +
+        `indexes=${JSON.stringify((states.afterExternalUniqueEnableReplay && states.afterExternalUniqueEnableReplay.indexes) || [])}`
+    ),
+    check(
+      "external-unique-index-protected-on-property-disable",
+      responseBusinessOk(requests.fieldUniqueDisableWithExternal) && states.afterExternalUniqueDisable &&
+        storedBooleanEquals(metadataValue(states.afterExternalUniqueDisable, "isUnique"), false) &&
+        states.afterExternalUniqueDisable.constraints.length === 0 &&
+        states.afterExternalUniqueDisable.indexes.length === 1 &&
+        hasIndex(states.afterExternalUniqueDisable, externalIndexName),
+      `response=${requests.fieldUniqueDisableWithExternal && requests.fieldUniqueDisableWithExternal.responseStatus}; ` +
+        `indexes=${JSON.stringify((states.afterExternalUniqueDisable && states.afterExternalUniqueDisable.indexes) || [])}`
+    ),
+    check(
+      "not-null-enabled",
+      responseBusinessOk(requests.fieldNotNullEnable) && states.afterNotNullEnable &&
+        storedBooleanEquals(metadataValue(states.afterNotNullEnable, "nullable"), false) &&
+        columnNullable(states.afterNotNullEnable, renamedColumn) === "NO" && hasProbe(states.afterNotNullEnable),
+      `response=${requests.fieldNotNullEnable && requests.fieldNotNullEnable.responseStatus}; ` +
+        `metadata=${JSON.stringify(states.afterNotNullEnable && states.afterNotNullEnable.metadata[0])}; ` +
+        `column=${JSON.stringify(states.afterNotNullEnable && columnByName(states.afterNotNullEnable, renamedColumn))}`
+    ),
+    check(
+      "not-null-enable-idempotent",
+      responseBusinessOk(requests.fieldNotNullEnableReplay) && states.afterNotNullEnableReplay &&
+        storedBooleanEquals(metadataValue(states.afterNotNullEnableReplay, "nullable"), false) &&
+        columnNullable(states.afterNotNullEnableReplay, renamedColumn) === "NO",
+      `response=${requests.fieldNotNullEnableReplay && requests.fieldNotNullEnableReplay.responseStatus}; ` +
+        `column=${JSON.stringify(states.afterNotNullEnableReplay && columnByName(states.afterNotNullEnableReplay, renamedColumn))}`
+    ),
+    check(
+      "not-null-rejects-null-row",
+      dbActions.nullInsertWhileNotNull && dbActions.nullInsertWhileNotNull.rejected &&
+        /null value|not-null constraint/i.test(dbActions.nullInsertWhileNotNull.error) &&
+        states.afterNullReject && states.afterNullReject.nullProbe.length === 0 && hasProbe(states.afterNullReject),
+      `dbAction=${JSON.stringify(dbActions.nullInsertWhileNotNull || null)}; ` +
+        `nullProbe=${JSON.stringify((states.afterNullReject && states.afterNullReject.nullProbe) || [])}`
+    ),
+    check(
+      "nullable-restored",
+      responseBusinessOk(requests.fieldNullableEnable) && states.afterNullableEnable &&
+        storedBooleanEquals(metadataValue(states.afterNullableEnable, "nullable"), true) &&
+        columnNullable(states.afterNullableEnable, renamedColumn) === "YES",
+      `response=${requests.fieldNullableEnable && requests.fieldNullableEnable.responseStatus}; ` +
+        `column=${JSON.stringify(states.afterNullableEnable && columnByName(states.afterNullableEnable, renamedColumn))}`
+    ),
+    check(
+      "nullable-restore-idempotent",
+      responseBusinessOk(requests.fieldNullableEnableReplay) && states.afterNullableEnableReplay &&
+        storedBooleanEquals(metadataValue(states.afterNullableEnableReplay, "nullable"), true) &&
+        columnNullable(states.afterNullableEnableReplay, renamedColumn) === "YES",
+      `response=${requests.fieldNullableEnableReplay && requests.fieldNullableEnableReplay.responseStatus}; ` +
+        `column=${JSON.stringify(states.afterNullableEnableReplay && columnByName(states.afterNullableEnableReplay, renamedColumn))}`
+    ),
+    check(
+      "null-fixture-written",
+      states.afterNullFixtureInsert && states.afterNullFixtureInsert.nullProbe.length === 1,
+      `nullProbe=${JSON.stringify((states.afterNullFixtureInsert && states.afterNullFixtureInsert.nullProbe) || [])}`
+    ),
+    check(
+      "unsafe-not-null-change-rolled-back",
+      requests.unsafeNotNull && !responseBusinessOk(requests.unsafeNotNull) && beforeUnsafeNotNullMetadata &&
+        afterUnsafeNotNullMetadata && afterUnsafeNotNullColumn &&
+        beforeUnsafeNotNullMetadata.version === afterUnsafeNotNullMetadata.version &&
+        storedBooleanEquals(afterUnsafeNotNullMetadata.nullable, true) &&
+        afterUnsafeNotNullColumn.nullable === "YES" && states.afterUnsafeNotNull.nullProbe.length === 1 &&
+        hasProbe(states.afterUnsafeNotNull),
+      `response=${requests.unsafeNotNull && requests.unsafeNotNull.responseStatus}; ` +
+        `before=${JSON.stringify(beforeUnsafeNotNullMetadata || null)}; ` +
+        `after=${JSON.stringify(afterUnsafeNotNullMetadata || null)}; ` +
+        `column=${JSON.stringify(afterUnsafeNotNullColumn || null)}; ` +
+        `nullProbe=${JSON.stringify((states.afterUnsafeNotNull && states.afterUnsafeNotNull.nullProbe) || [])}`
+    ),
+    check(
+      "null-fixture-cleaned",
+      states.afterNullFixtureDelete && states.afterNullFixtureDelete.nullProbe.length === 0 &&
+        hasProbe(states.afterNullFixtureDelete),
+      `nullProbe=${JSON.stringify((states.afterNullFixtureDelete && states.afterNullFixtureDelete.nullProbe) || [])}`
+    ),
+    check(
       "field-idempotent-replay",
-      responseBusinessOk(requests.fieldIdempotentReplay) &&
-        replayColumns.length === 1 &&
-        states.afterReplay.indexes.length === 1 &&
-        hasIndex(states.afterReplay, externalIndexName) &&
-        !hasIndex(states.afterReplay, renamedManagedIndex) &&
+      responseBusinessOk(requests.fieldIdempotentReplay) && states.afterReplay && replayColumns.length === 1 &&
+        storedBooleanEquals(metadataValue(states.afterReplay, "isUnique"), false) &&
+        storedBooleanEquals(metadataValue(states.afterReplay, "nullable"), true) &&
+        states.afterReplay.indexes.length === 1 && hasIndex(states.afterReplay, externalIndexName) &&
+        !hasIndex(states.afterReplay, renamedManagedIndex) && states.afterReplay.constraints.length === 0 &&
         hasProbe(states.afterReplay),
       `response=${requests.fieldIdempotentReplay && requests.fieldIdempotentReplay.responseStatus}; ` +
         `columns=${replayColumns.length}; indexes=${states.afterReplay ? states.afterReplay.indexes.length : 0}; ` +
@@ -837,15 +1236,11 @@ async function main() {
     ),
     check(
       "unsafe-type-change-rolled-back",
-      requests.unsafeTypeChange &&
-        !responseBusinessOk(requests.unsafeTypeChange) &&
-        afterUnsafeMetadata &&
+      requests.unsafeTypeChange && !responseBusinessOk(requests.unsafeTypeChange) && afterUnsafeMetadata &&
         afterUnsafeMetadata.type === "TEXT" &&
-        afterUnsafeMetadata.columnName.toLowerCase() === renamedColumn.toLowerCase() &&
-        afterUnsafeColumn &&
-        afterUnsafeColumn.dataType === "character varying" &&
-        afterUnsafeColumn.characterLength === "256" &&
-        hasProbe(states.afterUnsafeChange),
+        afterUnsafeMetadata.columnName.toLowerCase() === renamedColumn.toLowerCase() && afterUnsafeColumn &&
+        afterUnsafeColumn.dataType === "character varying" && afterUnsafeColumn.characterLength === "256" &&
+        afterUnsafeColumn.nullable === "YES" && hasProbe(states.afterUnsafeChange),
       `response=${requests.unsafeTypeChange && requests.unsafeTypeChange.responseStatus}; ` +
         `metadata=${JSON.stringify(afterUnsafeMetadata || null)}; column=${JSON.stringify(afterUnsafeColumn || null)}; ` +
         `probe=${JSON.stringify((states.afterUnsafeChange && states.afterUnsafeChange.probe) || [])}`
@@ -884,8 +1279,12 @@ async function main() {
       renamedColumn,
       initialManagedIndex,
       renamedManagedIndex,
+      initialManagedUnique,
+      renamedManagedUnique,
       externalIndexName,
       probeId,
+      duplicateProbeId,
+      nullProbeId,
       probeValue,
     },
     summary: {
@@ -898,26 +1297,34 @@ async function main() {
     checks,
     browser: browserEvidence,
     requests,
+    dbActions,
     states,
     cleanup,
     backendTrace: {
       endpoint: "PropertyController.save -> DtoUtils.getPropertyVO -> ModelServiceImpl.saveProperty",
       metadataPersistence: "propertyDao.merge -> public.ec_property",
       physicalPersistence:
-        "FieldSyncDBUtils.fieldSyncToDb -> PostgresFieldSyncSupport.sync -> ALTER TABLE/COMMENT/CREATE INDEX/ALTER INDEX/DROP INDEX",
+        "FieldSyncDBUtils.fieldSyncToDb -> PostgresFieldSyncSupport.sync -> ALTER TABLE/COMMENT/CREATE INDEX/ALTER INDEX/DROP INDEX/ADD CONSTRAINT/RENAME CONSTRAINT/DROP CONSTRAINT/SET NOT NULL/DROP NOT NULL",
       transactionBoundary:
         "ModelServiceImpl.saveProperty propagates PostgreSQL DDL failures so ec_property and physical DDL roll back together",
       destructivePolicy:
-        "No automatic DROP COLUMN. Only deterministic single-column non-unique managed indexes may be renamed or dropped; incompatible type conversion is rejected and rolled back.",
+        "No automatic DROP COLUMN. Only deterministic single-column managed indexes and unique constraints may be renamed or dropped; external equivalent indexes are preserved. Incompatible type and unsafe NOT NULL changes are rejected and rolled back.",
     },
     verificationSql: {
       metadata: metadataSql(),
       columns: columnSql(),
       indexes: indexSql(),
+      constraints: constraintSql(),
       externalIndexFixture:
         `create unique index ${sqlIdentifier(externalIndexName)} on public.${sqlIdentifier(tableName)} ` +
         `(${sqlIdentifier(renamedColumn)});`,
+      duplicateRejection:
+        `insert into public.${sqlIdentifier(tableName)} (id, ${sqlIdentifier(initialColumn)}, valid) values (` +
+        `${duplicateProbeId}, ${sqlLiteral(probeValue)}, 1);`,
+      nullRejection:
+        `insert into public.${sqlIdentifier(tableName)} (id, valid) values (${nullProbeId}, 1);`,
       markerRow: probeSql(renamedColumn),
+      nullMarkerRow: nullProbeSql(renamedColumn),
       cleanup: cleanupSql(),
     },
     fatalError,

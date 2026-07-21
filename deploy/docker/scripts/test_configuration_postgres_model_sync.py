@@ -72,10 +72,19 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertIn("information_schema.columns", field_support)
         self.assertIn("Unsafe PostgreSQL property type change", field_support)
         self.assertIn("synchronizeManagedIndex", field_support)
+        self.assertIn("synchronizeManagedUniqueConstraint", field_support)
+        self.assertIn("synchronizeNullability", field_support)
         self.assertIn("managedIndexExists", field_support)
         self.assertIn("hasEquivalentIndexForColumn", field_support)
+        self.assertIn("managedUniqueConstraintExists", field_support)
+        self.assertIn("hasEquivalentUniqueIndexForColumn", field_support)
         self.assertIn("ALTER INDEX public.", field_support)
         self.assertIn("DROP INDEX IF EXISTS public.", field_support)
+        self.assertIn("ADD CONSTRAINT", field_support)
+        self.assertIn("RENAME CONSTRAINT", field_support)
+        self.assertIn("DROP CONSTRAINT IF EXISTS", field_support)
+        self.assertIn("SET NOT NULL", field_support)
+        self.assertIn("DROP NOT NULL", field_support)
         self.assertIn("i.indnatts=1", field_support)
         managed_index_method = field_support[
             field_support.index("private static boolean managedIndexExists") : field_support.index(
@@ -91,6 +100,21 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertIn("i.indisvalid and i.indisready", managed_index_method)
         self.assertIn("not i.indisprimary", equivalent_index_method)
         self.assertNotIn("not i.indisunique", equivalent_index_method)
+        managed_unique_method = field_support[
+            field_support.index("private static boolean managedUniqueConstraintExists") : field_support.index(
+                "private static boolean hasEquivalentUniqueIndexForColumn"
+            )
+        ]
+        equivalent_unique_method = field_support[
+            field_support.index("private static boolean hasEquivalentUniqueIndexForColumn") : field_support.index(
+                "private static boolean constraintNameExists"
+            )
+        ]
+        self.assertIn("c.contype='u'", managed_unique_method)
+        self.assertIn("cardinality(c.conkey)=1", managed_unique_method)
+        self.assertIn("i.indisunique", equivalent_unique_method)
+        self.assertIn("i.indpred is null", equivalent_unique_method)
+        self.assertIn("i.indexprs is null", equivalent_unique_method)
         self.assertNotIn("DROP COLUMN", field_support.upper())
         self.assertIn("PostgreSQL physical field synchronization failed", service)
 

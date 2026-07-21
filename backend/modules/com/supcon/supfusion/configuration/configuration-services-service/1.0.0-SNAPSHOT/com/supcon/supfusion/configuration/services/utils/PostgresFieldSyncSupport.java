@@ -54,6 +54,8 @@ public final class PostgresFieldSyncSupport {
         }
 
         updateColumnComment(template, tableName, columnName, property);
+        synchronizeManagedUniqueConstraint(template, tableName, columnName, oldColumnName, property);
+        synchronizeNullability(template, tableName, columnName, property);
         synchronizeManagedIndex(template, tableName, columnName, oldColumnName, property);
     }
 
@@ -238,6 +240,11 @@ public final class PostgresFieldSyncSupport {
             }
         }
 
+        if (managedIndexExists(template, tableName, columnName, targetIndexName)
+                && hasEquivalentUniqueIndexForColumn(template, tableName, columnName)) {
+            dropManagedIndex(template, targetIndexName);
+        }
+
         if (!indexRequested) {
             if (managedIndexExists(template, tableName, columnName, targetIndexName)) {
                 dropManagedIndex(template, targetIndexName);
@@ -296,6 +303,140 @@ public final class PostgresFieldSyncSupport {
         return count != null && count.intValue() > 0;
     }
 
+    private static void synchronizeManagedUniqueConstraint(
+            JdbcTemplate template,
+            String tableName,
+            String columnName,
+            String oldColumnName,
+            Property property) {
+        boolean uniqueRequested = Boolean.TRUE.equals(property.getIsUnique());
+        String targetConstraintName = uniqueConstraintName(tableName, columnName);
+        String oldConstraintName = oldColumnName == null ? null : uniqueConstraintName(tableName, oldColumnName);
+
+        if (oldConstraintName != null
+                && !oldConstraintName.equals(targetConstraintName)
+                && managedUniqueConstraintExists(template, tableName, columnName, oldConstraintName)) {
+            if (!uniqueRequested
+                    || managedUniqueConstraintExists(template, tableName, columnName, targetConstraintName)) {
+                dropManagedUniqueConstraint(template, tableName, oldConstraintName);
+            } else if (constraintNameExists(template, tableName, targetConstraintName)
+                    || indexRelationExists(template, targetConstraintName)) {
+                throw new IllegalStateException(
+                        "PostgreSQL managed property unique constraint name is already in use: "
+                                + targetConstraintName);
+            } else {
+                renameManagedUniqueConstraint(template, tableName, oldConstraintName, targetConstraintName);
+            }
+        }
+
+        if (!uniqueRequested) {
+            if (managedUniqueConstraintExists(template, tableName, columnName, targetConstraintName)) {
+                dropManagedUniqueConstraint(template, tableName, targetConstraintName);
+            }
+            return;
+        }
+
+        if (managedUniqueConstraintExists(template, tableName, columnName, targetConstraintName)
+                || hasEquivalentUniqueIndexForColumn(template, tableName, columnName)) {
+            return;
+        }
+        if (constraintNameExists(template, tableName, targetConstraintName)
+                || indexRelationExists(template, targetConstraintName)) {
+            throw new IllegalStateException(
+                    "PostgreSQL managed property unique constraint name is already in use: "
+                            + targetConstraintName);
+        }
+        execute(
+                template,
+                "ALTER TABLE public." + tableName + " ADD CONSTRAINT " + targetConstraintName
+                        + " UNIQUE (" + columnName + ")");
+    }
+
+    private static void synchronizeNullability(
+            JdbcTemplate template,
+            String tableName,
+            String columnName,
+            Property property) {
+        boolean nullableRequested = Boolean.TRUE.equals(property.getNullable());
+        if (columnIsNullable(template, tableName, columnName) == nullableRequested) {
+            return;
+        }
+        execute(
+                template,
+                "ALTER TABLE public." + tableName + " ALTER COLUMN " + columnName
+                        + (nullableRequested ? " DROP NOT NULL" : " SET NOT NULL"));
+    }
+
+    private static boolean columnIsNullable(
+            JdbcTemplate template,
+            String tableName,
+            String columnName) {
+        String nullable = template.queryForObject(
+                "select is_nullable from information_schema.columns where table_schema='public' "
+                        + "and lower(table_name)=? and lower(column_name)=?",
+                new Object[]{tableName.toLowerCase(Locale.ROOT), columnName.toLowerCase(Locale.ROOT)},
+                String.class);
+        if (nullable == null) {
+            throw new IllegalStateException(
+                    "PostgreSQL property column nullability metadata is missing: "
+                            + tableName + "." + columnName);
+        }
+        return "YES".equalsIgnoreCase(nullable);
+    }
+
+    private static boolean managedUniqueConstraintExists(
+            JdbcTemplate template,
+            String tableName,
+            String columnName,
+            String constraintName) {
+        Integer count = template.queryForObject(
+                "select count(1) from pg_constraint c "
+                        + "join pg_class t on t.oid=c.conrelid "
+                        + "join pg_namespace n on n.oid=t.relnamespace "
+                        + "join pg_index i on i.indexrelid=c.conindid "
+                        + "join pg_attribute a on a.attrelid=t.oid and a.attnum=any(c.conkey) "
+                        + "where n.nspname='public' and lower(t.relname)=? and lower(a.attname)=? "
+                        + "and lower(c.conname)=? and c.contype='u' and cardinality(c.conkey)=1 "
+                        + "and c.convalidated and not c.condeferrable and i.indisvalid and i.indisready",
+                new Object[]{
+                        tableName.toLowerCase(Locale.ROOT),
+                        columnName.toLowerCase(Locale.ROOT),
+                        constraintName.toLowerCase(Locale.ROOT)},
+                Integer.class);
+        return count != null && count.intValue() > 0;
+    }
+
+    private static boolean hasEquivalentUniqueIndexForColumn(
+            JdbcTemplate template,
+            String tableName,
+            String columnName) {
+        Integer count = template.queryForObject(
+                "select count(1) from pg_index i "
+                        + "join pg_class t on t.oid=i.indrelid "
+                        + "join pg_namespace n on n.oid=t.relnamespace "
+                        + "join pg_attribute a on a.attrelid=t.oid and a.attnum=any(i.indkey) "
+                        + "where n.nspname='public' and lower(t.relname)=? and lower(a.attname)=? "
+                        + "and i.indnatts=1 and i.indnkeyatts=1 and i.indisunique and not i.indisprimary "
+                        + "and i.indisvalid and i.indisready and i.indpred is null and i.indexprs is null",
+                new Object[]{tableName.toLowerCase(Locale.ROOT), columnName.toLowerCase(Locale.ROOT)},
+                Integer.class);
+        return count != null && count.intValue() > 0;
+    }
+
+    private static boolean constraintNameExists(
+            JdbcTemplate template,
+            String tableName,
+            String constraintName) {
+        Integer count = template.queryForObject(
+                "select count(1) from pg_constraint c "
+                        + "join pg_class t on t.oid=c.conrelid "
+                        + "join pg_namespace n on n.oid=t.relnamespace "
+                        + "where n.nspname='public' and lower(t.relname)=? and lower(c.conname)=?",
+                new Object[]{tableName.toLowerCase(Locale.ROOT), constraintName.toLowerCase(Locale.ROOT)},
+                Integer.class);
+        return count != null && count.intValue() > 0;
+    }
+
     private static boolean indexRelationExists(JdbcTemplate template, String indexName) {
         Integer count = template.queryForObject(
                 "select count(1) from pg_class x join pg_namespace n on n.oid=x.relnamespace "
@@ -316,13 +457,45 @@ public final class PostgresFieldSyncSupport {
         execute(template, "DROP INDEX IF EXISTS public." + indexName);
     }
 
+    private static void renameManagedUniqueConstraint(
+            JdbcTemplate template,
+            String tableName,
+            String oldConstraintName,
+            String newConstraintName) {
+        execute(
+                template,
+                "ALTER TABLE public." + tableName + " RENAME CONSTRAINT "
+                        + oldConstraintName + " TO " + newConstraintName);
+    }
+
+    private static void dropManagedUniqueConstraint(
+            JdbcTemplate template,
+            String tableName,
+            String constraintName) {
+        execute(
+                template,
+                "ALTER TABLE public." + tableName + " DROP CONSTRAINT IF EXISTS " + constraintName);
+    }
+
     private static String indexName(String tableName, String columnName) {
-        String base = "IDX_" + tableName + "_" + columnName;
+        return managedObjectName("IDX", tableName, columnName, "property index");
+    }
+
+    private static String uniqueConstraintName(String tableName, String columnName) {
+        return managedObjectName("UQ", tableName, columnName, "property unique constraint");
+    }
+
+    private static String managedObjectName(
+            String prefix,
+            String tableName,
+            String columnName,
+            String label) {
+        String base = prefix + "_" + tableName + "_" + columnName;
         if (base.length() <= 63) {
-            return identifier(base, "property index");
+            return identifier(base, label);
         }
         String hash = Integer.toHexString(base.hashCode()).toUpperCase(Locale.ROOT);
-        return identifier(base.substring(0, 62 - hash.length()) + "_" + hash, "property index");
+        return identifier(base.substring(0, 62 - hash.length()) + "_" + hash, label);
     }
 
     private static ColumnSpec columnSpec(Property property) {
