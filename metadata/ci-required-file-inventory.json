@@ -3519,6 +3519,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/198-material-wms-completion-inbound-reversal.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -5667,6 +5673,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/material-wms-completion-inbound-reversal-contract-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/patrol-module-recovery-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -6430,6 +6442,12 @@
     {
       "ignored": false,
       "path": "metadata/material-service-dependency-analysis.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/material-wms-completion-inbound-reversal-contract-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -9674,16 +9692,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 614
+      "tracked": 615
     },
     "docs": {
-      "tracked": 116
+      "tracked": 117
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 198
+      "tracked": 199
     },
     "package.json": {
       "tracked": 1
@@ -9707,8 +9725,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1608,
-    "tracked": 1608,
+    "totalFiles": 1611,
+    "tracked": 1611,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -56,6 +56,58 @@ public class MaterialWmsRepository {
         return rows.isEmpty() ? null : rows.get(0);
     }
 
+    public Map<String, Object> lockCompletionInboundByDocumentNo(
+            String tenantId, String sourceSystem, String documentNo) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+            "SELECT * FROM wms_stock_documents "
+                + "WHERE tenant_id = ? AND document_type = 'COMPLETION_INBOUND' "
+                + "AND source_system = ? AND document_no = ? FOR UPDATE",
+            tenantId, sourceSystem, documentNo
+        );
+        return rows.isEmpty() ? null : rows.get(0);
+    }
+
+    public Map<String, Object> findReversalByOriginal(
+            String tenantId, long originalDocumentId) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+            "SELECT * FROM wms_stock_documents "
+                + "WHERE tenant_id = ? AND document_type = 'COMPLETION_INBOUND_REVERSAL' "
+                + "AND reversal_of_document_id = ?",
+            tenantId, originalDocumentId
+        );
+        return rows.isEmpty() ? null : rows.get(0);
+    }
+
+    public List<Map<String, Object>> findDocumentLines(long documentId) {
+        return jdbc.queryForList(
+            "SELECT * FROM wms_stock_document_lines WHERE document_id = ? ORDER BY line_no",
+            documentId
+        );
+    }
+
+    public void linkReversalToOriginal(
+            String tenantId, long reversalDocumentId, long originalDocumentId) {
+        int linked = jdbc.update(
+            "UPDATE wms_stock_documents SET reversal_of_document_id = ?, updated_at = CURRENT_TIMESTAMP "
+                + "WHERE tenant_id = ? AND id = ? "
+                + "AND document_type = 'COMPLETION_INBOUND_REVERSAL' "
+                + "AND reversal_of_document_id IS NULL",
+            originalDocumentId, tenantId, reversalDocumentId
+        );
+        if (linked != 1) {
+            throw new MaterialWmsBusinessException(409, "红字单无法关联唯一原完工入库单");
+        }
+        int reversed = jdbc.update(
+            "UPDATE wms_stock_documents SET status = 'REVERSED', updated_at = CURRENT_TIMESTAMP "
+                + "WHERE tenant_id = ? AND id = ? AND document_type = 'COMPLETION_INBOUND' "
+                + "AND status = 'POSTED'",
+            tenantId, originalDocumentId
+        );
+        if (reversed != 1) {
+            throw new MaterialWmsBusinessException(409, "原完工入库单已冲销或状态已变化");
+        }
+    }
+
     public void lockDocument(long documentId) {
         jdbc.queryForObject(
             "SELECT id FROM wms_stock_documents WHERE id = ? FOR UPDATE",
@@ -499,10 +551,21 @@ public class MaterialWmsRepository {
     }
 
     public Map<String, Object> completionInboundDetail(String tenantId, long documentId) {
+        return stockDocumentDetail(tenantId, documentId, DocumentType.COMPLETION_INBOUND);
+    }
+
+    public Map<String, Object> completionInboundReversalDetail(
+            String tenantId, long documentId) {
+        return stockDocumentDetail(
+            tenantId, documentId, DocumentType.COMPLETION_INBOUND_REVERSAL);
+    }
+
+    private Map<String, Object> stockDocumentDetail(
+            String tenantId, long documentId, DocumentType documentType) {
         List<Map<String, Object>> documents = jdbc.queryForList(
             "SELECT * FROM wms_stock_documents WHERE tenant_id = ? AND id = ? "
-                + "AND document_type = 'COMPLETION_INBOUND'",
-            tenantId, documentId
+                + "AND document_type = ?",
+            tenantId, documentId, documentType.name()
         );
         if (documents.isEmpty()) {
             return Collections.emptyMap();
@@ -513,6 +576,14 @@ public class MaterialWmsRepository {
             "SELECT * FROM wms_stock_document_lines WHERE document_id = ? ORDER BY line_no", documentId));
         result.put("transactions", jdbc.queryForList(
             "SELECT * FROM wms_inventory_transactions WHERE document_id = ? ORDER BY id", documentId));
+        Object originalDocumentId = documents.get(0).get("reversal_of_document_id");
+        if (originalDocumentId != null) {
+            List<Map<String, Object>> originals = jdbc.queryForList(
+                "SELECT * FROM wms_stock_documents WHERE tenant_id = ? AND id = ?",
+                tenantId, originalDocumentId
+            );
+            result.put("originalDocument", originals.isEmpty() ? null : originals.get(0));
+        }
         return result;
     }
 

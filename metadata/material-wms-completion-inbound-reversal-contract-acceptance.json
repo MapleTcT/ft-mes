@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-21T22:45:13+08:00",
+  "repoBaseCommit": "b1802dec418abad937cb6b18e23900f6e673c6c1",
+  "database": "H2 PostgreSQL compatibility mode",
+  "status": "PASS_LOCAL_PERSISTENCE_CONTRACT_ONLY",
+  "externalSystemParticipated": false,
+  "bpiWorkflowParticipated": false,
+  "productionActivationAllowed": false,
+  "summary": {
+    "tests": 12,
+    "pass": 12,
+    "fail": 0,
+    "integrationTests": 11,
+    "serviceTests": 1
+  },
+  "items": [
+    {
+      "scenario": "missing-integration-key",
+      "status": "PASS",
+      "evidence": "reversal create returned code 403 and persisted no red document"
+    },
+    {
+      "scenario": "original-business-fact-mismatch",
+      "status": "PASS",
+      "evidence": "quantity mismatch returned code 409 before any reversal write"
+    },
+    {
+      "scenario": "append-only-reversal",
+      "status": "PASS",
+      "evidence": "one blue inbound and one linked red reversal remained durable; immutable deltas were -10/-10/0 and stock became 0/0/0"
+    },
+    {
+      "scenario": "exact-idempotency-query",
+      "status": "PASS",
+      "evidence": "query returned the reversal document, original document, exact line and inventory transaction"
+    },
+    {
+      "scenario": "same-command-replay",
+      "status": "PASS",
+      "evidence": "same event, idempotency key and payload returned idempotent=true without new rows"
+    },
+    {
+      "scenario": "same-key-fact-conflict",
+      "status": "PASS",
+      "evidence": "changed quantity under the same key returned code 409 and row counts remained stable"
+    },
+    {
+      "scenario": "second-reversal-for-original",
+      "status": "PASS",
+      "evidence": "a new command and key for an already reversed original returned code 409"
+    },
+    {
+      "scenario": "consumed-stock-rollback",
+      "status": "PASS",
+      "evidence": "after inbound 10 and issue 3, reversal 10 returned code 409; no red document, line or transaction remained, original stayed POSTED and stock stayed 7/7/0"
+    },
+    {
+      "scenario": "real-postgresql-browser-kafka-bpi-acceptance",
+      "status": "BLOCKED",
+      "evidence": "This slice was local material-wms contract testing only"
+    },
+    {
+      "scenario": "real-external-wms-joint-test",
+      "status": "BLOCKED",
+      "evidence": "No external ERP/WMS endpoint or maintenance window participated"
+    }
+  ],
+  "schema": {
+    "migration": "deploy/docker/postgres/init/198-material-wms-completion-inbound-reversal.sql",
+    "documentType": "COMPLETION_INBOUND_REVERSAL",
+    "transactionType": "COMPLETION_INBOUND_REVERSAL",
+    "originalReference": "wms_stock_documents.reversal_of_document_id",
+    "oneReversalPerOriginal": "uk_wms_stock_documents_reversal_original"
+  },
+  "verification": {
+    "command": "make material-wms-test",
+    "result": "12/12 PASS"
+  },
+  "artifacts": [
+    "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/service/MaterialInventoryService.java",
+    "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/repository/MaterialWmsRepository.java",
+    "backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+    "deploy/docker/postgres/init/198-material-wms-completion-inbound-reversal.sql",
+    "docs/testing/material-wms-completion-inbound-reversal-contract-acceptance.md"
+  ]
+}

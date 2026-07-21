@@ -195,6 +195,14 @@ WMS adapter 的 query-first 合同还要求“创建响应不确定”后立即�
 返回冲突后才能发送 rejected receipt。该软件协议矩阵已通过 `16/16` adapter 测试，证据见
 `docs/testing/bpi-external-wms-protocol-contract-acceptance.md`；真实外部实例和冲销/补偿仍未验收。
 
+内部 `material-wms` 已补充追加式完工入库冲销持久化合同。adapter 后续只允许通过
+`POST /material/wms/completion-inbound-reversals` 创建 BPI 红字单，并通过
+`GET /material/wms/completion-inbound-reversals/by-idempotency` 精确查单。请求必须携带新的 command
+event、独立 idempotency key、原入库单号以及与原单完全一致的物料、批次、仓库、库位、数量和单位；
+库存已消耗或事实冲突时整事务失败，原蓝字单仍为 `POSTED`。本地持久化合同为 `12/12 PASS`，证据见
+`docs/testing/material-wms-completion-inbound-reversal-contract-acceptance.md`。该合同尚未接入 BPI 四眼审批、
+Protobuf/Kafka 或外部 WMS，因此不改变 Phase 2 默认关闭和 `G-021 PARTIAL` 结论。
+
 ## 3. 内部受信接入 API
 
 | Method | Path | 调用方 | 权限 | 成功/隔离结果 | 持久化 |

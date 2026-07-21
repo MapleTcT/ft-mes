@@ -2,6 +2,7 @@ package com.mapletct.ftmes.materialwms.domain;
 
 public enum DocumentType {
     COMPLETION_INBOUND("CIN"),
+    COMPLETION_INBOUND_REVERSAL("CIR"),
     PRODUCTION_ISSUE("PIS");
 
     private final String numberPrefix;

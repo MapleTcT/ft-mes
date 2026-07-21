@@ -38,6 +38,7 @@ public class MaterialWmsIntegrationTest {
         jdbc.update("DELETE FROM wms_quality_allocations");
         jdbc.update("DELETE FROM wms_inventory_transactions");
         jdbc.update("DELETE FROM wms_stock_document_lines");
+        jdbc.update("UPDATE wms_stock_documents SET reversal_of_document_id = NULL");
         jdbc.update("DELETE FROM wms_stock_documents");
         jdbc.update("DELETE FROM wms_quality_results");
         jdbc.update("DELETE FROM wms_batch_stocks");
@@ -325,6 +326,169 @@ public class MaterialWmsIntegrationTest {
         assertEquals(0L, count("wms_stock_documents"));
     }
 
+    @Test
+    public void bpiCompletionInboundReversalIsAppendOnlyPersistentAndIdempotent() throws Exception {
+        String inboundKey = "WMS_COMPLETION_INBOUND|COMP|BATCH-REV|GATE-1|1";
+        String inboundEventId = "2ea229c2-f2bb-5da8-b84c-5b4bd00148ce";
+        mockMvc.perform(post("/material/produceInSingles/produceInSingl/generateProductInSingle")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bpiInboundJson(inboundEventId, inboundKey, "10")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(200));
+
+        String originalDocumentNo = jdbc.queryForObject(
+            "SELECT document_no FROM wms_stock_documents WHERE idempotency_key = ?",
+            String.class, inboundKey);
+        String reversalKey = "WMS_COMPLETION_INBOUND_REVERSAL|COMP|BATCH-REV|GATE-1|1";
+        String reversalEventId = "c9288339-f020-59cd-a50e-2e2855115582";
+        String reversal = bpiReversalJson(
+            reversalEventId, reversalKey, originalDocumentNo, "10");
+
+        mockMvc.perform(post("/material/wms/completion-inbound-reversals")
+                .header("X-Tenant-Id", "COMP")
+                .contentType(MediaType.APPLICATION_JSON).content(reversal))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(403));
+        mockMvc.perform(post("/material/wms/completion-inbound-reversals")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bpiReversalJson(
+                    reversalEventId, reversalKey, originalDocumentNo, "9")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(409));
+        assertEquals(1L, count("wms_stock_documents"));
+        assertStock("10.000000", "10.000000", "0.000000");
+
+        mockMvc.perform(post("/material/wms/completion-inbound-reversals")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .contentType(MediaType.APPLICATION_JSON).content(reversal))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(200))
+            .andExpect(jsonPath("$.data.documentType")
+                .value("COMPLETION_INBOUND_REVERSAL"))
+            .andExpect(jsonPath("$.data.idempotent").value(false));
+
+        mockMvc.perform(get("/material/wms/completion-inbound-reversals/by-idempotency")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .param("sourceSystem", "BPI")
+                .param("idempotencyKey", reversalKey))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(200))
+            .andExpect(jsonPath("$.data.document.document_type")
+                .value("COMPLETION_INBOUND_REVERSAL"))
+            .andExpect(jsonPath("$.data.document.source_document_id")
+                .value(reversalEventId))
+            .andExpect(jsonPath("$.data.document.idempotency_key").value(reversalKey))
+            .andExpect(jsonPath("$.data.originalDocument.document_no")
+                .value(originalDocumentNo))
+            .andExpect(jsonPath("$.data.originalDocument.status").value("REVERSED"))
+            .andExpect(jsonPath("$.data.lines[0].source_system").value("BPI"))
+            .andExpect(jsonPath("$.data.lines[0].unit_code").value("kg"))
+            .andExpect(jsonPath("$.data.transactions[0].transaction_type")
+                .value("COMPLETION_INBOUND_REVERSAL"));
+
+        mockMvc.perform(post("/material/wms/completion-inbound-reversals")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .contentType(MediaType.APPLICATION_JSON).content(reversal))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(200))
+            .andExpect(jsonPath("$.data.idempotent").value(true));
+
+        mockMvc.perform(post("/material/wms/completion-inbound-reversals")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bpiReversalJson(
+                    reversalEventId, reversalKey, originalDocumentNo, "9")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(409));
+
+        mockMvc.perform(post("/material/wms/completion-inbound-reversals")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bpiReversalJson(
+                    "4c405c19-79f1-5db8-b6f8-c54bb4684eb1",
+                    reversalKey + "|OTHER", originalDocumentNo, "10")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(409));
+
+        assertEquals(2L, count("wms_stock_documents"));
+        assertEquals(2L, count("wms_stock_document_lines"));
+        assertEquals(2L, count("wms_inventory_transactions"));
+        assertEquals("REVERSED", jdbc.queryForObject(
+            "SELECT status FROM wms_stock_documents WHERE idempotency_key = ?",
+            String.class, inboundKey));
+        assertEquals("POSTED", jdbc.queryForObject(
+            "SELECT status FROM wms_stock_documents WHERE idempotency_key = ?",
+            String.class, reversalKey));
+        assertEquals(new BigDecimal("-10.000000"), jdbc.queryForObject(
+            "SELECT on_hand_delta FROM wms_inventory_transactions "
+                + "WHERE transaction_type = 'COMPLETION_INBOUND_REVERSAL'",
+            BigDecimal.class));
+        assertEquals(new BigDecimal("-10.000000"), jdbc.queryForObject(
+            "SELECT available_delta FROM wms_inventory_transactions "
+                + "WHERE transaction_type = 'COMPLETION_INBOUND_REVERSAL'",
+            BigDecimal.class));
+        assertStock("0.000000", "0.000000", "0.000000");
+    }
+
+    @Test
+    public void bpiReversalWithConsumedStockRollsBackCompletely() throws Exception {
+        String inboundKey = "WMS_COMPLETION_INBOUND|COMP|BATCH-CONSUMED|GATE-1|1";
+        mockMvc.perform(post("/material/produceInSingles/produceInSingl/generateProductInSingle")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bpiInboundJson(
+                    "2ea229c2-f2bb-5da8-b84c-5b4bd00148ce", inboundKey, "10")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(200));
+        String originalDocumentNo = jdbc.queryForObject(
+            "SELECT document_no FROM wms_stock_documents WHERE idempotency_key = ?",
+            String.class, inboundKey);
+
+        String issue = "{"
+            + "\"srcId\":\"BPI_REVERSAL_CONSUMED_OUT\",\"companyCode\":\"COMP\","
+            + "\"wareCode\":\"WARE\",\"storageDate\":\"2026-07-20\","
+            + "\"comeType\":\"produceOut\",\"redBlue\":\"blue\",\"detailList\":[{"
+            + "\"goodCode\":\"MAT\",\"batchText\":\"BATCH-1\","
+            + "\"produceBatchNum\":\"BATCH-1\",\"placeSetCode\":\"LOC\","
+            + "\"quantity\":3,\"unitCode\":\"kg\"}]}";
+        mockMvc.perform(post("/material/produceOutSingle/produceOutSing/generateProduceOutSing")
+                .contentType(MediaType.APPLICATION_JSON).content(issue))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(200));
+        assertStock("7.000000", "7.000000", "0.000000");
+
+        String reversalKey = "WMS_COMPLETION_INBOUND_REVERSAL|COMP|BATCH-CONSUMED|GATE-1|1";
+        mockMvc.perform(post("/material/wms/completion-inbound-reversals")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bpiReversalJson(
+                    "c9288339-f020-59cd-a50e-2e2855115582",
+                    reversalKey, originalDocumentNo, "10")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(409));
+
+        assertEquals(2L, count("wms_stock_documents"));
+        assertEquals(2L, count("wms_stock_document_lines"));
+        assertEquals(2L, count("wms_inventory_transactions"));
+        assertEquals(0L, countWhere(
+            "wms_stock_documents", "document_type = 'COMPLETION_INBOUND_REVERSAL'"));
+        assertEquals("POSTED", jdbc.queryForObject(
+            "SELECT status FROM wms_stock_documents WHERE idempotency_key = ?",
+            String.class, inboundKey));
+        assertStock("7.000000", "7.000000", "0.000000");
+    }
+
     private String inboundJson(String sourceId, String sourceLineId, String quantity) {
         return "{"
             + "\"srcID\":\"" + sourceId + "\",\"srcTableNo\":\"IN-1\",\"directiveNo\":\"MO-1\","
@@ -346,6 +510,26 @@ public class MaterialWmsIntegrationTest {
             + "\"checkResult\":\"BaseSet_checkResult/qualified\"}]}";
     }
 
+    private String bpiReversalJson(
+            String commandEventId,
+            String idempotencyKey,
+            String originalDocumentNo,
+            String quantity) {
+        return "{"
+            + "\"sourceSystem\":\"BPI\",\"idempotencyKey\":\"" + idempotencyKey + "\","
+            + "\"srcID\":\"" + commandEventId + "\","
+            + "\"originalDocumentNo\":\"" + originalDocumentNo + "\","
+            + "\"srcTableNo\":\"BATCH-1\",\"directiveNo\":\"MO-1\","
+            + "\"companyCode\":\"COMP\",\"wareCode\":\"WARE\","
+            + "\"storageDate\":\"2026-07-20\",\"comeType\":\"produceIn\","
+            + "\"redBlue\":\"red\",\"detailList\":[{"
+            + "\"srcPartId\":\"" + commandEventId + ":1\",\"goodCode\":\"MAT\","
+            + "\"batchText\":\"BATCH-1\",\"produceBatchNum\":\"BATCH-1\","
+            + "\"placeSetCode\":\"LOC\",\"quantity\":" + quantity + ","
+            + "\"unitCode\":\"kg\","
+            + "\"checkResult\":\"BaseSet_checkResult/qualified\"}]}";
+    }
+
     private String allocationJson(
             String action,
             String requestId,
@@ -364,6 +548,12 @@ public class MaterialWmsIntegrationTest {
 
     private long count(String table) {
         Long value = jdbc.queryForObject("SELECT COUNT(*) FROM " + table, Long.class);
+        return value == null ? 0L : value.longValue();
+    }
+
+    private long countWhere(String table, String predicate) {
+        Long value = jdbc.queryForObject(
+            "SELECT COUNT(*) FROM " + table + " WHERE " + predicate, Long.class);
         return value == null ? 0L : value.longValue();
     }
 

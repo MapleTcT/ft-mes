@@ -48,6 +48,16 @@ public class MaterialWmsController {
             tenantResolver.resolve(servletRequest, request.getCompanyCode()), request).toMap());
     }
 
+    @PostMapping("/material/wms/completion-inbound-reversals")
+    public LegacyResult<Map<String, Object>> createCompletionInboundReversal(
+            HttpServletRequest servletRequest,
+            @RequestHeader(value = "X-BPI-WMS-Key", required = false) String bpiApiKey,
+            @RequestBody StockDocumentRequest request) {
+        bpiIntegrationKeyVerifier.verifyIfBpi(request.getSourceSystem(), bpiApiKey);
+        return LegacyResult.success(inventoryService.createCompletionInboundReversal(
+            tenantResolver.resolve(servletRequest, request.getCompanyCode()), request).toMap());
+    }
+
     @PostMapping({
         "/public/material/produceOutSingle/produceOutSing/generateProduceOutSing",
         "/material/produceOutSingle/produceOutSing/generateProduceOutSing"
@@ -115,6 +125,17 @@ public class MaterialWmsController {
             @RequestParam("idempotencyKey") String idempotencyKey) {
         bpiIntegrationKeyVerifier.verifyIfBpi(sourceSystem, bpiApiKey);
         return LegacyResult.success(inventoryService.completionInboundByIdempotency(
+            tenantResolver.resolve(servletRequest, null), sourceSystem, idempotencyKey));
+    }
+
+    @GetMapping("/material/wms/completion-inbound-reversals/by-idempotency")
+    public LegacyResult<Map<String, Object>> completionInboundReversalByIdempotency(
+            HttpServletRequest servletRequest,
+            @RequestHeader(value = "X-BPI-WMS-Key", required = false) String bpiApiKey,
+            @RequestParam("sourceSystem") String sourceSystem,
+            @RequestParam("idempotencyKey") String idempotencyKey) {
+        bpiIntegrationKeyVerifier.verifyIfBpi(sourceSystem, bpiApiKey);
+        return LegacyResult.success(inventoryService.completionInboundReversalByIdempotency(
             tenantResolver.resolve(servletRequest, null), sourceSystem, idempotencyKey));
     }
 }

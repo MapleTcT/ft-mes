@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 197,
+  "migrationCount": 198,
   "firstNumber": 1,
-  "lastNumber": 197,
+  "lastNumber": 198,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -12,9 +12,9 @@
   "watchStatementCount": 78,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 10820,
+    "alter-table": 10827,
     "create-function": 93,
-    "create-index": 1004,
+    "create-index": 1005,
     "create-table": 580,
     "create-view": 142,
     "insert": 11016,
@@ -23,8 +23,8 @@
   "idempotencySignalTotals": {
     "create-or-replace": 232,
     "do-block": 395,
-    "if-exists": 121,
-    "if-not-exists": 13033,
+    "if-exists": 124,
+    "if-not-exists": 13035,
     "on-conflict": 10953,
     "to-regclass": 219,
     "where-not-exists": 45
@@ -34,7 +34,7 @@
     "business": 37,
     "compatibility": 77,
     "configuration": 45,
-    "general": 34,
+    "general": 35,
     "notification": 9,
     "platform": 55,
     "workflow": 21
@@ -7470,6 +7470,39 @@
           "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
         }
       ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/198-material-wms-completion-inbound-reversal.sql",
+      "name": "198-material-wms-completion-inbound-reversal.sql",
+      "number": 198,
+      "slug": "material-wms-completion-inbound-reversal",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 32,
+      "sha256": "d2250c397acd24059ab687ca6dad42c6aae26e83789da9d61e30dc2bb2ddc2b4",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 1,
+        "alter-table": 7,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 3,
+        "if-not-exists": 2,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
       "unguardedStructuralStatements": []
     }
   ]

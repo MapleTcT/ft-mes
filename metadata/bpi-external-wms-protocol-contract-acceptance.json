@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T22:27:49+08:00",
-  "repoBaseCommit": "7907ad3fc7e4bac609128759c621cb95a6ab9e50",
+  "generatedAt": "2026-07-21T22:45:13+08:00",
+  "repoBaseCommit": "b1802dec418abad937cb6b18e23900f6e673c6c1",
   "database": "NOT_APPLICABLE",
   "environment": "local-controlled-java17-maven3.9.3",
   "status": "PASS_SOFTWARE_PROTOCOL_ONLY",
@@ -62,7 +62,7 @@
     {
       "scenario": "completion-inbound-reversal-compensation",
       "status": "BLOCKED",
-      "evidence": "Append-only reversal contract and durable external reversal document are not implemented yet"
+      "evidence": "Internal material-wms append-only red-document persistence passed locally, but BPI approval, reversal command and receipt, adapter protocol, target PostgreSQL and external WMS acceptance are not implemented yet"
     }
   ],
   "verification": {

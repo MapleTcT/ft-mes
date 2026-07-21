@@ -45,6 +45,53 @@ public class MaterialInventoryService {
     }
 
     @Transactional
+    public StockDocumentResult createCompletionInboundReversal(
+            String tenantId, StockDocumentRequest request) {
+        validateRequest(request, DocumentType.COMPLETION_INBOUND_REVERSAL);
+        String sourceSystem = sourceSystem(request.getSourceSystem());
+        if (!"BPI".equals(sourceSystem)) {
+            throw new MaterialWmsBusinessException(400, "完工入库冲销接口只接受 BPI 来源");
+        }
+        String idempotencyKey = requiredWithMaximum(
+            request.getIdempotencyKey(), "idempotencyKey", 256);
+        String originalDocumentNo = requiredWithMaximum(
+            request.getOriginalDocumentNo(), "originalDocumentNo", 96);
+        Map<String, Object> original = repository.lockCompletionInboundByDocumentNo(
+            tenantId, sourceSystem, originalDocumentNo);
+        if (original == null) {
+            throw new MaterialWmsBusinessException(404, "原完工入库单不存在: " + originalDocumentNo);
+        }
+        long originalDocumentId = number(original.get("id")).longValue();
+        Map<String, Object> sameKey = repository.findDocumentByIdempotency(
+            tenantId, DocumentType.COMPLETION_INBOUND_REVERSAL, sourceSystem, idempotencyKey);
+        if (sameKey != null) {
+            Object linkedOriginal = sameKey.get("reversal_of_document_id");
+            if (linkedOriginal == null
+                    || number(linkedOriginal).longValue() != originalDocumentId) {
+                throw new MaterialWmsBusinessException(409, "冲销幂等键已关联其他原入库单");
+            }
+        }
+        Map<String, Object> previousReversal = repository.findReversalByOriginal(
+            tenantId, originalDocumentId);
+        if (previousReversal != null) {
+            if (!idempotencyKey.equals(string(previousReversal.get("idempotency_key")))) {
+                throw new MaterialWmsBusinessException(409, "原完工入库单已经存在其他红字冲销单");
+            }
+            return createDocument(
+                tenantId, request, DocumentType.COMPLETION_INBOUND_REVERSAL);
+        }
+        if (!"POSTED".equals(string(original.get("status")))) {
+            throw new MaterialWmsBusinessException(409, "原完工入库单不是可冲销的 POSTED 状态");
+        }
+        verifyReversalFacts(original, repository.findDocumentLines(originalDocumentId), request);
+
+        StockDocumentResult result = createDocument(
+            tenantId, request, DocumentType.COMPLETION_INBOUND_REVERSAL);
+        repository.linkReversalToOriginal(tenantId, result.getDocumentId(), originalDocumentId);
+        return result;
+    }
+
+    @Transactional
     public StockDocumentResult createFromLegacyOutEndpoint(String tenantId, StockDocumentRequest request) {
         if ("produceIn".equalsIgnoreCase(trim(request.getComeType()))) {
             return createDocument(tenantId, request, DocumentType.COMPLETION_INBOUND);
@@ -264,6 +311,22 @@ public class MaterialInventoryService {
             tenantId, number(document.get("id")).longValue());
     }
 
+    @Transactional(readOnly = true)
+    public Map<String, Object> completionInboundReversalByIdempotency(
+            String tenantId, String requestedSourceSystem, String requestedIdempotencyKey) {
+        String sourceSystem = sourceSystem(requestedSourceSystem);
+        String idempotencyKey = requiredWithMaximum(
+            requestedIdempotencyKey, "idempotencyKey", 256);
+        Map<String, Object> document = repository.findDocumentByIdempotency(
+            tenantId, DocumentType.COMPLETION_INBOUND_REVERSAL, sourceSystem, idempotencyKey);
+        if (document == null) {
+            throw new MaterialWmsBusinessException(404,
+                "完工入库冲销单不存在: " + sourceSystem + "/" + idempotencyKey);
+        }
+        return repository.completionInboundReversalDetail(
+            tenantId, number(document.get("id")).longValue());
+    }
+
     private StockDocumentResult createDocument(
             String tenantId, StockDocumentRequest request, DocumentType documentType) {
         validateRequest(request, documentType);
@@ -337,7 +400,9 @@ public class MaterialInventoryService {
                 goodQuantity = decimal(allocation.get("good_quantity"));
                 badQuantity = decimal(allocation.get("bad_quantity"));
             }
-            QualityStatus qualityStatus = documentType == DocumentType.PRODUCTION_ISSUE
+            boolean outbound = documentType == DocumentType.PRODUCTION_ISSUE
+                || documentType == DocumentType.COMPLETION_INBOUND_REVERSAL;
+            QualityStatus qualityStatus = outbound
                 ? QualityStatus.QUALIFIED
                 : resolveInitialQuality(tenantId, sourceSystem, sourceLineId, line.getCheckResult());
             if (qualityStatus == QualityStatus.QUALIFIED && badQuantity.compareTo(ZERO) > 0) {
@@ -375,12 +440,11 @@ public class MaterialInventoryService {
                 line.getBatchText(),
                 line.getProductionBatchNo()
             );
-            BigDecimal direction = documentType == DocumentType.COMPLETION_INBOUND
-                ? BigDecimal.ONE : BigDecimal.ONE.negate();
+            BigDecimal direction = outbound ? BigDecimal.ONE.negate() : BigDecimal.ONE;
             BigDecimal onHandDelta = line.getQuantity().multiply(direction);
             BigDecimal availableDelta;
             BigDecimal holdDelta;
-            if (documentType == DocumentType.PRODUCTION_ISSUE) {
+            if (outbound) {
                 availableDelta = line.getQuantity().negate();
                 holdDelta = ZERO;
             } else {
@@ -435,8 +499,17 @@ public class MaterialInventoryService {
         if (request.getDetailList() == null || request.getDetailList().isEmpty()) {
             throw new MaterialWmsBusinessException(400, "detailList 不能为空");
         }
-        if (!trim(request.getRedBlue()).isEmpty() && !"blue".equalsIgnoreCase(trim(request.getRedBlue()))) {
-            throw new MaterialWmsBusinessException(400, "首期不支持红字冲销，请提交 blue 单据");
+        String redBlue = trim(request.getRedBlue());
+        if (documentType == DocumentType.COMPLETION_INBOUND_REVERSAL) {
+            if (!"red".equalsIgnoreCase(redBlue)) {
+                throw new MaterialWmsBusinessException(400, "完工入库冲销必须提交 red 单据");
+            }
+            requiredWithMaximum(request.getOriginalDocumentNo(), "originalDocumentNo", 96);
+            if (request.getDetailList().size() != 1) {
+                throw new MaterialWmsBusinessException(400, "BPI 完工入库冲销必须包含且仅包含一条明细");
+            }
+        } else if (!redBlue.isEmpty() && !"blue".equalsIgnoreCase(redBlue)) {
+            throw new MaterialWmsBusinessException(400, "普通库存动作必须提交 blue 单据");
         }
         for (int index = 0; index < request.getDetailList().size(); index++) {
             StockDocumentLineRequest line = request.getDetailList().get(index);
@@ -454,6 +527,33 @@ public class MaterialInventoryService {
         if (documentType == DocumentType.COMPLETION_INBOUND
                 && "produceOut".equalsIgnoreCase(trim(request.getComeType()))) {
             throw new MaterialWmsBusinessException(400, "完工入库接口不能提交 produceOut 类型");
+        }
+    }
+
+    private void verifyReversalFacts(
+            Map<String, Object> original,
+            List<Map<String, Object>> originalLines,
+            StockDocumentRequest request) {
+        if (!"QUALIFIED".equals(string(original.get("quality_status")))
+                || originalLines.size() != 1) {
+            throw new MaterialWmsBusinessException(409, "只有单明细且质量合格的 BPI 入库单可以冲销");
+        }
+        Map<String, Object> persisted = originalLines.get(0);
+        StockDocumentLineRequest requested = request.getDetailList().get(0);
+        if (!"QUALIFIED".equals(string(persisted.get("quality_status")))
+                || !string(original.get("warehouse_code")).equals(request.getWareCode().trim())
+                || !string(persisted.get("material_code")).equals(requested.getGoodCode().trim())
+                || !string(persisted.get("batch_no")).equals(
+                    MaterialWmsRepository.normalizeDimension(requested.getBatchText()))
+                || !string(persisted.get("production_batch_no")).equals(
+                    MaterialWmsRepository.normalizeDimension(requested.getProductionBatchNo()))
+                || !string(persisted.get("location_code")).equals(
+                    MaterialWmsRepository.normalizeDimension(requested.getPlaceSetCode()))
+                || !string(persisted.get("unit_code")).equals(
+                    MaterialWmsRepository.normalizeDimension(requested.getUnitCode()))
+                || decimal(persisted.get("quantity")).compareTo(requested.getQuantity()) != 0) {
+            throw new MaterialWmsBusinessException(409,
+                "红字冲销的物料、批次、仓库、库位、数量或单位与原入库单不一致");
         }
     }
 

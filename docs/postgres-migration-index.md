@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`197`。
-- 编号范围：`001` 到 `197`。
+- 脚本数量：`198`。
+- 编号范围：`001` 到 `198`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -24,7 +24,7 @@
 | business | 37 |
 | compatibility | 77 |
 | configuration | 45 |
-| general | 34 |
+| general | 35 |
 | notification | 9 |
 | platform | 55 |
 | workflow | 21 |
@@ -33,9 +33,9 @@
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10820 |
+| alter-table | 10827 |
 | create-function | 93 |
-| create-index | 1004 |
+| create-index | 1005 |
 | create-table | 580 |
 | create-view | 142 |
 | insert | 11016 |
@@ -47,8 +47,8 @@
 | --- | --- |
 | create-or-replace | 232 |
 | do-block | 395 |
-| if-exists | 121 |
-| if-not-exists | 13033 |
+| if-exists | 124 |
+| if-not-exists | 13035 |
 | on-conflict | 10953 |
 | to-regclass | 219 |
 | where-not-exists | 45 |
@@ -254,6 +254,7 @@
 | 195 | 195-wom-source-compat.sql | compatibility | 120 | create-table:1, create-index:2, alter-table:2, insert:1 | 8 | - |
 | 196 | 196-qcs-manu-inspect-list-empty-column.sql | configuration, business | 114 | create-function:1, update:4 | 3 | watch:1 |
 | 197 | 197-configuration-app-owned-physical-schema-sync.sql | configuration | 4 | - | 2 | watch:2 |
+| 198 | 198-material-wms-completion-inbound-reversal.sql | general | 32 | create-index:1, alter-table:7 | 5 | - |
 
 ## 规则
 

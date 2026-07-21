@@ -17,6 +17,18 @@ public final class StockDocumentResult {
         this.idempotent = idempotent;
     }
 
+    public long getDocumentId() {
+        return documentId;
+    }
+
+    public String getDocumentNo() {
+        return documentNo;
+    }
+
+    public boolean isIdempotent() {
+        return idempotent;
+    }
+
     public Map<String, Object> toMap() {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         result.put("documentId", documentId);

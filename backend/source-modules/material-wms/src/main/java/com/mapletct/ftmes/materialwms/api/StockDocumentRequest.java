@@ -13,6 +13,7 @@ public class StockDocumentRequest {
     private String sourceDocumentId;
     private String sourceSystem;
     private String idempotencyKey;
+    private String originalDocumentNo;
     private String srcTableNo;
     private String directiveNo;
     private String companyCode;
@@ -49,6 +50,14 @@ public class StockDocumentRequest {
 
     public void setIdempotencyKey(String idempotencyKey) {
         this.idempotencyKey = idempotencyKey;
+    }
+
+    public String getOriginalDocumentNo() {
+        return originalDocumentNo;
+    }
+
+    public void setOriginalDocumentNo(String originalDocumentNo) {
+        this.originalDocumentNo = originalDocumentNo;
     }
 
     public String getSrcTableNo() {
