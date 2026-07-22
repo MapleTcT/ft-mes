@@ -6,6 +6,7 @@ set -eu
 : "${BPI_MATERIALIZER_DATABASE_PASSWORD:?BPI_MATERIALIZER_DATABASE_PASSWORD is required}"
 : "${BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD:?BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD is required}"
 : "${BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD:?BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD is required}"
+: "${BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD:?BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD is required}"
 
 BPI_DATABASE_NAME="${BPI_DATABASE_NAME:-ft_mes_bpi}"
 
@@ -17,7 +18,8 @@ psql --set ON_ERROR_STOP=1 \
   --set migrator_password="$BPI_MIGRATOR_PASSWORD" \
   --set materializer_password="$BPI_MATERIALIZER_DATABASE_PASSWORD" \
   --set catalog_publisher_password="$BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD" \
-  --set retention_archiver_password="$BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD" <<'SQL'
+  --set retention_archiver_password="$BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD" \
+  --set mlflow_registrar_password="$BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD" <<'SQL'
 SELECT format('CREATE ROLE bpi_migrator LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT PASSWORD %L', :'migrator_password')
  WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'bpi_migrator')
 \gexec
@@ -48,12 +50,18 @@ SELECT format('CREATE ROLE bpi_retention_archiver LOGIN NOSUPERUSER NOCREATEDB N
 SELECT format('ALTER ROLE bpi_retention_archiver LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS PASSWORD %L', :'retention_archiver_password')
 \gexec
 
+SELECT format('CREATE ROLE bpi_mlflow_registrar LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS PASSWORD %L', :'mlflow_registrar_password')
+ WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'bpi_mlflow_registrar')
+\gexec
+SELECT format('ALTER ROLE bpi_mlflow_registrar LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS PASSWORD %L', :'mlflow_registrar_password')
+\gexec
+
 SELECT format('CREATE DATABASE %I OWNER bpi_migrator', :'bpi_database')
  WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = :'bpi_database')
 \gexec
 SELECT format('REVOKE ALL ON DATABASE %I FROM PUBLIC', :'bpi_database')
 \gexec
-SELECT format('GRANT CONNECT ON DATABASE %I TO bpi_migrator, bpi_service, bpi_materializer, bpi_catalog_publisher, bpi_retention_archiver', :'bpi_database')
+SELECT format('GRANT CONNECT ON DATABASE %I TO bpi_migrator, bpi_service, bpi_materializer, bpi_catalog_publisher, bpi_retention_archiver, bpi_mlflow_registrar', :'bpi_database')
 \gexec
 SQL
 
@@ -61,5 +69,5 @@ psql --set ON_ERROR_STOP=1 \
   --username "$POSTGRES_USER" \
   --dbname "$BPI_DATABASE_NAME" <<'SQL'
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
-GRANT USAGE ON SCHEMA public TO bpi_migrator, bpi_service, bpi_materializer, bpi_catalog_publisher, bpi_retention_archiver;
+GRANT USAGE ON SCHEMA public TO bpi_migrator, bpi_service, bpi_materializer, bpi_catalog_publisher, bpi_retention_archiver, bpi_mlflow_registrar;
 SQL

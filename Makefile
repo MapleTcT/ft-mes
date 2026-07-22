@@ -170,7 +170,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
-.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-dataset-materializer-test bpi-dataset-catalog-publisher-test bpi-dataset-retention-archiver-test bpi-wms-adapter-test bpi-wms-adapter-package bpi-wms-outage-fixture-test bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only bpi-material-reversal-schema-upgrade-target bpi-material-wms-deploy-target acceptance-bpi-quality-release-target acceptance-bpi-wms-reconciliation-target acceptance-bpi-wms-outage-recovery-target acceptance-bpi-force-close-target acceptance-bpi-formal-identity-force-close-target acceptance-bpi-formal-identity-wms-reversal-target acceptance-bpi-formal-identity-wms-roundtrip-target acceptance-qcs-bpi-quality-gate-target rehearse-bpi-wms-outage-recovery-target bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test qcs-quality-gate-outbox-test qcs-quality-gate-outbox-postgres-test qcs-quality-gate-outbox-package up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
+.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-dataset-materializer-test bpi-dataset-catalog-publisher-test bpi-dataset-retention-archiver-test bpi-dataset-mlflow-registrar-test bpi-wms-adapter-test bpi-wms-adapter-package bpi-wms-outage-fixture-test bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only bpi-material-reversal-schema-upgrade-target bpi-material-wms-deploy-target acceptance-bpi-quality-release-target acceptance-bpi-wms-reconciliation-target acceptance-bpi-wms-outage-recovery-target acceptance-bpi-force-close-target acceptance-bpi-formal-identity-force-close-target acceptance-bpi-formal-identity-wms-reversal-target acceptance-bpi-formal-identity-wms-roundtrip-target acceptance-qcs-bpi-quality-gate-target rehearse-bpi-wms-outage-recovery-target bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test qcs-quality-gate-outbox-test qcs-quality-gate-outbox-postgres-test qcs-quality-gate-outbox-package up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -215,6 +215,7 @@ help:
 	@printf '%s\n' '  make bpi-dataset-materializer-test Run deterministic Parquet and object-store worker tests'
 	@printf '%s\n' '  make bpi-dataset-catalog-publisher-test Run exact-source and Iceberg catalog publisher tests'
 	@printf '%s\n' '  make bpi-dataset-retention-archiver-test Run Object Lock archive and recovery tests'
+	@printf '%s\n' '  make bpi-dataset-mlflow-registrar-test Run immutable MLflow dataset registration tests'
 	@printf '%s\n' '  make bpi-material-reversal-schema-upgrade-target Back up and add the material-wms red-document schema on the target'
 	@printf '%s\n' '  make bpi-material-wms-deploy-target Back up, deploy, restart and probe only target material-wms'
 	@printf '%s\n' '  make acceptance-bpi-quality-release-target Test the real ADP batch release page and adapter boundary'
@@ -417,7 +418,7 @@ help:
 
 ci: verify bpi-contracts-test bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-stream-static-check bpi-stream-deployment-check bpi-production-context-test qcs-quality-gate-outbox-test bpi-adapter-static-check bpi-ui-static-check bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check runtime-script-check sustainable-check ci-required-file-inventory-check ci-required-file-strict-check project-goal-acceptance-check goal-gap-register-check backend-table-audit-handoff-check basic-config-coverage-check basic-config-action-matrix-check entity-model-config-crud-readiness-check test-environment-address-check test-environment-static-bundle-link-check persistence-acceptance-check production-testcase-check wom-toolbar-action-coverage-check production-blocker-check production-module-backlog-check production-action-map-check platform-validation-check runtime-smoke-reports-check business-dependency-readiness-check business-dependency-contract-check business-module-intake-requirements-check business-package-scan-check production-export-readiness-check production-export-gap-breakdown-check production-source-evidence-refresh-check production-migration-readiness-check production-cutover-gate-check production-rehearsal-plan-check production-db-migration-evidence-check production-rollback-evidence-check production-license-strategy-check production-network-tls-check production-security-hardening-check production-business-smoke-signoff-check production-nacos-runtime-patch-check production-minio-migration-evidence-check production-keycloak-migration-evidence-check production-evidence-ready-gate-regression-check runtime-patch-manifest-check rm-web-formula-editor-acceptance-check source-module-check module-intake-precheck-regression-check module-intake-candidate-report-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
 
-ci-java17: bpi-contracts-test bpi-api-contract-check bpi-runtime-replay-test bpi-stream-test bpi-service-test
+ci-java17: bpi-contracts-test bpi-api-contract-check bpi-runtime-replay-test bpi-stream-test bpi-service-test bpi-dataset-mlflow-registrar-test
 
 verify: verify-pom compose-config
 
@@ -426,6 +427,7 @@ verify-pom:
 
 compose-config:
 	$(COMPOSE) config --quiet
+	$(COMPOSE) --profile bpi-ml config --quiet
 
 runtime-script-check:
 	sh -n deploy/docker/scripts/build-foundation-simulated-login-serverport-patch.sh
@@ -450,9 +452,12 @@ runtime-script-check:
 	sh -n deploy/docker/postgres/ensure-bpi-materializer-role.sh
 	sh -n deploy/docker/postgres/ensure-bpi-catalog-publisher-role.sh
 	sh -n deploy/docker/postgres/ensure-bpi-retention-archiver-role.sh
+	sh -n deploy/docker/postgres/ensure-bpi-mlflow-registrar-role.sh
 	sh -n deploy/minio/bootstrap-bpi-dataset-bucket.sh
 	sh -n deploy/minio/bootstrap-bpi-iceberg-warehouse.sh
 	sh -n deploy/minio/bootstrap-bpi-dataset-recovery-bucket.sh
+	sh -n deploy/minio/bootstrap-bpi-mlflow-artifact-bucket.sh
+	sh -n services/bpi-mlflow/start-mlflow.sh
 	sh -n deploy/polaris/check_metastore_bootstrap.sh
 	sh -n deploy/polaris/bootstrap_metastore_if_required.sh
 	sh -n deploy/docker/scripts/upgrade-bpi-integrated-expand-only.sh
@@ -783,6 +788,11 @@ bpi-dataset-retention-archiver-test:
 	PYTHONPATH="$(CURDIR)/services/bpi-dataset-catalog-publisher/src:$(CURDIR)/services/bpi-dataset-retention-archiver/src" \
 		$(PYTHON) -m unittest discover \
 		-s services/bpi-dataset-retention-archiver/tests -v
+
+bpi-dataset-mlflow-registrar-test:
+	PYTHONPATH="$(CURDIR)/services/bpi-dataset-mlflow-registrar/src" \
+		$(PYTHON) -m unittest discover \
+		-s services/bpi-dataset-mlflow-registrar/tests -v
 
 bpi-wms-adapter-test:
 	$(MVN) -f services/bpi-service/pom.xml -pl wms-adapter -am test

@@ -160,6 +160,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
     void cleanupMarker() {
         if (tenantId == null) return;
         if (Boolean.parseBoolean(env("BPI_TEST_KEEP_MARKER", "false"))) return;
+        cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_mlflow_registrations WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_retention_archives WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_catalog_publications WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_materializations WHERE tenant_id = ?", tenantId);
@@ -1023,6 +1024,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                     """, tenantId, archiveId))
                     .isInstanceOf(DataAccessException.class)
                     .hasMessageContaining("LOCKED");
+            proveMlflowRegistrationLifecycle(archiveId);
             return;
         }
 
@@ -1165,6 +1167,300 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 """, tenantId, archiveId))
                 .isInstanceOf(DataAccessException.class)
                 .hasMessageContaining("LOCKED");
+        proveMlflowRegistrationLifecycle(archiveId);
+    }
+
+    private void proveMlflowRegistrationLifecycle(UUID archiveId) throws Exception {
+        long archiveRevision = jdbc.queryForObject("""
+                SELECT revision
+                  FROM bpi.bpi_dataset_retention_archives
+                 WHERE tenant_id = ? AND id = ? AND state = 'LOCKED'
+                """, Long.class, tenantId, archiveId);
+        String semanticChecksum = jdbc.queryForObject("""
+                SELECT catalog_semantic_checksum
+                  FROM bpi.bpi_dataset_retention_archives
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, archiveId);
+        byte[] requestBody = objectMapper.writeValueAsBytes(Map.of(
+                "reason", "Register the exact locked recovery dataset in MLflow"));
+
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-retention-archives/{id}/mlflow-registrations",
+                        archiveId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-retention-archives/{id}/mlflow-registrations",
+                        archiveId)
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .header("Idempotency-Key", "mlflow-viewer-denied-" + tenantId)
+                        .header("If-Match", archiveRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-retention-archives/{id}/mlflow-registrations",
+                        archiveId)
+                        .header("Authorization", "Bearer " + wrongScopeToken)
+                        .header("Idempotency-Key", "mlflow-scope-denied-" + tenantId)
+                        .header("If-Match", archiveRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-retention-archives/{id}/mlflow-registrations",
+                        archiveId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "mlflow-stale-" + tenantId)
+                        .header("If-Match", archiveRevision - 1)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isConflict());
+
+        String requestKey = "mlflow-registration-request-" + tenantId;
+        MvcResult requestResult = mockMvc.perform(post(
+                        "/bpi/v1/dataset-retention-archives/{id}/mlflow-registrations",
+                        archiveId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", requestKey)
+                        .header("If-Match", archiveRevision)
+                        .header("X-Trace-Id", tenantId + "_MLFLOW_REGISTRATION")
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("QUEUED"))
+                .andExpect(jsonPath("$.data.revision").value(1))
+                .andExpect(jsonPath("$.data.retentionArchiveId")
+                        .value(archiveId.toString()))
+                .andExpect(jsonPath("$.data.registrarVersion")
+                        .value("bpi-dataset-mlflow-registrar/0.1.0"))
+                .andExpect(jsonPath("$.data.trackingProfile")
+                        .value("bpi-mlflow-dataset-v1"))
+                .andExpect(jsonPath("$.data.datasetDigest")
+                        .value(semanticChecksum.substring(0, 16)))
+                .andExpect(jsonPath("$.data.mlflowRunId").doesNotExist())
+                .andExpect(jsonPath("$.data.registrationMetadata").doesNotExist())
+                .andReturn();
+        UUID registrationId = UUID.fromString(
+                response(requestResult).path("data").path("id").asText());
+
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-retention-archives/{id}/mlflow-registrations",
+                        archiveId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", requestKey)
+                        .header("If-Match", archiveRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.id").value(registrationId.toString()));
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-retention-archives/{id}/mlflow-registrations",
+                        archiveId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "mlflow-duplicate-" + tenantId)
+                        .header("If-Match", archiveRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isConflict());
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}", registrationId)
+                        .header("Authorization", "Bearer " + wrongScopeToken))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}", registrationId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("QUEUED"));
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/retry", registrationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "mlflow-premature-retry-" + tenantId)
+                        .header("If-Match", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of(
+                                "reason", "A queued registration cannot be retried"))))
+                .andExpect(status().isConflict());
+
+        if (Boolean.parseBoolean(env("BPI_TEST_EXTERNAL_MLFLOW_REGISTRAR", "false"))) {
+            Map<String, Object> registration = awaitExternalMlflowRegistration(registrationId);
+            assertThat(registration)
+                    .containsEntry("state", "REGISTERED")
+                    .containsEntry("dataset_input_verified", "true")
+                    .containsEntry("lineage_verified", "true")
+                    .containsEntry("model_trained", "false")
+                    .containsEntry("model_registered", "false")
+                    .containsEntry("online_inference_enabled", "false")
+                    .containsEntry("production_activation_allowed", "false");
+            assertThat((String) registration.get("mlflow_experiment_id")).isNotBlank();
+            assertThat((String) registration.get("mlflow_run_id")).isNotBlank();
+            assertThat((String) registration.get("mlflow_artifact_uri")).isNotBlank();
+            assertThat((String) registration.get("mlflow_dataset_source"))
+                    .startsWith("s3://bpi-dataset-recovery/")
+                    .contains("?versionId=");
+            mockMvc.perform(get(
+                            "/bpi/v1/dataset-mlflow-registrations/{id}", registrationId)
+                            .header("Authorization", "Bearer " + viewerToken))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.state").value("REGISTERED"))
+                    .andExpect(jsonPath("$.data.registrationMetadata.datasetInputVerified")
+                            .value(true))
+                    .andExpect(jsonPath("$.data.registrationMetadata.modelTrained")
+                            .value(false))
+                    .andExpect(jsonPath("$.data.registrationMetadata.productionActivationAllowed")
+                            .value(false));
+            assertThat(jdbc.queryForObject("""
+                    SELECT count(*) FROM bpi.bpi_audit_events
+                     WHERE tenant_id = ? AND object_id = ?
+                       AND action IN ('DATASET_MLFLOW_REGISTRATION_QUEUED',
+                                      'DATASET_MLFLOW_REGISTRATION_REGISTERING',
+                                      'DATASET_MLFLOW_REGISTRATION_REGISTERED')
+                    """, Long.class, tenantId, registrationId)).isEqualTo(3L);
+            assertThatThrownBy(() -> jdbc.update("""
+                    UPDATE bpi.bpi_dataset_mlflow_registrations
+                       SET request_reason = 'mutated'
+                     WHERE tenant_id = ? AND id = ?
+                    """, tenantId, registrationId))
+                    .isInstanceOf(DataAccessException.class)
+                    .hasMessageContaining("REGISTERED");
+            return;
+        }
+
+        UUID failedClaim = UUID.randomUUID();
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_mlflow_registrations
+                   SET state = 'REGISTERING', revision = revision + 1,
+                       started_at = now(), claim_token = ?, claimed_at = now(),
+                       attempt_count = attempt_count + 1
+                 WHERE tenant_id = ? AND id = ? AND state = 'QUEUED'
+                """, failedClaim, tenantId, registrationId)).isEqualTo(1);
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_mlflow_registrations
+                   SET state = 'FAILED', revision = revision + 1,
+                       completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                       failure_code = 'MLFLOW_TRANSPORT_ERROR',
+                       failure_detail = 'Acceptance-injected MLflow outage'
+                 WHERE tenant_id = ? AND id = ? AND state = 'REGISTERING'
+                   AND claim_token = ?
+                """, tenantId, registrationId, failedClaim)).isEqualTo(1);
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}", registrationId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("FAILED"))
+                .andExpect(jsonPath("$.data.revision").value(3))
+                .andExpect(jsonPath("$.data.failureCode").value("MLFLOW_TRANSPORT_ERROR"));
+
+        byte[] retryBody = objectMapper.writeValueAsBytes(Map.of(
+                "reason", "Retry after the MLflow tracking service recovers"));
+        String retryKey = "mlflow-registration-retry-" + tenantId;
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/retry", registrationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", retryKey)
+                        .header("If-Match", 3)
+                        .contentType(MediaType.APPLICATION_JSON).content(retryBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("QUEUED"))
+                .andExpect(jsonPath("$.data.revision").value(4))
+                .andExpect(jsonPath("$.data.attemptCount").value(1));
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/retry", registrationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", retryKey)
+                        .header("If-Match", 3)
+                        .contentType(MediaType.APPLICATION_JSON).content(retryBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.revision").value(4));
+
+        UUID readyClaim = UUID.randomUUID();
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_mlflow_registrations
+                   SET state = 'REGISTERING', revision = revision + 1,
+                       started_at = now(), claim_token = ?, claimed_at = now(),
+                       attempt_count = attempt_count + 1
+                 WHERE tenant_id = ? AND id = ? AND state = 'QUEUED'
+                """, readyClaim, tenantId, registrationId)).isEqualTo(1);
+        Map<String, Object> source = jdbc.queryForMap("""
+                SELECT archive_bucket, source_archive_object_key, source_archive_version_id
+                  FROM bpi.bpi_dataset_mlflow_registrations
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, registrationId);
+        String datasetSource = "s3://" + source.get("archive_bucket") + "/"
+                + source.get("source_archive_object_key") + "?versionId="
+                + source.get("source_archive_version_id");
+        String invalidMetadata = "{\"datasetInputVerified\":true,"
+                + "\"lineageVerified\":true,\"modelTrained\":false,"
+                + "\"modelRegistered\":false,\"onlineInferenceEnabled\":false,"
+                + "\"productionActivationAllowed\":true}";
+        assertThatThrownBy(() -> jdbc.update("""
+                UPDATE bpi.bpi_dataset_mlflow_registrations
+                   SET state = 'REGISTERED', revision = revision + 1,
+                       completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                       mlflow_experiment_id = '31', mlflow_run_id = 'run-invalid',
+                       mlflow_artifact_uri = 'mlflow-artifacts:/31/run-invalid/artifacts',
+                       mlflow_dataset_source = ?, registration_metadata = CAST(? AS jsonb)
+                 WHERE tenant_id = ? AND id = ? AND state = 'REGISTERING'
+                   AND claim_token = ?
+                """, datasetSource, invalidMetadata, tenantId, registrationId, readyClaim))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("chk_bpi_dataset_mlflow_registration_lifecycle");
+
+        String metadata = "{\"datasetInputVerified\":true,"
+                + "\"lineageVerified\":true,\"sourceFactsVerified\":true,"
+                + "\"modelTrained\":false,\"modelRegistered\":false,"
+                + "\"onlineInferenceEnabled\":false,"
+                + "\"productionActivationAllowed\":false}";
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_mlflow_registrations
+                   SET state = 'REGISTERED', revision = revision + 1,
+                       completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                       mlflow_experiment_id = '31', mlflow_run_id = 'run-acceptance',
+                       mlflow_artifact_uri = 'mlflow-artifacts:/31/run-acceptance/artifacts',
+                       mlflow_dataset_source = ?, registration_metadata = CAST(? AS jsonb)
+                 WHERE tenant_id = ? AND id = ? AND state = 'REGISTERING'
+                   AND claim_token = ?
+                """, datasetSource, metadata, tenantId, registrationId, readyClaim)).isEqualTo(1);
+
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-retention-archives/{id}/mlflow-registrations",
+                        archiveId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(registrationId.toString()))
+                .andExpect(jsonPath("$.data.state").value("REGISTERED"))
+                .andExpect(jsonPath("$.data.revision").value(6))
+                .andExpect(jsonPath("$.data.attemptCount").value(2))
+                .andExpect(jsonPath("$.data.mlflowExperimentId").value("31"))
+                .andExpect(jsonPath("$.data.mlflowRunId").value("run-acceptance"))
+                .andExpect(jsonPath("$.data.mlflowDatasetSource").value(datasetSource))
+                .andExpect(jsonPath("$.data.registrationMetadata.datasetInputVerified")
+                        .value(true))
+                .andExpect(jsonPath("$.data.registrationMetadata.lineageVerified").value(true))
+                .andExpect(jsonPath("$.data.registrationMetadata.modelTrained").value(false))
+                .andExpect(jsonPath("$.data.registrationMetadata.modelRegistered").value(false))
+                .andExpect(jsonPath("$.data.registrationMetadata.onlineInferenceEnabled")
+                        .value(false))
+                .andExpect(jsonPath("$.data.registrationMetadata.productionActivationAllowed")
+                        .value(false));
+        assertThat(datasetSource).contains("?versionId=");
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/retry", registrationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "mlflow-registered-retry-" + tenantId)
+                        .header("If-Match", 6)
+                        .contentType(MediaType.APPLICATION_JSON).content(retryBody))
+                .andExpect(status().isConflict());
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ? AND object_id = ?
+                   AND action IN ('DATASET_MLFLOW_REGISTRATION_QUEUED',
+                                  'DATASET_MLFLOW_REGISTRATION_RETRIED')
+                """, Long.class, tenantId, registrationId)).isEqualTo(2L);
+        assertThatThrownBy(() -> jdbc.update("""
+                UPDATE bpi.bpi_dataset_mlflow_registrations
+                   SET request_reason = 'mutated'
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, registrationId))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("REGISTERED");
     }
 
     private Map<String, Object> awaitExternalMaterialization(UUID materializationId)
@@ -1227,6 +1523,42 @@ class BpiDatasetManifestPostgresAcceptanceTest {
             Thread.sleep(250);
         }
         throw new AssertionError("Timed out waiting for external retention archive " + archiveId);
+    }
+
+    private Map<String, Object> awaitExternalMlflowRegistration(UUID registrationId)
+            throws InterruptedException {
+        Instant deadline = Instant.now().plusSeconds(
+                Integer.parseInt(env("BPI_TEST_MLFLOW_REGISTRAR_TIMEOUT_SECONDS", "90")));
+        while (Instant.now().isBefore(deadline)) {
+            Map<String, Object> registration = jdbc.queryForMap("""
+                    SELECT state, revision, attempt_count,
+                           mlflow_experiment_id, mlflow_run_id,
+                           mlflow_artifact_uri, mlflow_dataset_source,
+                           registration_metadata ->> 'datasetInputVerified'
+                               AS dataset_input_verified,
+                           registration_metadata ->> 'lineageVerified'
+                               AS lineage_verified,
+                           registration_metadata ->> 'modelTrained' AS model_trained,
+                           registration_metadata ->> 'modelRegistered' AS model_registered,
+                           registration_metadata ->> 'onlineInferenceEnabled'
+                               AS online_inference_enabled,
+                           registration_metadata ->> 'productionActivationAllowed'
+                               AS production_activation_allowed,
+                           failure_code, failure_detail
+                      FROM bpi.bpi_dataset_mlflow_registrations
+                     WHERE tenant_id = ? AND id = ?
+                    """, tenantId, registrationId);
+            String state = (String) registration.get("state");
+            if ("REGISTERED".equals(state)) return registration;
+            if ("FAILED".equals(state)) {
+                throw new AssertionError("External MLflow registrar failed: "
+                        + registration.get("failure_code") + " "
+                        + registration.get("failure_detail"));
+            }
+            Thread.sleep(250);
+        }
+        throw new AssertionError(
+                "Timed out waiting for external MLflow registration " + registrationId);
     }
 
     private Map<String, Object> awaitExternalCatalogPublication(UUID publicationId)

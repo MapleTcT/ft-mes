@@ -106,6 +106,7 @@ services:
       BPI_MATERIALIZER_DATABASE_PASSWORD: ${BPI_MATERIALIZER_DATABASE_PASSWORD:-bpi-materializer-dev-only-change-me}
       BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD: ${BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD:-bpi-catalog-publisher-dev-only-change-me}
       BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD: ${BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD:-bpi-retention-archiver-dev-only-change-me}
+      BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD: ${BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD:-bpi-mlflow-registrar-dev-only-change-me}
       TZ: ${TZ:-Asia/Shanghai}
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -527,6 +528,97 @@ services:
       bpi-dataset-recovery-bootstrap:
         condition: service_completed_successfully
 
+  bpi-mlflow-artifact-bootstrap:
+    image: ${MINIO_MC_IMAGE:-m.daocloud.io/docker.io/minio/mc:latest}
+    profiles: ["bpi-ml"]
+    restart: "no"
+    environment:
+      BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED: ${BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED:-false}
+      BPI_MLFLOW_MINIO_ENDPOINT: http://minio:30200
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-adpminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-adpminio123}
+      BPI_MLFLOW_MINIO_ACCESS_KEY: ${BPI_MLFLOW_MINIO_ACCESS_KEY:-bpi-mlflow-artifact}
+      BPI_MLFLOW_MINIO_SECRET_KEY: ${BPI_MLFLOW_MINIO_SECRET_KEY:-bpi-mlflow-artifact-dev-only-change-me}
+      BPI_MLFLOW_ARTIFACT_BUCKET: ${BPI_MLFLOW_ARTIFACT_BUCKET:-bpi-mlflow-artifacts}
+    volumes:
+      - ../minio/bootstrap-bpi-mlflow-artifact-bucket.sh:/work/bootstrap.sh:ro
+      - ../minio/bpi-mlflow-artifact-policy.json:/work/policy.json:ro
+    entrypoint: ["/bin/sh", "/work/bootstrap.sh"]
+    depends_on:
+      minio:
+        condition: service_started
+
+  bpi-mlflow-postgres:
+    image: ${BPI_MLFLOW_POSTGRES_IMAGE:-m.daocloud.io/docker.io/library/postgres:16.13-alpine}
+    profiles: ["bpi-ml"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mlflow
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: ${BPI_MLFLOW_DATABASE_PASSWORD:-mlflow-dev-only-change-me}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - bpi-mlflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mlflow -d mlflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+
+  bpi-mlflow:
+    image: ${BPI_MLFLOW_SERVICE_IMAGE:-ft-mes-bpi-mlflow:local}
+    profiles: ["bpi-ml"]
+    build:
+      context: ../..
+      dockerfile: services/bpi-mlflow/Dockerfile
+      args:
+        MLFLOW_IMAGE: ${BPI_MLFLOW_IMAGE:-ghcr.io/mlflow/mlflow:v3.14.0}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      BPI_MLFLOW_DATABASE_PASSWORD: ${BPI_MLFLOW_DATABASE_PASSWORD:-mlflow-dev-only-change-me}
+      BPI_MLFLOW_ARTIFACT_BUCKET: ${BPI_MLFLOW_ARTIFACT_BUCKET:-bpi-mlflow-artifacts}
+      AWS_ACCESS_KEY_ID: ${BPI_MLFLOW_MINIO_ACCESS_KEY:-bpi-mlflow-artifact}
+      AWS_SECRET_ACCESS_KEY: ${BPI_MLFLOW_MINIO_SECRET_KEY:-bpi-mlflow-artifact-dev-only-change-me}
+      AWS_DEFAULT_REGION: ${BPI_MLFLOW_S3_REGION:-us-east-1}
+      MLFLOW_S3_ENDPOINT_URL: http://minio:30200
+    depends_on:
+      bpi-mlflow-postgres:
+        condition: service_healthy
+      bpi-mlflow-artifact-bootstrap:
+        condition: service_completed_successfully
+
+  bpi-dataset-mlflow-registrar:
+    image: ${BPI_DATASET_MLFLOW_REGISTRAR_IMAGE:-ft-mes-bpi-dataset-mlflow-registrar:local}
+    profiles: ["bpi-ml"]
+    build:
+      context: ../..
+      dockerfile: services/bpi-dataset-mlflow-registrar/Dockerfile
+      args:
+        PYTHON_IMAGE: ${BPI_DATASET_MLFLOW_REGISTRAR_PYTHON_IMAGE:-m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      BPI_DATASET_MLFLOW_REGISTRAR_ENABLED: ${BPI_DATASET_MLFLOW_REGISTRAR_ENABLED:-false}
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: ${BPI_DATABASE_NAME:-ft_mes_bpi}
+      PGUSER: bpi_mlflow_registrar
+      PGPASSWORD: ${BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD:-bpi-mlflow-registrar-dev-only-change-me}
+      PGSSLMODE: disable
+      BPI_MLFLOW_TRACKING_URI: http://bpi-mlflow:5000
+      BPI_MLFLOW_REQUEST_TIMEOUT_SECONDS: ${BPI_MLFLOW_REQUEST_TIMEOUT_SECONDS:-20}
+      BPI_DATASET_MLFLOW_REGISTRAR_POLL_SECONDS: ${BPI_DATASET_MLFLOW_REGISTRAR_POLL_SECONDS:-2}
+      BPI_DATASET_MLFLOW_REGISTRAR_CLAIM_TIMEOUT_SECONDS: ${BPI_DATASET_MLFLOW_REGISTRAR_CLAIM_TIMEOUT_SECONDS:-300}
+      BPI_DATASET_MLFLOW_REGISTRAR_MAX_ATTEMPTS: ${BPI_DATASET_MLFLOW_REGISTRAR_MAX_ATTEMPTS:-3}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      bpi-migrate:
+        condition: service_completed_successfully
+      bpi-mlflow:
+        condition: service_healthy
+
   websocket:
     <<: *java-service
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/websocket/supfusion-websocket.jar", "com.supcon.supfusion.ws.Application", "--nacos.server-addr=nacos:8848"]
@@ -781,7 +873,7 @@ services:
 
   bpi-migrate:
     image: ${BPI_FLYWAY_IMAGE:-m.daocloud.io/docker.io/flyway/flyway:11-alpine}
-    profiles: ["bpi", "bpi-catalog"]
+    profiles: ["bpi", "bpi-catalog", "bpi-ml"]
     restart: "no"
     environment:
       FLYWAY_URL: jdbc:postgresql://postgres:5432/${BPI_DATABASE_NAME:-ft_mes_bpi}
@@ -1161,3 +1253,4 @@ volumes:
   bpi-polaris-publisher-credentials:
   bpi-catalog-publisher-work:
   bpi-retention-archiver-work:
+  bpi-mlflow-postgres-data:
