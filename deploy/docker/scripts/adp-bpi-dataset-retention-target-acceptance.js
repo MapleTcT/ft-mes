@@ -43,6 +43,16 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+async function scrollCurrentPanel(page, selector) {
+  const found = await page.evaluate((targetSelector) => {
+    const panel = document.querySelector(targetSelector);
+    if (!panel) return false;
+    panel.scrollIntoView({ block: "center", inline: "nearest" });
+    return true;
+  }, selector);
+  assert(found, `cannot find current retention panel: ${selector}`);
+}
+
 function findTicket(payload) {
   return [
     payload?.ticket,
@@ -274,7 +284,9 @@ async function assertLockedPanel(page, archive) {
     === archive.verifiedSemanticChecksum, "page semantic checksum differs from the API");
   const deliveryStates = await page.locator(".dataset-delivery-grid .status").allTextContents();
   assert(JSON.stringify(deliveryStates)
-    === JSON.stringify(["MANIFEST_READY", "READY", "READY", "LOCKED", "NOT_STARTED"]),
+    === JSON.stringify([
+      "MANIFEST_READY", "READY", "READY", "LOCKED", "NOT_STARTED", "NOT_STARTED",
+    ]),
   `page delivery chain is inconsistent: ${JSON.stringify(deliveryStates)}`);
 }
 
@@ -320,7 +332,7 @@ async function runDesktop(page, api, auth, target, report) {
     assertLockedArchive(archive, target);
     await assertLockedPanel(page, archive);
   }
-  await page.locator(`[data-retention-state="${archive.state}"]`).scrollIntoViewIfNeeded();
+  await scrollCurrentPanel(page, `[data-retention-state="${archive.state}"]`);
   await page.screenshot({ path: desktopScreenshot, fullPage: true });
   report.archive = archive;
 }
@@ -351,7 +363,7 @@ async function runMobile(browser, auth, target, archive, report) {
   assert(geometry.drawerScrollTop === 0, "opening the retention drawer did not reset mobile scroll");
   assert(geometry.drawerScrollWidth <= geometry.drawerClientWidth + 1,
     `dataset retention drawer overflows mobile viewport: ${JSON.stringify(geometry)}`);
-  await page.locator('[data-retention-state="LOCKED"]').scrollIntoViewIfNeeded();
+  await scrollCurrentPanel(page, '[data-retention-state="LOCKED"]');
   await page.screenshot({ path: mobileScreenshot, fullPage: true });
   report.browser.mobile = { ...geometry, lockedPanel: true };
   await context.close();

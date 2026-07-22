@@ -44,6 +44,16 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+async function scrollCurrentPanel(page, selector) {
+  const found = await page.evaluate((targetSelector) => {
+    const panel = document.querySelector(targetSelector);
+    if (!panel) return false;
+    panel.scrollIntoView({ block: "center", inline: "nearest" });
+    return true;
+  }, selector);
+  assert(found, `cannot find current MLflow panel: ${selector}`);
+}
+
 function findTicket(payload) {
   return [
     payload?.ticket,
@@ -256,9 +266,10 @@ function assertRegistered(registration, target) {
   assert(registration.tableIdentifier === target.publication.tableIdentifier
     && registration.icebergSnapshotId === target.publication.icebergSnapshotId,
   "MLflow registration differs from the Iceberg publication identity");
-  assert(registration.registrationMetadata?.datasetInputVerified === true
+  assert(registration.registrationMetadata?.sourceFactsVerified === true
+    && registration.registrationMetadata?.datasetInputVerified === true
     && registration.registrationMetadata?.lineageVerified === true,
-  "MLflow Dataset Input or lineage was not read back and verified");
+  "source facts, MLflow Dataset Input, or lineage was not verified");
   assert(registration.registrationMetadata?.modelTrained === false
     && registration.registrationMetadata?.modelRegistered === false
     && registration.registrationMetadata?.onlineInferenceEnabled === false
@@ -319,7 +330,7 @@ async function runDesktop(page, api, auth, target, report) {
     assertRegistered(registration, target);
     await assertRegisteredPanel(page, registration);
   }
-  await page.locator(`[data-mlflow-state="${registration.state}"]`).scrollIntoViewIfNeeded();
+  await scrollCurrentPanel(page, `[data-mlflow-state="${registration.state}"]`);
   await page.screenshot({ path: desktopScreenshot, fullPage: true });
   report.registration = registration;
 }
@@ -350,7 +361,7 @@ async function runMobile(browser, auth, target, registration, report) {
   assert(geometry.drawerScrollTop === 0, "opening the MLflow drawer did not reset mobile scroll");
   assert(geometry.drawerScrollWidth <= geometry.drawerClientWidth + 1,
     `dataset MLflow drawer overflows mobile viewport: ${JSON.stringify(geometry)}`);
-  await page.locator('[data-mlflow-state="REGISTERED"]').scrollIntoViewIfNeeded();
+  await scrollCurrentPanel(page, '[data-mlflow-state="REGISTERED"]');
   await page.screenshot({ path: mobileScreenshot, fullPage: true });
   report.browser.mobile = { ...geometry, registeredPanel: true };
   await context.close();

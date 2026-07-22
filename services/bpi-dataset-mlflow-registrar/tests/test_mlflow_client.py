@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import threading
 import unittest
+from dataclasses import replace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from socketserver import TCPServer
 from urllib.parse import parse_qs, urlparse
@@ -186,8 +187,18 @@ class MlflowTrackingClientTest(unittest.TestCase):
         self.assertTrue(second.metadata["reusedRun"])
         self.assertEqual(1, mlflow.create_count)
         self.assertIn("versionId=locked-source-v1", first.dataset_source)
+        self.assertTrue(first.metadata["sourceFactsVerified"])
         self.assertFalse(first.metadata["modelTrained"])
         self.assertFalse(first.metadata["productionActivationAllowed"])
+
+    def test_rejects_unverified_source_facts_without_mlflow_side_effects(self) -> None:
+        with FakeMlflow() as mlflow:
+            client = MlflowTrackingClient(mlflow.url, 2)
+            with self.assertRaises(MlflowContractError):
+                client.register(replace(claim(), source_facts_verified=False))
+
+        self.assertIsNone(mlflow.experiment)
+        self.assertEqual(0, mlflow.create_count)
 
     def test_rejects_dataset_input_drift_on_recovery(self) -> None:
         with FakeMlflow() as mlflow:

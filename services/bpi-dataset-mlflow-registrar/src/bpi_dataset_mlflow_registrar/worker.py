@@ -69,11 +69,11 @@ class MlflowRegistrarWorker:
                 active_registration_id=str(claim.id),
             )
             try:
-                self._client.ping()
                 if not claim.source_facts_verified:
                     raise MlflowContractError(
                         "frozen registration facts do not match the LOCKED recovery archive"
                     )
+                self._client.ping()
                 result = self._client.register(claim)
                 self._repository.complete(claim, result)
                 LOGGER.info(

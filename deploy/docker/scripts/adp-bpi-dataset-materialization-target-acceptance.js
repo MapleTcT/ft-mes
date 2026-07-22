@@ -209,7 +209,9 @@ function assertReadyMaterialization(materialization) {
 async function assertMaterializationDeliveryChain(page) {
   const deliveryStates = await page.locator(".dataset-delivery-grid .status").allTextContents();
   assert(JSON.stringify(deliveryStates)
-    === JSON.stringify(["MANIFEST_READY", "READY", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED"]),
+    === JSON.stringify([
+      "MANIFEST_READY", "READY", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED",
+    ]),
   `target page claims unsupported downstream delivery: ${JSON.stringify(deliveryStates)}`);
 }
 

@@ -46,6 +46,10 @@ class MlflowTrackingClient:
             ) from exception
 
     def register(self, claim: RegistrationClaim) -> RegistrationResult:
+        if not claim.source_facts_verified:
+            raise MlflowContractError(
+                "frozen registration facts do not match the LOCKED recovery archive"
+            )
         experiment_id = self._ensure_experiment(claim.experiment_name)
         run, reused = self._find_registration_run(experiment_id, claim)
         if run is None:
@@ -77,6 +81,7 @@ class MlflowTrackingClient:
             artifact_uri=str(info.get("artifact_uri", "")),
             dataset_source=claim.source_uri,
             metadata={
+                "sourceFactsVerified": True,
                 "datasetInputVerified": True,
                 "lineageVerified": True,
                 "modelTrained": False,
