@@ -1244,6 +1244,9 @@ def main() -> int:
             "bpi.qcs-link=false",
             "bpi.wms-link=false",
             "rsync -a --delete",
+            "stage_runtime_deployment_manifests",
+            "docker-compose-before-v",
+            "bpi-minio-runtime-before-v",
         ],
         failures,
     )

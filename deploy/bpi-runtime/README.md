@@ -119,6 +119,14 @@ that version. This is not an Object Lock/WORM claim; retention-admin operations 
 governed. Schema
 downgrade, Flyway repair, object overwrite and `DROP` rollback are intentionally unsupported.
 
+The integrated ADP upgrade (`make bpi-integrated-upgrade-expand-only`) also treats deployment
+manifests as release artifacts. Before it resolves the new worker services, it validates the clean
+release Compose file, stores mode-0600 backups of the current runtime Compose and MinIO
+configuration, atomically stages only the release Compose plus the two dataset-bucket bootstrap
+files, and records both backup paths in the JSON report. It does not replace the rest of the ADP
+runtime tree. The materializer and bucket bootstrap still remain disabled and stopped throughout
+the expand-only upgrade.
+
 ## Integrated target image rollback
 
 The target service and adapter rollback rehearsal uses the integrated ADP Compose stack. It requires

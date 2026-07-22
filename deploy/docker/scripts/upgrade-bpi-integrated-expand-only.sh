@@ -38,6 +38,9 @@ esac
 DEPLOY_DIR="$RUNTIME_ROOT/deploy/docker"
 ENV_FILE="$DEPLOY_DIR/.env"
 COMPOSE_FILE="$DEPLOY_DIR/docker-compose.yml"
+RELEASE_COMPOSE_FILE="$RELEASE_ROOT/deploy/docker/docker-compose.yml"
+RELEASE_MINIO_DIR="$RELEASE_ROOT/deploy/minio"
+RUNTIME_MINIO_DIR="$RUNTIME_ROOT/deploy/minio"
 UI_TARGET="$RUNTIME_ROOT/frontend/apps/bpi/dist"
 UI_RELEASE="$RELEASE_ROOT/frontend/apps/bpi/dist"
 MIGRATIONS="$RELEASE_ROOT/services/bpi-service/app/src/main/resources/db/migration"
@@ -47,6 +50,9 @@ MATERIALIZER_ROLE_SCRIPT="$RELEASE_ROOT/deploy/docker/postgres/ensure-bpi-materi
 for path in \
     "$ENV_FILE" \
     "$COMPOSE_FILE" \
+    "$RELEASE_COMPOSE_FILE" \
+    "$RELEASE_MINIO_DIR/bootstrap-bpi-dataset-bucket.sh" \
+    "$RELEASE_MINIO_DIR/bpi-dataset-materializer-policy.json" \
     "$MIGRATIONS" \
     "$VERIFY_MIGRATIONS" \
     "$MATERIALIZER_ROLE_SCRIPT"; do
@@ -122,6 +128,46 @@ compose_expand() {
     BPI_DATASET_MATERIALIZER_ENABLED=false \
     BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED=false \
         docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" --profile bpi "$@"
+}
+
+stage_runtime_deployment_manifests() {
+    mkdir -p "$BACKUP_DIR"
+    chmod 700 "$BACKUP_DIR"
+
+    cp "$COMPOSE_FILE" "$COMPOSE_BACKUP"
+    chmod 600 "$COMPOSE_BACKUP"
+    if [ -d "$RUNTIME_MINIO_DIR" ]; then
+        tar -czf "$MINIO_CONFIG_BACKUP" -C "$RUNTIME_ROOT/deploy" minio
+    else
+        tar -czf "$MINIO_CONFIG_BACKUP" --files-from /dev/null
+    fi
+    chmod 600 "$MINIO_CONFIG_BACKUP"
+
+    docker compose --env-file "$ENV_FILE" -f "$RELEASE_COMPOSE_FILE" \
+        --profile bpi config --quiet
+    release_services=$(docker compose --env-file "$ENV_FILE" \
+        -f "$RELEASE_COMPOSE_FILE" --profile bpi config --services)
+    for service in bpi-service bpi-adapter bpi-wms-adapter \
+        bpi-dataset-minio-bootstrap bpi-dataset-materializer; do
+        if ! printf '%s\n' "$release_services" | grep -qx "$service"; then
+            printf 'ERROR: release Compose is missing required service: %s\n' \
+                "$service" >&2
+            exit 1
+        fi
+    done
+
+    temporary_compose=$(mktemp "$DEPLOY_DIR/.docker-compose.v${EXPECTED_VERSION}.XXXXXX")
+    cp "$RELEASE_COMPOSE_FILE" "$temporary_compose"
+    chmod 644 "$temporary_compose"
+    mv "$temporary_compose" "$COMPOSE_FILE"
+    mkdir -p "$RUNTIME_MINIO_DIR"
+    rsync -a "$RELEASE_MINIO_DIR/bootstrap-bpi-dataset-bucket.sh" \
+        "$RUNTIME_MINIO_DIR/bootstrap-bpi-dataset-bucket.sh"
+    rsync -a "$RELEASE_MINIO_DIR/bpi-dataset-materializer-policy.json" \
+        "$RUNTIME_MINIO_DIR/bpi-dataset-materializer-policy.json"
+
+    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" \
+        --profile bpi config --quiet
 }
 
 query_version() {
@@ -211,7 +257,8 @@ write_report() {
     export BEFORE_SERVICE_IMAGE_ID BEFORE_ADAPTER_IMAGE_ID BEFORE_WMS_ADAPTER_IMAGE_ID
     export AFTER_SERVICE_IMAGE_ID AFTER_ADAPTER_IMAGE_ID AFTER_WMS_ADAPTER_IMAGE_ID
     export ROLLBACK_SERVICE_IMAGE ROLLBACK_ADAPTER_IMAGE ROLLBACK_WMS_ADAPTER_IMAGE
-    export DATABASE_BACKUP ENV_BACKUP UI_BACKUP UI_SHA256
+    export DATABASE_BACKUP ENV_BACKUP COMPOSE_BACKUP MINIO_CONFIG_BACKUP
+    export UI_BACKUP UI_SHA256
     export MATERIALIZER_IMAGE_ID MATERIALIZER_IMAGE_USER MIGRATION_SET_SHA256
     python3 <<'PY'
 import datetime
@@ -268,6 +315,8 @@ report = {
             "postUpgradeState": "STOPPED",
         },
         "environmentBackup": value("ENV_BACKUP"),
+        "composeBackup": value("COMPOSE_BACKUP"),
+        "minioConfigBackup": value("MINIO_CONFIG_BACKUP"),
         "uiBackup": value("UI_BACKUP"),
         "uiIndexSha256": value("UI_SHA256"),
         "migrationSetSha256": value("MIGRATION_SET_SHA256"),
@@ -278,7 +327,7 @@ report = {
         "wmsAdapterDefault": False,
         "datasetMaterializerDefault": False,
         "datasetBucketBootstrapDefault": False,
-        "rollbackMethod": "Restore recorded images and UI; stop the WMS adapter if this was its first release; keep the expanded schema.",
+        "rollbackMethod": "Restore recorded images, UI, Compose and MinIO configuration; stop the WMS adapter and dataset materializer when required; keep the expanded schema.",
     },
 }
 path = Path(os.environ["REPORT"])
@@ -297,17 +346,8 @@ ADAPTER_IMAGE=${BPI_INTEGRATED_ADAPTER_IMAGE:-ft-mes-bpi-adapter:${release_suffi
 WMS_ADAPTER_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_IMAGE:-ft-mes-bpi-wms-adapter:${release_suffix}-${short_commit}}
 MATERIALIZER_IMAGE=${BPI_INTEGRATED_MATERIALIZER_IMAGE:-ft-mes-bpi-dataset-materializer:${release_suffix}-${short_commit}}
 REPORT=${BPI_INTEGRATED_UPGRADE_REPORT:-$BACKUP_DIR/bpi-integrated-upgrade-${timestamp}.json}
-
-POSTGRES_ID=$(compose ps -q postgres)
-SERVICE_ID=$(compose ps -q bpi-service)
-ADAPTER_ID=$(compose ps -q bpi-adapter)
-WMS_ADAPTER_ID=$(compose ps -q bpi-wms-adapter)
-MATERIALIZER_ID=$(compose ps -q bpi-dataset-materializer)
-NGINX_ID=$(compose ps -q nginx)
-if [ -z "$POSTGRES_ID" ] || [ -z "$SERVICE_ID" ] || [ -z "$ADAPTER_ID" ] || [ -z "$NGINX_ID" ]; then
-    printf 'ERROR: postgres, bpi-service, bpi-adapter and nginx must all be running\n' >&2
-    exit 1
-fi
+COMPOSE_BACKUP="$BACKUP_DIR/docker-compose-before-v${EXPECTED_VERSION}-${timestamp}.yml"
+MINIO_CONFIG_BACKUP="$BACKUP_DIR/bpi-minio-runtime-before-v${EXPECTED_VERSION}-${timestamp}.tar.gz"
 
 DATABASE_NAME=$(env_value BPI_DATABASE_NAME ft_mes_bpi)
 POSTGRES_USER=$(env_value POSTGRES_USER adp)
@@ -363,6 +403,18 @@ for disabled_key in \
         exit 1
     fi
 done
+
+stage_runtime_deployment_manifests
+POSTGRES_ID=$(compose ps -q postgres)
+SERVICE_ID=$(compose ps -q bpi-service)
+ADAPTER_ID=$(compose ps -q bpi-adapter)
+WMS_ADAPTER_ID=$(compose ps -q bpi-wms-adapter)
+MATERIALIZER_ID=$(compose ps -q bpi-dataset-materializer)
+NGINX_ID=$(compose ps -q nginx)
+if [ -z "$POSTGRES_ID" ] || [ -z "$SERVICE_ID" ] || [ -z "$ADAPTER_ID" ] || [ -z "$NGINX_ID" ]; then
+    printf 'ERROR: postgres, bpi-service, bpi-adapter and nginx must all be running\n' >&2
+    exit 1
+fi
 
 run_materializer_role_action() {
     action=$1
