@@ -3573,6 +3573,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-dataset-retention-target-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-flink-data-quality-browser-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -5253,6 +5259,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-dataset-retention-archive.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-iot-replay-runtime-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5680,6 +5692,12 @@
     {
       "ignored": false,
       "path": "docs/testing/bpi-dataset-materialization-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/bpi-dataset-retention-archive-acceptance.md",
       "state": "tracked",
       "tracked": true
     },
@@ -6220,6 +6238,36 @@
     {
       "ignored": false,
       "path": "metadata/bpi-dataset-materialization-ready-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-retention-archive-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-retention-failed-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-retention-locked-mobile-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-retention-locked-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-retention-recovery-rehearsal-target.json",
       "state": "tracked",
       "tracked": true
     },
@@ -10718,16 +10766,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 648
+      "tracked": 649
     },
     "docs": {
-      "tracked": 127
+      "tracked": 129
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 227
+      "tracked": 232
     },
     "package.json": {
       "tracked": 1
@@ -10751,8 +10799,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1782,
-    "tracked": 1782,
+    "totalFiles": 1790,
+    "tracked": 1790,
     "untracked": 0
   },
   "untrackedByDirectory": []

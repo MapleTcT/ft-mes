@@ -28,7 +28,8 @@
 | `bpi-candidate-protobuf-ingress.md` | 已恢复并验收 | Flink `BatchCandidateV1` 完整证据经 Protobuf bridge 入库，并已由目标环境 Kafka/浏览器联合 marker 复验 |
 | `bpi-candidate-kafka-ingress.md` | 已恢复并验收 | 目标环境三 broker、Flink、candidate listener、DLQ、PostgreSQL 和真实候选页面已闭合；退役前产生、退役后消费的候选按历史发布版本恰好一次落库 |
 | `bpi-quality-release-wms-inbound.md` | 已开始 | 本地与目标 V23 软件合同 PASS、真实 QCS/WMS 外部系统 BLOCKED；目标 Java 8 release 路由、质量/库存页、重启读取、4/4 PostgreSQL marker 和 12 表零残留已通过，Phase 2 开关保持关闭 |
-| `bpi-dataset-manifest.md` | 已恢复并验收 | Flyway V26 数据集定义、快照、样本、审计和幂等链已由真实 ADP 页面/API/PostgreSQL marker 闭合，跨工厂干扰为 0、十类残留为 0；交付仍为 `MANIFEST_ONLY` |
+| `bpi-dataset-manifest.md` | 已恢复并验收 | Flyway V26-V28 数据集定义、快照、样本、Parquet、Iceberg、审计和幂等链已由真实 ADP 页面/API/PostgreSQL/MinIO/Polaris marker 闭合；V28 post-commit fencing 已恢复到同一 snapshot |
+| `bpi-dataset-retention-archive.md` | 已恢复并验收 | Flyway V29 Object Lock 恢复包已完成真实页面失败/重试、PostgreSQL r1-r7、精确对象版本、最小权限、隔离 Polaris 恢复/物理清除和零残留退场；不替代整站灾备 |
 | [`../testing/bpi-rule-retirement-acceptance.md`](../testing/bpi-rule-retirement-acceptance.md) | V15 受控影子验收 PASS | 规则退役、typed inactive、savepoint 有状态升级、回滚草稿、延迟候选落库和 11 类 marker 清理；不声明现场 READY 或生产写回 |
 | `bpi-iot-replay-runtime-acceptance.md` | 已恢复并验收 | IoT 信号经边界引擎、Protobuf、候选确认到 PostgreSQL 的跨模块闭环 |
 | `persistence-acceptance.md` | 模板已建立 | 真实前端动作到 PostgreSQL 落库证明 |

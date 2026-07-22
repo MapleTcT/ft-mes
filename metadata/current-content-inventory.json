@@ -587,12 +587,12 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 74,
+    "composeServiceCount": 76,
     "composeServiceKindCounts": {
       "business-runtime": 20,
       "infrastructure": 11,
       "platform-runtime": 28,
-      "support-runtime": 15
+      "support-runtime": 17
     },
     "composeServices": [
       {
@@ -656,6 +656,11 @@
         "kind": "support-runtime"
       },
       {
+        "service": "bpi-dataset-recovery-bootstrap",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
         "service": "bpi-polaris-postgres",
         "jarPath": "",
         "kind": "support-runtime"
@@ -682,6 +687,11 @@
       },
       {
         "service": "bpi-dataset-catalog-publisher",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-dataset-retention-archiver",
         "jarPath": "",
         "kind": "support-runtime"
       },

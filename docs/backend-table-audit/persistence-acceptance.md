@@ -960,6 +960,26 @@ Polaris 1.4.1 与 PyIceberg 0.11.1 整链验收。三组 marker 在取证后均�
 `docs/testing/bpi-dataset-catalog-publication-acceptance.md`。本项关闭 Phase 3B-B 目录发布纵切，不声明
 WORM、MLflow、模型、7-14 天现场运行、外部 ERP/WMS 或生产 READY。
 
+### BPI V29 Object Lock 恢复包（目标页面/API/PostgreSQL/MinIO/Polaris）
+
+本节使用 marker `ADP_E2E_BPI_ARCHIVE_20260722_215300_A1`，在唯一目标栈完成受保护 V29 升级。
+同一真实页面链先产生 V26 manifest、V27 exact-version Parquet 和 V28 Iceberg publication，再申请
+V29 恢复包；PostgreSQL、Object Lock、最小权限、隔离恢复和清理均独立核验。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 页面请求恢复包并持久化失败 | `/bpi/#/datasets` | `POST /bpi-api/dataset-catalog-publications/{publicationId}/retention-archives`；archive GET | `DatasetRetentionArchiveController -> Service -> Repository.insert`；`RetentionArchiverWorker -> fail` | `bpi_dataset_retention_archives`、`bpi_audit_events`、`bpi_api_idempotency` | 按 archive ID 查询 state/revision/attempt/failure 和 r1-r3 审计 | POST 202；同一任务 `QUEUED/r1 -> ARCHIVING/r2 -> FAILED/r3`、attempt 1、`RETENTION_ARCHIVE_ERROR` | PASS_TARGET_FAILURE_PERSISTED |
+| 页面重试并持久化 LOCKED | 同一失败详情 | `POST /bpi-api/dataset-retention-archives/{archiveId}/retry`；archive GET | service optimistic revision/idempotency；worker claim/archive/readback/verify/complete | archive、audit、idempotency | 查询 r4-r7、对象版本、retention、row/checksum、metadata 与两个 `COMPLETED/202` | 同一 archive `c2d585f4-5793-4f17-a230-aa98440d3293` 达到 `LOCKED/r7/attempt2`；`objectLockVerified/recoveryVerified=true` | PASS_TARGET_LOCKED |
+| 精确 Object Lock 对象对账 | LOCKED 详情 | MinIO S3 stat/get by exact versionId | archiver archive store；独立 recovery operator | archive 表保存对象合同；MinIO recovery bucket | 比对 source/manifest versionId、SHA、retention mode/until、对象数/字节数 | source `dfa24784-...` 与 manifest `7a96696b-...` 均为 GOVERNANCE；SHA 匹配；2 objects/15301 bytes/1 row | PASS_TARGET_OBJECT_LOCK |
+| 最小权限反证 | 不适用 | exact-version DELETE；warehouse LIST | MinIO policy evaluation | 不新增业务表行 | archiver 删除、无 bypass 管理删除、recovery operator 业务 warehouse list/retained delete | `AccessDenied`、`InvalidRequest`、`AccessDenied`、`AccessDenied`；精确版本仍可读 | PASS_TARGET_SECURITY |
+| 隔离恢复、time-travel 和物理销毁 | 不适用 | Polaris Iceberg REST、PyIceberg scan、S3 exact-version | `bpi_dataset_catalog_publisher.recovery_rehearsal` | Polaris metastore；独立 recovery warehouse | 比较 original/recovery snapshot、row/checksum；复查 purge 后 table/namespace/version 数 | recovery snapshot `4888963949559974798` 为 1 row 且 checksum 匹配；恢复 table/namespace 和 6 个版本归零；原 snapshot 未改变 | PASS_TARGET_RECOVERY |
+| marker、对象和运行时清理 | 不适用 | cleanup SQL；Polaris/MinIO 精确管理操作；停止侧车 | `bpi-dataset-manifest-target-cleanup.sql` 与独立管理身份 | V26-V29 lineage、audit、idempotency 和 fixture 表 | 复查各 marker、四类对象版本、table/namespace、容器数和九个开关 | 数据库和对象残留均 0；optional running 0；主 BPI 三服务 healthy；九个相关开关 false | PASS_TARGET_CLEANED |
+
+机器证据：`metadata/bpi-dataset-retention-archive-acceptance.json`；表级报告：
+`docs/backend-table-audit/bpi-dataset-retention-archive.md`；完整页面、对象锁、恢复与清理证据：
+`docs/testing/bpi-dataset-retention-archive-acceptance.md`。本项只关闭单数据集不可变恢复包门槛，
+不关闭整站灾备、生产容量/RPO/RTO、MLflow、模型或现场连续运行。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

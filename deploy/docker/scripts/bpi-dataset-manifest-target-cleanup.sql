@@ -19,6 +19,11 @@ SELECT id FROM bpi.bpi_dataset_catalog_publications
  WHERE tenant_id = '1000'
    AND materialization_id IN (SELECT id FROM target_dataset_materializations);
 
+CREATE TEMP TABLE target_dataset_retention_archives AS
+SELECT id FROM bpi.bpi_dataset_retention_archives
+ WHERE tenant_id = '1000'
+   AND catalog_publication_id IN (SELECT id FROM target_dataset_catalog_publications);
+
 CREATE TEMP TABLE target_dataset_idempotency AS
 SELECT id FROM bpi.bpi_api_idempotency idempotency
  WHERE tenant_id = '1000'
@@ -44,7 +49,13 @@ SELECT id FROM bpi.bpi_api_idempotency idempotency
            SELECT 1 FROM target_dataset_catalog_publications publication
             WHERE response_body::text LIKE '%' || publication.id::text || '%'
                OR resource_path = '/bpi/v1/dataset-catalog-publications/' || publication.id::text
-               OR resource_path = '/bpi/v1/dataset-catalog-publications/' || publication.id::text || '/retry')
+               OR resource_path = '/bpi/v1/dataset-catalog-publications/' || publication.id::text || '/retry'
+               OR resource_path = '/bpi/v1/dataset-catalog-publications/' || publication.id::text || '/retention-archives')
+       OR EXISTS (
+           SELECT 1 FROM target_dataset_retention_archives archive
+            WHERE response_body::text LIKE '%' || archive.id::text || '%'
+               OR resource_path = '/bpi/v1/dataset-retention-archives/' || archive.id::text
+               OR resource_path = '/bpi/v1/dataset-retention-archives/' || archive.id::text || '/retry')
    );
 
 CREATE TEMP TABLE target_shadow_runs AS
@@ -60,10 +71,14 @@ DELETE FROM bpi.bpi_audit_events
        SELECT id FROM target_dataset_definitions
        UNION ALL SELECT id FROM target_dataset_snapshots
        UNION ALL SELECT id FROM target_dataset_materializations
-       UNION ALL SELECT id FROM target_dataset_catalog_publications);
+       UNION ALL SELECT id FROM target_dataset_catalog_publications
+       UNION ALL SELECT id FROM target_dataset_retention_archives);
 
 DELETE FROM bpi.bpi_api_idempotency
  WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_idempotency);
+
+DELETE FROM bpi.bpi_dataset_retention_archives
+ WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_retention_archives);
 
 DELETE FROM bpi.bpi_dataset_catalog_publications
  WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_catalog_publications);
@@ -119,6 +134,11 @@ SELECT jsonb_pretty(jsonb_build_object(
                                  WHERE publication.tenant_id = '1000'
                                    AND publication.id IN (
                                        SELECT id FROM target_dataset_catalog_publications)),
+        'retentionArchives', (SELECT count(*)
+                                FROM bpi.bpi_dataset_retention_archives archive
+                               WHERE archive.tenant_id = '1000'
+                                 AND archive.id IN (
+                                     SELECT id FROM target_dataset_retention_archives)),
         'shadowRuns', (SELECT count(*) FROM bpi.bpi_shadow_runs
                         WHERE tenant_id = '1000' AND run_code LIKE :'marker' || '_SHADOW_%'),
         'reviews', (SELECT count(*) FROM bpi.bpi_shadow_run_batch_reviews review

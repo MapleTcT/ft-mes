@@ -6,9 +6,9 @@
 
 ## 摘要
 
-- Generated At：`2026-07-22T10:51:12+00:00`。
-- Repo Commit：`b7356aa0749600a436df84f39fbff3851c89ed60`。
-- 总引用数：`1621`。
+- Generated At：`2026-07-22T15:14:40+00:00`。
+- Repo Commit：`ef8036b8b71718f3bb4f65ede3e9ba9cca093a82`。
+- 总引用数：`1622`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
@@ -19,7 +19,7 @@
 | --- | --- | --- |
 | allowed-legacy-contract | 6 | Oracle is explicit legacy compatibility, not the default runtime path. |
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
-| documentation-or-workflow | 188 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
+| documentation-or-workflow | 189 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
 | java-row-index-noise | 89 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |

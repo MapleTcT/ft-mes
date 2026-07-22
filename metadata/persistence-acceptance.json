@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-22T18:36:04+08:00",
-  "repoCommit": "b7356aa0749600a436df84f39fbff3851c89ed60+target-v28-iceberg-catalog-publication",
+  "generatedAt": "2026-07-22T22:20:55+08:00",
+  "repoCommit": "ef8036b8b71718f3bb4f65ede3e9ba9cca093a82+target-v29-object-lock-recovery",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -215,8 +215,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 232,
-    "pass": 229,
+    "testedFeatures": 241,
+    "pass": 238,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -5099,9 +5099,175 @@
       "status": "PASS",
       "evidence": "metadata/bpi-dataset-catalog-publication-acceptance.json; runtime permissions were not broadened, all exact test resources were removed, database counts were 0|0|0 and catalog/materialization/bootstrap defaults were restored false",
       "issues": []
+    },
+    {
+      "module": "BPI V29 恢复包请求与失败持久化",
+      "route": "/bpi/#/datasets",
+      "operation": "从真实 READY Iceberg 详情请求 Object Lock 恢复包，并以不可写工作目录注入一次受控 archiver 失败",
+      "api": "POST /bpi-api/dataset-catalog-publications/ae56f35f-013e-4973-bd5a-98b1ab4ef8e4/retention-archives; GET /bpi-api/dataset-retention-archives/c2d585f4-5793-4f17-a230-aa98440d3293",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetRetentionArchiveController -> DatasetRetentionArchiveService -> DatasetRetentionArchivePostgresRepository.insert; RetentionArchiverWorker -> RetentionArchiveRepository.fail",
+      "tables": [
+        "bpi.bpi_dataset_retention_archives",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
+      "verificationSql": "SELECT state, revision, attempt_count, failure_code, archive_bucket, source_archive_version_id, archive_manifest_version_id FROM bpi.bpi_dataset_retention_archives WHERE id='c2d585f4-5793-4f17-a230-aa98440d3293'",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-retention-archive-acceptance.json; real page POST returned 202, then PostgreSQL persisted QUEUED/r1 -> ARCHIVING/r2 -> FAILED/r3, attempt 1 and RETENTION_ARCHIVE_ERROR without claiming LOCKED",
+      "issues": []
+    },
+    {
+      "module": "BPI V29 页面重试与 LOCKED 落库",
+      "route": "/bpi/#/datasets",
+      "operation": "从失败详情重试同一恢复包并等待 Object Lock 校验完成",
+      "api": "POST /bpi-api/dataset-retention-archives/c2d585f4-5793-4f17-a230-aa98440d3293/retry; GET /bpi-api/dataset-retention-archives/c2d585f4-5793-4f17-a230-aa98440d3293",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetRetentionArchiveService.retry -> DatasetRetentionArchivePostgresRepository.retry; RetentionArchiverWorker claim/archive/verify/complete",
+      "tables": [
+        "bpi.bpi_dataset_retention_archives",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
+      "verificationSql": "SELECT state, revision, attempt_count, retention_mode, retain_until, archive_object_count, archive_total_bytes, verified_row_count, verified_semantic_checksum, archive_metadata FROM bpi.bpi_dataset_retention_archives WHERE id='c2d585f4-5793-4f17-a230-aa98440d3293'",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-retention-archive-acceptance.json; retry POST returned 202 and reused the same archive, which reached LOCKED/r7, attempt 2 with objectLockVerified=true and recoveryVerified=true",
+      "issues": []
+    },
+    {
+      "module": "BPI V29 精确 Object Lock 对象验收",
+      "route": "/bpi/#/datasets",
+      "operation": "按 PostgreSQL 保存的两个 versionId 下载 source Parquet 和 recovery manifest，复算 SHA 并核对 retention",
+      "api": "GET /bpi-api/dataset-retention-archives/{archiveId}; MinIO S3 stat/get with versionId",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetRetentionArchivePostgresRepository.find; ArchiveStore exact-version stat/get and Object Lock verification",
+      "tables": [
+        "bpi.bpi_dataset_retention_archives"
+      ],
+      "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
+      "verificationSql": "SELECT source_archive_object_key, source_archive_version_id, archive_manifest_object_key, archive_manifest_version_id, archive_manifest_sha256, retention_mode, retain_until FROM bpi.bpi_dataset_retention_archives WHERE id='c2d585f4-5793-4f17-a230-aa98440d3293'",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-retention-archive-acceptance.json; source version dfa24784-8270-4fda-8af7-8449845e90a5 and manifest version 7a96696b-3f27-48fb-9103-3d72bb5964b6 matched their SHA values and GOVERNANCE retain-until facts",
+      "issues": []
+    },
+    {
+      "module": "BPI V29 审计与幂等状态机",
+      "route": "/bpi/#/datasets",
+      "operation": "核对恢复包请求、失败、重试和锁定的 revision 审计，以及两条写路径的幂等结果",
+      "api": "POST retention-archives; POST dataset-retention-archives/{archiveId}/retry",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetRetentionArchiveService and RetentionArchiveRepository audit/idempotency writes",
+      "tables": [
+        "bpi.bpi_dataset_retention_archives",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
+      "verificationSql": "SELECT event_type, after_revision FROM bpi.bpi_audit_events WHERE aggregate_id='c2d585f4-5793-4f17-a230-aa98440d3293' ORDER BY after_revision; SELECT status, response_status FROM bpi.bpi_api_idempotency WHERE response_body::text LIKE '%c2d585f4-5793-4f17-a230-aa98440d3293%'",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-retention-archive-acceptance.json; audit order was QUEUED/ARCHIVING/FAILED/RETRIED/ARCHIVING/VERIFYING/LOCKED at r1-r7 and both idempotency rows were COMPLETED/202",
+      "issues": []
+    },
+    {
+      "module": "BPI V29 最小权限反证",
+      "route": "NOT_APPLICABLE",
+      "operation": "证明 archiver 和 recovery operator 无 retained-delete、governance-bypass 或业务 warehouse 越权能力",
+      "api": "MinIO S3 exact-version DELETE and LIST",
+      "method": "DELETE/LIST",
+      "requiresPersistence": false,
+      "backendEntry": "MinIO policy evaluation for the archiver, recovery operator and administrator without bypass",
+      "tables": [],
+      "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
+      "verificationSql": "NOT_APPLICABLE; permission denial is verified against exact S3 object versions and prefixes",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-retention-archive-acceptance.json; archiver delete and recovery-operator delete/list returned AccessDenied, administrator delete without governance bypass returned InvalidRequest, and both retained versions stayed readable",
+      "issues": []
+    },
+    {
+      "module": "BPI V29 隔离恢复与 time-travel",
+      "route": "NOT_APPLICABLE",
+      "operation": "以独立恢复身份从 exact-version 恢复包创建隔离 Polaris/Iceberg 表并按 snapshot 复核行数和语义校验和",
+      "api": "Polaris Iceberg REST; PyIceberg time-travel scan; MinIO exact-version GET",
+      "method": "CREATE/GET",
+      "requiresPersistence": true,
+      "backendEntry": "bpi_dataset_catalog_publisher.recovery_rehearsal",
+      "tables": [
+        "Polaris PostgreSQL metastore",
+        "bpi-iceberg-recovery warehouse"
+      ],
+      "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
+      "verificationSql": "Load ft_mes_bpi.bpi_recovery.archive_c2d585f457934f17a230aa98440d3293.dataset at snapshot 4888963949559974798 and compare row count plus semantic checksum with the recovery manifest",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-retention-recovery-rehearsal-target.json; recovery snapshot 4888963949559974798 scanned 1 row and matched semantic checksum 8b4dacce8c19b25e93ef632cf0f30451fded82f300385ec8d22a3649ea258a28",
+      "issues": []
+    },
+    {
+      "module": "BPI V29 恢复副本物理清除与原发布不变性",
+      "route": "NOT_APPLICABLE",
+      "operation": "purge 隔离恢复表、namespace 和精确 warehouse 版本，再复读原 training publication",
+      "api": "Polaris DROP WITH PURGE; MinIO exact-version delete in recovery prefix; PyIceberg scan",
+      "method": "DELETE/GET",
+      "requiresPersistence": true,
+      "backendEntry": "RecoveryRehearsal purge_inventory and namespace cleanup; independent original-table verification",
+      "tables": [
+        "Polaris PostgreSQL metastore",
+        "bpi-iceberg-recovery warehouse",
+        "bpi.bpi_dataset_catalog_publications"
+      ],
+      "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
+      "verificationSql": "Require recovery table and namespace absent, recovery prefix version count zero, and original snapshot 2413939455193407789 still one row with the same semantic checksum",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-retention-recovery-rehearsal-target.json; 6 exact recovery warehouse versions were purged, namespace cleanup passed and the original one-snapshot/one-row publication remained unchanged",
+      "issues": []
+    },
+    {
+      "module": "BPI V29 桌面与移动重新发现",
+      "route": "/bpi/#/datasets",
+      "operation": "刷新真实 ADP 页面，并在桌面和 390x844 移动视口复读同一 LOCKED 恢复包",
+      "api": "GET dataset, snapshot, materialization, catalog publication and retention archive",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "frontend/apps/bpi five-stage dataset delivery view through the Java 8 adapter",
+      "tables": [],
+      "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
+      "verificationSql": "NOT_APPLICABLE; read-only browser geometry and error channels were measured",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-retention-archive-acceptance.json and target screenshots; console/page/request errors were zero, mobile widths were 390/390/390 and drawer widths were 389/389 without overflow",
+      "issues": []
+    },
+    {
+      "module": "BPI V29 精确清理与默认关闭",
+      "route": "NOT_APPLICABLE",
+      "operation": "精确删除测试 table、source/training/recovery/archive object versions 和 marker，再停止所有可选侧车并复核主栈",
+      "api": "PostgreSQL cleanup; Polaris/MinIO administrator exact cleanup; Docker runtime verification",
+      "method": "DELETE/SQL/GET",
+      "requiresPersistence": true,
+      "backendEntry": "bpi-dataset-manifest-target-cleanup.sql; scoped Polaris/MinIO management; Docker Compose state check",
+      "tables": [
+        "bpi V26-V29 dataset lineage tables",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "Polaris PostgreSQL metastore"
+      ],
+      "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
+      "verificationSql": "Require all marker projections, source/training/recovery/archive versions and optional running sidecars to equal zero; require nine catalog/retention/unsafe flags false and primary BPI services healthy",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-retention-archive-acceptance.json; database and object residues were zero, optional running sidecars were zero, the primary BPI services were healthy and all nine relevant flags were false",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
+      "artifact": "metadata/bpi-dataset-retention-archive-acceptance.json",
+      "summary": "The V29 target slice closed real ADP failure/retry/LOCKED interaction, PostgreSQL r1-r7 and idempotency, two exact Object Lock versions, least privilege, isolated Polaris time-travel recovery, physical recovery-copy purge, original-publication preservation and exact zero-residue/default-off cleanup. Full-site DR, production RPO/RTO, MLflow, models, continuous field operation and external ERP/WMS remain open."
+    },
     {
       "marker": "ADP_E2E_BPI_ICEBERG_20260722_175829_A1 / ADP_E2E_BPI_ICEBERG_RETRY_20260722_181106_A1 / ADP_E2E_BPI_ICEBERG_FENCE_20260722_181629_A1",
       "artifact": "metadata/bpi-dataset-catalog-publication-acceptance.json",

@@ -10,7 +10,7 @@
 - 反编译服务 Java：`259` 个文件。
 - 前端 source map：`366` 个。
 - 前端恢复源码：`991` 个文件。
-- Docker Compose 服务：`74` 个。
+- Docker Compose 服务：`76` 个。
 - 默认数据库：`postgresql`。
 - Oracle 模式：`legacy-template-only`。
 
@@ -97,12 +97,14 @@
 | minio | infrastructure | - |
 | bpi-dataset-minio-bootstrap | support-runtime | - |
 | bpi-iceberg-warehouse-bootstrap | support-runtime | - |
+| bpi-dataset-recovery-bootstrap | support-runtime | - |
 | bpi-polaris-postgres | support-runtime | - |
 | bpi-polaris-bootstrap-check | support-runtime | - |
 | bpi-polaris-bootstrap | support-runtime | - |
 | bpi-polaris | support-runtime | - |
 | bpi-polaris-catalog-bootstrap | support-runtime | - |
 | bpi-dataset-catalog-publisher | support-runtime | - |
+| bpi-dataset-retention-archiver | support-runtime | - |
 | websocket | platform-runtime | bap-server/base-Server/websocket/supfusion-websocket.jar |
 | i18n | platform-runtime | bap-server/base-Server/i18n/supfusion-i18n.jar |
 | sysmanagement | platform-runtime | bap-server/base-Server/sysmanagement/supfusion-sysmanagement.jar |

@@ -305,6 +305,7 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
     'page reload must rediscover the publication from the materialization');
   assert.match(await page.locator('.dataset-retention-manifest-sha').textContent(), /^[a-f0-9]{64}$/,
     'page reload must rediscover the immutable recovery package from the publication');
+  await page.screenshot({ path: '/tmp/bpi-dataset-iceberg-desktop.png', fullPage: true });
   await page.screenshot({ path: '/tmp/bpi-dataset-object-lock-desktop.png', fullPage: true });
   assert.deepEqual(errors, []);
   await desktop.close();
@@ -329,6 +330,7 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   assert.equal(await mobilePage.locator('.dataset-iceberg-snapshot').textContent(), '9223372036854775001');
   const drawerGeometry = await mobilePage.evaluate(() => ({ body: document.body.scrollWidth, viewport: window.innerWidth }));
   assert.ok(drawerGeometry.body <= drawerGeometry.viewport + 1, `dataset drawer overflows viewport: ${JSON.stringify(drawerGeometry)}`);
+  await mobilePage.screenshot({ path: '/tmp/bpi-dataset-iceberg-mobile.png', fullPage: true });
   await mobilePage.screenshot({ path: '/tmp/bpi-dataset-object-lock-mobile.png', fullPage: true });
   assert.deepEqual(mobileErrors, []);
   await mobile.close();

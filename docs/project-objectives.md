@@ -133,10 +133,33 @@ PostgreSQL fencing 写回前以 exit code `86` 中止，形成 `COMMITTING/r2` �
 证明没有重复 append。桌面/移动/刷新读取无非预期浏览器错误和横向溢出；测试 table、对象版本、warehouse
 prefix 和 BPI marker 已定向清理，sidecar 与七个默认开关恢复关闭。
 
-该纵切通过不改变 G-021 的 `PARTIAL`：WORM、MLflow、模型训练/审批/推断、正式容量、物理来源连续
-7-14 天、外部 ERP/WMS 和生产激活仍不在本次结论内。
+该纵切通过不改变 G-021 的 `PARTIAL`：当时 Object Lock 恢复包、MLflow、模型训练/审批/推断、正式容量、
+物理来源连续 7-14 天、外部 ERP/WMS 和生产激活仍不在本次结论内；其后单数据集 Object Lock 门槛已由
+下述 V29 纵切关闭，但不等于整站灾备完成。
 机器证据为 `metadata/bpi-dataset-catalog-publication-acceptance.json`，完整报告为
 `docs/testing/bpi-dataset-catalog-publication-acceptance.md`。
+
+同日继续完成 V29 Object Lock 恢复包纵切。release
+`ef8036b8b71718f3bb4f65ede3e9ba9cca093a82` 已将唯一目标栈 expand-only 到 PostgreSQL
+15.18/Flyway V29。marker `ADP_E2E_BPI_ARCHIVE_20260722_215300_A1` 由真实页面创建恢复包；官方
+archiver 先在不可写工作目录下持久化 `FAILED/r3/RETENTION_ARCHIVE_ERROR`，恢复后从页面重试同一
+archive `c2d585f4-5793-4f17-a230-aa98440d3293`，最终达到 `LOCKED/r7/attempt2`。PostgreSQL 保存
+r1-r7 审计、两个 `COMPLETED/202` 幂等请求、精确 source/manifest versionId、GOVERNANCE
+retain-until、1 row 和 semantic checksum；MinIO 反证 archiver、无 bypass 管理请求及 recovery operator
+均不能删除 retained 版本，recovery operator 也不能列举业务 warehouse。
+
+独立恢复身份随后从两个 exact Object Lock 版本创建隔离 recovery Iceberg table；snapshot
+`4888963949559974798` time-travel 为 1 row，semantic checksum 与原 publication snapshot
+`2413939455193407789` 一致。演练结束时恢复 table/namespace 和 6 个 recovery warehouse 版本被物理
+清除，原 training publication 保持不变。桌面、刷新和 `390x844` 移动页面无非预期错误或溢出；测试
+marker、source/training/recovery/archive 对象均定向清零，materializer/publisher/archiver/Polaris 侧车停止，
+九个相关开关保持 false。
+
+该纵切只关闭单个已验证 BPI 数据集的不可变恢复包门槛。整站 PostgreSQL/Kafka/MinIO/Keycloak/Nacos
+灾备、生产留存周期决策、跨故障域复制、生产 RPO/RTO、容量、MLflow/模型、物理来源连续 7-14 天、
+外部 ERP/WMS 和生产激活仍未完成，因此 G-021 继续为 `PARTIAL`。机器证据为
+`metadata/bpi-dataset-retention-archive-acceptance.json`，完整报告为
+`docs/testing/bpi-dataset-retention-archive-acceptance.md`。
 
 2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、

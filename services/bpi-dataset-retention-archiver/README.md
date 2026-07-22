@@ -17,3 +17,15 @@ source dataset prefix and put/get/retention/legal-hold access to the recovery
 bucket. It has no delete or governance-bypass permission. Runtime activation,
 retention mode, duration and legal hold are environment-controlled and remain
 disabled by default.
+
+The target acceptance deliberately persists a worker failure before retrying the
+same archive to `LOCKED`; HTTP success alone is not accepted. A locked package
+must carry exact object version IDs, matching checksums, Object Lock retention
+facts, row/semantic checks and PostgreSQL audit revisions.
+
+Recovery is rehearsed with the separate
+`bpi_dataset_catalog_publisher.recovery_rehearsal` utility and dedicated MinIO
+and Polaris recovery credentials. It creates an isolated recovery namespace,
+verifies an exact Iceberg time-travel scan, then purges only that recovery table,
+namespace and warehouse prefix. This worker and the recovery utility do not own
+the active training warehouse and do not establish full-site disaster recovery.

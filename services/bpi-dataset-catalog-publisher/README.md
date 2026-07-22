@@ -12,6 +12,12 @@ It does not create a Polaris catalog, does not accept catalog or object-store
 coordinates from browser requests, and does not claim WORM retention, MLflow
 registration, model training or production readiness.
 
+Object Lock retention is a separate downstream V29 task owned by the default-off
+retention archiver. The recovery-rehearsal command in this package consumes only
+a verified V29 recovery manifest, writes to an isolated recovery namespace and
+must purge its own table, namespace and exact warehouse object versions before
+reporting success. Publisher credentials are never reused for that rehearsal.
+
 Its `BPI_DATASET_CATALOG_SOURCE_MINIO_*` identity is read-only and separate
 from the Phase 3B-A materializer identity. Polaris owns warehouse credentials;
 they are not passed to browser clients or persisted in BPI publication rows.

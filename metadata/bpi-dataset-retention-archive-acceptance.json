@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-22T22:20:55+08:00",
+  "repoBaseCommit": "ef8036b8b71718f3bb4f65ede3e9ba9cca093a82",
+  "runtimeRevision": "ef8036b8b71718f3bb4f65ede3e9ba9cca093a82",
+  "status": "PASS_TARGET_BROWSER_API_POSTGRES_OBJECT_LOCK_POLARIS_RECOVERY_CLEANED",
+  "database": "PostgreSQL 15.18",
+  "databaseName": "ft_mes_bpi",
+  "flywayVersion": 29,
+  "phase": "3B_C_OBJECT_LOCK_RECOVERY_ARCHIVE",
+  "productionActivationAllowed": false,
+  "summary": {
+    "testedFeatures": 12,
+    "pass": 12,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "targetBrowserRuns": 4,
+    "targetBrowserFailures": 0,
+    "unexpectedConsoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "horizontalOverflowFailures": 0,
+    "postgresAcceptanceRuns": 1,
+    "objectLockAcceptanceRuns": 1,
+    "recoveryRehearsalRuns": 1,
+    "cleanupRuns": 1
+  },
+  "items": [
+    {
+      "operation": "expand the sole target BPI database from Flyway V28 to V29",
+      "status": "PASS",
+      "evidence": "expand-only upgrade report completed; PostgreSQL reached V29 and the primary service, adapter, WMS adapter and /bpi/ returned healthy/200"
+    },
+    {
+      "operation": "request a retention archive from the real ADP page",
+      "status": "PASS",
+      "evidence": "POST returned 202 and persisted archive c2d585f4-5793-4f17-a230-aa98440d3293 as QUEUED/r1"
+    },
+    {
+      "operation": "persist a controlled archiver write failure",
+      "status": "PASS",
+      "evidence": "the official image with an unwritable work directory persisted FAILED/r3, attempt 1 and RETENTION_ARCHIVE_ERROR without claiming LOCKED"
+    },
+    {
+      "operation": "retry the same archive from the page",
+      "status": "PASS",
+      "evidence": "retry POST returned 202 and reused the same archive, which reached LOCKED/r7 with attempt 2"
+    },
+    {
+      "operation": "verify exact source and manifest object versions under Object Lock",
+      "status": "PASS",
+      "evidence": "both exact versions were readable, checksummed and retained in GOVERNANCE mode until 2026-08-21T14:00:55.331898Z"
+    },
+    {
+      "operation": "verify PostgreSQL revision, audit and idempotency facts",
+      "status": "PASS",
+      "evidence": "r1-r7 audit sequence matched the archive state machine and both write paths were COMPLETED/202"
+    },
+    {
+      "operation": "prove archiver and recovery-operator least privilege",
+      "status": "PASS",
+      "evidence": "archive deletes were denied, business warehouse list was denied and the recovery operator could access only the archive and isolated recovery prefix"
+    },
+    {
+      "operation": "restore the archive into an isolated Polaris namespace",
+      "status": "PASS",
+      "evidence": "recovery snapshot 4888963949559974798 scanned 1 row and matched semantic checksum 8b4dacce8c19b25e93ef632cf0f30451fded82f300385ec8d22a3649ea258a28"
+    },
+    {
+      "operation": "physically purge the recovery copy and namespace",
+      "status": "PASS",
+      "evidence": "the isolated table and namespace disappeared and 6 exact recovery warehouse object versions were removed"
+    },
+    {
+      "operation": "verify the original training publication after the rehearsal",
+      "status": "PASS",
+      "evidence": "original snapshot 2413939455193407789 remained one snapshot/one row with the same semantic checksum"
+    },
+    {
+      "operation": "verify desktop, reload and mobile interaction",
+      "status": "PASS",
+      "evidence": "console/page/request failures were all zero; mobile body/document/viewport were 390/390/390 and drawer client/scroll widths were 389/389"
+    },
+    {
+      "operation": "clean exact marker resources and restore default-off runtime",
+      "status": "PASS",
+      "evidence": "database projections, source/training/recovery/archive versions and optional running sidecars were zero; all catalog, retention and unsafe flags were false"
+    }
+  ],
+  "targetRun": {
+    "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "datasetId": "a67c078b-0b2f-434d-9b66-7fe8de9d21ac",
+    "snapshotId": "d97dd81f-04d0-4b7e-a7ee-5ea9bb3f2943",
+    "materializationId": "65571868-f6ed-42dc-bdae-ff9c99315541",
+    "catalogPublicationId": "ae56f35f-013e-4973-bd5a-98b1ab4ef8e4",
+    "retentionArchiveId": "c2d585f4-5793-4f17-a230-aa98440d3293",
+    "tableIdentifier": "ft_mes_bpi.bpi_training.tenant_40510175845988f1.dataset_a67c078b0b2f434d9b667fe8de9d21ac",
+    "originalIcebergSnapshotId": "2413939455193407789",
+    "recoveryTableIdentifier": "ft_mes_bpi.bpi_recovery.archive_c2d585f457934f17a230aa98440d3293.dataset",
+    "recoveryIcebergSnapshotId": "4888963949559974798",
+    "stateSequence": ["QUEUED", "ARCHIVING", "FAILED", "QUEUED", "ARCHIVING", "VERIFYING", "LOCKED"],
+    "finalRevision": 7,
+    "attemptCount": 2,
+    "failureCode": "RETENTION_ARCHIVE_ERROR",
+    "sourceContentSha256": "43a840dd341b9f667a571c0971a319640c7a57a66f429c1d500db3653f109dbb",
+    "verifiedSemanticChecksum": "8b4dacce8c19b25e93ef632cf0f30451fded82f300385ec8d22a3649ea258a28"
+  },
+  "postgres": {
+    "table": "bpi.bpi_dataset_retention_archives",
+    "projection": "LOCKED|r7|attempt=2|objects=2|bytes=15301|rows=1",
+    "auditCounts": {
+      "DATASET_RETENTION_ARCHIVE_QUEUED": 1,
+      "DATASET_RETENTION_ARCHIVE_ARCHIVING": 2,
+      "DATASET_RETENTION_ARCHIVE_FAILED": 1,
+      "DATASET_RETENTION_ARCHIVE_RETRIED": 1,
+      "DATASET_RETENTION_ARCHIVE_VERIFYING": 1,
+      "DATASET_RETENTION_ARCHIVE_LOCKED": 1
+    },
+    "idempotency": {
+      "rows": 2,
+      "completed": 2,
+      "responseStatuses": [202, 202]
+    },
+    "objectLockVerified": true,
+    "recoveryVerified": true
+  },
+  "objectLock": {
+    "bucket": "bpi-dataset-recovery",
+    "archivePrefix": "archives/tenant_40510175845988f1/ae56f35f-013e-4973-bd5a-98b1ab4ef8e4/c2d585f4-5793-4f17-a230-aa98440d3293",
+    "retentionMode": "GOVERNANCE",
+    "retainUntil": "2026-08-21T14:00:55.331898Z",
+    "legalHoldEnabled": false,
+    "source": {
+      "key": "archives/tenant_40510175845988f1/ae56f35f-013e-4973-bd5a-98b1ab4ef8e4/c2d585f4-5793-4f17-a230-aa98440d3293/source.parquet",
+      "versionId": "dfa24784-8270-4e83-a032-3679964730c0",
+      "sha256": "43a840dd341b9f667a571c0971a319640c7a57a66f429c1d500db3653f109dbb",
+      "rowCount": 1
+    },
+    "manifest": {
+      "key": "archives/tenant_40510175845988f1/ae56f35f-013e-4973-bd5a-98b1ab4ef8e4/c2d585f4-5793-4f17-a230-aa98440d3293/recovery-manifest.json",
+      "versionId": "7a96696b-3f27-48fb-9103-3d72bb5964b6",
+      "sha256": "9d01266b9b0bea65e0346d0a030c0948ea2678c4d79aa7b9d9d5b0c0def725c2"
+    },
+    "archiveObjectCount": 2,
+    "archiveTotalBytes": 15301,
+    "archiverExactVersionDelete": "AccessDenied",
+    "administratorDeleteWithoutGovernanceBypass": "InvalidRequest",
+    "recoveryOperatorBusinessWarehouseList": "AccessDenied",
+    "recoveryOperatorRetainedDelete": "AccessDenied"
+  },
+  "recoveryRehearsal": {
+    "status": "PASS",
+    "report": "metadata/bpi-dataset-retention-recovery-rehearsal-target.json",
+    "reportSha256": "67a6caf026dcb6d1130ad07f54baeb7cccb81545fb23819dd0a349424dcbb185",
+    "verifiedRowCount": 1,
+    "timeTravelVerified": true,
+    "physicalPurgeVerified": true,
+    "namespaceCleanupVerified": true,
+    "warehouseObjectVersionsPurged": 6,
+    "reconciledStaleObjectVersions": 0,
+    "originalPublicationUnchanged": true
+  },
+  "browser": {
+    "route": "http://10.11.100.17:18080/bpi/#/datasets",
+    "failedRunnerStatus": "PASS_FAILED_STATE_PERSISTED",
+    "lockedRunnerStatus": "PASS_PENDING_DATABASE_OBJECT_LOCK_RECOVERY_VERIFICATION_AND_CLEANUP",
+    "combinedStatus": "PASS_TARGET_BROWSER_API_POSTGRES_OBJECT_LOCK_POLARIS_RECOVERY_CLEANED",
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "mobileWidths": "390/390/390",
+    "mobileDrawerWidths": "389/389",
+    "evidence": {
+      "failedScreenshot": {
+        "path": "metadata/bpi-dataset-retention-failed-target.png",
+        "sha256": "8779bf23909a9bbab7a545325dfcaeeeea3c36de0da78a0bddaa32f51b4a948a"
+      },
+      "lockedScreenshot": {
+        "path": "metadata/bpi-dataset-retention-locked-target.png",
+        "sha256": "f5e92df44ed7b0d283800543936567655a854509db149f955f8b1ce4ad263439"
+      },
+      "lockedMobileScreenshot": {
+        "path": "metadata/bpi-dataset-retention-locked-mobile-target.png",
+        "sha256": "f7e55836ff0ba5f71bbe43da26fe7e15ba1ffcd59478022e83038513f800b356"
+      }
+    }
+  },
+  "cleanup": {
+    "datasetDefinitionRows": 0,
+    "datasetSnapshotRows": 0,
+    "datasetSampleRows": 0,
+    "datasetMaterializationRows": 0,
+    "datasetCatalogPublicationRows": 0,
+    "datasetRetentionArchiveRows": 0,
+    "auditRows": 0,
+    "idempotencyRows": 0,
+    "fixtureMarkerRows": 0,
+    "sourceObjectVersions": 0,
+    "trainingWarehouseObjectVersions": 0,
+    "recoveryWarehouseObjectVersions": 0,
+    "archiveObjectVersions": 0,
+    "optionalRunningSidecars": 0,
+    "defaultOffFlagsVerified": true
+  },
+  "target": {
+    "sshHost": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "composeProject": "adp-mes-newbase",
+    "runtimeDirectory": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "releaseDirectory": "/home/v6/ft-mes-release-ef8036b8",
+    "upgradeReport": "/home/v6/backups/bpi-v29-20260722-212917/bpi-integrated-upgrade-20260722T132918Z.json",
+    "recoveryReport": "/home/v6/backups/bpi-recovery-rehearsal-ADP_E2E_BPI_ARCHIVE_20260722_215300_A1.json",
+    "flywayVersion": 29,
+    "health": {
+      "bpiService": "healthy",
+      "bpiAdapter": "healthy",
+      "bpiWmsAdapter": "healthy",
+      "bpiWebHttpStatus": 200,
+      "optionalRunningSidecars": 0
+    },
+    "defaultOff": {
+      "BPI_DATASET_MATERIALIZER_ENABLED": false,
+      "BPI_POLARIS_ENABLED": false,
+      "BPI_POLARIS_DROP_WITH_PURGE_ENABLED": false,
+      "BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED": false,
+      "BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED": false,
+      "BPI_DATASET_CATALOG_PUBLISHER_ENABLED": false,
+      "BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED": false,
+      "BPI_DATASET_RETENTION_ARCHIVER_ENABLED": false,
+      "BPI_DATASET_RECOVERY_RECONCILE_STALE": false
+    }
+  },
+  "boundaries": {
+    "singleDatasetRecoveryPackageAccepted": true,
+    "fullSiteDisasterRecoveryAccepted": false,
+    "productionRetentionPolicyApproved": false,
+    "crossFailureDomainReplicationTested": false,
+    "productionRpoRtoTested": false,
+    "mlflowRegistered": false,
+    "modelTrained": false,
+    "modelApproved": false,
+    "onlineInferenceEnabled": false,
+    "productionCapacityTested": false,
+    "continuousFieldRunTested": false,
+    "externalErpWmsTested": false
+  }
+}

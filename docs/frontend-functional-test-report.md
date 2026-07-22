@@ -960,6 +960,25 @@ catalog table 已定向清理，目录相关 sidecar 与七个开关恢复为默
 `metadata/bpi-dataset-catalog-fencing-recovered-mobile-target.png`。完整报告：
 `docs/testing/bpi-dataset-catalog-publication-acceptance.md`。
 
+### BPI V29 Object Lock 恢复包（2026-07-22）
+
+本节使用唯一目标环境 `http://10.11.100.17:18080`、真实 ADP 登录和 exact revision
+`ef8036b8b71718f3bb4f65ede3e9ba9cca093a82`。PostgreSQL 已 expand-only 到 Flyway V29；验收临时启动
+materializer、publisher、archiver、Polaris 和 MinIO bootstrap，取证后全部停止并恢复默认关闭。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 数据集恢复包 | `/bpi/#/datasets` | 打开 `ADP_E2E_BPI_ARCHIVE_20260722_215300_A1` 的 READY Iceberg 发布，点击创建恢复包 | `POST /bpi-api/dataset-catalog-publications/ae56f35f-013e-4973-bd5a-98b1ab4ef8e4/retention-archives`；archive GET | POST `202`；受控不可写工作目录使页面真实显示 `FAILED/r3/attempt1` 和明确失败原因；console/page/request failure 均为 0 | PostgreSQL 持久化 `QUEUED/r1 -> ARCHIVING/r2 -> FAILED/r3`、`RETENTION_ARCHIVE_ERROR`；未伪留 LOCKED/Object Lock 完成事实 | `bpi_dataset_retention_archives`、`bpi_audit_events`、`bpi_api_idempotency` | PASS_TARGET_FAILURE_PERSISTED | 失败为验收故障注入，官方 archiver 随即恢复 |
+| BPI 数据集恢复包 | 同一失败详情 | 点击重试并等待同一 archive 达到 LOCKED | `POST /bpi-api/dataset-retention-archives/c2d585f4-5793-4f17-a230-aa98440d3293/retry`；archive GET | POST `202`，复用同一 ID；页面显示 `LOCKED/r7/attempt2`、GOVERNANCE、retain-until、两个对象版本和恢复已验证 | 状态继续为 `RETRIED/r4 -> ARCHIVING/r5 -> VERIFYING/r6 -> LOCKED/r7`；两条写路径均 `COMPLETED/202`，对象/row/checksum 与数据库一致 | 同上；MinIO `bpi-dataset-recovery` | PASS_TARGET_LOCKED | 测试留存为 30 天，不代表生产留存政策 |
+| BPI 恢复演练 | 同一 LOCKED 详情；桌面刷新与移动 `390x844` | 重新打开同一恢复包，并以独立恢复身份执行隔离 Polaris time-travel 恢复/销毁 | archive/publication/snapshot GET；Polaris Iceberg REST；MinIO exact-version GET | 桌面、刷新、移动均重发现同一任务；console/page/request error 为 0；viewport/body/document `390/390/390`、drawer `389/389`，无横向溢出 | recovery snapshot `4888963949559974798` 为 1 row 且 checksum 匹配；恢复 table/namespace 和 6 个 recovery warehouse 版本归零，原 snapshot `2413939455193407789` 未改变 | BPI archive/audit/idempotency；Polaris metastore；独立 recovery warehouse | PASS_TARGET_RECOVERY | 只证明单数据集恢复包，不是整站灾备 |
+| BPI V29 验收退场 | 不适用 | 精确删除测试 table、source/training/recovery/archive versions 和 marker，停止所有可选侧车 | cleanup SQL；Polaris/MinIO 独立管理操作；Compose runtime check | 页面回到无 marker 的正常数据集，`/bpi/` 仍为 200 | definition/snapshot/sample/materialization/publication/archive/audit/idempotency/fixture marker 均为 0；四类对象版本为 0；optional running=0；九个相关开关 false | V26-V29 lineage 表、Polaris、MinIO | PASS_TARGET_CLEANED | 未删除非 marker 业务行 |
+
+机器证据：`metadata/bpi-dataset-retention-archive-acceptance.json`；截图：
+`metadata/bpi-dataset-retention-failed-target.png`、
+`metadata/bpi-dataset-retention-locked-target.png`、
+`metadata/bpi-dataset-retention-locked-mobile-target.png`；完整报告：
+`docs/testing/bpi-dataset-retention-archive-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

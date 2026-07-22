@@ -206,6 +206,13 @@ function assertReadyMaterialization(materialization) {
   "materialization object version is missing");
 }
 
+async function assertMaterializationDeliveryChain(page) {
+  const deliveryStates = await page.locator(".dataset-delivery-grid .status").allTextContents();
+  assert(JSON.stringify(deliveryStates)
+    === JSON.stringify(["MANIFEST_READY", "READY", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED"]),
+  `target page claims unsupported downstream delivery: ${JSON.stringify(deliveryStates)}`);
+}
+
 async function openSnapshotDrawer(page, definition) {
   await page.goto(browserBaseUrl, { waitUntil: "networkidle" });
   await page.getByRole("heading", { name: "数据集清单" }).waitFor();
@@ -285,9 +292,7 @@ async function runDesktop(page, api, auth, target, report) {
     assert(/^[a-f0-9]{64}$/
       .test((await panel.locator(".dataset-artifact-sha").textContent()) || ""),
     "target page does not show a valid SHA-256");
-    assert(JSON.stringify(await panel.locator(".dataset-downstream-grid .status").allTextContents())
-      === JSON.stringify(["NOT_STARTED", "NOT_STARTED", "NOT_STARTED"]),
-    "target page claims unsupported downstream delivery");
+    await assertMaterializationDeliveryChain(page);
     const materializationPayload = await apiGet(
       api, auth.ticket, `/bpi-api/dataset-materializations/${before.id}`,
     );
@@ -308,6 +313,7 @@ async function runDesktop(page, api, auth, target, report) {
     const panel = page.locator('[data-materialization-state="READY"]');
     await panel.waitFor();
     await panel.getByText("VERIFIED", { exact: true }).waitFor();
+    await assertMaterializationDeliveryChain(page);
     report.materialization = materialization;
   }
   await page.screenshot({ path: desktopScreenshot, fullPage: true });
