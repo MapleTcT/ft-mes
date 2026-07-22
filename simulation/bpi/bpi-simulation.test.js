@@ -1580,6 +1580,105 @@ test('dataset manifests stay immutable while versioned Parquet materialization i
   assert.equal(result.response.status, 409);
   assert.equal(result.json.currentRevision, lockedArchive.revision);
 
+  result = await request('GET', `/bpi/v1/dataset-retention-archives/${archiveId}/mlflow-registrations`);
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data, null);
+
+  result = await request('POST', `/bpi/v1/dataset-retention-archives/${archiveId}/mlflow-registrations`, {
+    headers: commandHeaders('dataset-mlflow-registration-stale-0001', lockedArchive.revision - 1),
+    body: { reason: '登记精确恢复对象为 MLflow Dataset Input' },
+  });
+  assert.equal(result.response.status, 409);
+  assert.equal(result.json.currentRevision, lockedArchive.revision);
+
+  const registrationHeaders = commandHeaders('dataset-mlflow-registration-0002', lockedArchive.revision);
+  const registrationBody = { reason: '登记精确恢复对象为 MLflow Dataset Input' };
+  result = await request('POST', `/bpi/v1/dataset-retention-archives/${archiveId}/mlflow-registrations`, {
+    headers: registrationHeaders,
+    body: registrationBody,
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'QUEUED');
+  assert.equal(result.json.data.revision, 1);
+  assert.equal(result.json.data.registrarVersion, 'bpi-dataset-mlflow-registrar/0.1.0');
+  assert.equal(result.json.data.trackingProfile, 'bpi-mlflow-dataset-v1');
+  assert.equal(result.json.data.datasetDigest, published.semanticChecksum.slice(0, 16));
+  const registrationId = result.json.data.id;
+  const queuedRegistrationResponse = result.json;
+
+  result = await request('POST', `/bpi/v1/dataset-retention-archives/${archiveId}/mlflow-registrations`, {
+    headers: registrationHeaders,
+    body: registrationBody,
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, queuedRegistrationResponse);
+
+  result = await request('GET', `/bpi/v1/dataset-retention-archives/${archiveId}/mlflow-registrations`);
+  assert.equal(result.json.data.id, registrationId);
+  assert.equal(result.json.data.state, 'QUEUED');
+
+  result = await request('GET', `/bpi/v1/dataset-mlflow-registrations/${registrationId}`);
+  assert.equal(result.json.data.state, 'REGISTERING');
+  assert.equal(result.json.data.revision, 2);
+  assert.equal(result.json.data.attemptCount, 1);
+
+  result = await request('POST', '/__simulation/fail-dataset-mlflow-registration', {
+    body: {
+      registrationId,
+      failureCode: 'SIMULATED_MLFLOW_TIMEOUT',
+      failureDetail: '模拟 MLflow Tracking 超时，用于失败重排队验收。',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'FAILED');
+  assert.equal(result.json.data.revision, 3);
+  assert.equal(result.json.data.mlflowRunId, null);
+
+  const registrationRetryHeaders = commandHeaders('dataset-mlflow-registration-retry-0003', 3);
+  result = await request('POST', `/bpi/v1/dataset-mlflow-registrations/${registrationId}/retry`, {
+    headers: registrationRetryHeaders,
+    body: { reason: 'MLflow Tracking 恢复后重新登记并复验血缘' },
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'QUEUED');
+  assert.equal(result.json.data.revision, 4);
+  const retriedRegistrationResponse = result.json;
+
+  result = await request('POST', `/bpi/v1/dataset-mlflow-registrations/${registrationId}/retry`, {
+    headers: registrationRetryHeaders,
+    body: { reason: 'MLflow Tracking 恢复后重新登记并复验血缘' },
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, retriedRegistrationResponse);
+
+  result = await request('GET', `/bpi/v1/dataset-mlflow-registrations/${registrationId}`);
+  assert.equal(result.json.data.state, 'REGISTERING');
+  assert.equal(result.json.data.revision, 5);
+  assert.equal(result.json.data.attemptCount, 2);
+  result = await request('GET', `/bpi/v1/dataset-mlflow-registrations/${registrationId}`);
+  const registeredDataset = result.json.data;
+  assert.equal(registeredDataset.state, 'REGISTERED');
+  assert.equal(registeredDataset.revision, 6);
+  assert.match(registeredDataset.mlflowRunId, /^[a-f0-9]{32}$/);
+  assert.match(registeredDataset.mlflowArtifactUri, /^mlflow-artifacts:\//);
+  assert.equal(
+    registeredDataset.mlflowDatasetSource,
+    `s3://${lockedArchive.archiveBucket}/${lockedArchive.sourceArchiveObjectKey}?versionId=${lockedArchive.sourceArchiveVersionId}`,
+  );
+  assert.equal(registeredDataset.registrationMetadata.datasetInputVerified, true);
+  assert.equal(registeredDataset.registrationMetadata.lineageVerified, true);
+  assert.equal(registeredDataset.registrationMetadata.modelTrained, false);
+  assert.equal(registeredDataset.registrationMetadata.modelRegistered, false);
+  assert.equal(registeredDataset.registrationMetadata.onlineInferenceEnabled, false);
+  assert.equal(registeredDataset.registrationMetadata.productionActivationAllowed, false);
+
+  result = await request('POST', `/bpi/v1/dataset-mlflow-registrations/${registrationId}/retry`, {
+    headers: commandHeaders('dataset-mlflow-registration-registered-0004', registeredDataset.revision),
+    body: { reason: 'REGISTERED 数据集输入不可再次排队或转为模型' },
+  });
+  assert.equal(result.response.status, 409);
+  assert.equal(result.json.currentRevision, registeredDataset.revision);
+
   result = await request('POST', `/bpi/v1/dataset-materializations/${materializationId}/retry`, {
     headers: commandHeaders('dataset-materialization-ready-retry-0003', materialized.revision),
     body: { reason: 'READY 对象必须保持不可变，禁止再次排队' },

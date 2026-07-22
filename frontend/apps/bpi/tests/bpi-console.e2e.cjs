@@ -126,7 +126,7 @@ test('desktop operator confirms a candidate and opens the shadow batch', async (
   await context.close();
 });
 
-test('data engineer materializes a point-in-time dataset with failed retry and mobile evidence', async () => {
+test('data engineer delivers a version-locked MLflow Dataset Input with failed retries and mobile evidence', async () => {
   let response = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
   assert.equal(response.status, 200);
   response = await fetch(`${simulatorUrl}/__simulation/prepare-dataset-manifest`, { method: 'POST' });
@@ -189,7 +189,7 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   assert.match(await materializationPanel.locator('.dataset-artifact-uri').textContent(), /^s3:\/\/bpi-datasets\/datasets\/.*\.parquet\?versionId=.+$/);
   assert.match(await materializationPanel.locator('.dataset-artifact-sha').textContent(), /^[a-f0-9]{64}$/);
   assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
-    'MANIFEST_READY', 'READY', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED',
+    'MANIFEST_READY', 'READY', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED',
   ]);
 
   await page.getByRole('button', { name: '发布 Iceberg' }).click();
@@ -223,7 +223,7 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   assert.match(await catalogPanel.locator('.dataset-table-identifier').textContent(), /^ft_mes_bpi\.bpi_training\.tenant_[a-f0-9]{16}\.dataset_[a-f0-9]+$/);
   assert.match(await catalogPanel.locator('.dataset-semantic-sha').textContent(), /^[a-f0-9]{64}$/);
   assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
-    'MANIFEST_READY', 'READY', 'READY', 'NOT_STARTED', 'NOT_STARTED',
+    'MANIFEST_READY', 'READY', 'READY', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED',
   ]);
 
   await page.getByRole('button', { name: '创建恢复包' }).click();
@@ -260,7 +260,7 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   assert.equal(await archivePanel.locator('.dataset-retention-semantic-sha').textContent(),
     await catalogPanel.locator('.dataset-semantic-sha').textContent());
   assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
-    'MANIFEST_READY', 'READY', 'READY', 'LOCKED', 'NOT_STARTED',
+    'MANIFEST_READY', 'READY', 'READY', 'LOCKED', 'NOT_STARTED', 'NOT_STARTED',
   ]);
 
   publicationResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-catalog-publications/${publicationId}`).then((item) => item.json());
@@ -278,6 +278,59 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   assert.equal(archiveResponse.data.archiveMetadata.recoveryVerified, true);
   assert.equal(archiveResponse.data.archiveMetadata.mlflowRegistered, false);
   assert.equal(archiveResponse.data.archiveMetadata.modelTrained, false);
+
+  await page.getByRole('button', { name: '登记 MLflow 数据输入' }).click();
+  await page.getByRole('heading', { name: '登记数据输入' }).waitFor();
+  await page.getByText('仅登记 Dataset Input，不训练模型', { exact: true }).waitFor();
+  await page.locator('#dataset-mlflow-registration-reason').fill('登记浏览器验收使用的不可变恢复对象与精确版本血缘');
+  await page.locator('#dataset-mlflow-registration-submit').click();
+  await page.locator('[data-mlflow-state="REGISTERING"]').waitFor();
+
+  let registrationResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-retention-archives/${archiveId}/mlflow-registrations`).then((item) => item.json());
+  const registrationId = registrationResponse.data.id;
+  response = await fetch(`${simulatorUrl}/__simulation/fail-dataset-mlflow-registration`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      registrationId,
+      failureCode: 'SIMULATED_MLFLOW_TIMEOUT',
+      failureDetail: '浏览器验收注入的 MLflow Tracking Server 超时。',
+    }),
+  });
+  assert.equal(response.status, 200);
+  await page.locator('[data-mlflow-state="FAILED"]').waitFor();
+  await page.getByText('SIMULATED_MLFLOW_TIMEOUT', { exact: true }).waitFor();
+  await page.getByRole('button', { name: '重试 MLflow 登记' }).click();
+  await page.getByRole('heading', { name: '重新排队数据输入登记' }).waitFor();
+  await page.locator('#dataset-mlflow-registration-reason').fill('Tracking Server 恢复后复用同一登记任务并重新复验数据血缘');
+  await page.locator('#dataset-mlflow-registration-submit').click();
+
+  const mlflowPanel = page.locator('[data-mlflow-state="REGISTERED"]');
+  await mlflowPanel.waitFor();
+  await mlflowPanel.getByText('VERIFIED', { exact: true }).waitFor();
+  await mlflowPanel.getByText('NOT_STARTED', { exact: true }).waitFor();
+  assert.match(await mlflowPanel.locator('.dataset-mlflow-source').textContent(),
+    /^s3:\/\/bpi-dataset-recovery\/archives\/tenant_[a-f0-9]{16}\/.+\?versionId=[a-f0-9-]{36}$/);
+  assert.match(await mlflowPanel.locator('.dataset-mlflow-digest').textContent(), /^[a-f0-9]{16}$/);
+  assert.match(await mlflowPanel.locator('.dataset-mlflow-experiment').textContent(), /^\d+$/);
+  assert.match(await mlflowPanel.locator('.dataset-mlflow-run').textContent(), /^[a-f0-9]{32}$/);
+  assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
+    'MANIFEST_READY', 'READY', 'READY', 'LOCKED', 'REGISTERED', 'NOT_STARTED',
+  ]);
+
+  registrationResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-mlflow-registrations/${registrationId}`).then((item) => item.json());
+  assert.equal(registrationResponse.data.state, 'REGISTERED');
+  assert.equal(registrationResponse.data.retentionArchiveId, archiveId);
+  assert.equal(registrationResponse.data.catalogSemanticChecksum, publicationResponse.data.semanticChecksum);
+  assert.equal(registrationResponse.data.mlflowDatasetSource,
+    `s3://${archiveResponse.data.archiveBucket}/${archiveResponse.data.sourceArchiveObjectKey}?versionId=${archiveResponse.data.sourceArchiveVersionId}`);
+  assert.equal(registrationResponse.data.registrationMetadata.datasetInputVerified, true);
+  assert.equal(registrationResponse.data.registrationMetadata.lineageVerified, true);
+  assert.equal(registrationResponse.data.registrationMetadata.sourceFactsVerified, true);
+  assert.equal(registrationResponse.data.registrationMetadata.modelTrained, false);
+  assert.equal(registrationResponse.data.registrationMetadata.modelRegistered, false);
+  assert.equal(registrationResponse.data.registrationMetadata.onlineInferenceEnabled, false);
+  assert.equal(registrationResponse.data.registrationMetadata.productionActivationAllowed, false);
 
   const definitions = await fetch(`${simulatorUrl}/bpi/v1/datasets?plantId=PLANT-01&limit=100`).then((item) => item.json());
   assert.equal(definitions.data.length, 1);
@@ -301,12 +354,16 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   await page.getByRole('button', { name: '查看最近快照' }).click();
   await page.locator('[data-catalog-state="READY"]').waitFor();
   await page.locator('[data-retention-state="LOCKED"]').waitFor();
+  await page.locator('[data-mlflow-state="REGISTERED"]').waitFor();
   assert.equal(await page.locator('.dataset-iceberg-snapshot').textContent(), '9223372036854775001',
     'page reload must rediscover the publication from the materialization');
   assert.match(await page.locator('.dataset-retention-manifest-sha').textContent(), /^[a-f0-9]{64}$/,
     'page reload must rediscover the immutable recovery package from the publication');
+  assert.match(await page.locator('.dataset-mlflow-source').textContent(), /\?versionId=[a-f0-9-]{36}$/,
+    'page reload must rediscover the exact MLflow Dataset Input registration');
   await page.screenshot({ path: '/tmp/bpi-dataset-iceberg-desktop.png', fullPage: true });
   await page.screenshot({ path: '/tmp/bpi-dataset-object-lock-desktop.png', fullPage: true });
+  await page.locator('.dataset-mlflow-panel').screenshot({ path: '/tmp/bpi-dataset-mlflow-desktop.png' });
   assert.deepEqual(errors, []);
   await desktop.close();
 
@@ -327,11 +384,14 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   await mobilePage.locator('[data-materialization-state="READY"]').waitFor();
   await mobilePage.locator('[data-catalog-state="READY"]').waitFor();
   await mobilePage.locator('[data-retention-state="LOCKED"]').waitFor();
+  await mobilePage.locator('[data-mlflow-state="REGISTERED"]').waitFor();
   assert.equal(await mobilePage.locator('.dataset-iceberg-snapshot').textContent(), '9223372036854775001');
+  assert.match(await mobilePage.locator('.dataset-mlflow-source').textContent(), /\?versionId=[a-f0-9-]{36}$/);
   const drawerGeometry = await mobilePage.evaluate(() => ({ body: document.body.scrollWidth, viewport: window.innerWidth }));
   assert.ok(drawerGeometry.body <= drawerGeometry.viewport + 1, `dataset drawer overflows viewport: ${JSON.stringify(drawerGeometry)}`);
   await mobilePage.screenshot({ path: '/tmp/bpi-dataset-iceberg-mobile.png', fullPage: true });
   await mobilePage.screenshot({ path: '/tmp/bpi-dataset-object-lock-mobile.png', fullPage: true });
+  await mobilePage.locator('.dataset-mlflow-panel').screenshot({ path: '/tmp/bpi-dataset-mlflow-mobile.png' });
   assert.deepEqual(mobileErrors, []);
   await mobile.close();
 });

@@ -18,6 +18,8 @@ const DATASET_CATALOG_PUBLISHER_VERSION = 'bpi-dataset-catalog-publisher/0.1.0';
 const DATASET_RETENTION_ARCHIVER_VERSION = 'bpi-dataset-retention-archiver/0.1.0';
 const DATASET_RECOVERY_PROFILE = 'bpi-dataset-recovery-v1';
 const DATASET_RECOVERY_BUCKET = 'bpi-dataset-recovery';
+const DATASET_MLFLOW_REGISTRAR_VERSION = 'bpi-dataset-mlflow-registrar/0.1.0';
+const DATASET_MLFLOW_TRACKING_PROFILE = 'bpi-mlflow-dataset-v1';
 const DATASET_FEATURE_REFS = new Set([
   'batch.order_id', 'batch.material_code', 'batch.stage_code', 'batch.quantity_unit',
   'rule.version_id', 'topology.version_id', 'point_catalog.snapshot_id',
@@ -765,6 +767,8 @@ function prepareDatasetManifestAcceptance(state) {
   state.pendingDatasetCatalogPublicationIds = new Set();
   state.datasetRetentionArchives = [];
   state.pendingDatasetRetentionArchiveIds = new Set();
+  state.datasetMlflowRegistrations = [];
+  state.pendingDatasetMlflowRegistrationIds = new Set();
   state.idempotency = new Map();
   return { runId, ruleVersionId: state.rule.id, preparedReviewCount: state.shadowRunReviews.length };
 }
@@ -1124,6 +1128,56 @@ function progressDatasetRetentionArchive(state, archive) {
   if (archive.state === 'VERIFYING') completeDatasetRetentionArchive(state, archive);
 }
 
+function latestDatasetMlflowRegistration(state, archiveId) {
+  return state.datasetMlflowRegistrations
+    .filter((item) => item.retentionArchiveId === archiveId
+      && item.registrarVersion === DATASET_MLFLOW_REGISTRAR_VERSION
+      && item.trackingProfile === DATASET_MLFLOW_TRACKING_PROFILE)
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt)
+      || right.id.localeCompare(left.id))[0] || null;
+}
+
+function completeDatasetMlflowRegistration(state, registration) {
+  const experimentId = String(parseInt(sha256(registration.experimentName).slice(0, 12), 16));
+  const runId = sha256(`mlflow-dataset-run:${registration.id}`).slice(0, 32);
+  const datasetSource = `s3://${registration.archiveBucket}/${registration.sourceArchiveObjectKey}`
+    + `?versionId=${registration.sourceArchiveVersionId}`;
+  registration.state = 'REGISTERED';
+  registration.revision += 1;
+  registration.completedAt = FIXED_TIME;
+  registration.mlflowExperimentId = experimentId;
+  registration.mlflowRunId = runId;
+  registration.mlflowArtifactUri = `mlflow-artifacts:/${experimentId}/${runId}/artifacts`;
+  registration.mlflowDatasetSource = datasetSource;
+  registration.registrationMetadata = {
+    datasetInputVerified: true,
+    lineageVerified: true,
+    sourceFactsVerified: true,
+    modelTrained: false,
+    modelRegistered: false,
+    onlineInferenceEnabled: false,
+    productionActivationAllowed: false,
+    simulationOnly: true,
+  };
+  registration.failureCode = null;
+  registration.failureDetail = null;
+  state.pendingDatasetMlflowRegistrationIds.delete(registration.id);
+}
+
+function progressDatasetMlflowRegistration(state, registration) {
+  if (!state.pendingDatasetMlflowRegistrationIds.has(registration.id)) return;
+  if (registration.state === 'QUEUED') {
+    registration.state = 'REGISTERING';
+    registration.revision += 1;
+    registration.startedAt = FIXED_TIME;
+    registration.attemptCount += 1;
+    return;
+  }
+  if (registration.state === 'REGISTERING') {
+    completeDatasetMlflowRegistration(state, registration);
+  }
+}
+
 function calibrationEffectiveness(calibration, now = Date.now()) {
   if (calibration.state !== 'APPROVED') return calibration.state;
   if (now < Date.parse(calibration.validFrom)) return 'NOT_YET_EFFECTIVE';
@@ -1447,6 +1501,30 @@ function createHandler(state) {
         archive.failureDetail = String(body.failureDetail || 'Deterministic Object Lock failure injection.');
         state.pendingDatasetRetentionArchiveIds.delete(archive.id);
         return send(res, 200, envelope(operationId, archive), operationId);
+      }
+      if (req.method === 'POST' && path === '/__simulation/fail-dataset-mlflow-registration') {
+        const operationId = 'simulationFailDatasetMlflowRegistration';
+        const body = await readJson(req);
+        const registration = state.datasetMlflowRegistrations
+          .find((item) => item.id === body.registrationId);
+        if (!registration) {
+          return send(res, 404, { status: 'DATASET_MLFLOW_REGISTRATION_NOT_FOUND' }, operationId);
+        }
+        if (registration.state !== 'REGISTERING') {
+          return send(res, 409, { status: 'DATASET_MLFLOW_REGISTRATION_NOT_ACTIVE' }, operationId);
+        }
+        registration.state = 'FAILED';
+        registration.revision += 1;
+        registration.completedAt = FIXED_TIME;
+        registration.mlflowExperimentId = null;
+        registration.mlflowRunId = null;
+        registration.mlflowArtifactUri = null;
+        registration.mlflowDatasetSource = null;
+        registration.registrationMetadata = null;
+        registration.failureCode = String(body.failureCode || 'SIMULATED_MLFLOW_TRANSPORT_ERROR');
+        registration.failureDetail = String(body.failureDetail || 'Deterministic MLflow failure injection.');
+        state.pendingDatasetMlflowRegistrationIds.delete(registration.id);
+        return send(res, 200, envelope(operationId, registration), operationId);
       }
       if (req.method === 'POST' && path === '/__simulation/prepare-batch-release') {
         const prepared = prepareBatchReleaseAcceptance(state);
@@ -3496,6 +3574,141 @@ function createHandler(state) {
         archive.failureDetail = null;
         state.pendingDatasetRetentionArchiveIds.add(archive.id);
         return rememberAndSend(state, context, res, 202, envelope(operationId, archive), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-retention-archives\/([^/]+)\/mlflow-registrations$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getDatasetMlflowRegistrationForArchive';
+        const archive = state.datasetRetentionArchives.find((item) => item.id === ids[0]);
+        if (!archive) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset retention archive not found.', operationId), operationId);
+        }
+        return send(res, 200, envelope(
+          operationId, latestDatasetMlflowRegistration(state, archive.id),
+        ), operationId);
+      }
+      if (req.method === 'POST' && ids) {
+        const operationId = 'requestDatasetMlflowRegistration';
+        const archive = state.datasetRetentionArchives.find((item) => item.id === ids[0]);
+        if (!archive) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset retention archive not found.', operationId), operationId);
+        }
+        const context = commandContext(req, res, operationId, archive.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (String(body.reason || '').trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'MLflow registration reason must contain at least three characters.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        const recoveryVerified = archive.archiveMetadata?.objectLockVerified === true
+          && archive.archiveMetadata?.recoveryVerified === true;
+        const sourceFactsComplete = archive.archiveBucket && archive.sourceArchiveObjectKey
+          && archive.sourceArchiveVersionId && archive.archiveManifestObjectKey
+          && archive.archiveManifestVersionId && archive.archiveManifestSha256
+          && archive.catalogSemanticChecksum && archive.sourceSchema
+          && archive.verifiedRowCount === archive.sourceRowCount
+          && archive.verifiedSemanticChecksum === archive.catalogSemanticChecksum;
+        if (archive.state !== 'LOCKED' || !recoveryVerified || !sourceFactsComplete) {
+          const response = problem(409, 'Verified Recovery Archive Required', 'MLflow Dataset Input registration requires a LOCKED, recovery-verified exact archive version.', operationId, archive.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const existing = latestDatasetMlflowRegistration(state, archive.id);
+        if (existing) {
+          const response = problem(409, 'MLflow Registration Exists', 'The registrar contract already exists for this recovery archive.', operationId, existing.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const registration = {
+          id: stableUuid({ type: 'dataset-mlflow-registration', archiveId: archive.id }),
+          retentionArchiveId: archive.id,
+          catalogPublicationId: archive.catalogPublicationId,
+          materializationId: archive.materializationId,
+          snapshotId: archive.snapshotId,
+          datasetId: archive.datasetId,
+          datasetCode: archive.datasetCode,
+          datasetVersion: archive.datasetVersion,
+          tenantId: archive.tenantId,
+          plantId: archive.plantId,
+          lineIds: clone(archive.lineIds),
+          registrarVersion: DATASET_MLFLOW_REGISTRAR_VERSION,
+          trackingProfile: DATASET_MLFLOW_TRACKING_PROFILE,
+          state: 'QUEUED',
+          revision: 1,
+          manifestChecksum: archive.manifestChecksum,
+          sourceContentSha256: archive.sourceContentSha256,
+          sourceObjectVersionId: archive.sourceObjectVersionId,
+          sourceByteSize: archive.sourceByteSize,
+          sourceRowCount: archive.sourceRowCount,
+          sourceSchema: clone(archive.sourceSchema),
+          tableIdentifier: archive.tableIdentifier,
+          icebergSnapshotId: archive.icebergSnapshotId,
+          catalogSemanticChecksum: archive.catalogSemanticChecksum,
+          archiveBucket: archive.archiveBucket,
+          sourceArchiveObjectKey: archive.sourceArchiveObjectKey,
+          sourceArchiveVersionId: archive.sourceArchiveVersionId,
+          archiveManifestObjectKey: archive.archiveManifestObjectKey,
+          archiveManifestVersionId: archive.archiveManifestVersionId,
+          archiveManifestSha256: archive.archiveManifestSha256,
+          experimentName: `ft-mes-bpi-training-candidates-${archive.tenantId.replace(/[^A-Za-z0-9_.-]/g, '_')}`,
+          datasetName: archive.datasetCode,
+          datasetDigest: archive.catalogSemanticChecksum.slice(0, 16),
+          requestedBy: 'simulated.data.engineer',
+          requestReason: String(body.reason).trim(),
+          createdAt: FIXED_TIME,
+          startedAt: null,
+          completedAt: null,
+          attemptCount: 0,
+          mlflowExperimentId: null,
+          mlflowRunId: null,
+          mlflowArtifactUri: null,
+          mlflowDatasetSource: null,
+          registrationMetadata: null,
+          failureCode: null,
+          failureDetail: null,
+        };
+        state.datasetMlflowRegistrations.push(registration);
+        state.pendingDatasetMlflowRegistrationIds.add(registration.id);
+        return rememberAndSend(state, context, res, 202, envelope(operationId, registration), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-mlflow-registrations\/([^/]+)$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getDatasetMlflowRegistration';
+        const registration = state.datasetMlflowRegistrations.find((item) => item.id === ids[0]);
+        if (!registration) {
+          return send(res, 404, problem(404, 'Not Found', 'MLflow dataset registration not found.', operationId), operationId);
+        }
+        progressDatasetMlflowRegistration(state, registration);
+        return send(res, 200, envelope(operationId, registration), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-mlflow-registrations\/([^/]+)\/retry$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'retryDatasetMlflowRegistration';
+        const registration = state.datasetMlflowRegistrations.find((item) => item.id === ids[0]);
+        if (!registration) {
+          return send(res, 404, problem(404, 'Not Found', 'MLflow dataset registration not found.', operationId), operationId);
+        }
+        const context = commandContext(req, res, operationId, registration.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (String(body.reason || '').trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'Retry reason must contain at least three characters.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (registration.state !== 'FAILED') {
+          const response = problem(409, 'Invalid MLflow Registration State', 'Only a FAILED MLflow dataset registration can be retried.', operationId, registration.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        registration.state = 'QUEUED';
+        registration.revision += 1;
+        registration.startedAt = null;
+        registration.completedAt = null;
+        registration.mlflowExperimentId = null;
+        registration.mlflowRunId = null;
+        registration.mlflowArtifactUri = null;
+        registration.mlflowDatasetSource = null;
+        registration.registrationMetadata = null;
+        registration.failureCode = null;
+        registration.failureDetail = null;
+        state.pendingDatasetMlflowRegistrationIds.add(registration.id);
+        return rememberAndSend(state, context, res, 202, envelope(operationId, registration), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/integrations/health') {
         return send(res, 200, envelope('getIntegrationHealth', state.integrations), 'getIntegrationHealth');

@@ -40,6 +40,7 @@ import type {
   DatasetDefinition,
   DatasetDefinitionCreateCommand,
   DatasetMaterialization,
+  DatasetMlflowRegistration,
   DatasetRetentionArchive,
   DatasetSnapshot,
   DatasetSnapshotCommand,
@@ -137,9 +138,11 @@ const state = {
   selectedDatasetMaterialization: null as DatasetMaterialization | null,
   selectedDatasetCatalogPublication: null as DatasetCatalogPublication | null,
   selectedDatasetRetentionArchive: null as DatasetRetentionArchive | null,
+  selectedDatasetMlflowRegistration: null as DatasetMlflowRegistration | null,
   datasetMaterializationCommand: null as 'request' | 'retry' | null,
   datasetCatalogPublicationCommand: null as 'request' | 'retry' | null,
   datasetRetentionArchiveCommand: null as 'request' | 'retry' | null,
+  datasetMlflowRegistrationCommand: null as 'request' | 'retry' | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | 'reconcileWms' | 'forceCloseRequest' | 'forceCloseApprove' | 'requestWmsReversal' | 'approveWmsReversal' | null,
   shadowRunCommand: null as 'start' | 'complete' | 'approve' | 'reject' | 'cancel' | null,
@@ -567,6 +570,14 @@ function shell(): void {
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="dataset-retention-archive-submit" value="default" class="button button--primary">创建恢复包</button></footer>
         </form>
       </dialog>
+      <dialog id="dataset-mlflow-registration-dialog" class="command-dialog">
+        <form method="dialog" id="dataset-mlflow-registration-form">
+          <header><div><span>MLflow Dataset Input</span><h2 id="dataset-mlflow-registration-title">登记数据输入</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <div id="dataset-mlflow-registration-summary" class="command-summary"></div>
+          <label><span>操作依据</span><textarea id="dataset-mlflow-registration-reason" required minlength="3" maxlength="500"></textarea></label>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="dataset-mlflow-registration-submit" value="default" class="button button--primary">登记数据输入</button></footer>
+        </form>
+      </dialog>
       <dialog id="feature-flag-dialog" class="command-dialog">
         <form method="dialog" id="feature-flag-form">
           <header><div><span>运行治理</span><h2 id="feature-flag-dialog-title">变更运行开关</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
@@ -618,6 +629,7 @@ function bindShellEvents(): void {
   document.querySelector<HTMLFormElement>('#dataset-materialization-form')?.addEventListener('submit', handleDatasetMaterializationCommand);
   document.querySelector<HTMLFormElement>('#dataset-catalog-publication-form')?.addEventListener('submit', handleDatasetCatalogPublicationCommand);
   document.querySelector<HTMLFormElement>('#dataset-retention-archive-form')?.addEventListener('submit', handleDatasetRetentionArchiveCommand);
+  document.querySelector<HTMLFormElement>('#dataset-mlflow-registration-form')?.addEventListener('submit', handleDatasetMlflowRegistrationCommand);
   document.querySelector<HTMLFormElement>('#feature-flag-form')?.addEventListener('submit', handleFeatureFlagChange);
   document.querySelector<HTMLSelectElement>('#shadow-review-batch')?.addEventListener('change', applyShadowReviewBatch);
   document.querySelector<HTMLDialogElement>('#confirm-dialog')?.addEventListener('close', () => {
@@ -3437,6 +3449,7 @@ async function handleDatasetSnapshotCreate(event: SubmitEvent): Promise<void> {
     state.selectedDatasetSnapshot = response.data;
     state.selectedDatasetCatalogPublication = null;
     state.selectedDatasetRetentionArchive = null;
+    state.selectedDatasetMlflowRegistration = null;
     showToast(`快照 v${response.data.snapshotVersion} 已进入后台队列`);
     renderDatasetSnapshotDrawer(response.data);
     await pollDatasetSnapshot(response.data.id, generation);
@@ -3571,6 +3584,7 @@ async function pollDatasetMaterialization(
       } else {
         state.selectedDatasetCatalogPublication = null;
         state.selectedDatasetRetentionArchive = null;
+        state.selectedDatasetMlflowRegistration = null;
         renderDatasetSnapshotDrawer(snapshotResponse.data);
       }
       showToast(response.data.state === 'READY'
@@ -3602,6 +3616,7 @@ async function loadDatasetCatalogPublication(
     if (datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) {
       state.selectedDatasetCatalogPublication = null;
       state.selectedDatasetRetentionArchive = null;
+      state.selectedDatasetMlflowRegistration = null;
       renderDatasetSnapshotDrawer(snapshot);
     }
     return null;
@@ -3610,6 +3625,7 @@ async function loadDatasetCatalogPublication(
   if (!datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) return null;
   state.selectedDatasetCatalogPublication = response.data;
   state.selectedDatasetRetentionArchive = null;
+  state.selectedDatasetMlflowRegistration = null;
   renderDatasetSnapshotDrawer(snapshot);
   if (response.data?.state === 'READY') {
     await loadDatasetRetentionArchive(snapshot, response.data, generation);
@@ -3698,7 +3714,10 @@ async function pollDatasetCatalogPublication(
     const response = await bpiApi.datasetCatalogPublication(publicationId);
     if (!datasetSnapshotDrawerIsCurrent(snapshotId, generation)) return;
     state.selectedDatasetCatalogPublication = response.data;
-    if (response.data.state !== 'READY') state.selectedDatasetRetentionArchive = null;
+    if (response.data.state !== 'READY') {
+      state.selectedDatasetRetentionArchive = null;
+      state.selectedDatasetMlflowRegistration = null;
+    }
     renderDatasetSnapshotDrawer(state.selectedDatasetSnapshot!);
     if (['READY', 'FAILED'].includes(response.data.state)) {
       if (response.data.state === 'READY') {
@@ -3735,6 +3754,7 @@ async function loadDatasetRetentionArchive(
   if (publication.state !== 'READY') {
     if (datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) {
       state.selectedDatasetRetentionArchive = null;
+      state.selectedDatasetMlflowRegistration = null;
       renderDatasetSnapshotDrawer(snapshot);
     }
     return null;
@@ -3742,7 +3762,11 @@ async function loadDatasetRetentionArchive(
   const response = await bpiApi.datasetRetentionArchiveForPublication(publication.id);
   if (!datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) return null;
   state.selectedDatasetRetentionArchive = response.data;
+  if (response.data?.state !== 'LOCKED') state.selectedDatasetMlflowRegistration = null;
   renderDatasetSnapshotDrawer(snapshot);
+  if (response.data?.state === 'LOCKED') {
+    await loadDatasetMlflowRegistration(snapshot, response.data, generation);
+  }
   return response.data;
 }
 
@@ -3805,6 +3829,7 @@ async function handleDatasetRetentionArchiveCommand(event: SubmitEvent): Promise
       return;
     }
     state.selectedDatasetRetentionArchive = response.data;
+    state.selectedDatasetMlflowRegistration = null;
     state.datasetRetentionArchiveCommand = null;
     renderDatasetSnapshotDrawer(snapshot);
     showToast(command === 'retry' ? '恢复包任务已重新排队' : '恢复包任务已进入后台队列');
@@ -3827,8 +3852,16 @@ async function pollDatasetRetentionArchive(
     const response = await bpiApi.datasetRetentionArchive(archiveId);
     if (!datasetSnapshotDrawerIsCurrent(snapshotId, generation)) return;
     state.selectedDatasetRetentionArchive = response.data;
+    if (response.data.state !== 'LOCKED') state.selectedDatasetMlflowRegistration = null;
     renderDatasetSnapshotDrawer(state.selectedDatasetSnapshot!);
     if (['LOCKED', 'FAILED'].includes(response.data.state)) {
+      if (response.data.state === 'LOCKED') {
+        await loadDatasetMlflowRegistration(
+          state.selectedDatasetSnapshot!,
+          response.data,
+          generation,
+        );
+      }
       showToast(response.data.state === 'LOCKED'
         ? `恢复包已锁定至 ${formatTime(response.data.retainUntil)}`
         : `恢复包归档失败：${response.data.failureCode || 'UNKNOWN'}`,
@@ -3838,6 +3871,145 @@ async function pollDatasetRetentionArchive(
     await new Promise((resolve) => window.setTimeout(resolve, 800));
   }
   showToast('恢复包仍在后台归档，可稍后刷新状态', true);
+}
+
+function datasetArchiveReadyForMlflow(archive: DatasetRetentionArchive | null): archive is DatasetRetentionArchive {
+  if (!archive || archive.state !== 'LOCKED') return false;
+  const metadata = archive.archiveMetadata || {};
+  return metadata.objectLockVerified === true
+    && metadata.recoveryVerified === true
+    && Boolean(archive.archiveBucket)
+    && Boolean(archive.sourceArchiveObjectKey)
+    && Boolean(archive.sourceArchiveVersionId)
+    && Boolean(archive.archiveManifestObjectKey)
+    && Boolean(archive.archiveManifestVersionId)
+    && Boolean(archive.archiveManifestSha256)
+    && archive.verifiedRowCount === archive.sourceRowCount
+    && archive.verifiedSemanticChecksum === archive.catalogSemanticChecksum;
+}
+
+function currentDatasetMlflowRegistration(
+  archive: DatasetRetentionArchive | null,
+): DatasetMlflowRegistration | null {
+  const registration = state.selectedDatasetMlflowRegistration;
+  return archive && registration?.retentionArchiveId === archive.id
+    ? registration : null;
+}
+
+async function loadDatasetMlflowRegistration(
+  snapshot: DatasetSnapshot,
+  archive: DatasetRetentionArchive,
+  generation: number = datasetSnapshotRequestGeneration,
+): Promise<DatasetMlflowRegistration | null> {
+  if (!datasetArchiveReadyForMlflow(archive)) {
+    if (datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) {
+      state.selectedDatasetMlflowRegistration = null;
+      renderDatasetSnapshotDrawer(snapshot);
+    }
+    return null;
+  }
+  const response = await bpiApi.datasetMlflowRegistrationForArchive(archive.id);
+  if (!datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) return null;
+  state.selectedDatasetMlflowRegistration = response.data;
+  renderDatasetSnapshotDrawer(snapshot);
+  return response.data;
+}
+
+function openDatasetMlflowRegistrationDialog(
+  snapshot: DatasetSnapshot,
+  command: 'request' | 'retry',
+): void {
+  const publication = currentDatasetCatalogPublication(snapshot.latestMaterialization || null);
+  const archive = currentDatasetRetentionArchive(publication);
+  const registration = currentDatasetMlflowRegistration(archive);
+  if (!datasetArchiveReadyForMlflow(archive)) {
+    showToast('MLflow 数据输入登记要求恢复包已锁定并完成恢复复验', true);
+    return;
+  }
+  if (command === 'request' && registration) {
+    showToast('当前恢复包已经有 MLflow 数据输入登记任务', true);
+    return;
+  }
+  if (command === 'retry' && registration?.state !== 'FAILED') {
+    showToast('只有失败的 MLflow 数据输入登记任务可以重新排队', true);
+    return;
+  }
+  state.selectedDatasetSnapshot = snapshot;
+  state.datasetMlflowRegistrationCommand = command;
+  document.querySelector('#dataset-mlflow-registration-title')!.textContent = command === 'retry'
+    ? '重新排队数据输入登记' : '登记数据输入';
+  const sourceUri = `s3://${archive.archiveBucket}/${archive.sourceArchiveObjectKey}?versionId=${archive.sourceArchiveVersionId}`;
+  document.querySelector('#dataset-mlflow-registration-summary')!.innerHTML = `<div><span>精确恢复对象</span><b>${escapeHtml(sourceUri)}</b></div><div><span>数据集摘要</span><b>${escapeHtml(archive.catalogSemanticChecksum.slice(0, 16))}</b></div><div><span>当前状态</span><b>${escapeHtml(registration?.state || 'NOT_STARTED')}</b></div><div><span>边界</span><b>仅登记 Dataset Input，不训练模型</b></div><div><span>revision</span><b>${command === 'retry' ? registration?.revision : archive.revision}</b></div>`;
+  const reason = document.querySelector<HTMLTextAreaElement>('#dataset-mlflow-registration-reason')!;
+  reason.value = '';
+  const button = document.querySelector<HTMLButtonElement>('#dataset-mlflow-registration-submit')!;
+  button.textContent = command === 'retry' ? '重新排队' : '登记数据输入';
+  document.querySelector<HTMLDialogElement>('#dataset-mlflow-registration-dialog')!.showModal();
+  reason.focus();
+}
+
+async function handleDatasetMlflowRegistrationCommand(event: SubmitEvent): Promise<void> {
+  event.preventDefault();
+  const snapshot = state.selectedDatasetSnapshot;
+  const publication = currentDatasetCatalogPublication(snapshot?.latestMaterialization || null);
+  const archive = currentDatasetRetentionArchive(publication);
+  const registration = currentDatasetMlflowRegistration(archive);
+  const command = state.datasetMlflowRegistrationCommand;
+  if (!snapshot || !datasetArchiveReadyForMlflow(archive) || !command
+    || (command === 'retry' && !registration)) return;
+  const reason = document.querySelector<HTMLTextAreaElement>('#dataset-mlflow-registration-reason')!.value.trim();
+  if (reason.length < 3) {
+    showToast('操作依据至少填写 3 个字符', true);
+    return;
+  }
+  const button = document.querySelector<HTMLButtonElement>('#dataset-mlflow-registration-submit')!;
+  const idleLabel = command === 'retry' ? '重新排队' : '登记数据输入';
+  button.disabled = true;
+  button.textContent = '提交中...';
+  const generation = datasetSnapshotRequestGeneration;
+  try {
+    const response = command === 'retry'
+      ? await bpiApi.retryDatasetMlflowRegistration(registration!, reason, commandId())
+      : await bpiApi.requestDatasetMlflowRegistration(archive, reason, commandId());
+    document.querySelector<HTMLDialogElement>('#dataset-mlflow-registration-dialog')!.close();
+    state.datasetMlflowRegistrationCommand = null;
+    if (!datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) {
+      showToast(command === 'retry' ? 'MLflow 数据输入登记已重新排队' : 'MLflow 数据输入登记已进入后台队列');
+      return;
+    }
+    state.selectedDatasetMlflowRegistration = response.data;
+    renderDatasetSnapshotDrawer(snapshot);
+    showToast(command === 'retry' ? 'MLflow 数据输入登记已重新排队' : 'MLflow 数据输入登记已进入后台队列');
+    await pollDatasetMlflowRegistration(snapshot.id, response.data.id, generation);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = idleLabel;
+  }
+}
+
+async function pollDatasetMlflowRegistration(
+  snapshotId: string,
+  registrationId: string,
+  generation: number,
+): Promise<void> {
+  for (let attempt = 0; attempt < 15; attempt += 1) {
+    if (!datasetSnapshotDrawerIsCurrent(snapshotId, generation)) return;
+    const response = await bpiApi.datasetMlflowRegistration(registrationId);
+    if (!datasetSnapshotDrawerIsCurrent(snapshotId, generation)) return;
+    state.selectedDatasetMlflowRegistration = response.data;
+    renderDatasetSnapshotDrawer(state.selectedDatasetSnapshot!);
+    if (['REGISTERED', 'FAILED'].includes(response.data.state)) {
+      showToast(response.data.state === 'REGISTERED'
+        ? 'MLflow Dataset Input 已登记；模型训练仍未开始'
+        : `MLflow 数据输入登记失败：${response.data.failureCode || 'UNKNOWN'}`,
+      response.data.state === 'FAILED');
+      return;
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
+  }
+  showToast('MLflow 数据输入登记仍在后台执行，可稍后刷新状态', true);
 }
 
 async function openDatasetSnapshotById(snapshotId: string): Promise<void> {
@@ -3851,6 +4023,7 @@ async function openDatasetSnapshotById(snapshotId: string): Promise<void> {
     state.selectedDatasetSnapshot = response.data;
     state.selectedDatasetCatalogPublication = null;
     state.selectedDatasetRetentionArchive = null;
+    state.selectedDatasetMlflowRegistration = null;
     renderDatasetSnapshotDrawer(response.data);
     if (['QUEUED', 'BUILDING'].includes(response.data.state)) {
       await pollDatasetSnapshot(snapshotId, generation);
@@ -3870,6 +4043,11 @@ async function openDatasetSnapshotById(snapshotId: string): Promise<void> {
         const archive = currentDatasetRetentionArchive(publication);
         if (archive && ['QUEUED', 'ARCHIVING', 'VERIFYING'].includes(archive.state)) {
           await pollDatasetRetentionArchive(snapshotId, archive.id, generation);
+        } else if (archive?.state === 'LOCKED') {
+          const registration = currentDatasetMlflowRegistration(archive);
+          if (registration && ['QUEUED', 'REGISTERING'].includes(registration.state)) {
+            await pollDatasetMlflowRegistration(snapshotId, registration.id, generation);
+          }
         }
       }
     }
@@ -3909,7 +4087,8 @@ function datasetDeliveryChainHtml(snapshot: DatasetSnapshot): string {
   const materialization = snapshot.latestMaterialization || null;
   const publication = currentDatasetCatalogPublication(materialization);
   const archive = currentDatasetRetentionArchive(publication);
-  return `<div class="drawer-section dataset-delivery-panel"><div class="section-title"><h3>数据交付链</h3><span>分层验收</span></div><div class="dataset-delivery-grid"><div><span>1 · Manifest</span>${statusChip(snapshot.state)}</div><div><span>2 · Parquet</span>${statusChip(materialization?.state || 'NOT_STARTED')}</div><div><span>3 · Iceberg</span>${statusChip(publication?.state || 'NOT_STARTED')}</div><div><span>4 · 恢复包</span>${statusChip(archive?.state || 'NOT_STARTED')}</div><div><span>5 · ML / 模型</span>${statusChip('NOT_STARTED')}</div></div></div>`;
+  const registration = currentDatasetMlflowRegistration(archive);
+  return `<div class="drawer-section dataset-delivery-panel"><div class="section-title"><h3>数据交付链</h3><span>分层验收</span></div><div class="dataset-delivery-grid"><div><span>1 · Manifest</span>${statusChip(snapshot.state)}</div><div><span>2 · Parquet</span>${statusChip(materialization?.state || 'NOT_STARTED')}</div><div><span>3 · Iceberg</span>${statusChip(publication?.state || 'NOT_STARTED')}</div><div><span>4 · 恢复包</span>${statusChip(archive?.state || 'NOT_STARTED')}</div><div><span>5 · MLflow 数据输入</span>${statusChip(registration?.state || 'NOT_STARTED')}</div><div><span>6 · 模型训练</span>${statusChip('NOT_STARTED')}</div></div></div>`;
 }
 
 function safeCatalogFailureDetail(value?: string | null): string {
@@ -3971,6 +4150,40 @@ function datasetRetentionArchiveHtml(snapshot: DatasetSnapshot): string {
   return `<div class="drawer-section dataset-retention-panel" data-retention-state="${escapeHtml(archive.state)}"><div class="section-title"><h3>不可变恢复包</h3><span>${statusChip(archive.state)} · r${archive.revision}</span></div>${body}</div>`;
 }
 
+function datasetMlflowRegistrationHtml(snapshot: DatasetSnapshot): string {
+  const publication = currentDatasetCatalogPublication(snapshot.latestMaterialization || null);
+  const archive = currentDatasetRetentionArchive(publication);
+  const registration = currentDatasetMlflowRegistration(archive);
+  if (archive?.state !== 'LOCKED') {
+    return `<div class="drawer-section dataset-mlflow-panel" data-mlflow-state="NOT_STARTED"><div class="section-title"><h3>MLflow 数据输入</h3>${statusChip('NOT_STARTED')}</div><div class="simulation-empty">等待不可变恢复包完成锁定与恢复复验</div></div>`;
+  }
+  if (!datasetArchiveReadyForMlflow(archive)) {
+    return `<div class="drawer-section dataset-mlflow-panel" data-mlflow-state="NOT_STARTED"><div class="section-title"><h3>MLflow 数据输入</h3>${statusChip('BLOCKED')}</div><div class="simulation-empty">恢复包缺少 Object Lock、恢复重建或精确对象版本证据</div></div>`;
+  }
+  if (!registration) {
+    return `<div class="drawer-section dataset-mlflow-panel" data-mlflow-state="NOT_STARTED"><div class="section-title"><h3>MLflow 数据输入</h3>${statusChip('NOT_STARTED')}</div><div class="simulation-empty">恢复包已通过复验，尚未登记为 MLflow Dataset Input</div></div>`;
+  }
+  let body = '';
+  if (['QUEUED', 'REGISTERING'].includes(registration.state)) {
+    const label = registration.state === 'QUEUED'
+      ? '等待 Registrar 领取' : '正在登记并复验不可变数据血缘';
+    body = `<div class="batch-detail-loading"><i data-lucide="refresh-cw"></i><div><strong>${label}</strong><span>attempt ${registration.attemptCount} · revision ${registration.revision}</span></div></div>`;
+  } else if (registration.state === 'FAILED') {
+    body = `<div class="dataset-materialization-error"><i data-lucide="circle-alert"></i><div><strong>${escapeHtml(registration.failureCode || 'MLFLOW_REGISTRATION_FAILED')}</strong><span>${escapeHtml(safeCatalogFailureDetail(registration.failureDetail || 'MLflow 数据输入登记失败'))}</span></div></div>`;
+  } else {
+    const metadata = registration.registrationMetadata || {};
+    const inputVerified = metadata.datasetInputVerified === true
+      && metadata.lineageVerified === true
+      && metadata.sourceFactsVerified === true;
+    const modelNotStarted = metadata.modelTrained === false
+      && metadata.modelRegistered === false
+      && metadata.onlineInferenceEnabled === false
+      && metadata.productionActivationAllowed === false;
+    body = `<div class="dataset-mlflow-grid"><div><span>Dataset Input</span>${statusChip(inputVerified ? 'VERIFIED' : 'UNVERIFIED')}</div><div><span>模型训练</span>${statusChip(modelNotStarted ? 'NOT_STARTED' : 'UNVERIFIED')}</div><div><span>数据集摘要</span><code class="dataset-mlflow-digest">${escapeHtml(registration.datasetDigest)}</code></div><div><span>Experiment</span><code class="dataset-mlflow-experiment">${escapeHtml(registration.mlflowExperimentId || '-')}</code></div><div><span>Run</span><code class="dataset-mlflow-run">${escapeHtml(registration.mlflowRunId || '-')}</code></div><div><span>完成时间</span><b>${formatTime(registration.completedAt)}</b></div><div><span>Registrar</span><code>${escapeHtml(registration.registrarVersion)}</code></div><div><span>Tracking Profile</span><code>${escapeHtml(registration.trackingProfile)}</code></div><div><span>行数</span><b>${registration.sourceRowCount}</b></div></div><div class="dataset-artifact-reference"><span>精确 Dataset Source</span><code class="dataset-mlflow-source">${escapeHtml(registration.mlflowDatasetSource || '-')}</code><span>MLflow Artifact URI</span><code>${escapeHtml(registration.mlflowArtifactUri || '-')}</code><span>Iceberg 表 / 快照</span><code>${escapeHtml(registration.tableIdentifier)} / ${escapeHtml(registration.icebergSnapshotId)}</code><span>目录语义 SHA-256</span><code>${escapeHtml(registration.catalogSemanticChecksum)}</code></div>`;
+  }
+  return `<div class="drawer-section dataset-mlflow-panel" data-mlflow-state="${escapeHtml(registration.state)}"><div class="section-title"><h3>MLflow 数据输入</h3><span>${statusChip(registration.state)} · r${registration.revision}</span></div>${body}</div>`;
+}
+
 function datasetDeliveryActionHtml(snapshot: DatasetSnapshot): string {
   if (['QUEUED', 'BUILDING'].includes(snapshot.state)) {
     return '<button class="button button--primary" id="refresh-dataset-snapshot"><i data-lucide="refresh-cw"></i>刷新清单</button>';
@@ -4006,6 +4219,17 @@ function datasetDeliveryActionHtml(snapshot: DatasetSnapshot): string {
   if (['QUEUED', 'ARCHIVING', 'VERIFYING'].includes(archive.state)) {
     return '<button class="button button--primary" id="refresh-dataset-retention-archive"><i data-lucide="refresh-cw"></i>刷新恢复包</button>';
   }
+  if (!datasetArchiveReadyForMlflow(archive)) return '';
+  const registration = currentDatasetMlflowRegistration(archive);
+  if (!registration) {
+    return '<button class="button button--primary" id="open-dataset-mlflow-registration"><i data-lucide="database"></i>登记 MLflow 数据输入</button>';
+  }
+  if (registration.state === 'FAILED') {
+    return '<button class="button button--primary" id="retry-dataset-mlflow-registration"><i data-lucide="rotate-ccw"></i>重试 MLflow 登记</button>';
+  }
+  if (['QUEUED', 'REGISTERING'].includes(registration.state)) {
+    return '<button class="button button--primary" id="refresh-dataset-mlflow-registration"><i data-lucide="refresh-cw"></i>刷新 MLflow 登记</button>';
+  }
   return '';
 }
 
@@ -4017,7 +4241,7 @@ function renderDatasetSnapshotDrawer(snapshot: DatasetSnapshot): void {
   const samples = (manifest?.samples || []).slice(0, 50).map((sample) => `<tr><td><strong>${escapeHtml(sample.batchNo)}</strong><small>${escapeHtml(sample.lineId)}</small></td><td>${formatTime(sample.predictionTime)}</td><td>${escapeHtml(sample.splitKey)}</td><td>${number(sample.confidence * 100, 0)}%</td><td>${sample.included ? statusChip('INCLUDED') : statusChip('EXCLUDED')}</td><td>${escapeHtml(sample.exclusionReasons.join(', ') || '-')}</td></tr>`).join('');
   const phase = manifest?.phaseBoundary;
   const buildHtml = manifest
-    ? `<div class="drawer-section"><div class="section-title"><h3>Manifest 边界</h3><span>不可变</span></div><div class="dataset-phase-grid"><div><span>交付状态</span><b>${escapeHtml(phase?.deliveryState || 'MANIFEST_ONLY')}</b></div><div><span>Manifest 物化声明</span><b>${escapeHtml(phase?.materializationState || 'NOT_STARTED')}</b></div><div><span>Manifest Artifact URI</span><b>${escapeHtml(phase?.artifactUri || '-')}</b></div></div></div>${datasetDeliveryChainHtml(snapshot)}${datasetMaterializationHtml(snapshot)}${datasetCatalogPublicationHtml(snapshot)}${datasetRetentionArchiveHtml(snapshot)}<div class="drawer-section"><div class="section-title"><h3>样本统计</h3><span>${manifest.counts.total} 条</span></div><div class="metric-grid dataset-metrics"><div><span>总样本</span><b>${manifest.counts.total}</b></div><div><span>纳入</span><b>${manifest.counts.included}</b></div><div><span>排除</span><b>${manifest.counts.excluded}</b></div><div><span>排除原因</span><b>${Object.keys(manifest.counts.exclusionSummary).length}</b></div></div>${exclusions ? `<ul class="dataset-exclusion-list">${exclusions}</ul>` : ''}</div><div class="drawer-section"><div class="section-title"><h3>Point-in-time 样本</h3><span>${samples ? `显示 ${Math.min(manifest.samples.length, 50)} / ${manifest.samples.length}` : '无'}</span></div>${samples ? `<div class="table-frame dataset-sample-frame"><table><thead><tr><th>批次</th><th>预测时点</th><th>拆分</th><th>置信度</th><th>结果</th><th>排除原因</th></tr></thead><tbody>${samples}</tbody></table></div>` : '<div class="simulation-empty">没有满足冻结条件的影子复核样本</div>'}</div>`
+    ? `<div class="drawer-section"><div class="section-title"><h3>Manifest 边界</h3><span>不可变</span></div><div class="dataset-phase-grid"><div><span>交付状态</span><b>${escapeHtml(phase?.deliveryState || 'MANIFEST_ONLY')}</b></div><div><span>Manifest 物化声明</span><b>${escapeHtml(phase?.materializationState || 'NOT_STARTED')}</b></div><div><span>Manifest Artifact URI</span><b>${escapeHtml(phase?.artifactUri || '-')}</b></div></div></div>${datasetDeliveryChainHtml(snapshot)}${datasetMaterializationHtml(snapshot)}${datasetCatalogPublicationHtml(snapshot)}${datasetRetentionArchiveHtml(snapshot)}${datasetMlflowRegistrationHtml(snapshot)}<div class="drawer-section"><div class="section-title"><h3>样本统计</h3><span>${manifest.counts.total} 条</span></div><div class="metric-grid dataset-metrics"><div><span>总样本</span><b>${manifest.counts.total}</b></div><div><span>纳入</span><b>${manifest.counts.included}</b></div><div><span>排除</span><b>${manifest.counts.excluded}</b></div><div><span>排除原因</span><b>${Object.keys(manifest.counts.exclusionSummary).length}</b></div></div>${exclusions ? `<ul class="dataset-exclusion-list">${exclusions}</ul>` : ''}</div><div class="drawer-section"><div class="section-title"><h3>Point-in-time 样本</h3><span>${samples ? `显示 ${Math.min(manifest.samples.length, 50)} / ${manifest.samples.length}` : '无'}</span></div>${samples ? `<div class="table-frame dataset-sample-frame"><table><thead><tr><th>批次</th><th>预测时点</th><th>拆分</th><th>置信度</th><th>结果</th><th>排除原因</th></tr></thead><tbody>${samples}</tbody></table></div>` : '<div class="simulation-empty">没有满足冻结条件的影子复核样本</div>'}</div>`
     : `<div class="drawer-section"><div class="batch-detail-loading"><i data-lucide="refresh-cw"></i><div><strong>${snapshot.state === 'FAILED' ? '清单构建失败' : '后台正在构建清单'}</strong><span>${escapeHtml(snapshot.failureDetail || `attempt ${snapshot.attemptCount}`)}</span></div></div></div>`;
   openDrawer(`<header><div><span>数据集快照 v${snapshot.snapshotVersion}</span><h2>${escapeHtml(snapshot.datasetName)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(snapshot.state)}${statusChip(snapshot.materializationState)}<span class="shadow-label">POINT-IN-TIME</span></div><span>snapshot revision ${snapshot.revision}</span></div><div class="drawer-section facts-grid"><div><span>冻结时间</span><b>${formatTime(snapshot.freezeAt)}</b></div><div><span>产线</span><b>${escapeHtml(snapshot.lineIds.join(', '))}</b></div><div><span>规则版本筛选</span><b>${escapeHtml(snapshot.ruleVersionIds.join(', ') || '全部合格版本')}</b></div><div><span>低置信度排除</span><b>${snapshot.excludeLowConfidence ? '是' : '否'}</b></div><div><span>定义 checksum</span><b class="mono-value">${escapeHtml(snapshot.definitionChecksum)}</b></div><div><span>manifest checksum</span><b class="mono-value">${escapeHtml(snapshot.manifestChecksum || '-')}</b></div></div>${buildHtml}<footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${datasetDeliveryActionHtml(snapshot)}</footer>`, `dataset-snapshot:${snapshot.id}`);
   document.querySelector('#refresh-dataset-snapshot')?.addEventListener('click', () => void openDatasetSnapshotById(snapshot.id));
@@ -4054,6 +4278,20 @@ function renderDatasetSnapshotDrawer(snapshot: DatasetSnapshot): void {
     void pollDatasetRetentionArchive(
       snapshot.id,
       archive.id,
+      datasetSnapshotRequestGeneration,
+    )
+      .catch((error) => showToast(error instanceof Error ? error.message : String(error), true));
+  });
+  document.querySelector('#open-dataset-mlflow-registration')?.addEventListener('click', () => openDatasetMlflowRegistrationDialog(snapshot, 'request'));
+  document.querySelector('#retry-dataset-mlflow-registration')?.addEventListener('click', () => openDatasetMlflowRegistrationDialog(snapshot, 'retry'));
+  document.querySelector('#refresh-dataset-mlflow-registration')?.addEventListener('click', () => {
+    const publication = currentDatasetCatalogPublication(snapshot.latestMaterialization || null);
+    const archive = currentDatasetRetentionArchive(publication);
+    const registration = currentDatasetMlflowRegistration(archive);
+    if (!registration) return;
+    void pollDatasetMlflowRegistration(
+      snapshot.id,
+      registration.id,
       datasetSnapshotRequestGeneration,
     )
       .catch((error) => showToast(error instanceof Error ? error.message : String(error), true));

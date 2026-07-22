@@ -114,6 +114,10 @@
 | 训练数据 | POST | `/bpi/v1/dataset-catalog-publications/{publicationId}/retention-archives` | `requestDatasetRetentionArchive` | SERVICE_IMPLEMENTED；仅接受行数与语义 checksum 已对账的 `READY` Iceberg publication，保留模式、期限和目标桶由服务端固定 |
 | 训练数据 | GET | `/bpi/v1/dataset-retention-archives/{archiveId}` | `getDatasetRetentionArchive` | SERVICE_IMPLEMENTED；返回 `QUEUED/ARCHIVING/VERIFYING/LOCKED/FAILED`、精确对象版本、保留期限与恢复校验证据 |
 | 训练数据 | POST | `/bpi/v1/dataset-retention-archives/{archiveId}/retry` | `retryDatasetRetentionArchive` | SERVICE_IMPLEMENTED；仅失败任务可按当前 revision 幂等重排队，`LOCKED` 恢复包不可覆盖 |
+| 训练数据 | GET | `/bpi/v1/dataset-retention-archives/{archiveId}/mlflow-registrations` | `getDatasetMlflowRegistrationForArchive` | SERVICE_IMPLEMENTED；按恢复包 scope 查询当前 registrar 合同对应的 Dataset Input 登记，不从 `LOCKED` 推导已登记 |
+| 训练数据 | POST | `/bpi/v1/dataset-retention-archives/{archiveId}/mlflow-registrations` | `requestDatasetMlflowRegistration` | SERVICE_IMPLEMENTED；只接受 Object Lock 和恢复重建均已复验的 `LOCKED` 精确对象版本，运行开关默认关闭 |
+| 训练数据 | GET | `/bpi/v1/dataset-mlflow-registrations/{registrationId}` | `getDatasetMlflowRegistration` | SERVICE_IMPLEMENTED；返回 `QUEUED/REGISTERING/REGISTERED/FAILED`、精确 `s3://...?versionId=` 数据源、experiment/run 和不可变血缘证据 |
+| 训练数据 | POST | `/bpi/v1/dataset-mlflow-registrations/{registrationId}/retry` | `retryDatasetMlflowRegistration` | SERVICE_IMPLEMENTED；仅失败登记可按当前 revision 幂等重排队；`REGISTERED` 只证明 Dataset Input，不代表训练、模型注册、推理或生产激活 |
 | 集成运行 | GET | `/bpi/v1/integrations/health` | `getIntegrationHealth` | SIMULATED |
 | 集成运行 | POST | `/bpi/v1/integrations/{integrationId}/checks` | `runIntegrationCheck` | CONTRACT_ONLY |
 | 审计记录 | GET | `/bpi/v1/audit/events` | `listAuditEvents` | CONTRACT_ONLY |

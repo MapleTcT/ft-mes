@@ -12,6 +12,7 @@ import type {
   DatasetDefinitionCreateCommand,
   DatasetCatalogPublication,
   DatasetMaterialization,
+  DatasetMlflowRegistration,
   DatasetRetentionArchive,
   DatasetSnapshot,
   DatasetSnapshotCommand,
@@ -299,6 +300,22 @@ export const bpiApi = {
     request<DatasetRetentionArchive>(`/dataset-retention-archives/${encodeURIComponent(archive.id)}/retry`, {
       method: 'POST',
       headers: { 'Idempotency-Key': key, 'If-Match': String(archive.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  datasetMlflowRegistrationForArchive: (archiveId: string) =>
+    request<DatasetMlflowRegistration | null>(`/dataset-retention-archives/${encodeURIComponent(archiveId)}/mlflow-registrations`),
+  requestDatasetMlflowRegistration: (archive: DatasetRetentionArchive, reason: string, key: string) =>
+    request<DatasetMlflowRegistration>(`/dataset-retention-archives/${encodeURIComponent(archive.id)}/mlflow-registrations`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(archive.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  datasetMlflowRegistration: (registrationId: string) =>
+    request<DatasetMlflowRegistration>(`/dataset-mlflow-registrations/${encodeURIComponent(registrationId)}`),
+  retryDatasetMlflowRegistration: (registration: DatasetMlflowRegistration, reason: string, key: string) =>
+    request<DatasetMlflowRegistration>(`/dataset-mlflow-registrations/${encodeURIComponent(registration.id)}/retry`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(registration.revision) },
       body: JSON.stringify({ reason }),
     }),
   topologies: (plantId: string) =>

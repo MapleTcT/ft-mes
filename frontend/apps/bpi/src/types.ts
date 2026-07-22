@@ -747,6 +747,7 @@ export type DatasetMaterializationState = 'QUEUED' | 'WRITING' | 'READY' | 'FAIL
 export type DatasetMaterializationDisplayState = 'NOT_STARTED' | DatasetMaterializationState;
 export type DatasetCatalogPublicationState = 'QUEUED' | 'COMMITTING' | 'VERIFYING' | 'READY' | 'FAILED';
 export type DatasetRetentionArchiveState = 'QUEUED' | 'ARCHIVING' | 'VERIFYING' | 'LOCKED' | 'FAILED';
+export type DatasetMlflowRegistrationState = 'QUEUED' | 'REGISTERING' | 'REGISTERED' | 'FAILED';
 
 export interface DatasetSnapshotSummary {
   id: string;
@@ -935,6 +936,55 @@ export interface DatasetRetentionArchive {
   verifiedRowCount?: number | null;
   verifiedSemanticChecksum?: string | null;
   archiveMetadata?: Record<string, unknown> | null;
+  failureCode?: string | null;
+  failureDetail?: string | null;
+}
+
+export interface DatasetMlflowRegistration {
+  id: string;
+  retentionArchiveId: string;
+  catalogPublicationId: string;
+  materializationId: string;
+  snapshotId: string;
+  datasetId: string;
+  datasetCode: string;
+  datasetVersion: string;
+  tenantId: string;
+  plantId: string;
+  lineIds: string[];
+  registrarVersion: string;
+  trackingProfile: 'bpi-mlflow-dataset-v1';
+  state: DatasetMlflowRegistrationState;
+  revision: number;
+  manifestChecksum: string;
+  sourceContentSha256: string;
+  sourceObjectVersionId: string;
+  sourceByteSize: number;
+  sourceRowCount: number;
+  sourceSchema: Record<string, unknown>;
+  tableIdentifier: string;
+  icebergSnapshotId: string;
+  catalogSemanticChecksum: string;
+  archiveBucket: string;
+  sourceArchiveObjectKey: string;
+  sourceArchiveVersionId: string;
+  archiveManifestObjectKey: string;
+  archiveManifestVersionId: string;
+  archiveManifestSha256: string;
+  experimentName: string;
+  datasetName: string;
+  datasetDigest: string;
+  requestedBy: string;
+  requestReason: string;
+  createdAt: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  attemptCount: number;
+  mlflowExperimentId?: string | null;
+  mlflowRunId?: string | null;
+  mlflowArtifactUri?: string | null;
+  mlflowDatasetSource?: string | null;
+  registrationMetadata?: Record<string, unknown> | null;
   failureCode?: string | null;
   failureDetail?: string | null;
 }

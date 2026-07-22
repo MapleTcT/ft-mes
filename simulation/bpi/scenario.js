@@ -358,6 +358,8 @@ function createScenario() {
     pendingDatasetCatalogPublicationIds: new Set(),
     datasetRetentionArchives: [],
     pendingDatasetRetentionArchiveIds: new Set(),
+    datasetMlflowRegistrations: [],
+    pendingDatasetMlflowRegistrationIds: new Set(),
     integrations: [
       { id: 'jetlinks-exporter', status: 'UP', businessImpact: '关键测点可用', lastSuccessAt: FIXED_TIME, lag: 1.2, revision: 5 },
       { id: 'kafka', status: 'UP', businessImpact: '事件总线正常', lastSuccessAt: FIXED_TIME, lag: 0.4, revision: 8 },

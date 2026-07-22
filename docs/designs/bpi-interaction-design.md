@@ -347,15 +347,23 @@ Iceberg 回读行数和语义 checksum 全部对账后才能申请；任务按 `
 推进。页面只在精确源 Parquet 版本、规范化恢复 manifest、对象保留期限和本地重建结果均复验后显示 `LOCKED`，
 并明确区分恢复包锁定与活跃 Iceberg 表可用。运行模式、保留天数和 legal hold 由服务端环境固定，前端不能修改。
 
-MLflow 和模型训练继续显示为 `NOT_STARTED`。确定性模拟器只验证交互与契约，模拟 URI/SHA/snapshot
-不是 MinIO 或 Polaris 真实证据。目标 Phase 3B-B 后端检查点已经闭合真实 snapshot、time-travel、失败重试、
-重启和清理；真实 ADP 页面 V28 操作及 post-commit fencing 故障注入仍待验收。
+Phase 3C-A 把 MLflow Dataset Input 登记作为恢复包之后的第五个独立状态机。只有 `LOCKED` 且 Object Lock、
+恢复重建、行数、语义 checksum 和精确对象版本全部通过的恢复包才能申请；任务按
+`QUEUED -> REGISTERING -> REGISTERED/FAILED` 推进。页面显示 experiment、run、dataset digest 和带
+`versionId` 的精确 `s3://` Dataset Source，失败允许按 revision 重试。`REGISTERED` 只证明 Dataset Input
+及血缘复验通过；模型训练、模型注册、在线推理和生产激活作为第六阶段继续显示为 `NOT_STARTED`，不能由
+MLflow Tracking Server 健康或 run 存在推导模型可用。
+
+确定性模拟器只验证交互与契约，模拟 URI/SHA/snapshot/run 不是 MinIO、Polaris 或 MLflow 的真实证据。
+Phase 3C-A 的 Java/PostgreSQL 状态机和 Registrar 组件已实现且默认关闭；真实 MLflow/MinIO/PostgreSQL 联合链路、
+目标 ADP 页面故障重试、重启和清理仍须单独验收。
 
 **主要 API：** `listDatasets`、`createDatasetDefinition`、`createDatasetSnapshot`、`getDatasetSnapshot`、
 `requestDatasetMaterialization`、`getDatasetMaterialization`、`retryDatasetMaterialization`、
 `requestDatasetCatalogPublication`、`getDatasetCatalogPublicationForMaterialization`、`getDatasetCatalogPublication`、
 `retryDatasetCatalogPublication`、`getDatasetRetentionArchiveForPublication`、`requestDatasetRetentionArchive`、
-`getDatasetRetentionArchive`、`retryDatasetRetentionArchive`。
+`getDatasetRetentionArchive`、`retryDatasetRetentionArchive`、`getDatasetMlflowRegistrationForArchive`、
+`requestDatasetMlflowRegistration`、`getDatasetMlflowRegistration`、`retryDatasetMlflowRegistration`。
 
 ### 5.11 集成运行 `/bpi/integrations`
 

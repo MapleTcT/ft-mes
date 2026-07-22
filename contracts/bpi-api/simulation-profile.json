@@ -69,6 +69,10 @@
     "requestDatasetRetentionArchive",
     "getDatasetRetentionArchive",
     "retryDatasetRetentionArchive",
+    "getDatasetMlflowRegistrationForArchive",
+    "requestDatasetMlflowRegistration",
+    "getDatasetMlflowRegistration",
+    "retryDatasetMlflowRegistration",
     "getIntegrationHealth"
   ]
 }
