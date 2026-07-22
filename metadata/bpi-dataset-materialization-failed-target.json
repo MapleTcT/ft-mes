@@ -1,0 +1,136 @@
+{
+  "generatedAt": "2026-07-22T03:01:34.491Z",
+  "status": "PASS_FAILED_STATE_PERSISTED",
+  "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+  "action": "request-failure",
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "login": {
+    "status": 200,
+    "username": "admin"
+  },
+  "definition": {
+    "id": "64155718-d458-480e-9031-cbdb867896a8",
+    "datasetCode": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+    "latestSnapshotId": "117f0045-cf03-4177-8010-dc730c566f13"
+  },
+  "snapshot": {
+    "id": "117f0045-cf03-4177-8010-dc730c566f13",
+    "state": "MANIFEST_READY",
+    "revision": 3,
+    "manifestChecksum": "efd6658e89ee0c6f2931956d56a35ce27cce64ab846e065e2669a27eb19ab255"
+  },
+  "materialization": {
+    "id": "02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983",
+    "snapshotId": "117f0045-cf03-4177-8010-dc730c566f13",
+    "datasetId": "64155718-d458-480e-9031-cbdb867896a8",
+    "datasetCode": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+    "datasetVersion": "1.0.0",
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineIds": [
+      "LINE-S07-01"
+    ],
+    "artifactFormat": "PARQUET",
+    "artifactSchemaVersion": "bpi.dataset-parquet.v1",
+    "materializerVersion": "bpi-dataset-materializer/0.1.0",
+    "state": "FAILED",
+    "revision": 3,
+    "manifestChecksum": "efd6658e89ee0c6f2931956d56a35ce27cce64ab846e065e2669a27eb19ab255",
+    "requestedBy": "legacy-ticket:admin",
+    "requestReason": "ADP_E2E_BPI_PARQUET_20260722_105844_A1 目标对象失败恢复验收",
+    "createdAt": "2026-07-22T03:01:36.664Z",
+    "startedAt": "2026-07-22T03:01:37.442539Z",
+    "completedAt": "2026-07-22T03:01:37.511696Z",
+    "attemptCount": 1,
+    "failureCode": "MATERIALIZATION_ERROR",
+    "failureDetail": "PermissionError: [Errno 13] Permission denied: '/app/02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983-u1p5olz9'"
+  },
+  "browser": {
+    "route": "http://10.11.100.17:18080/bpi/#/datasets",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "network": [
+      {
+        "method": "GET",
+        "url": "/bpi-api/datasets?plantId=PLANT-01&limit=100",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/117f0045-cf03-4177-8010-dc730c566f13",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "POST",
+        "url": "/bpi-api/dataset-snapshots/117f0045-cf03-4177-8010-dc730c566f13/materializations",
+        "status": 202,
+        "payload": {
+          "artifactFormat": "PARQUET",
+          "reason": "ADP_E2E_BPI_PARQUET_20260722_105844_A1 目标对象失败恢复验收"
+        },
+        "response": {
+          "id": "02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983",
+          "snapshotId": "117f0045-cf03-4177-8010-dc730c566f13",
+          "datasetId": "64155718-d458-480e-9031-cbdb867896a8",
+          "datasetCode": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+          "datasetVersion": "1.0.0",
+          "tenantId": "1000",
+          "plantId": "PLANT-01",
+          "lineIds": [
+            "LINE-S07-01"
+          ],
+          "artifactFormat": "PARQUET",
+          "artifactSchemaVersion": "bpi.dataset-parquet.v1",
+          "materializerVersion": "bpi-dataset-materializer/0.1.0",
+          "state": "QUEUED",
+          "revision": 1,
+          "manifestChecksum": "efd6658e89ee0c6f2931956d56a35ce27cce64ab846e065e2669a27eb19ab255",
+          "requestedBy": "legacy-ticket:admin",
+          "requestReason": "ADP_E2E_BPI_PARQUET_20260722_105844_A1 目标对象失败恢复验收",
+          "createdAt": "2026-07-22T03:01:36.664Z",
+          "attemptCount": 0
+        }
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-materializations/02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-materializations/02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/117f0045-cf03-4177-8010-dc730c566f13",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/datasets?plantId=PLANT-01&limit=100",
+        "status": 200,
+        "payload": null
+      }
+    ],
+    "mobile": null
+  },
+  "screenshots": {
+    "desktop": "/tmp/ADP_E2E_BPI_PARQUET_20260722_105844_A1-dataset-materialization-failed.png",
+    "mobile": "/tmp/ADP_E2E_BPI_PARQUET_20260722_105844_A1-dataset-materialization-request-failure-mobile.png"
+  },
+  "databaseVerificationRequired": true,
+  "exactObjectVerificationRequired": false,
+  "cleanupRequired": true,
+  "error": null
+}

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-22T06:05:14+08:00",
-  "repoCommit": "e116580aa110fd9c6895a4bbd208b533d89e2dee+target-v26-dataset-manifest",
+  "generatedAt": "2026-07-22T11:10:00+08:00",
+  "repoCommit": "43e45ff33934cee83752c025be861c94f5b4938d+target-v27-parquet-materialization",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -196,11 +196,17 @@
       "marker": "ADP_E2E_20260721101217_PG_FIELD_DELETE",
       "evidence": "metadata/entity-model-field-delete-persistence-acceptance.json",
       "assertions": "18/18; real entity configuration parent page and model-field AJAX panel; irreversible warning visible; ordinaryDelete preserved column/data; explicit delete used DROP COLUMN RESTRICT; dependency, metadata-failure rollback and drift fail-closed paths returned HTTP 200/success=false messages; retries passed after repair; PROPERTYATTACHMENT metadata-only; inherent primary key protected; zero browser errors; cleanup 0/0/0/0/0/0"
+    },
+    "bpiDatasetMaterialization": {
+      "status": "PASS_TARGET_BROWSER_API_POSTGRES_MINIO_FAILURE_RETRY_RESTART_CLEANED",
+      "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+      "evidence": "metadata/bpi-dataset-materialization-acceptance.json; docs/testing/bpi-dataset-materialization-acceptance.md",
+      "assertions": "real ADP page and Java 8/17 APIs; controlled FAILED/r3 then same-task retry to READY/r6 attempt 2; PostgreSQL audit/idempotency; exact MinIO versionId SHA/bytes/rows/schema readback; service restart persistence; worker delete AccessDenied; database/object cleanup zero; worker count 0 and materializer/bootstrap defaults false"
     }
   },
   "summary": {
-    "testedFeatures": 220,
-    "pass": 217,
+    "testedFeatures": 225,
+    "pass": 222,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -4875,9 +4881,89 @@
       "status": "PASS",
       "evidence": "metadata/bpi-dataset-manifest-acceptance.json; local mutation was rejected; target preserved MANIFEST_ONLY/NOT_STARTED/null/false/false/false; definitions/snapshots/samples/shadowRuns/reviews/batches/rules/topologies/catalogs/idempotency all returned zero after cleanup",
       "issues": []
+    },
+    {
+      "module": "BPI Parquet 物化请求与失败持久化",
+      "route": "/bpi/#/datasets",
+      "operation": "从真实清单详情请求 Parquet，并以不可写工作目录注入一次受控 Worker 失败",
+      "api": "POST /bpi/v1/dataset-snapshots/{snapshotId}/materializations; GET /bpi/v1/dataset-materializations/{materializationId}",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetController.createMaterialization -> DatasetMaterializationService.request -> DatasetMaterializationPostgresRepository.insert; MaterializerWorker._cycle -> MaterializationRepository.fail",
+      "tables": ["bpi.bpi_dataset_materializations", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+      "verificationSql": "SELECT state, revision, attempt_count, failure_code, artifact_uri, content_sha256 FROM bpi.bpi_dataset_materializations WHERE id='02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983'; query QUEUED/WRITING/FAILED audit events and request idempotency.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-materialization-acceptance.json; real page POST returned 202, then PostgreSQL persisted FAILED/r3, attempt_count=1 and MATERIALIZATION_ERROR while artifact URI and SHA remained null",
+      "issues": []
+    },
+    {
+      "module": "BPI Parquet 页面重试与 READY 落库",
+      "route": "/bpi/#/datasets",
+      "operation": "从失败详情点击重新排队，并等待同一物化任务达到 READY",
+      "api": "POST /bpi/v1/dataset-materializations/{materializationId}/retry; GET /bpi/v1/dataset-materializations/{materializationId}",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetController.retryMaterialization -> DatasetMaterializationService.retry -> DatasetMaterializationPostgresRepository; MaterializerWorker claim/build/upload/complete",
+      "tables": ["bpi.bpi_dataset_materializations", "bpi.bpi_dataset_snapshot_samples", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+      "verificationSql": "deploy/docker/scripts/bpi-dataset-materialization-target-verification.sql; require READY/r6, attempt_count=2, six exact audit events and two COMPLETED/202 idempotency rows.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-materialization-acceptance.json; retry POST returned 202 and reused materialization 02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983, which reached READY/r6 with attempt_count=2",
+      "issues": []
+    },
+    {
+      "module": "BPI Parquet 精确对象版本验收",
+      "route": "/bpi/#/datasets",
+      "operation": "核对 PostgreSQL 制品合同，并按 MinIO versionId 下载后复算 SHA、大小、行数和 schema",
+      "api": "GET /bpi/v1/dataset-materializations/{materializationId}; MinIO S3 stat/get with versionId",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetMaterializationPostgresRepository projection; Minio.stat_object/fget_object; hashlib.sha256; pyarrow.parquet.read_table",
+      "tables": ["bpi.bpi_dataset_materializations", "bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_snapshot_samples"],
+      "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+      "verificationSql": "SELECT object_bucket, object_key, artifact_metadata->>'objectVersionId', byte_size, row_count, schema_json, content_sha256 FROM bpi.bpi_dataset_materializations WHERE id='02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983'.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-materialization-acceptance.json; exact version 28b5a178-d972-4e5b-9c6f-c3ece7bb0838 matched DB/object SHA 8837c21dd9a5ac181bd86d09e22e43421e0c9420fca943a1f765b614059df126, 11341 bytes, 1 row and 26 fields; manifest stayed MANIFEST_ONLY/NOT_STARTED",
+      "issues": []
+    },
+    {
+      "module": "BPI Parquet 重启持久化与响应式复验",
+      "route": "/bpi/#/datasets",
+      "operation": "重启 bpi-service 后使用新 ADP 会话在桌面和移动视口复读同一 READY 任务",
+      "api": "GET /bpi/v1/datasets; GET /bpi/v1/dataset-snapshots/{snapshotId}; GET /bpi/v1/dataset-materializations/{materializationId}",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "restarted bpi-service -> DatasetPostgresRepository and DatasetMaterializationPostgresRepository",
+      "tables": ["bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_materializations"],
+      "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+      "verificationSql": "SELECT state, revision, attempt_count, content_sha256 FROM bpi.bpi_dataset_materializations WHERE id='02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983'.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-materialization-post-restart-target.json and acceptance JSON; fresh session read READY/r6 attempt 2 after service restart; desktop/mobile console, page, request and overflow failures were all zero",
+      "issues": []
+    },
+    {
+      "module": "BPI Parquet 最小权限与验收清理",
+      "route": "NOT_APPLICABLE",
+      "operation": "证明 Worker 无删除权限，由管理员只删除精确测试版本，再清理 marker 并恢复默认关闭运行态",
+      "api": "MinIO S3 remove_object; mc rm --version-id; PostgreSQL cleanup; Docker runtime verification",
+      "method": "DELETE/SQL/GET",
+      "requiresPersistence": true,
+      "backendEntry": "MinIO policy evaluation/admin one-shot; bpi-dataset-manifest-target-cleanup.sql; Docker Compose state check",
+      "tables": ["bpi.bpi_dataset_definitions", "bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_snapshot_samples", "bpi.bpi_dataset_materializations", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+      "verificationSql": "Require worker delete AccessDenied; object versions 1 -> 0; eleven marker projections and captured idempotency ids equal zero; materializer container count 0 and materializer/bootstrap flags false.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-materialization-acceptance.json; Worker delete was AccessDenied, admin removed only the exact test version, 11 database projections and 4 associated idempotency rows were zero, worker count was 0 and both default-off switches remained false",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+      "artifact": "metadata/bpi-dataset-materialization-acceptance.json",
+      "summary": "Real target ADP page, Java 8 adapter, Java 17 service, Python materializer, PostgreSQL 15.18/Flyway V27 and private versioned MinIO closed controlled failure, same-task retry, exact-version Parquet verification, service restart persistence, least-privilege deletion denial and zero-residue/default-off cleanup; WORM, Iceberg, MLflow, training, inference and production activation remain open."
+    },
     {
       "marker": "ADP_E2E_BPI_DATASET_<UUID>",
       "artifact": "metadata/bpi-dataset-manifest-acceptance.json",

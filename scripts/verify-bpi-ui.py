@@ -11,6 +11,12 @@ UI = ROOT / "frontend/apps/bpi"
 ACCEPTANCE = ROOT / "metadata/bpi-ui-acceptance.json"
 QUALITY_INVENTORY_ACCEPTANCE = ROOT / "metadata/bpi-quality-inventory-ui-acceptance.json"
 DATASET_MANIFEST_ACCEPTANCE = ROOT / "metadata/bpi-dataset-manifest-acceptance.json"
+DATASET_MATERIALIZATION_ACCEPTANCE = ROOT / "metadata/bpi-dataset-materialization-acceptance.json"
+DATASET_MATERIALIZATION_SCREENSHOTS = [
+    ROOT / "metadata/bpi-dataset-materialization-failed-target.png",
+    ROOT / "metadata/bpi-dataset-materialization-ready-target.png",
+    ROOT / "metadata/bpi-dataset-materialization-ready-mobile-target.png",
+]
 REQUIRED = [
     "README.md",
     "package.json",
@@ -37,6 +43,11 @@ def main() -> int:
         failures.append("missing BPI quality/inventory UI acceptance evidence")
     if not DATASET_MANIFEST_ACCEPTANCE.is_file():
         failures.append("missing BPI dataset manifest UI acceptance evidence")
+    if not DATASET_MATERIALIZATION_ACCEPTANCE.is_file():
+        failures.append("missing BPI dataset materialization UI acceptance evidence")
+    for screenshot in DATASET_MATERIALIZATION_SCREENSHOTS:
+        if not screenshot.is_file():
+            failures.append(f"missing BPI dataset materialization screenshot: {screenshot.relative_to(ROOT)}")
 
     if not failures:
         package = json.loads((UI / "package.json").read_text(encoding="utf-8"))
@@ -48,7 +59,7 @@ def main() -> int:
                 failures.append(f"BPI UI package is missing {name!r} script")
 
         api = (UI / "src/api.ts").read_text(encoding="utf-8")
-        for required in ("const API_ROOT = '/bpi-api'", "localStorage.getItem('ticket')", "Idempotency-Key", "If-Match", "rejectCandidate", "suspendBatch", "resumeBatch", "forceCloseTask", "forceCloseBatch", "batchRelease", "featureFlags", "changeFeatureFlag", "simulateRule", "publishRule", "topologies", "createTopologyDraft", "validateTopology", "publishTopology", "createRuleDraft", "currentPointCatalog", "options?.cursor", "options?.search", "listPointCalibrations", "submitPointCalibration", "approvePointCalibration", "rejectPointCalibration", "revokePointCalibration", "shadowRuns", "createShadowRun", "reviewShadowRunBatch", "startShadowRun", "completeShadowRun", "approveShadowRun", "rejectShadowRun", "cancelShadowRun", "datasets", "createDatasetDefinition", "createDatasetSnapshot", "datasetSnapshot"):
+        for required in ("const API_ROOT = '/bpi-api'", "localStorage.getItem('ticket')", "Idempotency-Key", "If-Match", "rejectCandidate", "suspendBatch", "resumeBatch", "forceCloseTask", "forceCloseBatch", "batchRelease", "featureFlags", "changeFeatureFlag", "simulateRule", "publishRule", "topologies", "createTopologyDraft", "validateTopology", "publishTopology", "createRuleDraft", "currentPointCatalog", "options?.cursor", "options?.search", "listPointCalibrations", "submitPointCalibration", "approvePointCalibration", "rejectPointCalibration", "revokePointCalibration", "shadowRuns", "createShadowRun", "reviewShadowRunBatch", "startShadowRun", "completeShadowRun", "approveShadowRun", "rejectShadowRun", "cancelShadowRun", "datasets", "createDatasetDefinition", "createDatasetSnapshot", "datasetSnapshot", "requestDatasetMaterialization", "datasetMaterialization", "retryDatasetMaterialization"):
             if required not in api:
                 failures.append(f"BPI UI API client is missing {required!r}")
         forbidden = ("BPI_INTERNAL_JWT_SECRET", "http://bpi-service", "https://bpi-service")
@@ -60,7 +71,7 @@ def main() -> int:
                         failures.append(f"{path.relative_to(ROOT)} exposes forbidden marker {marker!r}")
 
         e2e = (UI / "tests/bpi-console.e2e.cjs").read_text(encoding="utf-8")
-        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "/tmp/bpi-console-candidate-rejected.png", "/tmp/bpi-console-batch-lifecycle.png", "/tmp/bpi-console-force-close.png", "/tmp/bpi-console-end-boundary.png", "/tmp/bpi-console-feature-flags.png", "/tmp/bpi-console-point-catalog-pagination.png", "/tmp/bpi-console-point-calibration-governance.png", "/tmp/bpi-console-rule-published.png", "/tmp/bpi-console-rule-application-applied.png", "/tmp/bpi-console-rule-publication-blocked.png", "/tmp/bpi-console-shadow-run-approved.png", "/tmp/bpi-console-batch-quality-inventory.png", "/tmp/bpi-console-batch-quality-inventory-mobile.png", "/tmp/bpi-dataset-manifest-desktop.png", "/tmp/bpi-dataset-manifest-mobile.png", "getBatchRelease", "WMS_LOCATION_LOCKED", "ADP-E2E-RELEASE-TRACE-503", "CLOSED_RAW", "END_BOUNDARY_CONFIRMED", "PENDING_APPROVAL", "批准并强制结束", "bpi.wms-link", "overrideRevision", "sourceCalibrationStatus", "calibrationEvidenceId", "REVOKED", "point catalog incrementally loads a pinned snapshot", "property.0204", "wrongSearch.status, 422", "rule-runtime-readiness", "DEGRADED", "runtimeReadinessStatus", "UNRESOLVED_CRITICAL_DATA_QUALITY", "boundaryAgreement", "externalWrites", "data engineer creates a point-in-time dataset manifest", "MANIFEST_READY", "MANIFEST_ONLY", "modelTrained", "document.documentElement.scrollWidth"):
+        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "/tmp/bpi-console-candidate-rejected.png", "/tmp/bpi-console-batch-lifecycle.png", "/tmp/bpi-console-force-close.png", "/tmp/bpi-console-end-boundary.png", "/tmp/bpi-console-feature-flags.png", "/tmp/bpi-console-point-catalog-pagination.png", "/tmp/bpi-console-point-calibration-governance.png", "/tmp/bpi-console-rule-published.png", "/tmp/bpi-console-rule-application-applied.png", "/tmp/bpi-console-rule-publication-blocked.png", "/tmp/bpi-console-shadow-run-approved.png", "/tmp/bpi-console-batch-quality-inventory.png", "/tmp/bpi-console-batch-quality-inventory-mobile.png", "/tmp/bpi-dataset-parquet-desktop.png", "/tmp/bpi-dataset-parquet-mobile.png", "getBatchRelease", "WMS_LOCATION_LOCKED", "ADP-E2E-RELEASE-TRACE-503", "CLOSED_RAW", "END_BOUNDARY_CONFIRMED", "PENDING_APPROVAL", "批准并强制结束", "bpi.wms-link", "overrideRevision", "sourceCalibrationStatus", "calibrationEvidenceId", "REVOKED", "point catalog incrementally loads a pinned snapshot", "property.0204", "wrongSearch.status, 422", "rule-runtime-readiness", "DEGRADED", "runtimeReadinessStatus", "UNRESOLVED_CRITICAL_DATA_QUALITY", "boundaryAgreement", "externalWrites", "data engineer materializes a point-in-time dataset with failed retry and mobile evidence", "SIMULATED_MINIO_TIMEOUT", "MANIFEST_READY", "MANIFEST_ONLY", "versionId", "simulationOnly", "modelTrained", "document.documentElement.scrollWidth"):
             if required not in e2e:
                 failures.append(f"BPI UI E2E is missing {required!r} evidence")
 
@@ -149,6 +160,34 @@ def main() -> int:
         for required in ("production-volume", "Iceberg", "MLflow", "model"):
             if required not in dataset_limitations:
                 failures.append(f"BPI dataset acceptance limitations are missing {required!r}")
+
+        materialization_acceptance = json.loads(
+            DATASET_MATERIALIZATION_ACCEPTANCE.read_text(encoding="utf-8")
+        )
+        if (materialization_acceptance.get("status")
+                != "PASS_TARGET_BROWSER_API_POSTGRES_MINIO_FAILURE_RETRY_RESTART_CLEANED"):
+            failures.append("BPI dataset materialization acceptance is not target-complete")
+        materialization_summary = materialization_acceptance.get("summary", {})
+        if (materialization_summary.get("testedFeatures") != 10
+                or materialization_summary.get("pass") != 10
+                or materialization_summary.get("fail") != 0
+                or materialization_summary.get("targetBrowserFailures") != 0
+                or materialization_summary.get("unexpectedConsoleErrors") != 0
+                or materialization_summary.get("pageErrors") != 0
+                or materialization_summary.get("requestFailures") != 0
+                or materialization_summary.get("horizontalOverflowFailures") != 0):
+            failures.append("BPI dataset materialization browser acceptance summary is incomplete")
+        materialization_target = materialization_acceptance.get("target", {})
+        materialization_browser = materialization_acceptance.get("browser", {})
+        materialization_cleanup = materialization_acceptance.get("cleanup", {})
+        if (materialization_target.get("adpBaseUrl") != "http://10.11.100.17:18080"
+                or materialization_target.get("flywayVersion") != 27
+                or materialization_browser.get("combinedStatus")
+                    != "PASS_TARGET_BROWSER_API_POSTGRES_MINIO_FAILURE_RETRY_RESTART_CLEANED"
+                or materialization_cleanup.get("datasetMaterializationRows") != 0
+                or materialization_cleanup.get("minioObjectVersions") != 0
+                or materialization_acceptance.get("productionActivationAllowed") is not False):
+            failures.append("BPI dataset materialization target boundary or cleanup is incomplete")
 
     if failures:
         print("\n".join(f"BPI UI error: {item}" for item in failures), file=sys.stderr)

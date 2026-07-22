@@ -1,5 +1,24 @@
 # 前端功能测试报告
 
+## 2026-07-22 BPI Parquet 版本化物化（Phase 3B-A 目标整链）
+
+本轮在唯一测试环境 `http://10.11.100.17:18080` 使用真实 ADP 会话、Java 8 adapter、
+Java 17 BPI service、Python 3.12 materializer、PostgreSQL 15.18/Flyway V27 和私有版本化
+MinIO 完成失败恢复整链。marker 为 `ADP_E2E_BPI_PARQUET_20260722_105844_A1`；同一任务
+`02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983` 经历
+`QUEUED -> WRITING -> FAILED -> QUEUED -> WRITING -> READY`，取证后数据库 marker 与精确对象版本均清零。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| Parquet 请求与受控失败 | `/bpi/#/datasets` 清单详情 | 点击“生成 Parquet”，再由不可写工作目录的正式 Worker 镜像处理 | `POST /bpi-api/dataset-snapshots/{id}/materializations`；materialization GET | POST `202`；页面显示 `FAILED/r3`、attempt 1 和 `MATERIALIZATION_ERROR`；非预期 console/page/request error 均为 0 | 单一任务从 `QUEUED/r1` 到 `FAILED/r3`；URI/SHA 保持 null；审计写入 QUEUED/WRITING/FAILED | `bpi_dataset_materializations`、`bpi_audit_events`、`bpi_api_idempotency` | PASS | 失败为受控注入，不是环境遗留故障 |
+| 页面重试与版本锁定对象 | 同一详情抽屉 | 点击“重新排队”，等待 READY，核对 URI/SHA/大小/行数/schema/versionId | `POST /bpi-api/dataset-materializations/{id}/retry`；materialization GET | retry `202`；同一任务到 `READY/r6`、attempt 2、`VERIFIED`；桌面 `1440x900` 与移动 `390x844` 无横向溢出 | PostgreSQL 保存 `11341` bytes、`1` row、`26` fields 和精确 versionId；MinIO 按该版本重新下载后 SHA/大小/行数/schema 全部一致 | materialization、snapshot/sample、审计、幂等表 | PASS | 不声明 WORM/Object Lock |
+| Manifest 边界与服务重启 | 同上 | 对比 manifest/物化投影，重启 `bpi-service` 后以新会话复读 | snapshot/materialization GET | 重启后仍显示同一 `READY/r6`；浏览器错误为 0 | manifest 保持 `MANIFEST_ONLY/NOT_STARTED/artifact_uri=null`，物化事实独立持久化 | `bpi_dataset_snapshots`、`bpi_dataset_materializations` | PASS | Iceberg、MLflow、训练和推断仍未开始 |
+| 最小权限与验收退场 | 不适用 | Worker 尝试删除对象版本；管理员定向删除；SQL 清理 marker；停止 Worker | MinIO S3 DELETE；cleanup SQL | Worker 删除得到预期 `AccessDenied`；页面 marker 清理后不可见 | MinIO versions `1 -> 0`；11 类数据库投影和 4 条关联幂等记录归零；Worker 数量 0，materializer/bootstrap 开关均为 false | 本轮数据集、审计、幂等表 | PASS | 生产激活仍不允许 |
+
+机器证据：`metadata/bpi-dataset-materialization-acceptance.json`；专项报告：
+`docs/testing/bpi-dataset-materialization-acceptance.md`；FAILED、READY、移动端与重启后的原始浏览器报告和截图
+均保存在 `metadata/bpi-dataset-materialization-*`。本节只关闭 Phase 3B-A 版本锁定 Parquet 纵切。
+
 ## 2026-07-22 BPI 数据集清单工作台（Phase 3A 目标整链）
 
 本轮先在确定性模拟器完成 `20/20` 浏览器回归和 `15/15` API 回归，再部署 exact revision

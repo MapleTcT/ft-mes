@@ -922,6 +922,24 @@ PostgreSQL 15.18/Flyway V26。取证后十类 marker 投影全部为 0。
 `docs/backend-table-audit/bpi-dataset-manifest.md`。目标页面、API 和 PostgreSQL 已整链闭合，但交付边界
 仍为 `MANIFEST_ONLY`；Iceberg、MLflow、模型训练/推断和生产激活明确未开始。
 
+### BPI V27 Parquet 版本化物化（目标页面/API/PostgreSQL/MinIO）
+
+本节使用 marker `ADP_E2E_BPI_PARQUET_20260722_105844_A1`，在同一目标栈完成受保护
+expand-only V27 升级。真实页面创建 definition/snapshot 后，对同一个 materialization 任务执行
+受控失败和页面重试；数据库状态、精确 MinIO 对象版本、服务重启复读与定向清理均独立核验。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 页面请求 Parquet 并持久化失败 | `/bpi/#/datasets` 清单详情 | `POST /bpi-api/dataset-snapshots/{snapshotId}/materializations`；GET materialization | `DatasetController -> DatasetMaterializationService -> DatasetMaterializationPostgresRepository`；`MaterializerWorker -> fail` | `bpi_dataset_materializations`、`bpi_audit_events`、`bpi_api_idempotency` | 查询 state/revision/attempt/failure/URI/SHA 和 QUEUED/WRITING/FAILED 审计 | POST `202`；任务 `QUEUED/r1 -> FAILED/r3`、attempt 1、`MATERIALIZATION_ERROR`，URI/SHA 均 null | PASS_TARGET_FAILURE_PERSISTED |
+| 页面重试并生成 READY 制品 | 同一失败详情 | `POST /bpi-api/dataset-materializations/{id}/retry`；GET materialization | `DatasetMaterializationService.retry -> Repository.claim/complete`；Python Worker 固定 schema 写入 | materialization、snapshot sample、审计、幂等表 | `bpi-dataset-materialization-target-verification.sql` 核对状态序列、审计、幂等、大小、行数、schema、SHA、versionId | 同一 ID 到 `READY/r6`、attempt 2；`11341` bytes、`1` row、`26` fields；六条审计与两条 `COMPLETED/202` 幂等记录吻合 | PASS_TARGET_READY |
+| 精确对象版本与不可变边界 | READY 详情 | materialization/snapshot GET；MinIO stat/get by versionId | `DatasetObjectStore.ensure_uploaded` 后按 versionId 回读；snapshot projection 独立读取 | `bpi_dataset_materializations`、`bpi_dataset_snapshots` | 比对 DB/对象 SHA、bytes、rows、fields；查询 manifest phaseBoundary | exact version `28b5a178-d972-4e5b-9c6f-c3ece7bb0838` 回读一致；manifest 仍为 `MANIFEST_ONLY/NOT_STARTED/null/false/false/false` | PASS_TARGET_EXACT_VERSION |
+| 重启持久化和最小权限 | 同一 READY 详情；Worker S3 客户端 | 重启 service 后 GET；Worker DELETE exact version | restarted service -> PostgreSQL；MinIO policy evaluation | snapshot/materialization 表；MinIO 私有版本化 bucket | 重启后查询同一 ID/r6/attempt 2；尝试以 Worker 删除对象 | 新 ADP 会话仍读取 READY；Worker 删除返回 `AccessDenied` | PASS_TARGET_RESTART_SECURITY |
+| marker、对象和运行时清理 | 不适用 | 管理员 exact-version 删除；cleanup SQL；停止 Worker | MinIO admin one-shot；`bpi-dataset-manifest-target-cleanup.sql` | 本轮定义/快照/样本/物化/fixture/审计/幂等表 | 复查 11 类 marker 投影、捕获的 idempotency UUID、bucket 版本数、容器数与开关 | 4 条关联幂等记录被定向删除；数据库投影全部 0；对象版本 `1 -> 0`；Worker 0；materializer/bootstrap=false | PASS_TARGET_CLEANED |
+
+机器证据：`metadata/bpi-dataset-materialization-acceptance.json`；完整页面、API、PostgreSQL、MinIO、
+失败注入、重启与清理报告见 `docs/testing/bpi-dataset-materialization-acceptance.md`。本项不把 versioning
+宣称为 WORM，也不关闭 Iceberg、MLflow、训练/推断、生产容量或 7-14 天现场运行门槛。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

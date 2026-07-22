@@ -1,0 +1,272 @@
+{
+  "generatedAt": "2026-07-22T03:05:00.594Z",
+  "status": "PASS_PENDING_DATABASE_OBJECT_VERIFICATION_AND_CLEANUP",
+  "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+  "action": "read-ready",
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "login": {
+    "status": 200,
+    "username": "admin"
+  },
+  "definition": {
+    "id": "64155718-d458-480e-9031-cbdb867896a8",
+    "datasetCode": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+    "latestSnapshotId": "117f0045-cf03-4177-8010-dc730c566f13"
+  },
+  "snapshot": {
+    "id": "117f0045-cf03-4177-8010-dc730c566f13",
+    "state": "MANIFEST_READY",
+    "revision": 3,
+    "manifestChecksum": "efd6658e89ee0c6f2931956d56a35ce27cce64ab846e065e2669a27eb19ab255"
+  },
+  "materialization": {
+    "id": "02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983",
+    "snapshotId": "117f0045-cf03-4177-8010-dc730c566f13",
+    "datasetId": "64155718-d458-480e-9031-cbdb867896a8",
+    "datasetCode": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+    "datasetVersion": "1.0.0",
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineIds": [
+      "LINE-S07-01"
+    ],
+    "artifactFormat": "PARQUET",
+    "artifactSchemaVersion": "bpi.dataset-parquet.v1",
+    "materializerVersion": "bpi-dataset-materializer/0.1.0",
+    "state": "READY",
+    "revision": 6,
+    "manifestChecksum": "efd6658e89ee0c6f2931956d56a35ce27cce64ab846e065e2669a27eb19ab255",
+    "requestedBy": "legacy-ticket:admin",
+    "requestReason": "ADP_E2E_BPI_PARQUET_20260722_105844_A1 目标对象失败恢复验收",
+    "createdAt": "2026-07-22T03:01:36.664Z",
+    "startedAt": "2026-07-22T03:02:35.929667Z",
+    "completedAt": "2026-07-22T03:02:36.044905Z",
+    "attemptCount": 2,
+    "artifactUri": "s3://bpi-datasets/datasets/117f0045-cf03-4177-8010-dc730c566f13/efd6658e89ee0c6f2931956d56a35ce27cce64ab846e065e2669a27eb19ab255/bpi-dataset-materializer-0.1.0/8837c21dd9a5ac181bd86d09e22e43421e0c9420fca943a1f765b614059df126.parquet?versionId=28b5a178-d972-4e5b-9c6f-c3ece7bb0838",
+    "objectBucket": "bpi-datasets",
+    "objectKey": "datasets/117f0045-cf03-4177-8010-dc730c566f13/efd6658e89ee0c6f2931956d56a35ce27cce64ab846e065e2669a27eb19ab255/bpi-dataset-materializer-0.1.0/8837c21dd9a5ac181bd86d09e22e43421e0c9420fca943a1f765b614059df126.parquet",
+    "contentSha256": "8837c21dd9a5ac181bd86d09e22e43421e0c9420fca943a1f765b614059df126",
+    "byteSize": 11341,
+    "rowCount": 1,
+    "schema": {
+      "fields": [
+        {
+          "name": "snapshot_id",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "review_id",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "shadow_run_id",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "batch_id",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "batch_no",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "line_id",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "prediction_time",
+          "type": "timestamp[us, tz=UTC]",
+          "nullable": false
+        },
+        {
+          "name": "feature_cutoff",
+          "type": "timestamp[us, tz=UTC]",
+          "nullable": false
+        },
+        {
+          "name": "label_available_at",
+          "type": "timestamp[us, tz=UTC]",
+          "nullable": false
+        },
+        {
+          "name": "confidence",
+          "type": "decimal128(7, 6)",
+          "nullable": false
+        },
+        {
+          "name": "split_key",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "feature_batch_order_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "feature_batch_material_code",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "feature_batch_stage_code",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "feature_batch_quantity_unit",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "feature_rule_version_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "feature_topology_version_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "feature_point_catalog_snapshot_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "label_review_manual_start_time",
+          "type": "timestamp[us, tz=UTC]",
+          "nullable": true
+        },
+        {
+          "name": "label_review_manual_end_time",
+          "type": "timestamp[us, tz=UTC]",
+          "nullable": true
+        },
+        {
+          "name": "label_review_reference_quantity",
+          "type": "decimal128(24, 6)",
+          "nullable": true
+        },
+        {
+          "name": "label_review_start_boundary_accepted",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "label_review_end_boundary_accepted",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "label_review_quantity_accepted",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "label_batch_automatic_end_time",
+          "type": "timestamp[us, tz=UTC]",
+          "nullable": true
+        },
+        {
+          "name": "label_batch_automatic_quantity",
+          "type": "decimal128(24, 6)",
+          "nullable": true
+        }
+      ],
+      "schemaVersion": "bpi.dataset-parquet.v1",
+      "selectedLabelRefs": [
+        "batch.automatic_end_time",
+        "batch.automatic_quantity",
+        "review.boundary_acceptance",
+        "review.manual_end_time",
+        "review.manual_start_time",
+        "review.quantity_acceptance",
+        "review.reference_quantity"
+      ],
+      "selectedFeatureRefs": [
+        "batch.material_code",
+        "batch.order_id",
+        "batch.quantity_unit",
+        "batch.stage_code",
+        "point_catalog.snapshot_id",
+        "rule.version_id",
+        "topology.version_id"
+      ]
+    },
+    "artifactMetadata": {
+      "rowOrder": "line_id,prediction_time,batch_id,review_id",
+      "compression": "zstd:3",
+      "icebergReady": false,
+      "modelTrained": false,
+      "objectVersionId": "28b5a178-d972-4e5b-9c6f-c3ece7bb0838",
+      "manifestChecksum": "efd6658e89ee0c6f2931956d56a35ce27cce64ab846e065e2669a27eb19ab255",
+      "mlflowRegistered": false,
+      "definitionChecksum": "06727c690f5feec03c354d5e46080c5357fc4ae10cd7f08d082c63dd5dcdaf2e",
+      "materializerVersion": "bpi-dataset-materializer/0.1.0",
+      "artifactSchemaVersion": "bpi.dataset-parquet.v1",
+      "manifestSchemaVersion": "bpi.dataset-manifest.v1",
+      "objectContentVerified": true,
+      "sourcePayloadIncluded": false,
+      "excludedSamplesIncluded": false
+    }
+  },
+  "browser": {
+    "route": "http://10.11.100.17:18080/bpi/#/datasets",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "network": [
+      {
+        "method": "GET",
+        "url": "/bpi-api/datasets?plantId=PLANT-01&limit=100",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/117f0045-cf03-4177-8010-dc730c566f13",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/datasets?plantId=PLANT-01&limit=100",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/117f0045-cf03-4177-8010-dc730c566f13",
+        "status": 200,
+        "payload": null
+      }
+    ],
+    "mobile": {
+      "viewport": 390,
+      "body": 390,
+      "document": 390,
+      "drawerScrollTop": 0,
+      "verifiedPanel": true
+    }
+  },
+  "screenshots": {
+    "desktop": "/tmp/ADP_E2E_BPI_PARQUET_20260722_105844_A1-dataset-materialization-post-restart.png",
+    "mobile": "/tmp/ADP_E2E_BPI_PARQUET_20260722_105844_A1-dataset-materialization-post-restart-mobile.png"
+  },
+  "databaseVerificationRequired": true,
+  "exactObjectVerificationRequired": true,
+  "cleanupRequired": true,
+  "error": null
+}

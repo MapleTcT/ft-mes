@@ -1,0 +1,246 @@
+{
+  "generatedAt": "2026-07-22T02:59:33.899Z",
+  "status": "PASS_PENDING_DATABASE_VERIFICATION_AND_CLEANUP",
+  "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "login": {
+    "status": 200,
+    "username": "admin"
+  },
+  "definition": {
+    "id": "64155718-d458-480e-9031-cbdb867896a8",
+    "revision": 1,
+    "checksum": "06727c690f5feec03c354d5e46080c5357fc4ae10cd7f08d082c63dd5dcdaf2e",
+    "state": "ACTIVE"
+  },
+  "snapshot": {
+    "id": "117f0045-cf03-4177-8010-dc730c566f13",
+    "queuedRevision": 1,
+    "queuedState": "QUEUED",
+    "readyRevision": 3,
+    "readyState": "MANIFEST_READY",
+    "manifestChecksum": "efd6658e89ee0c6f2931956d56a35ce27cce64ab846e065e2669a27eb19ab255",
+    "includedCount": 1,
+    "excludedCount": 2,
+    "materializationState": "NOT_STARTED",
+    "artifactUri": null
+  },
+  "api": {
+    "definitionListed": true,
+    "snapshotStatus": "MANIFEST_READY",
+    "phaseBoundary": {
+      "icebergReady": false,
+      "modelTrained": false,
+      "deliveryState": "MANIFEST_ONLY",
+      "mlflowRegistered": false,
+      "materializationState": "NOT_STARTED"
+    },
+    "counts": {
+      "total": 3,
+      "excluded": 2,
+      "included": 1,
+      "exclusionSummary": {
+        "LABEL_DELAY_EXCEEDED": 1,
+        "CONFIDENCE_BELOW_THRESHOLD": 1,
+        "START_BOUNDARY_OUTSIDE_TOLERANCE": 1
+      }
+    }
+  },
+  "browser": {
+    "route": "http://10.11.100.17:18080/bpi/#/datasets",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "network": [
+      {
+        "method": "GET",
+        "url": "/bpi-api/datasets?plantId=PLANT-01&limit=100",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "POST",
+        "url": "/bpi-api/datasets",
+        "status": 200,
+        "payload": {
+          "datasetCode": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+          "version": "1.0.0",
+          "name": "ADP_E2E_BPI_PARQUET_20260722_105844_A1 目标清单",
+          "plantId": "PLANT-01",
+          "lineIds": [
+            "LINE-S07-01"
+          ],
+          "predictionTimePolicy": "AUTOMATIC_BATCH_START",
+          "featureCutoffPolicy": "AT_OR_BEFORE_PREDICTION_TIME",
+          "featureRefs": [
+            "batch.material_code",
+            "batch.order_id",
+            "batch.quantity_unit",
+            "batch.stage_code",
+            "point_catalog.snapshot_id",
+            "rule.version_id",
+            "topology.version_id"
+          ],
+          "labelRefs": [
+            "batch.automatic_end_time",
+            "batch.automatic_quantity",
+            "review.boundary_acceptance",
+            "review.manual_end_time",
+            "review.manual_start_time",
+            "review.quantity_acceptance",
+            "review.reference_quantity"
+          ],
+          "maxLabelDelayHours": 24,
+          "minimumConfidence": 1,
+          "splitPolicy": "PRODUCTION_TIME",
+          "reason": "ADP_E2E_BPI_PARQUET_20260722_105844_A1 真实页面定义创建"
+        },
+        "response": {
+          "id": "64155718-d458-480e-9031-cbdb867896a8",
+          "datasetCode": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+          "version": "1.0.0",
+          "name": "ADP_E2E_BPI_PARQUET_20260722_105844_A1 目标清单",
+          "tenantId": "1000",
+          "plantId": "PLANT-01",
+          "lineIds": [
+            "LINE-S07-01"
+          ],
+          "state": "ACTIVE",
+          "revision": 1,
+          "predictionTimePolicy": "AUTOMATIC_BATCH_START",
+          "featureCutoffPolicy": "AT_OR_BEFORE_PREDICTION_TIME",
+          "featureRefs": [
+            "batch.material_code",
+            "batch.order_id",
+            "batch.quantity_unit",
+            "batch.stage_code",
+            "point_catalog.snapshot_id",
+            "rule.version_id",
+            "topology.version_id"
+          ],
+          "labelRefs": [
+            "batch.automatic_end_time",
+            "batch.automatic_quantity",
+            "review.boundary_acceptance",
+            "review.manual_end_time",
+            "review.manual_start_time",
+            "review.quantity_acceptance",
+            "review.reference_quantity"
+          ],
+          "maxLabelDelayHours": 24,
+          "minimumConfidence": 1,
+          "splitPolicy": "PRODUCTION_TIME",
+          "checksum": "06727c690f5feec03c354d5e46080c5357fc4ae10cd7f08d082c63dd5dcdaf2e",
+          "createdBy": "legacy-ticket:admin",
+          "createReason": "ADP_E2E_BPI_PARQUET_20260722_105844_A1 真实页面定义创建",
+          "createdAt": "2026-07-22T02:59:36.400161Z"
+        }
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/datasets?plantId=PLANT-01&limit=100",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "POST",
+        "url": "/bpi-api/datasets/64155718-d458-480e-9031-cbdb867896a8/snapshots",
+        "status": 202,
+        "payload": {
+          "freezeAt": "2026-07-22T02:59:31.000Z",
+          "lineIds": [
+            "LINE-S07-01"
+          ],
+          "predictionTimePolicy": "AUTOMATIC_BATCH_START",
+          "ruleVersionIds": [],
+          "excludeLowConfidence": true,
+          "reason": "ADP_E2E_BPI_PARQUET_20260722_105844_A1 真实页面冻结清单"
+        },
+        "response": {
+          "id": "117f0045-cf03-4177-8010-dc730c566f13",
+          "datasetId": "64155718-d458-480e-9031-cbdb867896a8",
+          "datasetCode": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
+          "datasetVersion": "1.0.0",
+          "datasetName": "ADP_E2E_BPI_PARQUET_20260722_105844_A1 目标清单",
+          "tenantId": "1000",
+          "plantId": "PLANT-01",
+          "snapshotVersion": 1,
+          "state": "QUEUED",
+          "revision": 1,
+          "freezeAt": "2026-07-22T02:59:31Z",
+          "lineIds": [
+            "LINE-S07-01"
+          ],
+          "predictionTimePolicy": "AUTOMATIC_BATCH_START",
+          "ruleVersionIds": [],
+          "excludeLowConfidence": true,
+          "definitionChecksum": "06727c690f5feec03c354d5e46080c5357fc4ae10cd7f08d082c63dd5dcdaf2e",
+          "manifestSchemaVersion": "bpi.dataset-manifest.v1",
+          "materializationState": "NOT_STARTED",
+          "requestedBy": "legacy-ticket:admin",
+          "requestReason": "ADP_E2E_BPI_PARQUET_20260722_105844_A1 真实页面冻结清单",
+          "createdAt": "2026-07-22T02:59:37.040834Z",
+          "attemptCount": 0
+        }
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/117f0045-cf03-4177-8010-dc730c566f13",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/117f0045-cf03-4177-8010-dc730c566f13",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/117f0045-cf03-4177-8010-dc730c566f13",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/117f0045-cf03-4177-8010-dc730c566f13",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/datasets?plantId=PLANT-01&limit=100",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/117f0045-cf03-4177-8010-dc730c566f13",
+        "status": 200,
+        "payload": null
+      }
+    ],
+    "desktop": {
+      "sampleRows": 3,
+      "exclusionRows": 3
+    },
+    "mobile": {
+      "viewport": 390,
+      "body": 390,
+      "document": 390,
+      "readyDrawer": true,
+      "sampleRows": 3
+    }
+  },
+  "screenshots": {
+    "desktop": "/tmp/ADP_E2E_BPI_PARQUET_20260722_105844_A1-dataset-manifest-desktop.png",
+    "mobile": "/tmp/ADP_E2E_BPI_PARQUET_20260722_105844_A1-dataset-manifest-mobile.png"
+  },
+  "databaseVerificationRequired": true,
+  "cleanupRequired": true,
+  "error": null
+}

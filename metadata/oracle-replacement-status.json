@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T22:22:24+00:00",
-  "repoCommit": "e116580aa110fd9c6895a4bbd208b533d89e2dee",
+  "generatedAt": "2026-07-22T03:39:51+00:00",
+  "repoCommit": "43e45ff33934cee83752c025be861c94f5b4938d",
   "generatedFrom": [
     "metadata/current-content-inventory.json",
     "metadata/backend-module-dependency-inventory.json",
@@ -22,7 +22,7 @@
     "plannedCount": 1,
     "sourceModuleCount": 10,
     "sourceModuleOraclePolicyPass": true,
-    "oracleBacklogReferenceCount": 1619,
+    "oracleBacklogReferenceCount": 1621,
     "directOracleDependencyCount": 2,
     "postgresMigrationCount": 198,
     "postgresMigrationHighRiskCount": 0,
@@ -39,7 +39,7 @@
     "decompiledServices": 23,
     "frontendSourceMaps": 366,
     "frontendRecoveredFiles": 991,
-    "composeServices": 65,
+    "composeServices": 67,
     "businessRuntimeServices": 20
   },
   "composeDefaults": {
@@ -82,10 +82,10 @@
     "topFiles": []
   },
   "oracleMigrationAudit": {
-    "generatedAt": "2026-07-21T22:22:09+00:00",
-    "repoCommit": "e116580aa110fd9c6895a4bbd208b533d89e2dee",
-    "findingCount": 1619,
-    "categoryTotal": 1619,
+    "generatedAt": "2026-07-22T03:39:27+00:00",
+    "repoCommit": "43e45ff33934cee83752c025be861c94f5b4938d",
+    "findingCount": 1621,
+    "categoryTotal": 1621,
     "unclassifiedReferenceCount": 0
   },
   "oracleBacklogCategoryCounts": {
@@ -93,7 +93,7 @@
     "decompiled-runtime-backlog": 16,
     "documentation-or-workflow": 188,
     "frontend-row-index-noise": 4,
-    "java-row-index-noise": 87,
+    "java-row-index-noise": 89,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 575,
@@ -170,7 +170,7 @@
       "id": "oracle-legacy-only",
       "title": "Oracle 只作为 legacy 路径保留",
       "status": "watch",
-      "evidence": "Oracle migration backlog has 1619 tracked references.",
+      "evidence": "Oracle migration backlog has 1621 tracked references.",
       "nextAction": "逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。",
       "blocking": false
     },
@@ -178,7 +178,7 @@
       "id": "oracle-audit-current-and-classified",
       "title": "Oracle migration audit 可追溯且无未分类引用",
       "status": "pass",
-      "evidence": "generatedAt=2026-07-21T22:22:09+00:00, repoCommit=e116580aa110fd9c6895a4bbd208b533d89e2dee, unclassified=0, findingCount=1619, categoryTotal=1619",
+      "evidence": "generatedAt=2026-07-22T03:39:27+00:00, repoCommit=43e45ff33934cee83752c025be861c94f5b4938d, unclassified=0, findingCount=1621, categoryTotal=1621",
       "nextAction": "先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。",
       "blocking": false
     },
@@ -210,7 +210,7 @@
       "id": "recovered-source-inventory",
       "title": "当前恢复内容有机器库存",
       "status": "pass",
-      "evidence": "250 source jars, 991 frontend files, 65 compose services.",
+      "evidence": "250 source jars, 991 frontend files, 67 compose services.",
       "nextAction": "新增包、服务或 source map 后运行 `make inventory`。",
       "blocking": false
     },

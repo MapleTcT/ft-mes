@@ -184,6 +184,8 @@ REQUIRED_FILES = [
     "docs/testing/bpi-dataset-manifest-acceptance.md",
     "docs/backend-table-audit/bpi-dataset-manifest.md",
     "metadata/bpi-dataset-manifest-acceptance.json",
+    "docs/testing/bpi-dataset-materialization-acceptance.md",
+    "metadata/bpi-dataset-materialization-acceptance.json",
     "deploy/docker/scripts/adp-bpi-dataset-manifest-target-acceptance.js",
     "deploy/docker/scripts/adp-bpi-dataset-materialization-target-acceptance.js",
     "deploy/docker/scripts/bpi-dataset-manifest-target-fixture.sql",
@@ -1883,6 +1885,108 @@ def main() -> int:
                      "physical-device"):
         if boundary not in dataset_limitations:
             fail(f"BPI dataset manifest limitation is missing: {boundary}", failures)
+
+    materialization_acceptance = json.loads(
+        (ROOT / "metadata/bpi-dataset-materialization-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if (materialization_acceptance.get("status")
+            != "PASS_TARGET_BROWSER_API_POSTGRES_MINIO_FAILURE_RETRY_RESTART_CLEANED"
+            or materialization_acceptance.get("database") != "PostgreSQL 15.18"
+            or materialization_acceptance.get("flywayVersion") != 27
+            or materialization_acceptance.get("phase")
+                != "3B_A_VERSION_PINNED_PARQUET"
+            or materialization_acceptance.get("productionActivationAllowed") is not False
+            or len(materialization_acceptance.get("repoBaseCommit", "")) != 40
+            or len(materialization_acceptance.get("runtimeRevision", "")) != 40):
+        fail("BPI dataset materialization target identity is incomplete", failures)
+    materialization_summary = materialization_acceptance.get("summary", {})
+    expected_materialization_summary = {
+        "testedFeatures": 10,
+        "pass": 10,
+        "fail": 0,
+        "blocked": 0,
+        "notApplicable": 0,
+        "targetBrowserRuns": 4,
+        "targetBrowserFailures": 0,
+        "unexpectedConsoleErrors": 0,
+        "pageErrors": 0,
+        "requestFailures": 0,
+        "horizontalOverflowFailures": 0,
+        "postgresAcceptanceRuns": 1,
+        "minioExactVersionAcceptanceRuns": 1,
+        "serviceRestartReadRuns": 1,
+        "cleanupRuns": 1,
+    }
+    if any(materialization_summary.get(key) != value
+           for key, value in expected_materialization_summary.items()):
+        fail("BPI dataset materialization summary is incomplete", failures)
+    materialization_items = materialization_acceptance.get("items", [])
+    if (len(materialization_items) != 10
+            or sum(item.get("status") == "PASS"
+                   for item in materialization_items) != 10):
+        fail("BPI dataset materialization item statuses are incomplete", failures)
+    materialization_run = materialization_acceptance.get("targetRun", {})
+    if (not materialization_run.get("marker", "").startswith(
+                "ADP_E2E_BPI_PARQUET_")
+            or materialization_run.get("stateSequence") != [
+                "QUEUED", "WRITING", "FAILED", "QUEUED", "WRITING", "READY"]
+            or materialization_run.get("finalRevision") != 6
+            or materialization_run.get("attemptCount") != 2
+            or materialization_run.get("failureCode") != "MATERIALIZATION_ERROR"
+            or materialization_run.get("byteSize") != 11341
+            or materialization_run.get("rowCount") != 1
+            or materialization_run.get("schemaFieldCount") != 26
+            or materialization_run.get("auditCounts") != {
+                "DATASET_MATERIALIZATION_QUEUED": 1,
+                "DATASET_MATERIALIZATION_WRITING": 2,
+                "DATASET_MATERIALIZATION_FAILED": 1,
+                "DATASET_MATERIALIZATION_RETRIED": 1,
+                "DATASET_MATERIALIZATION_READY": 1,
+            }
+            or materialization_run.get("idempotency") != {
+                "rows": 2,
+                "completed": 2,
+                "responseStatuses": [202, 202],
+            }):
+        fail("BPI dataset materialization PostgreSQL evidence is incomplete", failures)
+    materialization_minio = materialization_acceptance.get("minio", {})
+    if (materialization_minio.get("privacy") != "private"
+            or materialization_minio.get("versioning") != "enabled"
+            or materialization_minio.get("objectContentVerified") is not True
+            or materialization_minio.get("workerDeleteResult") != "AccessDenied"
+            or materialization_minio.get("administratorCleanup") != {
+                "versionsBefore": 1,
+                "versionsAfter": 0,
+                "exactVersionReadableAfterDelete": False,
+            }
+            or materialization_minio.get("finalBucketObjectVersionCount") != 0
+            or materialization_minio.get("wormOrObjectLockClaimed") is not False):
+        fail("BPI dataset materialization MinIO evidence is incomplete", failures)
+    materialization_cleanup = materialization_acceptance.get("cleanup", {})
+    expected_zero_cleanup = {
+        key: value for key, value in materialization_cleanup.items()
+        if key not in {"capturedIdempotencyRowsDeleted"}
+    }
+    if (any(expected_zero_cleanup.values())
+            or materialization_cleanup.get("capturedIdempotencyRowsDeleted") != 4):
+        fail("BPI dataset materialization cleanup is incomplete", failures)
+    materialization_target = materialization_acceptance.get("target", {})
+    if (materialization_target.get("sshHost") != "10.11.100.17"
+            or materialization_target.get("adpBaseUrl")
+                != "http://10.11.100.17:18080"
+            or materialization_target.get("composeProject") != "adp-mes-newbase"
+            or materialization_target.get("flywayVersion") != 27
+            or materialization_target.get("health", {}).get(
+                "materializerContainerCount") != 0
+            or any(materialization_target.get("defaultOff", {}).values())):
+        fail("BPI dataset materialization target was not restored default-off", failures)
+    materialization_boundaries = materialization_acceptance.get("boundaries", {})
+    if (materialization_boundaries.get("manifestDelivery") != "MANIFEST_ONLY"
+            or any(value for key, value in materialization_boundaries.items()
+                   if key != "manifestDelivery")):
+        fail("BPI dataset materialization overclaims a downstream boundary", failures)
 
     formal_reversal = json.loads(
         (ROOT / "metadata/bpi-formal-identity-wms-reversal-acceptance.json").read_text(

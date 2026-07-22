@@ -14,6 +14,28 @@ CREATE TEMP TABLE target_dataset_materializations AS
 SELECT id FROM bpi.bpi_dataset_materializations
  WHERE tenant_id = '1000' AND snapshot_id IN (SELECT id FROM target_dataset_snapshots);
 
+CREATE TEMP TABLE target_dataset_idempotency AS
+SELECT id FROM bpi.bpi_api_idempotency idempotency
+ WHERE tenant_id = '1000'
+   AND (
+       idempotency_key LIKE :'marker' || '%'
+       OR response_body::text LIKE '%' || :'marker' || '%'
+       OR EXISTS (
+           SELECT 1 FROM target_dataset_definitions definition
+            WHERE response_body::text LIKE '%' || definition.id::text || '%'
+               OR resource_path = '/bpi/v1/datasets/' || definition.id::text || '/snapshots')
+       OR EXISTS (
+           SELECT 1 FROM target_dataset_snapshots snapshot
+            WHERE response_body::text LIKE '%' || snapshot.id::text || '%'
+               OR resource_path = '/bpi/v1/dataset-snapshots/' || snapshot.id::text
+               OR resource_path = '/bpi/v1/dataset-snapshots/' || snapshot.id::text || '/materializations')
+       OR EXISTS (
+           SELECT 1 FROM target_dataset_materializations materialization
+            WHERE response_body::text LIKE '%' || materialization.id::text || '%'
+               OR resource_path = '/bpi/v1/dataset-materializations/' || materialization.id::text
+               OR resource_path = '/bpi/v1/dataset-materializations/' || materialization.id::text || '/retry')
+   );
+
 CREATE TEMP TABLE target_shadow_runs AS
 SELECT id FROM bpi.bpi_shadow_runs
  WHERE tenant_id = '1000' AND run_code LIKE :'marker' || '_SHADOW_%';
@@ -29,9 +51,7 @@ DELETE FROM bpi.bpi_audit_events
        UNION ALL SELECT id FROM target_dataset_materializations);
 
 DELETE FROM bpi.bpi_api_idempotency
- WHERE tenant_id = '1000'
-   AND (idempotency_key LIKE :'marker' || '%'
-        OR response_body::text LIKE '%' || :'marker' || '%');
+ WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_idempotency);
 
 DELETE FROM bpi.bpi_dataset_materializations
  WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_materializations);
@@ -94,7 +114,6 @@ SELECT jsonb_pretty(jsonb_build_object(
                       WHERE tenant_id = '1000' AND source_revision = :'marker'),
         'idempotency', (SELECT count(*) FROM bpi.bpi_api_idempotency
                          WHERE tenant_id = '1000'
-                           AND (idempotency_key LIKE :'marker' || '%'
-                                OR response_body::text LIKE '%' || :'marker' || '%'))
+                           AND id IN (SELECT id FROM target_dataset_idempotency))
     )
 ));

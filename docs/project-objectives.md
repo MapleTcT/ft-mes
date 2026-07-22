@@ -101,13 +101,20 @@ manifest。本地 PostgreSQL 验收为 3 个样本、1 included、2 excluded、3
 API、PostgreSQL 15.18/Flyway V26、跨工厂隔离、幂等和十类零残留清理。该纵切明确停在
 `MANIFEST_ONLY`；Iceberg 物化、MLflow、模型训练与推断均未完成，不能据此改变 G-021 的 `PARTIAL` 状态。
 
-同日源码继续完成 Phase 3B-A 的最小物化纵切：Flyway V27 持有 revisioned materialization 任务，
+同日继续完成 Phase 3B-A 的最小物化纵切：Flyway V27 持有 revisioned materialization 任务，
 Java 17 API 负责 scope、权限、幂等和失败重试，Java 8 adapter 只开放三个精确路径；独立 Python 3.12
 worker 用固定 PyArrow 版本生成稳定排序的 Parquet，上传到私有且开启 versioning 的 MinIO bucket，
 再下载精确 `versionId` 复算 SHA-256 后才发布 `READY`。页面把不可变 V26 manifest 与 V27 物化投影
-分开展示，并明确标记模拟证据；Iceberg、MLflow 和模型仍为 `NOT_STARTED`。当前测试机仍保持 V26，
-因此这一步只有源码和本地软件证据，目标 PostgreSQL/MinIO/真实页面 marker 验收完成前 G-021 仍为
-`PARTIAL`，也不能声称 Phase 3B 全部完成。
+分开展示，并明确标记模拟证据；Iceberg、MLflow 和模型仍为 `NOT_STARTED`。
+
+目标环境随后以受保护 expand-only 流程升级到 PostgreSQL 15.18/Flyway V27。marker
+`ADP_E2E_BPI_PARQUET_20260722_105844_A1` 从真实 ADP 页面创建 definition/snapshot，再发起物化；
+正式 worker 镜像受控写盘失败落为 `FAILED/MATERIALIZATION_ERROR`，页面重试同一任务后达到
+`READY/r6/attempt2`。目标 SQL 证明六条状态审计和两个 `COMPLETED/202` 幂等请求；MinIO 按精确
+versionId 下载得到与数据库相同的 SHA、11341 bytes、1 row、26 fields。`bpi-service` 重启后页面仍可读；
+worker 专用账号删除版本被 `AccessDenied`，管理员只删除该测试 versionId，数据库 11 类投影和
+4 条关联幂等记录归零，worker 与 bootstrap 默认开关恢复 false。Phase 3B-A 目标纵切因此闭合，但
+G-021 仍为 `PARTIAL`：WORM、Iceberg/MLflow、模型训练、现场连续运行和外部 ERP/WMS 均未完成。
 
 2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、

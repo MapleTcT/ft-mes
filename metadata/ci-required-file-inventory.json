@@ -3549,6 +3549,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-dataset-materialization-target-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-flink-data-quality-browser-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4072,6 +4078,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/bpi-dataset-manifest-target-verification.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-dataset-materialization-target-verification.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -5553,6 +5565,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-dataset-materialization-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-engineering-test-plan.md",
       "state": "tracked",
       "tracked": true
@@ -5986,6 +6004,54 @@
     {
       "ignored": false,
       "path": "metadata/bpi-dataset-manifest-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-materialization-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-materialization-failed-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-materialization-failed-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-materialization-manifest-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-materialization-post-restart-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-materialization-ready-mobile-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-materialization-ready-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-materialization-ready-target.png",
       "state": "tracked",
       "tracked": true
     },
@@ -10220,16 +10286,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 630
+      "tracked": 632
     },
     "docs": {
-      "tracked": 123
+      "tracked": 124
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 210
+      "tracked": 218
     },
     "package.json": {
       "tracked": 1
@@ -10253,8 +10319,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1699,
-    "tracked": 1699,
+    "totalFiles": 1710,
+    "tracked": 1710,
     "untracked": 0
   },
   "untrackedByDirectory": []

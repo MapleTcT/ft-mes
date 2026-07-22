@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T22:22:09+00:00",
-  "repoCommit": "e116580aa110fd9c6895a4bbd208b533d89e2dee",
-  "findingCount": 1619,
+  "generatedAt": "2026-07-22T03:39:27+00:00",
+  "repoCommit": "43e45ff33934cee83752c025be861c94f5b4938d",
+  "findingCount": 1621,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
     "documentation-or-workflow": 188,
     "frontend-row-index-noise": 4,
-    "java-row-index-noise": 87,
+    "java-row-index-noise": 89,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 575,
@@ -22,7 +22,7 @@
     "from-dual": 140,
     "ojdbc": 15,
     "oracle-keyword": 638,
-    "rownum": 688,
+    "rownum": 690,
     "sysdate": 135
   },
   "topFiles": [
@@ -246,7 +246,7 @@
     },
     {
       "file": "Makefile",
-      "line": 310,
+      "line": 311,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -254,7 +254,7 @@
     },
     {
       "file": "Makefile",
-      "line": 311,
+      "line": 312,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -262,7 +262,7 @@
     },
     {
       "file": "Makefile",
-      "line": 314,
+      "line": 315,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -270,7 +270,7 @@
     },
     {
       "file": "Makefile",
-      "line": 315,
+      "line": 316,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -278,7 +278,7 @@
     },
     {
       "file": "Makefile",
-      "line": 415,
+      "line": 416,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -286,7 +286,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1036,
+      "line": 1046,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -294,7 +294,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1037,
+      "line": 1047,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -302,7 +302,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1039,
+      "line": 1049,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -310,7 +310,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1040,
+      "line": 1050,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -318,7 +318,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1048,
+      "line": 1058,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -326,7 +326,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1049,
+      "line": 1059,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -334,7 +334,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1051,
+      "line": 1061,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -342,7 +342,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1052,
+      "line": 1062,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -9534,11 +9534,11 @@
     },
     {
       "file": "docs/backend-table-audit/bpi-dataset-manifest.md",
-      "line": 6,
+      "line": 7,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "生成、读取、幂等、审计和清理。默认数据库保持 PostgreSQL；Oracle 不参与该运行路径。结论同时包含"
+      "excerpt": "失败恢复、精确对象版本校验、读取、幂等、审计和清理。默认数据库保持 PostgreSQL；Oracle 不参与该"
     },
     {
       "file": "docs/backend-table-audit/business-production.md",
@@ -9614,7 +9614,7 @@
     },
     {
       "file": "docs/current-content-inventory.md",
-      "line": 158,
+      "line": 160,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -9630,7 +9630,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 298,
+      "line": 317,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10106,7 +10106,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `220` 项，其中 `217 PASS / 0 FAIL / 0 BLOCKED / 3 NOT_APPLICABLE`；"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `225` 项，其中 `222 PASS / 0 FAIL / 0 BLOCKED / 3 NOT_APPLICABLE`；"
     },
     {
       "file": "docs/project-objectives.md",
@@ -10142,7 +10142,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 350,
+      "line": 365,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10150,7 +10150,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 372,
+      "line": 387,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10158,7 +10158,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 375,
+      "line": 390,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10166,7 +10166,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 377,
+      "line": 392,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10174,7 +10174,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 384,
+      "line": 399,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10182,7 +10182,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 387,
+      "line": 402,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10190,7 +10190,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 389,
+      "line": 404,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10198,7 +10198,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 394,
+      "line": 409,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10206,7 +10206,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 395,
+      "line": 410,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10214,7 +10214,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 397,
+      "line": 412,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10222,7 +10222,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 399,
+      "line": 414,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10230,7 +10230,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 463,
+      "line": 478,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10238,7 +10238,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 467,
+      "line": 482,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10246,7 +10246,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 469,
+      "line": 484,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10254,7 +10254,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 473,
+      "line": 488,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10262,7 +10262,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 474,
+      "line": 489,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -11718,7 +11718,7 @@
     },
     {
       "file": "scripts/verify-bpi-service.py",
-      "line": 1271,
+      "line": 1290,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12462,7 +12462,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 70,
+      "line": 79,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12470,7 +12470,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 81,
+      "line": 90,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12478,7 +12478,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 109,
+      "line": 118,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12486,7 +12486,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 110,
+      "line": 119,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12494,7 +12494,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 129,
+      "line": 138,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12502,7 +12502,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 130,
+      "line": 139,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12510,7 +12510,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 189,
+      "line": 198,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12518,7 +12518,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 404,
+      "line": 413,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12526,7 +12526,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 452,
+      "line": 461,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12534,7 +12534,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 461,
+      "line": 470,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12542,7 +12542,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 465,
+      "line": 474,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12550,7 +12550,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 472,
+      "line": 481,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12558,7 +12558,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 480,
+      "line": 489,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12566,7 +12566,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 481,
+      "line": 490,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12773,8 +12773,24 @@
       "excerpt": "(rs, rowNum) -> new Aggregate("
     },
     {
-      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetMaterializationPostgresRepository.java",
       "line": 92,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "sql.toString(), parameters, (rs, rowNum) -> map(rs));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetMaterializationPostgresRepository.java",
+      "line": 143,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "sql.toString(), parameters, (rs, rowNum) -> map(rs));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+      "line": 138,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -12782,19 +12798,11 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
-      "line": 103,
+      "line": 149,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
       "excerpt": "sql.toString(), parameters, (rs, rowNum) -> mapDefinition(rs));"
-    },
-    {
-      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
-      "line": 253,
-      "pattern": "rownum",
-      "category": "java-row-index-noise",
-      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
-      "excerpt": "sql.toString(), parameters, (rs, rowNum) -> rs.getObject(1, UUID.class)));"
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
@@ -12802,11 +12810,19 @@
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "sql.toString(), parameters, (rs, rowNum) -> rs.getObject(1, UUID.class)));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+      "line": 345,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
       "excerpt": "(rs, rowNum) -> rs.getObject(1, UUID.class));"
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
-      "line": 335,
+      "line": 381,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -12814,7 +12830,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
-      "line": 408,
+      "line": 454,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -12822,7 +12838,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
-      "line": 460,
+      "line": 506,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -12830,7 +12846,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
-      "line": 490,
+      "line": 536,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
