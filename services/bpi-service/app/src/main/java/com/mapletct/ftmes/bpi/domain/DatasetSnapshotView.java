@@ -37,5 +37,6 @@ public record DatasetSnapshotView(
         Instant completedAt,
         int attemptCount,
         String failureCode,
-        String failureDetail) {
+        String failureDetail,
+        DatasetMaterializationView latestMaterialization) {
 }

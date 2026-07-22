@@ -103,6 +103,7 @@ services:
       BPI_DATABASE_NAME: ${BPI_DATABASE_NAME:-ft_mes_bpi}
       BPI_DATABASE_PASSWORD: ${BPI_DATABASE_PASSWORD:-bpi-dev-only-change-me}
       BPI_MIGRATOR_PASSWORD: ${BPI_MIGRATOR_PASSWORD:-bpi-migrator-dev-only-change-me}
+      BPI_MATERIALIZER_DATABASE_PASSWORD: ${BPI_MATERIALIZER_DATABASE_PASSWORD:-bpi-materializer-dev-only-change-me}
       TZ: ${TZ:-Asia/Shanghai}
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -231,6 +232,26 @@ services:
       TZ: ${TZ:-Asia/Shanghai}
     volumes:
       - minio-data:/data
+
+  bpi-dataset-minio-bootstrap:
+    image: ${MINIO_MC_IMAGE:-m.daocloud.io/docker.io/minio/mc:latest}
+    profiles: ["bpi"]
+    restart: "no"
+    environment:
+      BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED: ${BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED:-false}
+      BPI_DATASET_MINIO_ENDPOINT: http://minio:30200
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-adpminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-adpminio123}
+      BPI_DATASET_MINIO_ACCESS_KEY: ${BPI_DATASET_MINIO_ACCESS_KEY:-bpi-materializer}
+      BPI_DATASET_MINIO_SECRET_KEY: ${BPI_DATASET_MINIO_SECRET_KEY:-bpi-materializer-dev-only-change-me}
+      BPI_DATASET_MINIO_BUCKET: ${BPI_DATASET_MINIO_BUCKET:-bpi-datasets}
+    volumes:
+      - ../minio/bootstrap-bpi-dataset-bucket.sh:/work/bootstrap.sh:ro
+      - ../minio/bpi-dataset-materializer-policy.json:/work/policy.json:ro
+    entrypoint: ["/bin/sh", "/work/bootstrap.sh"]
+    depends_on:
+      minio:
+        condition: service_started
 
   websocket:
     <<: *java-service
@@ -628,6 +649,42 @@ services:
       bpi-migrate:
         condition: service_completed_successfully
 
+  bpi-dataset-materializer:
+    image: ${BPI_DATASET_MATERIALIZER_IMAGE:-ft-mes-bpi-dataset-materializer:local}
+    profiles: ["bpi"]
+    build:
+      context: ../..
+      dockerfile: services/bpi-dataset-materializer/Dockerfile
+      args:
+        PYTHON_IMAGE: ${BPI_DATASET_MATERIALIZER_PYTHON_IMAGE:-python:3.12.13-slim-bookworm}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      BPI_DATASET_MATERIALIZER_ENABLED: ${BPI_DATASET_MATERIALIZER_ENABLED:-false}
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: ${BPI_DATABASE_NAME:-ft_mes_bpi}
+      PGUSER: bpi_materializer
+      PGPASSWORD: ${BPI_MATERIALIZER_DATABASE_PASSWORD:-bpi-materializer-dev-only-change-me}
+      PGSSLMODE: disable
+      BPI_DATASET_MINIO_ENDPOINT: minio:30200
+      BPI_DATASET_MINIO_SECURE: "false"
+      BPI_DATASET_MINIO_ACCESS_KEY: ${BPI_DATASET_MINIO_ACCESS_KEY:-bpi-materializer}
+      BPI_DATASET_MINIO_SECRET_KEY: ${BPI_DATASET_MINIO_SECRET_KEY:-bpi-materializer-dev-only-change-me}
+      BPI_DATASET_MINIO_BUCKET: ${BPI_DATASET_MINIO_BUCKET:-bpi-datasets}
+      BPI_DATASET_MATERIALIZER_POLL_SECONDS: ${BPI_DATASET_MATERIALIZER_POLL_SECONDS:-2}
+      BPI_DATASET_MATERIALIZER_CLAIM_TIMEOUT_SECONDS: ${BPI_DATASET_MATERIALIZER_CLAIM_TIMEOUT_SECONDS:-300}
+      BPI_DATASET_MATERIALIZER_MAX_ATTEMPTS: ${BPI_DATASET_MATERIALIZER_MAX_ATTEMPTS:-3}
+    volumes:
+      - bpi-materializer-work:/var/lib/bpi-materializer
+    depends_on:
+      postgres:
+        condition: service_healthy
+      bpi-migrate:
+        condition: service_completed_successfully
+      bpi-dataset-minio-bootstrap:
+        condition: service_completed_successfully
+
   qcs-quality-gate-outbox:
     image: ${QCS_BPI_OUTBOX_IMAGE:-ft-mes-qcs-quality-gate-outbox:local}
     profiles: ["bpi"]
@@ -824,3 +881,4 @@ volumes:
   kafka-data:
   mongo-data:
   minio-data:
+  bpi-materializer-work:

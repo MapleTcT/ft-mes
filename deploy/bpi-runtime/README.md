@@ -8,7 +8,8 @@ not a current target entry. Kafka/Flink/MinIO remain isolated in `deploy/bpi-str
 
 Keep this Compose file for isolated development and migration rehearsal. Target runtime changes must
 use the integrated `deploy/docker/docker-compose.yml` composition and must not start a second BPI Web,
-service, adapter or PostgreSQL beside it.
+service, adapter or PostgreSQL beside it. The isolated template now includes a private MinIO only for
+Phase 3B dataset artifacts; Kafka, Flink and their checkpoint MinIO remain in `deploy/bpi-streaming`.
 
 ## Isolated start
 
@@ -17,7 +18,8 @@ make bpi-service-package
 make bpi-adapter-package
 make bpi-ui-build
 cp deploy/bpi-runtime/.env.example deploy/bpi-runtime/.env
-# Replace every change-me value, verify the Keycloak issuer, and set private Kafka addresses.
+# Replace every change-me value, use distinct service/migrator/materializer credentials,
+# verify the Keycloak issuer, and set private Kafka addresses.
 sh deploy/bpi-runtime/scripts/preflight.sh deploy/bpi-runtime/.env
 docker compose --env-file deploy/bpi-runtime/.env \
   -f deploy/bpi-runtime/docker-compose.yml up -d --build
@@ -26,11 +28,22 @@ sh deploy/bpi-runtime/scripts/smoke.sh deploy/bpi-runtime/.env
 
 The one-shot `bpi-migrate` container uses the same tested application image with the DDL-owning
 `bpi_migrator` account and exits after Flyway completes. The long-running service starts afterward
-with the DML-only `bpi_service` account.
+with the DML-only `bpi_service` account. Flyway V27 adds the Parquet materialization job ledger.
+The separate Python 3.12 worker runs as UID/GID `10001:10001` with the `bpi_materializer` database
+role and a bucket-scoped MinIO identity. It cannot insert snapshots or read `source_payload`.
 
 `BPI_EXPECTED_FLYWAY_VERSION` is the runtime smoke contract for the release and defaults to the
-latest repository migration (`23`). Set it explicitly in the target `.env` when preparing a release;
-the smoke check fails if the database is behind or unexpectedly ahead of that version.
+latest repository migration (`27`). Set it explicitly in the target `.env` when preparing a release.
+Preflight compares every packaged migration name and checksum in the service JAR with the source
+migration directory; a stale JAR, a changed historical migration, or an unexpected migration head
+fails before any database action.
+
+Both `BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED` and `BPI_DATASET_MATERIALIZER_ENABLED` default to
+`false`. An expand-only deployment builds and records the worker image but leaves the worker stopped
+and does not create or change the MinIO bucket. Enable bucket bootstrap once in a separately approved
+acceptance window, verify the private bucket, versioning and scoped identity, return bootstrap to
+`false`, and only then enable the worker for marker-scoped acceptance. Neither switch is an Iceberg,
+MLflow, training, inference or production-readiness claim.
 
 The browser reaches only the same-origin `/bpi-api` path on `bpi-web`. Nginx proxies that path to
 the Java 8 adapter. A three-segment access token is validated by Keycloak JWKS. The legacy ADP login
@@ -73,8 +86,9 @@ remain distinct: an `APPLIED` control-plane receipt never implies runtime `READY
 
 The runtime upgrade helper refuses to run without an explicit confirmation, an absolute protected
 backup directory, a running PostgreSQL/service pair and a target Flyway version greater than the
-current version. It creates a custom-format `pg_dump`, a mode-0600 environment backup and a tagged
-rollback image before it builds or migrates anything:
+current version. Preflight also rejects placeholder or shared materializer credentials and unsafe
+worker polling bounds. The helper stops an existing materializer, creates a custom-format `pg_dump`,
+a mode-0600 environment backup and a tagged rollback image before it changes the database:
 
 ```bash
 BPI_RUNTIME_UPGRADE_BACKUP_DIR=/secure/bpi-upgrade-backups \
@@ -83,9 +97,11 @@ BPI_RUNTIME_UPGRADE_CONFIRM=UPGRADE_BPI_RUNTIME_EXPAND_ONLY \
 ```
 
 Set `BPI_EXPECTED_FLYWAY_VERSION` to the exact target migration before each expand-only upgrade. The
-helper builds the new service image, runs only `bpi-migrate`, verifies that version, recreates only
-`bpi-service`, waits up to 180 seconds for its Docker health check, and then runs the runtime smoke.
-It does not recreate PostgreSQL, the adapter, the web container or any named volume. Override the
+helper verifies the packaged migration set, builds the service, WMS adapter and dataset materializer
+images, provisions or rotates the non-inheriting `bpi_materializer` role, runs only `bpi-migrate`,
+reapplies and verifies its exact table privileges, and recreates only the service-side application
+containers. The dataset worker and bucket bootstrap stay disabled and stopped. It does not recreate
+PostgreSQL, the web container or any named volume. Override the
 bounded wait with `BPI_RUNTIME_UPGRADE_HEALTH_TIMEOUT_SECONDS` only when a measured cold start needs
 more time. Runtime HTTP checks also use bounded connect/request timeouts so a failed dependency
 cannot leave the upgrade command hanging indefinitely.
@@ -95,10 +111,13 @@ after migration, service recreation and final smoke. If a later phase fails, kee
 report and its referenced artifacts: `phase=MIGRATION_APPLIED` means the schema must stay expanded
 even if the previous application image is restored.
 
-Rollback is application-only: keep the expanded schema, keep rule publication/application and
-candidate consumers disabled, select the tagged rollback service image recorded in the report,
-recreate only `bpi-service`, and rerun the runtime smoke. Schema downgrade or `DROP` rollback is
-intentionally unsupported.
+Rollback is application-only: keep the expanded schema, keep rule publication/application,
+candidate consumers, dataset materializer and dataset bucket bootstrap disabled, select the tagged
+rollback service image recorded in the report, recreate only `bpi-service`, and rerun the runtime
+smoke. A READY row pins a verified MinIO object version, and application rollback does not delete
+that version. This is not an Object Lock/WORM claim; retention-admin operations remain separately
+governed. Schema
+downgrade, Flyway repair, object overwrite and `DROP` rollback are intentionally unsupported.
 
 ## Integrated target image rollback
 

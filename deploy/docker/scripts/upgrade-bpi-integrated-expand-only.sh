@@ -41,19 +41,31 @@ COMPOSE_FILE="$DEPLOY_DIR/docker-compose.yml"
 UI_TARGET="$RUNTIME_ROOT/frontend/apps/bpi/dist"
 UI_RELEASE="$RELEASE_ROOT/frontend/apps/bpi/dist"
 MIGRATIONS="$RELEASE_ROOT/services/bpi-service/app/src/main/resources/db/migration"
+VERIFY_MIGRATIONS="$RELEASE_ROOT/scripts/verify-bpi-release-migrations.py"
+MATERIALIZER_ROLE_SCRIPT="$RELEASE_ROOT/deploy/docker/postgres/ensure-bpi-materializer-role.sh"
 
-for path in "$ENV_FILE" "$COMPOSE_FILE" "$MIGRATIONS"; do
+for path in \
+    "$ENV_FILE" \
+    "$COMPOSE_FILE" \
+    "$MIGRATIONS" \
+    "$VERIFY_MIGRATIONS" \
+    "$MATERIALIZER_ROLE_SCRIPT"; do
     if [ ! -e "$path" ]; then
         printf 'ERROR: required integrated runtime path is missing: %s\n' "$path" >&2
         exit 1
     fi
 done
-for command_name in curl docker git npm python3 rsync sha256sum tar; do
+for command_name in curl docker git mktemp npm python3 rsync sha256sum tar; do
     if ! command -v "$command_name" >/dev/null 2>&1; then
         printf 'ERROR: required command is unavailable: %s\n' "$command_name" >&2
         exit 1
     fi
 done
+
+if [ -n "$(git -C "$RELEASE_ROOT" status --porcelain --untracked-files=normal)" ]; then
+    printf 'ERROR: integrated BPI release checkout must be clean before image build\n' >&2
+    exit 1
+fi
 
 env_value() {
     key=$1
@@ -62,16 +74,54 @@ env_value() {
     printf '%s' "${value:-$fallback}"
 }
 
-container_env_value() {
-    container_id=$1
-    key=$2
-    docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$container_id" \
-        | sed -n "s/^${key}=//p" \
-        | tail -1
+required_env_value() {
+    key=$1
+    value=$(sed -n "s/^${key}=//p" "$ENV_FILE" | tail -1)
+    test -n "$value" || {
+        printf 'ERROR: %s must be explicitly set in %s\n' "$key" "$ENV_FILE" >&2
+        exit 1
+    }
+    printf '%s' "$value"
+}
+
+required_secret() {
+    key=$1
+    value=$(required_env_value "$key")
+    case "$value" in
+        *change-me*|*dev-only*|*_DISABLED_*)
+            printf 'ERROR: %s still contains a placeholder value\n' "$key" >&2
+            exit 1
+            ;;
+    esac
+    printf '%s' "$value"
+}
+
+require_integer_range() {
+    key=$1
+    minimum=$2
+    maximum=$3
+    value=$(required_env_value "$key")
+    case "$value" in
+        ''|*[!0-9]*)
+            printf 'ERROR: %s must be an integer\n' "$key" >&2
+            exit 1
+            ;;
+    esac
+    if [ "$value" -lt "$minimum" ] || [ "$value" -gt "$maximum" ]; then
+        printf 'ERROR: %s must be between %s and %s\n' \
+            "$key" "$minimum" "$maximum" >&2
+        exit 1
+    fi
 }
 
 compose() {
     docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" --profile bpi "$@"
+}
+
+compose_expand() {
+    BPI_DATASET_MATERIALIZER_ENABLED=false \
+    BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED=false \
+        docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" --profile bpi "$@"
 }
 
 query_version() {
@@ -106,7 +156,13 @@ wait_for_health() {
 }
 
 replace_env_images() {
-    python3 - "$ENV_FILE" "$SERVICE_IMAGE" "$ADAPTER_IMAGE" "$WMS_ADAPTER_IMAGE" "$EXPECTED_VERSION" <<'PY'
+    python3 - \
+        "$ENV_FILE" \
+        "$SERVICE_IMAGE" \
+        "$ADAPTER_IMAGE" \
+        "$WMS_ADAPTER_IMAGE" \
+        "$MATERIALIZER_IMAGE" \
+        "$EXPECTED_VERSION" <<'PY'
 import os
 import stat
 import sys
@@ -118,7 +174,10 @@ updates = {
     "BPI_SERVICE_IMAGE": sys.argv[2],
     "BPI_ADAPTER_IMAGE": sys.argv[3],
     "BPI_WMS_ADAPTER_IMAGE": sys.argv[4],
-    "BPI_EXPECTED_FLYWAY_VERSION": sys.argv[5],
+    "BPI_DATASET_MATERIALIZER_IMAGE": sys.argv[5],
+    "BPI_EXPECTED_FLYWAY_VERSION": sys.argv[6],
+    "BPI_DATASET_MATERIALIZER_ENABLED": "false",
+    "BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED": "false",
 }
 lines = path.read_text(encoding="utf-8").splitlines()
 seen = set()
@@ -148,11 +207,12 @@ write_report() {
     report_phase=$2
     export REPORT report_status report_phase
     export RELEASE_COMMIT EXPECTED_VERSION BEFORE_VERSION AFTER_VERSION
-    export SERVICE_IMAGE ADAPTER_IMAGE WMS_ADAPTER_IMAGE
+    export SERVICE_IMAGE ADAPTER_IMAGE WMS_ADAPTER_IMAGE MATERIALIZER_IMAGE
     export BEFORE_SERVICE_IMAGE_ID BEFORE_ADAPTER_IMAGE_ID BEFORE_WMS_ADAPTER_IMAGE_ID
     export AFTER_SERVICE_IMAGE_ID AFTER_ADAPTER_IMAGE_ID AFTER_WMS_ADAPTER_IMAGE_ID
     export ROLLBACK_SERVICE_IMAGE ROLLBACK_ADAPTER_IMAGE ROLLBACK_WMS_ADAPTER_IMAGE
     export DATABASE_BACKUP ENV_BACKUP UI_BACKUP UI_SHA256
+    export MATERIALIZER_IMAGE_ID MATERIALIZER_IMAGE_USER MIGRATION_SET_SHA256
     python3 <<'PY'
 import datetime
 import json
@@ -199,14 +259,25 @@ report = {
             "releaseImage": value("WMS_ADAPTER_IMAGE"),
             "rollbackImage": value("ROLLBACK_WMS_ADAPTER_IMAGE"),
         },
+        "datasetMaterializer": {
+            "releaseImage": value("MATERIALIZER_IMAGE"),
+            "releaseImageId": value("MATERIALIZER_IMAGE_ID"),
+            "runtimeUser": value("MATERIALIZER_IMAGE_USER"),
+            "enabledDuringUpgrade": False,
+            "bucketBootstrapEnabledDuringUpgrade": False,
+            "postUpgradeState": "STOPPED",
+        },
         "environmentBackup": value("ENV_BACKUP"),
         "uiBackup": value("UI_BACKUP"),
         "uiIndexSha256": value("UI_SHA256"),
+        "migrationSetSha256": value("MIGRATION_SET_SHA256"),
     },
     "safety": {
         "phase2IntegrationDefault": False,
         "wmsOutboxDefault": False,
         "wmsAdapterDefault": False,
+        "datasetMaterializerDefault": False,
+        "datasetBucketBootstrapDefault": False,
         "rollbackMethod": "Restore recorded images and UI; stop the WMS adapter if this was its first release; keep the expanded schema.",
     },
 }
@@ -224,12 +295,14 @@ short_commit=$(printf '%s' "$RELEASE_COMMIT" | cut -c1-12)
 SERVICE_IMAGE=${BPI_INTEGRATED_SERVICE_IMAGE:-ft-mes-bpi-service:${release_suffix}-${short_commit}}
 ADAPTER_IMAGE=${BPI_INTEGRATED_ADAPTER_IMAGE:-ft-mes-bpi-adapter:${release_suffix}-${short_commit}}
 WMS_ADAPTER_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_IMAGE:-ft-mes-bpi-wms-adapter:${release_suffix}-${short_commit}}
+MATERIALIZER_IMAGE=${BPI_INTEGRATED_MATERIALIZER_IMAGE:-ft-mes-bpi-dataset-materializer:${release_suffix}-${short_commit}}
 REPORT=${BPI_INTEGRATED_UPGRADE_REPORT:-$BACKUP_DIR/bpi-integrated-upgrade-${timestamp}.json}
 
 POSTGRES_ID=$(compose ps -q postgres)
 SERVICE_ID=$(compose ps -q bpi-service)
 ADAPTER_ID=$(compose ps -q bpi-adapter)
 WMS_ADAPTER_ID=$(compose ps -q bpi-wms-adapter)
+MATERIALIZER_ID=$(compose ps -q bpi-dataset-materializer)
 NGINX_ID=$(compose ps -q nginx)
 if [ -z "$POSTGRES_ID" ] || [ -z "$SERVICE_ID" ] || [ -z "$ADAPTER_ID" ] || [ -z "$NGINX_ID" ]; then
     printf 'ERROR: postgres, bpi-service, bpi-adapter and nginx must all be running\n' >&2
@@ -238,10 +311,14 @@ fi
 
 DATABASE_NAME=$(env_value BPI_DATABASE_NAME ft_mes_bpi)
 POSTGRES_USER=$(env_value POSTGRES_USER adp)
-MIGRATOR_PASSWORD=$(env_value BPI_MIGRATOR_PASSWORD '')
-if [ -z "$MIGRATOR_PASSWORD" ]; then
-    MIGRATOR_PASSWORD=$(container_env_value "$POSTGRES_ID" BPI_MIGRATOR_PASSWORD)
-fi
+POSTGRES_DB=$(env_value POSTGRES_DB adp)
+DATABASE_PASSWORD=$(required_secret BPI_DATABASE_PASSWORD)
+MIGRATOR_PASSWORD=$(required_secret BPI_MIGRATOR_PASSWORD)
+MATERIALIZER_DATABASE_PASSWORD=$(required_secret BPI_MATERIALIZER_DATABASE_PASSWORD)
+MINIO_ROOT_USER=$(required_secret MINIO_ROOT_USER)
+MINIO_ROOT_PASSWORD=$(required_secret MINIO_ROOT_PASSWORD)
+MATERIALIZER_MINIO_ACCESS_KEY=$(required_secret BPI_DATASET_MINIO_ACCESS_KEY)
+MATERIALIZER_MINIO_SECRET_KEY=$(required_secret BPI_DATASET_MINIO_SECRET_KEY)
 FLYWAY_IMAGE=$(env_value BPI_FLYWAY_IMAGE m.daocloud.io/docker.io/flyway/flyway:11-alpine)
 SERVICE_MAVEN_IMAGE=${BPI_INTEGRATED_SERVICE_MAVEN_IMAGE:-$(env_value BPI_MAVEN_IMAGE m.daocloud.io/docker.io/library/maven:3.9.9-eclipse-temurin-17)}
 SERVICE_JAVA_IMAGE=${BPI_INTEGRATED_SERVICE_JAVA_IMAGE:-$(env_value BPI_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:17-jre-jammy)}
@@ -249,16 +326,36 @@ ADAPTER_MAVEN_IMAGE=${BPI_INTEGRATED_ADAPTER_MAVEN_IMAGE:-$(env_value BPI_ADAPTE
 ADAPTER_JAVA_IMAGE=${BPI_INTEGRATED_ADAPTER_JAVA_IMAGE:-$(env_value BPI_ADAPTER_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:8-jre-jammy)}
 WMS_ADAPTER_MAVEN_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_MAVEN_IMAGE:-$(env_value BPI_WMS_ADAPTER_MAVEN_IMAGE m.daocloud.io/docker.io/library/maven:3.9.9-eclipse-temurin-17)}
 WMS_ADAPTER_JAVA_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_JAVA_IMAGE:-$(env_value BPI_WMS_ADAPTER_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:17-jre-jammy)}
-if [ -z "$MIGRATOR_PASSWORD" ]; then
-    printf 'ERROR: BPI_MIGRATOR_PASSWORD is missing\n' >&2
+MATERIALIZER_PYTHON_IMAGE=${BPI_INTEGRATED_MATERIALIZER_PYTHON_IMAGE:-$(env_value BPI_DATASET_MATERIALIZER_PYTHON_IMAGE python:3.12.13-slim-bookworm)}
+if [ "$MATERIALIZER_DATABASE_PASSWORD" = "$DATABASE_PASSWORD" ] \
+   || [ "$MATERIALIZER_DATABASE_PASSWORD" = "$MIGRATOR_PASSWORD" ]; then
+    printf 'ERROR: BPI materializer database credentials must be distinct\n' >&2
     exit 1
 fi
+if [ "$MATERIALIZER_MINIO_ACCESS_KEY" = "$MINIO_ROOT_USER" ] \
+   || [ "$MATERIALIZER_MINIO_SECRET_KEY" = "$MINIO_ROOT_PASSWORD" ]; then
+    printf 'ERROR: BPI dataset MinIO credentials must be distinct from root\n' >&2
+    exit 1
+fi
+test "${#MINIO_ROOT_PASSWORD}" -ge 8 || {
+    printf 'ERROR: MINIO_ROOT_PASSWORD must contain at least 8 characters\n' >&2
+    exit 1
+}
+test "${#MATERIALIZER_MINIO_SECRET_KEY}" -ge 8 || {
+    printf 'ERROR: BPI_DATASET_MINIO_SECRET_KEY must contain at least 8 characters\n' >&2
+    exit 1
+}
+require_integer_range BPI_DATASET_MATERIALIZER_POLL_SECONDS 1 3600
+require_integer_range BPI_DATASET_MATERIALIZER_CLAIM_TIMEOUT_SECONDS 30 86400
+require_integer_range BPI_DATASET_MATERIALIZER_MAX_ATTEMPTS 1 20
 for disabled_key in \
     BPI_PHASE2_INTEGRATION_ENABLED \
     BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED \
     BPI_PHASE2_KAFKA_ENABLED \
     BPI_WMS_OUTBOX_ENABLED \
     BPI_WMS_ADAPTER_ENABLED \
+    BPI_DATASET_MATERIALIZER_ENABLED \
+    BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED \
     QCS_BPI_OUTBOX_ENABLED; do
     if [ "$(env_value "$disabled_key" false)" != "false" ]; then
         printf 'ERROR: %s must remain false during the integrated expand-only upgrade\n' \
@@ -266,6 +363,41 @@ for disabled_key in \
         exit 1
     fi
 done
+
+run_materializer_role_action() {
+    action=$1
+    docker exec -i \
+        -e "POSTGRES_USER=$POSTGRES_USER" \
+        -e "POSTGRES_DB=$POSTGRES_DB" \
+        -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
+        -e "BPI_MATERIALIZER_DATABASE_PASSWORD=$MATERIALIZER_DATABASE_PASSWORD" \
+        "$POSTGRES_ID" sh -s -- "$action" <"$MATERIALIZER_ROLE_SCRIPT"
+}
+
+verify_service_image_migrations() {
+    temporary_directory=$(mktemp -d)
+    temporary_container=$(docker create "$SERVICE_IMAGE")
+    if ! docker cp \
+        "$temporary_container:/opt/bpi/bpi-service.jar" \
+        "$temporary_directory/bpi-service.jar" >/dev/null; then
+        docker rm "$temporary_container" >/dev/null 2>&1 || true
+        rm -f "$temporary_directory/bpi-service.jar"
+        rmdir "$temporary_directory" 2>/dev/null || true
+        return 1
+    fi
+    docker rm "$temporary_container" >/dev/null
+    if ! python3 "$VERIFY_MIGRATIONS" \
+        --jar "$temporary_directory/bpi-service.jar" \
+        --migrations-dir "$MIGRATIONS" \
+        --expected-version "$EXPECTED_VERSION" \
+        --digest-only; then
+        rm -f "$temporary_directory/bpi-service.jar"
+        rmdir "$temporary_directory" 2>/dev/null || true
+        return 1
+    fi
+    rm -f "$temporary_directory/bpi-service.jar"
+    rmdir "$temporary_directory"
+}
 
 BEFORE_VERSION=$(query_version)
 case "$BEFORE_VERSION" in
@@ -288,6 +420,9 @@ AFTER_VERSION=
 AFTER_SERVICE_IMAGE_ID=
 AFTER_ADAPTER_IMAGE_ID=
 AFTER_WMS_ADAPTER_IMAGE_ID=
+MATERIALIZER_IMAGE_ID=
+MATERIALIZER_IMAGE_USER=
+MIGRATION_SET_SHA256=
 DATABASE_BACKUP=
 ENV_BACKUP=
 UI_BACKUP=
@@ -336,6 +471,24 @@ docker build \
     --label "org.opencontainers.image.revision=$RELEASE_COMMIT" \
     -f "$RELEASE_ROOT/services/bpi-service/wms-adapter/Dockerfile" \
     -t "$WMS_ADAPTER_IMAGE" "$RELEASE_ROOT"
+docker build \
+    --build-arg "PYTHON_IMAGE=$MATERIALIZER_PYTHON_IMAGE" \
+    --label "org.opencontainers.image.revision=$RELEASE_COMMIT" \
+    -f "$RELEASE_ROOT/services/bpi-dataset-materializer/Dockerfile" \
+    -t "$MATERIALIZER_IMAGE" "$RELEASE_ROOT"
+
+MIGRATION_SET_SHA256=$(verify_service_image_migrations)
+MATERIALIZER_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$MATERIALIZER_IMAGE")
+MATERIALIZER_IMAGE_USER=$(docker image inspect --format '{{.Config.User}}' "$MATERIALIZER_IMAGE")
+if [ "$MATERIALIZER_IMAGE_USER" != "10001:10001" ]; then
+    printf 'ERROR: BPI dataset materializer must run as 10001:10001, found %s\n' \
+        "$MATERIALIZER_IMAGE_USER" >&2
+    exit 1
+fi
+
+if [ -n "$MATERIALIZER_ID" ]; then
+    compose_expand stop bpi-dataset-materializer
+fi
 
 phase=BACKUP
 mkdir -p "$BACKUP_DIR"
@@ -366,6 +519,7 @@ chmod 600 "$UI_BACKUP"
 write_report PREPARED BACKUP_COMPLETE
 
 phase=MIGRATION
+run_materializer_role_action provision
 runtime_network=$(docker inspect --format \
     '{{range $name, $_ := .NetworkSettings.Networks}}{{println $name}}{{end}}' \
     "$POSTGRES_ID" | head -1)
@@ -389,15 +543,17 @@ if [ "$AFTER_VERSION" != "$EXPECTED_VERSION" ]; then
         "$EXPECTED_VERSION" "$AFTER_VERSION" >&2
     exit 1
 fi
+run_materializer_role_action grant
+run_materializer_role_action verify
 write_report IN_PROGRESS MIGRATION_APPLIED
 
 phase=SERVICE_RECREATE
 replace_env_images
-compose up -d --no-deps --force-recreate bpi-service
+compose_expand up -d --no-deps --force-recreate bpi-service
 wait_for_health bpi-service
-compose up -d --no-deps --force-recreate bpi-adapter
+compose_expand up -d --no-deps --force-recreate bpi-adapter
 wait_for_health bpi-adapter
-compose up -d --no-deps --force-recreate bpi-wms-adapter
+compose_expand up -d --no-deps --force-recreate bpi-wms-adapter
 wait_for_health bpi-wms-adapter
 SERVICE_ID=$(compose ps -q bpi-service)
 ADAPTER_ID=$(compose ps -q bpi-adapter)
@@ -428,6 +584,10 @@ printf '%s' "$flag_state" | grep -q 'bpi.auto-confirm=false'
 printf '%s' "$flag_state" | grep -q 'bpi.qcs-link=false'
 printf '%s' "$flag_state" | grep -q 'bpi.shadow-only=true'
 printf '%s' "$flag_state" | grep -q 'bpi.wms-link=false'
+if [ -n "$(compose ps -q bpi-dataset-materializer)" ]; then
+    printf 'ERROR: BPI dataset materializer must remain stopped after expand-only upgrade\n' >&2
+    exit 1
+fi
 
 write_report PASS COMPLETE
 trap - EXIT HUP INT TERM
@@ -435,3 +595,4 @@ printf 'Integrated BPI expand-only upgrade: PASS (Flyway %s, release %s)\n' \
     "$AFTER_VERSION" "$RELEASE_COMMIT"
 printf 'Service image: %s\nAdapter image: %s\nWMS adapter image: %s\nReport: %s\n' \
     "$SERVICE_IMAGE" "$ADAPTER_IMAGE" "$WMS_ADAPTER_IMAGE" "$REPORT"
+printf 'Dataset materializer image (built, not started): %s\n' "$MATERIALIZER_IMAGE"

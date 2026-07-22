@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools==75.8.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ft-mes-bpi-dataset-materializer"
+version = "0.1.0"
+description = "Deterministic Parquet materializer for frozen FT MES BPI datasets"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "minio==7.2.20",
+  "psycopg[binary]==3.3.4",
+  "pyarrow==25.0.0",
+]
+
+[project.scripts]
+bpi-dataset-materializer = "bpi_dataset_materializer.worker:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+bpi_dataset_materializer = ["py.typed"]

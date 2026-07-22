@@ -5,6 +5,11 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 DEPLOY_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 ROOT_DIR=$(CDPATH= cd -- "$DEPLOY_DIR/../.." && pwd)
 ENV_FILE=${1:-$DEPLOY_DIR/.env}
+MIGRATIONS="$ROOT_DIR/services/bpi-service/app/src/main/resources/db/migration"
+VERIFY_MIGRATIONS="$ROOT_DIR/scripts/verify-bpi-release-migrations.py"
+MATERIALIZER_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-materializer-role.sh"
+JAR="$ROOT_DIR/services/bpi-service/app/target/bpi-service-0.1.0-SNAPSHOT-exec.jar"
+WMS_ADAPTER_JAR="$ROOT_DIR/services/bpi-service/wms-adapter/target/bpi-wms-adapter-0.1.0-SNAPSHOT-exec.jar"
 
 if [ "${BPI_RUNTIME_UPGRADE_CONFIRM:-}" != "UPGRADE_BPI_RUNTIME_EXPAND_ONLY" ]; then
     printf 'ERROR: set BPI_RUNTIME_UPGRADE_CONFIRM=UPGRADE_BPI_RUNTIME_EXPAND_ONLY\n' >&2
@@ -26,12 +31,21 @@ compose() {
     docker compose --env-file "$ENV_FILE" -f "$DEPLOY_DIR/docker-compose.yml" "$@"
 }
 
+compose_expand() {
+    BPI_DATASET_MATERIALIZER_ENABLED=false \
+    BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED=false \
+        docker compose --env-file "$ENV_FILE" -f "$DEPLOY_DIR/docker-compose.yml" "$@"
+}
+
 DATABASE_NAME=$(env_value BPI_DATABASE_NAME ft_mes_bpi)
 POSTGRES_USER=$(env_value POSTGRES_USER bpi_admin)
 EXPECTED_VERSION=$(env_value BPI_EXPECTED_FLYWAY_VERSION '')
 BACKUP_DIR=${BPI_RUNTIME_UPGRADE_BACKUP_DIR:-}
 REPORT=${BPI_RUNTIME_UPGRADE_REPORT:-/tmp/bpi-runtime-expand-upgrade.json}
 HEALTH_TIMEOUT_SECONDS=${BPI_RUNTIME_UPGRADE_HEALTH_TIMEOUT_SECONDS:-180}
+MATERIALIZER_DATABASE_PASSWORD=$(env_value BPI_MATERIALIZER_DATABASE_PASSWORD '')
+POSTGRES_DB=$(env_value POSTGRES_DB postgres)
+MATERIALIZER_IMAGE=$(env_value BPI_DATASET_MATERIALIZER_IMAGE ft-mes-bpi-dataset-materializer:local)
 
 case "$EXPECTED_VERSION" in
     ''|*[!0-9]*) printf 'ERROR: BPI_EXPECTED_FLYWAY_VERSION must be numeric\n' >&2; exit 1 ;;
@@ -45,13 +59,48 @@ case "$HEALTH_TIMEOUT_SECONDS" in
     ''|*[!0-9]*|0) printf 'ERROR: BPI_RUNTIME_UPGRADE_HEALTH_TIMEOUT_SECONDS must be a positive integer\n' >&2; exit 1 ;;
 esac
 
+for path in "$MIGRATIONS" "$VERIFY_MIGRATIONS" "$MATERIALIZER_ROLE_SCRIPT"; do
+    test -e "$path" || {
+        printf 'ERROR: required release path is missing: %s\n' "$path" >&2
+        exit 1
+    }
+done
+for command_name in docker python3 sha256sum; do
+    command -v "$command_name" >/dev/null 2>&1 || {
+        printf 'ERROR: required command is unavailable: %s\n' "$command_name" >&2
+        exit 1
+    }
+done
+
+sh "$SCRIPT_DIR/preflight.sh" "$ENV_FILE"
+for disabled_key in \
+    BPI_DATASET_MATERIALIZER_ENABLED \
+    BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED; do
+    if [ "$(env_value "$disabled_key" false)" != "false" ]; then
+        printf 'ERROR: %s must remain false during expand-only upgrade\n' \
+            "$disabled_key" >&2
+        exit 1
+    fi
+done
+
 postgres_id=$(compose ps -q bpi-postgres)
 service_id=$(compose ps -q bpi-service)
 wms_adapter_id=$(compose ps -q bpi-wms-adapter)
+materializer_id=$(compose ps -q bpi-dataset-materializer)
 if [ -z "$postgres_id" ] || [ -z "$service_id" ]; then
     printf 'ERROR: BPI PostgreSQL and service must be running before an expand-only upgrade\n' >&2
     exit 1
 fi
+
+run_materializer_role_action() {
+    action=$1
+    docker exec -i \
+        -e "POSTGRES_USER=$POSTGRES_USER" \
+        -e "POSTGRES_DB=$POSTGRES_DB" \
+        -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
+        -e "BPI_MATERIALIZER_DATABASE_PASSWORD=$MATERIALIZER_DATABASE_PASSWORD" \
+        "$postgres_id" sh -s -- "$action" <"$MATERIALIZER_ROLE_SCRIPT"
+}
 if [ "$(env_value BPI_WMS_ADAPTER_ENABLED false)" != "false" ]; then
     printf 'ERROR: BPI_WMS_ADAPTER_ENABLED must remain false during expand-only upgrade\n' >&2
     exit 1
@@ -99,8 +148,9 @@ write_report() {
     export REPORT UPGRADE_STATUS UPGRADE_PHASE SMOKE_STATUS
     export BEFORE_VERSION AFTER_VERSION EXPECTED_VERSION BACKUP_FILE ENV_BACKUP
     export ROLLBACK_IMAGE BEFORE_IMAGE_ID AFTER_IMAGE_ID JAR JAR_SHA256
-    export WMS_ADAPTER_JAR WMS_ADAPTER_JAR_SHA256
+    export WMS_ADAPTER_JAR WMS_ADAPTER_JAR_SHA256 MIGRATION_SET_SHA256
     export BEFORE_WMS_ADAPTER_IMAGE_ID AFTER_WMS_ADAPTER_IMAGE_ID ROLLBACK_WMS_ADAPTER_IMAGE
+    export MATERIALIZER_IMAGE MATERIALIZER_IMAGE_ID MATERIALIZER_IMAGE_USER
     python3 <<'PY'
 import datetime
 import json
@@ -134,6 +184,15 @@ report = {
         "rollbackImage": os.environ["ROLLBACK_IMAGE"],
         "environmentBackup": os.environ["ENV_BACKUP"],
         "smoke": os.environ["SMOKE_STATUS"],
+        "migrationSetSha256": os.environ["MIGRATION_SET_SHA256"],
+    },
+    "datasetMaterializer": {
+        "releaseImage": os.environ["MATERIALIZER_IMAGE"],
+        "releaseImageId": os.environ.get("MATERIALIZER_IMAGE_ID") or None,
+        "runtimeUser": os.environ.get("MATERIALIZER_IMAGE_USER") or None,
+        "enabledDuringUpgrade": False,
+        "bucketBootstrapEnabledDuringUpgrade": False,
+        "postUpgradeState": "STOPPED",
     },
     "wmsAdapter": {
         "jar": os.environ["WMS_ADAPTER_JAR"],
@@ -165,6 +224,26 @@ if [ "$BEFORE_VERSION" -ge "$EXPECTED_VERSION" ]; then
     exit 1
 fi
 
+test -f "$JAR" || {
+    printf 'ERROR: package BPI service before upgrade: %s\n' "$JAR" >&2
+    exit 1
+}
+test -f "$WMS_ADAPTER_JAR" || {
+    printf 'ERROR: package BPI WMS adapter before upgrade: %s\n' "$WMS_ADAPTER_JAR" >&2
+    exit 1
+}
+MIGRATION_SET_SHA256=$(python3 "$VERIFY_MIGRATIONS" \
+    --jar "$JAR" \
+    --migrations-dir "$MIGRATIONS" \
+    --expected-version "$EXPECTED_VERSION" \
+    --digest-only)
+JAR_SHA256=$(sha256sum "$JAR" | awk '{print $1}')
+WMS_ADAPTER_JAR_SHA256=$(sha256sum "$WMS_ADAPTER_JAR" | awk '{print $1}')
+
+if [ -n "$materializer_id" ]; then
+    compose_expand stop bpi-dataset-materializer
+fi
+
 timestamp=$(date -u +%Y%m%dT%H%M%SZ)
 mkdir -p "$BACKUP_DIR"
 chmod 700 "$BACKUP_DIR"
@@ -191,23 +270,23 @@ test -s "$BACKUP_FILE" || {
     exit 1
 }
 
-JAR="$ROOT_DIR/services/bpi-service/app/target/bpi-service-0.1.0-SNAPSHOT-exec.jar"
-test -f "$JAR" || {
-    printf 'ERROR: package BPI service before upgrade: %s\n' "$JAR" >&2
-    exit 1
-}
-JAR_SHA256=$(sha256sum "$JAR" | awk '{print $1}')
-WMS_ADAPTER_JAR="$ROOT_DIR/services/bpi-service/wms-adapter/target/bpi-wms-adapter-0.1.0-SNAPSHOT-exec.jar"
-test -f "$WMS_ADAPTER_JAR" || {
-    printf 'ERROR: package BPI WMS adapter before upgrade: %s\n' "$WMS_ADAPTER_JAR" >&2
-    exit 1
-}
-WMS_ADAPTER_JAR_SHA256=$(sha256sum "$WMS_ADAPTER_JAR" | awk '{print $1}')
 AFTER_VERSION=
+MATERIALIZER_IMAGE_ID=
+MATERIALIZER_IMAGE_USER=
 write_report PREPARED BACKUP_COMPLETE NOT_RUN
 
-compose build bpi-service bpi-wms-adapter
-compose up --no-deps --force-recreate --abort-on-container-exit \
+compose_expand build bpi-service bpi-wms-adapter bpi-dataset-materializer
+MATERIALIZER_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$MATERIALIZER_IMAGE")
+MATERIALIZER_IMAGE_USER=$(docker image inspect --format '{{.Config.User}}' "$MATERIALIZER_IMAGE")
+if [ "$MATERIALIZER_IMAGE_USER" != "10001:10001" ]; then
+    printf 'ERROR: BPI dataset materializer must run as 10001:10001, found %s\n' \
+        "$MATERIALIZER_IMAGE_USER" >&2
+    exit 1
+fi
+write_report IN_PROGRESS ARTIFACTS_BUILT NOT_RUN
+
+run_materializer_role_action provision
+compose_expand up --no-deps --force-recreate --abort-on-container-exit \
     --exit-code-from bpi-migrate bpi-migrate
 
 AFTER_VERSION=$(query_version)
@@ -216,12 +295,14 @@ if [ "$AFTER_VERSION" != "$EXPECTED_VERSION" ]; then
         "$EXPECTED_VERSION" "$AFTER_VERSION" >&2
     exit 1
 fi
+run_materializer_role_action grant
+run_materializer_role_action verify
 write_report IN_PROGRESS MIGRATION_APPLIED NOT_RUN
 
-compose up -d --no-deps --force-recreate bpi-service
+compose_expand up -d --no-deps --force-recreate bpi-service
 AFTER_SERVICE_ID=$(compose ps -q bpi-service)
 AFTER_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$AFTER_SERVICE_ID")
-compose up -d --no-deps --force-recreate bpi-wms-adapter
+compose_expand up -d --no-deps --force-recreate bpi-wms-adapter
 AFTER_WMS_ADAPTER_ID=$(compose ps -q bpi-wms-adapter)
 AFTER_WMS_ADAPTER_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$AFTER_WMS_ADAPTER_ID")
 write_report IN_PROGRESS SERVICES_RECREATED NOT_RUN "$AFTER_IMAGE_ID" "$AFTER_WMS_ADAPTER_IMAGE_ID"

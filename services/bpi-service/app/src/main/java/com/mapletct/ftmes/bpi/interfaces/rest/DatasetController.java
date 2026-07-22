@@ -2,8 +2,10 @@ package com.mapletct.ftmes.bpi.interfaces.rest;
 
 import com.mapletct.ftmes.bpi.application.ActorContextFactory;
 import com.mapletct.ftmes.bpi.application.CommandResult;
+import com.mapletct.ftmes.bpi.application.DatasetMaterializationService;
 import com.mapletct.ftmes.bpi.application.DatasetService;
 import com.mapletct.ftmes.bpi.domain.DatasetDefinitionView;
+import com.mapletct.ftmes.bpi.domain.DatasetMaterializationView;
 import com.mapletct.ftmes.bpi.domain.DatasetSnapshotView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -27,12 +29,15 @@ import java.util.UUID;
 public class DatasetController {
     private final ActorContextFactory actorContextFactory;
     private final DatasetService service;
+    private final DatasetMaterializationService materializationService;
 
     public DatasetController(
             ActorContextFactory actorContextFactory,
-            DatasetService service) {
+            DatasetService service,
+            DatasetMaterializationService materializationService) {
         this.actorContextFactory = actorContextFactory;
         this.service = service;
+        this.materializationService = materializationService;
     }
 
     @GetMapping("/bpi/v1/datasets")
@@ -83,10 +88,55 @@ public class DatasetController {
                 service.getSnapshot(actorContextFactory.from(jwt), snapshotId), request);
     }
 
+    @PostMapping("/bpi/v1/dataset-snapshots/{snapshotId}/materializations")
+    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<DatasetMaterializationView>> requestMaterialization(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID snapshotId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody DatasetMaterializationCommand command,
+            HttpServletRequest request) {
+        return accepted(materializationService.request(
+                actorContextFactory.from(jwt), snapshotId, idempotencyKey,
+                ifMatch, command, traceId(request)), request);
+    }
+
+    @GetMapping("/bpi/v1/dataset-materializations/{materializationId}")
+    public ApiResponse<DatasetMaterializationView> getMaterialization(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID materializationId,
+            HttpServletRequest request) {
+        return ApiResponse.of(materializationService.get(
+                actorContextFactory.from(jwt), materializationId), request);
+    }
+
+    @PostMapping("/bpi/v1/dataset-materializations/{materializationId}/retry")
+    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<DatasetMaterializationView>> retryMaterialization(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID materializationId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        return accepted(materializationService.retry(
+                actorContextFactory.from(jwt), materializationId, idempotencyKey,
+                ifMatch, command, traceId(request)), request);
+    }
+
     private <T> ResponseEntity<ApiResponse<T>> ok(
             CommandResult<T> result,
             HttpServletRequest request) {
         ResponseEntity.BodyBuilder response = ResponseEntity.ok();
+        if (result.replayed()) response.header("Idempotent-Replay", "true");
+        return response.body(ApiResponse.of(result.data(), request));
+    }
+
+    private <T> ResponseEntity<ApiResponse<T>> accepted(
+            CommandResult<T> result,
+            HttpServletRequest request) {
+        ResponseEntity.BodyBuilder response = ResponseEntity.accepted();
         if (result.replayed()) response.header("Idempotent-Replay", "true");
         return response.body(ApiResponse.of(result.data(), request));
     }

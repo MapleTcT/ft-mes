@@ -18,12 +18,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -64,6 +67,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired DatasetManifestProcessor processor;
 
+    private JdbcTemplate cleanupJdbc;
     private String tenantId;
     private UUID pointSnapshotId;
     private UUID topologyId;
@@ -78,6 +82,10 @@ class BpiDatasetManifestPostgresAcceptanceTest {
 
     @BeforeEach
     void setUpApprovedShadowFacts() throws Exception {
+        cleanupJdbc = new JdbcTemplate(new DriverManagerDataSource(
+                env("BPI_TEST_CLEANUP_DATABASE_URL", System.getenv("BPI_TEST_DATABASE_URL")),
+                env("BPI_TEST_CLEANUP_DATABASE_USER", env("BPI_TEST_DATABASE_USER", "postgres")),
+                env("BPI_TEST_CLEANUP_DATABASE_PASSWORD", env("BPI_TEST_DATABASE_PASSWORD", ""))));
         tenantId = "ADP_E2E_BPI_DATASET_" + UUID.randomUUID().toString().replace("-", "");
         pointSnapshotId = UUID.randomUUID();
         topologyId = UUID.randomUUID();
@@ -151,21 +159,25 @@ class BpiDatasetManifestPostgresAcceptanceTest {
     @AfterEach
     void cleanupMarker() {
         if (tenantId == null) return;
-        jdbc.update("DELETE FROM bpi.bpi_dataset_snapshot_samples WHERE tenant_id = ?", tenantId);
-        jdbc.update("DELETE FROM bpi.bpi_dataset_snapshots WHERE tenant_id = ?", tenantId);
-        jdbc.update("DELETE FROM bpi.bpi_dataset_definitions WHERE tenant_id = ?", tenantId);
-        jdbc.update("DELETE FROM bpi.bpi_audit_events WHERE tenant_id = ?", tenantId);
-        jdbc.update("DELETE FROM bpi.bpi_api_idempotency WHERE tenant_id = ?", tenantId);
-        jdbc.update("DELETE FROM bpi.bpi_shadow_run_batch_reviews WHERE tenant_id = ?", tenantId);
-        jdbc.update("DELETE FROM bpi.bpi_shadow_runs WHERE tenant_id = ?", tenantId);
-        jdbc.update("DELETE FROM bpi.bpi_batch_instances WHERE tenant_id = ?", tenantId);
-        jdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
-        jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
-        jdbc.update("DELETE FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id = ?", tenantId);
+        if (Boolean.parseBoolean(env("BPI_TEST_KEEP_MARKER", "false"))) return;
+        cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_materializations WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_snapshot_samples WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_snapshots WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_definitions WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_audit_events WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_api_idempotency WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_shadow_run_batch_reviews WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_shadow_runs WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_batch_instances WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id = ?", tenantId);
     }
 
     @Test
     void apiWorkerAndPostgresProveLeakageSafeReproducibleManifestOnlySnapshot() throws Exception {
+        boolean externalMaterializer = Boolean.parseBoolean(
+                env("BPI_TEST_EXTERNAL_MATERIALIZER", "false"));
         byte[] definitionBody = objectMapper.writeValueAsBytes(Map.ofEntries(
                 Map.entry("datasetCode", "BOUNDARY-LABELS-" + tenantId.substring(tenantId.length() - 8)),
                 Map.entry("version", "1.0.0"),
@@ -316,6 +328,256 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 """, String.class, tenantId, secondSnapshotId);
         assertThat(secondChecksum).isEqualTo(firstChecksum);
 
+        long snapshotRevision = jdbc.queryForObject("""
+                SELECT revision FROM bpi.bpi_dataset_snapshots
+                 WHERE tenant_id = ? AND id = ?
+                """, Long.class, tenantId, firstSnapshotId);
+        byte[] materializationBody = objectMapper.writeValueAsBytes(Map.of(
+                "artifactFormat", "PARQUET",
+                "reason", "Materialize the immutable acceptance manifest"));
+
+        mockMvc.perform(post("/bpi/v1/dataset-snapshots/{id}/materializations", firstSnapshotId)
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .header("Idempotency-Key", "materialization-viewer-denied-" + tenantId)
+                        .header("If-Match", snapshotRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(materializationBody))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/bpi/v1/dataset-snapshots/{id}/materializations", firstSnapshotId)
+                        .header("Authorization", "Bearer " + wrongScopeToken)
+                        .header("Idempotency-Key", "materialization-scope-denied-" + tenantId)
+                        .header("If-Match", snapshotRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(materializationBody))
+                .andExpect(status().isNotFound());
+
+        String materializationKey = "materialization-request-" + tenantId;
+        MvcResult materializationResult = mockMvc.perform(
+                        post("/bpi/v1/dataset-snapshots/{id}/materializations", firstSnapshotId)
+                                .header("Authorization", "Bearer " + engineerToken)
+                                .header("Idempotency-Key", materializationKey)
+                                .header("If-Match", snapshotRevision)
+                                .header("X-Trace-Id", tenantId + "_MATERIALIZATION")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(materializationBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("QUEUED"))
+                .andExpect(jsonPath("$.data.revision").value(1))
+                .andExpect(jsonPath("$.data.artifactFormat").value("PARQUET"))
+                .andExpect(jsonPath("$.data.artifactSchemaVersion")
+                        .value("bpi.dataset-parquet.v1"))
+                .andExpect(jsonPath("$.data.materializerVersion")
+                        .value("bpi-dataset-materializer/0.1.0"))
+                .andExpect(jsonPath("$.data.artifactUri").doesNotExist())
+                .andReturn();
+        UUID materializationId = UUID.fromString(
+                response(materializationResult).path("data").path("id").asText());
+
+        mockMvc.perform(post("/bpi/v1/dataset-snapshots/{id}/materializations", firstSnapshotId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", materializationKey)
+                        .header("If-Match", snapshotRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(materializationBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.id").value(materializationId.toString()));
+
+        byte[] changedMaterializationBody = objectMapper.writeValueAsBytes(Map.of(
+                "artifactFormat", "PARQUET",
+                "reason", "Reuse must be rejected"));
+        mockMvc.perform(post("/bpi/v1/dataset-snapshots/{id}/materializations", firstSnapshotId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", materializationKey)
+                        .header("If-Match", snapshotRevision)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(changedMaterializationBody))
+                .andExpect(status().isConflict());
+        mockMvc.perform(post("/bpi/v1/dataset-snapshots/{id}/materializations", firstSnapshotId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "materialization-duplicate-" + tenantId)
+                        .header("If-Match", snapshotRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(materializationBody))
+                .andExpect(status().isConflict());
+
+        mockMvc.perform(get("/bpi/v1/dataset-materializations/{id}", materializationId)
+                        .header("Authorization", "Bearer " + wrongScopeToken))
+                .andExpect(status().isNotFound());
+        var queuedRead = mockMvc.perform(
+                        get("/bpi/v1/dataset-materializations/{id}", materializationId)
+                                .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.snapshotId").value(firstSnapshotId.toString()));
+        if (!externalMaterializer) {
+            queuedRead.andExpect(jsonPath("$.data.state").value("QUEUED"));
+        }
+
+        mockMvc.perform(post("/bpi/v1/dataset-materializations/{id}/retry", materializationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "materialization-premature-retry-" + tenantId)
+                        .header("If-Match", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of(
+                                "reason", "A queued task cannot be retried"))))
+                .andExpect(status().isConflict());
+
+        String contentSha;
+        String objectKey;
+        String artifactUri;
+        if (externalMaterializer) {
+            Map<String, Object> artifact = awaitExternalMaterialization(materializationId);
+            contentSha = (String) artifact.get("content_sha256");
+            objectKey = (String) artifact.get("object_key");
+            artifactUri = (String) artifact.get("artifact_uri");
+            String objectVersionId = (String) artifact.get("object_version_id");
+            assertThat(contentSha).hasSize(64);
+            assertThat(objectKey)
+                    .startsWith("datasets/%s/%s/bpi-dataset-materializer-0.1.0/"
+                            .formatted(firstSnapshotId, firstChecksum))
+                    .endsWith("/" + contentSha + ".parquet");
+            String versionedUriPrefix = "s3://bpi-datasets/" + objectKey + "?versionId=";
+            assertThat(artifactUri).startsWith(versionedUriPrefix);
+            assertThat(URLDecoder.decode(
+                    artifactUri.substring(versionedUriPrefix.length()), StandardCharsets.UTF_8))
+                    .isEqualTo(objectVersionId);
+            assertThat(objectVersionId).isNotBlank();
+            assertThat(artifact).containsEntry("object_content_verified", "true");
+            assertThat(((Number) artifact.get("byte_size")).longValue()).isPositive();
+            assertThat(((Number) artifact.get("row_count")).longValue()).isEqualTo(1L);
+            assertThat(artifact).containsEntry("source_payload_included", "false")
+                    .containsEntry("excluded_samples_included", "false")
+                    .containsEntry("iceberg_ready", "false")
+                    .containsEntry("mlflow_registered", "false")
+                    .containsEntry("model_trained", "false");
+        } else {
+            UUID failedClaim = UUID.randomUUID();
+            assertThat(jdbc.update("""
+                    UPDATE bpi.bpi_dataset_materializations
+                       SET state = 'WRITING', revision = revision + 1,
+                           started_at = now(), claim_token = ?, claimed_at = now(),
+                           attempt_count = attempt_count + 1
+                     WHERE tenant_id = ? AND id = ? AND state = 'QUEUED'
+                    """, failedClaim, tenantId, materializationId)).isEqualTo(1);
+            assertThat(jdbc.update("""
+                    UPDATE bpi.bpi_dataset_materializations
+                       SET state = 'FAILED', revision = revision + 1,
+                           completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                           failure_code = 'MINIO_UNAVAILABLE',
+                           failure_detail = 'Acceptance-injected transient failure'
+                     WHERE tenant_id = ? AND id = ? AND state = 'WRITING'
+                       AND claim_token = ?
+                    """, tenantId, materializationId, failedClaim)).isEqualTo(1);
+
+            mockMvc.perform(post("/bpi/v1/dataset-materializations/{id}/retry", materializationId)
+                            .header("Authorization", "Bearer " + wrongScopeToken)
+                            .header("Idempotency-Key", "materialization-retry-scope-" + tenantId)
+                            .header("If-Match", 3)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(Map.of(
+                                    "reason", "Wrong line scope must stay hidden"))))
+                    .andExpect(status().isNotFound());
+
+            byte[] retryBody = objectMapper.writeValueAsBytes(Map.of(
+                    "reason", "Retry after the transient object-store failure"));
+            String retryKey = "materialization-retry-" + tenantId;
+            mockMvc.perform(post("/bpi/v1/dataset-materializations/{id}/retry", materializationId)
+                            .header("Authorization", "Bearer " + engineerToken)
+                            .header("Idempotency-Key", retryKey)
+                            .header("If-Match", 3)
+                            .contentType(MediaType.APPLICATION_JSON).content(retryBody))
+                    .andExpect(status().isAccepted())
+                    .andExpect(jsonPath("$.data.state").value("QUEUED"))
+                    .andExpect(jsonPath("$.data.revision").value(4))
+                    .andExpect(jsonPath("$.data.failureCode").doesNotExist());
+            mockMvc.perform(post("/bpi/v1/dataset-materializations/{id}/retry", materializationId)
+                            .header("Authorization", "Bearer " + engineerToken)
+                            .header("Idempotency-Key", retryKey)
+                            .header("If-Match", 3)
+                            .contentType(MediaType.APPLICATION_JSON).content(retryBody))
+                    .andExpect(status().isAccepted())
+                    .andExpect(header().string("Idempotent-Replay", "true"))
+                    .andExpect(jsonPath("$.data.revision").value(4));
+
+            contentSha = "d".repeat(64);
+            objectKey = "datasets/%s/%s/bpi-dataset-materializer-0.1.0/%s.parquet"
+                    .formatted(firstSnapshotId, firstChecksum, contentSha);
+            String objectVersionId = "acceptance-version-1";
+            artifactUri = "s3://bpi-datasets/" + objectKey
+                    + "?versionId=" + objectVersionId;
+            UUID readyClaim = UUID.randomUUID();
+            assertThat(jdbc.update("""
+                    UPDATE bpi.bpi_dataset_materializations
+                       SET state = 'WRITING', revision = revision + 1,
+                           started_at = now(), claim_token = ?, claimed_at = now(),
+                           attempt_count = attempt_count + 1
+                     WHERE tenant_id = ? AND id = ? AND state = 'QUEUED'
+                    """, readyClaim, tenantId, materializationId)).isEqualTo(1);
+            assertThatThrownBy(() -> jdbc.update("""
+                    UPDATE bpi.bpi_dataset_materializations
+                       SET state = 'READY', revision = revision + 1,
+                           completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                           artifact_uri = ?, object_bucket = 'bpi-datasets', object_key = ?,
+                           content_sha256 = ?, byte_size = 4096, row_count = 1,
+                           schema_json = CAST(? AS jsonb),
+                           artifact_metadata = CAST(? AS jsonb)
+                     WHERE tenant_id = ? AND id = ? AND state = 'WRITING'
+                       AND claim_token = ?
+                    """, "s3://bpi-datasets/" + objectKey, objectKey, contentSha,
+                    "{\"version\":\"bpi.dataset-parquet.v1\"}",
+                    "{\"objectContentVerified\":false}",
+                    tenantId, materializationId, readyClaim))
+                    .isInstanceOf(DataAccessException.class)
+                    .hasMessageContaining("chk_bpi_dataset_materialization_lifecycle");
+            assertThat(jdbc.update("""
+                    UPDATE bpi.bpi_dataset_materializations
+                       SET state = 'READY', revision = revision + 1,
+                           completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                           artifact_uri = ?, object_bucket = 'bpi-datasets', object_key = ?,
+                           content_sha256 = ?, byte_size = 4096, row_count = 1,
+                           schema_json = CAST(? AS jsonb),
+                           artifact_metadata = CAST(? AS jsonb)
+                     WHERE tenant_id = ? AND id = ? AND state = 'WRITING'
+                       AND claim_token = ?
+                    """, artifactUri, objectKey, contentSha,
+                    "{\"version\":\"bpi.dataset-parquet.v1\"}",
+                    "{\"compression\":\"zstd\","
+                            + "\"objectVersionId\":\"" + objectVersionId + "\","
+                            + "\"objectContentVerified\":true,\"icebergReady\":false,"
+                            + "\"mlflowRegistered\":false,\"modelTrained\":false}",
+                    tenantId, materializationId, readyClaim)).isEqualTo(1);
+        }
+
+        mockMvc.perform(get("/bpi/v1/dataset-snapshots/{id}", firstSnapshotId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("MANIFEST_READY"))
+                .andExpect(jsonPath("$.data.materializationState").value("READY"))
+                .andExpect(jsonPath("$.data.artifactUri").value(artifactUri))
+                .andExpect(jsonPath("$.data.latestMaterialization.id")
+                        .value(materializationId.toString()))
+                .andExpect(jsonPath("$.data.latestMaterialization.state").value("READY"))
+                .andExpect(jsonPath("$.data.latestMaterialization.contentSha256")
+                        .value(contentSha));
+        if (externalMaterializer) {
+            assertThat(jdbc.queryForObject("""
+                    SELECT count(*) FROM bpi.bpi_audit_events
+                     WHERE tenant_id = ? AND object_id = ?
+                       AND action IN ('DATASET_MATERIALIZATION_QUEUED',
+                                      'DATASET_MATERIALIZATION_WRITING',
+                                      'DATASET_MATERIALIZATION_READY')
+                    """, Long.class, tenantId, materializationId)).isEqualTo(3L);
+        } else {
+            assertThat(jdbc.queryForObject("""
+                    SELECT count(*) FROM bpi.bpi_audit_events
+                     WHERE tenant_id = ? AND object_id = ?
+                       AND action IN ('DATASET_MATERIALIZATION_QUEUED',
+                                      'DATASET_MATERIALIZATION_RETRIED')
+                    """, Long.class, tenantId, materializationId)).isEqualTo(2L);
+        }
+        assertThatThrownBy(() -> jdbc.update("""
+                UPDATE bpi.bpi_dataset_materializations SET request_reason = 'mutated'
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, materializationId))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("immutable");
+
         assertThatThrownBy(() -> jdbc.update("""
                 UPDATE bpi.bpi_dataset_snapshots SET request_reason = 'mutated'
                  WHERE tenant_id = ? AND id = ?
@@ -327,6 +589,38 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                  WHERE tenant_id = ? AND object_id IN (?, ?)
                    AND action = 'DATASET_MANIFEST_READY'
                 """, Long.class, tenantId, firstSnapshotId, secondSnapshotId)).isEqualTo(2L);
+    }
+
+    private Map<String, Object> awaitExternalMaterialization(UUID materializationId)
+            throws InterruptedException {
+        Instant deadline = Instant.now().plusSeconds(
+                Integer.parseInt(env("BPI_TEST_MATERIALIZER_TIMEOUT_SECONDS", "90")));
+        while (Instant.now().isBefore(deadline)) {
+            Map<String, Object> artifact = jdbc.queryForMap("""
+                    SELECT state, artifact_uri, object_key, content_sha256, byte_size, row_count,
+                           artifact_metadata ->> 'sourcePayloadIncluded'
+                               AS source_payload_included,
+                           artifact_metadata ->> 'excludedSamplesIncluded'
+                               AS excluded_samples_included,
+                           artifact_metadata ->> 'objectVersionId' AS object_version_id,
+                           artifact_metadata ->> 'objectContentVerified'
+                               AS object_content_verified,
+                           artifact_metadata ->> 'icebergReady' AS iceberg_ready,
+                           artifact_metadata ->> 'mlflowRegistered' AS mlflow_registered,
+                           artifact_metadata ->> 'modelTrained' AS model_trained,
+                           failure_code, failure_detail
+                      FROM bpi.bpi_dataset_materializations
+                     WHERE tenant_id = ? AND id = ?
+                    """, tenantId, materializationId);
+            String state = (String) artifact.get("state");
+            if ("READY".equals(state)) return artifact;
+            if ("FAILED".equals(state)) {
+                throw new AssertionError("External materializer failed: "
+                        + artifact.get("failure_code") + " " + artifact.get("failure_detail"));
+            }
+            Thread.sleep(250);
+        }
+        throw new AssertionError("External materializer did not reach READY before timeout");
     }
 
     private void insertReviewedBatch(

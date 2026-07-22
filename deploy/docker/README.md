@@ -110,23 +110,32 @@ If a legacy module must temporarily connect to Oracle, copy the relevant values 
 
 The target environment runs BPI inside this single ADP Compose project. Use the integrated expand-only
 helper from a clean release checkout; do not start the isolated `deploy/bpi-runtime` stack beside it.
-The helper builds immutable service and Java 8 adapter images, then creates a custom-format PostgreSQL
-backup, a mode-0600 `.env` backup, a UI archive and rollback image tags before applying Flyway. It
-never downgrades the schema and it requires the Phase 2 QCS/WMS integration and WMS outbox to remain
-disabled by default.
+The helper builds immutable service, Java 8 adapter, WMS adapter and Python 3.12 dataset materializer
+images, verifies that the service image contains the exact source migration set, then creates a
+custom-format PostgreSQL backup, a mode-0600 `.env` backup, a UI archive and rollback image tags
+before applying Flyway. It never downgrades or repairs the schema. Phase 2 QCS/WMS, WMS outbox,
+dataset materializer and dataset bucket bootstrap must all remain disabled.
 
 ```bash
 BPI_INTEGRATED_RUNTIME_ROOT=/home/v6/adp-mes-docker-newbase-20260611-181921 \
-BPI_INTEGRATED_BACKUP_DIR=/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v23 \
-BPI_EXPECTED_FLYWAY_VERSION=23 \
+BPI_INTEGRATED_BACKUP_DIR=/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v27 \
+BPI_EXPECTED_FLYWAY_VERSION=27 \
 BPI_INTEGRATED_UPGRADE_CONFIRM=UPGRADE_INTEGRATED_BPI_EXPAND_ONLY \
   make bpi-integrated-upgrade-expand-only
 ```
 
-The generated JSON report records before/after Flyway versions, exact image IDs, rollback image tags,
-backup paths and the deployed UI checksum. If an application rollback is required, keep the expanded
-PostgreSQL schema, restore the recorded service/adapter images and UI archive, then rerun the browser,
-API and PostgreSQL acceptance checks.
+Before running it, replace every `change-me` or `dev-only` value, including
+`BPI_DATABASE_PASSWORD`, `BPI_MIGRATOR_PASSWORD`, `BPI_MATERIALIZER_DATABASE_PASSWORD` and
+`BPI_DATASET_MINIO_SECRET_KEY`; the three database credentials and the two MinIO identities must be
+distinct. Production deployment must also rotate the recovered test MinIO root credential through
+its separate security-hardening gate. For an existing database the helper creates or rotates `bpi_materializer` before V27,
+then verifies its exact SELECT/UPDATE/INSERT allowlist after migration.
+
+The generated JSON report records before/after Flyway versions, the migration-set checksum, exact
+image IDs, rollback image tags, backup paths and the deployed UI checksum. The materializer image is
+built and recorded but is not started. If an application rollback is required, keep the expanded
+PostgreSQL schema and version-pinned Parquet objects, restore the recorded service/adapter images and UI
+archive, keep both dataset switches false, then rerun browser, API and PostgreSQL acceptance checks.
 
 ## RM Web Formula Editor
 

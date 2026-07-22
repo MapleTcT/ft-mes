@@ -9,6 +9,7 @@ import com.mapletct.ftmes.bpi.domain.DatasetDefinitionView;
 import com.mapletct.ftmes.bpi.domain.DatasetManifestBuild;
 import com.mapletct.ftmes.bpi.domain.DatasetManifestClaim;
 import com.mapletct.ftmes.bpi.domain.DatasetManifestSample;
+import com.mapletct.ftmes.bpi.domain.DatasetMaterializationView;
 import com.mapletct.ftmes.bpi.domain.DatasetSampleSource;
 import com.mapletct.ftmes.bpi.domain.DatasetSnapshotSummary;
 import com.mapletct.ftmes.bpi.domain.DatasetSnapshotView;
@@ -46,7 +47,8 @@ public class DatasetPostgresRepository {
                    latest.manifest_checksum AS latest_manifest_checksum,
                    latest.included_count AS latest_included_count,
                    latest.excluded_count AS latest_excluded_count,
-                   latest.materialization_state AS latest_materialization_state,
+                   COALESCE(materialization.state, latest.materialization_state)
+                       AS latest_materialization_state,
                    latest.created_at AS latest_created_at,
                    latest.completed_at AS latest_completed_at,
                    latest.failure_code AS latest_failure_code,
@@ -60,15 +62,59 @@ public class DatasetPostgresRepository {
                      ORDER BY snapshot.snapshot_version DESC, snapshot.id DESC
                      LIMIT 1
               ) latest ON true
+              LEFT JOIN LATERAL (
+                    SELECT materialization.state
+                      FROM bpi.bpi_dataset_materializations materialization
+                     WHERE materialization.tenant_id = latest.tenant_id
+                       AND materialization.snapshot_id = latest.id
+                     ORDER BY materialization.created_at DESC, materialization.id DESC
+                     LIMIT 1
+              ) materialization ON true
             """;
 
     private static final String SNAPSHOT_SELECT = """
             SELECT snapshot.*, definition.dataset_code, definition.version AS dataset_version,
-                   definition.name AS dataset_name, definition.plant_id
+                   definition.name AS dataset_name, definition.plant_id,
+                   COALESCE(materialization.state, snapshot.materialization_state)
+                       AS effective_materialization_state,
+                   COALESCE(materialization.artifact_uri, snapshot.artifact_uri)
+                       AS effective_artifact_uri,
+                   materialization.id AS materialization_id,
+                   materialization.snapshot_id AS materialization_snapshot_id,
+                   materialization.artifact_format AS materialization_artifact_format,
+                   materialization.artifact_schema_version AS materialization_artifact_schema_version,
+                   materialization.materializer_version AS materialization_materializer_version,
+                   materialization.state AS materialization_state_value,
+                   materialization.revision AS materialization_revision,
+                   materialization.manifest_checksum AS materialization_manifest_checksum,
+                   materialization.requested_by AS materialization_requested_by,
+                   materialization.request_reason AS materialization_request_reason,
+                   materialization.created_at AS materialization_created_at,
+                   materialization.started_at AS materialization_started_at,
+                   materialization.completed_at AS materialization_completed_at,
+                   materialization.attempt_count AS materialization_attempt_count,
+                   materialization.artifact_uri AS materialization_artifact_uri,
+                   materialization.object_bucket AS materialization_object_bucket,
+                   materialization.object_key AS materialization_object_key,
+                   materialization.content_sha256 AS materialization_content_sha256,
+                   materialization.byte_size AS materialization_byte_size,
+                   materialization.row_count AS materialization_row_count,
+                   materialization.schema_json::text AS materialization_schema_json,
+                   materialization.artifact_metadata::text AS materialization_artifact_metadata,
+                   materialization.failure_code AS materialization_failure_code,
+                   materialization.failure_detail AS materialization_failure_detail
               FROM bpi.bpi_dataset_snapshots snapshot
               JOIN bpi.bpi_dataset_definitions definition
                 ON definition.tenant_id = snapshot.tenant_id
                AND definition.id = snapshot.dataset_id
+              LEFT JOIN LATERAL (
+                    SELECT candidate.*
+                      FROM bpi.bpi_dataset_materializations candidate
+                     WHERE candidate.tenant_id = snapshot.tenant_id
+                       AND candidate.snapshot_id = snapshot.id
+                     ORDER BY candidate.created_at DESC, candidate.id DESC
+                     LIMIT 1
+              ) materialization ON true
             """;
 
     private final NamedParameterJdbcTemplate jdbc;
@@ -525,6 +571,39 @@ public class DatasetPostgresRepository {
     }
 
     private DatasetSnapshotView mapSnapshot(ResultSet rs) throws SQLException {
+        UUID materializationId = rs.getObject("materialization_id", UUID.class);
+        DatasetMaterializationView materialization = materializationId == null ? null
+                : new DatasetMaterializationView(
+                        materializationId,
+                        rs.getObject("materialization_snapshot_id", UUID.class),
+                        rs.getObject("dataset_id", UUID.class),
+                        rs.getString("dataset_code"),
+                        rs.getString("dataset_version"),
+                        rs.getString("tenant_id"),
+                        rs.getString("plant_id"),
+                        readStrings(rs.getString("line_ids")),
+                        rs.getString("materialization_artifact_format"),
+                        rs.getString("materialization_artifact_schema_version"),
+                        rs.getString("materialization_materializer_version"),
+                        rs.getString("materialization_state_value"),
+                        rs.getLong("materialization_revision"),
+                        rs.getString("materialization_manifest_checksum"),
+                        rs.getString("materialization_requested_by"),
+                        rs.getString("materialization_request_reason"),
+                        instant(rs, "materialization_created_at"),
+                        instant(rs, "materialization_started_at"),
+                        instant(rs, "materialization_completed_at"),
+                        rs.getInt("materialization_attempt_count"),
+                        rs.getString("materialization_artifact_uri"),
+                        rs.getString("materialization_object_bucket"),
+                        rs.getString("materialization_object_key"),
+                        rs.getString("materialization_content_sha256"),
+                        rs.getObject("materialization_byte_size", Long.class),
+                        rs.getObject("materialization_row_count", Long.class),
+                        readMap(rs.getString("materialization_schema_json")),
+                        readMap(rs.getString("materialization_artifact_metadata")),
+                        rs.getString("materialization_failure_code"),
+                        rs.getString("materialization_failure_detail"));
         return new DatasetSnapshotView(
                 rs.getObject("id", UUID.class), rs.getObject("dataset_id", UUID.class),
                 rs.getString("dataset_code"), rs.getString("dataset_version"),
@@ -538,10 +617,12 @@ public class DatasetPostgresRepository {
                 rs.getObject("included_count", Integer.class),
                 rs.getObject("excluded_count", Integer.class),
                 readIntegerMap(rs.getString("exclusion_summary")),
-                rs.getString("materialization_state"), rs.getString("artifact_uri"),
+                rs.getString("effective_materialization_state"),
+                rs.getString("effective_artifact_uri"),
                 rs.getString("requested_by"), rs.getString("request_reason"),
                 instant(rs, "created_at"), instant(rs, "started_at"), instant(rs, "completed_at"),
-                rs.getInt("attempt_count"), rs.getString("failure_code"), rs.getString("failure_detail"));
+                rs.getInt("attempt_count"), rs.getString("failure_code"),
+                rs.getString("failure_detail"), materialization);
     }
 
     private DatasetSampleSource mapSource(ResultSet rs) throws SQLException {
