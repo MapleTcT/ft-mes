@@ -17,7 +17,7 @@ public class BpiRoutePolicy {
                     + "topologies(?:/" + ID + "(?:/compare)?)?|point-catalog/(?:current|snapshots)|"
                     + "point-calibrations|"
                     + "data-quality/(?:summary|incidents(?:/" + ID + ")?)|"
-                    + "datasets|dataset-snapshots/" + ID + "|"
+                    + "datasets|dataset-snapshots/" + ID + "|dataset-materializations/" + ID + "|"
                     + "rules(?:/" + ID + "(?:/compare)?)?|rule-simulations/" + ID + ")$");
     private static final Pattern POST_ROUTE = Pattern.compile(
             "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume|force-close|wms/(?:reconcile|reversal))|"
@@ -26,7 +26,8 @@ public class BpiRoutePolicy {
                     + "topologies/drafts|topologies/" + ID + "/(?:validate|publish)|point-catalog/snapshots|"
                     + "point-calibrations(?:/" + ID + "/(?:approve|reject|revoke))?|rules/drafts|"
                     + "data-quality/incidents/" + ID + "/(?:acknowledge|resolve)|"
-                    + "datasets(?:/" + ID + "/snapshots)?|"
+                    + "datasets(?:/" + ID + "/snapshots)?|dataset-snapshots/" + ID + "/materializations|"
+                    + "dataset-materializations/" + ID + "/retry|"
                     + "rules/" + ID + "/(?:simulate|submit-approval|reject-approval|publish|retire|publication/retry))$");
 
     public boolean allows(HttpMethod method, String path) {

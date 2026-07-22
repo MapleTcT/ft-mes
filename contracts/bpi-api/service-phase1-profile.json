@@ -1,6 +1,6 @@
 {
   "profile": "phase-1-java17-shadow-service",
-  "description": "Public OpenAPI operations and trusted internal ingestion endpoints implemented by the real Java 17/PostgreSQL service through Flyway V26; Phase 2 integrations remain independently disabled by default and Phase 3A stops at an immutable point-in-time manifest.",
+  "description": "Public OpenAPI operations and trusted internal ingestion endpoints implemented by the real Java 17/PostgreSQL service through Flyway V27; Phase 2 integrations remain independently disabled by default, Phase 3A preserves the immutable point-in-time manifest, and Phase 3B-A adds version-pinned Parquet materialization only.",
   "operationIds": [
     "getBpiOverview",
     "listFeatureFlags",
@@ -61,7 +61,10 @@
     "listDatasets",
     "createDatasetDefinition",
     "createDatasetSnapshot",
-    "getDatasetSnapshot"
+    "getDatasetSnapshot",
+    "requestDatasetMaterialization",
+    "getDatasetMaterialization",
+    "retryDatasetMaterialization"
   ],
   "internalEndpoints": [
     {

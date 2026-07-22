@@ -743,6 +743,8 @@ export interface RuleSimulation {
 }
 
 export type DatasetSnapshotState = 'QUEUED' | 'BUILDING' | 'MANIFEST_READY' | 'FAILED';
+export type DatasetMaterializationState = 'QUEUED' | 'WRITING' | 'READY' | 'FAILED';
+export type DatasetMaterializationDisplayState = 'NOT_STARTED' | DatasetMaterializationState;
 
 export interface DatasetSnapshotSummary {
   id: string;
@@ -753,7 +755,7 @@ export interface DatasetSnapshotSummary {
   manifestChecksum?: string | null;
   includedCount?: number | null;
   excludedCount?: number | null;
-  materializationState: 'NOT_STARTED';
+  materializationState: DatasetMaterializationDisplayState;
   createdAt: string;
   completedAt?: string | null;
   failureCode?: string | null;
@@ -807,6 +809,39 @@ export interface DatasetSnapshotCommand {
   ruleVersionIds: string[];
   excludeLowConfidence: boolean;
   reason: string;
+}
+
+export interface DatasetMaterialization {
+  id: string;
+  snapshotId: string;
+  datasetId: string;
+  datasetCode: string;
+  datasetVersion: string;
+  tenantId: string;
+  plantId: string;
+  lineIds: string[];
+  artifactFormat: 'PARQUET';
+  artifactSchemaVersion: string;
+  materializerVersion: string;
+  state: DatasetMaterializationState;
+  revision: number;
+  manifestChecksum: string;
+  requestedBy: string;
+  requestReason: string;
+  createdAt: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  attemptCount: number;
+  artifactUri?: string | null;
+  objectBucket?: string | null;
+  objectKey?: string | null;
+  contentSha256?: string | null;
+  byteSize?: number | null;
+  rowCount?: number | null;
+  schema?: Record<string, unknown> | null;
+  artifactMetadata?: Record<string, unknown> | null;
+  failureCode?: string | null;
+  failureDetail?: string | null;
 }
 
 export interface DatasetManifestSample {
@@ -863,9 +898,10 @@ export interface DatasetSnapshot extends DatasetSnapshotSummary {
   manifestSchemaVersion?: string | null;
   manifest?: DatasetManifest | null;
   exclusionSummary?: Record<string, number> | null;
-  artifactUri?: null;
+  artifactUri?: string | null;
   requestedBy: string;
   requestReason: string;
   startedAt?: string | null;
   attemptCount: number;
+  latestMaterialization?: DatasetMaterialization | null;
 }

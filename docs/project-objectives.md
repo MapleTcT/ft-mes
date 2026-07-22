@@ -101,6 +101,14 @@ manifest。本地 PostgreSQL 验收为 3 个样本、1 included、2 excluded、3
 API、PostgreSQL 15.18/Flyway V26、跨工厂隔离、幂等和十类零残留清理。该纵切明确停在
 `MANIFEST_ONLY`；Iceberg 物化、MLflow、模型训练与推断均未完成，不能据此改变 G-021 的 `PARTIAL` 状态。
 
+同日源码继续完成 Phase 3B-A 的最小物化纵切：Flyway V27 持有 revisioned materialization 任务，
+Java 17 API 负责 scope、权限、幂等和失败重试，Java 8 adapter 只开放三个精确路径；独立 Python 3.12
+worker 用固定 PyArrow 版本生成稳定排序的 Parquet，上传到私有且开启 versioning 的 MinIO bucket，
+再下载精确 `versionId` 复算 SHA-256 后才发布 `READY`。页面把不可变 V26 manifest 与 V27 物化投影
+分开展示，并明确标记模拟证据；Iceberg、MLflow 和模型仍为 `NOT_STARTED`。当前测试机仍保持 V26，
+因此这一步只有源码和本地软件证据，目标 PostgreSQL/MinIO/真实页面 marker 验收完成前 G-021 仍为
+`PARTIAL`，也不能声称 Phase 3B 全部完成。
+
 2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、
 规则历史回放、精确 simulation 证明提交、同 actor `422` 拒绝、独立管理员批准发布和独立管理员驳回。

@@ -10,6 +10,9 @@ const FEATURE_FLAG_TENANT = 'TENANT-01';
 const DATASET_PREDICTION_TIME_POLICY = 'AUTOMATIC_BATCH_START';
 const DATASET_FEATURE_CUTOFF_POLICY = 'AT_OR_BEFORE_PREDICTION_TIME';
 const DATASET_SPLIT_POLICY = 'PRODUCTION_TIME';
+const DATASET_ARTIFACT_SCHEMA_VERSION = 'bpi.dataset-parquet.v1';
+const DATASET_MATERIALIZER_VERSION = 'bpi-dataset-materializer/0.1.0';
+const DATASET_OBJECT_BUCKET = 'bpi-datasets';
 const DATASET_FEATURE_REFS = new Set([
   'batch.order_id', 'batch.material_code', 'batch.stage_code', 'batch.quantity_unit',
   'rule.version_id', 'topology.version_id', 'point_catalog.snapshot_id',
@@ -602,11 +605,25 @@ function stableUuid(value) {
   return `${digest.slice(0, 8)}-${digest.slice(8, 12)}-5${digest.slice(13, 16)}-a${digest.slice(17, 20)}-${digest.slice(20, 32)}`;
 }
 
-function datasetSnapshotView(snapshot) {
-  return clone(snapshot);
+function latestDatasetMaterialization(state, snapshotId) {
+  return state.datasetMaterializations
+    .filter((item) => item.snapshotId === snapshotId)
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt)
+      || right.id.localeCompare(left.id))[0] || null;
 }
 
-function datasetSnapshotSummary(snapshot) {
+function datasetSnapshotView(state, snapshot) {
+  const materialization = latestDatasetMaterialization(state, snapshot.id);
+  return {
+    ...clone(snapshot),
+    materializationState: materialization?.state || 'NOT_STARTED',
+    artifactUri: materialization?.artifactUri || null,
+    latestMaterialization: materialization ? clone(materialization) : null,
+  };
+}
+
+function datasetSnapshotSummary(state, snapshot) {
+  const materialization = latestDatasetMaterialization(state, snapshot.id);
   return {
     id: snapshot.id,
     snapshotVersion: snapshot.snapshotVersion,
@@ -616,7 +633,7 @@ function datasetSnapshotSummary(snapshot) {
     manifestChecksum: snapshot.manifestChecksum,
     includedCount: snapshot.includedCount,
     excludedCount: snapshot.excludedCount,
-    materializationState: snapshot.materializationState,
+    materializationState: materialization?.state || 'NOT_STARTED',
     createdAt: snapshot.createdAt,
     completedAt: snapshot.completedAt,
     failureCode: snapshot.failureCode,
@@ -630,7 +647,7 @@ function datasetDefinitionView(state, definition) {
     .sort((left, right) => right.snapshotVersion - left.snapshotVersion)[0] || null;
   return {
     ...clone(definition),
-    latestSnapshot: latestSnapshot ? datasetSnapshotSummary(latestSnapshot) : null,
+    latestSnapshot: latestSnapshot ? datasetSnapshotSummary(state, latestSnapshot) : null,
   };
 }
 
@@ -737,6 +754,8 @@ function prepareDatasetManifestAcceptance(state) {
   state.datasetDefinitions = [];
   state.datasetSnapshots = [];
   state.pendingDatasetSnapshotIds = new Set();
+  state.datasetMaterializations = [];
+  state.pendingDatasetMaterializationIds = new Set();
   state.idempotency = new Map();
   return { runId, ruleVersionId: state.rule.id, preparedReviewCount: state.shadowRunReviews.length };
 }
@@ -893,6 +912,89 @@ function buildDatasetSnapshot(state, snapshot) {
   snapshot.exclusionSummary = exclusionSummary;
   snapshot.completedAt = FIXED_TIME;
   state.pendingDatasetSnapshotIds.delete(snapshot.id);
+}
+
+function materializationSchema(snapshot) {
+  return {
+    schemaVersion: DATASET_ARTIFACT_SCHEMA_VERSION,
+    fields: [
+      { name: 'snapshot_id', type: 'string', nullable: false },
+      { name: 'review_id', type: 'string', nullable: false },
+      { name: 'shadow_run_id', type: 'string', nullable: false },
+      { name: 'batch_id', type: 'string', nullable: false },
+      { name: 'batch_no', type: 'string', nullable: false },
+      { name: 'line_id', type: 'string', nullable: false },
+      { name: 'prediction_time', type: 'timestamp[us, tz=UTC]', nullable: false },
+      { name: 'feature_cutoff', type: 'timestamp[us, tz=UTC]', nullable: false },
+      { name: 'label_available_at', type: 'timestamp[us, tz=UTC]', nullable: false },
+      { name: 'confidence', type: 'decimal128(7, 6)', nullable: false },
+      { name: 'split_key', type: 'string', nullable: false },
+    ],
+    selectedFeatureRefs: clone(snapshot.manifest.definition.featureRefs),
+    selectedLabelRefs: clone(snapshot.manifest.definition.labelRefs),
+  };
+}
+
+function completeDatasetMaterialization(state, materialization) {
+  const snapshot = state.datasetSnapshots.find((item) => item.id === materialization.snapshotId);
+  if (!snapshot?.manifest) return;
+  const includedSamples = snapshot.manifest.samples
+    .filter((sample) => sample.included)
+    .sort((left, right) => left.lineId.localeCompare(right.lineId)
+      || left.predictionTime.localeCompare(right.predictionTime)
+      || left.batchId.localeCompare(right.batchId)
+      || left.reviewId.localeCompare(right.reviewId));
+  const contentSha256 = sha256({
+    schemaVersion: DATASET_ARTIFACT_SCHEMA_VERSION,
+    snapshotId: snapshot.id,
+    manifestChecksum: snapshot.manifestChecksum,
+    samples: includedSamples,
+  });
+  const versionSegment = DATASET_MATERIALIZER_VERSION.replace('/', '-');
+  const objectKey = `datasets/${snapshot.id}/${snapshot.manifestChecksum}/${versionSegment}/${contentSha256}.parquet`;
+  const objectVersionId = stableUuid(`simulated-object-version:${objectKey}`);
+  materialization.state = 'READY';
+  materialization.revision += 1;
+  materialization.completedAt = FIXED_TIME;
+  materialization.artifactUri = `s3://${DATASET_OBJECT_BUCKET}/${objectKey}?versionId=${objectVersionId}`;
+  materialization.objectBucket = DATASET_OBJECT_BUCKET;
+  materialization.objectKey = objectKey;
+  materialization.contentSha256 = contentSha256;
+  materialization.byteSize = 4096 + includedSamples.length * 1024;
+  materialization.rowCount = includedSamples.length;
+  materialization.schema = materializationSchema(snapshot);
+  materialization.artifactMetadata = {
+    artifactSchemaVersion: DATASET_ARTIFACT_SCHEMA_VERSION,
+    materializerVersion: DATASET_MATERIALIZER_VERSION,
+    manifestSchemaVersion: snapshot.manifestSchemaVersion,
+    manifestChecksum: snapshot.manifestChecksum,
+    definitionChecksum: snapshot.definitionChecksum,
+    rowOrder: 'line_id,prediction_time,batch_id,review_id',
+    compression: 'zstd:3',
+    sourcePayloadIncluded: false,
+    excludedSamplesIncluded: false,
+    icebergReady: false,
+    mlflowRegistered: false,
+    modelTrained: false,
+    objectVersionId,
+    objectContentVerified: true,
+    simulationOnly: true,
+  };
+  materialization.failureCode = null;
+  materialization.failureDetail = null;
+  state.pendingDatasetMaterializationIds.delete(materialization.id);
+}
+
+function progressDatasetMaterialization(state, materialization) {
+  if (!state.pendingDatasetMaterializationIds.has(materialization.id)) return;
+  if (materialization.state === 'QUEUED') {
+    materialization.state = 'WRITING';
+    materialization.revision += 1;
+    materialization.startedAt = FIXED_TIME;
+    materialization.attemptCount += 1;
+    return;
+  }
+  if (materialization.state === 'WRITING') completeDatasetMaterialization(state, materialization);
 }
 
 function calibrationEffectiveness(calibration, now = Date.now()) {
@@ -1152,6 +1254,24 @@ function createHandler(state) {
       if (req.method === 'POST' && path === '/__simulation/prepare-dataset-manifest') {
         const prepared = prepareDatasetManifestAcceptance(state);
         return send(res, 200, { status: 'DATASET_MANIFEST_SOURCE_READY', ...prepared }, 'simulationPrepareDatasetManifest');
+      }
+      if (req.method === 'POST' && path === '/__simulation/fail-dataset-materialization') {
+        const operationId = 'simulationFailDatasetMaterialization';
+        const body = await readJson(req);
+        const materialization = state.datasetMaterializations.find((item) => item.id === body.materializationId);
+        if (!materialization) {
+          return send(res, 404, { status: 'DATASET_MATERIALIZATION_NOT_FOUND' }, operationId);
+        }
+        if (materialization.state !== 'WRITING') {
+          return send(res, 409, { status: 'DATASET_MATERIALIZATION_NOT_WRITING' }, operationId);
+        }
+        materialization.state = 'FAILED';
+        materialization.revision += 1;
+        materialization.completedAt = FIXED_TIME;
+        materialization.failureCode = String(body.failureCode || 'SIMULATED_OBJECT_STORE_FAILURE');
+        materialization.failureDetail = String(body.failureDetail || 'Deterministic simulator failure injection.');
+        state.pendingDatasetMaterializationIds.delete(materialization.id);
+        return send(res, 200, envelope(operationId, materialization), operationId);
       }
       if (req.method === 'POST' && path === '/__simulation/prepare-batch-release') {
         const prepared = prepareBatchReleaseAcceptance(state);
@@ -2845,7 +2965,7 @@ function createHandler(state) {
         };
         state.datasetSnapshots.push(snapshot);
         state.pendingDatasetSnapshotIds.add(snapshot.id);
-        const response = envelope(operationId, datasetSnapshotView(snapshot));
+        const response = envelope(operationId, datasetSnapshotView(state, snapshot));
         return rememberAndSend(state, context, res, 202, response, operationId);
       }
       ids = match(path, /^\/bpi\/v1\/dataset-snapshots\/([^/]+)$/);
@@ -2856,7 +2976,108 @@ function createHandler(state) {
           return send(res, 404, problem(404, 'Not Found', 'Dataset snapshot not found.', operationId), operationId);
         }
         if (state.pendingDatasetSnapshotIds.has(snapshot.id)) buildDatasetSnapshot(state, snapshot);
-        return send(res, 200, envelope(operationId, datasetSnapshotView(snapshot)), operationId);
+        return send(res, 200, envelope(operationId, datasetSnapshotView(state, snapshot)), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-snapshots\/([^/]+)\/materializations$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'requestDatasetMaterialization';
+        const snapshot = state.datasetSnapshots.find((item) => item.id === ids[0]);
+        if (!snapshot) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset snapshot not found.', operationId), operationId);
+        }
+        const context = commandContext(req, res, operationId, snapshot.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (snapshot.state !== 'MANIFEST_READY' || !snapshot.manifestChecksum) {
+          const response = problem(409, 'Manifest Required', 'Dataset materialization requires a MANIFEST_READY snapshot.', operationId, snapshot.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        if (body.artifactFormat !== 'PARQUET' || String(body.reason || '').trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'Phase 3B-A supports PARQUET and requires a reason.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        const existing = state.datasetMaterializations.find((item) => item.snapshotId === snapshot.id
+          && item.artifactFormat === 'PARQUET'
+          && item.artifactSchemaVersion === DATASET_ARTIFACT_SCHEMA_VERSION
+          && item.materializerVersion === DATASET_MATERIALIZER_VERSION);
+        if (existing) {
+          const response = problem(409, 'Materialization Exists', 'The versioned Parquet materialization contract already exists.', operationId, existing.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const materialization = {
+          id: stableUuid({ type: 'dataset-materialization', snapshotId: snapshot.id, format: 'PARQUET' }),
+          snapshotId: snapshot.id,
+          datasetId: snapshot.datasetId,
+          datasetCode: snapshot.datasetCode,
+          datasetVersion: snapshot.datasetVersion,
+          tenantId: snapshot.tenantId,
+          plantId: snapshot.plantId,
+          lineIds: clone(snapshot.lineIds),
+          artifactFormat: 'PARQUET',
+          artifactSchemaVersion: DATASET_ARTIFACT_SCHEMA_VERSION,
+          materializerVersion: DATASET_MATERIALIZER_VERSION,
+          state: 'QUEUED',
+          revision: 1,
+          manifestChecksum: snapshot.manifestChecksum,
+          requestedBy: 'simulated.data.engineer',
+          requestReason: String(body.reason).trim(),
+          createdAt: FIXED_TIME,
+          startedAt: null,
+          completedAt: null,
+          attemptCount: 0,
+          artifactUri: null,
+          objectBucket: null,
+          objectKey: null,
+          contentSha256: null,
+          byteSize: null,
+          rowCount: null,
+          schema: null,
+          artifactMetadata: null,
+          failureCode: null,
+          failureDetail: null,
+        };
+        state.datasetMaterializations.push(materialization);
+        state.pendingDatasetMaterializationIds.add(materialization.id);
+        const response = envelope(operationId, materialization);
+        return rememberAndSend(state, context, res, 202, response, operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-materializations\/([^/]+)$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getDatasetMaterialization';
+        const materialization = state.datasetMaterializations.find((item) => item.id === ids[0]);
+        if (!materialization) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset materialization not found.', operationId), operationId);
+        }
+        progressDatasetMaterialization(state, materialization);
+        return send(res, 200, envelope(operationId, materialization), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-materializations\/([^/]+)\/retry$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'retryDatasetMaterialization';
+        const materialization = state.datasetMaterializations.find((item) => item.id === ids[0]);
+        if (!materialization) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset materialization not found.', operationId), operationId);
+        }
+        const context = commandContext(req, res, operationId, materialization.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (String(body.reason || '').trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'Retry reason must contain at least three characters.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (materialization.state !== 'FAILED') {
+          const response = problem(409, 'Invalid Materialization State', 'Only a FAILED dataset materialization can be retried.', operationId, materialization.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        materialization.state = 'QUEUED';
+        materialization.revision += 1;
+        materialization.startedAt = null;
+        materialization.completedAt = null;
+        materialization.failureCode = null;
+        materialization.failureDetail = null;
+        state.pendingDatasetMaterializationIds.add(materialization.id);
+        const response = envelope(operationId, materialization);
+        return rememberAndSend(state, context, res, 202, response, operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/integrations/health') {
         return send(res, 200, envelope('getIntegrationHealth', state.integrations), 'getIntegrationHealth');

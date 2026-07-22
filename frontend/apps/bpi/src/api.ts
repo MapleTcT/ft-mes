@@ -10,6 +10,7 @@ import type {
   DataQualitySummary,
   DatasetDefinition,
   DatasetDefinitionCreateCommand,
+  DatasetMaterialization,
   DatasetSnapshot,
   DatasetSnapshotCommand,
   Evidence,
@@ -252,6 +253,20 @@ export const bpiApi = {
     }),
   datasetSnapshot: (snapshotId: string) =>
     request<DatasetSnapshot>(`/dataset-snapshots/${encodeURIComponent(snapshotId)}`),
+  requestDatasetMaterialization: (snapshot: DatasetSnapshot, reason: string, key: string) =>
+    request<DatasetMaterialization>(`/dataset-snapshots/${encodeURIComponent(snapshot.id)}/materializations`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(snapshot.revision) },
+      body: JSON.stringify({ artifactFormat: 'PARQUET', reason }),
+    }),
+  datasetMaterialization: (materializationId: string) =>
+    request<DatasetMaterialization>(`/dataset-materializations/${encodeURIComponent(materializationId)}`),
+  retryDatasetMaterialization: (materialization: DatasetMaterialization, reason: string, key: string) =>
+    request<DatasetMaterialization>(`/dataset-materializations/${encodeURIComponent(materialization.id)}/retry`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(materialization.revision) },
+      body: JSON.stringify({ reason }),
+    }),
   topologies: (plantId: string) =>
     request<TopologyVersion[]>(`/topologies?plantId=${encodeURIComponent(plantId)}`),
   currentPointCatalog: (

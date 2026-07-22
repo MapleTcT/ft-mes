@@ -1224,7 +1224,7 @@ test('data quality and integration impact remain visible', async () => {
   assert.match(timescale.businessImpact, /不阻断批次事实查询/);
 });
 
-test('dataset manifests are immutable, point-in-time and stop before materialization', async () => {
+test('dataset manifests stay immutable while versioned Parquet materialization is tracked separately', async () => {
   let result = await request('POST', '/__simulation/reset');
   assert.equal(result.response.status, 200);
   result = await request('POST', '/__simulation/prepare-dataset-manifest');
@@ -1319,6 +1319,103 @@ test('dataset manifests are immutable, point-in-time and stop before materializa
   assert.equal(ready.manifest.samples.every((sample) => !Object.keys(sample.features)
     .some((reference) => reference.startsWith('review.'))), true);
   assert.match(ready.manifestChecksum, /^[a-f0-9]{64}$/);
+
+  const materializationHeaders = commandHeaders('dataset-materialization-0001', ready.revision);
+  const materializationBody = {
+    artifactFormat: 'PARQUET',
+    reason: '生成独立的版本锁定 Parquet 数据集对象',
+  };
+  result = await request('POST', `/bpi/v1/dataset-snapshots/${ready.id}/materializations`, {
+    headers: materializationHeaders,
+    body: materializationBody,
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'QUEUED');
+  assert.equal(result.json.data.revision, 1);
+  assert.equal(result.json.data.attemptCount, 0);
+  const materializationId = result.json.data.id;
+  const queuedMaterializationResponse = result.json;
+
+  result = await request('POST', `/bpi/v1/dataset-snapshots/${ready.id}/materializations`, {
+    headers: materializationHeaders,
+    body: materializationBody,
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, queuedMaterializationResponse);
+
+  result = await request('GET', `/bpi/v1/dataset-materializations/${materializationId}`);
+  assert.equal(result.json.data.state, 'WRITING');
+  assert.equal(result.json.data.revision, 2);
+  assert.equal(result.json.data.attemptCount, 1);
+
+  result = await request('POST', '/__simulation/fail-dataset-materialization', {
+    body: {
+      materializationId,
+      failureCode: 'SIMULATED_MINIO_TIMEOUT',
+      failureDetail: '模拟 MinIO 写入超时，用于失败重排队验收。',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'FAILED');
+  assert.equal(result.json.data.revision, 3);
+  assert.equal(result.json.data.artifactUri, null);
+
+  result = await request('GET', `/bpi/v1/dataset-snapshots/${ready.id}`);
+  assert.equal(result.json.data.materializationState, 'FAILED');
+  assert.equal(result.json.data.latestMaterialization.failureCode, 'SIMULATED_MINIO_TIMEOUT');
+  assert.equal(result.json.data.manifest.phaseBoundary.materializationState, 'NOT_STARTED');
+
+  const retryHeaders = commandHeaders('dataset-materialization-retry-0002', 3);
+  result = await request('POST', `/bpi/v1/dataset-materializations/${materializationId}/retry`, {
+    headers: retryHeaders,
+    body: { reason: '对象存储恢复后重新排队生成 Parquet' },
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'QUEUED');
+  assert.equal(result.json.data.revision, 4);
+  const retriedResponse = result.json;
+
+  result = await request('POST', `/bpi/v1/dataset-materializations/${materializationId}/retry`, {
+    headers: retryHeaders,
+    body: { reason: '对象存储恢复后重新排队生成 Parquet' },
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, retriedResponse);
+
+  result = await request('GET', `/bpi/v1/dataset-materializations/${materializationId}`);
+  assert.equal(result.json.data.state, 'WRITING');
+  assert.equal(result.json.data.revision, 5);
+  assert.equal(result.json.data.attemptCount, 2);
+  result = await request('GET', `/bpi/v1/dataset-materializations/${materializationId}`);
+  const materialized = result.json.data;
+  assert.equal(materialized.state, 'READY');
+  assert.equal(materialized.revision, 6);
+  assert.equal(materialized.rowCount, ready.includedCount);
+  assert.match(materialized.contentSha256, /^[a-f0-9]{64}$/);
+  assert.match(materialized.artifactUri, /^s3:\/\/bpi-datasets\/datasets\/.*\.parquet\?versionId=.+$/);
+  assert.equal(materialized.objectKey.endsWith(`${materialized.contentSha256}.parquet`), true);
+  assert.equal(materialized.artifactMetadata.objectContentVerified, true);
+  assert.equal(materialized.artifactMetadata.simulationOnly, true);
+  assert.equal(materialized.artifactMetadata.icebergReady, false);
+  assert.equal(materialized.artifactMetadata.mlflowRegistered, false);
+  assert.equal(materialized.artifactMetadata.modelTrained, false);
+
+  result = await request('GET', `/bpi/v1/dataset-snapshots/${ready.id}`);
+  assert.equal(result.json.data.materializationState, 'READY');
+  assert.equal(result.json.data.artifactUri, materialized.artifactUri);
+  assert.equal(result.json.data.latestMaterialization.id, materializationId);
+  assert.equal(result.json.data.manifest.phaseBoundary.materializationState, 'NOT_STARTED');
+  assert.equal(result.json.data.manifest.phaseBoundary.artifactUri, null);
+  assert.equal(result.json.data.manifest.phaseBoundary.icebergReady, false);
+  assert.equal(result.json.data.manifest.phaseBoundary.mlflowRegistered, false);
+  assert.equal(result.json.data.manifest.phaseBoundary.modelTrained, false);
+
+  result = await request('POST', `/bpi/v1/dataset-materializations/${materializationId}/retry`, {
+    headers: commandHeaders('dataset-materialization-ready-retry-0003', materialized.revision),
+    body: { reason: 'READY 对象必须保持不可变，禁止再次排队' },
+  });
+  assert.equal(result.response.status, 409);
+  assert.equal(result.json.currentRevision, materialized.revision);
 
   result = await request('POST', `/bpi/v1/datasets/${definition.id}/snapshots`, {
     headers: commandHeaders('dataset-snapshot-0002', definition.revision),

@@ -332,11 +332,15 @@ point catalog 时可用。批次复核只列出同 scope、同规则/拓扑版�
 `QUEUED -> BUILDING -> MANIFEST_READY/FAILED` 在后台推进；结果展示纳入/排除数量、逐项排除原因、
 point-in-time 样本、manifest 和 checksum。定义、清单样本和终态快照均不可覆盖。
 
-Phase 3A 的产品边界固定为 `MANIFEST_ONLY / NOT_STARTED`：`artifactUri=null`、`icebergReady=false`、
-`mlflowRegistered=false`、`modelTrained=false`。页面不得把 manifest 就绪展示成 Iceberg 物化、
-MLflow 注册或模型训练完成。
+manifest 自身继续保留 Phase 3A 的不可变边界事实：`MANIFEST_ONLY / NOT_STARTED`、`artifactUri=null`、
+`icebergReady=false`、`mlflowRegistered=false`、`modelTrained=false`。Phase 3B-A 在这个事实之外增加独立的
+Parquet 物化任务，按 `QUEUED -> WRITING -> READY/FAILED` 推进。数据工程师可从 `MANIFEST_READY` 快照请求生成；
+页面轮询任务，失败时允许按 revision 重新排队，READY 后显示带 `versionId` 的精确对象 URI、SHA-256、行数、
+字节数和 schema。页面仍必须把 Iceberg、MLflow 和模型训练显示为 `NOT_STARTED`，不得把 Parquet READY
+解释成训练链路完成。确定性模拟器只验证交互与契约，模拟 URI/SHA 不是 MinIO 真实落物证据。
 
-**主要 API：** `listDatasets`、`createDatasetDefinition`、`createDatasetSnapshot`、`getDatasetSnapshot`。
+**主要 API：** `listDatasets`、`createDatasetDefinition`、`createDatasetSnapshot`、`getDatasetSnapshot`、
+`requestDatasetMaterialization`、`getDatasetMaterialization`、`retryDatasetMaterialization`。
 
 ### 5.11 集成运行 `/bpi/integrations`
 

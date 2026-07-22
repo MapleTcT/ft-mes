@@ -587,12 +587,12 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 65,
+    "composeServiceCount": 67,
     "composeServiceKindCounts": {
       "business-runtime": 20,
       "infrastructure": 11,
       "platform-runtime": 28,
-      "support-runtime": 6
+      "support-runtime": 8
     },
     "composeServices": [
       {
@@ -644,6 +644,11 @@
         "service": "minio",
         "jarPath": "",
         "kind": "infrastructure"
+      },
+      {
+        "service": "bpi-dataset-minio-bootstrap",
+        "jarPath": "",
+        "kind": "support-runtime"
       },
       {
         "service": "websocket",
@@ -842,6 +847,11 @@
       },
       {
         "service": "bpi-service",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-dataset-materializer",
         "jarPath": "",
         "kind": "support-runtime"
       },

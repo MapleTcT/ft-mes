@@ -126,7 +126,7 @@ test('desktop operator confirms a candidate and opens the shadow batch', async (
   await context.close();
 });
 
-test('data engineer creates a point-in-time dataset manifest on desktop and inspects it on mobile', async () => {
+test('data engineer materializes a point-in-time dataset with failed retry and mobile evidence', async () => {
   let response = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
   assert.equal(response.status, 200);
   response = await fetch(`${simulatorUrl}/__simulation/prepare-dataset-manifest`, { method: 'POST' });
@@ -149,15 +149,53 @@ test('data engineer creates a point-in-time dataset manifest on desktop and insp
   await page.locator('#dataset-snapshot-submit').click();
 
   await page.locator('.batch-state-band').getByText('MANIFEST_READY', { exact: true }).waitFor();
-  await page.locator('.batch-state-band').getByText('MANIFEST ONLY', { exact: true }).waitFor();
+  await page.locator('.batch-state-band').getByText('POINT-IN-TIME', { exact: true }).waitFor();
+  await page.getByText('MANIFEST_ONLY', { exact: true }).waitFor();
   await page.locator('.dataset-exclusion-list').getByText('CONFIDENCE_BELOW_THRESHOLD', { exact: true }).waitFor();
   await page.locator('.dataset-exclusion-list').getByText('LABEL_DELAY_EXCEEDED', { exact: true }).waitFor();
   assert.equal(await page.locator('.dataset-sample-frame tbody tr').count(), 3);
   assert.match(await page.locator('.facts-grid .mono-value').last().textContent(), /^[a-f0-9]{64}$/);
 
+  await page.getByRole('button', { name: '生成 Parquet' }).click();
+  await page.getByRole('heading', { name: '生成版本锁定对象' }).waitFor();
+  await page.locator('#dataset-materialization-reason').fill('生成浏览器验收使用的版本锁定 Parquet 对象');
+  await page.locator('#dataset-materialization-submit').click();
+  await page.locator('[data-materialization-state="WRITING"]').waitFor();
+
+  let snapshotResponse = await fetch(`${simulatorUrl}/bpi/v1/datasets?plantId=PLANT-01&limit=100`).then((item) => item.json());
+  const snapshotId = snapshotResponse.data[0].latestSnapshot.id;
+  snapshotResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-snapshots/${snapshotId}`).then((item) => item.json());
+  const materializationId = snapshotResponse.data.latestMaterialization.id;
+  response = await fetch(`${simulatorUrl}/__simulation/fail-dataset-materialization`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      materializationId,
+      failureCode: 'SIMULATED_MINIO_TIMEOUT',
+      failureDetail: '浏览器验收注入的对象存储超时。',
+    }),
+  });
+  assert.equal(response.status, 200);
+  await page.locator('[data-materialization-state="FAILED"]').waitFor();
+  await page.getByText('SIMULATED_MINIO_TIMEOUT', { exact: true }).waitFor();
+  await page.getByRole('button', { name: '重新排队' }).click();
+  await page.getByRole('heading', { name: '重新排队 Parquet' }).waitFor();
+  await page.locator('#dataset-materialization-reason').fill('对象存储恢复后从页面重新排队并复验');
+  await page.locator('#dataset-materialization-submit').click();
+
+  const materializationPanel = page.locator('[data-materialization-state="READY"]');
+  await materializationPanel.waitFor();
+  await materializationPanel.getByText('SIMULATED', { exact: true }).waitFor();
+  assert.match(await materializationPanel.locator('.dataset-artifact-uri').textContent(), /^s3:\/\/bpi-datasets\/datasets\/.*\.parquet\?versionId=.+$/);
+  assert.match(await materializationPanel.locator('.dataset-artifact-sha').textContent(), /^[a-f0-9]{64}$/);
+  assert.deepEqual(await materializationPanel.locator('.dataset-downstream-grid .status').allTextContents(), [
+    'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED',
+  ]);
+
   const definitions = await fetch(`${simulatorUrl}/bpi/v1/datasets?plantId=PLANT-01&limit=100`).then((item) => item.json());
   assert.equal(definitions.data.length, 1);
   assert.equal(definitions.data[0].latestSnapshot.state, 'MANIFEST_READY');
+  assert.equal(definitions.data[0].latestSnapshot.materializationState, 'READY');
   const snapshot = await fetch(`${simulatorUrl}/bpi/v1/dataset-snapshots/${definitions.data[0].latestSnapshot.id}`).then((item) => item.json());
   assert.equal(snapshot.data.manifest.phaseBoundary.deliveryState, 'MANIFEST_ONLY');
   assert.equal(snapshot.data.manifest.phaseBoundary.materializationState, 'NOT_STARTED');
@@ -167,7 +205,11 @@ test('data engineer creates a point-in-time dataset manifest on desktop and insp
   assert.equal(snapshot.data.manifest.phaseBoundary.modelTrained, false);
   assert.equal(snapshot.data.includedCount, 1);
   assert.equal(snapshot.data.excludedCount, 2);
-  await page.screenshot({ path: '/tmp/bpi-dataset-manifest-desktop.png', fullPage: true });
+  assert.equal(snapshot.data.materializationState, 'READY');
+  assert.equal(snapshot.data.latestMaterialization.id, materializationId);
+  assert.equal(snapshot.data.latestMaterialization.artifactMetadata.objectContentVerified, true);
+  assert.equal(snapshot.data.latestMaterialization.artifactMetadata.simulationOnly, true);
+  await page.screenshot({ path: '/tmp/bpi-dataset-parquet-desktop.png', fullPage: true });
   assert.deepEqual(errors, []);
   await desktop.close();
 
@@ -181,7 +223,14 @@ test('data engineer creates a point-in-time dataset manifest on desktop and insp
   await mobilePage.locator('[data-dataset-id]').click();
   await assertDrawerSettled(mobilePage);
   await mobilePage.getByRole('heading', { name: 'ADP E2E 启动边界清单' }).waitFor();
-  await mobilePage.screenshot({ path: '/tmp/bpi-dataset-manifest-mobile.png', fullPage: true });
+  await mobilePage.getByRole('button', { name: '查看最近快照' }).click();
+  await assertDrawerSettled(mobilePage);
+  assert.equal(await mobilePage.locator('#detail-drawer').evaluate((element) => element.scrollTop), 0,
+    'opening another dataset object must reset the drawer to its header');
+  await mobilePage.locator('[data-materialization-state="READY"]').waitFor();
+  const drawerGeometry = await mobilePage.evaluate(() => ({ body: document.body.scrollWidth, viewport: window.innerWidth }));
+  assert.ok(drawerGeometry.body <= drawerGeometry.viewport + 1, `dataset drawer overflows viewport: ${JSON.stringify(drawerGeometry)}`);
+  await mobilePage.screenshot({ path: '/tmp/bpi-dataset-parquet-mobile.png', fullPage: true });
   assert.deepEqual(mobileErrors, []);
   await mobile.close();
 });

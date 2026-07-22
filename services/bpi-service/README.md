@@ -86,9 +86,16 @@ immutable definitions from controlled feature and label references, then freeze 
 approved shadow-run reviews visible at the requested time. The worker uses a recoverable
 `FOR UPDATE SKIP LOCKED` claim, persists included and excluded samples, prevents label fields from
 entering feature payloads, records stable exclusion reasons and produces a deterministic manifest
-checksum. Definitions, terminal snapshots and samples are immutable. This phase deliberately stops
-at `MANIFEST_ONLY`: materialization remains `NOT_STARTED`, `artifactUri` is null and Iceberg, MLflow
-and model readiness remain false.
+checksum. Definitions, terminal snapshots and samples are immutable. The immutable V26 manifest keeps
+its original `MANIFEST_ONLY/NOT_STARTED` phase boundary even when later projections advance.
+
+Flyway V27 adds the Phase 3B-A materialization task boundary. Authorized engineers can queue one
+logical `PARQUET_V1` task for a `MANIFEST_READY` snapshot, read its state and explicitly retry only a
+`FAILED` revision. A separate Python 3.12 worker claims tasks with `FOR UPDATE SKIP LOCKED`, writes a
+deterministic PyArrow Parquet object to a private versioned MinIO bucket, downloads the exact object
+version and verifies SHA-256 before publishing `READY`. Snapshot reads project the latest task without
+mutating the V26 manifest. Iceberg, MLflow and model readiness remain `NOT_STARTED`; the worker and all
+Phase 2 integration switches remain disabled by default.
 
 ```bash
 make bpi-service-test
@@ -124,7 +131,8 @@ JAVA_HOME=/path/to/jdk17 mvn -f services/bpi-service/pom.xml -pl :bpi-service -a
   -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
-The focused Phase 3A dataset-manifest acceptance uses a fresh PostgreSQL schema migrated through V26:
+The focused dataset acceptance uses a fresh PostgreSQL schema migrated through V27 and covers both
+the Phase 3A manifest facts and Phase 3B-A task state machine:
 
 ```bash
 JAVA_HOME=/path/to/jdk17 BPI_TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/ft_mes_bpi_test \
@@ -132,6 +140,13 @@ JAVA_HOME=/path/to/jdk17 BPI_TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/
   mvn -f services/bpi-service/pom.xml -pl :bpi-service -am \
   -Dtest=BpiDatasetManifestPostgresAcceptanceTest \
   -Dsurefire.failIfNoSpecifiedTests=false test
+```
+
+The deterministic Parquet and object-store worker tests require Python 3.12 with the pinned runtime
+requirements (or the worker Docker image):
+
+```bash
+make bpi-dataset-materializer-test
 ```
 
 The focused data-quality acceptance uses real PostgreSQL and Embedded Kafka:

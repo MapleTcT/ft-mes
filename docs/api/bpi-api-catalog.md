@@ -103,6 +103,9 @@
 | 训练数据 | POST | `/bpi/v1/datasets` | `createDatasetDefinition` | SERVICE_IMPLEMENTED；仅允许受控特征/标签、固定 prediction time/cutoff/split policy |
 | 训练数据 | POST | `/bpi/v1/datasets/{datasetId}/snapshots` | `createDatasetSnapshot` | SERVICE_IMPLEMENTED；202 后台任务，只接受冻结时点前已批准且有复核的影子运行 |
 | 训练数据 | GET | `/bpi/v1/dataset-snapshots/{snapshotId}` | `getDatasetSnapshot` | SERVICE_IMPLEMENTED；返回 point-in-time manifest、checksum、样本排除原因和失败状态 |
+| 训练数据 | POST | `/bpi/v1/dataset-snapshots/{snapshotId}/materializations` | `requestDatasetMaterialization` | SERVICE_IMPLEMENTED；仅 `MANIFEST_READY` 快照可请求 PARQUET，任务进入 `QUEUED` |
+| 训练数据 | GET | `/bpi/v1/dataset-materializations/{materializationId}` | `getDatasetMaterialization` | SERVICE_IMPLEMENTED；返回 `QUEUED/WRITING/READY/FAILED`、精确对象版本 URI、SHA、行数和 schema 证据 |
+| 训练数据 | POST | `/bpi/v1/dataset-materializations/{materializationId}/retry` | `retryDatasetMaterialization` | SERVICE_IMPLEMENTED；仅失败任务可按当前 revision 幂等重排队 |
 | 集成运行 | GET | `/bpi/v1/integrations/health` | `getIntegrationHealth` | SIMULATED |
 | 集成运行 | POST | `/bpi/v1/integrations/{integrationId}/checks` | `runIntegrationCheck` | CONTRACT_ONLY |
 | 审计记录 | GET | `/bpi/v1/audit/events` | `listAuditEvents` | CONTRACT_ONLY |

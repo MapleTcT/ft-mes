@@ -38,6 +38,7 @@ import type {
   DataQualitySummary,
   DatasetDefinition,
   DatasetDefinitionCreateCommand,
+  DatasetMaterialization,
   DatasetSnapshot,
   DatasetSnapshotCommand,
   Evidence,
@@ -131,6 +132,8 @@ const state = {
   selectedFeatureFlag: null as FeatureFlag | null,
   selectedDataset: null as DatasetDefinition | null,
   selectedDatasetSnapshot: null as DatasetSnapshot | null,
+  selectedDatasetMaterialization: null as DatasetMaterialization | null,
+  datasetMaterializationCommand: null as 'request' | 'retry' | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | 'reconcileWms' | 'forceCloseRequest' | 'forceCloseApprove' | 'requestWmsReversal' | 'approveWmsReversal' | null,
   shadowRunCommand: null as 'start' | 'complete' | 'approve' | 'reject' | 'cancel' | null,
@@ -180,6 +183,13 @@ function number(value: number | null | undefined, digits = 1): string {
   return value === null || value === undefined ? '-' : value.toFixed(digits);
 }
 
+function formatBytes(value: number | null | undefined): string {
+  if (value === null || value === undefined) return '-';
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KiB`;
+  return `${(value / 1024 / 1024).toFixed(1)} MiB`;
+}
+
 function formatDuration(from: string, to: string): string {
   const durationMs = Math.max(0, Date.parse(to) - Date.parse(from));
   if (!Number.isFinite(durationMs)) return '-';
@@ -225,8 +235,8 @@ function dataQualityCategoryCount(patterns: string[]): number {
 }
 
 function statusTone(status: string): string {
-  if (['RUNNING', 'ACTIVE', 'READY', 'PASS', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED', 'QUALIFIED', 'COMPLETED', 'INBOUNDED', 'INBOUND_REVERSED', 'REVERSED', 'MANIFEST_READY'].includes(status)) return 'ok';
-  if (['PENDING', 'PENDING_APPROVAL', 'PENDING_WMS', 'INBOUND_REVERSING', 'REVERSAL_PENDING', 'EVALUATING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING', 'QUEUED', 'BUILDING'].includes(status)) return 'warn';
+  if (['RUNNING', 'ACTIVE', 'READY', 'PASS', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED', 'QUALIFIED', 'COMPLETED', 'INBOUNDED', 'INBOUND_REVERSED', 'REVERSED', 'MANIFEST_READY', 'VERIFIED'].includes(status)) return 'ok';
+  if (['PENDING', 'PENDING_APPROVAL', 'PENDING_WMS', 'INBOUND_REVERSING', 'REVERSAL_PENDING', 'EVALUATING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING', 'QUEUED', 'BUILDING', 'WRITING', 'SIMULATED'].includes(status)) return 'warn';
   if (['FAILED', 'REVERSAL_FAILED', 'FAIL', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED', 'OPEN', 'CRITICAL', 'ERROR', 'MISSING', 'DISABLED'].includes(status)) return 'danger';
   return 'neutral';
 }
@@ -526,6 +536,14 @@ function shell(): void {
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="dataset-snapshot-submit" value="default" class="button button--primary">生成清单</button></footer>
         </form>
       </dialog>
+      <dialog id="dataset-materialization-dialog" class="command-dialog">
+        <form method="dialog" id="dataset-materialization-form">
+          <header><div><span>Parquet 物化</span><h2 id="dataset-materialization-title">生成版本锁定对象</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <div id="dataset-materialization-summary" class="command-summary"></div>
+          <label><span>操作依据</span><textarea id="dataset-materialization-reason" required minlength="3" maxlength="500"></textarea></label>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="dataset-materialization-submit" value="default" class="button button--primary">生成 Parquet</button></footer>
+        </form>
+      </dialog>
       <dialog id="feature-flag-dialog" class="command-dialog">
         <form method="dialog" id="feature-flag-form">
           <header><div><span>运行治理</span><h2 id="feature-flag-dialog-title">变更运行开关</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
@@ -574,6 +592,7 @@ function bindShellEvents(): void {
   document.querySelector<HTMLFormElement>('#shadow-review-form')?.addEventListener('submit', handleShadowRunBatchReview);
   document.querySelector<HTMLFormElement>('#dataset-definition-form')?.addEventListener('submit', handleDatasetDefinitionCreate);
   document.querySelector<HTMLFormElement>('#dataset-snapshot-form')?.addEventListener('submit', handleDatasetSnapshotCreate);
+  document.querySelector<HTMLFormElement>('#dataset-materialization-form')?.addEventListener('submit', handleDatasetMaterializationCommand);
   document.querySelector<HTMLFormElement>('#feature-flag-form')?.addEventListener('submit', handleFeatureFlagChange);
   document.querySelector<HTMLSelectElement>('#shadow-review-batch')?.addEventListener('change', applyShadowReviewBatch);
   document.querySelector<HTMLDialogElement>('#confirm-dialog')?.addEventListener('close', () => {
@@ -3249,16 +3268,19 @@ function checkedDatasetRefs(selector: string): string[] {
 function renderDatasets(): void {
   const content = document.querySelector('#content')!;
   const readyCount = state.datasets.filter((dataset) => dataset.latestSnapshot?.state === 'MANIFEST_READY').length;
-  const activeCount = state.datasets.filter((dataset) => ['QUEUED', 'BUILDING'].includes(dataset.latestSnapshot?.state || '')).length;
-  const failedCount = state.datasets.filter((dataset) => dataset.latestSnapshot?.state === 'FAILED').length;
-  const toolbar = `<div class="toolbar dataset-toolbar"><div class="dataset-phase-badge"><i data-lucide="shield-check"></i><span>MANIFEST_ONLY</span><b>NOT_STARTED</b></div><div class="toolbar-actions"><button id="open-dataset-definition" class="icon-text-button"><i data-lucide="plus"></i>新建定义</button></div></div>`;
-  const summary = `<div class="dataset-summary"><div><span>数据集定义</span><b>${state.datasets.length}</b></div><div><span>清单已就绪</span><b>${readyCount}</b></div><div><span>后台构建中</span><b>${activeCount}</b></div><div><span>构建失败</span><b>${failedCount}</b></div></div>`;
+  const parquetReadyCount = state.datasets.filter((dataset) => dataset.latestSnapshot?.materializationState === 'READY').length;
+  const activeCount = state.datasets.filter((dataset) => ['QUEUED', 'BUILDING'].includes(dataset.latestSnapshot?.state || '')
+    || ['QUEUED', 'WRITING'].includes(dataset.latestSnapshot?.materializationState || '')).length;
+  const failedCount = state.datasets.filter((dataset) => dataset.latestSnapshot?.state === 'FAILED'
+    || dataset.latestSnapshot?.materializationState === 'FAILED').length;
+  const toolbar = `<div class="toolbar dataset-toolbar"><div class="dataset-phase-badge"><i data-lucide="database"></i><span>PARQUET</span><b>VERSION-PINNED</b></div><div class="toolbar-actions"><button id="open-dataset-definition" class="icon-text-button"><i data-lucide="plus"></i>新建定义</button></div></div>`;
+  const summary = `<div class="dataset-summary"><div><span>数据集定义</span><b>${state.datasets.length}</b></div><div><span>清单已就绪</span><b>${readyCount}</b></div><div><span>Parquet 已就绪</span><b>${parquetReadyCount}</b></div><div><span>后台处理中</span><b>${activeCount}</b></div><div><span>失败任务</span><b>${failedCount}</b></div></div>`;
   const rows = state.datasets.map((dataset) => {
     const latest = dataset.latestSnapshot;
-    return `<tr data-dataset-id="${escapeHtml(dataset.id)}" tabindex="0"><td><strong>${escapeHtml(dataset.name)}</strong><small>${escapeHtml(dataset.datasetCode)}@${escapeHtml(dataset.version)}</small></td><td>${escapeHtml(dataset.lineIds.join(', '))}</td><td>${escapeHtml(dataset.predictionTimePolicy)}</td><td>${dataset.featureRefs.length} / ${dataset.labelRefs.length}</td><td>${number(dataset.minimumConfidence * 100, 0)}%</td><td>${latest ? statusChip(latest.state) : statusChip('NOT_CREATED')}</td><td>${latest ? `v${latest.snapshotVersion} · ${formatTime(latest.freezeAt)}` : '-'}</td><td>${latest?.manifestChecksum ? `<code class="dataset-checksum">${escapeHtml(latest.manifestChecksum.slice(0, 12))}</code>` : '-'}</td><td><button class="icon-text-button dataset-row-action" data-create-dataset-snapshot="${escapeHtml(dataset.id)}"><i data-lucide="play"></i>生成清单</button></td></tr>`;
+    return `<tr data-dataset-id="${escapeHtml(dataset.id)}" tabindex="0"><td><strong>${escapeHtml(dataset.name)}</strong><small>${escapeHtml(dataset.datasetCode)}@${escapeHtml(dataset.version)}</small></td><td>${escapeHtml(dataset.lineIds.join(', '))}</td><td>${escapeHtml(dataset.predictionTimePolicy)}</td><td>${dataset.featureRefs.length} / ${dataset.labelRefs.length}</td><td>${number(dataset.minimumConfidence * 100, 0)}%</td><td>${latest ? statusChip(latest.state) : statusChip('NOT_CREATED')}</td><td>${latest ? statusChip(latest.materializationState) : statusChip('NOT_STARTED')}</td><td>${latest ? `v${latest.snapshotVersion} · ${formatTime(latest.freezeAt)}` : '-'}</td><td>${latest?.manifestChecksum ? `<code class="dataset-checksum">${escapeHtml(latest.manifestChecksum.slice(0, 12))}</code>` : '-'}</td><td><button class="icon-text-button dataset-row-action" data-create-dataset-snapshot="${escapeHtml(dataset.id)}"><i data-lucide="play"></i>生成清单</button></td></tr>`;
   }).join('');
   content.innerHTML = state.datasets.length
-    ? `${toolbar}${summary}<div class="table-frame"><table class="dataset-table"><thead><tr><th>数据集</th><th>产线</th><th>预测时点</th><th>特征 / 标签</th><th>最低置信度</th><th>最近状态</th><th>最近快照</th><th>清单校验和</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>`
+    ? `${toolbar}${summary}<div class="table-frame"><table class="dataset-table"><thead><tr><th>数据集</th><th>产线</th><th>预测时点</th><th>特征 / 标签</th><th>最低置信度</th><th>清单状态</th><th>Parquet</th><th>最近快照</th><th>清单校验和</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>`
     : `${toolbar}${summary}<div class="empty-state"><i data-lucide="boxes"></i><strong>尚未建立数据集定义</strong><span>当前工厂没有不可变数据集定义。</span></div>`;
   content.querySelector('#open-dataset-definition')?.addEventListener('click', openDatasetDefinitionDialog);
   content.querySelectorAll<HTMLElement>('[data-dataset-id]').forEach((row) => row.addEventListener('click', () => {
@@ -3338,9 +3360,9 @@ function openDatasetDefinition(dataset: DatasetDefinition): void {
   const featureItems = dataset.featureRefs.map((reference) => `<li><code>${escapeHtml(reference)}</code></li>`).join('');
   const labelItems = dataset.labelRefs.map((reference) => `<li><code>${escapeHtml(reference)}</code></li>`).join('');
   const latestHtml = latest
-    ? `<div class="dataset-latest"><div><span>v${latest.snapshotVersion}</span>${statusChip(latest.state)}</div><b>${formatTime(latest.freezeAt)}</b><code>${escapeHtml(latest.manifestChecksum || '-')}</code><button id="open-latest-dataset-snapshot" class="button button--secondary">查看最近快照</button></div>`
+    ? `<div class="dataset-latest"><div><span>v${latest.snapshotVersion}</span>${statusChip(latest.state)}${statusChip(latest.materializationState)}</div><b>${formatTime(latest.freezeAt)}</b><code>${escapeHtml(latest.manifestChecksum || '-')}</code><button id="open-latest-dataset-snapshot" class="button button--secondary">查看最近快照</button></div>`
     : '<div class="simulation-empty">尚未生成快照</div>';
-  openDrawer(`<header><div><span>不可变数据集定义</span><h2>${escapeHtml(dataset.name)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(dataset.state)}<span class="shadow-label">MANIFEST ONLY</span></div><span>revision ${dataset.revision}</span></div><div class="drawer-section facts-grid"><div><span>编码 / 版本</span><b>${escapeHtml(dataset.datasetCode)}@${escapeHtml(dataset.version)}</b></div><div><span>工厂 / 产线</span><b>${escapeHtml(dataset.plantId)} / ${escapeHtml(dataset.lineIds.join(', '))}</b></div><div><span>预测时点</span><b>${escapeHtml(dataset.predictionTimePolicy)}</b></div><div><span>特征截止</span><b>${escapeHtml(dataset.featureCutoffPolicy)}</b></div><div><span>标签最大延迟</span><b>${dataset.maxLabelDelayHours} 小时</b></div><div><span>最低置信度</span><b>${number(dataset.minimumConfidence * 100, 0)}%</b></div><div><span>拆分策略</span><b>${escapeHtml(dataset.splitPolicy)}</b></div><div><span>定义 checksum</span><b class="mono-value">${escapeHtml(dataset.checksum)}</b></div></div><div class="drawer-section dataset-ref-columns"><div><div class="section-title"><h3>特征字段</h3><span>${dataset.featureRefs.length} 项</span></div><ul class="dataset-ref-list">${featureItems}</ul></div><div><div class="section-title"><h3>标签字段</h3><span>${dataset.labelRefs.length} 项</span></div><ul class="dataset-ref-list">${labelItems}</ul></div></div><div class="drawer-section"><div class="section-title"><h3>最近快照</h3><span>${latest ? `v${latest.snapshotVersion}` : '无'}</span></div>${latestHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--primary" id="open-dataset-snapshot"><i data-lucide="play"></i>生成清单</button></footer>`, `dataset:${dataset.id}`);
+  openDrawer(`<header><div><span>不可变数据集定义</span><h2>${escapeHtml(dataset.name)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(dataset.state)}<span class="shadow-label">POINT-IN-TIME</span></div><span>revision ${dataset.revision}</span></div><div class="drawer-section facts-grid"><div><span>编码 / 版本</span><b>${escapeHtml(dataset.datasetCode)}@${escapeHtml(dataset.version)}</b></div><div><span>工厂 / 产线</span><b>${escapeHtml(dataset.plantId)} / ${escapeHtml(dataset.lineIds.join(', '))}</b></div><div><span>预测时点</span><b>${escapeHtml(dataset.predictionTimePolicy)}</b></div><div><span>特征截止</span><b>${escapeHtml(dataset.featureCutoffPolicy)}</b></div><div><span>标签最大延迟</span><b>${dataset.maxLabelDelayHours} 小时</b></div><div><span>最低置信度</span><b>${number(dataset.minimumConfidence * 100, 0)}%</b></div><div><span>拆分策略</span><b>${escapeHtml(dataset.splitPolicy)}</b></div><div><span>定义 checksum</span><b class="mono-value">${escapeHtml(dataset.checksum)}</b></div></div><div class="drawer-section dataset-ref-columns"><div><div class="section-title"><h3>特征字段</h3><span>${dataset.featureRefs.length} 项</span></div><ul class="dataset-ref-list">${featureItems}</ul></div><div><div class="section-title"><h3>标签字段</h3><span>${dataset.labelRefs.length} 项</span></div><ul class="dataset-ref-list">${labelItems}</ul></div></div><div class="drawer-section"><div class="section-title"><h3>最近快照</h3><span>${latest ? `v${latest.snapshotVersion}` : '无'}</span></div>${latestHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--primary" id="open-dataset-snapshot"><i data-lucide="play"></i>生成清单</button></footer>`, `dataset:${dataset.id}`);
   document.querySelector('#open-dataset-snapshot')?.addEventListener('click', () => openDatasetSnapshotDialog(dataset));
   document.querySelector('#open-latest-dataset-snapshot')?.addEventListener('click', () => {
     if (latest) void openDatasetSnapshotById(latest.id);
@@ -3413,15 +3435,160 @@ async function pollDatasetSnapshot(snapshotId: string): Promise<void> {
   await loadView(true);
 }
 
+function withDatasetMaterialization(
+  snapshot: DatasetSnapshot,
+  materialization: DatasetMaterialization,
+): DatasetSnapshot {
+  return {
+    ...snapshot,
+    materializationState: materialization.state,
+    artifactUri: materialization.artifactUri || null,
+    latestMaterialization: materialization,
+  };
+}
+
+function openDatasetMaterializationDialog(
+  snapshot: DatasetSnapshot,
+  command: 'request' | 'retry',
+): void {
+  const materialization = snapshot.latestMaterialization || null;
+  if (command === 'request' && snapshot.state !== 'MANIFEST_READY') {
+    showToast('Parquet 物化要求快照清单已就绪', true);
+    return;
+  }
+  if (command === 'retry' && materialization?.state !== 'FAILED') {
+    showToast('只有失败的 Parquet 任务可以重新排队', true);
+    return;
+  }
+  state.selectedDatasetSnapshot = snapshot;
+  state.selectedDatasetMaterialization = materialization;
+  state.datasetMaterializationCommand = command;
+  document.querySelector('#dataset-materialization-title')!.textContent = command === 'retry'
+    ? '重新排队 Parquet' : '生成版本锁定对象';
+  document.querySelector('#dataset-materialization-summary')!.innerHTML = `<div><span>数据集快照</span><b>${escapeHtml(snapshot.datasetCode)}@${escapeHtml(snapshot.datasetVersion)} / v${snapshot.snapshotVersion}</b></div><div><span>manifest checksum</span><b>${escapeHtml(snapshot.manifestChecksum || '-')}</b></div><div><span>当前状态</span><b>${escapeHtml(materialization?.state || 'NOT_STARTED')}</b></div><div><span>revision</span><b>${command === 'retry' ? materialization?.revision : snapshot.revision}</b></div>`;
+  const reason = document.querySelector<HTMLTextAreaElement>('#dataset-materialization-reason')!;
+  reason.value = '';
+  const button = document.querySelector<HTMLButtonElement>('#dataset-materialization-submit')!;
+  button.textContent = command === 'retry' ? '重新排队' : '生成 Parquet';
+  document.querySelector<HTMLDialogElement>('#dataset-materialization-dialog')!.showModal();
+  reason.focus();
+}
+
+async function handleDatasetMaterializationCommand(event: SubmitEvent): Promise<void> {
+  event.preventDefault();
+  const snapshot = state.selectedDatasetSnapshot;
+  const command = state.datasetMaterializationCommand;
+  const materialization = state.selectedDatasetMaterialization;
+  if (!snapshot || !command || (command === 'retry' && !materialization)) return;
+  const reason = document.querySelector<HTMLTextAreaElement>('#dataset-materialization-reason')!.value.trim();
+  if (reason.length < 3) {
+    showToast('操作依据至少填写 3 个字符', true);
+    return;
+  }
+  const button = document.querySelector<HTMLButtonElement>('#dataset-materialization-submit')!;
+  const idleLabel = command === 'retry' ? '重新排队' : '生成 Parquet';
+  button.disabled = true;
+  button.textContent = command === 'retry' ? '排队中...' : '提交中...';
+  try {
+    const response = command === 'retry'
+      ? await bpiApi.retryDatasetMaterialization(materialization!, reason, commandId())
+      : await bpiApi.requestDatasetMaterialization(snapshot, reason, commandId());
+    document.querySelector<HTMLDialogElement>('#dataset-materialization-dialog')!.close();
+    state.selectedDatasetMaterialization = response.data;
+    state.datasetMaterializationCommand = null;
+    const updatedSnapshot = withDatasetMaterialization(snapshot, response.data);
+    state.selectedDatasetSnapshot = updatedSnapshot;
+    renderDatasetSnapshotDrawer(updatedSnapshot);
+    showToast(command === 'retry' ? 'Parquet 任务已重新排队' : 'Parquet 任务已进入后台队列');
+    await pollDatasetMaterialization(snapshot.id, response.data.id);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = idleLabel;
+  }
+}
+
+async function pollDatasetMaterialization(snapshotId: string, materializationId: string): Promise<void> {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const response = await bpiApi.datasetMaterialization(materializationId);
+    state.selectedDatasetMaterialization = response.data;
+    if (state.selectedDatasetSnapshot?.id === snapshotId) {
+      state.selectedDatasetSnapshot = withDatasetMaterialization(state.selectedDatasetSnapshot, response.data);
+      if (activeDrawerKey === `dataset-snapshot:${snapshotId}`) {
+        renderDatasetSnapshotDrawer(state.selectedDatasetSnapshot);
+      }
+    }
+    if (['READY', 'FAILED'].includes(response.data.state)) {
+      const snapshotResponse = await bpiApi.datasetSnapshot(snapshotId);
+      if (state.selectedDatasetSnapshot?.id === snapshotId) state.selectedDatasetSnapshot = snapshotResponse.data;
+      if (activeDrawerKey === `dataset-snapshot:${snapshotId}`) renderDatasetSnapshotDrawer(snapshotResponse.data);
+      showToast(response.data.state === 'READY'
+        ? `Parquet 已就绪，共 ${response.data.rowCount ?? 0} 行`
+        : `Parquet 生成失败：${response.data.failureCode || 'UNKNOWN'}`, response.data.state === 'FAILED');
+      await loadView(true);
+      return;
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
+  }
+  showToast('Parquet 仍在后台生成，可稍后刷新状态', true);
+  await loadView(true);
+}
+
 async function openDatasetSnapshotById(snapshotId: string): Promise<void> {
   try {
     const response = await bpiApi.datasetSnapshot(snapshotId);
     state.selectedDatasetSnapshot = response.data;
     renderDatasetSnapshotDrawer(response.data);
     if (['QUEUED', 'BUILDING'].includes(response.data.state)) await pollDatasetSnapshot(snapshotId);
+    else if (response.data.latestMaterialization
+      && ['QUEUED', 'WRITING'].includes(response.data.latestMaterialization.state)) {
+      await pollDatasetMaterialization(snapshotId, response.data.latestMaterialization.id);
+    }
   } catch (error) {
     showToast(error instanceof Error ? error.message : String(error), true);
   }
+}
+
+function datasetMaterializationHtml(snapshot: DatasetSnapshot): string {
+  const materialization = snapshot.latestMaterialization || null;
+  const downstream = `<div class="dataset-downstream-grid"><div><span>Iceberg</span>${statusChip('NOT_STARTED')}</div><div><span>MLflow</span>${statusChip('NOT_STARTED')}</div><div><span>模型训练</span>${statusChip('NOT_STARTED')}</div></div>`;
+  if (!materialization) {
+    return `<div class="drawer-section dataset-materialization-panel" data-materialization-state="NOT_STARTED"><div class="section-title"><h3>Parquet 物化</h3>${statusChip('NOT_STARTED')}</div><div class="simulation-empty">尚未生成 Parquet 对象</div>${downstream}</div>`;
+  }
+  const metadata = materialization.artifactMetadata || {};
+  const objectVersionId = typeof metadata.objectVersionId === 'string' ? metadata.objectVersionId : '-';
+  const schemaFields = materialization.schema?.fields;
+  const schemaFieldCount = Array.isArray(schemaFields) ? schemaFields.length : 0;
+  const evidenceState = metadata.simulationOnly === true
+    ? 'SIMULATED' : metadata.objectContentVerified === true ? 'VERIFIED' : 'UNVERIFIED';
+  let body = '';
+  if (['QUEUED', 'WRITING'].includes(materialization.state)) {
+    body = `<div class="batch-detail-loading"><i data-lucide="refresh-cw"></i><div><strong>${materialization.state === 'QUEUED' ? '等待 Worker 领取' : '正在写入并复验对象'}</strong><span>attempt ${materialization.attemptCount} · revision ${materialization.revision}</span></div></div>`;
+  } else if (materialization.state === 'FAILED') {
+    body = `<div class="dataset-materialization-error"><i data-lucide="circle-alert"></i><div><strong>${escapeHtml(materialization.failureCode || 'MATERIALIZATION_FAILED')}</strong><span>${escapeHtml(materialization.failureDetail || '物化任务失败')}</span></div></div>`;
+  } else {
+    body = `<div class="dataset-artifact-grid"><div><span>对象复验</span>${statusChip(evidenceState)}</div><div><span>行数</span><b>${materialization.rowCount ?? 0}</b></div><div><span>文件大小</span><b>${formatBytes(materialization.byteSize)}</b></div><div><span>Schema 字段</span><b>${schemaFieldCount}</b></div><div><span>对象版本</span><code>${escapeHtml(objectVersionId)}</code></div><div><span>完成时间</span><b>${formatTime(materialization.completedAt)}</b></div></div><div class="dataset-artifact-reference"><span>精确对象 URI</span><code class="dataset-artifact-uri">${escapeHtml(materialization.artifactUri || '-')}</code><span>内容 SHA-256</span><code class="dataset-artifact-sha">${escapeHtml(materialization.contentSha256 || '-')}</code></div>`;
+  }
+  return `<div class="drawer-section dataset-materialization-panel" data-materialization-state="${escapeHtml(materialization.state)}"><div class="section-title"><h3>Parquet 物化</h3><span>${statusChip(materialization.state)} · r${materialization.revision}</span></div>${body}${downstream}</div>`;
+}
+
+function datasetMaterializationActionHtml(snapshot: DatasetSnapshot): string {
+  if (['QUEUED', 'BUILDING'].includes(snapshot.state)) {
+    return '<button class="button button--primary" id="refresh-dataset-snapshot"><i data-lucide="refresh-cw"></i>刷新清单</button>';
+  }
+  if (snapshot.state !== 'MANIFEST_READY') return '';
+  const materialization = snapshot.latestMaterialization || null;
+  if (!materialization) {
+    return '<button class="button button--primary" id="open-dataset-materialization"><i data-lucide="database"></i>生成 Parquet</button>';
+  }
+  if (materialization.state === 'FAILED') {
+    return '<button class="button button--primary" id="retry-dataset-materialization"><i data-lucide="rotate-ccw"></i>重新排队</button>';
+  }
+  if (['QUEUED', 'WRITING'].includes(materialization.state)) {
+    return '<button class="button button--primary" id="refresh-dataset-materialization"><i data-lucide="refresh-cw"></i>刷新 Parquet</button>';
+  }
+  return '';
 }
 
 function renderDatasetSnapshotDrawer(snapshot: DatasetSnapshot): void {
@@ -3432,16 +3599,27 @@ function renderDatasetSnapshotDrawer(snapshot: DatasetSnapshot): void {
   const samples = (manifest?.samples || []).slice(0, 50).map((sample) => `<tr><td><strong>${escapeHtml(sample.batchNo)}</strong><small>${escapeHtml(sample.lineId)}</small></td><td>${formatTime(sample.predictionTime)}</td><td>${escapeHtml(sample.splitKey)}</td><td>${number(sample.confidence * 100, 0)}%</td><td>${sample.included ? statusChip('INCLUDED') : statusChip('EXCLUDED')}</td><td>${escapeHtml(sample.exclusionReasons.join(', ') || '-')}</td></tr>`).join('');
   const phase = manifest?.phaseBoundary;
   const buildHtml = manifest
-    ? `<div class="drawer-section dataset-phase-grid"><div><span>交付状态</span><b>${escapeHtml(phase?.deliveryState || 'MANIFEST_ONLY')}</b></div><div><span>物化状态</span><b>${escapeHtml(phase?.materializationState || snapshot.materializationState)}</b></div><div><span>Iceberg</span>${statusChip(phase?.icebergReady ? 'READY' : 'NOT_STARTED')}</div><div><span>MLflow</span>${statusChip(phase?.mlflowRegistered ? 'REGISTERED' : 'NOT_STARTED')}</div><div><span>模型训练</span>${statusChip(phase?.modelTrained ? 'TRAINED' : 'NOT_STARTED')}</div><div><span>Artifact URI</span><b>${escapeHtml(phase?.artifactUri || '-')}</b></div></div><div class="drawer-section"><div class="section-title"><h3>样本统计</h3><span>${manifest.counts.total} 条</span></div><div class="metric-grid dataset-metrics"><div><span>总样本</span><b>${manifest.counts.total}</b></div><div><span>纳入</span><b>${manifest.counts.included}</b></div><div><span>排除</span><b>${manifest.counts.excluded}</b></div><div><span>排除原因</span><b>${Object.keys(manifest.counts.exclusionSummary).length}</b></div></div>${exclusions ? `<ul class="dataset-exclusion-list">${exclusions}</ul>` : ''}</div><div class="drawer-section"><div class="section-title"><h3>Point-in-time 样本</h3><span>${samples ? `显示 ${Math.min(manifest.samples.length, 50)} / ${manifest.samples.length}` : '无'}</span></div>${samples ? `<div class="table-frame dataset-sample-frame"><table><thead><tr><th>批次</th><th>预测时点</th><th>拆分</th><th>置信度</th><th>结果</th><th>排除原因</th></tr></thead><tbody>${samples}</tbody></table></div>` : '<div class="simulation-empty">没有满足冻结条件的影子复核样本</div>'}</div>`
+    ? `<div class="drawer-section"><div class="section-title"><h3>Manifest 边界</h3><span>不可变</span></div><div class="dataset-phase-grid"><div><span>交付状态</span><b>${escapeHtml(phase?.deliveryState || 'MANIFEST_ONLY')}</b></div><div><span>Manifest 物化声明</span><b>${escapeHtml(phase?.materializationState || 'NOT_STARTED')}</b></div><div><span>Manifest Artifact URI</span><b>${escapeHtml(phase?.artifactUri || '-')}</b></div></div></div>${datasetMaterializationHtml(snapshot)}<div class="drawer-section"><div class="section-title"><h3>样本统计</h3><span>${manifest.counts.total} 条</span></div><div class="metric-grid dataset-metrics"><div><span>总样本</span><b>${manifest.counts.total}</b></div><div><span>纳入</span><b>${manifest.counts.included}</b></div><div><span>排除</span><b>${manifest.counts.excluded}</b></div><div><span>排除原因</span><b>${Object.keys(manifest.counts.exclusionSummary).length}</b></div></div>${exclusions ? `<ul class="dataset-exclusion-list">${exclusions}</ul>` : ''}</div><div class="drawer-section"><div class="section-title"><h3>Point-in-time 样本</h3><span>${samples ? `显示 ${Math.min(manifest.samples.length, 50)} / ${manifest.samples.length}` : '无'}</span></div>${samples ? `<div class="table-frame dataset-sample-frame"><table><thead><tr><th>批次</th><th>预测时点</th><th>拆分</th><th>置信度</th><th>结果</th><th>排除原因</th></tr></thead><tbody>${samples}</tbody></table></div>` : '<div class="simulation-empty">没有满足冻结条件的影子复核样本</div>'}</div>`
     : `<div class="drawer-section"><div class="batch-detail-loading"><i data-lucide="refresh-cw"></i><div><strong>${snapshot.state === 'FAILED' ? '清单构建失败' : '后台正在构建清单'}</strong><span>${escapeHtml(snapshot.failureDetail || `attempt ${snapshot.attemptCount}`)}</span></div></div></div>`;
-  openDrawer(`<header><div><span>数据集快照 v${snapshot.snapshotVersion}</span><h2>${escapeHtml(snapshot.datasetName)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(snapshot.state)}<span class="shadow-label">MANIFEST ONLY</span></div><span>revision ${snapshot.revision}</span></div><div class="drawer-section facts-grid"><div><span>冻结时间</span><b>${formatTime(snapshot.freezeAt)}</b></div><div><span>产线</span><b>${escapeHtml(snapshot.lineIds.join(', '))}</b></div><div><span>规则版本筛选</span><b>${escapeHtml(snapshot.ruleVersionIds.join(', ') || '全部合格版本')}</b></div><div><span>低置信度排除</span><b>${snapshot.excludeLowConfidence ? '是' : '否'}</b></div><div><span>定义 checksum</span><b class="mono-value">${escapeHtml(snapshot.definitionChecksum)}</b></div><div><span>manifest checksum</span><b class="mono-value">${escapeHtml(snapshot.manifestChecksum || '-')}</b></div></div>${buildHtml}<footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${['QUEUED', 'BUILDING'].includes(snapshot.state) ? '<button class="button button--primary" id="refresh-dataset-snapshot"><i data-lucide="refresh-cw"></i>刷新状态</button>' : ''}</footer>`, `dataset-snapshot:${snapshot.id}`);
+  openDrawer(`<header><div><span>数据集快照 v${snapshot.snapshotVersion}</span><h2>${escapeHtml(snapshot.datasetName)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(snapshot.state)}${statusChip(snapshot.materializationState)}<span class="shadow-label">POINT-IN-TIME</span></div><span>snapshot revision ${snapshot.revision}</span></div><div class="drawer-section facts-grid"><div><span>冻结时间</span><b>${formatTime(snapshot.freezeAt)}</b></div><div><span>产线</span><b>${escapeHtml(snapshot.lineIds.join(', '))}</b></div><div><span>规则版本筛选</span><b>${escapeHtml(snapshot.ruleVersionIds.join(', ') || '全部合格版本')}</b></div><div><span>低置信度排除</span><b>${snapshot.excludeLowConfidence ? '是' : '否'}</b></div><div><span>定义 checksum</span><b class="mono-value">${escapeHtml(snapshot.definitionChecksum)}</b></div><div><span>manifest checksum</span><b class="mono-value">${escapeHtml(snapshot.manifestChecksum || '-')}</b></div></div>${buildHtml}<footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${datasetMaterializationActionHtml(snapshot)}</footer>`, `dataset-snapshot:${snapshot.id}`);
   document.querySelector('#refresh-dataset-snapshot')?.addEventListener('click', () => void openDatasetSnapshotById(snapshot.id));
+  document.querySelector('#open-dataset-materialization')?.addEventListener('click', () => openDatasetMaterializationDialog(snapshot, 'request'));
+  document.querySelector('#retry-dataset-materialization')?.addEventListener('click', () => openDatasetMaterializationDialog(snapshot, 'retry'));
+  document.querySelector('#refresh-dataset-materialization')?.addEventListener('click', () => {
+    const materialization = snapshot.latestMaterialization;
+    if (!materialization) return;
+    void pollDatasetMaterialization(snapshot.id, materialization.id)
+      .catch((error) => showToast(error instanceof Error ? error.message : String(error), true));
+  });
 }
 
 function openDrawer(html: string, drawerKey: string | null = null): void {
   const drawer = document.querySelector<HTMLElement>('#detail-drawer')!;
+  const previousKey = activeDrawerKey;
+  const previousScrollTop = drawer.scrollTop;
   activeDrawerKey = drawerKey;
   drawer.innerHTML = html;
+  drawer.scrollTop = previousKey === drawerKey ? previousScrollTop : 0;
   drawer.classList.add('is-open');
   drawer.setAttribute('aria-hidden', 'false');
   drawer.querySelectorAll('[data-close-drawer]').forEach((button) => button.addEventListener('click', closeDrawer));

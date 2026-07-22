@@ -10,7 +10,7 @@
 - 反编译服务 Java：`259` 个文件。
 - 前端 source map：`366` 个。
 - 前端恢复源码：`991` 个文件。
-- Docker Compose 服务：`65` 个。
+- Docker Compose 服务：`67` 个。
 - 默认数据库：`postgresql`。
 - Oracle 模式：`legacy-template-only`。
 
@@ -95,6 +95,7 @@
 | nacos-config | infrastructure | - |
 | keycloak | infrastructure | - |
 | minio | infrastructure | - |
+| bpi-dataset-minio-bootstrap | support-runtime | - |
 | websocket | platform-runtime | bap-server/base-Server/websocket/supfusion-websocket.jar |
 | i18n | platform-runtime | bap-server/base-Server/i18n/supfusion-i18n.jar |
 | sysmanagement | platform-runtime | bap-server/base-Server/sysmanagement/supfusion-sysmanagement.jar |
@@ -135,6 +136,7 @@
 | ProcessAnalysis | business-runtime | bap-server/module-Server/ProcessAnalysis/manual/process-analysis.jar |
 | bpi-migrate | support-runtime | - |
 | bpi-service | support-runtime | - |
+| bpi-dataset-materializer | support-runtime | - |
 | qcs-quality-gate-outbox | support-runtime | - |
 | bpi-adapter | support-runtime | - |
 | bpi-wms-adapter | support-runtime | - |
