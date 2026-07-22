@@ -460,6 +460,7 @@ runtime-script-check:
 	BPI_ROLLBACK_SERVICE_IMAGE=static:test BPI_ROLLBACK_ADAPTER_IMAGE=static:test BPI_ROLLBACK_JOB_JAR=/tmp/old.jar BPI_LOAD_CLIENT_JOB_JAR=/tmp/new.jar ADP_BASE_URL=http://127.0.0.1 ADP_USERNAME=static ADP_PASSWORD=static BPI_INTEGRATED_ROLLBACK_CONFIRM=ROLLBACK_BPI_SERVICE_ADAPTER_FLINK_AND_RESTORE $(NODE) deploy/docker/scripts/adp-bpi-integrated-rollback-rehearsal.js --print-remote-script | sh -n
 	$(NODE) --check deploy/docker/scripts/adp-bpi-quality-release-target-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-dataset-manifest-target-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-bpi-dataset-materialization-target-acceptance.js
 	$(NODE) --check deploy/docker/scripts/run-qcs-bpi-quality-gate-target.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-wms-outage-recovery-acceptance.js
 	$(NODE) --check deploy/docker/scripts/generate-bpi-wms-outage-fixture.js

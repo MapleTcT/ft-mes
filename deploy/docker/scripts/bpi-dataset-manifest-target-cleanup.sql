@@ -2,15 +2,19 @@
 
 BEGIN;
 
-CREATE TEMP TABLE target_dataset_definitions ON COMMIT DROP AS
+CREATE TEMP TABLE target_dataset_definitions AS
 SELECT id FROM bpi.bpi_dataset_definitions
  WHERE tenant_id = '1000' AND dataset_code = :'marker';
 
-CREATE TEMP TABLE target_dataset_snapshots ON COMMIT DROP AS
+CREATE TEMP TABLE target_dataset_snapshots AS
 SELECT id FROM bpi.bpi_dataset_snapshots
  WHERE tenant_id = '1000' AND dataset_id IN (SELECT id FROM target_dataset_definitions);
 
-CREATE TEMP TABLE target_shadow_runs ON COMMIT DROP AS
+CREATE TEMP TABLE target_dataset_materializations AS
+SELECT id FROM bpi.bpi_dataset_materializations
+ WHERE tenant_id = '1000' AND snapshot_id IN (SELECT id FROM target_dataset_snapshots);
+
+CREATE TEMP TABLE target_shadow_runs AS
 SELECT id FROM bpi.bpi_shadow_runs
  WHERE tenant_id = '1000' AND run_code LIKE :'marker' || '_SHADOW_%';
 
@@ -21,12 +25,16 @@ DELETE FROM bpi.bpi_audit_events
  WHERE tenant_id = '1000'
    AND object_id IN (
        SELECT id FROM target_dataset_definitions
-       UNION ALL SELECT id FROM target_dataset_snapshots);
+       UNION ALL SELECT id FROM target_dataset_snapshots
+       UNION ALL SELECT id FROM target_dataset_materializations);
 
 DELETE FROM bpi.bpi_api_idempotency
  WHERE tenant_id = '1000'
    AND (idempotency_key LIKE :'marker' || '%'
         OR response_body::text LIKE '%' || :'marker' || '%');
+
+DELETE FROM bpi.bpi_dataset_materializations
+ WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_materializations);
 
 DELETE FROM bpi.bpi_dataset_snapshots
  WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_snapshots);
@@ -67,6 +75,10 @@ SELECT jsonb_pretty(jsonb_build_object(
         'samples', (SELECT count(*) FROM bpi.bpi_dataset_snapshot_samples sample
                      WHERE sample.tenant_id = '1000'
                        AND sample.batch_no LIKE :'marker' || '_%'),
+        'materializations', (SELECT count(*) FROM bpi.bpi_dataset_materializations materialization
+                              WHERE materialization.tenant_id = '1000'
+                                AND materialization.snapshot_id IN (
+                                    SELECT id FROM target_dataset_snapshots)),
         'shadowRuns', (SELECT count(*) FROM bpi.bpi_shadow_runs
                         WHERE tenant_id = '1000' AND run_code LIKE :'marker' || '_SHADOW_%'),
         'reviews', (SELECT count(*) FROM bpi.bpi_shadow_run_batch_reviews review
