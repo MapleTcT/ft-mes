@@ -1,11 +1,13 @@
-# BPI 数据集清单与 Parquet 物化落表审计
+# BPI 数据集清单、Parquet 物化与 Iceberg 目录发布落表审计
 
 ## 范围
 
-本审计覆盖 Flyway `V26__bpi_dataset_manifest_workbench.sql` 与
-`V27__bpi_dataset_parquet_materialization.sql`，包含数据集定义、快照清单、版本锁定 Parquet 请求、
-失败恢复、精确对象版本校验、读取、幂等、审计和清理。默认数据库保持 PostgreSQL；Oracle 不参与该
-运行路径。结论同时包含本地回归和 `10.11.100.17` 目标 PostgreSQL 15.18/Flyway V27 真实整链。
+本审计覆盖 Flyway `V26__bpi_dataset_manifest_workbench.sql`、
+`V27__bpi_dataset_parquet_materialization.sql` 与
+`V28__bpi_dataset_iceberg_catalog_publication.sql`，包含数据集定义、快照清单、版本锁定 Parquet、
+Iceberg 目录发布、失败恢复、精确对象版本、post-commit fencing、读取、幂等、审计和清理。默认数据库
+保持 PostgreSQL；Oracle 不参与该运行路径。结论包含本地回归和 `10.11.100.17` 目标 PostgreSQL
+15.18/Flyway V28、MinIO 与 Polaris 真实整链。
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
 |---|---|---|---|---|---|---|---|
@@ -20,6 +22,10 @@
 | 请求 Parquet 并持久化受控失败 | `/bpi/#/datasets` 清单详情 | `POST /bpi/v1/dataset-snapshots/{id}/materializations`；GET materialization | `DatasetMaterializationService`；Python materializer | `bpi_dataset_materializations`、审计、幂等 | 查询 state/revision/attempt/failure/URI/SHA 与审计序列 | 同一任务 `QUEUED/r1 -> FAILED/r3`，attempt 1、`MATERIALIZATION_ERROR`，URI/SHA null | PASS_TARGET |
 | 页面重试并完成版本锁定制品 | 同一失败详情 | `POST /bpi/v1/dataset-materializations/{id}/retry`；GET materialization | service retry；Worker claim/build/upload/readback/complete | materialization、snapshot sample、审计、幂等 | `bpi-dataset-materialization-target-verification.sql` | `READY/r6`、attempt 2、11341 bytes、1 row、26 fields；DB 与 exact-version 对象 SHA 一致 | PASS_TARGET |
 | 重启、最小权限和 V27 清理 | READY 详情/运行时 | service restart GET；Worker DELETE；admin version DELETE；cleanup SQL | PostgreSQL repositories；MinIO policy/admin；cleanup | V26/V27 数据集表、审计、幂等和对象版本 | 重启复读；Worker 删除反证；11 类 marker/4 条 idempotency/对象版本/容器/开关终态 | 重启后 READY 不变；Worker `AccessDenied`；数据库与对象版本归零；Worker 0、开关 false | PASS_TARGET_CLEANED |
+| 页面发布 Iceberg 并 READY | `/bpi/#/datasets` | catalog publication POST/GET | adapter -> service -> publication repository -> Python publisher | `bpi_dataset_catalog_publications`、审计、幂等、Polaris metastore | `bpi-dataset-catalog-target-verification.sql`；MinIO exact version；PyIceberg snapshot scan | `READY/r4/attempt1`，snapshot `1863646729883880222`，1 row/1 data file；桌面/移动浏览器错误 0 | PASS_TARGET |
+| 页面失败与同任务重试 | 同一失败详情 | publication POST；retry POST；GET | service retry；publisher fail/reclaim/verify/complete | publication、审计、幂等、Polaris metastore | revision 顺序、failure/snapshot、两个 `COMPLETED/202` | `FAILED/r3/SOURCE_OBJECT_ERROR -> READY/r7/attempt2`，复用同一 publication ID | PASS_TARGET |
+| post-commit fencing 恢复 | 页面创建 QUEUED；受保护注入 | real commit -> exit 86；原版 publisher restart/reconcile | repository、source reader、catalog publisher | publication、审计、Polaris metastore | 故障前后 snapshot/metadata、按 `after_revision` 审计、独立 snapshot 数 | `COMMITTING/r2` 且 DB snapshot null 时 Polaris 恰有 1 snapshot；恢复为 `READY/r6/attempt2` 后仍只有同一 snapshot | PASS_TARGET |
+| V28 最小权限与清理 | 不适用 | publisher drop 反证；bootstrap/MinIO admin；cleanup SQL | Polaris auth + 独立管理身份 | V26-V28 lineage、Polaris、MinIO | exact table/version/prefix 和 marker 终态 | publisher drop 403；definition/materialization/publication `0/0/0`；sidecar 停止、七开关 false | PASS_TARGET_CLEANED |
 
 ## 表所有权与约束
 
@@ -29,6 +35,7 @@
 | `bpi.bpi_dataset_snapshots` | BPI service/worker | tenant FK；版本唯一；状态约束；终态不可变；artifact 永远 null | SELECT、INSERT、受控 UPDATE |
 | `bpi.bpi_dataset_snapshot_samples` | BPI worker | tenant 复合 FK；快照+review 主键；included/reason 一致；cutoff=prediction time；UPDATE 拒绝 | SELECT、INSERT |
 | `bpi.bpi_dataset_materializations` | BPI service/Python materializer | tenant+snapshot+format 唯一活动任务；revision/attempt/state 转移受控；READY 要求 URI、versionId、SHA、bytes/rows/schema 完整；FAILED 不得伪留制品事实 | SELECT、INSERT、受控 UPDATE |
+| `bpi.bpi_dataset_catalog_publications` | BPI service/Python publisher | tenant+materialization+catalog/table 唯一活动任务；claim/revision/attempt/fencing 受控；READY 要求 snapshot/table/metadata/schema/spec/rows/checksum 完整；FAILED 不得伪留 snapshot | SELECT、INSERT、受控 UPDATE |
 
 ## 目标验收标识
 
@@ -48,6 +55,17 @@ V27 物化验收：
 - object versionId：`28b5a178-d972-4e5b-9c6f-c3ece7bb0838`
 - 目标验证 SQL：`deploy/docker/scripts/bpi-dataset-materialization-target-verification.sql`
 - 机器证据：`metadata/bpi-dataset-materialization-acceptance.json`
+
+V28 目录发布验收：
+
+- clean release：`b7356aa0749600a436df84f39fbff3851c89ed60`
+- 成功 marker：`ADP_E2E_BPI_ICEBERG_20260722_175829_A1`，snapshot `1863646729883880222`
+- 重试 marker：`ADP_E2E_BPI_ICEBERG_RETRY_20260722_181106_A1`，同任务 `FAILED/r3 -> READY/r7`
+- fencing marker：`ADP_E2E_BPI_ICEBERG_FENCE_20260722_181629_A1`，同一 snapshot `3771508441673321637`
+- 目标验证 SQL：`deploy/docker/scripts/bpi-dataset-catalog-target-verification.sql`
+- 浏览器 runner：`deploy/docker/scripts/adp-bpi-dataset-catalog-target-acceptance.js`
+- 故障注入：`deploy/docker/scripts/bpi-dataset-catalog-post-commit-failure-injection.py`
+- 机器证据：`metadata/bpi-dataset-catalog-publication-acceptance.json`
 
 ## 验收命令
 
@@ -70,3 +88,7 @@ V27 runner 为 `deploy/docker/scripts/adp-bpi-dataset-materialization-target-acc
 `request-failure`、`retry-ready` 和 `read-ready`。V27 组合结论必须同时满足页面无非预期错误、PostgreSQL
 状态/审计/幂等一致、按 MinIO `versionId` 回读一致、服务重启后可读、Worker 删除被拒绝、管理员只删除
 测试版本、数据库和对象零残留、Worker 归零且默认开关保持 false；否则不得标记通过。
+
+V28 runner 支持 `request-failure`、`request-ready`、`retry-ready` 和 `read-ready`。组合结论还必须证明
+真实 post-commit 进程退出窗口、claim 恢复复用同一 snapshot、publisher drop 被拒绝、独立管理身份精确
+清理以及七个开关恢复 false；任何一项缺失都不得写成 Phase 3B-B 目标通过。

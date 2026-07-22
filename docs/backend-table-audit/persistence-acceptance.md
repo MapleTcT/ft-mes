@@ -940,25 +940,25 @@ expand-only V27 升级。真实页面创建 definition/snapshot 后，对同一�
 失败注入、重启与清理报告见 `docs/testing/bpi-dataset-materialization-acceptance.md`。本项不把 versioning
 宣称为 WORM，也不关闭 Iceberg、MLflow、训练/推断、生产容量或 7-14 天现场运行门槛。
 
-### BPI V28 Iceberg 目录发布（目标后端检查点）
+### BPI V28 Iceberg 目录发布（目标页面/API/PostgreSQL/MinIO/Polaris）
 
-本节使用 marker `ADP_E2E_BPI_DATASET_961b1001a363487bb5e68a0419c7a23d`，在唯一目标栈的
-PostgreSQL 15.18/Flyway V28 上执行真实 Java 应用、MinIO 精确源对象、Apache Polaris 1.4.1 持久
-metastore 和 PyIceberg 0.11.1 验收。它是后端检查点，不包含真实 ADP 页面 V28 证据；catalog commit 后
-BPI PostgreSQL fencing 回写失败的真实故障窗口也仍待注入。
+本节使用 clean release `b7356aa0749600a436df84f39fbff3851c89ed60`，在唯一目标栈完成真实
+ADP 页面、Java 8 adapter、Java 17 service、PostgreSQL 15.18/Flyway V28、版本化 MinIO、Apache
+Polaris 1.4.1 与 PyIceberg 0.11.1 整链验收。三组 marker 在取证后均已定向清理。
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
 |---|---|---|---|---|---|---|---|
-| 请求并领取目录发布 | 目标页面待部署；本轮经 V28 Java 应用验收 | `POST /bpi/v1/dataset-materializations/{materializationId}/catalog-publications` | `DatasetController -> DatasetCatalogPublicationService -> DatasetCatalogPublicationPostgresRepository`；publisher `claim` | `bpi_dataset_catalog_publications`、`bpi_audit_events`、`bpi_api_idempotency` | 查询 publication state/revision/attempt 和审计序列 | publication `ccf2abb1-d0e0-4e23-8df2-ed63604799b6` 为 `QUEUED/r1 -> COMMITTING/r2`、attempt 1 | PASS_TARGET_BACKEND |
-| 精确源对象校验并提交 Iceberg | 不适用 | MinIO S3 GET by versionId；Polaris Iceberg REST | `SourceObjectReader -> CatalogPublisher` | materialization/publication 表；Polaris metastore；MinIO warehouse | 比对 versionId/SHA/bytes/rows/schema；查询 table/snapshot/metadata | version `78e62390-c039-4bbd-9381-f8ccf61852ad`、SHA、9589 bytes、1 row 一致；snapshot `9198617437104218826`、schema 0、spec 1 | PASS_TARGET_BACKEND |
-| time-travel 对账并 READY | 不适用 | PyIceberg scan by snapshot ID | `CatalogPublisher.verify_snapshot -> Repository.complete` | publication/audit；Iceberg manifest/data file | 查询 source/verified rows、semantic checksum、metadata location；独立 scan | `VERIFYING/r3 -> READY/r4`；1 row/1 data file；checksum `52b03f...a5d8` 一致 | PASS_TARGET_BACKEND |
-| 失败、重试与幂等 | 目标页面待部署；本轮经真实 V28 HTTP API | `POST /bpi/v1/dataset-catalog-publications/{id}/retry` | `DatasetCatalogPublicationService.retry -> publisher fail` | publication/audit/idempotency | 查询 `state/revision/attempt/failure_code/snapshot_id` 和六条审计 | publication `6873b265-241f-49ba-8c9e-b13cd65b5304` 两轮 `SOURCE_OBJECT_ERROR` 到 `FAILED/r6/attempt2`；同 key 重放 `Idempotent-Replay=true`；snapshot null | PASS_TARGET_BACKEND |
-| Polaris 重启持久化与 bootstrap 幂等 | 不适用 | health/catalog/bootstrap scripts | Polaris PostgreSQL/metastore gates | metastore auth/entity/grant/version | 比较重启前后计数和 snapshot scan；比较 credential SHA | `2/13/24/1` 前后不变，同一 snapshot 仍为 1 row 且无重复；credential SHA 不变 | PASS_TARGET_BACKEND |
-| 定向清理 | 不适用 | PyIceberg/Polaris drop；MinIO exact remove；PostgreSQL SQL | one-shot admin + marker cleanup | publication/materialization/manifest lineage、audit/idempotency、Polaris metadata | publication/materialization/definition 投影和 exact table/object lookup | 两个 table、两个 namespace、源对象版本、warehouse prefixes 和 marker 行全部清零 | PASS_TARGET_CLEANED |
-| 真实 ADP 页面与 post-commit fencing | `/bpi/#/datasets` | 四个 V28 catalog API | Web -> Java 8 adapter -> V28 service；publisher reconcile | 同上 | 桌面/移动 console/network + PostgreSQL/Polaris；注入 commit 后 DB fencing 失败 | 尚未执行，不能由本轮后端检查点推断 | BLOCKED |
+| 页面请求目录发布并 READY | `/bpi/#/datasets` | `POST /bpi-api/dataset-materializations/628ee8a0-bc8e-470e-b8be-46e0c8eb0f00/catalog-publications`；GET publication | Web -> Java 8 adapter -> `DatasetController -> DatasetCatalogPublicationService -> Repository.insert`；publisher claim/verify/complete | `bpi_dataset_catalog_publications`、`bpi_audit_events`、`bpi_api_idempotency` | `bpi-dataset-catalog-target-verification.sql` 查询 publication、audit、idempotency | marker `ADP_E2E_BPI_ICEBERG_20260722_175829_A1`；publication `41a1826f-d872-483d-b710-b4f24c7ca4b9` 为 `READY/r4/attempt1`；审计四态，幂等 `COMPLETED/202` | PASS_TARGET_READY |
+| 精确源对象与 Iceberg time-travel 对账 | 同一 READY 详情 | MinIO GET by versionId；Polaris Iceberg REST | `SourceObjectReader.load_and_verify -> CatalogPublisher.publish_and_verify` | materialization/publication；Polaris metastore | 比对 versionId/SHA/bytes/rows/schema；按 snapshot ID 独立 PyIceberg scan | source version `9f6028b5-c320-4e13-b111-d6f74ba98557`、SHA `fc0907...854f`、11341 bytes、1 row/26 fields；snapshot `1863646729883880222` 为 1 row/1 data file、schema/spec 0/1 | PASS_TARGET_EXACT_VERSION |
+| 页面受控失败与同任务重试 | 同一页面失败详情 | catalog publication POST；`POST /bpi-api/dataset-catalog-publications/ddd76d7d-3073-42a3-ba56-7dbad3327c23/retry` | service retry -> publisher fail/reclaim/complete | publication、audit、idempotency；Polaris metastore | 查询 state/revision/attempt/failure/snapshot 与七条 revision 排序审计 | 错误 secret 使同一任务 `FAILED/r3/attempt1/SOURCE_OBJECT_ERROR` 且 snapshot null；恢复后页面重试到 `READY/r7/attempt2`、2/2 行；两个 `COMPLETED/202` | PASS_TARGET_FAILURE_RETRY |
+| post-commit fencing 故障注入 | 页面先创建 `QUEUED` publication | 正式 repository/source/catalog 组件；受保护 one-shot exit 86 | `claim -> publish_and_verify -> os._exit(86)`，不执行 mark_verifying/fail | publication/audit；Polaris metastore | 故障前后查询 BPI state/revision/snapshot；独立查询 Polaris snapshot 数 | marker `ADP_E2E_BPI_ICEBERG_FENCE_20260722_181629_A1`；BPI 停在 `COMMITTING/r2/attempt1` 且 snapshot null，Polaris 恰有 snapshot `3771508441673321637` 一条 | PASS_TARGET_POST_COMMIT_FAILURE |
+| claim 超时恢复且不重复 append | 同一页面刷新读取 | publisher reconcile；publication GET | 原版 publisher `recover_stale_claim -> ensure existing snapshot -> verify -> complete` | publication/audit；Polaris metastore | 审计按 `after_revision` 排序；对比故障前后 snapshot/metadata；PyIceberg scan | `CLAIM_RECOVERED/r3 -> COMMITTING/r4 -> VERIFYING/r5 -> READY/r6/attempt2`；snapshot 与 metadata location 不变；仍为 1 snapshot/1 row/1 file | PASS_TARGET_FENCING_RECOVERED |
+| 桌面/移动重发现 | `/bpi/#/datasets`，`1440x900`、`390x844` | 刷新并重新打开 READY | catalog/snapshot/materialization GET | 只读 PostgreSQL/Polaris 投影 | 对比 publication ID、snapshot ID、table，检查浏览器错误和几何 | 同一任务和 snapshot 可重发现；console/page/request/network error 均为 0；移动页面和 drawer 无横向溢出 | PASS_TARGET_REDISCOVERY |
+| 最小权限与定向清理 | 不适用 | publisher drop 反证；bootstrap/MinIO admin；cleanup SQL | 运行身份被拒绝，独立管理身份只删除精确测试资源 | 本轮 BPI lineage 表、Polaris metastore、MinIO | exact table/prefix/version lookup；marker definitions/materializations/publications 终态统计 | publisher drop 返回 403；三组 table/prefix/version 和 marker 已删除，终态 `0/0/0`；sidecar 停止，七个默认开关 false | PASS_TARGET_CLEANED |
 
 机器证据：`metadata/bpi-dataset-catalog-publication-acceptance.json`；完整报告：
-`docs/testing/bpi-dataset-catalog-publication-acceptance.md`。本项不声明 WORM、MLflow、模型或生产 READY。
+`docs/testing/bpi-dataset-catalog-publication-acceptance.md`。本项关闭 Phase 3B-B 目录发布纵切，不声明
+WORM、MLflow、模型、7-14 天现场运行、外部 ERP/WMS 或生产 READY。
 
 ## 证据要求
 

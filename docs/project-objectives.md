@@ -115,20 +115,26 @@ versionId 下载得到与数据库相同的 SHA、11341 bytes、1 row、26 field
 worker 专用账号删除版本被 `AccessDenied`，管理员只删除该测试 versionId，数据库 11 类投影和
 4 条关联幂等记录归零，worker 与 bootstrap 默认开关恢复 false。Phase 3B-A 目标纵切因此闭合，但
 G-021 仍为 `PARTIAL`：当时 WORM、Iceberg/MLflow、模型训练、现场连续运行和外部 ERP/WMS 均未完成；
-其后 Iceberg 只推进到下述 Phase 3B-B 后端检查点，不等于整阶段完成。
+其后 Iceberg 已推进到下述 Phase 3B-B 目标纵切，不等于整阶段完成。
 
-同日继续形成 Phase 3B-B Iceberg 目录发布的目标后端检查点。Flyway V28 新增独立 catalog publication
+同日继续完成 Phase 3B-B Iceberg 目录发布目标纵切。Flyway V28 新增独立 catalog publication
 事实、状态审计、幂等和 fencing；Java 17 服务暴露 scoped 创建/查询/重试 API，Java 8 adapter 只代理精确
 路径；Python publisher 使用 MinIO 精确 `versionId` 重新校验源 Parquet，再通过 Apache Polaris `1.4.1`
-和 PyIceberg `0.11.1` 提交 Iceberg v2 snapshot，并按 snapshot ID 做 time-travel checksum 对账。目标 marker
-`ADP_E2E_BPI_DATASET_961b1001a363487bb5e68a0419c7a23d` 最终为 `READY/r4/attempt1`，Iceberg snapshot
-`9198617437104218826` 为 `1 row / 1 data file`；Polaris PostgreSQL 重启前后 metastore 计数和 snapshot
-不变，缺失精确源对象的同一任务又完成两轮 `SOURCE_OBJECT_ERROR` 与 retry 幂等验证。两个测试 table、
-namespace、对象版本、warehouse prefix 和 BPI marker 已定向清理。
+和 PyIceberg `0.11.1` 提交 Iceberg v2 snapshot，并按 snapshot ID 做 time-travel checksum 对账。clean
+release `b7356aa0749600a436df84f39fbff3851c89ed60` 已部署到唯一目标栈。真实页面 marker
+`ADP_E2E_BPI_ICEBERG_20260722_175829_A1` 达到 `READY/r4/attempt1`，Iceberg snapshot
+`1863646729883880222` 为 `1 row / 1 data file`；第二个 marker 真实进入
+`FAILED/SOURCE_OBJECT_ERROR` 后由同一页面重试至 `READY/r7/attempt2`。
 
-该检查点不改变 G-021 的 `PARTIAL`：面向业务的 V28 service/adapter/Web 尚未部署并通过真实 ADP
-桌面/移动页面验收；“catalog commit 成功但 BPI PostgreSQL fencing 回写失败”的目标故障窗口仍需真实
-注入和重启 reconcile。WORM、MLflow、模型训练/审批/推断、正式容量和生产激活也不在本次结论内。
+第三个 marker `ADP_E2E_BPI_ICEBERG_FENCE_20260722_181629_A1` 在真实 catalog commit 后、BPI
+PostgreSQL fencing 写回前以 exit code `86` 中止，形成 `COMMITTING/r2` 与 Polaris 单一 snapshot
+`3771508441673321637` 的故障窗口。30 秒 claim timeout 后，未修改的正式 publisher 恢复同一任务到
+`READY/r6/attempt2`；snapshot 与 metadata location 均未变化，独立扫描仍为 `1 row / 1 data file`，
+证明没有重复 append。桌面/移动/刷新读取无非预期浏览器错误和横向溢出；测试 table、对象版本、warehouse
+prefix 和 BPI marker 已定向清理，sidecar 与七个默认开关恢复关闭。
+
+该纵切通过不改变 G-021 的 `PARTIAL`：WORM、MLflow、模型训练/审批/推断、正式容量、物理来源连续
+7-14 天、外部 ERP/WMS 和生产激活仍不在本次结论内。
 机器证据为 `metadata/bpi-dataset-catalog-publication-acceptance.json`，完整报告为
 `docs/testing/bpi-dataset-catalog-publication-acceptance.md`。
 

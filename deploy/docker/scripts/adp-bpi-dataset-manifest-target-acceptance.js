@@ -253,7 +253,7 @@ async function main() {
     report.snapshot = { id: queued.id, queuedRevision: queued.revision, queuedState: queued.state };
 
     await page.locator("#detail-drawer")
-      .getByText("MANIFEST_READY", { exact: true }).waitFor({ timeout: timeoutMs });
+      .getByText("MANIFEST_READY", { exact: true }).first().waitFor({ timeout: timeoutMs });
     await page.locator(".dataset-exclusion-list")
       .getByText("CONFIDENCE_BELOW_THRESHOLD", { exact: true }).waitFor();
     await page.locator(".dataset-exclusion-list")
@@ -324,7 +324,7 @@ async function main() {
     await mobilePage.locator("#detail-drawer")
       .getByText("数据集快照 v1", { exact: true }).waitFor();
     await mobilePage.locator("#detail-drawer")
-      .getByText("MANIFEST_READY", { exact: true }).waitFor();
+      .getByText("MANIFEST_READY", { exact: true }).first().waitFor();
     await mobilePage.locator(".dataset-sample-frame tbody tr").nth(2).waitFor();
     await mobilePage.screenshot({ path: mobileScreenshot, fullPage: true });
     report.browser.mobile = {

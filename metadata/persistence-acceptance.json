@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-22T11:10:00+08:00",
-  "repoCommit": "43e45ff33934cee83752c025be861c94f5b4938d+target-v27-parquet-materialization",
+  "generatedAt": "2026-07-22T18:36:04+08:00",
+  "repoCommit": "b7356aa0749600a436df84f39fbff3851c89ed60+target-v28-iceberg-catalog-publication",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -202,11 +202,21 @@
       "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
       "evidence": "metadata/bpi-dataset-materialization-acceptance.json; docs/testing/bpi-dataset-materialization-acceptance.md",
       "assertions": "real ADP page and Java 8/17 APIs; controlled FAILED/r3 then same-task retry to READY/r6 attempt 2; PostgreSQL audit/idempotency; exact MinIO versionId SHA/bytes/rows/schema readback; service restart persistence; worker delete AccessDenied; database/object cleanup zero; worker count 0 and materializer/bootstrap defaults false"
+    },
+    "bpiDatasetCatalogPublication": {
+      "status": "PASS_TARGET_BROWSER_API_POSTGRES_MINIO_POLARIS_FENCING_CLEANED",
+      "markers": [
+        "ADP_E2E_BPI_ICEBERG_20260722_175829_A1",
+        "ADP_E2E_BPI_ICEBERG_RETRY_20260722_181106_A1",
+        "ADP_E2E_BPI_ICEBERG_FENCE_20260722_181629_A1"
+      ],
+      "evidence": "metadata/bpi-dataset-catalog-publication-acceptance.json; docs/testing/bpi-dataset-catalog-publication-acceptance.md",
+      "assertions": "clean V28 target release; real desktop/mobile ADP publication and rediscovery; exact source version and Iceberg time-travel; controlled FAILED then same-task retry READY; real post-commit exit 86 and stale-claim reconcile to the same single snapshot; least privilege; exact cleanup and seven default-off flags"
     }
   },
   "summary": {
-    "testedFeatures": 225,
-    "pass": 222,
+    "testedFeatures": 232,
+    "pass": 229,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -4956,9 +4966,147 @@
       "status": "PASS",
       "evidence": "metadata/bpi-dataset-materialization-acceptance.json; Worker delete was AccessDenied, admin removed only the exact test version, 11 database projections and 4 associated idempotency rows were zero, worker count was 0 and both default-off switches remained false",
       "issues": []
+    },
+    {
+      "module": "BPI V28 页面目录发布与 READY 落库",
+      "route": "/bpi/#/datasets",
+      "operation": "从真实清单详情发布 Iceberg 并轮询同一任务到 READY",
+      "api": "POST /bpi-api/dataset-materializations/628ee8a0-bc8e-470e-b8be-46e0c8eb0f00/catalog-publications; GET /bpi-api/dataset-catalog-publications/41a1826f-d872-483d-b710-b4f24c7ca4b9",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "frontend -> Java 8 adapter -> DatasetController -> DatasetCatalogPublicationService -> DatasetCatalogPublicationPostgresRepository -> publisher",
+      "tables": [
+        "bpi.bpi_dataset_catalog_publications",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_ICEBERG_20260722_175829_A1",
+      "verificationSql": "deploy/docker/scripts/bpi-dataset-catalog-target-verification.sql; require READY/r4/attempt1, QUEUED/COMMITTING/VERIFYING/READY audits and one COMPLETED/202 idempotency row.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-catalog-publication-acceptance.json; real page POST returned 202 and publication 41a1826f-d872-483d-b710-b4f24c7ca4b9 reached READY/r4/attempt1",
+      "issues": []
+    },
+    {
+      "module": "BPI V28 精确源对象与 Iceberg time-travel 对账",
+      "route": "/bpi/#/datasets",
+      "operation": "按 MinIO versionId 复核源 Parquet，并独立扫描精确 Iceberg snapshot",
+      "api": "MinIO S3 stat/get with versionId; Apache Polaris Iceberg REST; PyIceberg scan",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "SourceObjectReader.load_and_verify -> CatalogPublisher.publish_and_verify -> Repository.complete",
+      "tables": [
+        "bpi.bpi_dataset_materializations",
+        "bpi.bpi_dataset_catalog_publications",
+        "Polaris PostgreSQL metastore"
+      ],
+      "marker": "ADP_E2E_BPI_ICEBERG_20260722_175829_A1",
+      "verificationSql": "Compare source versionId/SHA/bytes/rows/schema with publication snapshot/table/schema/spec/source and verified rows; scan snapshot 1863646729883880222 independently.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-catalog-publication-acceptance.json; version 9f6028b5-c320-4e13-b111-d6f74ba98557 and SHA matched 11341 bytes/1 row/26 fields; snapshot 1863646729883880222 had 1 row and 1 data file",
+      "issues": []
+    },
+    {
+      "module": "BPI V28 页面失败与同任务重试",
+      "route": "/bpi/#/datasets",
+      "operation": "以容器内错误 source-reader secret 持久化失败，恢复后从页面重试同一 publication",
+      "api": "POST catalog publication; POST /bpi-api/dataset-catalog-publications/ddd76d7d-3073-42a3-ba56-7dbad3327c23/retry; GET publication",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetCatalogPublicationService.request/retry -> publisher fail/reclaim/verify/complete",
+      "tables": [
+        "bpi.bpi_dataset_catalog_publications",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "Polaris PostgreSQL metastore"
+      ],
+      "marker": "ADP_E2E_BPI_ICEBERG_RETRY_20260722_181106_A1",
+      "verificationSql": "Require FAILED/r3/attempt1/SOURCE_OBJECT_ERROR with null snapshot, then RETRIED/COMMITTING/VERIFYING/READY to r7/attempt2 and two COMPLETED/202 idempotency rows.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-catalog-publication-acceptance.json; the same publication ddd76d7d-3073-42a3-ba56-7dbad3327c23 moved from FAILED to READY/r7/attempt2 with snapshot 3484290016623316580",
+      "issues": []
+    },
+    {
+      "module": "BPI V28 post-commit fencing 故障落库",
+      "route": "/bpi/#/datasets",
+      "operation": "页面创建 QUEUED 任务后执行真实 catalog commit，并在 PostgreSQL fencing 写回前以 exit 86 中止",
+      "api": "POST catalog publication; protected one-shot publisher process",
+      "method": "POST/EXECUTE",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetCatalogPublicationPostgresRepository.claim -> SourceObjectReader -> CatalogPublisher.publish_and_verify -> os._exit(86)",
+      "tables": [
+        "bpi.bpi_dataset_catalog_publications",
+        "bpi.bpi_audit_events",
+        "Polaris PostgreSQL metastore"
+      ],
+      "marker": "ADP_E2E_BPI_ICEBERG_FENCE_20260722_181629_A1",
+      "verificationSql": "SELECT state, revision, attempt_count, iceberg_snapshot_id, metadata_location FROM bpi.bpi_dataset_catalog_publications WHERE id='c6cd596b-b389-46b0-aaef-292ebf61bf21'; independently count exact Polaris snapshots.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-catalog-publication-acceptance.json; expected exit 86 left PostgreSQL COMMITTING/r2/attempt1 with null snapshot while Polaris contained exactly one snapshot 3771508441673321637",
+      "issues": []
+    },
+    {
+      "module": "BPI V28 stale-claim 恢复且无重复 append",
+      "route": "/bpi/#/datasets",
+      "operation": "等待 claim 超时后启动未修改 publisher，reconcile 已提交 snapshot 并恢复 READY",
+      "api": "publisher recovery loop; GET publication",
+      "method": "RESTART/GET",
+      "requiresPersistence": true,
+      "backendEntry": "recover_stale_claim -> claim -> ensure existing publication snapshot -> verify -> complete",
+      "tables": [
+        "bpi.bpi_dataset_catalog_publications",
+        "bpi.bpi_audit_events",
+        "Polaris PostgreSQL metastore"
+      ],
+      "marker": "ADP_E2E_BPI_ICEBERG_FENCE_20260722_181629_A1",
+      "verificationSql": "Order audit by after_revision; compare snapshot ID and metadata location before/after; require one table snapshot, one publication-property match, one row and one data file.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-catalog-publication-acceptance.json; CLAIM_RECOVERED/r3 -> COMMITTING/r4 -> VERIFYING/r5 -> READY/r6/attempt2 reused snapshot 3771508441673321637 and did not append again",
+      "issues": []
+    },
+    {
+      "module": "BPI V28 桌面/移动刷新重发现",
+      "route": "/bpi/#/datasets",
+      "operation": "刷新真实 ADP 页面，并在桌面和移动视口复读同一 READY publication",
+      "api": "GET publication, dataset snapshot and materialization",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "frontend -> adapter -> V28 service -> PostgreSQL projections",
+      "tables": [
+        "bpi.bpi_dataset_catalog_publications",
+        "bpi.bpi_dataset_materializations",
+        "bpi.bpi_dataset_snapshots"
+      ],
+      "marker": "ADP_E2E_BPI_ICEBERG_20260722_175829_A1",
+      "verificationSql": "Read the same persisted publication/materialization/snapshot IDs and verify no additional audit or catalog snapshot.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-catalog-publication-acceptance.json and target screenshots; reload and 390x844 mobile rediscovered the same snapshot/table with zero console/page/request/HTTP errors and no overflow",
+      "issues": []
+    },
+    {
+      "module": "BPI V28 最小权限、精确清理与默认关闭",
+      "route": "NOT_APPLICABLE",
+      "operation": "证明 publisher 无 drop 权限，使用独立管理身份删除精确 table/version/prefix，清理 marker 并停止 sidecar",
+      "api": "Polaris DROP_TABLE_WITHOUT_PURGE; bootstrap/MinIO admin; PostgreSQL cleanup; Docker runtime verification",
+      "method": "DELETE/SQL/GET",
+      "requiresPersistence": true,
+      "backendEntry": "Polaris authorization; bpi-dataset-manifest-target-cleanup.sql; exact storage cleanup; Docker Compose state check",
+      "tables": [
+        "bpi dataset publication/materialization/manifest lineage tables",
+        "Polaris PostgreSQL metastore"
+      ],
+      "marker": "ADP_E2E_BPI_ICEBERG_%",
+      "verificationSql": "Require publisher drop HTTP 403; exact objects absent; marker definition/materialization/publication counts 0|0|0; four optional sidecars stopped and seven default-off flags false.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-catalog-publication-acceptance.json; runtime permissions were not broadened, all exact test resources were removed, database counts were 0|0|0 and catalog/materialization/bootstrap defaults were restored false",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_BPI_ICEBERG_20260722_175829_A1 / ADP_E2E_BPI_ICEBERG_RETRY_20260722_181106_A1 / ADP_E2E_BPI_ICEBERG_FENCE_20260722_181629_A1",
+      "artifact": "metadata/bpi-dataset-catalog-publication-acceptance.json",
+      "summary": "The clean V28 target release closed real ADP desktop/mobile publication, exact MinIO source verification, Polaris Iceberg time-travel, controlled failure and same-task retry, real post-commit exit 86 plus stale-claim reconcile to the same single snapshot, least privilege and exact zero-residue/default-off cleanup. WORM, MLflow, models, continuous field operation, external ERP/WMS and production activation remain open."
+    },
     {
       "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
       "artifact": "metadata/bpi-dataset-materialization-acceptance.json",

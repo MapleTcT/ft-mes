@@ -14,6 +14,11 @@ CREATE TEMP TABLE target_dataset_materializations AS
 SELECT id FROM bpi.bpi_dataset_materializations
  WHERE tenant_id = '1000' AND snapshot_id IN (SELECT id FROM target_dataset_snapshots);
 
+CREATE TEMP TABLE target_dataset_catalog_publications AS
+SELECT id FROM bpi.bpi_dataset_catalog_publications
+ WHERE tenant_id = '1000'
+   AND materialization_id IN (SELECT id FROM target_dataset_materializations);
+
 CREATE TEMP TABLE target_dataset_idempotency AS
 SELECT id FROM bpi.bpi_api_idempotency idempotency
  WHERE tenant_id = '1000'
@@ -33,7 +38,13 @@ SELECT id FROM bpi.bpi_api_idempotency idempotency
            SELECT 1 FROM target_dataset_materializations materialization
             WHERE response_body::text LIKE '%' || materialization.id::text || '%'
                OR resource_path = '/bpi/v1/dataset-materializations/' || materialization.id::text
-               OR resource_path = '/bpi/v1/dataset-materializations/' || materialization.id::text || '/retry')
+               OR resource_path = '/bpi/v1/dataset-materializations/' || materialization.id::text || '/retry'
+               OR resource_path = '/bpi/v1/dataset-materializations/' || materialization.id::text || '/catalog-publications')
+       OR EXISTS (
+           SELECT 1 FROM target_dataset_catalog_publications publication
+            WHERE response_body::text LIKE '%' || publication.id::text || '%'
+               OR resource_path = '/bpi/v1/dataset-catalog-publications/' || publication.id::text
+               OR resource_path = '/bpi/v1/dataset-catalog-publications/' || publication.id::text || '/retry')
    );
 
 CREATE TEMP TABLE target_shadow_runs AS
@@ -48,10 +59,14 @@ DELETE FROM bpi.bpi_audit_events
    AND object_id IN (
        SELECT id FROM target_dataset_definitions
        UNION ALL SELECT id FROM target_dataset_snapshots
-       UNION ALL SELECT id FROM target_dataset_materializations);
+       UNION ALL SELECT id FROM target_dataset_materializations
+       UNION ALL SELECT id FROM target_dataset_catalog_publications);
 
 DELETE FROM bpi.bpi_api_idempotency
  WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_idempotency);
+
+DELETE FROM bpi.bpi_dataset_catalog_publications
+ WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_catalog_publications);
 
 DELETE FROM bpi.bpi_dataset_materializations
  WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_materializations);
@@ -99,6 +114,11 @@ SELECT jsonb_pretty(jsonb_build_object(
                               WHERE materialization.tenant_id = '1000'
                                 AND materialization.snapshot_id IN (
                                     SELECT id FROM target_dataset_snapshots)),
+        'catalogPublications', (SELECT count(*)
+                                  FROM bpi.bpi_dataset_catalog_publications publication
+                                 WHERE publication.tenant_id = '1000'
+                                   AND publication.id IN (
+                                       SELECT id FROM target_dataset_catalog_publications)),
         'shadowRuns', (SELECT count(*) FROM bpi.bpi_shadow_runs
                         WHERE tenant_id = '1000' AND run_code LIKE :'marker' || '_SHADOW_%'),
         'reviews', (SELECT count(*) FROM bpi.bpi_shadow_run_batch_reviews review
