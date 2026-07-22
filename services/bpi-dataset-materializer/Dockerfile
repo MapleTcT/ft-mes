@@ -10,15 +10,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY services/bpi-dataset-materializer/requirements.runtime.txt ./
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --requirement requirements.runtime.txt
+RUN pip install --requirement requirements.runtime.txt
 
 COPY services/bpi-dataset-materializer/pyproject.toml ./
 COPY services/bpi-dataset-materializer/README.md ./
 COPY services/bpi-dataset-materializer/src ./src
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-build-isolation --no-deps . \
+RUN pip install --no-build-isolation --no-deps . \
     && (getent group bpi >/dev/null 2>&1 \
         || addgroup --system --gid 10001 bpi) \
     && (id -u bpi >/dev/null 2>&1 \

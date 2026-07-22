@@ -98,7 +98,7 @@ services:
       context: ../..
       dockerfile: services/bpi-dataset-materializer/Dockerfile
       args:
-        PYTHON_IMAGE: ${BPI_DATASET_MATERIALIZER_PYTHON_IMAGE:-python:3.12.13-slim-bookworm}
+        PYTHON_IMAGE: ${BPI_DATASET_MATERIALIZER_PYTHON_IMAGE:-m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm}
     restart: unless-stopped
     environment:
       TZ: ${TZ:-Asia/Shanghai}

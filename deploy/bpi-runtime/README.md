@@ -96,6 +96,11 @@ BPI_RUNTIME_UPGRADE_CONFIRM=UPGRADE_BPI_RUNTIME_EXPAND_ONLY \
   make bpi-runtime-upgrade-expand-only
 ```
 
+The worker Dockerfile avoids BuildKit-only directives so the target Docker engine can build it
+without installing a host plugin. The checked-in environment templates use the exact
+DaoCloud-proxied `python:3.12.13-slim-bookworm` base, avoiding a floating Python tag while remaining
+reachable from the target network.
+
 Set `BPI_EXPECTED_FLYWAY_VERSION` to the exact target migration before each expand-only upgrade. The
 helper verifies the packaged migration set, builds the service, WMS adapter and dataset materializer
 images, provisions or rotates the non-inheriting `bpi_materializer` role, runs only `bpi-migrate`,

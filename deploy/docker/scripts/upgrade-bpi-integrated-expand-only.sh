@@ -366,7 +366,7 @@ ADAPTER_MAVEN_IMAGE=${BPI_INTEGRATED_ADAPTER_MAVEN_IMAGE:-$(env_value BPI_ADAPTE
 ADAPTER_JAVA_IMAGE=${BPI_INTEGRATED_ADAPTER_JAVA_IMAGE:-$(env_value BPI_ADAPTER_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:8-jre-jammy)}
 WMS_ADAPTER_MAVEN_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_MAVEN_IMAGE:-$(env_value BPI_WMS_ADAPTER_MAVEN_IMAGE m.daocloud.io/docker.io/library/maven:3.9.9-eclipse-temurin-17)}
 WMS_ADAPTER_JAVA_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_JAVA_IMAGE:-$(env_value BPI_WMS_ADAPTER_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:17-jre-jammy)}
-MATERIALIZER_PYTHON_IMAGE=${BPI_INTEGRATED_MATERIALIZER_PYTHON_IMAGE:-$(env_value BPI_DATASET_MATERIALIZER_PYTHON_IMAGE python:3.12.13-slim-bookworm)}
+MATERIALIZER_PYTHON_IMAGE=${BPI_INTEGRATED_MATERIALIZER_PYTHON_IMAGE:-$(env_value BPI_DATASET_MATERIALIZER_PYTHON_IMAGE m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm)}
 if [ "$MATERIALIZER_DATABASE_PASSWORD" = "$DATABASE_PASSWORD" ] \
    || [ "$MATERIALIZER_DATABASE_PASSWORD" = "$MIGRATOR_PASSWORD" ]; then
     printf 'ERROR: BPI materializer database credentials must be distinct\n' >&2

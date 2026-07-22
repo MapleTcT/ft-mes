@@ -1250,6 +1250,18 @@ def main() -> int:
         ],
         failures,
     )
+    materializer_dockerfile = ROOT / "services/bpi-dataset-materializer/Dockerfile"
+    require_text(
+        materializer_dockerfile,
+        [
+            "pip install --requirement requirements.runtime.txt",
+            "pip install --no-build-isolation --no-deps .",
+            "USER 10001:10001",
+        ],
+        failures,
+    )
+    if "--mount=" in materializer_dockerfile.read_text(encoding="utf-8"):
+        fail("BPI dataset materializer Dockerfile must not require BuildKit-only mounts", failures)
     require_text(
         SERVICE / "Dockerfile",
         ["COPY pom.xml pom.xml", "COPY contracts contracts", "bpi-service-*-exec.jar"],
