@@ -16,6 +16,9 @@ CATALOG_NAME = "ft_mes_bpi"
 PUBLISHER_PRINCIPAL = "bpi-dataset-catalog-publisher"
 PUBLISHER_PRINCIPAL_ROLE = "bpi_dataset_catalog_publisher"
 PUBLISHER_CATALOG_ROLE = "bpi_dataset_catalog_publisher"
+RECOVERY_PRINCIPAL = "bpi-dataset-recovery-operator"
+RECOVERY_PRINCIPAL_ROLE = "bpi_dataset_recovery_operator"
+RECOVERY_CATALOG_ROLE = "bpi_dataset_recovery_operator"
 PUBLISHER_GRANTS = frozenset(
     {
         "NAMESPACE_CREATE",
@@ -37,6 +40,7 @@ PUBLISHER_GRANTS = frozenset(
         "TABLE_SET_PROPERTIES",
     }
 )
+RECOVERY_GRANTS = PUBLISHER_GRANTS | frozenset({"NAMESPACE_DROP", "TABLE_DROP"})
 
 
 class BootstrapError(RuntimeError):
@@ -212,22 +216,34 @@ def ensure_named_resource(
     return resource
 
 
-def _credential_parts(path: Path) -> tuple[str, str]:
+def _credential_parts(path: Path, label: str) -> tuple[str, str]:
     if path.stat().st_mode & (stat.S_IRWXG | stat.S_IRWXO):
-        raise BootstrapError("publisher credential file must have mode 0600")
+        raise BootstrapError(f"{label} credential file must have mode 0600")
     raw = path.read_text(encoding="utf-8").strip()
     if "\n" in raw or raw.count(":") != 1:
-        raise BootstrapError("publisher credential file has an invalid format")
+        raise BootstrapError(f"{label} credential file has an invalid format")
     client_id, client_secret = raw.split(":", 1)
     if not client_id or not client_secret:
-        raise BootstrapError("publisher credential file contains an empty value")
+        raise BootstrapError(f"{label} credential file contains an empty value")
     return client_id, client_secret
 
 
-def _write_credential(path: Path, client_id: str, client_secret: str) -> None:
+def _write_credential(
+    path: Path,
+    client_id: str,
+    client_secret: str,
+    *,
+    uid_environment: str,
+    gid_environment: str,
+    temporary_prefix: str,
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with NamedTemporaryFile(
-        "w", encoding="utf-8", dir=path.parent, prefix=".publisher-", delete=False
+        "w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=temporary_prefix,
+        delete=False,
     ) as handle:
         temporary = Path(handle.name)
         handle.write(f"{client_id}:{client_secret}\n")
@@ -236,19 +252,28 @@ def _write_credential(path: Path, client_id: str, client_secret: str) -> None:
     try:
         os.chown(
             temporary,
-            int(os.getenv("BPI_POLARIS_PUBLISHER_CREDENTIAL_UID", "10002")),
-            int(os.getenv("BPI_POLARIS_PUBLISHER_CREDENTIAL_GID", "10002")),
+            int(os.getenv(uid_environment, "10002")),
+            int(os.getenv(gid_environment, "10002")),
         )
         os.replace(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
 
 
-def ensure_principal(
-    api: PolarisApi, admin_token: str, credential_path: Path
+def ensure_principal_contract(
+    api: PolarisApi,
+    admin_token: str,
+    credential_path: Path,
+    *,
+    principal_name: str,
+    rotation_environment: str,
+    uid_environment: str,
+    gid_environment: str,
+    temporary_prefix: str,
+    label: str,
 ) -> tuple[str, str]:
     principal_path = (
-        f"/api/management/v1/principals/{quote(PUBLISHER_PRINCIPAL, safe='')}"
+        f"/api/management/v1/principals/{quote(principal_name, safe='')}"
     )
     principal = get_or_none(api, principal_path, admin_token)
     if principal is None:
@@ -258,7 +283,7 @@ def ensure_principal(
             admin_token,
             {
                 "principal": {
-                    "name": PUBLISHER_PRINCIPAL,
+                    "name": principal_name,
                     "properties": {"owner": "ft-mes-bpi"},
                 },
                 "credentialRotationRequired": False,
@@ -271,11 +296,14 @@ def ensure_principal(
             credential_path,
             str(credentials["clientId"]),
             str(credentials["clientSecret"]),
+            uid_environment=uid_environment,
+            gid_environment=gid_environment,
+            temporary_prefix=temporary_prefix,
         )
     elif not credential_path.exists():
-        if not enabled("BPI_POLARIS_PUBLISHER_CREDENTIAL_ROTATION_ENABLED"):
+        if not enabled(rotation_environment):
             raise BootstrapError(
-                "publisher principal exists but its credential file is missing; "
+                f"{label} principal exists but its credential file is missing; "
                 "explicit rotation is required"
             )
         _, rotated = api.json("POST", f"{principal_path}/rotate", admin_token, expected={200})
@@ -284,49 +312,93 @@ def ensure_principal(
             credential_path,
             str(credentials["clientId"]),
             str(credentials["clientSecret"]),
+            uid_environment=uid_environment,
+            gid_environment=gid_environment,
+            temporary_prefix=temporary_prefix,
         )
         principal = rotated["principal"]
-    client_id, client_secret = _credential_parts(credential_path)
+    client_id, client_secret = _credential_parts(credential_path, label)
     if principal.get("clientId") != client_id:
-        raise BootstrapError("publisher credential client ID does not match Polaris")
+        raise BootstrapError(f"{label} credential client ID does not match Polaris")
     return client_id, client_secret
 
 
-def ensure_roles(api: PolarisApi, token: str) -> None:
+def ensure_principal(
+    api: PolarisApi, admin_token: str, credential_path: Path
+) -> tuple[str, str]:
+    return ensure_principal_contract(
+        api,
+        admin_token,
+        credential_path,
+        principal_name=PUBLISHER_PRINCIPAL,
+        rotation_environment="BPI_POLARIS_PUBLISHER_CREDENTIAL_ROTATION_ENABLED",
+        uid_environment="BPI_POLARIS_PUBLISHER_CREDENTIAL_UID",
+        gid_environment="BPI_POLARIS_PUBLISHER_CREDENTIAL_GID",
+        temporary_prefix=".publisher-",
+        label="publisher",
+    )
+
+
+def ensure_recovery_principal(
+    api: PolarisApi, admin_token: str, credential_path: Path
+) -> tuple[str, str]:
+    return ensure_principal_contract(
+        api,
+        admin_token,
+        credential_path,
+        principal_name=RECOVERY_PRINCIPAL,
+        rotation_environment="BPI_POLARIS_RECOVERY_CREDENTIAL_ROTATION_ENABLED",
+        uid_environment="BPI_POLARIS_RECOVERY_CREDENTIAL_UID",
+        gid_environment="BPI_POLARIS_RECOVERY_CREDENTIAL_GID",
+        temporary_prefix=".recovery-",
+        label="recovery",
+    )
+
+
+def ensure_role_contract(
+    api: PolarisApi,
+    token: str,
+    *,
+    principal_name: str,
+    principal_role_name: str,
+    catalog_role_name: str,
+    expected_grants: frozenset[str],
+    label: str,
+) -> None:
     principal_role_path = (
-        f"/api/management/v1/principal-roles/{quote(PUBLISHER_PRINCIPAL_ROLE, safe='')}"
+        f"/api/management/v1/principal-roles/{quote(principal_role_name, safe='')}"
     )
     ensure_named_resource(
         api,
         token,
         principal_role_path,
         "/api/management/v1/principal-roles",
-        {"principalRole": {"name": PUBLISHER_PRINCIPAL_ROLE}},
+        {"principalRole": {"name": principal_role_name}},
     )
     assigned_path = (
-        f"/api/management/v1/principals/{quote(PUBLISHER_PRINCIPAL, safe='')}"
+        f"/api/management/v1/principals/{quote(principal_name, safe='')}"
         "/principal-roles"
     )
     _, assigned = api.json("GET", assigned_path, token)
-    if PUBLISHER_PRINCIPAL_ROLE not in {role["name"] for role in assigned["roles"]}:
+    if principal_role_name not in {role["name"] for role in assigned["roles"]}:
         api.json(
             "PUT",
             assigned_path,
             token,
-            {"principalRole": {"name": PUBLISHER_PRINCIPAL_ROLE}},
+            {"principalRole": {"name": principal_role_name}},
             {201},
         )
 
     catalog_role_path = (
         f"/api/management/v1/catalogs/{CATALOG_NAME}/catalog-roles/"
-        f"{quote(PUBLISHER_CATALOG_ROLE, safe='')}"
+        f"{quote(catalog_role_name, safe='')}"
     )
     ensure_named_resource(
         api,
         token,
         catalog_role_path,
         f"/api/management/v1/catalogs/{CATALOG_NAME}/catalog-roles",
-        {"catalogRole": {"name": PUBLISHER_CATALOG_ROLE}},
+        {"catalogRole": {"name": catalog_role_name}},
     )
     grants_path = f"{catalog_role_path}/grants"
     _, existing = api.json("GET", grants_path, token)
@@ -336,10 +408,10 @@ def ensure_roles(api: PolarisApi, token: str) -> None:
         if grant.get("type") == "catalog"
     }
     non_catalog = [grant for grant in existing["grants"] if grant.get("type") != "catalog"]
-    unexpected = actual - PUBLISHER_GRANTS
+    unexpected = actual - expected_grants
     if unexpected or non_catalog:
-        raise BootstrapError("publisher catalog role contains unexpected privileges")
-    for privilege in sorted(PUBLISHER_GRANTS - actual):
+        raise BootstrapError(f"{label} catalog role contains unexpected privileges")
+    for privilege in sorted(expected_grants - actual):
         api.json(
             "PUT",
             grants_path,
@@ -348,18 +420,42 @@ def ensure_roles(api: PolarisApi, token: str) -> None:
             {201},
         )
     mapping_path = (
-        f"/api/management/v1/principal-roles/{quote(PUBLISHER_PRINCIPAL_ROLE, safe='')}"
+        f"/api/management/v1/principal-roles/{quote(principal_role_name, safe='')}"
         f"/catalog-roles/{CATALOG_NAME}"
     )
     _, mapped = api.json("GET", mapping_path, token)
-    if PUBLISHER_CATALOG_ROLE not in {role["name"] for role in mapped["roles"]}:
+    if catalog_role_name not in {role["name"] for role in mapped["roles"]}:
         api.json(
             "PUT",
             mapping_path,
             token,
-            {"catalogRole": {"name": PUBLISHER_CATALOG_ROLE}},
+            {"catalogRole": {"name": catalog_role_name}},
             {201},
         )
+
+
+def ensure_roles(api: PolarisApi, token: str) -> None:
+    ensure_role_contract(
+        api,
+        token,
+        principal_name=PUBLISHER_PRINCIPAL,
+        principal_role_name=PUBLISHER_PRINCIPAL_ROLE,
+        catalog_role_name=PUBLISHER_CATALOG_ROLE,
+        expected_grants=PUBLISHER_GRANTS,
+        label="publisher",
+    )
+
+
+def ensure_recovery_roles(api: PolarisApi, token: str) -> None:
+    ensure_role_contract(
+        api,
+        token,
+        principal_name=RECOVERY_PRINCIPAL,
+        principal_role_name=RECOVERY_PRINCIPAL_ROLE,
+        catalog_role_name=RECOVERY_CATALOG_ROLE,
+        expected_grants=RECOVERY_GRANTS,
+        label="recovery",
+    )
 
 
 def main() -> int:
@@ -376,6 +472,11 @@ def main() -> int:
     credential_path = Path(required("BPI_POLARIS_PUBLISHER_CREDENTIAL_FILE"))
     if not credential_path.is_absolute():
         raise BootstrapError("BPI_POLARIS_PUBLISHER_CREDENTIAL_FILE must be absolute")
+    recovery_credential_path = Path(
+        required("BPI_POLARIS_RECOVERY_CREDENTIAL_FILE")
+    )
+    if not recovery_credential_path.is_absolute():
+        raise BootstrapError("BPI_POLARIS_RECOVERY_CREDENTIAL_FILE must be absolute")
     api = PolarisApi(base_url, realm)
     admin_token = api.token(
         required("BPI_POLARIS_BOOTSTRAP_CLIENT_ID"),
@@ -391,8 +492,15 @@ def main() -> int:
     )
     client_id, client_secret = ensure_principal(api, admin_token, credential_path)
     ensure_roles(api, admin_token)
+    recovery_client_id, recovery_client_secret = ensure_recovery_principal(
+        api, admin_token, recovery_credential_path
+    )
+    ensure_recovery_roles(api, admin_token)
     api.token(client_id, client_secret)
-    print("BPI Polaris catalog, principal and least-privilege roles: PASS")
+    api.token(recovery_client_id, recovery_client_secret)
+    print(
+        "BPI Polaris catalog, publisher and isolated recovery roles: PASS"
+    )
     return 0
 
 

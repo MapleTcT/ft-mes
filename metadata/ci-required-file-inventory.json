@@ -2343,6 +2343,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/ensure-bpi-retention-archiver-role.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/postgres/init/001-adp-postgres-compat.sql",
       "state": "tracked",
       "tracked": true
@@ -4731,6 +4737,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/minio/bootstrap-bpi-dataset-recovery-bucket.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/minio/bootstrap-bpi-iceberg-warehouse.sh",
       "state": "tracked",
       "tracked": true
@@ -4738,6 +4750,18 @@
     {
       "ignored": false,
       "path": "deploy/minio/bpi-dataset-catalog-source-reader-policy.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/minio/bpi-dataset-recovery-operator-policy.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/minio/bpi-dataset-retention-archiver-policy.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5440,6 +5464,12 @@
     {
       "ignored": false,
       "path": "docs/plans/2026-07-22-bpi-phase3b-materialized-artifact-design.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/plans/2026-07-22-bpi-phase3b-retained-recovery-design.md",
       "state": "tracked",
       "tracked": true
     },
@@ -7767,6 +7797,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-dataset-catalog-publisher/src/bpi_dataset_catalog_publisher/recovery_rehearsal.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-dataset-catalog-publisher/src/bpi_dataset_catalog_publisher/repository.py",
       "state": "tracked",
       "tracked": true
@@ -7792,6 +7828,12 @@
     {
       "ignored": false,
       "path": "services/bpi-dataset-catalog-publisher/tests/test_config.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-catalog-publisher/tests/test_recovery_rehearsal.py",
       "state": "tracked",
       "tracked": true
     },
@@ -7900,6 +7942,96 @@
     {
       "ignored": false,
       "path": "services/bpi-dataset-materializer/tests/test_parquet.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/Dockerfile",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/pyproject.toml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/requirements.runtime.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/src/bpi_dataset_retention_archiver/__init__.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/src/bpi_dataset_retention_archiver/__main__.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/src/bpi_dataset_retention_archiver/archive_store.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/src/bpi_dataset_retention_archiver/config.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/src/bpi_dataset_retention_archiver/health.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/src/bpi_dataset_retention_archiver/models.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/src/bpi_dataset_retention_archiver/repository.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/src/bpi_dataset_retention_archiver/worker.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/tests/test_archive_store.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/tests/test_config.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-retention-archiver/tests/test_worker.py",
       "state": "tracked",
       "tracked": true
     },
@@ -8044,6 +8176,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetMaterializationService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetRetentionArchiveService.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8332,6 +8470,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetMaterializationView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetRetentionArchiveView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8883,6 +9027,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetRetentionArchivePostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetRetentionArchiveSource.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/FeatureFlagPostgresRepository.java",
       "state": "tracked",
       "tracked": true
@@ -9352,6 +9508,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V28__bpi_dataset_iceberg_catalog_publication.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V29__bpi_dataset_object_lock_recovery_archive.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -10556,10 +10718,10 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 644
+      "tracked": 648
     },
     "docs": {
-      "tracked": 126
+      "tracked": 127
     },
     "frontend": {
       "tracked": 11
@@ -10577,7 +10739,7 @@
       "tracked": 57
     },
     "services": {
-      "tracked": 368
+      "tracked": 390
     },
     "simulation": {
       "tracked": 4
@@ -10589,8 +10751,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1755,
-    "tracked": 1755,
+    "totalFiles": 1782,
+    "tracked": 1782,
     "untracked": 0
   },
   "untrackedByDirectory": []

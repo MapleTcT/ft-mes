@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools==75.8.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ft-mes-bpi-dataset-retention-archiver"
+version = "0.1.0"
+description = "Object Lock retained recovery packages for verified FT MES BPI datasets"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "ft-mes-bpi-dataset-catalog-publisher==0.1.0",
+  "minio==7.2.20",
+  "psycopg[binary]==3.3.4",
+  "pyarrow==25.0.0",
+]
+
+[project.scripts]
+bpi-dataset-retention-archiver = "bpi_dataset_retention_archiver.worker:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+bpi_dataset_retention_archiver = ["py.typed"]

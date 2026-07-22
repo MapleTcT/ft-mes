@@ -746,6 +746,7 @@ export type DatasetSnapshotState = 'QUEUED' | 'BUILDING' | 'MANIFEST_READY' | 'F
 export type DatasetMaterializationState = 'QUEUED' | 'WRITING' | 'READY' | 'FAILED';
 export type DatasetMaterializationDisplayState = 'NOT_STARTED' | DatasetMaterializationState;
 export type DatasetCatalogPublicationState = 'QUEUED' | 'COMMITTING' | 'VERIFYING' | 'READY' | 'FAILED';
+export type DatasetRetentionArchiveState = 'QUEUED' | 'ARCHIVING' | 'VERIFYING' | 'LOCKED' | 'FAILED';
 
 export interface DatasetSnapshotSummary {
   id: string;
@@ -881,6 +882,59 @@ export interface DatasetCatalogPublication {
   verifiedRowCount?: number | null;
   semanticChecksum?: string | null;
   catalogMetadata?: Record<string, unknown> | null;
+  failureCode?: string | null;
+  failureDetail?: string | null;
+}
+
+export interface DatasetRetentionArchive {
+  id: string;
+  catalogPublicationId: string;
+  materializationId: string;
+  snapshotId: string;
+  datasetId: string;
+  datasetCode: string;
+  datasetVersion: string;
+  tenantId: string;
+  plantId: string;
+  lineIds: string[];
+  archiverVersion: string;
+  archiveProfile: 'bpi-dataset-recovery-v1';
+  state: DatasetRetentionArchiveState;
+  revision: number;
+  manifestChecksum: string;
+  sourceContentSha256: string;
+  sourceObjectVersionId: string;
+  sourceByteSize: number;
+  sourceRowCount: number;
+  sourceSchema: Record<string, unknown>;
+  tableIdentifier: string;
+  icebergSnapshotId: string;
+  icebergMetadataLocation: string;
+  icebergSchemaId: number;
+  icebergPartitionSpecId: number;
+  catalogVerifiedRowCount: number;
+  catalogSemanticChecksum: string;
+  requestedBy: string;
+  requestReason: string;
+  createdAt: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  attemptCount: number;
+  retentionMode?: 'GOVERNANCE' | 'COMPLIANCE' | null;
+  retainUntil?: string | null;
+  legalHoldEnabled?: boolean | null;
+  archiveBucket?: string | null;
+  archivePrefix?: string | null;
+  sourceArchiveObjectKey?: string | null;
+  sourceArchiveVersionId?: string | null;
+  archiveManifestObjectKey?: string | null;
+  archiveManifestVersionId?: string | null;
+  archiveManifestSha256?: string | null;
+  archiveObjectCount?: number | null;
+  archiveTotalBytes?: number | null;
+  verifiedRowCount?: number | null;
+  verifiedSemanticChecksum?: string | null;
+  archiveMetadata?: Record<string, unknown> | null;
   failureCode?: string | null;
   failureDetail?: string | null;
 }

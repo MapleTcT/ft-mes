@@ -160,6 +160,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
     void cleanupMarker() {
         if (tenantId == null) return;
         if (Boolean.parseBoolean(env("BPI_TEST_KEEP_MARKER", "false"))) return;
+        cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_retention_archives WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_catalog_publications WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_materializations WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_snapshot_samples WHERE tenant_id = ?", tenantId);
@@ -754,6 +755,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                                       'DATASET_CATALOG_PUBLICATION_VERIFYING',
                                       'DATASET_CATALOG_PUBLICATION_READY')
                     """, Long.class, tenantId, publicationId)).isEqualTo(3L);
+            proveRetentionArchiveLifecycle(publicationId);
             return;
         }
 
@@ -863,6 +865,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                    AND action IN ('DATASET_CATALOG_PUBLICATION_QUEUED',
                                   'DATASET_CATALOG_PUBLICATION_RETRIED')
                 """, Long.class, tenantId, publicationId)).isEqualTo(2L);
+        proveRetentionArchiveLifecycle(publicationId);
         assertThatThrownBy(() -> jdbc.update("""
                 UPDATE bpi.bpi_dataset_catalog_publications
                    SET request_reason = 'mutated'
@@ -870,6 +873,298 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 """, tenantId, publicationId))
                 .isInstanceOf(DataAccessException.class)
                 .hasMessageContaining("immutable");
+    }
+
+    private void proveRetentionArchiveLifecycle(UUID publicationId) throws Exception {
+        long publicationRevision = jdbc.queryForObject("""
+                SELECT revision FROM bpi.bpi_dataset_catalog_publications
+                 WHERE tenant_id = ? AND id = ? AND state = 'READY'
+                """, Long.class, tenantId, publicationId);
+        String catalogSemanticChecksum = jdbc.queryForObject("""
+                SELECT semantic_checksum FROM bpi.bpi_dataset_catalog_publications
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, publicationId);
+        byte[] requestBody = objectMapper.writeValueAsBytes(Map.of(
+                "reason", "Freeze an exact Object Lock dataset recovery package"));
+
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-catalog-publications/{id}/retention-archives",
+                        publicationId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-catalog-publications/{id}/retention-archives",
+                        publicationId)
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .header("Idempotency-Key", "archive-viewer-denied-" + tenantId)
+                        .header("If-Match", publicationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-catalog-publications/{id}/retention-archives",
+                        publicationId)
+                        .header("Authorization", "Bearer " + wrongScopeToken)
+                        .header("Idempotency-Key", "archive-scope-denied-" + tenantId)
+                        .header("If-Match", publicationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-catalog-publications/{id}/retention-archives",
+                        publicationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "archive-stale-" + tenantId)
+                        .header("If-Match", publicationRevision - 1)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isConflict());
+
+        String requestKey = "archive-request-" + tenantId;
+        MvcResult requestResult = mockMvc.perform(post(
+                        "/bpi/v1/dataset-catalog-publications/{id}/retention-archives",
+                        publicationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", requestKey)
+                        .header("If-Match", publicationRevision)
+                        .header("X-Trace-Id", tenantId + "_RETENTION_ARCHIVE")
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("QUEUED"))
+                .andExpect(jsonPath("$.data.revision").value(1))
+                .andExpect(jsonPath("$.data.catalogPublicationId")
+                        .value(publicationId.toString()))
+                .andExpect(jsonPath("$.data.archiverVersion")
+                        .value("bpi-dataset-retention-archiver/0.1.0"))
+                .andExpect(jsonPath("$.data.archiveProfile")
+                        .value("bpi-dataset-recovery-v1"))
+                .andExpect(jsonPath("$.data.catalogSemanticChecksum")
+                        .value(catalogSemanticChecksum))
+                .andExpect(jsonPath("$.data.retentionMode").doesNotExist())
+                .andReturn();
+        UUID archiveId = UUID.fromString(
+                response(requestResult).path("data").path("id").asText());
+
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-catalog-publications/{id}/retention-archives",
+                        publicationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", requestKey)
+                        .header("If-Match", publicationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.id").value(archiveId.toString()));
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-catalog-publications/{id}/retention-archives",
+                        publicationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "archive-duplicate-" + tenantId)
+                        .header("If-Match", publicationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isConflict());
+        mockMvc.perform(get("/bpi/v1/dataset-retention-archives/{id}", archiveId)
+                        .header("Authorization", "Bearer " + wrongScopeToken))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/bpi/v1/dataset-retention-archives/{id}", archiveId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("QUEUED"));
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-retention-archives/{id}/retry", archiveId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "archive-premature-retry-" + tenantId)
+                        .header("If-Match", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of(
+                                "reason", "A queued recovery package cannot be retried"))))
+                .andExpect(status().isConflict());
+
+        if (Boolean.parseBoolean(env("BPI_TEST_EXTERNAL_RETENTION_ARCHIVER", "false"))) {
+            Map<String, Object> archive = awaitExternalRetentionArchive(archiveId);
+            assertThat(archive)
+                    .containsEntry("state", "LOCKED")
+                    .containsEntry("retention_mode", "GOVERNANCE")
+                    .containsEntry("legal_hold_enabled", false)
+                    .containsEntry("archive_bucket", "bpi-dataset-recovery")
+                    .containsEntry("archive_object_count", 2)
+                    .containsEntry("verified_row_count", 1L)
+                    .containsEntry("verified_semantic_checksum", catalogSemanticChecksum)
+                    .containsEntry("object_lock_verified", "true")
+                    .containsEntry("recovery_verified", "true")
+                    .containsEntry("mlflow_registered", "false")
+                    .containsEntry("model_trained", "false");
+            assertThat((String) archive.get("source_archive_version_id")).isNotBlank();
+            assertThat((String) archive.get("archive_manifest_version_id")).isNotBlank();
+            assertThat((String) archive.get("archive_manifest_sha256")).hasSize(64);
+            assertThat((String) archive.get("archive_prefix"))
+                    .startsWith("archives/tenant_")
+                    .contains(publicationId.toString())
+                    .endsWith(archiveId.toString());
+            mockMvc.perform(get("/bpi/v1/dataset-retention-archives/{id}", archiveId)
+                            .header("Authorization", "Bearer " + viewerToken))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.state").value("LOCKED"))
+                    .andExpect(jsonPath("$.data.verifiedSemanticChecksum")
+                            .value(catalogSemanticChecksum))
+                    .andExpect(jsonPath("$.data.archiveMetadata.objectLockVerified")
+                            .value(true))
+                    .andExpect(jsonPath("$.data.archiveMetadata.recoveryVerified")
+                            .value(true));
+            assertThat(jdbc.queryForObject("""
+                    SELECT count(*) FROM bpi.bpi_audit_events
+                     WHERE tenant_id = ? AND object_id = ?
+                       AND action IN ('DATASET_RETENTION_ARCHIVE_ARCHIVING',
+                                      'DATASET_RETENTION_ARCHIVE_VERIFYING',
+                                      'DATASET_RETENTION_ARCHIVE_LOCKED')
+                    """, Long.class, tenantId, archiveId)).isEqualTo(3L);
+            assertThatThrownBy(() -> jdbc.update("""
+                    UPDATE bpi.bpi_dataset_retention_archives
+                       SET request_reason = 'mutated'
+                     WHERE tenant_id = ? AND id = ?
+                    """, tenantId, archiveId))
+                    .isInstanceOf(DataAccessException.class)
+                    .hasMessageContaining("LOCKED");
+            return;
+        }
+
+        UUID failedClaim = UUID.randomUUID();
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_retention_archives
+                   SET state = 'ARCHIVING', revision = revision + 1,
+                       started_at = now(), claim_token = ?, claimed_at = now(),
+                       attempt_count = attempt_count + 1,
+                       retention_mode = 'GOVERNANCE',
+                       retain_until = now() + interval '30 days',
+                       legal_hold_enabled = false
+                 WHERE tenant_id = ? AND id = ? AND state = 'QUEUED'
+                """, failedClaim, tenantId, archiveId)).isEqualTo(1);
+        String prefix = "archives/tenant_acceptance/" + publicationId + "/" + archiveId;
+        String sourceVersion = "retained-source-version-001";
+        String manifestVersion = "retained-manifest-version-001";
+        String manifestSha = "f".repeat(64);
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_retention_archives
+                   SET state = 'VERIFYING', revision = revision + 1,
+                       archive_bucket = 'bpi-dataset-recovery', archive_prefix = ?,
+                       source_archive_object_key = ?, source_archive_version_id = ?,
+                       archive_manifest_object_key = ?, archive_manifest_version_id = ?,
+                       archive_manifest_sha256 = ?, archive_object_count = 2,
+                       archive_total_bytes = source_byte_size + 2048
+                 WHERE tenant_id = ? AND id = ? AND state = 'ARCHIVING'
+                   AND claim_token = ?
+                """, prefix, prefix + "/source.parquet", sourceVersion,
+                prefix + "/recovery-manifest.json", manifestVersion, manifestSha,
+                tenantId, archiveId, failedClaim)).isEqualTo(1);
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_retention_archives
+                   SET state = 'FAILED', revision = revision + 1,
+                       completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                       failure_code = 'OBJECT_LOCK_STORE_ERROR',
+                       failure_detail = 'Acceptance-injected post-write verification failure'
+                 WHERE tenant_id = ? AND id = ? AND state = 'VERIFYING'
+                   AND claim_token = ?
+                """, tenantId, archiveId, failedClaim)).isEqualTo(1);
+
+        byte[] retryBody = objectMapper.writeValueAsBytes(Map.of(
+                "reason", "Retry exact-version recovery verification after store recovery"));
+        String retryKey = "archive-retry-" + tenantId;
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-retention-archives/{id}/retry", archiveId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", retryKey)
+                        .header("If-Match", 4)
+                        .contentType(MediaType.APPLICATION_JSON).content(retryBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("QUEUED"))
+                .andExpect(jsonPath("$.data.revision").value(5))
+                .andExpect(jsonPath("$.data.sourceArchiveVersionId")
+                        .value(sourceVersion))
+                .andExpect(jsonPath("$.data.archiveManifestVersionId")
+                        .value(manifestVersion));
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-retention-archives/{id}/retry", archiveId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", retryKey)
+                        .header("If-Match", 4)
+                        .contentType(MediaType.APPLICATION_JSON).content(retryBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.revision").value(5));
+
+        UUID readyClaim = UUID.randomUUID();
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_retention_archives
+                   SET state = 'ARCHIVING', revision = revision + 1,
+                       started_at = now(), claim_token = ?, claimed_at = now(),
+                       attempt_count = attempt_count + 1
+                 WHERE tenant_id = ? AND id = ? AND state = 'QUEUED'
+                """, readyClaim, tenantId, archiveId)).isEqualTo(1);
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_retention_archives
+                   SET state = 'VERIFYING', revision = revision + 1
+                 WHERE tenant_id = ? AND id = ? AND state = 'ARCHIVING'
+                   AND claim_token = ?
+                """, tenantId, archiveId, readyClaim)).isEqualTo(1);
+        assertThatThrownBy(() -> jdbc.update("""
+                UPDATE bpi.bpi_dataset_retention_archives
+                   SET state = 'LOCKED', revision = revision + 1,
+                       completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                       verified_row_count = catalog_verified_row_count,
+                       verified_semantic_checksum = ?,
+                       archive_metadata = '{"objectLockVerified":true,"recoveryVerified":true}'::jsonb
+                 WHERE tenant_id = ? AND id = ? AND state = 'VERIFYING'
+                   AND claim_token = ?
+                """, "0".repeat(64), tenantId, archiveId, readyClaim))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("chk_bpi_dataset_retention_archive_lifecycle");
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_retention_archives
+                   SET state = 'LOCKED', revision = revision + 1,
+                       completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                       verified_row_count = catalog_verified_row_count,
+                       verified_semantic_checksum = catalog_semantic_checksum,
+                       archive_metadata = CAST(? AS jsonb)
+                 WHERE tenant_id = ? AND id = ? AND state = 'VERIFYING'
+                   AND claim_token = ?
+                """, "{\"objectLockVerified\":true,\"recoveryVerified\":true,"
+                + "\"sourceVersionVerified\":true,\"manifestVersionVerified\":true,"
+                + "\"mlflowRegistered\":false,\"modelTrained\":false}",
+                tenantId, archiveId, readyClaim)).isEqualTo(1);
+
+        mockMvc.perform(get("/bpi/v1/dataset-retention-archives/{id}", archiveId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("LOCKED"))
+                .andExpect(jsonPath("$.data.revision").value(8))
+                .andExpect(jsonPath("$.data.attemptCount").value(2))
+                .andExpect(jsonPath("$.data.retentionMode").value("GOVERNANCE"))
+                .andExpect(jsonPath("$.data.archiveBucket").value("bpi-dataset-recovery"))
+                .andExpect(jsonPath("$.data.sourceArchiveVersionId").value(sourceVersion))
+                .andExpect(jsonPath("$.data.archiveManifestVersionId").value(manifestVersion))
+                .andExpect(jsonPath("$.data.verifiedSemanticChecksum")
+                        .value(catalogSemanticChecksum))
+                .andExpect(jsonPath("$.data.archiveMetadata.objectLockVerified").value(true))
+                .andExpect(jsonPath("$.data.archiveMetadata.recoveryVerified").value(true))
+                .andExpect(jsonPath("$.data.archiveMetadata.mlflowRegistered").value(false));
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-retention-archives/{id}/retry", archiveId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "archive-locked-retry-" + tenantId)
+                        .header("If-Match", 8)
+                        .contentType(MediaType.APPLICATION_JSON).content(retryBody))
+                .andExpect(status().isConflict());
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ? AND object_id = ?
+                   AND action IN ('DATASET_RETENTION_ARCHIVE_QUEUED',
+                                  'DATASET_RETENTION_ARCHIVE_RETRIED')
+                """, Long.class, tenantId, archiveId)).isEqualTo(2L);
+        assertThatThrownBy(() -> jdbc.update("""
+                UPDATE bpi.bpi_dataset_retention_archives
+                   SET request_reason = 'mutated'
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, archiveId))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("LOCKED");
     }
 
     private Map<String, Object> awaitExternalMaterialization(UUID materializationId)
@@ -902,6 +1197,36 @@ class BpiDatasetManifestPostgresAcceptanceTest {
             Thread.sleep(250);
         }
         throw new AssertionError("External materializer did not reach READY before timeout");
+    }
+
+    private Map<String, Object> awaitExternalRetentionArchive(UUID archiveId)
+            throws InterruptedException {
+        Instant deadline = Instant.now().plusSeconds(
+                Integer.parseInt(env("BPI_TEST_RETENTION_ARCHIVER_TIMEOUT_SECONDS", "90")));
+        while (Instant.now().isBefore(deadline)) {
+            Map<String, Object> archive = jdbc.queryForMap("""
+                    SELECT state, revision, attempt_count, retention_mode, retain_until,
+                           legal_hold_enabled, archive_bucket, archive_prefix,
+                           source_archive_version_id, archive_manifest_version_id,
+                           archive_manifest_sha256, archive_object_count, archive_total_bytes,
+                           verified_row_count, verified_semantic_checksum,
+                           archive_metadata ->> 'objectLockVerified' AS object_lock_verified,
+                           archive_metadata ->> 'recoveryVerified' AS recovery_verified,
+                           archive_metadata ->> 'mlflowRegistered' AS mlflow_registered,
+                           archive_metadata ->> 'modelTrained' AS model_trained,
+                           failure_code, failure_detail
+                      FROM bpi.bpi_dataset_retention_archives
+                     WHERE tenant_id = ? AND id = ?
+                    """, tenantId, archiveId);
+            String state = (String) archive.get("state");
+            if ("LOCKED".equals(state)) return archive;
+            if ("FAILED".equals(state)) {
+                throw new AssertionError("External retention archiver failed: "
+                        + archive.get("failure_code") + " " + archive.get("failure_detail"));
+            }
+            Thread.sleep(250);
+        }
+        throw new AssertionError("Timed out waiting for external retention archive " + archiveId);
     }
 
     private Map<String, Object> awaitExternalCatalogPublication(UUID publicationId)

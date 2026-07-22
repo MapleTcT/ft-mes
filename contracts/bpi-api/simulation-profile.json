@@ -65,6 +65,10 @@
     "requestDatasetMaterialization",
     "getDatasetMaterialization",
     "retryDatasetMaterialization",
+    "getDatasetRetentionArchiveForPublication",
+    "requestDatasetRetentionArchive",
+    "getDatasetRetentionArchive",
+    "retryDatasetRetentionArchive",
     "getIntegrationHealth"
   ]
 }

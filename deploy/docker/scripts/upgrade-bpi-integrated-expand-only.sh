@@ -55,6 +55,7 @@ MIGRATIONS="$RELEASE_ROOT/services/bpi-service/app/src/main/resources/db/migrati
 VERIFY_MIGRATIONS="$RELEASE_ROOT/scripts/verify-bpi-release-migrations.py"
 MATERIALIZER_ROLE_SCRIPT="$RELEASE_ROOT/deploy/docker/postgres/ensure-bpi-materializer-role.sh"
 CATALOG_PUBLISHER_ROLE_SCRIPT="$RELEASE_ROOT/deploy/docker/postgres/ensure-bpi-catalog-publisher-role.sh"
+RETENTION_ARCHIVER_ROLE_SCRIPT="$RELEASE_ROOT/deploy/docker/postgres/ensure-bpi-retention-archiver-role.sh"
 
 for path in \
     "$ENV_FILE" \
@@ -65,13 +66,17 @@ for path in \
     "$RELEASE_MINIO_DIR/bpi-dataset-catalog-source-reader-policy.json" \
     "$RELEASE_MINIO_DIR/bootstrap-bpi-iceberg-warehouse.sh" \
     "$RELEASE_MINIO_DIR/bpi-iceberg-warehouse-policy.json" \
+    "$RELEASE_MINIO_DIR/bootstrap-bpi-dataset-recovery-bucket.sh" \
+    "$RELEASE_MINIO_DIR/bpi-dataset-retention-archiver-policy.json" \
+    "$RELEASE_MINIO_DIR/bpi-dataset-recovery-operator-policy.json" \
     "$RELEASE_POLARIS_DIR/bootstrap_bpi_catalog.py" \
     "$RELEASE_POLARIS_DIR/check_metastore_bootstrap.sh" \
     "$RELEASE_POLARIS_DIR/bootstrap_metastore_if_required.sh" \
     "$MIGRATIONS" \
     "$VERIFY_MIGRATIONS" \
     "$MATERIALIZER_ROLE_SCRIPT" \
-    "$CATALOG_PUBLISHER_ROLE_SCRIPT"; do
+    "$CATALOG_PUBLISHER_ROLE_SCRIPT" \
+    "$RETENTION_ARCHIVER_ROLE_SCRIPT"; do
     if [ ! -e "$path" ]; then
         printf 'ERROR: required integrated runtime path is missing: %s\n' "$path" >&2
         exit 1
@@ -148,6 +153,9 @@ compose_expand() {
     BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED=false \
     BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED=false \
     BPI_DATASET_CATALOG_PUBLISHER_ENABLED=false \
+    BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED=false \
+    BPI_DATASET_RETENTION_ARCHIVER_ENABLED=false \
+    BPI_DATASET_RECOVERY_RECONCILE_STALE=false \
         docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" --profile bpi "$@"
 }
 
@@ -160,7 +168,8 @@ validate_release_deployment_manifests() {
         bpi-dataset-minio-bootstrap bpi-dataset-materializer \
         bpi-polaris-postgres bpi-polaris-bootstrap-check bpi-polaris-bootstrap bpi-polaris \
         bpi-iceberg-warehouse-bootstrap \
-        bpi-polaris-catalog-bootstrap bpi-dataset-catalog-publisher; do
+        bpi-polaris-catalog-bootstrap bpi-dataset-catalog-publisher \
+        bpi-dataset-recovery-bootstrap bpi-dataset-retention-archiver; do
         if ! printf '%s\n' "$release_services" | grep -qx "$service"; then
             printf 'ERROR: release Compose is missing required service: %s\n' \
                 "$service" >&2
@@ -203,6 +212,12 @@ stage_runtime_deployment_manifests() {
         "$RUNTIME_MINIO_DIR/bootstrap-bpi-iceberg-warehouse.sh"
     rsync -a "$RELEASE_MINIO_DIR/bpi-iceberg-warehouse-policy.json" \
         "$RUNTIME_MINIO_DIR/bpi-iceberg-warehouse-policy.json"
+    rsync -a "$RELEASE_MINIO_DIR/bootstrap-bpi-dataset-recovery-bucket.sh" \
+        "$RUNTIME_MINIO_DIR/bootstrap-bpi-dataset-recovery-bucket.sh"
+    rsync -a "$RELEASE_MINIO_DIR/bpi-dataset-retention-archiver-policy.json" \
+        "$RUNTIME_MINIO_DIR/bpi-dataset-retention-archiver-policy.json"
+    rsync -a "$RELEASE_MINIO_DIR/bpi-dataset-recovery-operator-policy.json" \
+        "$RUNTIME_MINIO_DIR/bpi-dataset-recovery-operator-policy.json"
     mkdir -p "$RUNTIME_POLARIS_DIR"
     rsync -a "$RELEASE_POLARIS_DIR/bootstrap_bpi_catalog.py" \
         "$RUNTIME_POLARIS_DIR/bootstrap_bpi_catalog.py"
@@ -254,6 +269,7 @@ replace_env_images() {
         "$WMS_ADAPTER_IMAGE" \
         "$MATERIALIZER_IMAGE" \
         "$CATALOG_PUBLISHER_IMAGE" \
+        "$RETENTION_ARCHIVER_IMAGE" \
         "$EXPECTED_VERSION" <<'PY'
 import os
 import stat
@@ -268,17 +284,23 @@ updates = {
     "BPI_WMS_ADAPTER_IMAGE": sys.argv[4],
     "BPI_DATASET_MATERIALIZER_IMAGE": sys.argv[5],
     "BPI_DATASET_CATALOG_PUBLISHER_IMAGE": sys.argv[6],
-    "BPI_EXPECTED_FLYWAY_VERSION": sys.argv[7],
+    "BPI_DATASET_RETENTION_ARCHIVER_IMAGE": sys.argv[7],
+    "BPI_EXPECTED_FLYWAY_VERSION": sys.argv[8],
     "BPI_DATASET_MATERIALIZER_ENABLED": "false",
     "BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED": "false",
     "BPI_DATASET_SOURCE_READER_ENABLED": "false",
     "BPI_POLARIS_ENABLED": "false",
     "BPI_POLARIS_ALLOW_INSECURE_STORAGE_TYPES": "false",
+    "BPI_POLARIS_DROP_WITH_PURGE_ENABLED": "false",
     "BPI_POLARIS_IGNORE_SEVERE_READINESS_ISSUES": "false",
     "BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED": "false",
     "BPI_POLARIS_PUBLISHER_CREDENTIAL_ROTATION_ENABLED": "false",
+    "BPI_POLARIS_RECOVERY_CREDENTIAL_ROTATION_ENABLED": "false",
     "BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED": "false",
     "BPI_DATASET_CATALOG_PUBLISHER_ENABLED": "false",
+    "BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED": "false",
+    "BPI_DATASET_RETENTION_ARCHIVER_ENABLED": "false",
+    "BPI_DATASET_RECOVERY_RECONCILE_STALE": "false",
 }
 lines = path.read_text(encoding="utf-8").splitlines()
 seen = set()
@@ -309,6 +331,7 @@ write_report() {
     export REPORT report_status report_phase
     export RELEASE_COMMIT EXPECTED_VERSION BEFORE_VERSION AFTER_VERSION DATABASE_MIGRATION_MODE
     export SERVICE_IMAGE ADAPTER_IMAGE WMS_ADAPTER_IMAGE MATERIALIZER_IMAGE CATALOG_PUBLISHER_IMAGE
+    export RETENTION_ARCHIVER_IMAGE
     export BEFORE_SERVICE_IMAGE_ID BEFORE_ADAPTER_IMAGE_ID BEFORE_WMS_ADAPTER_IMAGE_ID
     export AFTER_SERVICE_IMAGE_ID AFTER_ADAPTER_IMAGE_ID AFTER_WMS_ADAPTER_IMAGE_ID
     export ROLLBACK_SERVICE_IMAGE ROLLBACK_ADAPTER_IMAGE ROLLBACK_WMS_ADAPTER_IMAGE
@@ -317,6 +340,7 @@ write_report() {
     export UI_BACKUP UI_SHA256
     export MATERIALIZER_IMAGE_ID MATERIALIZER_IMAGE_USER MIGRATION_SET_SHA256
     export CATALOG_PUBLISHER_IMAGE_ID CATALOG_PUBLISHER_IMAGE_USER
+    export RETENTION_ARCHIVER_IMAGE_ID RETENTION_ARCHIVER_IMAGE_USER
     python3 <<'PY'
 import datetime
 import json
@@ -381,6 +405,14 @@ report = {
             "polarisEnabledDuringUpgrade": False,
             "postUpgradeState": "STOPPED",
         },
+        "datasetRetentionArchiver": {
+            "releaseImage": value("RETENTION_ARCHIVER_IMAGE"),
+            "releaseImageId": value("RETENTION_ARCHIVER_IMAGE_ID"),
+            "runtimeUser": value("RETENTION_ARCHIVER_IMAGE_USER"),
+            "enabledDuringUpgrade": False,
+            "recoveryBucketBootstrapEnabledDuringUpgrade": False,
+            "postUpgradeState": "STOPPED",
+        },
         "environmentBackup": value("ENV_BACKUP"),
         "composeBackup": value("COMPOSE_BACKUP"),
         "minioConfigBackup": value("MINIO_CONFIG_BACKUP"),
@@ -396,6 +428,9 @@ report = {
         "datasetMaterializerDefault": False,
         "datasetBucketBootstrapDefault": False,
         "datasetCatalogPublisherDefault": False,
+        "datasetRetentionArchiverDefault": False,
+        "recoveryBucketBootstrapDefault": False,
+        "staleRecoveryReconcileDefault": False,
         "polarisDefault": False,
         "rollbackMethod": "Restore recorded images, UI, Compose, MinIO and Polaris configuration; stop optional WMS/materializer/catalog services when required; keep the expanded schema.",
     },
@@ -416,6 +451,7 @@ ADAPTER_IMAGE=${BPI_INTEGRATED_ADAPTER_IMAGE:-ft-mes-bpi-adapter:${release_suffi
 WMS_ADAPTER_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_IMAGE:-ft-mes-bpi-wms-adapter:${release_suffix}-${short_commit}}
 MATERIALIZER_IMAGE=${BPI_INTEGRATED_MATERIALIZER_IMAGE:-ft-mes-bpi-dataset-materializer:${release_suffix}-${short_commit}}
 CATALOG_PUBLISHER_IMAGE=${BPI_INTEGRATED_CATALOG_PUBLISHER_IMAGE:-ft-mes-bpi-dataset-catalog-publisher:${release_suffix}-${short_commit}}
+RETENTION_ARCHIVER_IMAGE=${BPI_INTEGRATED_RETENTION_ARCHIVER_IMAGE:-ft-mes-bpi-dataset-retention-archiver:${release_suffix}-${short_commit}}
 REPORT=${BPI_INTEGRATED_UPGRADE_REPORT:-$BACKUP_DIR/bpi-integrated-upgrade-${timestamp}.json}
 COMPOSE_BACKUP="$BACKUP_DIR/docker-compose-before-v${EXPECTED_VERSION}-${timestamp}.yml"
 MINIO_CONFIG_BACKUP="$BACKUP_DIR/bpi-minio-runtime-before-v${EXPECTED_VERSION}-${timestamp}.tar.gz"
@@ -428,10 +464,15 @@ DATABASE_PASSWORD=$(required_secret BPI_DATABASE_PASSWORD)
 MIGRATOR_PASSWORD=$(required_secret BPI_MIGRATOR_PASSWORD)
 MATERIALIZER_DATABASE_PASSWORD=$(required_secret BPI_MATERIALIZER_DATABASE_PASSWORD)
 CATALOG_PUBLISHER_DATABASE_PASSWORD=$(required_secret BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD)
+RETENTION_ARCHIVER_DATABASE_PASSWORD=$(required_secret BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD)
 MINIO_ROOT_USER=$(required_secret MINIO_ROOT_USER)
 MINIO_ROOT_PASSWORD=$(required_secret MINIO_ROOT_PASSWORD)
 MATERIALIZER_MINIO_ACCESS_KEY=$(required_secret BPI_DATASET_MINIO_ACCESS_KEY)
 MATERIALIZER_MINIO_SECRET_KEY=$(required_secret BPI_DATASET_MINIO_SECRET_KEY)
+RETENTION_MINIO_ACCESS_KEY=$(required_secret BPI_DATASET_RETENTION_MINIO_ACCESS_KEY)
+RETENTION_MINIO_SECRET_KEY=$(required_secret BPI_DATASET_RETENTION_MINIO_SECRET_KEY)
+RECOVERY_MINIO_ACCESS_KEY=$(required_secret BPI_DATASET_RECOVERY_MINIO_ACCESS_KEY)
+RECOVERY_MINIO_SECRET_KEY=$(required_secret BPI_DATASET_RECOVERY_MINIO_SECRET_KEY)
 FLYWAY_IMAGE=$(env_value BPI_FLYWAY_IMAGE m.daocloud.io/docker.io/flyway/flyway:11-alpine)
 SERVICE_MAVEN_IMAGE=${BPI_INTEGRATED_SERVICE_MAVEN_IMAGE:-$(env_value BPI_MAVEN_IMAGE m.daocloud.io/docker.io/library/maven:3.9.9-eclipse-temurin-17)}
 SERVICE_JAVA_IMAGE=${BPI_INTEGRATED_SERVICE_JAVA_IMAGE:-$(env_value BPI_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:17-jre-jammy)}
@@ -441,17 +482,35 @@ WMS_ADAPTER_MAVEN_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_MAVEN_IMAGE:-$(env_value BP
 WMS_ADAPTER_JAVA_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_JAVA_IMAGE:-$(env_value BPI_WMS_ADAPTER_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:17-jre-jammy)}
 MATERIALIZER_PYTHON_IMAGE=${BPI_INTEGRATED_MATERIALIZER_PYTHON_IMAGE:-$(env_value BPI_DATASET_MATERIALIZER_PYTHON_IMAGE m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm)}
 CATALOG_PUBLISHER_PYTHON_IMAGE=${BPI_INTEGRATED_CATALOG_PUBLISHER_PYTHON_IMAGE:-$(env_value BPI_DATASET_CATALOG_PUBLISHER_PYTHON_IMAGE m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm)}
+RETENTION_ARCHIVER_PYTHON_IMAGE=${BPI_INTEGRATED_RETENTION_ARCHIVER_PYTHON_IMAGE:-$(env_value BPI_DATASET_RETENTION_ARCHIVER_PYTHON_IMAGE m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm)}
 if [ "$MATERIALIZER_DATABASE_PASSWORD" = "$DATABASE_PASSWORD" ] \
    || [ "$MATERIALIZER_DATABASE_PASSWORD" = "$MIGRATOR_PASSWORD" ] \
    || [ "$CATALOG_PUBLISHER_DATABASE_PASSWORD" = "$DATABASE_PASSWORD" ] \
    || [ "$CATALOG_PUBLISHER_DATABASE_PASSWORD" = "$MIGRATOR_PASSWORD" ] \
-   || [ "$CATALOG_PUBLISHER_DATABASE_PASSWORD" = "$MATERIALIZER_DATABASE_PASSWORD" ]; then
+   || [ "$CATALOG_PUBLISHER_DATABASE_PASSWORD" = "$MATERIALIZER_DATABASE_PASSWORD" ] \
+   || [ "$RETENTION_ARCHIVER_DATABASE_PASSWORD" = "$DATABASE_PASSWORD" ] \
+   || [ "$RETENTION_ARCHIVER_DATABASE_PASSWORD" = "$MIGRATOR_PASSWORD" ] \
+   || [ "$RETENTION_ARCHIVER_DATABASE_PASSWORD" = "$MATERIALIZER_DATABASE_PASSWORD" ] \
+   || [ "$RETENTION_ARCHIVER_DATABASE_PASSWORD" = "$CATALOG_PUBLISHER_DATABASE_PASSWORD" ]; then
     printf 'ERROR: BPI service, migrator and worker database credentials must be distinct\n' >&2
     exit 1
 fi
 if [ "$MATERIALIZER_MINIO_ACCESS_KEY" = "$MINIO_ROOT_USER" ] \
    || [ "$MATERIALIZER_MINIO_SECRET_KEY" = "$MINIO_ROOT_PASSWORD" ]; then
     printf 'ERROR: BPI dataset MinIO credentials must be distinct from root\n' >&2
+    exit 1
+fi
+if [ "$RETENTION_MINIO_ACCESS_KEY" = "$MINIO_ROOT_USER" ] \
+   || [ "$RETENTION_MINIO_ACCESS_KEY" = "$MATERIALIZER_MINIO_ACCESS_KEY" ] \
+   || [ "$RECOVERY_MINIO_ACCESS_KEY" = "$MINIO_ROOT_USER" ] \
+   || [ "$RECOVERY_MINIO_ACCESS_KEY" = "$MATERIALIZER_MINIO_ACCESS_KEY" ] \
+   || [ "$RECOVERY_MINIO_ACCESS_KEY" = "$RETENTION_MINIO_ACCESS_KEY" ] \
+   || [ "$RETENTION_MINIO_SECRET_KEY" = "$MINIO_ROOT_PASSWORD" ] \
+   || [ "$RETENTION_MINIO_SECRET_KEY" = "$MATERIALIZER_MINIO_SECRET_KEY" ] \
+   || [ "$RECOVERY_MINIO_SECRET_KEY" = "$MINIO_ROOT_PASSWORD" ] \
+   || [ "$RECOVERY_MINIO_SECRET_KEY" = "$MATERIALIZER_MINIO_SECRET_KEY" ] \
+   || [ "$RECOVERY_MINIO_SECRET_KEY" = "$RETENTION_MINIO_SECRET_KEY" ]; then
+    printf 'ERROR: retention and recovery MinIO credentials must be isolated\n' >&2
     exit 1
 fi
 test "${#MINIO_ROOT_PASSWORD}" -ge 8 || {
@@ -462,12 +521,24 @@ test "${#MATERIALIZER_MINIO_SECRET_KEY}" -ge 8 || {
     printf 'ERROR: BPI_DATASET_MINIO_SECRET_KEY must contain at least 8 characters\n' >&2
     exit 1
 }
+test "${#RETENTION_MINIO_SECRET_KEY}" -ge 8 || {
+    printf 'ERROR: BPI_DATASET_RETENTION_MINIO_SECRET_KEY must contain at least 8 characters\n' >&2
+    exit 1
+}
+test "${#RECOVERY_MINIO_SECRET_KEY}" -ge 8 || {
+    printf 'ERROR: BPI_DATASET_RECOVERY_MINIO_SECRET_KEY must contain at least 8 characters\n' >&2
+    exit 1
+}
 require_integer_range BPI_DATASET_MATERIALIZER_POLL_SECONDS 1 3600
 require_integer_range BPI_DATASET_MATERIALIZER_CLAIM_TIMEOUT_SECONDS 30 86400
 require_integer_range BPI_DATASET_MATERIALIZER_MAX_ATTEMPTS 1 20
 require_integer_range BPI_DATASET_CATALOG_PUBLISHER_POLL_SECONDS 1 60
 require_integer_range BPI_DATASET_CATALOG_PUBLISHER_CLAIM_TIMEOUT_SECONDS 30 86400
 require_integer_range BPI_DATASET_CATALOG_PUBLISHER_MAX_ATTEMPTS 1 20
+require_integer_range BPI_DATASET_RETENTION_DAYS 1 36500
+require_integer_range BPI_DATASET_RETENTION_ARCHIVER_POLL_SECONDS 1 3600
+require_integer_range BPI_DATASET_RETENTION_ARCHIVER_CLAIM_TIMEOUT_SECONDS 30 86400
+require_integer_range BPI_DATASET_RETENTION_ARCHIVER_MAX_ATTEMPTS 1 20
 for disabled_key in \
     BPI_PHASE2_INTEGRATION_ENABLED \
     BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED \
@@ -479,11 +550,16 @@ for disabled_key in \
     BPI_DATASET_SOURCE_READER_ENABLED \
     BPI_POLARIS_ENABLED \
     BPI_POLARIS_ALLOW_INSECURE_STORAGE_TYPES \
+    BPI_POLARIS_DROP_WITH_PURGE_ENABLED \
     BPI_POLARIS_IGNORE_SEVERE_READINESS_ISSUES \
     BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED \
     BPI_POLARIS_PUBLISHER_CREDENTIAL_ROTATION_ENABLED \
+    BPI_POLARIS_RECOVERY_CREDENTIAL_ROTATION_ENABLED \
     BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED \
     BPI_DATASET_CATALOG_PUBLISHER_ENABLED \
+    BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED \
+    BPI_DATASET_RETENTION_ARCHIVER_ENABLED \
+    BPI_DATASET_RECOVERY_RECONCILE_STALE \
     QCS_BPI_OUTBOX_ENABLED; do
     if [ "$(env_value "$disabled_key" false)" != "false" ]; then
         printf 'ERROR: %s must remain false during the integrated expand-only upgrade\n' \
@@ -498,6 +574,7 @@ SERVICE_ID=$(compose ps -q bpi-service)
 ADAPTER_ID=$(compose ps -q bpi-adapter)
 WMS_ADAPTER_ID=$(compose ps -q bpi-wms-adapter)
 MATERIALIZER_ID=$(compose ps -q bpi-dataset-materializer)
+RETENTION_ARCHIVER_ID=$(compose ps -q bpi-dataset-retention-archiver)
 NGINX_ID=$(compose ps -q nginx)
 if [ -z "$POSTGRES_ID" ] || [ -z "$SERVICE_ID" ] || [ -z "$ADAPTER_ID" ] || [ -z "$NGINX_ID" ]; then
     printf 'ERROR: postgres, bpi-service, bpi-adapter and nginx must all be running\n' >&2
@@ -522,6 +599,16 @@ run_catalog_publisher_role_action() {
         -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
         -e "BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD=$CATALOG_PUBLISHER_DATABASE_PASSWORD" \
         "$POSTGRES_ID" sh -s -- "$action" <"$CATALOG_PUBLISHER_ROLE_SCRIPT"
+}
+
+run_retention_archiver_role_action() {
+    action=$1
+    docker exec -i \
+        -e "POSTGRES_USER=$POSTGRES_USER" \
+        -e "POSTGRES_DB=$POSTGRES_DB" \
+        -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
+        -e "BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD=$RETENTION_ARCHIVER_DATABASE_PASSWORD" \
+        "$POSTGRES_ID" sh -s -- "$action" <"$RETENTION_ARCHIVER_ROLE_SCRIPT"
 }
 
 verify_service_image_migrations() {
@@ -584,6 +671,8 @@ MATERIALIZER_IMAGE_ID=
 MATERIALIZER_IMAGE_USER=
 CATALOG_PUBLISHER_IMAGE_ID=
 CATALOG_PUBLISHER_IMAGE_USER=
+RETENTION_ARCHIVER_IMAGE_ID=
+RETENTION_ARCHIVER_IMAGE_USER=
 MIGRATION_SET_SHA256=
 DATABASE_BACKUP=
 ENV_BACKUP=
@@ -643,6 +732,11 @@ docker build \
     --label "org.opencontainers.image.revision=$RELEASE_COMMIT" \
     -f "$RELEASE_ROOT/services/bpi-dataset-catalog-publisher/Dockerfile" \
     -t "$CATALOG_PUBLISHER_IMAGE" "$RELEASE_ROOT"
+docker build \
+    --build-arg "PYTHON_IMAGE=$RETENTION_ARCHIVER_PYTHON_IMAGE" \
+    --label "org.opencontainers.image.revision=$RELEASE_COMMIT" \
+    -f "$RELEASE_ROOT/services/bpi-dataset-retention-archiver/Dockerfile" \
+    -t "$RETENTION_ARCHIVER_IMAGE" "$RELEASE_ROOT"
 
 MIGRATION_SET_SHA256=$(verify_service_image_migrations)
 MATERIALIZER_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$MATERIALIZER_IMAGE")
@@ -659,9 +753,19 @@ if [ "$CATALOG_PUBLISHER_IMAGE_USER" != "10002:10002" ]; then
         "$CATALOG_PUBLISHER_IMAGE_USER" >&2
     exit 1
 fi
+RETENTION_ARCHIVER_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$RETENTION_ARCHIVER_IMAGE")
+RETENTION_ARCHIVER_IMAGE_USER=$(docker image inspect --format '{{.Config.User}}' "$RETENTION_ARCHIVER_IMAGE")
+if [ "$RETENTION_ARCHIVER_IMAGE_USER" != "10003:10003" ]; then
+    printf 'ERROR: BPI retention archiver must run as 10003:10003, found %s\n' \
+        "$RETENTION_ARCHIVER_IMAGE_USER" >&2
+    exit 1
+fi
 
 if [ -n "$MATERIALIZER_ID" ]; then
     compose_expand stop bpi-dataset-materializer
+fi
+if [ -n "$RETENTION_ARCHIVER_ID" ]; then
+    compose_expand stop bpi-dataset-retention-archiver
 fi
 
 phase=BACKUP
@@ -696,6 +800,7 @@ write_report PREPARED BACKUP_COMPLETE
 phase=MIGRATION
 run_materializer_role_action provision
 run_catalog_publisher_role_action provision
+run_retention_archiver_role_action provision
 runtime_network=$(docker inspect --format \
     '{{range $name, $_ := .NetworkSettings.Networks}}{{println $name}}{{end}}' \
     "$POSTGRES_ID" | head -1)
@@ -723,6 +828,8 @@ run_materializer_role_action grant
 run_materializer_role_action verify
 run_catalog_publisher_role_action grant
 run_catalog_publisher_role_action verify
+run_retention_archiver_role_action grant
+run_retention_archiver_role_action verify
 if [ "$DATABASE_MIGRATION_MODE" = "APPLY_EXPANSION" ]; then
     write_report IN_PROGRESS MIGRATION_APPLIED
 else
@@ -770,7 +877,7 @@ if [ -n "$(compose ps -q bpi-dataset-materializer)" ]; then
     printf 'ERROR: BPI dataset materializer must remain stopped after expand-only upgrade\n' >&2
     exit 1
 fi
-for disabled_service in bpi-dataset-catalog-publisher bpi-polaris \
+for disabled_service in bpi-dataset-catalog-publisher bpi-dataset-retention-archiver bpi-polaris \
     bpi-polaris-postgres bpi-polaris-catalog-bootstrap; do
     if [ -n "$(docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" \
         --profile bpi-catalog ps -q "$disabled_service")" ]; then
@@ -784,8 +891,9 @@ write_report PASS COMPLETE
 trap - EXIT HUP INT TERM
 printf 'Integrated BPI expand-only upgrade: PASS (Flyway %s, mode %s, release %s)\n' \
     "$AFTER_VERSION" "$DATABASE_MIGRATION_MODE" "$RELEASE_COMMIT"
-printf 'Service image: %s\nAdapter image: %s\nWMS adapter image: %s\nReport: %s\n' \
-    "$SERVICE_IMAGE" "$ADAPTER_IMAGE" "$WMS_ADAPTER_IMAGE" "$REPORT"
+printf 'Service image: %s\nAdapter image: %s\nWMS adapter image: %s\nRetention archiver image: %s\nReport: %s\n' \
+    "$SERVICE_IMAGE" "$ADAPTER_IMAGE" "$WMS_ADAPTER_IMAGE" \
+    "$RETENTION_ARCHIVER_IMAGE" "$REPORT"
 printf 'Dataset materializer image (built, not started): %s\n' "$MATERIALIZER_IMAGE"
 printf 'Dataset catalog publisher image (built, not started): %s\n' \
     "$CATALOG_PUBLISHER_IMAGE"

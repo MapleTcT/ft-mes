@@ -13,6 +13,7 @@ services:
       BPI_MIGRATOR_PASSWORD: ${BPI_MIGRATOR_PASSWORD:?BPI_MIGRATOR_PASSWORD is required}
       BPI_MATERIALIZER_DATABASE_PASSWORD: ${BPI_MATERIALIZER_DATABASE_PASSWORD:?BPI_MATERIALIZER_DATABASE_PASSWORD is required}
       BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD: ${BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD:?BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD is required}
+      BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD: ${BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD:?BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD is required}
       TZ: ${TZ:-Asia/Shanghai}
     volumes:
       - bpi-postgres-data:/var/lib/postgresql/data
@@ -82,6 +83,39 @@ services:
     depends_on:
       bpi-minio:
         condition: service_started
+    networks:
+      - bpi-runtime
+
+  bpi-dataset-recovery-bootstrap:
+    image: ${MINIO_MC_IMAGE:-m.daocloud.io/docker.io/minio/mc:latest}
+    profiles: ["bpi-catalog"]
+    restart: "no"
+    environment:
+      BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED: ${BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED:-false}
+      BPI_DATASET_RETENTION_MINIO_ENDPOINT: http://bpi-minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+      BPI_DATASET_RETENTION_MINIO_ACCESS_KEY: ${BPI_DATASET_RETENTION_MINIO_ACCESS_KEY:?BPI_DATASET_RETENTION_MINIO_ACCESS_KEY is required}
+      BPI_DATASET_RETENTION_MINIO_SECRET_KEY: ${BPI_DATASET_RETENTION_MINIO_SECRET_KEY:?BPI_DATASET_RETENTION_MINIO_SECRET_KEY is required}
+      BPI_DATASET_RECOVERY_MINIO_ACCESS_KEY: ${BPI_DATASET_RECOVERY_MINIO_ACCESS_KEY:?BPI_DATASET_RECOVERY_MINIO_ACCESS_KEY is required}
+      BPI_DATASET_RECOVERY_MINIO_SECRET_KEY: ${BPI_DATASET_RECOVERY_MINIO_SECRET_KEY:?BPI_DATASET_RECOVERY_MINIO_SECRET_KEY is required}
+      BPI_DATASET_MINIO_BUCKET: ${BPI_DATASET_MINIO_BUCKET:-bpi-datasets}
+      BPI_DATASET_RECOVERY_BUCKET: ${BPI_DATASET_RECOVERY_BUCKET:-bpi-dataset-recovery}
+      BPI_ICEBERG_WAREHOUSE_BUCKET: ${BPI_ICEBERG_WAREHOUSE_BUCKET:-bpi-iceberg-warehouse}
+      BPI_DATASET_RETENTION_MODE: ${BPI_DATASET_RETENTION_MODE:-GOVERNANCE}
+      BPI_DATASET_RETENTION_DAYS: ${BPI_DATASET_RETENTION_DAYS:-30}
+    volumes:
+      - ../minio/bootstrap-bpi-dataset-recovery-bucket.sh:/work/bootstrap.sh:ro
+      - ../minio/bpi-dataset-retention-archiver-policy.json:/work/policy.json:ro
+      - ../minio/bpi-dataset-recovery-operator-policy.json:/work/recovery-policy.json:ro
+    entrypoint: ["/bin/sh", "/work/bootstrap.sh"]
+    depends_on:
+      bpi-minio:
+        condition: service_started
+      bpi-dataset-minio-bootstrap:
+        condition: service_completed_successfully
+      bpi-iceberg-warehouse-bootstrap:
+        condition: service_completed_successfully
     networks:
       - bpi-runtime
 
@@ -171,6 +205,7 @@ services:
       POLARIS_AUTHENTICATION_TOKEN_BROKER_TYPE: symmetric-key
       POLARIS_AUTHENTICATION_TOKEN_BROKER_SYMMETRIC_KEY_SECRET: ${BPI_POLARIS_TOKEN_BROKER_SECRET:?BPI_POLARIS_TOKEN_BROKER_SECRET is required}
       polaris.features."ALLOW_INSECURE_STORAGE_TYPES": ${BPI_POLARIS_ALLOW_INSECURE_STORAGE_TYPES:-false}
+      polaris.features."DROP_WITH_PURGE_ENABLED": ${BPI_POLARIS_DROP_WITH_PURGE_ENABLED:-false}
       polaris.readiness.ignore-severe-issues: ${BPI_POLARIS_IGNORE_SEVERE_READINESS_ISSUES:-false}
       QUARKUS_OTEL_SDK_DISABLED: "true"
       QUARKUS_LOG_FILE_ENABLED: "false"
@@ -210,6 +245,10 @@ services:
       BPI_POLARIS_BOOTSTRAP_CLIENT_SECRET: ${BPI_POLARIS_BOOTSTRAP_CLIENT_SECRET:?BPI_POLARIS_BOOTSTRAP_CLIENT_SECRET is required}
       BPI_POLARIS_PUBLISHER_CREDENTIAL_FILE: /var/run/bpi-polaris-credentials/publisher-credential
       BPI_POLARIS_PUBLISHER_CREDENTIAL_ROTATION_ENABLED: ${BPI_POLARIS_PUBLISHER_CREDENTIAL_ROTATION_ENABLED:-false}
+      BPI_POLARIS_RECOVERY_CREDENTIAL_FILE: /var/run/bpi-polaris-credentials/recovery-credential
+      BPI_POLARIS_RECOVERY_CREDENTIAL_ROTATION_ENABLED: ${BPI_POLARIS_RECOVERY_CREDENTIAL_ROTATION_ENABLED:-false}
+      BPI_POLARIS_RECOVERY_CREDENTIAL_UID: "10004"
+      BPI_POLARIS_RECOVERY_CREDENTIAL_GID: "10004"
       BPI_ICEBERG_WAREHOUSE_BUCKET: ${BPI_ICEBERG_WAREHOUSE_BUCKET:-bpi-iceberg-warehouse}
       BPI_ICEBERG_S3_ENDPOINT_EXTERNAL: ${BPI_ICEBERG_S3_ENDPOINT_EXTERNAL:-http://bpi-minio:9000}
       BPI_ICEBERG_S3_ENDPOINT_INTERNAL: http://bpi-minio:9000
@@ -264,6 +303,45 @@ services:
       bpi-dataset-minio-bootstrap:
         condition: service_completed_successfully
       bpi-polaris-catalog-bootstrap:
+        condition: service_completed_successfully
+    networks:
+      - bpi-runtime
+
+  bpi-dataset-retention-archiver:
+    image: ${BPI_DATASET_RETENTION_ARCHIVER_IMAGE:-ft-mes-bpi-dataset-retention-archiver:local}
+    profiles: ["bpi-catalog"]
+    build:
+      context: ../..
+      dockerfile: services/bpi-dataset-retention-archiver/Dockerfile
+      args:
+        PYTHON_IMAGE: ${BPI_DATASET_RETENTION_ARCHIVER_PYTHON_IMAGE:-m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      BPI_DATASET_RETENTION_ARCHIVER_ENABLED: ${BPI_DATASET_RETENTION_ARCHIVER_ENABLED:-false}
+      PGHOST: bpi-postgres
+      PGPORT: "5432"
+      PGDATABASE: ${BPI_DATABASE_NAME:-ft_mes_bpi}
+      PGUSER: bpi_retention_archiver
+      PGPASSWORD: ${BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD:?BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD is required}
+      PGSSLMODE: disable
+      BPI_DATASET_RETENTION_MINIO_ENDPOINT: bpi-minio:9000
+      BPI_DATASET_RETENTION_MINIO_SECURE: "false"
+      BPI_DATASET_RETENTION_MINIO_ACCESS_KEY: ${BPI_DATASET_RETENTION_MINIO_ACCESS_KEY:?BPI_DATASET_RETENTION_MINIO_ACCESS_KEY is required}
+      BPI_DATASET_RETENTION_MINIO_SECRET_KEY: ${BPI_DATASET_RETENTION_MINIO_SECRET_KEY:?BPI_DATASET_RETENTION_MINIO_SECRET_KEY is required}
+      BPI_DATASET_RECOVERY_BUCKET: ${BPI_DATASET_RECOVERY_BUCKET:-bpi-dataset-recovery}
+      BPI_DATASET_RETENTION_MODE: ${BPI_DATASET_RETENTION_MODE:-GOVERNANCE}
+      BPI_DATASET_RETENTION_DAYS: ${BPI_DATASET_RETENTION_DAYS:-30}
+      BPI_DATASET_RETENTION_LEGAL_HOLD: ${BPI_DATASET_RETENTION_LEGAL_HOLD:-false}
+      BPI_DATASET_RETENTION_ARCHIVER_POLL_SECONDS: ${BPI_DATASET_RETENTION_ARCHIVER_POLL_SECONDS:-2}
+      BPI_DATASET_RETENTION_ARCHIVER_CLAIM_TIMEOUT_SECONDS: ${BPI_DATASET_RETENTION_ARCHIVER_CLAIM_TIMEOUT_SECONDS:-300}
+      BPI_DATASET_RETENTION_ARCHIVER_MAX_ATTEMPTS: ${BPI_DATASET_RETENTION_ARCHIVER_MAX_ATTEMPTS:-3}
+    volumes:
+      - bpi-retention-archiver-work:/var/lib/bpi-retention-archiver
+    depends_on:
+      bpi-migrate:
+        condition: service_completed_successfully
+      bpi-dataset-recovery-bootstrap:
         condition: service_completed_successfully
     networks:
       - bpi-runtime
@@ -567,3 +645,4 @@ volumes:
   bpi-polaris-bootstrap-state:
   bpi-polaris-publisher-credentials:
   bpi-catalog-publisher-work:
+  bpi-retention-archiver-work:

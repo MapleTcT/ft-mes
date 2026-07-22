@@ -40,6 +40,7 @@ import type {
   DatasetDefinition,
   DatasetDefinitionCreateCommand,
   DatasetMaterialization,
+  DatasetRetentionArchive,
   DatasetSnapshot,
   DatasetSnapshotCommand,
   Evidence,
@@ -135,8 +136,10 @@ const state = {
   selectedDatasetSnapshot: null as DatasetSnapshot | null,
   selectedDatasetMaterialization: null as DatasetMaterialization | null,
   selectedDatasetCatalogPublication: null as DatasetCatalogPublication | null,
+  selectedDatasetRetentionArchive: null as DatasetRetentionArchive | null,
   datasetMaterializationCommand: null as 'request' | 'retry' | null,
   datasetCatalogPublicationCommand: null as 'request' | 'retry' | null,
+  datasetRetentionArchiveCommand: null as 'request' | 'retry' | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | 'reconcileWms' | 'forceCloseRequest' | 'forceCloseApprove' | 'requestWmsReversal' | 'approveWmsReversal' | null,
   shadowRunCommand: null as 'start' | 'complete' | 'approve' | 'reject' | 'cancel' | null,
@@ -239,8 +242,8 @@ function dataQualityCategoryCount(patterns: string[]): number {
 }
 
 function statusTone(status: string): string {
-  if (['RUNNING', 'ACTIVE', 'READY', 'PASS', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED', 'QUALIFIED', 'COMPLETED', 'INBOUNDED', 'INBOUND_REVERSED', 'REVERSED', 'MANIFEST_READY', 'VERIFIED'].includes(status)) return 'ok';
-  if (['PENDING', 'PENDING_APPROVAL', 'PENDING_WMS', 'INBOUND_REVERSING', 'REVERSAL_PENDING', 'EVALUATING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING', 'QUEUED', 'BUILDING', 'WRITING', 'COMMITTING', 'VERIFYING', 'SIMULATED'].includes(status)) return 'warn';
+  if (['RUNNING', 'ACTIVE', 'READY', 'PASS', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED', 'QUALIFIED', 'COMPLETED', 'INBOUNDED', 'INBOUND_REVERSED', 'REVERSED', 'MANIFEST_READY', 'VERIFIED', 'LOCKED'].includes(status)) return 'ok';
+  if (['PENDING', 'PENDING_APPROVAL', 'PENDING_WMS', 'INBOUND_REVERSING', 'REVERSAL_PENDING', 'EVALUATING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING', 'QUEUED', 'BUILDING', 'WRITING', 'COMMITTING', 'ARCHIVING', 'VERIFYING', 'SIMULATED'].includes(status)) return 'warn';
   if (['FAILED', 'REVERSAL_FAILED', 'FAIL', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED', 'OPEN', 'CRITICAL', 'ERROR', 'MISSING', 'DISABLED'].includes(status)) return 'danger';
   return 'neutral';
 }
@@ -556,6 +559,14 @@ function shell(): void {
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="dataset-catalog-publication-submit" value="default" class="button button--primary">发布 Iceberg</button></footer>
         </form>
       </dialog>
+      <dialog id="dataset-retention-archive-dialog" class="command-dialog">
+        <form method="dialog" id="dataset-retention-archive-form">
+          <header><div><span>Object Lock 恢复包</span><h2 id="dataset-retention-archive-title">创建不可变恢复包</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <div id="dataset-retention-archive-summary" class="command-summary"></div>
+          <label><span>操作依据</span><textarea id="dataset-retention-archive-reason" required minlength="3" maxlength="500"></textarea></label>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="dataset-retention-archive-submit" value="default" class="button button--primary">创建恢复包</button></footer>
+        </form>
+      </dialog>
       <dialog id="feature-flag-dialog" class="command-dialog">
         <form method="dialog" id="feature-flag-form">
           <header><div><span>运行治理</span><h2 id="feature-flag-dialog-title">变更运行开关</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
@@ -606,6 +617,7 @@ function bindShellEvents(): void {
   document.querySelector<HTMLFormElement>('#dataset-snapshot-form')?.addEventListener('submit', handleDatasetSnapshotCreate);
   document.querySelector<HTMLFormElement>('#dataset-materialization-form')?.addEventListener('submit', handleDatasetMaterializationCommand);
   document.querySelector<HTMLFormElement>('#dataset-catalog-publication-form')?.addEventListener('submit', handleDatasetCatalogPublicationCommand);
+  document.querySelector<HTMLFormElement>('#dataset-retention-archive-form')?.addEventListener('submit', handleDatasetRetentionArchiveCommand);
   document.querySelector<HTMLFormElement>('#feature-flag-form')?.addEventListener('submit', handleFeatureFlagChange);
   document.querySelector<HTMLSelectElement>('#shadow-review-batch')?.addEventListener('change', applyShadowReviewBatch);
   document.querySelector<HTMLDialogElement>('#confirm-dialog')?.addEventListener('close', () => {
@@ -3424,6 +3436,7 @@ async function handleDatasetSnapshotCreate(event: SubmitEvent): Promise<void> {
     const generation = ++datasetSnapshotRequestGeneration;
     state.selectedDatasetSnapshot = response.data;
     state.selectedDatasetCatalogPublication = null;
+    state.selectedDatasetRetentionArchive = null;
     showToast(`快照 v${response.data.snapshotVersion} 已进入后台队列`);
     renderDatasetSnapshotDrawer(response.data);
     await pollDatasetSnapshot(response.data.id, generation);
@@ -3557,6 +3570,7 @@ async function pollDatasetMaterialization(
         await loadDatasetCatalogPublication(snapshotResponse.data, generation);
       } else {
         state.selectedDatasetCatalogPublication = null;
+        state.selectedDatasetRetentionArchive = null;
         renderDatasetSnapshotDrawer(snapshotResponse.data);
       }
       showToast(response.data.state === 'READY'
@@ -3587,6 +3601,7 @@ async function loadDatasetCatalogPublication(
   if (materialization?.state !== 'READY') {
     if (datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) {
       state.selectedDatasetCatalogPublication = null;
+      state.selectedDatasetRetentionArchive = null;
       renderDatasetSnapshotDrawer(snapshot);
     }
     return null;
@@ -3594,7 +3609,11 @@ async function loadDatasetCatalogPublication(
   const response = await bpiApi.datasetCatalogPublicationForMaterialization(materialization.id);
   if (!datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) return null;
   state.selectedDatasetCatalogPublication = response.data;
+  state.selectedDatasetRetentionArchive = null;
   renderDatasetSnapshotDrawer(snapshot);
+  if (response.data?.state === 'READY') {
+    await loadDatasetRetentionArchive(snapshot, response.data, generation);
+  }
   return response.data;
 }
 
@@ -3679,8 +3698,16 @@ async function pollDatasetCatalogPublication(
     const response = await bpiApi.datasetCatalogPublication(publicationId);
     if (!datasetSnapshotDrawerIsCurrent(snapshotId, generation)) return;
     state.selectedDatasetCatalogPublication = response.data;
+    if (response.data.state !== 'READY') state.selectedDatasetRetentionArchive = null;
     renderDatasetSnapshotDrawer(state.selectedDatasetSnapshot!);
     if (['READY', 'FAILED'].includes(response.data.state)) {
+      if (response.data.state === 'READY') {
+        await loadDatasetRetentionArchive(
+          state.selectedDatasetSnapshot!,
+          response.data,
+          generation,
+        );
+      }
       showToast(response.data.state === 'READY'
         ? `Iceberg 快照 ${response.data.icebergSnapshotId || '-'} 已复验`
         : `Iceberg 发布失败：${response.data.failureCode || 'UNKNOWN'}`,
@@ -3690,6 +3717,127 @@ async function pollDatasetCatalogPublication(
     await new Promise((resolve) => window.setTimeout(resolve, 800));
   }
   showToast('Iceberg 发布仍在后台执行，可稍后刷新状态', true);
+}
+
+function currentDatasetRetentionArchive(
+  publication: DatasetCatalogPublication | null,
+): DatasetRetentionArchive | null {
+  const archive = state.selectedDatasetRetentionArchive;
+  return publication && archive?.catalogPublicationId === publication.id
+    ? archive : null;
+}
+
+async function loadDatasetRetentionArchive(
+  snapshot: DatasetSnapshot,
+  publication: DatasetCatalogPublication,
+  generation: number = datasetSnapshotRequestGeneration,
+): Promise<DatasetRetentionArchive | null> {
+  if (publication.state !== 'READY') {
+    if (datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) {
+      state.selectedDatasetRetentionArchive = null;
+      renderDatasetSnapshotDrawer(snapshot);
+    }
+    return null;
+  }
+  const response = await bpiApi.datasetRetentionArchiveForPublication(publication.id);
+  if (!datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) return null;
+  state.selectedDatasetRetentionArchive = response.data;
+  renderDatasetSnapshotDrawer(snapshot);
+  return response.data;
+}
+
+function openDatasetRetentionArchiveDialog(
+  snapshot: DatasetSnapshot,
+  command: 'request' | 'retry',
+): void {
+  const publication = currentDatasetCatalogPublication(snapshot.latestMaterialization || null);
+  const archive = currentDatasetRetentionArchive(publication);
+  if (publication?.state !== 'READY'
+    || publication.catalogMetadata?.catalogSnapshotVerified !== true) {
+    showToast('恢复包要求 Iceberg 快照已就绪并完成目录复验', true);
+    return;
+  }
+  if (command === 'request' && archive) {
+    showToast('当前 Iceberg 发布已经有恢复包任务', true);
+    return;
+  }
+  if (command === 'retry' && archive?.state !== 'FAILED') {
+    showToast('只有失败的恢复包任务可以重新排队', true);
+    return;
+  }
+  state.selectedDatasetSnapshot = snapshot;
+  state.datasetRetentionArchiveCommand = command;
+  document.querySelector('#dataset-retention-archive-title')!.textContent = command === 'retry'
+    ? '重新排队恢复包' : '创建不可变恢复包';
+  document.querySelector('#dataset-retention-archive-summary')!.innerHTML = `<div><span>Iceberg 表</span><b>${escapeHtml(publication.tableIdentifier)}</b></div><div><span>快照 ID</span><b>${escapeHtml(publication.icebergSnapshotId || '-')}</b></div><div><span>语义 SHA-256</span><b>${escapeHtml(publication.semanticChecksum || '-')}</b></div><div><span>revision</span><b>${command === 'retry' ? archive?.revision : publication.revision}</b></div>`;
+  const reason = document.querySelector<HTMLTextAreaElement>('#dataset-retention-archive-reason')!;
+  reason.value = '';
+  const button = document.querySelector<HTMLButtonElement>('#dataset-retention-archive-submit')!;
+  button.textContent = command === 'retry' ? '重新排队' : '创建恢复包';
+  document.querySelector<HTMLDialogElement>('#dataset-retention-archive-dialog')!.showModal();
+  reason.focus();
+}
+
+async function handleDatasetRetentionArchiveCommand(event: SubmitEvent): Promise<void> {
+  event.preventDefault();
+  const snapshot = state.selectedDatasetSnapshot;
+  const publication = currentDatasetCatalogPublication(snapshot?.latestMaterialization || null);
+  const archive = currentDatasetRetentionArchive(publication);
+  const command = state.datasetRetentionArchiveCommand;
+  if (!snapshot || !publication || !command || (command === 'retry' && !archive)) return;
+  const reason = document.querySelector<HTMLTextAreaElement>('#dataset-retention-archive-reason')!.value.trim();
+  if (reason.length < 3) {
+    showToast('操作依据至少填写 3 个字符', true);
+    return;
+  }
+  const button = document.querySelector<HTMLButtonElement>('#dataset-retention-archive-submit')!;
+  const idleLabel = command === 'retry' ? '重新排队' : '创建恢复包';
+  button.disabled = true;
+  button.textContent = '提交中...';
+  const generation = datasetSnapshotRequestGeneration;
+  try {
+    const response = command === 'retry'
+      ? await bpiApi.retryDatasetRetentionArchive(archive!, reason, commandId())
+      : await bpiApi.requestDatasetRetentionArchive(publication, reason, commandId());
+    document.querySelector<HTMLDialogElement>('#dataset-retention-archive-dialog')!.close();
+    if (!datasetSnapshotDrawerIsCurrent(snapshot.id, generation)) {
+      showToast(command === 'retry' ? '恢复包任务已重新排队' : '恢复包任务已进入后台队列');
+      return;
+    }
+    state.selectedDatasetRetentionArchive = response.data;
+    state.datasetRetentionArchiveCommand = null;
+    renderDatasetSnapshotDrawer(snapshot);
+    showToast(command === 'retry' ? '恢复包任务已重新排队' : '恢复包任务已进入后台队列');
+    await pollDatasetRetentionArchive(snapshot.id, response.data.id, generation);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = idleLabel;
+  }
+}
+
+async function pollDatasetRetentionArchive(
+  snapshotId: string,
+  archiveId: string,
+  generation: number,
+): Promise<void> {
+  for (let attempt = 0; attempt < 15; attempt += 1) {
+    if (!datasetSnapshotDrawerIsCurrent(snapshotId, generation)) return;
+    const response = await bpiApi.datasetRetentionArchive(archiveId);
+    if (!datasetSnapshotDrawerIsCurrent(snapshotId, generation)) return;
+    state.selectedDatasetRetentionArchive = response.data;
+    renderDatasetSnapshotDrawer(state.selectedDatasetSnapshot!);
+    if (['LOCKED', 'FAILED'].includes(response.data.state)) {
+      showToast(response.data.state === 'LOCKED'
+        ? `恢复包已锁定至 ${formatTime(response.data.retainUntil)}`
+        : `恢复包归档失败：${response.data.failureCode || 'UNKNOWN'}`,
+      response.data.state === 'FAILED');
+      return;
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
+  }
+  showToast('恢复包仍在后台归档，可稍后刷新状态', true);
 }
 
 async function openDatasetSnapshotById(snapshotId: string): Promise<void> {
@@ -3702,6 +3850,7 @@ async function openDatasetSnapshotById(snapshotId: string): Promise<void> {
       || activeDrawerKey !== originDrawerKey) return;
     state.selectedDatasetSnapshot = response.data;
     state.selectedDatasetCatalogPublication = null;
+    state.selectedDatasetRetentionArchive = null;
     renderDatasetSnapshotDrawer(response.data);
     if (['QUEUED', 'BUILDING'].includes(response.data.state)) {
       await pollDatasetSnapshot(snapshotId, generation);
@@ -3717,6 +3866,11 @@ async function openDatasetSnapshotById(snapshotId: string): Promise<void> {
       const publication = await loadDatasetCatalogPublication(response.data, generation);
       if (publication && ['QUEUED', 'COMMITTING', 'VERIFYING'].includes(publication.state)) {
         await pollDatasetCatalogPublication(snapshotId, publication.id, generation);
+      } else if (publication?.state === 'READY') {
+        const archive = currentDatasetRetentionArchive(publication);
+        if (archive && ['QUEUED', 'ARCHIVING', 'VERIFYING'].includes(archive.state)) {
+          await pollDatasetRetentionArchive(snapshotId, archive.id, generation);
+        }
       }
     }
   } catch (error) {
@@ -3754,7 +3908,8 @@ function datasetMaterializationHtml(snapshot: DatasetSnapshot): string {
 function datasetDeliveryChainHtml(snapshot: DatasetSnapshot): string {
   const materialization = snapshot.latestMaterialization || null;
   const publication = currentDatasetCatalogPublication(materialization);
-  return `<div class="drawer-section dataset-delivery-panel"><div class="section-title"><h3>数据交付链</h3><span>分层验收</span></div><div class="dataset-delivery-grid"><div><span>1 · Manifest</span>${statusChip(snapshot.state)}</div><div><span>2 · Parquet</span>${statusChip(materialization?.state || 'NOT_STARTED')}</div><div><span>3 · Iceberg</span>${statusChip(publication?.state || 'NOT_STARTED')}</div><div><span>4 · ML / 模型</span>${statusChip('NOT_STARTED')}</div></div></div>`;
+  const archive = currentDatasetRetentionArchive(publication);
+  return `<div class="drawer-section dataset-delivery-panel"><div class="section-title"><h3>数据交付链</h3><span>分层验收</span></div><div class="dataset-delivery-grid"><div><span>1 · Manifest</span>${statusChip(snapshot.state)}</div><div><span>2 · Parquet</span>${statusChip(materialization?.state || 'NOT_STARTED')}</div><div><span>3 · Iceberg</span>${statusChip(publication?.state || 'NOT_STARTED')}</div><div><span>4 · 恢复包</span>${statusChip(archive?.state || 'NOT_STARTED')}</div><div><span>5 · ML / 模型</span>${statusChip('NOT_STARTED')}</div></div></div>`;
 }
 
 function safeCatalogFailureDetail(value?: string | null): string {
@@ -3787,6 +3942,35 @@ function datasetCatalogPublicationHtml(snapshot: DatasetSnapshot): string {
   return `<div class="drawer-section dataset-catalog-panel" data-catalog-state="${escapeHtml(publication.state)}"><div class="section-title"><h3>Iceberg 目录</h3><span>${statusChip(publication.state)} · r${publication.revision}</span></div>${body}</div>`;
 }
 
+function datasetRetentionArchiveHtml(snapshot: DatasetSnapshot): string {
+  const publication = currentDatasetCatalogPublication(snapshot.latestMaterialization || null);
+  const archive = currentDatasetRetentionArchive(publication);
+  if (publication?.state !== 'READY') {
+    return `<div class="drawer-section dataset-retention-panel" data-retention-state="NOT_STARTED"><div class="section-title"><h3>不可变恢复包</h3>${statusChip('NOT_STARTED')}</div><div class="simulation-empty">等待 Iceberg 快照完成目录复验</div></div>`;
+  }
+  if (!archive) {
+    return `<div class="drawer-section dataset-retention-panel" data-retention-state="NOT_STARTED"><div class="section-title"><h3>不可变恢复包</h3>${statusChip('NOT_STARTED')}</div><div class="simulation-empty">该 Iceberg 快照尚未生成独立 Object Lock 恢复包</div></div>`;
+  }
+  let body = '';
+  if (['QUEUED', 'ARCHIVING', 'VERIFYING'].includes(archive.state)) {
+    const label = archive.state === 'QUEUED' ? '等待 Archiver 领取'
+      : archive.state === 'ARCHIVING' ? '正在写入受保留对象版本'
+        : '正在回读并重建校验恢复包';
+    body = `<div class="batch-detail-loading"><i data-lucide="refresh-cw"></i><div><strong>${label}</strong><span>attempt ${archive.attemptCount} · revision ${archive.revision}</span></div></div>`;
+  } else if (archive.state === 'FAILED') {
+    body = `<div class="dataset-materialization-error"><i data-lucide="circle-alert"></i><div><strong>${escapeHtml(archive.failureCode || 'RETENTION_ARCHIVE_FAILED')}</strong><span>${escapeHtml(safeCatalogFailureDetail(archive.failureDetail || '恢复包归档失败'))}</span></div></div>`;
+  } else {
+    const metadata = archive.archiveMetadata || {};
+    const simulationOnly = metadata.simulationOnly === true;
+    const objectLockState = simulationOnly ? 'SIMULATED'
+      : metadata.objectLockVerified === true ? 'VERIFIED' : 'UNVERIFIED';
+    const recoveryState = simulationOnly ? 'SIMULATED'
+      : metadata.recoveryVerified === true ? 'VERIFIED' : 'UNVERIFIED';
+    body = `<div class="dataset-retention-grid"><div><span>Object Lock</span>${statusChip(objectLockState)}</div><div><span>恢复重建</span>${statusChip(recoveryState)}</div><div><span>保留模式</span><b>${escapeHtml(archive.retentionMode || '-')}</b></div><div><span>保留截止</span><b>${formatTime(archive.retainUntil)}</b></div><div><span>Legal hold</span><b>${archive.legalHoldEnabled === true ? 'ENABLED' : 'DISABLED'}</b></div><div><span>对象 / 总大小</span><b>${archive.archiveObjectCount ?? 0} / ${formatBytes(archive.archiveTotalBytes)}</b></div><div><span>恢复行数</span><b>${archive.verifiedRowCount ?? 0} / ${archive.catalogVerifiedRowCount}</b></div><div><span>完成时间</span><b>${formatTime(archive.completedAt)}</b></div></div><div class="dataset-artifact-reference"><span>恢复桶 / 前缀</span><code class="dataset-retention-prefix">s3://${escapeHtml(archive.archiveBucket || '-')}/${escapeHtml(archive.archivePrefix || '-')}</code><span>源对象版本</span><code class="dataset-retained-source-version">${escapeHtml(archive.sourceArchiveVersionId || '-')}</code><span>Manifest 版本</span><code class="dataset-retained-manifest-version">${escapeHtml(archive.archiveManifestVersionId || '-')}</code><span>Manifest SHA-256</span><code class="dataset-retention-manifest-sha">${escapeHtml(archive.archiveManifestSha256 || '-')}</code><span>恢复语义 SHA-256</span><code class="dataset-retention-semantic-sha">${escapeHtml(archive.verifiedSemanticChecksum || '-')}</code></div>`;
+  }
+  return `<div class="drawer-section dataset-retention-panel" data-retention-state="${escapeHtml(archive.state)}"><div class="section-title"><h3>不可变恢复包</h3><span>${statusChip(archive.state)} · r${archive.revision}</span></div>${body}</div>`;
+}
+
 function datasetDeliveryActionHtml(snapshot: DatasetSnapshot): string {
   if (['QUEUED', 'BUILDING'].includes(snapshot.state)) {
     return '<button class="button button--primary" id="refresh-dataset-snapshot"><i data-lucide="refresh-cw"></i>刷新清单</button>';
@@ -3812,6 +3996,16 @@ function datasetDeliveryActionHtml(snapshot: DatasetSnapshot): string {
   if (['QUEUED', 'COMMITTING', 'VERIFYING'].includes(publication.state)) {
     return '<button class="button button--primary" id="refresh-dataset-catalog-publication"><i data-lucide="refresh-cw"></i>刷新 Iceberg</button>';
   }
+  const archive = currentDatasetRetentionArchive(publication);
+  if (!archive) {
+    return '<button class="button button--primary" id="open-dataset-retention-archive"><i data-lucide="lock-keyhole"></i>创建恢复包</button>';
+  }
+  if (archive.state === 'FAILED') {
+    return '<button class="button button--primary" id="retry-dataset-retention-archive"><i data-lucide="rotate-ccw"></i>重试恢复包</button>';
+  }
+  if (['QUEUED', 'ARCHIVING', 'VERIFYING'].includes(archive.state)) {
+    return '<button class="button button--primary" id="refresh-dataset-retention-archive"><i data-lucide="refresh-cw"></i>刷新恢复包</button>';
+  }
   return '';
 }
 
@@ -3823,7 +4017,7 @@ function renderDatasetSnapshotDrawer(snapshot: DatasetSnapshot): void {
   const samples = (manifest?.samples || []).slice(0, 50).map((sample) => `<tr><td><strong>${escapeHtml(sample.batchNo)}</strong><small>${escapeHtml(sample.lineId)}</small></td><td>${formatTime(sample.predictionTime)}</td><td>${escapeHtml(sample.splitKey)}</td><td>${number(sample.confidence * 100, 0)}%</td><td>${sample.included ? statusChip('INCLUDED') : statusChip('EXCLUDED')}</td><td>${escapeHtml(sample.exclusionReasons.join(', ') || '-')}</td></tr>`).join('');
   const phase = manifest?.phaseBoundary;
   const buildHtml = manifest
-    ? `<div class="drawer-section"><div class="section-title"><h3>Manifest 边界</h3><span>不可变</span></div><div class="dataset-phase-grid"><div><span>交付状态</span><b>${escapeHtml(phase?.deliveryState || 'MANIFEST_ONLY')}</b></div><div><span>Manifest 物化声明</span><b>${escapeHtml(phase?.materializationState || 'NOT_STARTED')}</b></div><div><span>Manifest Artifact URI</span><b>${escapeHtml(phase?.artifactUri || '-')}</b></div></div></div>${datasetDeliveryChainHtml(snapshot)}${datasetMaterializationHtml(snapshot)}${datasetCatalogPublicationHtml(snapshot)}<div class="drawer-section"><div class="section-title"><h3>样本统计</h3><span>${manifest.counts.total} 条</span></div><div class="metric-grid dataset-metrics"><div><span>总样本</span><b>${manifest.counts.total}</b></div><div><span>纳入</span><b>${manifest.counts.included}</b></div><div><span>排除</span><b>${manifest.counts.excluded}</b></div><div><span>排除原因</span><b>${Object.keys(manifest.counts.exclusionSummary).length}</b></div></div>${exclusions ? `<ul class="dataset-exclusion-list">${exclusions}</ul>` : ''}</div><div class="drawer-section"><div class="section-title"><h3>Point-in-time 样本</h3><span>${samples ? `显示 ${Math.min(manifest.samples.length, 50)} / ${manifest.samples.length}` : '无'}</span></div>${samples ? `<div class="table-frame dataset-sample-frame"><table><thead><tr><th>批次</th><th>预测时点</th><th>拆分</th><th>置信度</th><th>结果</th><th>排除原因</th></tr></thead><tbody>${samples}</tbody></table></div>` : '<div class="simulation-empty">没有满足冻结条件的影子复核样本</div>'}</div>`
+    ? `<div class="drawer-section"><div class="section-title"><h3>Manifest 边界</h3><span>不可变</span></div><div class="dataset-phase-grid"><div><span>交付状态</span><b>${escapeHtml(phase?.deliveryState || 'MANIFEST_ONLY')}</b></div><div><span>Manifest 物化声明</span><b>${escapeHtml(phase?.materializationState || 'NOT_STARTED')}</b></div><div><span>Manifest Artifact URI</span><b>${escapeHtml(phase?.artifactUri || '-')}</b></div></div></div>${datasetDeliveryChainHtml(snapshot)}${datasetMaterializationHtml(snapshot)}${datasetCatalogPublicationHtml(snapshot)}${datasetRetentionArchiveHtml(snapshot)}<div class="drawer-section"><div class="section-title"><h3>样本统计</h3><span>${manifest.counts.total} 条</span></div><div class="metric-grid dataset-metrics"><div><span>总样本</span><b>${manifest.counts.total}</b></div><div><span>纳入</span><b>${manifest.counts.included}</b></div><div><span>排除</span><b>${manifest.counts.excluded}</b></div><div><span>排除原因</span><b>${Object.keys(manifest.counts.exclusionSummary).length}</b></div></div>${exclusions ? `<ul class="dataset-exclusion-list">${exclusions}</ul>` : ''}</div><div class="drawer-section"><div class="section-title"><h3>Point-in-time 样本</h3><span>${samples ? `显示 ${Math.min(manifest.samples.length, 50)} / ${manifest.samples.length}` : '无'}</span></div>${samples ? `<div class="table-frame dataset-sample-frame"><table><thead><tr><th>批次</th><th>预测时点</th><th>拆分</th><th>置信度</th><th>结果</th><th>排除原因</th></tr></thead><tbody>${samples}</tbody></table></div>` : '<div class="simulation-empty">没有满足冻结条件的影子复核样本</div>'}</div>`
     : `<div class="drawer-section"><div class="batch-detail-loading"><i data-lucide="refresh-cw"></i><div><strong>${snapshot.state === 'FAILED' ? '清单构建失败' : '后台正在构建清单'}</strong><span>${escapeHtml(snapshot.failureDetail || `attempt ${snapshot.attemptCount}`)}</span></div></div></div>`;
   openDrawer(`<header><div><span>数据集快照 v${snapshot.snapshotVersion}</span><h2>${escapeHtml(snapshot.datasetName)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(snapshot.state)}${statusChip(snapshot.materializationState)}<span class="shadow-label">POINT-IN-TIME</span></div><span>snapshot revision ${snapshot.revision}</span></div><div class="drawer-section facts-grid"><div><span>冻结时间</span><b>${formatTime(snapshot.freezeAt)}</b></div><div><span>产线</span><b>${escapeHtml(snapshot.lineIds.join(', '))}</b></div><div><span>规则版本筛选</span><b>${escapeHtml(snapshot.ruleVersionIds.join(', ') || '全部合格版本')}</b></div><div><span>低置信度排除</span><b>${snapshot.excludeLowConfidence ? '是' : '否'}</b></div><div><span>定义 checksum</span><b class="mono-value">${escapeHtml(snapshot.definitionChecksum)}</b></div><div><span>manifest checksum</span><b class="mono-value">${escapeHtml(snapshot.manifestChecksum || '-')}</b></div></div>${buildHtml}<footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${datasetDeliveryActionHtml(snapshot)}</footer>`, `dataset-snapshot:${snapshot.id}`);
   document.querySelector('#refresh-dataset-snapshot')?.addEventListener('click', () => void openDatasetSnapshotById(snapshot.id));
@@ -3847,6 +4041,19 @@ function renderDatasetSnapshotDrawer(snapshot: DatasetSnapshot): void {
     void pollDatasetCatalogPublication(
       snapshot.id,
       publication.id,
+      datasetSnapshotRequestGeneration,
+    )
+      .catch((error) => showToast(error instanceof Error ? error.message : String(error), true));
+  });
+  document.querySelector('#open-dataset-retention-archive')?.addEventListener('click', () => openDatasetRetentionArchiveDialog(snapshot, 'request'));
+  document.querySelector('#retry-dataset-retention-archive')?.addEventListener('click', () => openDatasetRetentionArchiveDialog(snapshot, 'retry'));
+  document.querySelector('#refresh-dataset-retention-archive')?.addEventListener('click', () => {
+    const publication = currentDatasetCatalogPublication(snapshot.latestMaterialization || null);
+    const archive = currentDatasetRetentionArchive(publication);
+    if (!archive) return;
+    void pollDatasetRetentionArchive(
+      snapshot.id,
+      archive.id,
       datasetSnapshotRequestGeneration,
     )
       .catch((error) => showToast(error instanceof Error ? error.message : String(error), true));

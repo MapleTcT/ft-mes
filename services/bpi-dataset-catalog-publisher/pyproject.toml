@@ -17,6 +17,7 @@ dependencies = [
 
 [project.scripts]
 bpi-dataset-catalog-publisher = "bpi_dataset_catalog_publisher.worker:main"
+bpi-dataset-recovery-rehearsal = "bpi_dataset_catalog_publisher.recovery_rehearsal:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

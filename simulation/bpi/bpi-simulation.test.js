@@ -1480,6 +1480,106 @@ test('dataset manifests stay immutable while versioned Parquet materialization i
   assert.match(published.semanticChecksum, /^[a-f0-9]{64}$/);
   assert.match(published.tableIdentifier, /^ft_mes_bpi\.bpi_training\.tenant_[a-f0-9]{16}\.dataset_[a-f0-9]+$/);
 
+  result = await request('GET', `/bpi/v1/dataset-catalog-publications/${publicationId}/retention-archives`);
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data, null);
+
+  result = await request('POST', `/bpi/v1/dataset-catalog-publications/${publicationId}/retention-archives`, {
+    headers: commandHeaders('dataset-retention-archive-stale-0001', published.revision - 1),
+    body: { reason: '冻结精确数据集恢复包并验证对象保留' },
+  });
+  assert.equal(result.response.status, 409);
+  assert.equal(result.json.currentRevision, published.revision);
+
+  const archiveHeaders = commandHeaders('dataset-retention-archive-0002', published.revision);
+  const archiveBody = { reason: '冻结精确数据集恢复包并验证对象保留' };
+  result = await request('POST', `/bpi/v1/dataset-catalog-publications/${publicationId}/retention-archives`, {
+    headers: archiveHeaders,
+    body: archiveBody,
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'QUEUED');
+  assert.equal(result.json.data.revision, 1);
+  assert.equal(result.json.data.catalogVerifiedRowCount, published.verifiedRowCount);
+  assert.equal(result.json.data.catalogSemanticChecksum, published.semanticChecksum);
+  const archiveId = result.json.data.id;
+  const queuedArchiveResponse = result.json;
+
+  result = await request('POST', `/bpi/v1/dataset-catalog-publications/${publicationId}/retention-archives`, {
+    headers: archiveHeaders,
+    body: archiveBody,
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, queuedArchiveResponse);
+
+  result = await request('GET', `/bpi/v1/dataset-catalog-publications/${publicationId}/retention-archives`);
+  assert.equal(result.json.data.id, archiveId);
+  assert.equal(result.json.data.state, 'QUEUED');
+
+  result = await request('GET', `/bpi/v1/dataset-retention-archives/${archiveId}`);
+  assert.equal(result.json.data.state, 'ARCHIVING');
+  assert.equal(result.json.data.revision, 2);
+  assert.equal(result.json.data.attemptCount, 1);
+  assert.equal(result.json.data.retentionMode, 'GOVERNANCE');
+  assert.equal(result.json.data.legalHoldEnabled, false);
+
+  result = await request('POST', '/__simulation/fail-dataset-retention-archive', {
+    body: {
+      archiveId,
+      failureCode: 'SIMULATED_OBJECT_LOCK_TIMEOUT',
+      failureDetail: '模拟 Object Lock 写入超时，用于失败重排队验收。',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'FAILED');
+  assert.equal(result.json.data.revision, 3);
+  assert.equal(result.json.data.archiveBucket, null);
+
+  const archiveRetryHeaders = commandHeaders('dataset-retention-archive-retry-0003', 3);
+  result = await request('POST', `/bpi/v1/dataset-retention-archives/${archiveId}/retry`, {
+    headers: archiveRetryHeaders,
+    body: { reason: '对象锁服务恢复后重新归档并执行恢复校验' },
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'QUEUED');
+  assert.equal(result.json.data.revision, 4);
+  const retriedArchiveResponse = result.json;
+
+  result = await request('POST', `/bpi/v1/dataset-retention-archives/${archiveId}/retry`, {
+    headers: archiveRetryHeaders,
+    body: { reason: '对象锁服务恢复后重新归档并执行恢复校验' },
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, retriedArchiveResponse);
+
+  result = await request('GET', `/bpi/v1/dataset-retention-archives/${archiveId}`);
+  assert.equal(result.json.data.state, 'ARCHIVING');
+  assert.equal(result.json.data.revision, 5);
+  assert.equal(result.json.data.attemptCount, 2);
+  result = await request('GET', `/bpi/v1/dataset-retention-archives/${archiveId}`);
+  assert.equal(result.json.data.state, 'VERIFYING');
+  assert.equal(result.json.data.revision, 6);
+  assert.equal(result.json.data.archiveBucket, 'bpi-dataset-recovery');
+  assert.match(result.json.data.sourceArchiveVersionId, /^[0-9a-f-]{36}$/);
+  assert.match(result.json.data.archiveManifestSha256, /^[a-f0-9]{64}$/);
+  result = await request('GET', `/bpi/v1/dataset-retention-archives/${archiveId}`);
+  const lockedArchive = result.json.data;
+  assert.equal(lockedArchive.state, 'LOCKED');
+  assert.equal(lockedArchive.revision, 7);
+  assert.equal(lockedArchive.verifiedRowCount, published.verifiedRowCount);
+  assert.equal(lockedArchive.verifiedSemanticChecksum, published.semanticChecksum);
+  assert.equal(lockedArchive.archiveMetadata.objectLockVerified, true);
+  assert.equal(lockedArchive.archiveMetadata.recoveryVerified, true);
+  assert.equal(lockedArchive.archiveMetadata.mlflowRegistered, false);
+  assert.equal(lockedArchive.archiveMetadata.modelTrained, false);
+
+  result = await request('POST', `/bpi/v1/dataset-retention-archives/${archiveId}/retry`, {
+    headers: commandHeaders('dataset-retention-archive-locked-0004', lockedArchive.revision),
+    body: { reason: 'LOCKED 恢复包不可重新排队或覆盖' },
+  });
+  assert.equal(result.response.status, 409);
+  assert.equal(result.json.currentRevision, lockedArchive.revision);
+
   result = await request('POST', `/bpi/v1/dataset-materializations/${materializationId}/retry`, {
     headers: commandHeaders('dataset-materialization-ready-retry-0003', materialized.revision),
     body: { reason: 'READY 对象必须保持不可变，禁止再次排队' },

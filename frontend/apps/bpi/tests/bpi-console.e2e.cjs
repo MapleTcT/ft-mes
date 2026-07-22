@@ -189,7 +189,7 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   assert.match(await materializationPanel.locator('.dataset-artifact-uri').textContent(), /^s3:\/\/bpi-datasets\/datasets\/.*\.parquet\?versionId=.+$/);
   assert.match(await materializationPanel.locator('.dataset-artifact-sha').textContent(), /^[a-f0-9]{64}$/);
   assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
-    'MANIFEST_READY', 'READY', 'NOT_STARTED', 'NOT_STARTED',
+    'MANIFEST_READY', 'READY', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED',
   ]);
 
   await page.getByRole('button', { name: '发布 Iceberg' }).click();
@@ -223,7 +223,44 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   assert.match(await catalogPanel.locator('.dataset-table-identifier').textContent(), /^ft_mes_bpi\.bpi_training\.tenant_[a-f0-9]{16}\.dataset_[a-f0-9]+$/);
   assert.match(await catalogPanel.locator('.dataset-semantic-sha').textContent(), /^[a-f0-9]{64}$/);
   assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
-    'MANIFEST_READY', 'READY', 'READY', 'NOT_STARTED',
+    'MANIFEST_READY', 'READY', 'READY', 'NOT_STARTED', 'NOT_STARTED',
+  ]);
+
+  await page.getByRole('button', { name: '创建恢复包' }).click();
+  await page.getByRole('heading', { name: '创建不可变恢复包' }).waitFor();
+  await page.locator('#dataset-retention-archive-reason').fill('为精确 Iceberg 快照创建浏览器验收恢复包');
+  await page.locator('#dataset-retention-archive-submit').click();
+  await page.locator('[data-retention-state="ARCHIVING"]').waitFor();
+
+  let archiveResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-catalog-publications/${publicationId}/retention-archives`).then((item) => item.json());
+  const archiveId = archiveResponse.data.id;
+  response = await fetch(`${simulatorUrl}/__simulation/fail-dataset-retention-archive`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      archiveId,
+      failureCode: 'SIMULATED_OBJECT_LOCK_TIMEOUT',
+      failureDetail: '浏览器验收注入的 Object Lock 写入超时。',
+    }),
+  });
+  assert.equal(response.status, 200);
+  await page.locator('[data-retention-state="FAILED"]').waitFor();
+  await page.getByText('SIMULATED_OBJECT_LOCK_TIMEOUT', { exact: true }).waitFor();
+  await page.getByRole('button', { name: '重试恢复包' }).click();
+  await page.getByRole('heading', { name: '重新排队恢复包' }).waitFor();
+  await page.locator('#dataset-retention-archive-reason').fill('对象存储恢复后复用同一归档任务并重新校验');
+  await page.locator('#dataset-retention-archive-submit').click();
+
+  const archivePanel = page.locator('[data-retention-state="LOCKED"]');
+  await archivePanel.waitFor();
+  assert.match(await archivePanel.locator('.dataset-retention-prefix').textContent(), /^s3:\/\/bpi-dataset-recovery\/archives\/tenant_[a-f0-9]{16}\/.+$/);
+  assert.match(await archivePanel.locator('.dataset-retained-source-version').textContent(), /^[a-f0-9-]{36}$/);
+  assert.match(await archivePanel.locator('.dataset-retained-manifest-version').textContent(), /^[a-f0-9-]{36}$/);
+  assert.match(await archivePanel.locator('.dataset-retention-manifest-sha').textContent(), /^[a-f0-9]{64}$/);
+  assert.equal(await archivePanel.locator('.dataset-retention-semantic-sha').textContent(),
+    await catalogPanel.locator('.dataset-semantic-sha').textContent());
+  assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
+    'MANIFEST_READY', 'READY', 'READY', 'LOCKED', 'NOT_STARTED',
   ]);
 
   publicationResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-catalog-publications/${publicationId}`).then((item) => item.json());
@@ -233,6 +270,14 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   assert.equal(publicationResponse.data.sourceContentSha256, materializedResponse.data.contentSha256);
   assert.equal(publicationResponse.data.sourceObjectVersionId, materializedResponse.data.artifactMetadata.objectVersionId);
   assert.equal(publicationResponse.data.catalogMetadata.catalogSnapshotVerified, true);
+  archiveResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-retention-archives/${archiveId}`).then((item) => item.json());
+  assert.equal(archiveResponse.data.state, 'LOCKED');
+  assert.equal(archiveResponse.data.catalogSemanticChecksum, publicationResponse.data.semanticChecksum);
+  assert.equal(archiveResponse.data.verifiedSemanticChecksum, publicationResponse.data.semanticChecksum);
+  assert.equal(archiveResponse.data.archiveMetadata.objectLockVerified, true);
+  assert.equal(archiveResponse.data.archiveMetadata.recoveryVerified, true);
+  assert.equal(archiveResponse.data.archiveMetadata.mlflowRegistered, false);
+  assert.equal(archiveResponse.data.archiveMetadata.modelTrained, false);
 
   const definitions = await fetch(`${simulatorUrl}/bpi/v1/datasets?plantId=PLANT-01&limit=100`).then((item) => item.json());
   assert.equal(definitions.data.length, 1);
@@ -255,9 +300,12 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   await page.locator('[data-dataset-id]').click();
   await page.getByRole('button', { name: '查看最近快照' }).click();
   await page.locator('[data-catalog-state="READY"]').waitFor();
+  await page.locator('[data-retention-state="LOCKED"]').waitFor();
   assert.equal(await page.locator('.dataset-iceberg-snapshot').textContent(), '9223372036854775001',
     'page reload must rediscover the publication from the materialization');
-  await page.screenshot({ path: '/tmp/bpi-dataset-iceberg-desktop.png', fullPage: true });
+  assert.match(await page.locator('.dataset-retention-manifest-sha').textContent(), /^[a-f0-9]{64}$/,
+    'page reload must rediscover the immutable recovery package from the publication');
+  await page.screenshot({ path: '/tmp/bpi-dataset-object-lock-desktop.png', fullPage: true });
   assert.deepEqual(errors, []);
   await desktop.close();
 
@@ -277,10 +325,11 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
     'opening another dataset object must reset the drawer to its header');
   await mobilePage.locator('[data-materialization-state="READY"]').waitFor();
   await mobilePage.locator('[data-catalog-state="READY"]').waitFor();
+  await mobilePage.locator('[data-retention-state="LOCKED"]').waitFor();
   assert.equal(await mobilePage.locator('.dataset-iceberg-snapshot').textContent(), '9223372036854775001');
   const drawerGeometry = await mobilePage.evaluate(() => ({ body: document.body.scrollWidth, viewport: window.innerWidth }));
   assert.ok(drawerGeometry.body <= drawerGeometry.viewport + 1, `dataset drawer overflows viewport: ${JSON.stringify(drawerGeometry)}`);
-  await mobilePage.screenshot({ path: '/tmp/bpi-dataset-iceberg-mobile.png', fullPage: true });
+  await mobilePage.screenshot({ path: '/tmp/bpi-dataset-object-lock-mobile.png', fullPage: true });
   assert.deepEqual(mobileErrors, []);
   await mobile.close();
 });

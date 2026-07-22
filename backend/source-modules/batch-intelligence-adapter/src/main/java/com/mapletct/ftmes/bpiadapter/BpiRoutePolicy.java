@@ -19,7 +19,8 @@ public class BpiRoutePolicy {
                     + "data-quality/(?:summary|incidents(?:/" + ID + ")?)|"
                     + "datasets|dataset-snapshots/" + ID + "|dataset-materializations/" + ID
                     + "(?:/catalog-publications)?|"
-                    + "dataset-catalog-publications/" + ID + "|"
+                    + "dataset-catalog-publications/" + ID + "(?:/retention-archives)?|"
+                    + "dataset-retention-archives/" + ID + "|"
                     + "rules(?:/" + ID + "(?:/compare)?)?|rule-simulations/" + ID + ")$");
     private static final Pattern POST_ROUTE = Pattern.compile(
             "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume|force-close|wms/(?:reconcile|reversal))|"
@@ -30,7 +31,8 @@ public class BpiRoutePolicy {
                     + "data-quality/incidents/" + ID + "/(?:acknowledge|resolve)|"
                     + "datasets(?:/" + ID + "/snapshots)?|dataset-snapshots/" + ID + "/materializations|"
                     + "dataset-materializations/" + ID + "/(?:retry|catalog-publications)|"
-                    + "dataset-catalog-publications/" + ID + "/retry|"
+                    + "dataset-catalog-publications/" + ID + "/(?:retry|retention-archives)|"
+                    + "dataset-retention-archives/" + ID + "/retry|"
                     + "rules/" + ID + "/(?:simulate|submit-approval|reject-approval|publish|retire|publication/retry))$");
 
     public boolean allows(HttpMethod method, String path) {

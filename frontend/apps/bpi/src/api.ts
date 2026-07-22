@@ -12,6 +12,7 @@ import type {
   DatasetDefinitionCreateCommand,
   DatasetCatalogPublication,
   DatasetMaterialization,
+  DatasetRetentionArchive,
   DatasetSnapshot,
   DatasetSnapshotCommand,
   Evidence,
@@ -282,6 +283,22 @@ export const bpiApi = {
     request<DatasetCatalogPublication>(`/dataset-catalog-publications/${encodeURIComponent(publication.id)}/retry`, {
       method: 'POST',
       headers: { 'Idempotency-Key': key, 'If-Match': String(publication.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  datasetRetentionArchiveForPublication: (publicationId: string) =>
+    request<DatasetRetentionArchive | null>(`/dataset-catalog-publications/${encodeURIComponent(publicationId)}/retention-archives`),
+  requestDatasetRetentionArchive: (publication: DatasetCatalogPublication, reason: string, key: string) =>
+    request<DatasetRetentionArchive>(`/dataset-catalog-publications/${encodeURIComponent(publication.id)}/retention-archives`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(publication.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  datasetRetentionArchive: (archiveId: string) =>
+    request<DatasetRetentionArchive>(`/dataset-retention-archives/${encodeURIComponent(archiveId)}`),
+  retryDatasetRetentionArchive: (archive: DatasetRetentionArchive, reason: string, key: string) =>
+    request<DatasetRetentionArchive>(`/dataset-retention-archives/${encodeURIComponent(archive.id)}/retry`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(archive.revision) },
       body: JSON.stringify({ reason }),
     }),
   topologies: (plantId: string) =>

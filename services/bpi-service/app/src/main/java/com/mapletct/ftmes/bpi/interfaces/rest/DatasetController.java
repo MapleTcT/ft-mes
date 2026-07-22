@@ -4,10 +4,12 @@ import com.mapletct.ftmes.bpi.application.ActorContextFactory;
 import com.mapletct.ftmes.bpi.application.CommandResult;
 import com.mapletct.ftmes.bpi.application.DatasetCatalogPublicationService;
 import com.mapletct.ftmes.bpi.application.DatasetMaterializationService;
+import com.mapletct.ftmes.bpi.application.DatasetRetentionArchiveService;
 import com.mapletct.ftmes.bpi.application.DatasetService;
 import com.mapletct.ftmes.bpi.domain.DatasetCatalogPublicationView;
 import com.mapletct.ftmes.bpi.domain.DatasetDefinitionView;
 import com.mapletct.ftmes.bpi.domain.DatasetMaterializationView;
+import com.mapletct.ftmes.bpi.domain.DatasetRetentionArchiveView;
 import com.mapletct.ftmes.bpi.domain.DatasetSnapshotView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -33,16 +35,19 @@ public class DatasetController {
     private final DatasetService service;
     private final DatasetMaterializationService materializationService;
     private final DatasetCatalogPublicationService catalogPublicationService;
+    private final DatasetRetentionArchiveService retentionArchiveService;
 
     public DatasetController(
             ActorContextFactory actorContextFactory,
             DatasetService service,
             DatasetMaterializationService materializationService,
-            DatasetCatalogPublicationService catalogPublicationService) {
+            DatasetCatalogPublicationService catalogPublicationService,
+            DatasetRetentionArchiveService retentionArchiveService) {
         this.actorContextFactory = actorContextFactory;
         this.service = service;
         this.materializationService = materializationService;
         this.catalogPublicationService = catalogPublicationService;
+        this.retentionArchiveService = retentionArchiveService;
     }
 
     @GetMapping("/bpi/v1/datasets")
@@ -173,6 +178,52 @@ public class DatasetController {
             HttpServletRequest request) {
         return accepted(catalogPublicationService.retry(
                 actorContextFactory.from(jwt), publicationId, idempotencyKey,
+                ifMatch, command, traceId(request)), request);
+    }
+
+    @PostMapping("/bpi/v1/dataset-catalog-publications/{publicationId}/retention-archives")
+    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<DatasetRetentionArchiveView>> requestRetentionArchive(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID publicationId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        return accepted(retentionArchiveService.request(
+                actorContextFactory.from(jwt), publicationId, idempotencyKey,
+                ifMatch, command, traceId(request)), request);
+    }
+
+    @GetMapping("/bpi/v1/dataset-catalog-publications/{publicationId}/retention-archives")
+    public ApiResponse<DatasetRetentionArchiveView> getRetentionArchiveForPublication(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID publicationId,
+            HttpServletRequest request) {
+        return ApiResponse.of(retentionArchiveService.getForPublication(
+                actorContextFactory.from(jwt), publicationId), request);
+    }
+
+    @GetMapping("/bpi/v1/dataset-retention-archives/{archiveId}")
+    public ApiResponse<DatasetRetentionArchiveView> getRetentionArchive(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID archiveId,
+            HttpServletRequest request) {
+        return ApiResponse.of(retentionArchiveService.get(
+                actorContextFactory.from(jwt), archiveId), request);
+    }
+
+    @PostMapping("/bpi/v1/dataset-retention-archives/{archiveId}/retry")
+    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<DatasetRetentionArchiveView>> retryRetentionArchive(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID archiveId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        return accepted(retentionArchiveService.retry(
+                actorContextFactory.from(jwt), archiveId, idempotencyKey,
                 ifMatch, command, traceId(request)), request);
     }
 

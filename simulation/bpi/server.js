@@ -15,6 +15,9 @@ const DATASET_MATERIALIZER_VERSION = 'bpi-dataset-materializer/0.1.0';
 const DATASET_OBJECT_BUCKET = 'bpi-datasets';
 const DATASET_CATALOG_NAME = 'ft_mes_bpi';
 const DATASET_CATALOG_PUBLISHER_VERSION = 'bpi-dataset-catalog-publisher/0.1.0';
+const DATASET_RETENTION_ARCHIVER_VERSION = 'bpi-dataset-retention-archiver/0.1.0';
+const DATASET_RECOVERY_PROFILE = 'bpi-dataset-recovery-v1';
+const DATASET_RECOVERY_BUCKET = 'bpi-dataset-recovery';
 const DATASET_FEATURE_REFS = new Set([
   'batch.order_id', 'batch.material_code', 'batch.stage_code', 'batch.quantity_unit',
   'rule.version_id', 'topology.version_id', 'point_catalog.snapshot_id',
@@ -760,6 +763,8 @@ function prepareDatasetManifestAcceptance(state) {
   state.pendingDatasetMaterializationIds = new Set();
   state.datasetCatalogPublications = [];
   state.pendingDatasetCatalogPublicationIds = new Set();
+  state.datasetRetentionArchives = [];
+  state.pendingDatasetRetentionArchiveIds = new Set();
   state.idempotency = new Map();
   return { runId, ruleVersionId: state.rule.id, preparedReviewCount: state.shadowRunReviews.length };
 }
@@ -1051,6 +1056,72 @@ function progressDatasetCatalogPublication(state, publication) {
     return;
   }
   if (publication.state === 'VERIFYING') completeDatasetCatalogPublication(state, publication);
+}
+
+function latestDatasetRetentionArchive(state, publicationId) {
+  return state.datasetRetentionArchives
+    .filter((item) => item.catalogPublicationId === publicationId
+      && item.archiverVersion === DATASET_RETENTION_ARCHIVER_VERSION)
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt)
+      || right.id.localeCompare(left.id))[0] || null;
+}
+
+function completeDatasetRetentionArchive(state, archive) {
+  archive.state = 'LOCKED';
+  archive.revision += 1;
+  archive.completedAt = FIXED_TIME;
+  archive.verifiedRowCount = archive.catalogVerifiedRowCount;
+  archive.verifiedSemanticChecksum = archive.catalogSemanticChecksum;
+  archive.archiveMetadata = {
+    objectLockVerified: true,
+    recoveryVerified: true,
+    sourceVersionVerified: true,
+    manifestVersionVerified: true,
+    simulationOnly: true,
+    mlflowRegistered: false,
+    modelTrained: false,
+  };
+  archive.failureCode = null;
+  archive.failureDetail = null;
+  state.pendingDatasetRetentionArchiveIds.delete(archive.id);
+}
+
+function progressDatasetRetentionArchive(state, archive) {
+  if (!state.pendingDatasetRetentionArchiveIds.has(archive.id)) return;
+  if (archive.state === 'QUEUED') {
+    archive.state = 'ARCHIVING';
+    archive.revision += 1;
+    archive.startedAt = FIXED_TIME;
+    archive.attemptCount += 1;
+    archive.retentionMode = 'GOVERNANCE';
+    archive.retainUntil = '2026-07-13T08:00:00.000Z';
+    archive.legalHoldEnabled = false;
+    return;
+  }
+  if (archive.state === 'ARCHIVING') {
+    const tenantHash = sha256(archive.tenantId).slice(0, 16);
+    archive.state = 'VERIFYING';
+    archive.revision += 1;
+    archive.archiveBucket = DATASET_RECOVERY_BUCKET;
+    archive.archivePrefix = `archives/tenant_${tenantHash}/${archive.catalogPublicationId}/${archive.id}`;
+    archive.sourceArchiveObjectKey = `${archive.archivePrefix}/source.parquet`;
+    archive.sourceArchiveVersionId = stableUuid(`retained-source:${archive.id}`);
+    archive.archiveManifestObjectKey = `${archive.archivePrefix}/recovery-manifest.json`;
+    archive.archiveManifestVersionId = stableUuid(`retained-manifest:${archive.id}`);
+    archive.archiveManifestSha256 = sha256({
+      archiveId: archive.id,
+      publicationId: archive.catalogPublicationId,
+      sourceContentSha256: archive.sourceContentSha256,
+      sourceArchiveVersionId: archive.sourceArchiveVersionId,
+      catalogSemanticChecksum: archive.catalogSemanticChecksum,
+      retentionMode: archive.retentionMode,
+      retainUntil: archive.retainUntil,
+    });
+    archive.archiveObjectCount = 2;
+    archive.archiveTotalBytes = archive.sourceByteSize + 2048;
+    return;
+  }
+  if (archive.state === 'VERIFYING') completeDatasetRetentionArchive(state, archive);
 }
 
 function calibrationEffectiveness(calibration, now = Date.now()) {
@@ -1346,6 +1417,36 @@ function createHandler(state) {
         publication.failureDetail = String(body.failureDetail || 'Deterministic catalog failure injection.');
         state.pendingDatasetCatalogPublicationIds.delete(publication.id);
         return send(res, 200, envelope(operationId, publication), operationId);
+      }
+      if (req.method === 'POST' && path === '/__simulation/fail-dataset-retention-archive') {
+        const operationId = 'simulationFailDatasetRetentionArchive';
+        const body = await readJson(req);
+        const archive = state.datasetRetentionArchives.find((item) => item.id === body.archiveId);
+        if (!archive) {
+          return send(res, 404, { status: 'DATASET_RETENTION_ARCHIVE_NOT_FOUND' }, operationId);
+        }
+        if (!['ARCHIVING', 'VERIFYING'].includes(archive.state)) {
+          return send(res, 409, { status: 'DATASET_RETENTION_ARCHIVE_NOT_ACTIVE' }, operationId);
+        }
+        archive.state = 'FAILED';
+        archive.revision += 1;
+        archive.completedAt = FIXED_TIME;
+        archive.archiveBucket = null;
+        archive.archivePrefix = null;
+        archive.sourceArchiveObjectKey = null;
+        archive.sourceArchiveVersionId = null;
+        archive.archiveManifestObjectKey = null;
+        archive.archiveManifestVersionId = null;
+        archive.archiveManifestSha256 = null;
+        archive.archiveObjectCount = null;
+        archive.archiveTotalBytes = null;
+        archive.verifiedRowCount = null;
+        archive.verifiedSemanticChecksum = null;
+        archive.archiveMetadata = null;
+        archive.failureCode = String(body.failureCode || 'SIMULATED_OBJECT_LOCK_FAILURE');
+        archive.failureDetail = String(body.failureDetail || 'Deterministic Object Lock failure injection.');
+        state.pendingDatasetRetentionArchiveIds.delete(archive.id);
+        return send(res, 200, envelope(operationId, archive), operationId);
       }
       if (req.method === 'POST' && path === '/__simulation/prepare-batch-release') {
         const prepared = prepareBatchReleaseAcceptance(state);
@@ -3267,6 +3368,134 @@ function createHandler(state) {
         publication.failureDetail = null;
         state.pendingDatasetCatalogPublicationIds.add(publication.id);
         return rememberAndSend(state, context, res, 202, envelope(operationId, publication), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-catalog-publications\/([^/]+)\/retention-archives$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getDatasetRetentionArchiveForPublication';
+        const publication = state.datasetCatalogPublications.find((item) => item.id === ids[0]);
+        if (!publication) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset catalog publication not found.', operationId), operationId);
+        }
+        return send(res, 200, envelope(operationId, latestDatasetRetentionArchive(state, publication.id)), operationId);
+      }
+      if (req.method === 'POST' && ids) {
+        const operationId = 'requestDatasetRetentionArchive';
+        const publication = state.datasetCatalogPublications.find((item) => item.id === ids[0]);
+        if (!publication) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset catalog publication not found.', operationId), operationId);
+        }
+        const context = commandContext(req, res, operationId, publication.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (String(body.reason || '').trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'Retention archive reason must contain at least three characters.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        const catalogVerified = publication.catalogMetadata?.catalogSnapshotVerified === true;
+        if (publication.state !== 'READY' || !catalogVerified
+            || !publication.icebergSnapshotId || !publication.icebergMetadataLocation
+            || publication.verifiedRowCount !== publication.sourceRowCount
+            || !publication.semanticChecksum) {
+          const response = problem(409, 'Verified Catalog Publication Required', 'Retention archive requires a reconciled READY Iceberg publication.', operationId, publication.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const existing = latestDatasetRetentionArchive(state, publication.id);
+        if (existing) {
+          const response = problem(409, 'Retention Archive Exists', 'The retention archive contract already exists for this publication.', operationId, existing.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const archive = {
+          id: stableUuid({ type: 'dataset-retention-archive', publicationId: publication.id }),
+          catalogPublicationId: publication.id,
+          materializationId: publication.materializationId,
+          snapshotId: publication.snapshotId,
+          datasetId: publication.datasetId,
+          datasetCode: publication.datasetCode,
+          datasetVersion: publication.datasetVersion,
+          tenantId: publication.tenantId,
+          plantId: publication.plantId,
+          lineIds: clone(publication.lineIds),
+          archiverVersion: DATASET_RETENTION_ARCHIVER_VERSION,
+          archiveProfile: DATASET_RECOVERY_PROFILE,
+          state: 'QUEUED',
+          revision: 1,
+          manifestChecksum: publication.manifestChecksum,
+          sourceContentSha256: publication.sourceContentSha256,
+          sourceObjectVersionId: publication.sourceObjectVersionId,
+          sourceByteSize: publication.sourceByteSize,
+          sourceRowCount: publication.sourceRowCount,
+          sourceSchema: clone(publication.sourceSchema),
+          tableIdentifier: publication.tableIdentifier,
+          icebergSnapshotId: publication.icebergSnapshotId,
+          icebergMetadataLocation: publication.icebergMetadataLocation,
+          icebergSchemaId: publication.icebergSchemaId,
+          icebergPartitionSpecId: publication.icebergPartitionSpecId,
+          catalogVerifiedRowCount: publication.verifiedRowCount,
+          catalogSemanticChecksum: publication.semanticChecksum,
+          requestedBy: 'simulated.data.engineer',
+          requestReason: String(body.reason).trim(),
+          createdAt: FIXED_TIME,
+          startedAt: null,
+          completedAt: null,
+          attemptCount: 0,
+          retentionMode: null,
+          retainUntil: null,
+          legalHoldEnabled: null,
+          archiveBucket: null,
+          archivePrefix: null,
+          sourceArchiveObjectKey: null,
+          sourceArchiveVersionId: null,
+          archiveManifestObjectKey: null,
+          archiveManifestVersionId: null,
+          archiveManifestSha256: null,
+          archiveObjectCount: null,
+          archiveTotalBytes: null,
+          verifiedRowCount: null,
+          verifiedSemanticChecksum: null,
+          archiveMetadata: null,
+          failureCode: null,
+          failureDetail: null,
+        };
+        state.datasetRetentionArchives.push(archive);
+        state.pendingDatasetRetentionArchiveIds.add(archive.id);
+        return rememberAndSend(state, context, res, 202, envelope(operationId, archive), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-retention-archives\/([^/]+)$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getDatasetRetentionArchive';
+        const archive = state.datasetRetentionArchives.find((item) => item.id === ids[0]);
+        if (!archive) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset retention archive not found.', operationId), operationId);
+        }
+        progressDatasetRetentionArchive(state, archive);
+        return send(res, 200, envelope(operationId, archive), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-retention-archives\/([^/]+)\/retry$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'retryDatasetRetentionArchive';
+        const archive = state.datasetRetentionArchives.find((item) => item.id === ids[0]);
+        if (!archive) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset retention archive not found.', operationId), operationId);
+        }
+        const context = commandContext(req, res, operationId, archive.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (String(body.reason || '').trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'Retry reason must contain at least three characters.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (archive.state !== 'FAILED') {
+          const response = problem(409, 'Invalid Retention Archive State', 'Only a FAILED dataset retention archive can be retried.', operationId, archive.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        archive.state = 'QUEUED';
+        archive.revision += 1;
+        archive.startedAt = null;
+        archive.completedAt = null;
+        archive.failureCode = null;
+        archive.failureDetail = null;
+        state.pendingDatasetRetentionArchiveIds.add(archive.id);
+        return rememberAndSend(state, context, res, 202, envelope(operationId, archive), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/integrations/health') {
         return send(res, 200, envelope('getIntegrationHealth', state.integrations), 'getIntegrationHealth');

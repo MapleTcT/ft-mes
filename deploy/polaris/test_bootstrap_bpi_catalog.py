@@ -88,6 +88,13 @@ class CatalogBootstrapContractTest(unittest.TestCase):
         ):
             self.ensure(api)
 
+    def test_recovery_role_only_adds_cleanup_privileges(self) -> None:
+        self.assertEqual(
+            {"NAMESPACE_DROP", "TABLE_DROP"},
+            MODULE.RECOVERY_GRANTS - MODULE.PUBLISHER_GRANTS,
+        )
+        self.assertNotIn("TABLE_DROP", MODULE.PUBLISHER_GRANTS)
+
 
 if __name__ == "__main__":
     unittest.main()

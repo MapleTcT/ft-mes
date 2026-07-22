@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -36,6 +37,7 @@ REQUIRED_PATHS = [
     "services/bpi-service/app/src/main/resources/db/migration/V14__bpi_rule_approval_workflow.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V27__bpi_dataset_parquet_materialization.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V28__bpi_dataset_iceberg_catalog_publication.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V29__bpi_dataset_object_lock_recovery_archive.sql",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetCatalogPublicationService.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetCatalogPublicationPostgresRepository.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
@@ -58,9 +60,11 @@ REQUIRED_PATHS = [
     "services/bpi-dataset-catalog-publisher/requirements.runtime.txt",
     "services/bpi-dataset-catalog-publisher/src/bpi_dataset_catalog_publisher/catalog.py",
     "services/bpi-dataset-catalog-publisher/src/bpi_dataset_catalog_publisher/repository.py",
+    "services/bpi-dataset-catalog-publisher/src/bpi_dataset_catalog_publisher/recovery_rehearsal.py",
     "services/bpi-dataset-catalog-publisher/src/bpi_dataset_catalog_publisher/source_object.py",
     "services/bpi-dataset-catalog-publisher/src/bpi_dataset_catalog_publisher/worker.py",
     "services/bpi-dataset-catalog-publisher/tests/test_catalog.py",
+    "services/bpi-dataset-catalog-publisher/tests/test_recovery_rehearsal.py",
     "services/bpi-dataset-catalog-publisher/tests/test_source_object.py",
     "services/bpi-dataset-catalog-publisher/tests/test_worker.py",
     "streaming/pom.xml",
@@ -92,9 +96,19 @@ REQUIRED_PATHS = [
     "deploy/docker/.env.example",
     "deploy/docker/.env.oracle-legacy.example",
     "deploy/docker/postgres/ensure-bpi-catalog-publisher-role.sh",
+    "deploy/docker/postgres/ensure-bpi-retention-archiver-role.sh",
     "deploy/minio/bootstrap-bpi-iceberg-warehouse.sh",
+    "deploy/minio/bootstrap-bpi-dataset-recovery-bucket.sh",
     "deploy/minio/bpi-dataset-catalog-source-reader-policy.json",
     "deploy/minio/bpi-iceberg-warehouse-policy.json",
+    "deploy/minio/bpi-dataset-retention-archiver-policy.json",
+    "deploy/minio/bpi-dataset-recovery-operator-policy.json",
+    "services/bpi-dataset-retention-archiver/Dockerfile",
+    "services/bpi-dataset-retention-archiver/README.md",
+    "services/bpi-dataset-retention-archiver/pyproject.toml",
+    "services/bpi-dataset-retention-archiver/src/bpi_dataset_retention_archiver/archive_store.py",
+    "services/bpi-dataset-retention-archiver/src/bpi_dataset_retention_archiver/repository.py",
+    "services/bpi-dataset-retention-archiver/src/bpi_dataset_retention_archiver/worker.py",
     "deploy/polaris/check_metastore_bootstrap.sh",
     "deploy/polaris/bootstrap_metastore_if_required.sh",
     "deploy/polaris/bootstrap_bpi_catalog.py",
@@ -520,6 +534,53 @@ def check_postgres_defaults(failures: list[str]) -> None:
         fail(".env.example must point the system database host to postgres", failures)
 
 
+def check_recovery_storage_policy(failures: list[str]) -> None:
+    archiver = json.loads(
+        (ROOT / "deploy/minio/bpi-dataset-retention-archiver-policy.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    archiver_actions = {
+        action
+        for statement in archiver.get("Statement", [])
+        for action in statement.get("Action", [])
+    }
+    if any(action.startswith("s3:Delete") for action in archiver_actions):
+        fail("retention archiver policy must never delete retained objects", failures)
+
+    recovery = json.loads(
+        (ROOT / "deploy/minio/bpi-dataset-recovery-operator-policy.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    delete_actions: set[str] = set()
+    for statement in recovery.get("Statement", []):
+        actions = set(statement.get("Action", []))
+        resources = set(statement.get("Resource", []))
+        if "s3:PutObject" in actions:
+            fail("recovery operator policy must not write retained archives", failures)
+        if any(action.startswith("s3:Delete") for action in actions):
+            delete_actions.update(action for action in actions if action.startswith("s3:Delete"))
+            expected = {
+                "arn:aws:s3:::__WAREHOUSE_BUCKET__/warehouse/bpi_recovery/*"
+            }
+            if resources != expected:
+                fail(
+                    "recovery operator delete permission must be limited to the isolated warehouse prefix",
+                    failures,
+                )
+    if delete_actions != {"s3:DeleteObject", "s3:DeleteObjectVersion"}:
+        fail("recovery operator must delete exact current and versioned recovery objects", failures)
+
+    compose = (ROOT / "deploy/docker/docker-compose.yml").read_text(encoding="utf-8")
+    for setting in (
+        "BPI_POLARIS_DROP_WITH_PURGE_ENABLED:-false",
+        "BPI_POLARIS_RECOVERY_CREDENTIAL_ROTATION_ENABLED:-false",
+    ):
+        if setting not in compose:
+            fail(f"integrated Compose must default {setting} off", failures)
+
+
 def check_binary_policy(failures: list[str]) -> None:
     for relative in git_ls_files():
         path = Path(relative)
@@ -578,6 +639,7 @@ def main() -> int:
     check_required_text(failures)
     check_maven_structure(failures)
     check_postgres_defaults(failures)
+    check_recovery_storage_policy(failures)
     check_gitignore_policy(failures)
     check_tracked_generated_artifacts(failures)
     check_binary_policy(failures)

@@ -9,6 +9,7 @@ MIGRATIONS="$ROOT_DIR/services/bpi-service/app/src/main/resources/db/migration"
 VERIFY_MIGRATIONS="$ROOT_DIR/scripts/verify-bpi-release-migrations.py"
 MATERIALIZER_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-materializer-role.sh"
 CATALOG_PUBLISHER_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-catalog-publisher-role.sh"
+RETENTION_ARCHIVER_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-retention-archiver-role.sh"
 JAR="$ROOT_DIR/services/bpi-service/app/target/bpi-service-0.1.0-SNAPSHOT-exec.jar"
 WMS_ADAPTER_JAR="$ROOT_DIR/services/bpi-service/wms-adapter/target/bpi-wms-adapter-0.1.0-SNAPSHOT-exec.jar"
 
@@ -41,7 +42,11 @@ compose_expand() {
     BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED=false \
     BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED=false \
     BPI_DATASET_CATALOG_PUBLISHER_ENABLED=false \
-        docker compose --env-file "$ENV_FILE" -f "$DEPLOY_DIR/docker-compose.yml" "$@"
+    BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED=false \
+    BPI_DATASET_RETENTION_ARCHIVER_ENABLED=false \
+    BPI_DATASET_RECOVERY_RECONCILE_STALE=false \
+        docker compose --env-file "$ENV_FILE" -f "$DEPLOY_DIR/docker-compose.yml" \
+        --profile bpi-catalog "$@"
 }
 
 DATABASE_NAME=$(env_value BPI_DATABASE_NAME ft_mes_bpi)
@@ -52,8 +57,11 @@ REPORT=${BPI_RUNTIME_UPGRADE_REPORT:-/tmp/bpi-runtime-expand-upgrade.json}
 HEALTH_TIMEOUT_SECONDS=${BPI_RUNTIME_UPGRADE_HEALTH_TIMEOUT_SECONDS:-180}
 MATERIALIZER_DATABASE_PASSWORD=$(env_value BPI_MATERIALIZER_DATABASE_PASSWORD '')
 CATALOG_PUBLISHER_DATABASE_PASSWORD=$(env_value BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD '')
+RETENTION_ARCHIVER_DATABASE_PASSWORD=$(env_value BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD '')
 POSTGRES_DB=$(env_value POSTGRES_DB postgres)
 MATERIALIZER_IMAGE=$(env_value BPI_DATASET_MATERIALIZER_IMAGE ft-mes-bpi-dataset-materializer:local)
+CATALOG_PUBLISHER_IMAGE=$(env_value BPI_DATASET_CATALOG_PUBLISHER_IMAGE ft-mes-bpi-dataset-catalog-publisher:local)
+RETENTION_ARCHIVER_IMAGE=$(env_value BPI_DATASET_RETENTION_ARCHIVER_IMAGE ft-mes-bpi-dataset-retention-archiver:local)
 
 case "$EXPECTED_VERSION" in
     ''|*[!0-9]*) printf 'ERROR: BPI_EXPECTED_FLYWAY_VERSION must be numeric\n' >&2; exit 1 ;;
@@ -66,9 +74,20 @@ esac
 case "$HEALTH_TIMEOUT_SECONDS" in
     ''|*[!0-9]*|0) printf 'ERROR: BPI_RUNTIME_UPGRADE_HEALTH_TIMEOUT_SECONDS must be a positive integer\n' >&2; exit 1 ;;
 esac
+for worker_secret in \
+    "$MATERIALIZER_DATABASE_PASSWORD" \
+    "$CATALOG_PUBLISHER_DATABASE_PASSWORD" \
+    "$RETENTION_ARCHIVER_DATABASE_PASSWORD"; do
+    case "$worker_secret" in
+        ''|*change-me*|*dev-only*)
+            printf 'ERROR: all BPI worker database passwords must be explicitly configured\n' >&2
+            exit 1
+            ;;
+    esac
+done
 
 for path in "$MIGRATIONS" "$VERIFY_MIGRATIONS" "$MATERIALIZER_ROLE_SCRIPT" \
-    "$CATALOG_PUBLISHER_ROLE_SCRIPT"; do
+    "$CATALOG_PUBLISHER_ROLE_SCRIPT" "$RETENTION_ARCHIVER_ROLE_SCRIPT"; do
     test -e "$path" || {
         printf 'ERROR: required release path is missing: %s\n' "$path" >&2
         exit 1
@@ -87,9 +106,15 @@ for disabled_key in \
     BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED \
     BPI_DATASET_SOURCE_READER_ENABLED \
     BPI_POLARIS_ENABLED \
+    BPI_POLARIS_DROP_WITH_PURGE_ENABLED \
     BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED \
+    BPI_POLARIS_PUBLISHER_CREDENTIAL_ROTATION_ENABLED \
+    BPI_POLARIS_RECOVERY_CREDENTIAL_ROTATION_ENABLED \
     BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED \
-    BPI_DATASET_CATALOG_PUBLISHER_ENABLED; do
+    BPI_DATASET_CATALOG_PUBLISHER_ENABLED \
+    BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED \
+    BPI_DATASET_RETENTION_ARCHIVER_ENABLED \
+    BPI_DATASET_RECOVERY_RECONCILE_STALE; do
     if [ "$(env_value "$disabled_key" false)" != "false" ]; then
         printf 'ERROR: %s must remain false during expand-only upgrade\n' \
             "$disabled_key" >&2
@@ -101,6 +126,9 @@ postgres_id=$(compose ps -q bpi-postgres)
 service_id=$(compose ps -q bpi-service)
 wms_adapter_id=$(compose ps -q bpi-wms-adapter)
 materializer_id=$(compose ps -q bpi-dataset-materializer)
+retention_archiver_id=$(docker compose --env-file "$ENV_FILE" \
+    -f "$DEPLOY_DIR/docker-compose.yml" --profile bpi-catalog \
+    ps -q bpi-dataset-retention-archiver)
 if [ -z "$postgres_id" ] || [ -z "$service_id" ]; then
     printf 'ERROR: BPI PostgreSQL and service must be running before an expand-only upgrade\n' >&2
     exit 1
@@ -124,6 +152,16 @@ run_catalog_publisher_role_action() {
         -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
         -e "BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD=$CATALOG_PUBLISHER_DATABASE_PASSWORD" \
         "$postgres_id" sh -s -- "$action" <"$CATALOG_PUBLISHER_ROLE_SCRIPT"
+}
+
+run_retention_archiver_role_action() {
+    action=$1
+    docker exec -i \
+        -e "POSTGRES_USER=$POSTGRES_USER" \
+        -e "POSTGRES_DB=$POSTGRES_DB" \
+        -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
+        -e "BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD=$RETENTION_ARCHIVER_DATABASE_PASSWORD" \
+        "$postgres_id" sh -s -- "$action" <"$RETENTION_ARCHIVER_ROLE_SCRIPT"
 }
 if [ "$(env_value BPI_WMS_ADAPTER_ENABLED false)" != "false" ]; then
     printf 'ERROR: BPI_WMS_ADAPTER_ENABLED must remain false during expand-only upgrade\n' >&2
@@ -175,6 +213,8 @@ write_report() {
     export WMS_ADAPTER_JAR WMS_ADAPTER_JAR_SHA256 MIGRATION_SET_SHA256
     export BEFORE_WMS_ADAPTER_IMAGE_ID AFTER_WMS_ADAPTER_IMAGE_ID ROLLBACK_WMS_ADAPTER_IMAGE
     export MATERIALIZER_IMAGE MATERIALIZER_IMAGE_ID MATERIALIZER_IMAGE_USER
+    export CATALOG_PUBLISHER_IMAGE CATALOG_PUBLISHER_IMAGE_ID CATALOG_PUBLISHER_IMAGE_USER
+    export RETENTION_ARCHIVER_IMAGE RETENTION_ARCHIVER_IMAGE_ID RETENTION_ARCHIVER_IMAGE_USER
     python3 <<'PY'
 import datetime
 import json
@@ -216,6 +256,21 @@ report = {
         "runtimeUser": os.environ.get("MATERIALIZER_IMAGE_USER") or None,
         "enabledDuringUpgrade": False,
         "bucketBootstrapEnabledDuringUpgrade": False,
+        "postUpgradeState": "STOPPED",
+    },
+    "datasetCatalogPublisher": {
+        "releaseImage": os.environ["CATALOG_PUBLISHER_IMAGE"],
+        "releaseImageId": os.environ.get("CATALOG_PUBLISHER_IMAGE_ID") or None,
+        "runtimeUser": os.environ.get("CATALOG_PUBLISHER_IMAGE_USER") or None,
+        "enabledDuringUpgrade": False,
+        "postUpgradeState": "STOPPED",
+    },
+    "datasetRetentionArchiver": {
+        "releaseImage": os.environ["RETENTION_ARCHIVER_IMAGE"],
+        "releaseImageId": os.environ.get("RETENTION_ARCHIVER_IMAGE_ID") or None,
+        "runtimeUser": os.environ.get("RETENTION_ARCHIVER_IMAGE_USER") or None,
+        "enabledDuringUpgrade": False,
+        "recoveryBucketBootstrapEnabledDuringUpgrade": False,
         "postUpgradeState": "STOPPED",
     },
     "wmsAdapter": {
@@ -267,6 +322,9 @@ WMS_ADAPTER_JAR_SHA256=$(sha256sum "$WMS_ADAPTER_JAR" | awk '{print $1}')
 if [ -n "$materializer_id" ]; then
     compose_expand stop bpi-dataset-materializer
 fi
+if [ -n "$retention_archiver_id" ]; then
+    compose_expand stop bpi-dataset-retention-archiver
+fi
 
 timestamp=$(date -u +%Y%m%dT%H%M%SZ)
 mkdir -p "$BACKUP_DIR"
@@ -297,9 +355,14 @@ test -s "$BACKUP_FILE" || {
 AFTER_VERSION=
 MATERIALIZER_IMAGE_ID=
 MATERIALIZER_IMAGE_USER=
+CATALOG_PUBLISHER_IMAGE_ID=
+CATALOG_PUBLISHER_IMAGE_USER=
+RETENTION_ARCHIVER_IMAGE_ID=
+RETENTION_ARCHIVER_IMAGE_USER=
 write_report PREPARED BACKUP_COMPLETE NOT_RUN
 
-compose_expand build bpi-service bpi-wms-adapter bpi-dataset-materializer
+compose_expand build bpi-service bpi-wms-adapter bpi-dataset-materializer \
+    bpi-dataset-catalog-publisher bpi-dataset-retention-archiver
 MATERIALIZER_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$MATERIALIZER_IMAGE")
 MATERIALIZER_IMAGE_USER=$(docker image inspect --format '{{.Config.User}}' "$MATERIALIZER_IMAGE")
 if [ "$MATERIALIZER_IMAGE_USER" != "10001:10001" ]; then
@@ -307,10 +370,25 @@ if [ "$MATERIALIZER_IMAGE_USER" != "10001:10001" ]; then
         "$MATERIALIZER_IMAGE_USER" >&2
     exit 1
 fi
+CATALOG_PUBLISHER_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$CATALOG_PUBLISHER_IMAGE")
+CATALOG_PUBLISHER_IMAGE_USER=$(docker image inspect --format '{{.Config.User}}' "$CATALOG_PUBLISHER_IMAGE")
+if [ "$CATALOG_PUBLISHER_IMAGE_USER" != "10002:10002" ]; then
+    printf 'ERROR: BPI catalog publisher must run as 10002:10002, found %s\n' \
+        "$CATALOG_PUBLISHER_IMAGE_USER" >&2
+    exit 1
+fi
+RETENTION_ARCHIVER_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$RETENTION_ARCHIVER_IMAGE")
+RETENTION_ARCHIVER_IMAGE_USER=$(docker image inspect --format '{{.Config.User}}' "$RETENTION_ARCHIVER_IMAGE")
+if [ "$RETENTION_ARCHIVER_IMAGE_USER" != "10003:10003" ]; then
+    printf 'ERROR: BPI retention archiver must run as 10003:10003, found %s\n' \
+        "$RETENTION_ARCHIVER_IMAGE_USER" >&2
+    exit 1
+fi
 write_report IN_PROGRESS ARTIFACTS_BUILT NOT_RUN
 
 run_materializer_role_action provision
 run_catalog_publisher_role_action provision
+run_retention_archiver_role_action provision
 compose_expand up --no-deps --force-recreate --abort-on-container-exit \
     --exit-code-from bpi-migrate bpi-migrate
 
@@ -324,6 +402,8 @@ run_materializer_role_action grant
 run_materializer_role_action verify
 run_catalog_publisher_role_action grant
 run_catalog_publisher_role_action verify
+run_retention_archiver_role_action grant
+run_retention_archiver_role_action verify
 write_report IN_PROGRESS MIGRATION_APPLIED NOT_RUN
 
 compose_expand up -d --no-deps --force-recreate bpi-service
@@ -336,6 +416,19 @@ write_report IN_PROGRESS SERVICES_RECREATED NOT_RUN "$AFTER_IMAGE_ID" "$AFTER_WM
 wait_for_service_health bpi-service
 wait_for_service_health bpi-wms-adapter
 sh "$SCRIPT_DIR/smoke.sh" "$ENV_FILE"
+for disabled_service in \
+    bpi-dataset-catalog-publisher \
+    bpi-dataset-retention-archiver \
+    bpi-polaris \
+    bpi-polaris-postgres; do
+    if [ -n "$(docker compose --env-file "$ENV_FILE" \
+        -f "$DEPLOY_DIR/docker-compose.yml" --profile bpi-catalog \
+        ps -q "$disabled_service")" ]; then
+        printf 'ERROR: %s must remain stopped after expand-only upgrade\n' \
+            "$disabled_service" >&2
+        exit 1
+    fi
+done
 write_report PASS COMPLETE PASS "$AFTER_IMAGE_ID" "$AFTER_WMS_ADAPTER_IMAGE_ID"
 printf 'BPI runtime expand-only upgrade: PASS (%s)\n' "$REPORT"
 printf 'Rollback image: %s\n' "$ROLLBACK_IMAGE"

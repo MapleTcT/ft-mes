@@ -64,6 +64,10 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.POST, "/dataset-materializations/9c392d57-7502-4cd8-bc37-e72961bb08b4/catalog-publications"));
         assertTrue(policy.allows(HttpMethod.GET, "/dataset-catalog-publications/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertTrue(policy.allows(HttpMethod.POST, "/dataset-catalog-publications/9c392d57-7502-4cd8-bc37-e72961bb08b4/retry"));
+        assertTrue(policy.allows(HttpMethod.GET, "/dataset-catalog-publications/9c392d57-7502-4cd8-bc37-e72961bb08b4/retention-archives"));
+        assertTrue(policy.allows(HttpMethod.POST, "/dataset-catalog-publications/9c392d57-7502-4cd8-bc37-e72961bb08b4/retention-archives"));
+        assertTrue(policy.allows(HttpMethod.GET, "/dataset-retention-archives/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
+        assertTrue(policy.allows(HttpMethod.POST, "/dataset-retention-archives/9c392d57-7502-4cd8-bc37-e72961bb08b4/retry"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START/compare"));
@@ -105,6 +109,8 @@ public class BpiRoutePolicyTest {
         assertFalse(policy.allows(HttpMethod.DELETE, "/dataset-materializations/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertFalse(policy.allows(HttpMethod.GET, "/dataset-catalog-publications/9c392d57-7502-4cd8-bc37-e72961bb08b4/export"));
         assertFalse(policy.allows(HttpMethod.DELETE, "/dataset-catalog-publications/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
+        assertFalse(policy.allows(HttpMethod.DELETE, "/dataset-retention-archives/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
+        assertFalse(policy.allows(HttpMethod.POST, "/dataset-retention-archives/9c392d57-7502-4cd8-bc37-e72961bb08b4/export"));
         assertFalse(policy.allows(HttpMethod.DELETE, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertFalse(policy.allows(HttpMethod.GET, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/release/export"));
         assertFalse(policy.allows(HttpMethod.GET, "/http://attacker.example"));

@@ -117,6 +117,14 @@ class SourceObjectStore:
         claim: PublicationClaim,
         destination: Path,
     ) -> VerifiedSource:
+        self.download_exact(claim, destination)
+        return validate_local_source(claim, destination)
+
+    def download_exact(
+        self,
+        claim: PublicationClaim,
+        destination: Path,
+    ) -> Path:
         stat = self._client.stat_object(
             claim.source_bucket,
             claim.source_object_key,
@@ -154,57 +162,65 @@ class SourceObjectStore:
         if digest.hexdigest() != claim.source_content_sha256:
             raise SourceObjectContractError("source object SHA-256 does not match")
 
-        parquet_file = pq.ParquetFile(destination)
-        source_table = parquet_file.read()
-        if source_table.num_rows != claim.source_row_count:
-            raise SourceObjectContractError(
-                "source Parquet row count does not match the frozen publication"
-            )
-        expected_fields = claim.source_schema_json.get("fields")
-        if not isinstance(expected_fields, list):
-            raise SourceObjectContractError("frozen source schema has no fields contract")
-        if _schema_contract(source_table.schema) != expected_fields:
-            raise SourceObjectContractError("source Parquet schema does not match")
+        return destination
 
-        metadata = source_table.schema.metadata or {}
-        expected_metadata = {
-            b"bpi.snapshot_id": str(claim.source_snapshot_id).encode(),
-            b"bpi.manifest_checksum": claim.manifest_checksum.encode(),
-        }
-        for key, expected in expected_metadata.items():
-            if metadata.get(key) != expected:
-                raise SourceObjectContractError(
-                    f"source Parquet metadata {key.decode()} does not match"
-                )
-        if "snapshot_id" not in source_table.column_names:
-            raise SourceObjectContractError("source Parquet snapshot_id column is missing")
-        if set(source_table.column("snapshot_id").to_pylist()) != {
-            str(claim.source_snapshot_id)
-        }:
-            raise SourceObjectContractError("source Parquet contains another snapshot")
 
-        enriched = source_table
-        identity_columns = {
-            "tenant_id": claim.tenant_id,
-            "plant_id": claim.plant_id,
-            "dataset_id": str(claim.dataset_id),
-            "source_snapshot_id": str(claim.source_snapshot_id),
-            "source_materialization_id": str(claim.materialization_id),
-            "source_content_sha256": claim.source_content_sha256,
-        }
-        collisions = set(identity_columns).intersection(enriched.column_names)
-        if collisions:
-            raise SourceObjectContractError(
-                f"source Parquet already defines publisher columns: {sorted(collisions)}"
-            )
-        for name, value in identity_columns.items():
-            enriched = enriched.append_column(
-                name,
-                pa.array([value] * enriched.num_rows, type=pa.string()),
-            )
-        enriched = enriched.replace_schema_metadata(None)
-        return VerifiedSource(
-            path=destination,
-            table=enriched,
-            semantic_checksum=semantic_checksum(enriched),
+def validate_local_source(
+    claim: PublicationClaim,
+    source_path: Path,
+) -> VerifiedSource:
+    """Validate and enrich an already downloaded exact Parquet object version."""
+    parquet_file = pq.ParquetFile(source_path)
+    source_table = parquet_file.read()
+    if source_table.num_rows != claim.source_row_count:
+        raise SourceObjectContractError(
+            "source Parquet row count does not match the frozen publication"
         )
+    expected_fields = claim.source_schema_json.get("fields")
+    if not isinstance(expected_fields, list):
+        raise SourceObjectContractError("frozen source schema has no fields contract")
+    if _schema_contract(source_table.schema) != expected_fields:
+        raise SourceObjectContractError("source Parquet schema does not match")
+
+    metadata = source_table.schema.metadata or {}
+    expected_metadata = {
+        b"bpi.snapshot_id": str(claim.source_snapshot_id).encode(),
+        b"bpi.manifest_checksum": claim.manifest_checksum.encode(),
+    }
+    for key, expected in expected_metadata.items():
+        if metadata.get(key) != expected:
+            raise SourceObjectContractError(
+                f"source Parquet metadata {key.decode()} does not match"
+            )
+    if "snapshot_id" not in source_table.column_names:
+        raise SourceObjectContractError("source Parquet snapshot_id column is missing")
+    if set(source_table.column("snapshot_id").to_pylist()) != {
+        str(claim.source_snapshot_id)
+    }:
+        raise SourceObjectContractError("source Parquet contains another snapshot")
+
+    enriched = source_table
+    identity_columns = {
+        "tenant_id": claim.tenant_id,
+        "plant_id": claim.plant_id,
+        "dataset_id": str(claim.dataset_id),
+        "source_snapshot_id": str(claim.source_snapshot_id),
+        "source_materialization_id": str(claim.materialization_id),
+        "source_content_sha256": claim.source_content_sha256,
+    }
+    collisions = set(identity_columns).intersection(enriched.column_names)
+    if collisions:
+        raise SourceObjectContractError(
+            f"source Parquet already defines publisher columns: {sorted(collisions)}"
+        )
+    for name, value in identity_columns.items():
+        enriched = enriched.append_column(
+            name,
+            pa.array([value] * enriched.num_rows, type=pa.string()),
+        )
+    enriched = enriched.replace_schema_metadata(None)
+    return VerifiedSource(
+        path=source_path,
+        table=enriched,
+        semantic_checksum=semantic_checksum(enriched),
+    )

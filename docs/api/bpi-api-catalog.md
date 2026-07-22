@@ -110,6 +110,10 @@
 | 训练数据 | GET | `/bpi/v1/dataset-materializations/{materializationId}/catalog-publications` | `getDatasetCatalogPublicationForMaterialization` | SERVICE_IMPLEMENTED；按源快照 tenant/plant/line scope 返回该 materialization 的独立 publication，不由 Parquet READY 推导 Iceberg READY |
 | 训练数据 | GET | `/bpi/v1/dataset-catalog-publications/{publicationId}` | `getDatasetCatalogPublication` | SERVICE_IMPLEMENTED；仅 `READY` 返回 table identifier、snapshot ID、metadata location、schema/spec、行数和 checksum 对账事实 |
 | 训练数据 | POST | `/bpi/v1/dataset-catalog-publications/{publicationId}/retry` | `retryDatasetCatalogPublication` | SERVICE_IMPLEMENTED；仅 `FAILED` revision 可重试，publisher 必须先 reconcile 带同一 BPI source properties 的既有 snapshot；目标 post-commit fencing 故障注入待验收 |
+| 训练数据 | GET | `/bpi/v1/dataset-catalog-publications/{publicationId}/retention-archives` | `getDatasetRetentionArchiveForPublication` | SERVICE_IMPLEMENTED；按 publication tenant/plant/line scope 查询独立恢复包，不从 Iceberg READY 推导 Object Lock 已生效 |
+| 训练数据 | POST | `/bpi/v1/dataset-catalog-publications/{publicationId}/retention-archives` | `requestDatasetRetentionArchive` | SERVICE_IMPLEMENTED；仅接受行数与语义 checksum 已对账的 `READY` Iceberg publication，保留模式、期限和目标桶由服务端固定 |
+| 训练数据 | GET | `/bpi/v1/dataset-retention-archives/{archiveId}` | `getDatasetRetentionArchive` | SERVICE_IMPLEMENTED；返回 `QUEUED/ARCHIVING/VERIFYING/LOCKED/FAILED`、精确对象版本、保留期限与恢复校验证据 |
+| 训练数据 | POST | `/bpi/v1/dataset-retention-archives/{archiveId}/retry` | `retryDatasetRetentionArchive` | SERVICE_IMPLEMENTED；仅失败任务可按当前 revision 幂等重排队，`LOCKED` 恢复包不可覆盖 |
 | 集成运行 | GET | `/bpi/v1/integrations/health` | `getIntegrationHealth` | SIMULATED |
 | 集成运行 | POST | `/bpi/v1/integrations/{integrationId}/checks` | `runIntegrationCheck` | CONTRACT_ONLY |
 | 审计记录 | GET | `/bpi/v1/audit/events` | `listAuditEvents` | CONTRACT_ONLY |

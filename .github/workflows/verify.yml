@@ -101,6 +101,77 @@ jobs:
             --file services/bpi-dataset-materializer/Dockerfile \
             --tag ft-mes-bpi-dataset-materializer:ci .
           test "$(docker image inspect --format '{{.Config.User}}' ft-mes-bpi-dataset-materializer:ci)" = "10001:10001"
+          docker run --rm --entrypoint sh ft-mes-bpi-dataset-materializer:ci \
+            -c 'touch /var/lib/bpi-materializer/.writable'
+
+  bpi-dataset-catalog-publisher:
+    name: BPI Python 3.12 Iceberg catalog publisher
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/bpi-dataset-catalog-publisher/requirements.runtime.txt
+
+      - name: Install locked runtime and package
+        run: |
+          python -m pip install --requirement services/bpi-dataset-catalog-publisher/requirements.runtime.txt
+          python -m pip install --no-build-isolation --no-deps services/bpi-dataset-catalog-publisher
+
+      - name: Test exact source versions and Iceberg reconciliation
+        run: make bpi-dataset-catalog-publisher-test PYTHON=python
+
+      - name: Build non-root runtime image
+        run: |
+          docker build \
+            --build-arg PYTHON_IMAGE=python:3.12.13-slim-bookworm \
+            --file services/bpi-dataset-catalog-publisher/Dockerfile \
+            --tag ft-mes-bpi-dataset-catalog-publisher:ci .
+          test "$(docker image inspect --format '{{.Config.User}}' ft-mes-bpi-dataset-catalog-publisher:ci)" = "10002:10002"
+          docker run --rm --entrypoint sh ft-mes-bpi-dataset-catalog-publisher:ci \
+            -c 'test -x /usr/local/bin/bpi-dataset-recovery-rehearsal && touch /var/lib/bpi-catalog-publisher/.writable'
+
+  bpi-dataset-retention-archiver:
+    name: BPI Python 3.12 Object Lock recovery archiver
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/bpi-dataset-retention-archiver/requirements.runtime.txt
+
+      - name: Install locked runtime and internal source validator
+        run: |
+          python -m pip install --requirement services/bpi-dataset-retention-archiver/requirements.runtime.txt
+          python -m pip install --no-build-isolation --no-deps services/bpi-dataset-catalog-publisher
+          python -m pip install --no-build-isolation --no-deps services/bpi-dataset-retention-archiver
+
+      - name: Test retained versions, Object Lock evidence and recovery reconstruction
+        run: make bpi-dataset-retention-archiver-test PYTHON=python
+
+      - name: Build non-root runtime image
+        run: |
+          docker build \
+            --build-arg PYTHON_IMAGE=python:3.12.13-slim-bookworm \
+            --file services/bpi-dataset-retention-archiver/Dockerfile \
+            --tag ft-mes-bpi-dataset-retention-archiver:ci .
+          test "$(docker image inspect --format '{{.Config.User}}' ft-mes-bpi-dataset-retention-archiver:ci)" = "10003:10003"
+          docker run --rm --entrypoint sh ft-mes-bpi-dataset-retention-archiver:ci \
+            -c 'touch /var/lib/bpi-retention-archiver/.writable'
 
   bpi-ui-node20:
     name: BPI console and browser acceptance

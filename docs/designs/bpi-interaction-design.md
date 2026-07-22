@@ -342,6 +342,11 @@ catalog、Iceberg table identifier、snapshot ID、metadata location、schema ID
 和语义 checksum；失败显示错误码并允许按 revision 重试。页面不得从 Parquet READY 推导 Iceberg READY，
 也不得在 publisher 健康但任务仍未对账时显示成功。
 
+Phase 3B-C 在活跃 Iceberg warehouse 之外增加独立 Object Lock 恢复包。只有 `READY` publication 的源行数、
+Iceberg 回读行数和语义 checksum 全部对账后才能申请；任务按 `QUEUED -> ARCHIVING -> VERIFYING -> LOCKED/FAILED`
+推进。页面只在精确源 Parquet 版本、规范化恢复 manifest、对象保留期限和本地重建结果均复验后显示 `LOCKED`，
+并明确区分恢复包锁定与活跃 Iceberg 表可用。运行模式、保留天数和 legal hold 由服务端环境固定，前端不能修改。
+
 MLflow 和模型训练继续显示为 `NOT_STARTED`。确定性模拟器只验证交互与契约，模拟 URI/SHA/snapshot
 不是 MinIO 或 Polaris 真实证据。目标 Phase 3B-B 后端检查点已经闭合真实 snapshot、time-travel、失败重试、
 重启和清理；真实 ADP 页面 V28 操作及 post-commit fencing 故障注入仍待验收。
@@ -349,7 +354,8 @@ MLflow 和模型训练继续显示为 `NOT_STARTED`。确定性模拟器只验�
 **主要 API：** `listDatasets`、`createDatasetDefinition`、`createDatasetSnapshot`、`getDatasetSnapshot`、
 `requestDatasetMaterialization`、`getDatasetMaterialization`、`retryDatasetMaterialization`、
 `requestDatasetCatalogPublication`、`getDatasetCatalogPublicationForMaterialization`、`getDatasetCatalogPublication`、
-`retryDatasetCatalogPublication`。
+`retryDatasetCatalogPublication`、`getDatasetRetentionArchiveForPublication`、`requestDatasetRetentionArchive`、
+`getDatasetRetentionArchive`、`retryDatasetRetentionArchive`。
 
 ### 5.11 集成运行 `/bpi/integrations`
 
