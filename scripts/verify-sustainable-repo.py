@@ -99,6 +99,8 @@ REQUIRED_PATHS = [
     "deploy/docker/postgres/ensure-bpi-catalog-publisher-role.sh",
     "deploy/docker/postgres/ensure-bpi-retention-archiver-role.sh",
     "deploy/docker/postgres/ensure-bpi-mlflow-registrar-role.sh",
+    "deploy/docker/scripts/adp-bpi-dataset-mlflow-target-acceptance.js",
+    "deploy/docker/scripts/bpi-dataset-mlflow-target-verification.sql",
     "deploy/minio/bootstrap-bpi-iceberg-warehouse.sh",
     "deploy/minio/bootstrap-bpi-dataset-recovery-bucket.sh",
     "deploy/minio/bpi-dataset-catalog-source-reader-policy.json",

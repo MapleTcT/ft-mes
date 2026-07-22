@@ -47,8 +47,19 @@ if ! mc admin user info bpi-minio \
         "$BPI_MLFLOW_MINIO_SECRET_KEY"
 fi
 
-sed "s/__MLFLOW_ARTIFACT_BUCKET__/$BPI_MLFLOW_ARTIFACT_BUCKET/g" \
-    /work/policy.json >/tmp/bpi-mlflow-artifact-policy.json
+while IFS= read -r policy_line || [ -n "$policy_line" ]; do
+    case "$policy_line" in
+        *__MLFLOW_ARTIFACT_BUCKET__*)
+            policy_prefix=${policy_line%%__MLFLOW_ARTIFACT_BUCKET__*}
+            policy_suffix=${policy_line#*__MLFLOW_ARTIFACT_BUCKET__}
+            printf '%s%s%s\n' "$policy_prefix" \
+                "$BPI_MLFLOW_ARTIFACT_BUCKET" "$policy_suffix"
+            ;;
+        *)
+            printf '%s\n' "$policy_line"
+            ;;
+    esac
+done </work/policy.json >/tmp/bpi-mlflow-artifact-policy.json
 case "$(cat /tmp/bpi-mlflow-artifact-policy.json)" in
     *__MLFLOW_ARTIFACT_BUCKET__*)
         printf 'ERROR: rendered MLflow artifact policy is incomplete\n' >&2

@@ -66,7 +66,7 @@ class FakeMlflow:
             def do_GET(self) -> None:  # noqa: N802
                 parsed = urlparse(self.path)
                 if parsed.path == "/health":
-                    self.reply(200, {})
+                    self.reply_text(200, "OK")
                     return
                 if parsed.path.endswith("/experiments/get-by-name"):
                     if state.experiment is None:
@@ -136,6 +136,14 @@ class FakeMlflow:
                 self.end_headers()
                 self.wfile.write(body)
 
+            def reply_text(self, status: int, payload: str) -> None:
+                body = payload.encode()
+                self.send_response(status)
+                self.send_header("Content-Type", "text/plain")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
             def log_message(self, _format: str, *_args) -> None:
                 return
 
@@ -162,6 +170,10 @@ class FakeMlflow:
 
 
 class MlflowTrackingClientTest(unittest.TestCase):
+    def test_accepts_plain_text_health_response(self) -> None:
+        with FakeMlflow() as mlflow:
+            MlflowTrackingClient(mlflow.url, 2).ping()
+
     def test_registers_and_reuses_one_verified_dataset_input(self) -> None:
         with FakeMlflow() as mlflow:
             client = MlflowTrackingClient(mlflow.url, 2)

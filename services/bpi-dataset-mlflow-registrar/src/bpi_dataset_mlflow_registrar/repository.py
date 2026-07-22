@@ -8,11 +8,8 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 from .config import Settings
+from .errors import LostClaimError
 from .models import RegistrationClaim, RegistrationResult
-
-
-class LostClaimError(RuntimeError):
-    pass
 
 
 class MlflowRegistrationRepository:

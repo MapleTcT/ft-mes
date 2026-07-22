@@ -1,4 +1,4 @@
-ARG MLFLOW_IMAGE=ghcr.io/mlflow/mlflow:v3.14.0
+ARG MLFLOW_IMAGE=m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm
 FROM ${MLFLOW_IMAGE}
 
 ARG PIP_INDEX_URL=https://pypi.org/simple
@@ -14,7 +14,17 @@ COPY services/bpi-mlflow/requirements.runtime.txt /tmp/requirements.runtime.txt
 RUN pip install --requirement /tmp/requirements.runtime.txt
 
 COPY services/bpi-mlflow/start-mlflow.sh /usr/local/bin/start-bpi-mlflow
-RUN chmod 0555 /usr/local/bin/start-bpi-mlflow
+RUN chmod 0555 /usr/local/bin/start-bpi-mlflow \
+    && (getent group 10004 >/dev/null 2>&1 \
+        || addgroup --system --gid 10004 bpi_mlflow_server) \
+    && (getent passwd 10004 >/dev/null 2>&1 \
+        || adduser --system --uid 10004 \
+            --ingroup "$(getent group 10004 | cut -d: -f1)" \
+            --home /nonexistent bpi_mlflow_server)
+
+ENV HOME=/tmp
+
+USER 10004:10004
 
 EXPOSE 5000
 

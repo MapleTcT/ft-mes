@@ -14,6 +14,7 @@ services:
       BPI_MATERIALIZER_DATABASE_PASSWORD: ${BPI_MATERIALIZER_DATABASE_PASSWORD:?BPI_MATERIALIZER_DATABASE_PASSWORD is required}
       BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD: ${BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD:?BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD is required}
       BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD: ${BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD:?BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD is required}
+      BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD: ${BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD:?BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD is required}
       TZ: ${TZ:-Asia/Shanghai}
     volumes:
       - bpi-postgres-data:/var/lib/postgresql/data
@@ -346,6 +347,105 @@ services:
     networks:
       - bpi-runtime
 
+  bpi-mlflow-artifact-bootstrap:
+    image: ${MINIO_MC_IMAGE:-m.daocloud.io/docker.io/minio/mc:latest}
+    profiles: ["bpi-ml"]
+    restart: "no"
+    environment:
+      BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED: ${BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED:-false}
+      BPI_MLFLOW_MINIO_ENDPOINT: http://bpi-minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+      BPI_MLFLOW_MINIO_ACCESS_KEY: ${BPI_MLFLOW_MINIO_ACCESS_KEY:?BPI_MLFLOW_MINIO_ACCESS_KEY is required}
+      BPI_MLFLOW_MINIO_SECRET_KEY: ${BPI_MLFLOW_MINIO_SECRET_KEY:?BPI_MLFLOW_MINIO_SECRET_KEY is required}
+      BPI_MLFLOW_ARTIFACT_BUCKET: ${BPI_MLFLOW_ARTIFACT_BUCKET:-bpi-mlflow-artifacts}
+    volumes:
+      - ../minio/bootstrap-bpi-mlflow-artifact-bucket.sh:/work/bootstrap.sh:ro
+      - ../minio/bpi-mlflow-artifact-policy.json:/work/policy.json:ro
+    entrypoint: ["/bin/sh", "/work/bootstrap.sh"]
+    depends_on:
+      bpi-minio:
+        condition: service_started
+    networks:
+      - bpi-runtime
+
+  bpi-mlflow-postgres:
+    image: ${BPI_MLFLOW_POSTGRES_IMAGE:-m.daocloud.io/docker.io/library/postgres:16.13-alpine}
+    profiles: ["bpi-ml"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mlflow
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: ${BPI_MLFLOW_DATABASE_PASSWORD:?BPI_MLFLOW_DATABASE_PASSWORD is required}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - bpi-mlflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mlflow -d mlflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+    networks:
+      - bpi-runtime
+
+  bpi-mlflow:
+    image: ${BPI_MLFLOW_SERVICE_IMAGE:-ft-mes-bpi-mlflow:local}
+    profiles: ["bpi-ml"]
+    build:
+      context: ../..
+      dockerfile: services/bpi-mlflow/Dockerfile
+      args:
+        MLFLOW_IMAGE: ${BPI_MLFLOW_IMAGE:-m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm}
+        PIP_INDEX_URL: ${BPI_MLFLOW_PIP_INDEX_URL:-https://pypi.org/simple}
+        PIP_DEFAULT_TIMEOUT: ${BPI_MLFLOW_PIP_DEFAULT_TIMEOUT:-120}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      BPI_MLFLOW_DATABASE_PASSWORD: ${BPI_MLFLOW_DATABASE_PASSWORD:?BPI_MLFLOW_DATABASE_PASSWORD is required}
+      BPI_MLFLOW_ARTIFACT_BUCKET: ${BPI_MLFLOW_ARTIFACT_BUCKET:-bpi-mlflow-artifacts}
+      AWS_ACCESS_KEY_ID: ${BPI_MLFLOW_MINIO_ACCESS_KEY:?BPI_MLFLOW_MINIO_ACCESS_KEY is required}
+      AWS_SECRET_ACCESS_KEY: ${BPI_MLFLOW_MINIO_SECRET_KEY:?BPI_MLFLOW_MINIO_SECRET_KEY is required}
+      AWS_DEFAULT_REGION: ${BPI_MLFLOW_S3_REGION:-us-east-1}
+      MLFLOW_S3_ENDPOINT_URL: http://bpi-minio:9000
+    depends_on:
+      bpi-mlflow-postgres:
+        condition: service_healthy
+      bpi-mlflow-artifact-bootstrap:
+        condition: service_completed_successfully
+    networks:
+      - bpi-runtime
+
+  bpi-dataset-mlflow-registrar:
+    image: ${BPI_DATASET_MLFLOW_REGISTRAR_IMAGE:-ft-mes-bpi-dataset-mlflow-registrar:local}
+    profiles: ["bpi-ml"]
+    build:
+      context: ../..
+      dockerfile: services/bpi-dataset-mlflow-registrar/Dockerfile
+      args:
+        PYTHON_IMAGE: ${BPI_DATASET_MLFLOW_REGISTRAR_PYTHON_IMAGE:-m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      BPI_DATASET_MLFLOW_REGISTRAR_ENABLED: ${BPI_DATASET_MLFLOW_REGISTRAR_ENABLED:-false}
+      PGHOST: bpi-postgres
+      PGPORT: "5432"
+      PGDATABASE: ${BPI_DATABASE_NAME:-ft_mes_bpi}
+      PGUSER: bpi_mlflow_registrar
+      PGPASSWORD: ${BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD:?BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD is required}
+      PGSSLMODE: disable
+      BPI_MLFLOW_TRACKING_URI: http://bpi-mlflow:5000
+      BPI_MLFLOW_REQUEST_TIMEOUT_SECONDS: ${BPI_MLFLOW_REQUEST_TIMEOUT_SECONDS:-20}
+      BPI_DATASET_MLFLOW_REGISTRAR_POLL_SECONDS: ${BPI_DATASET_MLFLOW_REGISTRAR_POLL_SECONDS:-2}
+      BPI_DATASET_MLFLOW_REGISTRAR_CLAIM_TIMEOUT_SECONDS: ${BPI_DATASET_MLFLOW_REGISTRAR_CLAIM_TIMEOUT_SECONDS:-300}
+      BPI_DATASET_MLFLOW_REGISTRAR_MAX_ATTEMPTS: ${BPI_DATASET_MLFLOW_REGISTRAR_MAX_ATTEMPTS:-3}
+    depends_on:
+      bpi-migrate:
+        condition: service_completed_successfully
+      bpi-mlflow:
+        condition: service_healthy
+    networks:
+      - bpi-runtime
+
   bpi-migrate:
     image: ${BPI_SERVICE_IMAGE:-ft-mes-bpi-service:local}
     build:
@@ -646,3 +746,4 @@ volumes:
   bpi-polaris-publisher-credentials:
   bpi-catalog-publisher-work:
   bpi-retention-archiver-work:
+  bpi-mlflow-postgres-data:

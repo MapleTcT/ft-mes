@@ -14,6 +14,10 @@ SECRET_PATTERN = re.compile(
 )
 
 
+class LostClaimError(RuntimeError):
+    pass
+
+
 def sanitize_error(exception: BaseException) -> str:
     message = f"{type(exception).__name__}: {exception}"
 

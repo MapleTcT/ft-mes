@@ -8,8 +8,10 @@ not a current target entry. Kafka/Flink/MinIO remain isolated in `deploy/bpi-str
 
 Keep this Compose file for isolated development and migration rehearsal. Target runtime changes must
 use the integrated `deploy/docker/docker-compose.yml` composition and must not start a second BPI Web,
-service, adapter or PostgreSQL beside it. The isolated template now includes a private MinIO only for
-Phase 3B dataset artifacts; Kafka, Flink and their checkpoint MinIO remain in `deploy/bpi-streaming`.
+service, adapter or PostgreSQL beside it. The isolated template includes a private MinIO for Phase 3B
+dataset artifacts, optional `bpi-catalog` services for Iceberg/Polaris, and optional `bpi-ml` services
+for MLflow Dataset Input registration. Kafka, Flink and their checkpoint MinIO remain in
+`deploy/bpi-streaming`.
 
 ## Isolated start
 
@@ -28,12 +30,13 @@ sh deploy/bpi-runtime/scripts/smoke.sh deploy/bpi-runtime/.env
 
 The one-shot `bpi-migrate` container uses the same tested application image with the DDL-owning
 `bpi_migrator` account and exits after Flyway completes. The long-running service starts afterward
-with the DML-only `bpi_service` account. Flyway V27 adds the Parquet materialization job ledger.
-The separate Python 3.12 worker runs as UID/GID `10001:10001` with the `bpi_materializer` database
-role and a bucket-scoped MinIO identity. It cannot insert snapshots or read `source_payload`.
+with the DML-only `bpi_service` account. Flyway V27-V30 add the Parquet materialization, Iceberg
+publication, Object Lock recovery and MLflow Dataset Input ledgers. Separate Python 3.12 workers use
+dedicated non-inheriting PostgreSQL roles; the MLflow registrar runs as UID/GID `10005:10005`, can
+only update its own registration ledger, and has no recovery-object or production-system credentials.
 
 `BPI_EXPECTED_FLYWAY_VERSION` is the runtime smoke contract for the release and defaults to the
-latest repository migration (`27`). Set it explicitly in the target `.env` when preparing a release.
+latest repository migration (`30`). Set it explicitly in the target `.env` when preparing a release.
 Preflight compares every packaged migration name and checksum in the service JAR with the source
 migration directory; a stale JAR, a changed historical migration, or an unexpected migration head
 fails before any database action.
@@ -44,6 +47,29 @@ and does not create or change the MinIO bucket. Enable bucket bootstrap once in 
 acceptance window, verify the private bucket, versioning and scoped identity, return bootstrap to
 `false`, and only then enable the worker for marker-scoped acceptance. Neither switch is an Iceberg,
 MLflow, training, inference or production-readiness claim.
+
+`BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED` and `BPI_DATASET_MLFLOW_REGISTRAR_ENABLED` also default to
+`false`, and all MLflow services are behind the explicit `bpi-ml` Compose profile. In an approved
+local acceptance window, bootstrap the private artifact bucket once, provision the least-privilege
+registrar role, then start the profile. The service image installs the pinned `mlflow==3.14.0`
+package on the pinned Python 3.12 base; `BPI_MLFLOW_PIP_INDEX_URL` changes only the package mirror,
+not the selected MLflow version:
+
+```bash
+BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED=true \
+BPI_DATASET_MLFLOW_REGISTRAR_ENABLED=true \
+docker compose --env-file deploy/bpi-runtime/.env \
+  -f deploy/bpi-runtime/docker-compose.yml --profile bpi-ml \
+  up -d --build bpi-mlflow-postgres bpi-mlflow-artifact-bootstrap \
+  bpi-mlflow bpi-dataset-mlflow-registrar
+```
+
+After the one-shot bootstrap succeeds, persist
+`BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED=false`; leave the registrar enabled only for the approved
+acceptance window and return it to `false` before closing that window.
+
+A `REGISTERED` row proves only the exact Dataset Input and immutable lineage. It must not be used as
+evidence that a model was trained, registered, served or approved for production.
 
 The browser reaches only the same-origin `/bpi-api` path on `bpi-web`. Nginx proxies that path to
 the Java 8 adapter. A three-segment access token is validated by Keycloak JWKS. The legacy ADP login

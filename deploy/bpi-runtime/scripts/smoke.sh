@@ -6,6 +6,7 @@ DEPLOY_DIR="$ROOT_DIR/deploy/bpi-runtime"
 ENV_FILE=${1:-"$DEPLOY_DIR/.env"}
 REPORT=${BPI_RUNTIME_SMOKE_REPORT:-/tmp/bpi-runtime-smoke.json}
 MATERIALIZER_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-materializer-role.sh"
+MLFLOW_REGISTRAR_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-mlflow-registrar-role.sh"
 
 env_value() {
     key=$1
@@ -24,11 +25,14 @@ web_bind_address=$(env_value BPI_WEB_BIND_ADDRESS 127.0.0.1)
 web_port=$(env_value BPI_WEB_PORT 18090)
 database_name=$(env_value BPI_DATABASE_NAME ft_mes_bpi)
 postgres_user=$(env_value POSTGRES_USER bpi_admin)
-expected_flyway=$(env_value BPI_EXPECTED_FLYWAY_VERSION 27)
+expected_flyway=$(env_value BPI_EXPECTED_FLYWAY_VERSION 30)
 postgres_db=$(env_value POSTGRES_DB postgres)
 materializer_password=$(env_value BPI_MATERIALIZER_DATABASE_PASSWORD '')
+mlflow_registrar_password=$(env_value BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD '')
 materializer_enabled=$(env_value BPI_DATASET_MATERIALIZER_ENABLED false)
 bucket_bootstrap_enabled=$(env_value BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED false)
+mlflow_artifact_bootstrap_enabled=$(env_value BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED false)
+mlflow_registrar_enabled=$(env_value BPI_DATASET_MLFLOW_REGISTRAR_ENABLED false)
 connect_timeout=${BPI_RUNTIME_SMOKE_CONNECT_TIMEOUT_SECONDS:-5}
 request_timeout=${BPI_RUNTIME_SMOKE_REQUEST_TIMEOUT_SECONDS:-20}
 
@@ -44,6 +48,14 @@ test "$materializer_enabled" = "false" || {
 }
 test "$bucket_bootstrap_enabled" = "false" || {
     printf 'ERROR: BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED must remain false for expand smoke\n' >&2
+    exit 1
+}
+test "$mlflow_artifact_bootstrap_enabled" = "false" || {
+    printf 'ERROR: BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED must remain false for expand smoke\n' >&2
+    exit 1
+}
+test "$mlflow_registrar_enabled" = "false" || {
+    printf 'ERROR: BPI_DATASET_MLFLOW_REGISTRAR_ENABLED must remain false for expand smoke\n' >&2
     exit 1
 }
 
@@ -93,6 +105,14 @@ test "$materialization_table" = "bpi.bpi_dataset_materializations" || {
     exit 1
 }
 
+mlflow_registration_table=$(compose exec -T bpi-postgres \
+    psql -At -U "$postgres_user" -d "$database_name" \
+    -c "SELECT to_regclass('bpi.bpi_dataset_mlflow_registrations')::text")
+test "$mlflow_registration_table" = "bpi.bpi_dataset_mlflow_registrations" || {
+    printf 'ERROR: BPI dataset MLflow registration table is missing\n' >&2
+    exit 1
+}
+
 postgres_id=$(compose ps -q bpi-postgres)
 docker exec -i \
     -e "POSTGRES_USER=$postgres_user" \
@@ -100,6 +120,27 @@ docker exec -i \
     -e "BPI_DATABASE_NAME=$database_name" \
     -e "BPI_MATERIALIZER_DATABASE_PASSWORD=$materializer_password" \
     "$postgres_id" sh -s -- verify <"$MATERIALIZER_ROLE_SCRIPT"
+
+docker exec -i \
+    -e "POSTGRES_USER=$postgres_user" \
+    -e "POSTGRES_DB=$postgres_db" \
+    -e "BPI_DATABASE_NAME=$database_name" \
+    -e "BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD=$mlflow_registrar_password" \
+    "$postgres_id" sh -s -- verify <"$MLFLOW_REGISTRAR_ROLE_SCRIPT"
+
+for disabled_service in \
+    bpi-dataset-mlflow-registrar \
+    bpi-mlflow \
+    bpi-mlflow-postgres \
+    bpi-mlflow-artifact-bootstrap; do
+    disabled_id=$(docker compose --env-file "$ENV_FILE" \
+        -f "$DEPLOY_DIR/docker-compose.yml" --profile bpi-ml \
+        ps -q "$disabled_service")
+    test -z "$disabled_id" || {
+        printf 'ERROR: %s must remain stopped for expand smoke\n' "$disabled_service" >&2
+        exit 1
+    }
+done
 
 materializer_id=$(compose ps -q bpi-dataset-materializer)
 materializer_state=STOPPED
@@ -148,6 +189,13 @@ report = {
         "bucketBootstrapEnabled": False,
         "state": sys.argv[10],
         "databaseRole": "LEAST_PRIVILEGE_VERIFIED",
+    },
+    "datasetMlflowRegistrar": {
+        "enabled": False,
+        "artifactBootstrapEnabled": False,
+        "state": "STOPPED",
+        "databaseRole": "LEAST_PRIVILEGE_VERIFIED",
+        "registrationTable": "bpi.bpi_dataset_mlflow_registrations",
     },
     "postgres": {
         "database": sys.argv[6],

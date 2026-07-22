@@ -100,11 +100,16 @@ for key in \
     BPI_MIGRATOR_PASSWORD \
     BPI_MATERIALIZER_DATABASE_PASSWORD \
     BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD \
+    BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD \
+    BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD \
+    BPI_MLFLOW_DATABASE_PASSWORD \
     BPI_INTERNAL_JWT_SECRET \
     MINIO_ROOT_USER \
     MINIO_ROOT_PASSWORD \
     BPI_DATASET_MINIO_ACCESS_KEY \
-    BPI_DATASET_MINIO_SECRET_KEY; do
+    BPI_DATASET_MINIO_SECRET_KEY \
+    BPI_MLFLOW_MINIO_ACCESS_KEY \
+    BPI_MLFLOW_MINIO_SECRET_KEY; do
     require_secret "$key"
 done
 
@@ -147,7 +152,9 @@ for key in \
     BPI_DATASET_CATALOG_PUBLISHER_ENABLED \
     BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED \
     BPI_DATASET_RETENTION_ARCHIVER_ENABLED \
-    BPI_DATASET_RECOVERY_RECONCILE_STALE; do
+    BPI_DATASET_RECOVERY_RECONCILE_STALE \
+    BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED \
+    BPI_DATASET_MLFLOW_REGISTRAR_ENABLED; do
     require_boolean "$key"
 done
 require_integer_range BPI_DATASET_MATERIALIZER_POLL_SECONDS 1 3600
@@ -160,17 +167,39 @@ require_integer_range BPI_DATASET_RETENTION_DAYS 1 36500
 require_integer_range BPI_DATASET_RETENTION_ARCHIVER_POLL_SECONDS 1 3600
 require_integer_range BPI_DATASET_RETENTION_ARCHIVER_CLAIM_TIMEOUT_SECONDS 30 86400
 require_integer_range BPI_DATASET_RETENTION_ARCHIVER_MAX_ATTEMPTS 1 20
+require_integer_range BPI_MLFLOW_REQUEST_TIMEOUT_SECONDS 1 300
+require_integer_range BPI_DATASET_MLFLOW_REGISTRAR_POLL_SECONDS 1 3600
+require_integer_range BPI_DATASET_MLFLOW_REGISTRAR_CLAIM_TIMEOUT_SECONDS 30 86400
+require_integer_range BPI_DATASET_MLFLOW_REGISTRAR_MAX_ATTEMPTS 1 20
 
 database_password=$(env_value BPI_DATABASE_PASSWORD '')
 migrator_password=$(env_value BPI_MIGRATOR_PASSWORD '')
 materializer_password=$(env_value BPI_MATERIALIZER_DATABASE_PASSWORD '')
 catalog_publisher_password=$(env_value BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD '')
+retention_archiver_password=$(env_value BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD '')
+mlflow_registrar_password=$(env_value BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD '')
+mlflow_database_password=$(env_value BPI_MLFLOW_DATABASE_PASSWORD '')
 if [ "$materializer_password" = "$database_password" ] \
    || [ "$materializer_password" = "$migrator_password" ] \
    || [ "$catalog_publisher_password" = "$database_password" ] \
    || [ "$catalog_publisher_password" = "$migrator_password" ] \
-   || [ "$catalog_publisher_password" = "$materializer_password" ]; then
-    printf 'ERROR: BPI service, migrator and worker database credentials must be distinct\n' >&2
+   || [ "$catalog_publisher_password" = "$materializer_password" ] \
+   || [ "$retention_archiver_password" = "$database_password" ] \
+   || [ "$retention_archiver_password" = "$migrator_password" ] \
+   || [ "$retention_archiver_password" = "$materializer_password" ] \
+   || [ "$retention_archiver_password" = "$catalog_publisher_password" ] \
+   || [ "$mlflow_registrar_password" = "$database_password" ] \
+   || [ "$mlflow_registrar_password" = "$migrator_password" ] \
+   || [ "$mlflow_registrar_password" = "$materializer_password" ] \
+   || [ "$mlflow_registrar_password" = "$catalog_publisher_password" ] \
+   || [ "$mlflow_registrar_password" = "$retention_archiver_password" ] \
+   || [ "$mlflow_database_password" = "$database_password" ] \
+   || [ "$mlflow_database_password" = "$migrator_password" ] \
+   || [ "$mlflow_database_password" = "$materializer_password" ] \
+   || [ "$mlflow_database_password" = "$catalog_publisher_password" ] \
+   || [ "$mlflow_database_password" = "$retention_archiver_password" ] \
+   || [ "$mlflow_database_password" = "$mlflow_registrar_password" ]; then
+    printf 'ERROR: BPI service, migrator, worker and MLflow database credentials must be distinct\n' >&2
     exit 1
 fi
 
@@ -202,10 +231,16 @@ publisher_enabled=$(env_value BPI_DATASET_CATALOG_PUBLISHER_ENABLED false)
 recovery_bootstrap_enabled=$(env_value BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED false)
 retention_archiver_enabled=$(env_value BPI_DATASET_RETENTION_ARCHIVER_ENABLED false)
 reconcile_stale=$(env_value BPI_DATASET_RECOVERY_RECONCILE_STALE false)
+mlflow_artifact_bootstrap_enabled=$(env_value BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED false)
+mlflow_registrar_enabled=$(env_value BPI_DATASET_MLFLOW_REGISTRAR_ENABLED false)
 source_reader_access=''
 source_reader_secret=''
 warehouse_access=''
 warehouse_secret=''
+retention_access=''
+retention_secret=''
+recovery_access=''
+recovery_secret=''
 if [ "$source_reader_enabled" = true ]; then
     require_secret BPI_DATASET_SOURCE_READER_ACCESS_KEY
     require_secret BPI_DATASET_SOURCE_READER_SECRET_KEY
@@ -347,6 +382,33 @@ if [ "$retention_archiver_enabled" = true ]; then
         printf 'ERROR: retention archiver requires recovery bucket bootstrap\n' >&2
         exit 1
     fi
+fi
+
+require_value BPI_MLFLOW_ARTIFACT_BUCKET
+mlflow_access=$(env_value BPI_MLFLOW_MINIO_ACCESS_KEY '')
+mlflow_secret=$(env_value BPI_MLFLOW_MINIO_SECRET_KEY '')
+if [ "$mlflow_access" = "$minio_root_user" ] \
+   || [ "$mlflow_access" = "$minio_access_key" ] \
+   || { [ -n "$source_reader_access" ] && [ "$mlflow_access" = "$source_reader_access" ]; } \
+   || { [ -n "$warehouse_access" ] && [ "$mlflow_access" = "$warehouse_access" ]; } \
+   || { [ -n "$retention_access" ] && [ "$mlflow_access" = "$retention_access" ]; } \
+   || { [ -n "$recovery_access" ] && [ "$mlflow_access" = "$recovery_access" ]; } \
+   || [ "$mlflow_secret" = "$minio_root_password" ] \
+   || [ "$mlflow_secret" = "$minio_secret_key" ] \
+   || { [ -n "$source_reader_secret" ] && [ "$mlflow_secret" = "$source_reader_secret" ]; } \
+   || { [ -n "$warehouse_secret" ] && [ "$mlflow_secret" = "$warehouse_secret" ]; } \
+   || { [ -n "$retention_secret" ] && [ "$mlflow_secret" = "$retention_secret" ]; } \
+   || { [ -n "$recovery_secret" ] && [ "$mlflow_secret" = "$recovery_secret" ]; }; then
+    printf 'ERROR: MLflow artifact MinIO credentials must be isolated\n' >&2
+    exit 1
+fi
+test "${#mlflow_secret}" -ge 8 || {
+    printf 'ERROR: BPI_MLFLOW_MINIO_SECRET_KEY must contain at least 8 characters\n' >&2
+    exit 1
+}
+if [ "$mlflow_registrar_enabled" = true ] \
+   && [ "$mlflow_artifact_bootstrap_enabled" != true ]; then
+    printf 'BPI runtime preflight note: MLflow artifact bootstrap is disabled; the private bucket must already exist\n'
 fi
 
 python3 "$VERIFY_MIGRATIONS" \

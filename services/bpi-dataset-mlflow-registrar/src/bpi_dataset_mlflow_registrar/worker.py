@@ -5,12 +5,15 @@ import os
 import signal
 import threading
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from .config import ConfigurationError, Settings
-from .errors import failure_code, sanitize_error
+from .errors import LostClaimError, failure_code, sanitize_error
 from .health import HealthServer, HealthState
 from .mlflow_client import MlflowContractError, MlflowTrackingClient
-from .repository import LostClaimError, MlflowRegistrationRepository
+
+if TYPE_CHECKING:
+    from .repository import MlflowRegistrationRepository
 
 
 LOGGER = logging.getLogger("bpi-dataset-mlflow-registrar")
@@ -36,6 +39,8 @@ class MlflowRegistrarWorker:
                 self._wait_until_stopped()
                 return
             assert self._settings.tracking_uri is not None
+            from .repository import MlflowRegistrationRepository
+
             self._repository = MlflowRegistrationRepository(self._settings)
             self._client = MlflowTrackingClient(
                 self._settings.tracking_uri,
@@ -53,9 +58,9 @@ class MlflowRegistrarWorker:
         assert self._client is not None
         try:
             self._repository.ping()
-            self._client.ping()
             claim = self._repository.recover_and_claim()
             if claim is None:
+                self._client.ping()
                 self._health.cycle_succeeded()
                 return
             self._health.update(
@@ -64,6 +69,7 @@ class MlflowRegistrarWorker:
                 active_registration_id=str(claim.id),
             )
             try:
+                self._client.ping()
                 if not claim.source_facts_verified:
                     raise MlflowContractError(
                         "frozen registration facts do not match the LOCKED recovery archive"

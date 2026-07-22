@@ -1233,6 +1233,12 @@ def main() -> int:
             "QCS_BPI_OUTBOX_BPI_BASE_URL: http://bpi-service:19091",
             "BPI_WMS_OUTBOX_ENABLED",
             "BPI_WMS_OUTBOX_TOPIC",
+            "bpi-mlflow-artifact-bootstrap:",
+            "bpi-mlflow-postgres:",
+            "bpi-mlflow:",
+            "bpi-dataset-mlflow-registrar:",
+            "BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED: ${BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED:-false}",
+            "BPI_DATASET_MLFLOW_REGISTRAR_ENABLED: ${BPI_DATASET_MLFLOW_REGISTRAR_ENABLED:-false}",
             "profiles: [\"bpi\"]",
         ],
         failures,
@@ -1255,6 +1261,51 @@ def main() -> int:
             "migrationMode",
             "docker-compose-before-v",
             "bpi-minio-runtime-before-v",
+            "--profile bpi-ml",
+            "ensure-bpi-mlflow-registrar-role.sh",
+            "BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED=false",
+            "BPI_DATASET_MLFLOW_REGISTRAR_ENABLED=false",
+            "bpi.bpi_dataset_mlflow_registrations",
+            "10004:10004",
+            "10005:10005",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "services/bpi-mlflow/Dockerfile",
+        [
+            "PIP_INDEX_URL",
+            "USER 10004:10004",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "services/bpi-mlflow/requirements.runtime.txt",
+        ["mlflow==3.14.0", "psycopg2-binary", "boto3"],
+        failures,
+    )
+    require_text(
+        ROOT / "services/bpi-dataset-mlflow-registrar/Dockerfile",
+        ["USER 10005:10005"],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/scripts/adp-bpi-dataset-mlflow-target-acceptance.js",
+        [
+            "request-failure",
+            "retry-registered",
+            "MLFLOW_TRANSPORT_ERROR",
+            'data-mlflow-state="REGISTERED"',
+            "productionActivationAllowed === false",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/scripts/bpi-dataset-manifest-target-cleanup.sql",
+        [
+            "target_dataset_mlflow_registrations",
+            "DELETE FROM bpi.bpi_dataset_mlflow_registrations",
+            "mlflowRegistrations",
         ],
         failures,
     )

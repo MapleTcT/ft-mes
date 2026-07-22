@@ -56,6 +56,7 @@ VERIFY_MIGRATIONS="$RELEASE_ROOT/scripts/verify-bpi-release-migrations.py"
 MATERIALIZER_ROLE_SCRIPT="$RELEASE_ROOT/deploy/docker/postgres/ensure-bpi-materializer-role.sh"
 CATALOG_PUBLISHER_ROLE_SCRIPT="$RELEASE_ROOT/deploy/docker/postgres/ensure-bpi-catalog-publisher-role.sh"
 RETENTION_ARCHIVER_ROLE_SCRIPT="$RELEASE_ROOT/deploy/docker/postgres/ensure-bpi-retention-archiver-role.sh"
+MLFLOW_REGISTRAR_ROLE_SCRIPT="$RELEASE_ROOT/deploy/docker/postgres/ensure-bpi-mlflow-registrar-role.sh"
 
 for path in \
     "$ENV_FILE" \
@@ -69,6 +70,8 @@ for path in \
     "$RELEASE_MINIO_DIR/bootstrap-bpi-dataset-recovery-bucket.sh" \
     "$RELEASE_MINIO_DIR/bpi-dataset-retention-archiver-policy.json" \
     "$RELEASE_MINIO_DIR/bpi-dataset-recovery-operator-policy.json" \
+    "$RELEASE_MINIO_DIR/bootstrap-bpi-mlflow-artifact-bucket.sh" \
+    "$RELEASE_MINIO_DIR/bpi-mlflow-artifact-policy.json" \
     "$RELEASE_POLARIS_DIR/bootstrap_bpi_catalog.py" \
     "$RELEASE_POLARIS_DIR/check_metastore_bootstrap.sh" \
     "$RELEASE_POLARIS_DIR/bootstrap_metastore_if_required.sh" \
@@ -76,7 +79,8 @@ for path in \
     "$VERIFY_MIGRATIONS" \
     "$MATERIALIZER_ROLE_SCRIPT" \
     "$CATALOG_PUBLISHER_ROLE_SCRIPT" \
-    "$RETENTION_ARCHIVER_ROLE_SCRIPT"; do
+    "$RETENTION_ARCHIVER_ROLE_SCRIPT" \
+    "$MLFLOW_REGISTRAR_ROLE_SCRIPT"; do
     if [ ! -e "$path" ]; then
         printf 'ERROR: required integrated runtime path is missing: %s\n' "$path" >&2
         exit 1
@@ -156,20 +160,26 @@ compose_expand() {
     BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED=false \
     BPI_DATASET_RETENTION_ARCHIVER_ENABLED=false \
     BPI_DATASET_RECOVERY_RECONCILE_STALE=false \
-        docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" --profile bpi "$@"
+    BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED=false \
+    BPI_DATASET_MLFLOW_REGISTRAR_ENABLED=false \
+        docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" \
+        --profile bpi --profile bpi-catalog --profile bpi-ml "$@"
 }
 
 validate_release_deployment_manifests() {
     docker compose --env-file "$ENV_FILE" -f "$RELEASE_COMPOSE_FILE" \
-        --profile bpi --profile bpi-catalog config --quiet
+        --profile bpi --profile bpi-catalog --profile bpi-ml config --quiet
     release_services=$(docker compose --env-file "$ENV_FILE" \
-        -f "$RELEASE_COMPOSE_FILE" --profile bpi --profile bpi-catalog config --services)
+        -f "$RELEASE_COMPOSE_FILE" --profile bpi --profile bpi-catalog \
+        --profile bpi-ml config --services)
     for service in bpi-service bpi-adapter bpi-wms-adapter \
         bpi-dataset-minio-bootstrap bpi-dataset-materializer \
         bpi-polaris-postgres bpi-polaris-bootstrap-check bpi-polaris-bootstrap bpi-polaris \
         bpi-iceberg-warehouse-bootstrap \
         bpi-polaris-catalog-bootstrap bpi-dataset-catalog-publisher \
-        bpi-dataset-recovery-bootstrap bpi-dataset-retention-archiver; do
+        bpi-dataset-recovery-bootstrap bpi-dataset-retention-archiver \
+        bpi-mlflow-artifact-bootstrap bpi-mlflow-postgres bpi-mlflow \
+        bpi-dataset-mlflow-registrar; do
         if ! printf '%s\n' "$release_services" | grep -qx "$service"; then
             printf 'ERROR: release Compose is missing required service: %s\n' \
                 "$service" >&2
@@ -218,6 +228,10 @@ stage_runtime_deployment_manifests() {
         "$RUNTIME_MINIO_DIR/bpi-dataset-retention-archiver-policy.json"
     rsync -a "$RELEASE_MINIO_DIR/bpi-dataset-recovery-operator-policy.json" \
         "$RUNTIME_MINIO_DIR/bpi-dataset-recovery-operator-policy.json"
+    rsync -a "$RELEASE_MINIO_DIR/bootstrap-bpi-mlflow-artifact-bucket.sh" \
+        "$RUNTIME_MINIO_DIR/bootstrap-bpi-mlflow-artifact-bucket.sh"
+    rsync -a "$RELEASE_MINIO_DIR/bpi-mlflow-artifact-policy.json" \
+        "$RUNTIME_MINIO_DIR/bpi-mlflow-artifact-policy.json"
     mkdir -p "$RUNTIME_POLARIS_DIR"
     rsync -a "$RELEASE_POLARIS_DIR/bootstrap_bpi_catalog.py" \
         "$RUNTIME_POLARIS_DIR/bootstrap_bpi_catalog.py"
@@ -227,7 +241,7 @@ stage_runtime_deployment_manifests() {
         "$RUNTIME_POLARIS_DIR/bootstrap_metastore_if_required.sh"
 
     docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" \
-        --profile bpi config --quiet
+        --profile bpi --profile bpi-catalog --profile bpi-ml config --quiet
 }
 
 query_version() {
@@ -270,6 +284,8 @@ replace_env_images() {
         "$MATERIALIZER_IMAGE" \
         "$CATALOG_PUBLISHER_IMAGE" \
         "$RETENTION_ARCHIVER_IMAGE" \
+        "$MLFLOW_IMAGE" \
+        "$MLFLOW_REGISTRAR_IMAGE" \
         "$EXPECTED_VERSION" <<'PY'
 import os
 import stat
@@ -285,7 +301,9 @@ updates = {
     "BPI_DATASET_MATERIALIZER_IMAGE": sys.argv[5],
     "BPI_DATASET_CATALOG_PUBLISHER_IMAGE": sys.argv[6],
     "BPI_DATASET_RETENTION_ARCHIVER_IMAGE": sys.argv[7],
-    "BPI_EXPECTED_FLYWAY_VERSION": sys.argv[8],
+    "BPI_MLFLOW_SERVICE_IMAGE": sys.argv[8],
+    "BPI_DATASET_MLFLOW_REGISTRAR_IMAGE": sys.argv[9],
+    "BPI_EXPECTED_FLYWAY_VERSION": sys.argv[10],
     "BPI_DATASET_MATERIALIZER_ENABLED": "false",
     "BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED": "false",
     "BPI_DATASET_SOURCE_READER_ENABLED": "false",
@@ -301,6 +319,8 @@ updates = {
     "BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED": "false",
     "BPI_DATASET_RETENTION_ARCHIVER_ENABLED": "false",
     "BPI_DATASET_RECOVERY_RECONCILE_STALE": "false",
+    "BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED": "false",
+    "BPI_DATASET_MLFLOW_REGISTRAR_ENABLED": "false",
 }
 lines = path.read_text(encoding="utf-8").splitlines()
 seen = set()
@@ -331,7 +351,7 @@ write_report() {
     export REPORT report_status report_phase
     export RELEASE_COMMIT EXPECTED_VERSION BEFORE_VERSION AFTER_VERSION DATABASE_MIGRATION_MODE
     export SERVICE_IMAGE ADAPTER_IMAGE WMS_ADAPTER_IMAGE MATERIALIZER_IMAGE CATALOG_PUBLISHER_IMAGE
-    export RETENTION_ARCHIVER_IMAGE
+    export RETENTION_ARCHIVER_IMAGE MLFLOW_IMAGE MLFLOW_REGISTRAR_IMAGE
     export BEFORE_SERVICE_IMAGE_ID BEFORE_ADAPTER_IMAGE_ID BEFORE_WMS_ADAPTER_IMAGE_ID
     export AFTER_SERVICE_IMAGE_ID AFTER_ADAPTER_IMAGE_ID AFTER_WMS_ADAPTER_IMAGE_ID
     export ROLLBACK_SERVICE_IMAGE ROLLBACK_ADAPTER_IMAGE ROLLBACK_WMS_ADAPTER_IMAGE
@@ -341,6 +361,8 @@ write_report() {
     export MATERIALIZER_IMAGE_ID MATERIALIZER_IMAGE_USER MIGRATION_SET_SHA256
     export CATALOG_PUBLISHER_IMAGE_ID CATALOG_PUBLISHER_IMAGE_USER
     export RETENTION_ARCHIVER_IMAGE_ID RETENTION_ARCHIVER_IMAGE_USER
+    export MLFLOW_IMAGE_ID MLFLOW_IMAGE_USER
+    export MLFLOW_REGISTRAR_IMAGE_ID MLFLOW_REGISTRAR_IMAGE_USER
     python3 <<'PY'
 import datetime
 import json
@@ -353,6 +375,13 @@ def value(name):
 def number(name):
     current = value(name)
     return int(current) if current else None
+
+database_roles_verified = os.environ["report_phase"] in {
+    "MIGRATION_APPLIED",
+    "EXISTING_MIGRATION_VALIDATED",
+    "APPLICATIONS_HEALTHY",
+    "COMPLETE",
+}
 
 report = {
     "generatedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -413,6 +442,23 @@ report = {
             "recoveryBucketBootstrapEnabledDuringUpgrade": False,
             "postUpgradeState": "STOPPED",
         },
+        "mlflowTrackingServer": {
+            "releaseImage": value("MLFLOW_IMAGE"),
+            "releaseImageId": value("MLFLOW_IMAGE_ID"),
+            "runtimeUser": value("MLFLOW_IMAGE_USER"),
+            "artifactBootstrapEnabledDuringUpgrade": False,
+            "postUpgradeState": "STOPPED",
+        },
+        "datasetMlflowRegistrar": {
+            "releaseImage": value("MLFLOW_REGISTRAR_IMAGE"),
+            "releaseImageId": value("MLFLOW_REGISTRAR_IMAGE_ID"),
+            "runtimeUser": value("MLFLOW_REGISTRAR_IMAGE_USER"),
+            "enabledDuringUpgrade": False,
+            "databaseRole": (
+                "LEAST_PRIVILEGE_VERIFIED" if database_roles_verified else "PENDING"
+            ),
+            "postUpgradeState": "STOPPED",
+        },
         "environmentBackup": value("ENV_BACKUP"),
         "composeBackup": value("COMPOSE_BACKUP"),
         "minioConfigBackup": value("MINIO_CONFIG_BACKUP"),
@@ -431,8 +477,10 @@ report = {
         "datasetRetentionArchiverDefault": False,
         "recoveryBucketBootstrapDefault": False,
         "staleRecoveryReconcileDefault": False,
+        "mlflowArtifactBootstrapDefault": False,
+        "datasetMlflowRegistrarDefault": False,
         "polarisDefault": False,
-        "rollbackMethod": "Restore recorded images, UI, Compose, MinIO and Polaris configuration; stop optional WMS/materializer/catalog services when required; keep the expanded schema.",
+        "rollbackMethod": "Restore recorded images, UI, Compose, MinIO and Polaris configuration; stop optional WMS/materializer/catalog/MLflow services when required; keep the expanded schema.",
     },
 }
 path = Path(os.environ["REPORT"])
@@ -452,6 +500,8 @@ WMS_ADAPTER_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_IMAGE:-ft-mes-bpi-wms-adapter:${r
 MATERIALIZER_IMAGE=${BPI_INTEGRATED_MATERIALIZER_IMAGE:-ft-mes-bpi-dataset-materializer:${release_suffix}-${short_commit}}
 CATALOG_PUBLISHER_IMAGE=${BPI_INTEGRATED_CATALOG_PUBLISHER_IMAGE:-ft-mes-bpi-dataset-catalog-publisher:${release_suffix}-${short_commit}}
 RETENTION_ARCHIVER_IMAGE=${BPI_INTEGRATED_RETENTION_ARCHIVER_IMAGE:-ft-mes-bpi-dataset-retention-archiver:${release_suffix}-${short_commit}}
+MLFLOW_IMAGE=${BPI_INTEGRATED_MLFLOW_IMAGE:-ft-mes-bpi-mlflow:${release_suffix}-${short_commit}}
+MLFLOW_REGISTRAR_IMAGE=${BPI_INTEGRATED_MLFLOW_REGISTRAR_IMAGE:-ft-mes-bpi-dataset-mlflow-registrar:${release_suffix}-${short_commit}}
 REPORT=${BPI_INTEGRATED_UPGRADE_REPORT:-$BACKUP_DIR/bpi-integrated-upgrade-${timestamp}.json}
 COMPOSE_BACKUP="$BACKUP_DIR/docker-compose-before-v${EXPECTED_VERSION}-${timestamp}.yml"
 MINIO_CONFIG_BACKUP="$BACKUP_DIR/bpi-minio-runtime-before-v${EXPECTED_VERSION}-${timestamp}.tar.gz"
@@ -465,6 +515,8 @@ MIGRATOR_PASSWORD=$(required_secret BPI_MIGRATOR_PASSWORD)
 MATERIALIZER_DATABASE_PASSWORD=$(required_secret BPI_MATERIALIZER_DATABASE_PASSWORD)
 CATALOG_PUBLISHER_DATABASE_PASSWORD=$(required_secret BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD)
 RETENTION_ARCHIVER_DATABASE_PASSWORD=$(required_secret BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD)
+MLFLOW_REGISTRAR_DATABASE_PASSWORD=$(required_secret BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD)
+MLFLOW_DATABASE_PASSWORD=$(required_secret BPI_MLFLOW_DATABASE_PASSWORD)
 MINIO_ROOT_USER=$(required_secret MINIO_ROOT_USER)
 MINIO_ROOT_PASSWORD=$(required_secret MINIO_ROOT_PASSWORD)
 MATERIALIZER_MINIO_ACCESS_KEY=$(required_secret BPI_DATASET_MINIO_ACCESS_KEY)
@@ -473,6 +525,8 @@ RETENTION_MINIO_ACCESS_KEY=$(required_secret BPI_DATASET_RETENTION_MINIO_ACCESS_
 RETENTION_MINIO_SECRET_KEY=$(required_secret BPI_DATASET_RETENTION_MINIO_SECRET_KEY)
 RECOVERY_MINIO_ACCESS_KEY=$(required_secret BPI_DATASET_RECOVERY_MINIO_ACCESS_KEY)
 RECOVERY_MINIO_SECRET_KEY=$(required_secret BPI_DATASET_RECOVERY_MINIO_SECRET_KEY)
+MLFLOW_MINIO_ACCESS_KEY=$(required_secret BPI_MLFLOW_MINIO_ACCESS_KEY)
+MLFLOW_MINIO_SECRET_KEY=$(required_secret BPI_MLFLOW_MINIO_SECRET_KEY)
 FLYWAY_IMAGE=$(env_value BPI_FLYWAY_IMAGE m.daocloud.io/docker.io/flyway/flyway:11-alpine)
 SERVICE_MAVEN_IMAGE=${BPI_INTEGRATED_SERVICE_MAVEN_IMAGE:-$(env_value BPI_MAVEN_IMAGE m.daocloud.io/docker.io/library/maven:3.9.9-eclipse-temurin-17)}
 SERVICE_JAVA_IMAGE=${BPI_INTEGRATED_SERVICE_JAVA_IMAGE:-$(env_value BPI_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:17-jre-jammy)}
@@ -483,6 +537,10 @@ WMS_ADAPTER_JAVA_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_JAVA_IMAGE:-$(env_value BPI_
 MATERIALIZER_PYTHON_IMAGE=${BPI_INTEGRATED_MATERIALIZER_PYTHON_IMAGE:-$(env_value BPI_DATASET_MATERIALIZER_PYTHON_IMAGE m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm)}
 CATALOG_PUBLISHER_PYTHON_IMAGE=${BPI_INTEGRATED_CATALOG_PUBLISHER_PYTHON_IMAGE:-$(env_value BPI_DATASET_CATALOG_PUBLISHER_PYTHON_IMAGE m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm)}
 RETENTION_ARCHIVER_PYTHON_IMAGE=${BPI_INTEGRATED_RETENTION_ARCHIVER_PYTHON_IMAGE:-$(env_value BPI_DATASET_RETENTION_ARCHIVER_PYTHON_IMAGE m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm)}
+MLFLOW_PYTHON_IMAGE=${BPI_INTEGRATED_MLFLOW_PYTHON_IMAGE:-$(env_value BPI_MLFLOW_IMAGE m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm)}
+MLFLOW_PIP_INDEX_URL=${BPI_INTEGRATED_MLFLOW_PIP_INDEX_URL:-$(env_value BPI_MLFLOW_PIP_INDEX_URL https://pypi.org/simple)}
+MLFLOW_PIP_DEFAULT_TIMEOUT=${BPI_INTEGRATED_MLFLOW_PIP_DEFAULT_TIMEOUT:-$(env_value BPI_MLFLOW_PIP_DEFAULT_TIMEOUT 120)}
+MLFLOW_REGISTRAR_PYTHON_IMAGE=${BPI_INTEGRATED_MLFLOW_REGISTRAR_PYTHON_IMAGE:-$(env_value BPI_DATASET_MLFLOW_REGISTRAR_PYTHON_IMAGE m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm)}
 if [ "$MATERIALIZER_DATABASE_PASSWORD" = "$DATABASE_PASSWORD" ] \
    || [ "$MATERIALIZER_DATABASE_PASSWORD" = "$MIGRATOR_PASSWORD" ] \
    || [ "$CATALOG_PUBLISHER_DATABASE_PASSWORD" = "$DATABASE_PASSWORD" ] \
@@ -491,8 +549,19 @@ if [ "$MATERIALIZER_DATABASE_PASSWORD" = "$DATABASE_PASSWORD" ] \
    || [ "$RETENTION_ARCHIVER_DATABASE_PASSWORD" = "$DATABASE_PASSWORD" ] \
    || [ "$RETENTION_ARCHIVER_DATABASE_PASSWORD" = "$MIGRATOR_PASSWORD" ] \
    || [ "$RETENTION_ARCHIVER_DATABASE_PASSWORD" = "$MATERIALIZER_DATABASE_PASSWORD" ] \
-   || [ "$RETENTION_ARCHIVER_DATABASE_PASSWORD" = "$CATALOG_PUBLISHER_DATABASE_PASSWORD" ]; then
-    printf 'ERROR: BPI service, migrator and worker database credentials must be distinct\n' >&2
+   || [ "$RETENTION_ARCHIVER_DATABASE_PASSWORD" = "$CATALOG_PUBLISHER_DATABASE_PASSWORD" ] \
+   || [ "$MLFLOW_REGISTRAR_DATABASE_PASSWORD" = "$DATABASE_PASSWORD" ] \
+   || [ "$MLFLOW_REGISTRAR_DATABASE_PASSWORD" = "$MIGRATOR_PASSWORD" ] \
+   || [ "$MLFLOW_REGISTRAR_DATABASE_PASSWORD" = "$MATERIALIZER_DATABASE_PASSWORD" ] \
+   || [ "$MLFLOW_REGISTRAR_DATABASE_PASSWORD" = "$CATALOG_PUBLISHER_DATABASE_PASSWORD" ] \
+   || [ "$MLFLOW_REGISTRAR_DATABASE_PASSWORD" = "$RETENTION_ARCHIVER_DATABASE_PASSWORD" ] \
+   || [ "$MLFLOW_DATABASE_PASSWORD" = "$DATABASE_PASSWORD" ] \
+   || [ "$MLFLOW_DATABASE_PASSWORD" = "$MIGRATOR_PASSWORD" ] \
+   || [ "$MLFLOW_DATABASE_PASSWORD" = "$MATERIALIZER_DATABASE_PASSWORD" ] \
+   || [ "$MLFLOW_DATABASE_PASSWORD" = "$CATALOG_PUBLISHER_DATABASE_PASSWORD" ] \
+   || [ "$MLFLOW_DATABASE_PASSWORD" = "$RETENTION_ARCHIVER_DATABASE_PASSWORD" ] \
+   || [ "$MLFLOW_DATABASE_PASSWORD" = "$MLFLOW_REGISTRAR_DATABASE_PASSWORD" ]; then
+    printf 'ERROR: BPI service, migrator, worker and MLflow database credentials must be distinct\n' >&2
     exit 1
 fi
 if [ "$MATERIALIZER_MINIO_ACCESS_KEY" = "$MINIO_ROOT_USER" ] \
@@ -509,8 +578,16 @@ if [ "$RETENTION_MINIO_ACCESS_KEY" = "$MINIO_ROOT_USER" ] \
    || [ "$RETENTION_MINIO_SECRET_KEY" = "$MATERIALIZER_MINIO_SECRET_KEY" ] \
    || [ "$RECOVERY_MINIO_SECRET_KEY" = "$MINIO_ROOT_PASSWORD" ] \
    || [ "$RECOVERY_MINIO_SECRET_KEY" = "$MATERIALIZER_MINIO_SECRET_KEY" ] \
-   || [ "$RECOVERY_MINIO_SECRET_KEY" = "$RETENTION_MINIO_SECRET_KEY" ]; then
-    printf 'ERROR: retention and recovery MinIO credentials must be isolated\n' >&2
+   || [ "$RECOVERY_MINIO_SECRET_KEY" = "$RETENTION_MINIO_SECRET_KEY" ] \
+   || [ "$MLFLOW_MINIO_ACCESS_KEY" = "$MINIO_ROOT_USER" ] \
+   || [ "$MLFLOW_MINIO_ACCESS_KEY" = "$MATERIALIZER_MINIO_ACCESS_KEY" ] \
+   || [ "$MLFLOW_MINIO_ACCESS_KEY" = "$RETENTION_MINIO_ACCESS_KEY" ] \
+   || [ "$MLFLOW_MINIO_ACCESS_KEY" = "$RECOVERY_MINIO_ACCESS_KEY" ] \
+   || [ "$MLFLOW_MINIO_SECRET_KEY" = "$MINIO_ROOT_PASSWORD" ] \
+   || [ "$MLFLOW_MINIO_SECRET_KEY" = "$MATERIALIZER_MINIO_SECRET_KEY" ] \
+   || [ "$MLFLOW_MINIO_SECRET_KEY" = "$RETENTION_MINIO_SECRET_KEY" ] \
+   || [ "$MLFLOW_MINIO_SECRET_KEY" = "$RECOVERY_MINIO_SECRET_KEY" ]; then
+    printf 'ERROR: retention, recovery and MLflow artifact MinIO credentials must be isolated\n' >&2
     exit 1
 fi
 test "${#MINIO_ROOT_PASSWORD}" -ge 8 || {
@@ -529,6 +606,16 @@ test "${#RECOVERY_MINIO_SECRET_KEY}" -ge 8 || {
     printf 'ERROR: BPI_DATASET_RECOVERY_MINIO_SECRET_KEY must contain at least 8 characters\n' >&2
     exit 1
 }
+test "${#MLFLOW_MINIO_SECRET_KEY}" -ge 8 || {
+    printf 'ERROR: BPI_MLFLOW_MINIO_SECRET_KEY must contain at least 8 characters\n' >&2
+    exit 1
+}
+case "$MLFLOW_PIP_DEFAULT_TIMEOUT" in
+    ''|*[!0-9]*|0)
+        printf 'ERROR: BPI_MLFLOW_PIP_DEFAULT_TIMEOUT must be a positive integer\n' >&2
+        exit 1
+        ;;
+esac
 require_integer_range BPI_DATASET_MATERIALIZER_POLL_SECONDS 1 3600
 require_integer_range BPI_DATASET_MATERIALIZER_CLAIM_TIMEOUT_SECONDS 30 86400
 require_integer_range BPI_DATASET_MATERIALIZER_MAX_ATTEMPTS 1 20
@@ -539,6 +626,10 @@ require_integer_range BPI_DATASET_RETENTION_DAYS 1 36500
 require_integer_range BPI_DATASET_RETENTION_ARCHIVER_POLL_SECONDS 1 3600
 require_integer_range BPI_DATASET_RETENTION_ARCHIVER_CLAIM_TIMEOUT_SECONDS 30 86400
 require_integer_range BPI_DATASET_RETENTION_ARCHIVER_MAX_ATTEMPTS 1 20
+require_integer_range BPI_MLFLOW_REQUEST_TIMEOUT_SECONDS 1 300
+require_integer_range BPI_DATASET_MLFLOW_REGISTRAR_POLL_SECONDS 1 3600
+require_integer_range BPI_DATASET_MLFLOW_REGISTRAR_CLAIM_TIMEOUT_SECONDS 30 86400
+require_integer_range BPI_DATASET_MLFLOW_REGISTRAR_MAX_ATTEMPTS 1 20
 for disabled_key in \
     BPI_PHASE2_INTEGRATION_ENABLED \
     BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED \
@@ -560,6 +651,8 @@ for disabled_key in \
     BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED \
     BPI_DATASET_RETENTION_ARCHIVER_ENABLED \
     BPI_DATASET_RECOVERY_RECONCILE_STALE \
+    BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED \
+    BPI_DATASET_MLFLOW_REGISTRAR_ENABLED \
     QCS_BPI_OUTBOX_ENABLED; do
     if [ "$(env_value "$disabled_key" false)" != "false" ]; then
         printf 'ERROR: %s must remain false during the integrated expand-only upgrade\n' \
@@ -569,12 +662,27 @@ for disabled_key in \
 done
 
 validate_release_deployment_manifests
+runtime_services=$(docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" \
+    --profile bpi --profile bpi-catalog --profile bpi-ml config --services)
+
+runtime_service_id() {
+    service=$1
+    if printf '%s\n' "$runtime_services" | grep -qx "$service"; then
+        docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" \
+            --profile bpi --profile bpi-catalog --profile bpi-ml \
+            ps -q "$service"
+    fi
+}
+
 POSTGRES_ID=$(compose ps -q postgres)
 SERVICE_ID=$(compose ps -q bpi-service)
 ADAPTER_ID=$(compose ps -q bpi-adapter)
 WMS_ADAPTER_ID=$(compose ps -q bpi-wms-adapter)
 MATERIALIZER_ID=$(compose ps -q bpi-dataset-materializer)
 RETENTION_ARCHIVER_ID=$(compose ps -q bpi-dataset-retention-archiver)
+MLFLOW_REGISTRAR_ID=$(runtime_service_id bpi-dataset-mlflow-registrar)
+MLFLOW_ID=$(runtime_service_id bpi-mlflow)
+MLFLOW_POSTGRES_ID=$(runtime_service_id bpi-mlflow-postgres)
 NGINX_ID=$(compose ps -q nginx)
 if [ -z "$POSTGRES_ID" ] || [ -z "$SERVICE_ID" ] || [ -z "$ADAPTER_ID" ] || [ -z "$NGINX_ID" ]; then
     printf 'ERROR: postgres, bpi-service, bpi-adapter and nginx must all be running\n' >&2
@@ -609,6 +717,16 @@ run_retention_archiver_role_action() {
         -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
         -e "BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD=$RETENTION_ARCHIVER_DATABASE_PASSWORD" \
         "$POSTGRES_ID" sh -s -- "$action" <"$RETENTION_ARCHIVER_ROLE_SCRIPT"
+}
+
+run_mlflow_registrar_role_action() {
+    action=$1
+    docker exec -i \
+        -e "POSTGRES_USER=$POSTGRES_USER" \
+        -e "POSTGRES_DB=$POSTGRES_DB" \
+        -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
+        -e "BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD=$MLFLOW_REGISTRAR_DATABASE_PASSWORD" \
+        "$POSTGRES_ID" sh -s -- "$action" <"$MLFLOW_REGISTRAR_ROLE_SCRIPT"
 }
 
 verify_service_image_migrations() {
@@ -673,6 +791,10 @@ CATALOG_PUBLISHER_IMAGE_ID=
 CATALOG_PUBLISHER_IMAGE_USER=
 RETENTION_ARCHIVER_IMAGE_ID=
 RETENTION_ARCHIVER_IMAGE_USER=
+MLFLOW_IMAGE_ID=
+MLFLOW_IMAGE_USER=
+MLFLOW_REGISTRAR_IMAGE_ID=
+MLFLOW_REGISTRAR_IMAGE_USER=
 MIGRATION_SET_SHA256=
 DATABASE_BACKUP=
 ENV_BACKUP=
@@ -737,6 +859,18 @@ docker build \
     --label "org.opencontainers.image.revision=$RELEASE_COMMIT" \
     -f "$RELEASE_ROOT/services/bpi-dataset-retention-archiver/Dockerfile" \
     -t "$RETENTION_ARCHIVER_IMAGE" "$RELEASE_ROOT"
+docker build \
+    --build-arg "MLFLOW_IMAGE=$MLFLOW_PYTHON_IMAGE" \
+    --build-arg "PIP_INDEX_URL=$MLFLOW_PIP_INDEX_URL" \
+    --build-arg "PIP_DEFAULT_TIMEOUT=$MLFLOW_PIP_DEFAULT_TIMEOUT" \
+    --label "org.opencontainers.image.revision=$RELEASE_COMMIT" \
+    -f "$RELEASE_ROOT/services/bpi-mlflow/Dockerfile" \
+    -t "$MLFLOW_IMAGE" "$RELEASE_ROOT"
+docker build \
+    --build-arg "PYTHON_IMAGE=$MLFLOW_REGISTRAR_PYTHON_IMAGE" \
+    --label "org.opencontainers.image.revision=$RELEASE_COMMIT" \
+    -f "$RELEASE_ROOT/services/bpi-dataset-mlflow-registrar/Dockerfile" \
+    -t "$MLFLOW_REGISTRAR_IMAGE" "$RELEASE_ROOT"
 
 MIGRATION_SET_SHA256=$(verify_service_image_migrations)
 MATERIALIZER_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$MATERIALIZER_IMAGE")
@@ -760,12 +894,35 @@ if [ "$RETENTION_ARCHIVER_IMAGE_USER" != "10003:10003" ]; then
         "$RETENTION_ARCHIVER_IMAGE_USER" >&2
     exit 1
 fi
+MLFLOW_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$MLFLOW_IMAGE")
+MLFLOW_IMAGE_USER=$(docker image inspect --format '{{.Config.User}}' "$MLFLOW_IMAGE")
+if [ "$MLFLOW_IMAGE_USER" != "10004:10004" ]; then
+    printf 'ERROR: BPI MLflow tracking server must run as 10004:10004, found %s\n' \
+        "$MLFLOW_IMAGE_USER" >&2
+    exit 1
+fi
+MLFLOW_REGISTRAR_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$MLFLOW_REGISTRAR_IMAGE")
+MLFLOW_REGISTRAR_IMAGE_USER=$(docker image inspect --format '{{.Config.User}}' "$MLFLOW_REGISTRAR_IMAGE")
+if [ "$MLFLOW_REGISTRAR_IMAGE_USER" != "10005:10005" ]; then
+    printf 'ERROR: BPI MLflow registrar must run as 10005:10005, found %s\n' \
+        "$MLFLOW_REGISTRAR_IMAGE_USER" >&2
+    exit 1
+fi
 
 if [ -n "$MATERIALIZER_ID" ]; then
     compose_expand stop bpi-dataset-materializer
 fi
 if [ -n "$RETENTION_ARCHIVER_ID" ]; then
     compose_expand stop bpi-dataset-retention-archiver
+fi
+if [ -n "$MLFLOW_REGISTRAR_ID" ]; then
+    compose_expand stop bpi-dataset-mlflow-registrar
+fi
+if [ -n "$MLFLOW_ID" ]; then
+    compose_expand stop bpi-mlflow
+fi
+if [ -n "$MLFLOW_POSTGRES_ID" ]; then
+    compose_expand stop bpi-mlflow-postgres
 fi
 
 phase=BACKUP
@@ -801,6 +958,7 @@ phase=MIGRATION
 run_materializer_role_action provision
 run_catalog_publisher_role_action provision
 run_retention_archiver_role_action provision
+run_mlflow_registrar_role_action provision
 runtime_network=$(docker inspect --format \
     '{{range $name, $_ := .NetworkSettings.Networks}}{{println $name}}{{end}}' \
     "$POSTGRES_ID" | head -1)
@@ -830,6 +988,8 @@ run_catalog_publisher_role_action grant
 run_catalog_publisher_role_action verify
 run_retention_archiver_role_action grant
 run_retention_archiver_role_action verify
+run_mlflow_registrar_role_action grant
+run_mlflow_registrar_role_action verify
 if [ "$DATABASE_MIGRATION_MODE" = "APPLY_EXPANSION" ]; then
     write_report IN_PROGRESS MIGRATION_APPLIED
 else
@@ -873,14 +1033,22 @@ printf '%s' "$flag_state" | grep -q 'bpi.auto-confirm=false'
 printf '%s' "$flag_state" | grep -q 'bpi.qcs-link=false'
 printf '%s' "$flag_state" | grep -q 'bpi.shadow-only=true'
 printf '%s' "$flag_state" | grep -q 'bpi.wms-link=false'
+mlflow_registration_table=$(docker exec "$POSTGRES_ID" \
+    psql -X -At -U "$POSTGRES_USER" -d "$DATABASE_NAME" \
+    -c "SELECT to_regclass('bpi.bpi_dataset_mlflow_registrations')::text")
+if [ "$mlflow_registration_table" != "bpi.bpi_dataset_mlflow_registrations" ]; then
+    printf 'ERROR: BPI dataset MLflow registration table is missing\n' >&2
+    exit 1
+fi
 if [ -n "$(compose ps -q bpi-dataset-materializer)" ]; then
     printf 'ERROR: BPI dataset materializer must remain stopped after expand-only upgrade\n' >&2
     exit 1
 fi
 for disabled_service in bpi-dataset-catalog-publisher bpi-dataset-retention-archiver bpi-polaris \
-    bpi-polaris-postgres bpi-polaris-catalog-bootstrap; do
-    if [ -n "$(docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" \
-        --profile bpi-catalog ps -q "$disabled_service")" ]; then
+    bpi-polaris-postgres bpi-polaris-catalog-bootstrap \
+    bpi-dataset-mlflow-registrar bpi-mlflow bpi-mlflow-postgres \
+    bpi-mlflow-artifact-bootstrap; do
+    if [ -n "$(compose_expand ps -q "$disabled_service")" ]; then
         printf 'ERROR: %s must remain stopped after expand-only upgrade\n' \
             "$disabled_service" >&2
         exit 1
@@ -891,9 +1059,9 @@ write_report PASS COMPLETE
 trap - EXIT HUP INT TERM
 printf 'Integrated BPI expand-only upgrade: PASS (Flyway %s, mode %s, release %s)\n' \
     "$AFTER_VERSION" "$DATABASE_MIGRATION_MODE" "$RELEASE_COMMIT"
-printf 'Service image: %s\nAdapter image: %s\nWMS adapter image: %s\nRetention archiver image: %s\nReport: %s\n' \
+printf 'Service image: %s\nAdapter image: %s\nWMS adapter image: %s\nRetention archiver image: %s\nMLflow image: %s\nMLflow registrar image: %s\nReport: %s\n' \
     "$SERVICE_IMAGE" "$ADAPTER_IMAGE" "$WMS_ADAPTER_IMAGE" \
-    "$RETENTION_ARCHIVER_IMAGE" "$REPORT"
+    "$RETENTION_ARCHIVER_IMAGE" "$MLFLOW_IMAGE" "$MLFLOW_REGISTRAR_IMAGE" "$REPORT"
 printf 'Dataset materializer image (built, not started): %s\n' "$MATERIALIZER_IMAGE"
 printf 'Dataset catalog publisher image (built, not started): %s\n' \
     "$CATALOG_PUBLISHER_IMAGE"

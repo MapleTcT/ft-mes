@@ -10,6 +10,7 @@ VERIFY_MIGRATIONS="$ROOT_DIR/scripts/verify-bpi-release-migrations.py"
 MATERIALIZER_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-materializer-role.sh"
 CATALOG_PUBLISHER_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-catalog-publisher-role.sh"
 RETENTION_ARCHIVER_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-retention-archiver-role.sh"
+MLFLOW_REGISTRAR_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-mlflow-registrar-role.sh"
 JAR="$ROOT_DIR/services/bpi-service/app/target/bpi-service-0.1.0-SNAPSHOT-exec.jar"
 WMS_ADAPTER_JAR="$ROOT_DIR/services/bpi-service/wms-adapter/target/bpi-wms-adapter-0.1.0-SNAPSHOT-exec.jar"
 
@@ -45,8 +46,10 @@ compose_expand() {
     BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED=false \
     BPI_DATASET_RETENTION_ARCHIVER_ENABLED=false \
     BPI_DATASET_RECOVERY_RECONCILE_STALE=false \
+    BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED=false \
+    BPI_DATASET_MLFLOW_REGISTRAR_ENABLED=false \
         docker compose --env-file "$ENV_FILE" -f "$DEPLOY_DIR/docker-compose.yml" \
-        --profile bpi-catalog "$@"
+        --profile bpi-catalog --profile bpi-ml "$@"
 }
 
 DATABASE_NAME=$(env_value BPI_DATABASE_NAME ft_mes_bpi)
@@ -58,10 +61,13 @@ HEALTH_TIMEOUT_SECONDS=${BPI_RUNTIME_UPGRADE_HEALTH_TIMEOUT_SECONDS:-180}
 MATERIALIZER_DATABASE_PASSWORD=$(env_value BPI_MATERIALIZER_DATABASE_PASSWORD '')
 CATALOG_PUBLISHER_DATABASE_PASSWORD=$(env_value BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD '')
 RETENTION_ARCHIVER_DATABASE_PASSWORD=$(env_value BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD '')
+MLFLOW_REGISTRAR_DATABASE_PASSWORD=$(env_value BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD '')
 POSTGRES_DB=$(env_value POSTGRES_DB postgres)
 MATERIALIZER_IMAGE=$(env_value BPI_DATASET_MATERIALIZER_IMAGE ft-mes-bpi-dataset-materializer:local)
 CATALOG_PUBLISHER_IMAGE=$(env_value BPI_DATASET_CATALOG_PUBLISHER_IMAGE ft-mes-bpi-dataset-catalog-publisher:local)
 RETENTION_ARCHIVER_IMAGE=$(env_value BPI_DATASET_RETENTION_ARCHIVER_IMAGE ft-mes-bpi-dataset-retention-archiver:local)
+MLFLOW_IMAGE=$(env_value BPI_MLFLOW_SERVICE_IMAGE ft-mes-bpi-mlflow:local)
+MLFLOW_REGISTRAR_IMAGE=$(env_value BPI_DATASET_MLFLOW_REGISTRAR_IMAGE ft-mes-bpi-dataset-mlflow-registrar:local)
 
 case "$EXPECTED_VERSION" in
     ''|*[!0-9]*) printf 'ERROR: BPI_EXPECTED_FLYWAY_VERSION must be numeric\n' >&2; exit 1 ;;
@@ -77,7 +83,8 @@ esac
 for worker_secret in \
     "$MATERIALIZER_DATABASE_PASSWORD" \
     "$CATALOG_PUBLISHER_DATABASE_PASSWORD" \
-    "$RETENTION_ARCHIVER_DATABASE_PASSWORD"; do
+    "$RETENTION_ARCHIVER_DATABASE_PASSWORD" \
+    "$MLFLOW_REGISTRAR_DATABASE_PASSWORD"; do
     case "$worker_secret" in
         ''|*change-me*|*dev-only*)
             printf 'ERROR: all BPI worker database passwords must be explicitly configured\n' >&2
@@ -87,7 +94,8 @@ for worker_secret in \
 done
 
 for path in "$MIGRATIONS" "$VERIFY_MIGRATIONS" "$MATERIALIZER_ROLE_SCRIPT" \
-    "$CATALOG_PUBLISHER_ROLE_SCRIPT" "$RETENTION_ARCHIVER_ROLE_SCRIPT"; do
+    "$CATALOG_PUBLISHER_ROLE_SCRIPT" "$RETENTION_ARCHIVER_ROLE_SCRIPT" \
+    "$MLFLOW_REGISTRAR_ROLE_SCRIPT"; do
     test -e "$path" || {
         printf 'ERROR: required release path is missing: %s\n' "$path" >&2
         exit 1
@@ -114,7 +122,9 @@ for disabled_key in \
     BPI_DATASET_CATALOG_PUBLISHER_ENABLED \
     BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED \
     BPI_DATASET_RETENTION_ARCHIVER_ENABLED \
-    BPI_DATASET_RECOVERY_RECONCILE_STALE; do
+    BPI_DATASET_RECOVERY_RECONCILE_STALE \
+    BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED \
+    BPI_DATASET_MLFLOW_REGISTRAR_ENABLED; do
     if [ "$(env_value "$disabled_key" false)" != "false" ]; then
         printf 'ERROR: %s must remain false during expand-only upgrade\n' \
             "$disabled_key" >&2
@@ -129,6 +139,9 @@ materializer_id=$(compose ps -q bpi-dataset-materializer)
 retention_archiver_id=$(docker compose --env-file "$ENV_FILE" \
     -f "$DEPLOY_DIR/docker-compose.yml" --profile bpi-catalog \
     ps -q bpi-dataset-retention-archiver)
+mlflow_registrar_id=$(compose_expand ps -q bpi-dataset-mlflow-registrar)
+mlflow_id=$(compose_expand ps -q bpi-mlflow)
+mlflow_postgres_id=$(compose_expand ps -q bpi-mlflow-postgres)
 if [ -z "$postgres_id" ] || [ -z "$service_id" ]; then
     printf 'ERROR: BPI PostgreSQL and service must be running before an expand-only upgrade\n' >&2
     exit 1
@@ -162,6 +175,16 @@ run_retention_archiver_role_action() {
         -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
         -e "BPI_RETENTION_ARCHIVER_DATABASE_PASSWORD=$RETENTION_ARCHIVER_DATABASE_PASSWORD" \
         "$postgres_id" sh -s -- "$action" <"$RETENTION_ARCHIVER_ROLE_SCRIPT"
+}
+
+run_mlflow_registrar_role_action() {
+    action=$1
+    docker exec -i \
+        -e "POSTGRES_USER=$POSTGRES_USER" \
+        -e "POSTGRES_DB=$POSTGRES_DB" \
+        -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
+        -e "BPI_MLFLOW_REGISTRAR_DATABASE_PASSWORD=$MLFLOW_REGISTRAR_DATABASE_PASSWORD" \
+        "$postgres_id" sh -s -- "$action" <"$MLFLOW_REGISTRAR_ROLE_SCRIPT"
 }
 if [ "$(env_value BPI_WMS_ADAPTER_ENABLED false)" != "false" ]; then
     printf 'ERROR: BPI_WMS_ADAPTER_ENABLED must remain false during expand-only upgrade\n' >&2
@@ -215,6 +238,8 @@ write_report() {
     export MATERIALIZER_IMAGE MATERIALIZER_IMAGE_ID MATERIALIZER_IMAGE_USER
     export CATALOG_PUBLISHER_IMAGE CATALOG_PUBLISHER_IMAGE_ID CATALOG_PUBLISHER_IMAGE_USER
     export RETENTION_ARCHIVER_IMAGE RETENTION_ARCHIVER_IMAGE_ID RETENTION_ARCHIVER_IMAGE_USER
+    export MLFLOW_IMAGE MLFLOW_IMAGE_ID MLFLOW_IMAGE_USER
+    export MLFLOW_REGISTRAR_IMAGE MLFLOW_REGISTRAR_IMAGE_ID MLFLOW_REGISTRAR_IMAGE_USER
     python3 <<'PY'
 import datetime
 import json
@@ -225,6 +250,12 @@ from pathlib import Path
 def optional_int(name):
     value = os.environ.get(name, "")
     return int(value) if value else None
+
+database_roles_verified = os.environ["UPGRADE_PHASE"] in {
+    "MIGRATION_APPLIED",
+    "SERVICES_RECREATED",
+    "COMPLETE",
+}
 
 
 report = {
@@ -271,6 +302,23 @@ report = {
         "runtimeUser": os.environ.get("RETENTION_ARCHIVER_IMAGE_USER") or None,
         "enabledDuringUpgrade": False,
         "recoveryBucketBootstrapEnabledDuringUpgrade": False,
+        "postUpgradeState": "STOPPED",
+    },
+    "mlflowTrackingServer": {
+        "releaseImage": os.environ["MLFLOW_IMAGE"],
+        "releaseImageId": os.environ.get("MLFLOW_IMAGE_ID") or None,
+        "runtimeUser": os.environ.get("MLFLOW_IMAGE_USER") or None,
+        "artifactBootstrapEnabledDuringUpgrade": False,
+        "postUpgradeState": "STOPPED",
+    },
+    "datasetMlflowRegistrar": {
+        "releaseImage": os.environ["MLFLOW_REGISTRAR_IMAGE"],
+        "releaseImageId": os.environ.get("MLFLOW_REGISTRAR_IMAGE_ID") or None,
+        "runtimeUser": os.environ.get("MLFLOW_REGISTRAR_IMAGE_USER") or None,
+        "enabledDuringUpgrade": False,
+        "databaseRole": (
+            "LEAST_PRIVILEGE_VERIFIED" if database_roles_verified else "PENDING"
+        ),
         "postUpgradeState": "STOPPED",
     },
     "wmsAdapter": {
@@ -325,6 +373,15 @@ fi
 if [ -n "$retention_archiver_id" ]; then
     compose_expand stop bpi-dataset-retention-archiver
 fi
+if [ -n "$mlflow_registrar_id" ]; then
+    compose_expand stop bpi-dataset-mlflow-registrar
+fi
+if [ -n "$mlflow_id" ]; then
+    compose_expand stop bpi-mlflow
+fi
+if [ -n "$mlflow_postgres_id" ]; then
+    compose_expand stop bpi-mlflow-postgres
+fi
 
 timestamp=$(date -u +%Y%m%dT%H%M%SZ)
 mkdir -p "$BACKUP_DIR"
@@ -359,10 +416,15 @@ CATALOG_PUBLISHER_IMAGE_ID=
 CATALOG_PUBLISHER_IMAGE_USER=
 RETENTION_ARCHIVER_IMAGE_ID=
 RETENTION_ARCHIVER_IMAGE_USER=
+MLFLOW_IMAGE_ID=
+MLFLOW_IMAGE_USER=
+MLFLOW_REGISTRAR_IMAGE_ID=
+MLFLOW_REGISTRAR_IMAGE_USER=
 write_report PREPARED BACKUP_COMPLETE NOT_RUN
 
 compose_expand build bpi-service bpi-wms-adapter bpi-dataset-materializer \
-    bpi-dataset-catalog-publisher bpi-dataset-retention-archiver
+    bpi-dataset-catalog-publisher bpi-dataset-retention-archiver \
+    bpi-mlflow bpi-dataset-mlflow-registrar
 MATERIALIZER_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$MATERIALIZER_IMAGE")
 MATERIALIZER_IMAGE_USER=$(docker image inspect --format '{{.Config.User}}' "$MATERIALIZER_IMAGE")
 if [ "$MATERIALIZER_IMAGE_USER" != "10001:10001" ]; then
@@ -384,11 +446,26 @@ if [ "$RETENTION_ARCHIVER_IMAGE_USER" != "10003:10003" ]; then
         "$RETENTION_ARCHIVER_IMAGE_USER" >&2
     exit 1
 fi
+MLFLOW_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$MLFLOW_IMAGE")
+MLFLOW_IMAGE_USER=$(docker image inspect --format '{{.Config.User}}' "$MLFLOW_IMAGE")
+if [ "$MLFLOW_IMAGE_USER" != "10004:10004" ]; then
+    printf 'ERROR: BPI MLflow tracking server must run as 10004:10004, found %s\n' \
+        "$MLFLOW_IMAGE_USER" >&2
+    exit 1
+fi
+MLFLOW_REGISTRAR_IMAGE_ID=$(docker image inspect --format '{{.Id}}' "$MLFLOW_REGISTRAR_IMAGE")
+MLFLOW_REGISTRAR_IMAGE_USER=$(docker image inspect --format '{{.Config.User}}' "$MLFLOW_REGISTRAR_IMAGE")
+if [ "$MLFLOW_REGISTRAR_IMAGE_USER" != "10005:10005" ]; then
+    printf 'ERROR: BPI MLflow registrar must run as 10005:10005, found %s\n' \
+        "$MLFLOW_REGISTRAR_IMAGE_USER" >&2
+    exit 1
+fi
 write_report IN_PROGRESS ARTIFACTS_BUILT NOT_RUN
 
 run_materializer_role_action provision
 run_catalog_publisher_role_action provision
 run_retention_archiver_role_action provision
+run_mlflow_registrar_role_action provision
 compose_expand up --no-deps --force-recreate --abort-on-container-exit \
     --exit-code-from bpi-migrate bpi-migrate
 
@@ -404,6 +481,8 @@ run_catalog_publisher_role_action grant
 run_catalog_publisher_role_action verify
 run_retention_archiver_role_action grant
 run_retention_archiver_role_action verify
+run_mlflow_registrar_role_action grant
+run_mlflow_registrar_role_action verify
 write_report IN_PROGRESS MIGRATION_APPLIED NOT_RUN
 
 compose_expand up -d --no-deps --force-recreate bpi-service
@@ -420,10 +499,12 @@ for disabled_service in \
     bpi-dataset-catalog-publisher \
     bpi-dataset-retention-archiver \
     bpi-polaris \
-    bpi-polaris-postgres; do
-    if [ -n "$(docker compose --env-file "$ENV_FILE" \
-        -f "$DEPLOY_DIR/docker-compose.yml" --profile bpi-catalog \
-        ps -q "$disabled_service")" ]; then
+    bpi-polaris-postgres \
+    bpi-dataset-mlflow-registrar \
+    bpi-mlflow \
+    bpi-mlflow-postgres \
+    bpi-mlflow-artifact-bootstrap; do
+    if [ -n "$(compose_expand ps -q "$disabled_service")" ]; then
         printf 'ERROR: %s must remain stopped after expand-only upgrade\n' \
             "$disabled_service" >&2
         exit 1

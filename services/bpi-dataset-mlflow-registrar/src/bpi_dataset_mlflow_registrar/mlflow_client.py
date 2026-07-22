@@ -39,7 +39,7 @@ class MlflowTrackingClient:
 
     def ping(self) -> None:
         try:
-            self._request("GET", "/health")
+            self._request("GET", "/health", expect_json=False)
         except _HttpFailure as exception:
             raise MlflowTransportError(
                 f"MLflow health endpoint returned HTTP {exception.status}"
@@ -306,6 +306,7 @@ class MlflowTrackingClient:
         path: str,
         payload: dict[str, Any] | None = None,
         query: dict[str, str] | None = None,
+        expect_json: bool = True,
     ) -> dict[str, Any]:
         url = f"{self._base_url}{path}"
         if query:
@@ -330,6 +331,8 @@ class MlflowTrackingClient:
             raise MlflowTransportError(
                 f"MLflow request transport failed: {type(exception).__name__}"
             ) from exception
+        if not expect_json:
+            return {}
         if not raw:
             return {}
         try:
