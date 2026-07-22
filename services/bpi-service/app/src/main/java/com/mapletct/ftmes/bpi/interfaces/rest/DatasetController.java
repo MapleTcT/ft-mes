@@ -2,8 +2,10 @@ package com.mapletct.ftmes.bpi.interfaces.rest;
 
 import com.mapletct.ftmes.bpi.application.ActorContextFactory;
 import com.mapletct.ftmes.bpi.application.CommandResult;
+import com.mapletct.ftmes.bpi.application.DatasetCatalogPublicationService;
 import com.mapletct.ftmes.bpi.application.DatasetMaterializationService;
 import com.mapletct.ftmes.bpi.application.DatasetService;
+import com.mapletct.ftmes.bpi.domain.DatasetCatalogPublicationView;
 import com.mapletct.ftmes.bpi.domain.DatasetDefinitionView;
 import com.mapletct.ftmes.bpi.domain.DatasetMaterializationView;
 import com.mapletct.ftmes.bpi.domain.DatasetSnapshotView;
@@ -30,14 +32,17 @@ public class DatasetController {
     private final ActorContextFactory actorContextFactory;
     private final DatasetService service;
     private final DatasetMaterializationService materializationService;
+    private final DatasetCatalogPublicationService catalogPublicationService;
 
     public DatasetController(
             ActorContextFactory actorContextFactory,
             DatasetService service,
-            DatasetMaterializationService materializationService) {
+            DatasetMaterializationService materializationService,
+            DatasetCatalogPublicationService catalogPublicationService) {
         this.actorContextFactory = actorContextFactory;
         this.service = service;
         this.materializationService = materializationService;
+        this.catalogPublicationService = catalogPublicationService;
     }
 
     @GetMapping("/bpi/v1/datasets")
@@ -122,6 +127,52 @@ public class DatasetController {
             HttpServletRequest request) {
         return accepted(materializationService.retry(
                 actorContextFactory.from(jwt), materializationId, idempotencyKey,
+                ifMatch, command, traceId(request)), request);
+    }
+
+    @PostMapping("/bpi/v1/dataset-materializations/{materializationId}/catalog-publications")
+    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<DatasetCatalogPublicationView>> requestCatalogPublication(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID materializationId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        return accepted(catalogPublicationService.request(
+                actorContextFactory.from(jwt), materializationId, idempotencyKey,
+                ifMatch, command, traceId(request)), request);
+    }
+
+    @GetMapping("/bpi/v1/dataset-materializations/{materializationId}/catalog-publications")
+    public ApiResponse<DatasetCatalogPublicationView> getCatalogPublicationForMaterialization(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID materializationId,
+            HttpServletRequest request) {
+        return ApiResponse.of(catalogPublicationService.getForMaterialization(
+                actorContextFactory.from(jwt), materializationId), request);
+    }
+
+    @GetMapping("/bpi/v1/dataset-catalog-publications/{publicationId}")
+    public ApiResponse<DatasetCatalogPublicationView> getCatalogPublication(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID publicationId,
+            HttpServletRequest request) {
+        return ApiResponse.of(catalogPublicationService.get(
+                actorContextFactory.from(jwt), publicationId), request);
+    }
+
+    @PostMapping("/bpi/v1/dataset-catalog-publications/{publicationId}/retry")
+    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<DatasetCatalogPublicationView>> retryCatalogPublication(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID publicationId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        return accepted(catalogPublicationService.retry(
+                actorContextFactory.from(jwt), publicationId, idempotencyKey,
                 ifMatch, command, traceId(request)), request);
     }
 

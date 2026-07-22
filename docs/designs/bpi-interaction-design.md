@@ -336,11 +336,20 @@ manifest 自身继续保留 Phase 3A 的不可变边界事实：`MANIFEST_ONLY /
 `icebergReady=false`、`mlflowRegistered=false`、`modelTrained=false`。Phase 3B-A 在这个事实之外增加独立的
 Parquet 物化任务，按 `QUEUED -> WRITING -> READY/FAILED` 推进。数据工程师可从 `MANIFEST_READY` 快照请求生成；
 页面轮询任务，失败时允许按 revision 重新排队，READY 后显示带 `versionId` 的精确对象 URI、SHA-256、行数、
-字节数和 schema。页面仍必须把 Iceberg、MLflow 和模型训练显示为 `NOT_STARTED`，不得把 Parquet READY
-解释成训练链路完成。确定性模拟器只验证交互与契约，模拟 URI/SHA 不是 MinIO 真实落物证据。
+字节数和 schema。Phase 3B-B 再增加完全独立的 catalog publication：只有已校验、非空的 Parquet READY
+任务才能请求发布；状态按 `QUEUED -> COMMITTING -> VERIFYING -> READY/FAILED` 推进。READY 显示 Polaris
+catalog、Iceberg table identifier、snapshot ID、metadata location、schema ID、partition spec ID、源/回读行数
+和语义 checksum；失败显示错误码并允许按 revision 重试。页面不得从 Parquet READY 推导 Iceberg READY，
+也不得在 publisher 健康但任务仍未对账时显示成功。
+
+MLflow 和模型训练继续显示为 `NOT_STARTED`。确定性模拟器只验证交互与契约，模拟 URI/SHA/snapshot
+不是 MinIO 或 Polaris 真实证据。目标 Phase 3B-B 后端检查点已经闭合真实 snapshot、time-travel、失败重试、
+重启和清理；真实 ADP 页面 V28 操作及 post-commit fencing 故障注入仍待验收。
 
 **主要 API：** `listDatasets`、`createDatasetDefinition`、`createDatasetSnapshot`、`getDatasetSnapshot`、
-`requestDatasetMaterialization`、`getDatasetMaterialization`、`retryDatasetMaterialization`。
+`requestDatasetMaterialization`、`getDatasetMaterialization`、`retryDatasetMaterialization`、
+`requestDatasetCatalogPublication`、`getDatasetCatalogPublicationForMaterialization`、`getDatasetCatalogPublication`、
+`retryDatasetCatalogPublication`。
 
 ### 5.11 集成运行 `/bpi/integrations`
 

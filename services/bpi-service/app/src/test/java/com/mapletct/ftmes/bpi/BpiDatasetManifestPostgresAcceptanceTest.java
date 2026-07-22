@@ -160,6 +160,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
     void cleanupMarker() {
         if (tenantId == null) return;
         if (Boolean.parseBoolean(env("BPI_TEST_KEEP_MARKER", "false"))) return;
+        cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_catalog_publications WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_materializations WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_snapshot_samples WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_snapshots WHERE tenant_id = ?", tenantId);
@@ -555,6 +556,10 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.latestMaterialization.state").value("READY"))
                 .andExpect(jsonPath("$.data.latestMaterialization.contentSha256")
                         .value(contentSha));
+
+        proveCatalogPublicationLifecycle(
+                materializationId, datasetId, firstSnapshotId, firstChecksum, contentSha);
+
         if (externalMaterializer) {
             assertThat(jdbc.queryForObject("""
                     SELECT count(*) FROM bpi.bpi_audit_events
@@ -591,6 +596,282 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 """, Long.class, tenantId, firstSnapshotId, secondSnapshotId)).isEqualTo(2L);
     }
 
+    private void proveCatalogPublicationLifecycle(
+            UUID materializationId,
+            UUID datasetId,
+            UUID snapshotId,
+            String manifestChecksum,
+            String sourceContentSha256) throws Exception {
+        long materializationRevision = jdbc.queryForObject("""
+                SELECT revision FROM bpi.bpi_dataset_materializations
+                 WHERE tenant_id = ? AND id = ?
+                """, Long.class, tenantId, materializationId);
+        byte[] requestBody = objectMapper.writeValueAsBytes(Map.of(
+                "reason", "Publish the verified Parquet version to the Iceberg catalog"));
+
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-materializations/{id}/catalog-publications",
+                        materializationId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-materializations/{id}/catalog-publications",
+                        materializationId)
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .header("Idempotency-Key", "catalog-viewer-denied-" + tenantId)
+                        .header("If-Match", materializationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-materializations/{id}/catalog-publications",
+                        materializationId)
+                        .header("Authorization", "Bearer " + wrongScopeToken)
+                        .header("Idempotency-Key", "catalog-scope-denied-" + tenantId)
+                        .header("If-Match", materializationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-materializations/{id}/catalog-publications",
+                        materializationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "catalog-stale-" + tenantId)
+                        .header("If-Match", materializationRevision - 1)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isConflict());
+
+        String requestKey = "catalog-request-" + tenantId;
+        MvcResult requestResult = mockMvc.perform(post(
+                        "/bpi/v1/dataset-materializations/{id}/catalog-publications",
+                        materializationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", requestKey)
+                        .header("If-Match", materializationRevision)
+                        .header("X-Trace-Id", tenantId + "_CATALOG")
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("QUEUED"))
+                .andExpect(jsonPath("$.data.revision").value(1))
+                .andExpect(jsonPath("$.data.materializationId")
+                        .value(materializationId.toString()))
+                .andExpect(jsonPath("$.data.snapshotId").value(snapshotId.toString()))
+                .andExpect(jsonPath("$.data.datasetId").value(datasetId.toString()))
+                .andExpect(jsonPath("$.data.catalogName").value("ft_mes_bpi"))
+                .andExpect(jsonPath("$.data.publisherVersion")
+                        .value("bpi-dataset-catalog-publisher/0.1.0"))
+                .andExpect(jsonPath("$.data.manifestChecksum").value(manifestChecksum))
+                .andExpect(jsonPath("$.data.sourceContentSha256")
+                        .value(sourceContentSha256))
+                .andExpect(jsonPath("$.data.icebergSnapshotId").doesNotExist())
+                .andReturn();
+        UUID publicationId = UUID.fromString(
+                response(requestResult).path("data").path("id").asText());
+
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-materializations/{id}/catalog-publications",
+                        materializationId)
+                        .header("Authorization", "Bearer " + wrongScopeToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist());
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-materializations/{id}/catalog-publications",
+                        materializationId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(publicationId.toString()))
+                .andExpect(jsonPath("$.data.state").value("QUEUED"));
+
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-materializations/{id}/catalog-publications",
+                        materializationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", requestKey)
+                        .header("If-Match", materializationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.id").value(publicationId.toString()));
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-materializations/{id}/catalog-publications",
+                        materializationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "catalog-duplicate-" + tenantId)
+                        .header("If-Match", materializationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isConflict());
+
+        mockMvc.perform(get("/bpi/v1/dataset-catalog-publications/{id}", publicationId)
+                        .header("Authorization", "Bearer " + wrongScopeToken))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/bpi/v1/dataset-catalog-publications/{id}", publicationId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("QUEUED"));
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-catalog-publications/{id}/retry", publicationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "catalog-premature-retry-" + tenantId)
+                        .header("If-Match", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of(
+                                "reason", "A queued publication cannot be retried"))))
+                .andExpect(status().isConflict());
+
+        if (Boolean.parseBoolean(env("BPI_TEST_EXTERNAL_CATALOG_PUBLISHER", "false"))) {
+            Map<String, Object> publication = awaitExternalCatalogPublication(publicationId);
+            String snapshotIdText = (String) publication.get("iceberg_snapshot_id");
+            assertThat(snapshotIdText).isNotBlank().matches("-?[0-9]+");
+            assertThat(publication)
+                    .containsEntry("verified_row_count", 1L)
+                    .containsEntry("catalog_snapshot_verified", "true")
+                    .containsEntry("source_version_verified", "true")
+                    .containsEntry("manifest_checksum_verified", "true")
+                    .containsEntry("iceberg_ready", "true")
+                    .containsEntry("mlflow_registered", "false")
+                    .containsEntry("model_trained", "false");
+            assertThat((String) publication.get("semantic_checksum")).hasSize(64);
+            assertThat((String) publication.get("iceberg_metadata_location"))
+                    .startsWith("s3://bpi-iceberg-warehouse/warehouse/")
+                    .endsWith(".metadata.json");
+            assertThat((String) publication.get("table_identifier"))
+                    .startsWith("ft_mes_bpi.bpi_training.");
+
+            mockMvc.perform(get("/bpi/v1/dataset-catalog-publications/{id}", publicationId)
+                            .header("Authorization", "Bearer " + viewerToken))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.state").value("READY"))
+                    .andExpect(jsonPath("$.data.icebergSnapshotId").value(snapshotIdText))
+                    .andExpect(jsonPath("$.data.verifiedRowCount").value(1))
+                    .andExpect(jsonPath("$.data.catalogMetadata.catalogSnapshotVerified")
+                            .value(true))
+                    .andExpect(jsonPath("$.data.catalogMetadata.mlflowRegistered")
+                            .value(false));
+            assertThat(jdbc.queryForObject("""
+                    SELECT count(*) FROM bpi.bpi_audit_events
+                     WHERE tenant_id = ? AND object_id = ?
+                       AND action IN ('DATASET_CATALOG_PUBLICATION_COMMITTING',
+                                      'DATASET_CATALOG_PUBLICATION_VERIFYING',
+                                      'DATASET_CATALOG_PUBLICATION_READY')
+                    """, Long.class, tenantId, publicationId)).isEqualTo(3L);
+            return;
+        }
+
+        UUID failedClaim = UUID.randomUUID();
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_catalog_publications
+                   SET state = 'COMMITTING', revision = revision + 1,
+                       started_at = now(), claim_token = ?, claimed_at = now(),
+                       attempt_count = attempt_count + 1
+                 WHERE tenant_id = ? AND id = ? AND state = 'QUEUED'
+                """, failedClaim, tenantId, publicationId)).isEqualTo(1);
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_catalog_publications
+                   SET state = 'FAILED', revision = revision + 1,
+                       completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                       failure_code = 'POLARIS_UNAVAILABLE',
+                       failure_detail = 'Acceptance-injected transient catalog failure'
+                 WHERE tenant_id = ? AND id = ? AND state = 'COMMITTING'
+                   AND claim_token = ?
+                """, tenantId, publicationId, failedClaim)).isEqualTo(1);
+
+        byte[] retryBody = objectMapper.writeValueAsBytes(Map.of(
+                "reason", "Retry after the transient catalog failure"));
+        String retryKey = "catalog-retry-" + tenantId;
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-catalog-publications/{id}/retry", publicationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", retryKey)
+                        .header("If-Match", 3)
+                        .contentType(MediaType.APPLICATION_JSON).content(retryBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("QUEUED"))
+                .andExpect(jsonPath("$.data.revision").value(4))
+                .andExpect(jsonPath("$.data.failureCode").doesNotExist());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-catalog-publications/{id}/retry", publicationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", retryKey)
+                        .header("If-Match", 3)
+                        .contentType(MediaType.APPLICATION_JSON).content(retryBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.revision").value(4));
+
+        UUID readyClaim = UUID.randomUUID();
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_catalog_publications
+                   SET state = 'COMMITTING', revision = revision + 1,
+                       started_at = now(), claim_token = ?, claimed_at = now(),
+                       attempt_count = attempt_count + 1
+                 WHERE tenant_id = ? AND id = ? AND state = 'QUEUED'
+                """, readyClaim, tenantId, publicationId)).isEqualTo(1);
+        long icebergSnapshotId = 792644343122L;
+        String metadataLocation = "s3://bpi-iceberg/warehouse/acceptance/metadata/v1.metadata.json";
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_catalog_publications
+                   SET state = 'VERIFYING', revision = revision + 1,
+                       iceberg_snapshot_id = ?, iceberg_metadata_location = ?,
+                       iceberg_schema_id = 0, iceberg_partition_spec_id = 0
+                 WHERE tenant_id = ? AND id = ? AND state = 'COMMITTING'
+                   AND claim_token = ?
+                """, icebergSnapshotId, metadataLocation,
+                tenantId, publicationId, readyClaim)).isEqualTo(1);
+        assertThatThrownBy(() -> jdbc.update("""
+                UPDATE bpi.bpi_dataset_catalog_publications
+                   SET state = 'READY', revision = revision + 1,
+                       completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                       verified_row_count = source_row_count + 1,
+                       semantic_checksum = ?,
+                       catalog_metadata = '{"catalogSnapshotVerified":true}'::jsonb
+                 WHERE tenant_id = ? AND id = ? AND state = 'VERIFYING'
+                   AND claim_token = ?
+                """, "e".repeat(64), tenantId, publicationId, readyClaim))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("chk_bpi_dataset_catalog_publication_lifecycle");
+        String semanticChecksum = "e".repeat(64);
+        assertThat(jdbc.update("""
+                UPDATE bpi.bpi_dataset_catalog_publications
+                   SET state = 'READY', revision = revision + 1,
+                       completed_at = now(), claim_token = NULL, claimed_at = NULL,
+                       verified_row_count = source_row_count,
+                       semantic_checksum = ?,
+                       catalog_metadata = CAST(? AS jsonb)
+                 WHERE tenant_id = ? AND id = ? AND state = 'VERIFYING'
+                   AND claim_token = ?
+                """, semanticChecksum,
+                "{\"catalogSnapshotVerified\":true,\"sourceVersionVerified\":true}",
+                tenantId, publicationId, readyClaim)).isEqualTo(1);
+
+        mockMvc.perform(get("/bpi/v1/dataset-catalog-publications/{id}", publicationId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("READY"))
+                .andExpect(jsonPath("$.data.revision").value(7))
+                .andExpect(jsonPath("$.data.attemptCount").value(2))
+                .andExpect(jsonPath("$.data.icebergSnapshotId")
+                        .value(String.valueOf(icebergSnapshotId)))
+                .andExpect(jsonPath("$.data.icebergMetadataLocation")
+                        .value(metadataLocation))
+                .andExpect(jsonPath("$.data.verifiedRowCount").value(1))
+                .andExpect(jsonPath("$.data.semanticChecksum").value(semanticChecksum))
+                .andExpect(jsonPath("$.data.catalogMetadata.catalogSnapshotVerified")
+                        .value(true));
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ? AND object_id = ?
+                   AND action IN ('DATASET_CATALOG_PUBLICATION_QUEUED',
+                                  'DATASET_CATALOG_PUBLICATION_RETRIED')
+                """, Long.class, tenantId, publicationId)).isEqualTo(2L);
+        assertThatThrownBy(() -> jdbc.update("""
+                UPDATE bpi.bpi_dataset_catalog_publications
+                   SET request_reason = 'mutated'
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, publicationId))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("immutable");
+    }
+
     private Map<String, Object> awaitExternalMaterialization(UUID materializationId)
             throws InterruptedException {
         Instant deadline = Instant.now().plusSeconds(
@@ -621,6 +902,41 @@ class BpiDatasetManifestPostgresAcceptanceTest {
             Thread.sleep(250);
         }
         throw new AssertionError("External materializer did not reach READY before timeout");
+    }
+
+    private Map<String, Object> awaitExternalCatalogPublication(UUID publicationId)
+            throws InterruptedException {
+        Instant deadline = Instant.now().plusSeconds(
+                Integer.parseInt(env("BPI_TEST_CATALOG_PUBLISHER_TIMEOUT_SECONDS", "120")));
+        while (Instant.now().isBefore(deadline)) {
+            Map<String, Object> publication = jdbc.queryForMap("""
+                    SELECT state, table_identifier, iceberg_snapshot_id::text,
+                           iceberg_metadata_location, iceberg_schema_id,
+                           iceberg_partition_spec_id, verified_row_count,
+                           semantic_checksum,
+                           catalog_metadata ->> 'catalogSnapshotVerified'
+                               AS catalog_snapshot_verified,
+                           catalog_metadata ->> 'sourceVersionVerified'
+                               AS source_version_verified,
+                           catalog_metadata ->> 'manifestChecksumVerified'
+                               AS manifest_checksum_verified,
+                           catalog_metadata ->> 'icebergReady' AS iceberg_ready,
+                           catalog_metadata ->> 'mlflowRegistered' AS mlflow_registered,
+                           catalog_metadata ->> 'modelTrained' AS model_trained,
+                           failure_code, failure_detail
+                      FROM bpi.bpi_dataset_catalog_publications
+                     WHERE tenant_id = ? AND id = ?
+                    """, tenantId, publicationId);
+            String state = (String) publication.get("state");
+            if ("READY".equals(state)) return publication;
+            if ("FAILED".equals(state)) {
+                throw new AssertionError("External catalog publisher failed: "
+                        + publication.get("failure_code") + " "
+                        + publication.get("failure_detail"));
+            }
+            Thread.sleep(250);
+        }
+        throw new AssertionError("External catalog publisher did not reach READY before timeout");
     }
 
     private void insertReviewedBatch(

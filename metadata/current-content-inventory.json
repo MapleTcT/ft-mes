@@ -587,12 +587,12 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 67,
+    "composeServiceCount": 74,
     "composeServiceKindCounts": {
       "business-runtime": 20,
       "infrastructure": 11,
       "platform-runtime": 28,
-      "support-runtime": 8
+      "support-runtime": 15
     },
     "composeServices": [
       {
@@ -647,6 +647,41 @@
       },
       {
         "service": "bpi-dataset-minio-bootstrap",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-iceberg-warehouse-bootstrap",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-polaris-postgres",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-polaris-bootstrap-check",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-polaris-bootstrap",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-polaris",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-polaris-catalog-bootstrap",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-dataset-catalog-publisher",
         "jarPath": "",
         "kind": "support-runtime"
       },

@@ -97,6 +97,15 @@ version and verifies SHA-256 before publishing `READY`. Snapshot reads project t
 mutating the V26 manifest. Iceberg, MLflow and model readiness remain `NOT_STARTED`; the worker and all
 Phase 2 integration switches remain disabled by default.
 
+Flyway V28 adds the Phase 3B-B Iceberg catalog-publication boundary without mutating either the V26
+manifest or the V27 Parquet fact. Authorized engineers can queue one logical publication for a verified,
+non-empty `READY` materialization, list/get the scoped task and retry only a `FAILED` revision. A separate
+Python publisher re-reads the exact MinIO object version, verifies its content contract, commits an Iceberg
+v2 snapshot through the Apache Polaris REST catalog, then time-travel scans that exact snapshot before
+publishing `READY`. The catalog task persists the table identifier, snapshot ID, metadata location, schema
+and partition IDs, source/verified row counts and semantic checksum. Publisher, Polaris and bootstrap
+services remain disabled by default; MLflow and model readiness remain `NOT_STARTED`.
+
 ```bash
 make bpi-service-test
 ```
@@ -131,8 +140,8 @@ JAVA_HOME=/path/to/jdk17 mvn -f services/bpi-service/pom.xml -pl :bpi-service -a
   -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
-The focused dataset acceptance uses a fresh PostgreSQL schema migrated through V27 and covers both
-the Phase 3A manifest facts and Phase 3B-A task state machine:
+The focused dataset acceptance uses a fresh PostgreSQL schema migrated through V28 and covers the
+Phase 3A manifest facts, Phase 3B-A task state machine and Phase 3B-B catalog-publication contract:
 
 ```bash
 JAVA_HOME=/path/to/jdk17 BPI_TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/ft_mes_bpi_test \
@@ -147,6 +156,7 @@ requirements (or the worker Docker image):
 
 ```bash
 make bpi-dataset-materializer-test
+make bpi-dataset-catalog-publisher-test
 ```
 
 The focused data-quality acceptance uses real PostgreSQL and Embedded Kafka:

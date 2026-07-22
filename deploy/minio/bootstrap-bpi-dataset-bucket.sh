@@ -58,4 +58,37 @@ mc admin policy create bpi-minio bpi-dataset-materializer \
 mc admin policy attach bpi-minio bpi-dataset-materializer \
     --user "$BPI_DATASET_MINIO_ACCESS_KEY"
 
+if [ "${BPI_DATASET_SOURCE_READER_ENABLED:-false}" = "true" ]; then
+    : "${BPI_DATASET_SOURCE_READER_ACCESS_KEY:?BPI_DATASET_SOURCE_READER_ACCESS_KEY is required}"
+    : "${BPI_DATASET_SOURCE_READER_SECRET_KEY:?BPI_DATASET_SOURCE_READER_SECRET_KEY is required}"
+    if [ "$BPI_DATASET_SOURCE_READER_ACCESS_KEY" = "$MINIO_ROOT_USER" ] \
+       || [ "$BPI_DATASET_SOURCE_READER_ACCESS_KEY" = "$BPI_DATASET_MINIO_ACCESS_KEY" ] \
+       || [ "$BPI_DATASET_SOURCE_READER_SECRET_KEY" = "$MINIO_ROOT_PASSWORD" ] \
+       || [ "$BPI_DATASET_SOURCE_READER_SECRET_KEY" = "$BPI_DATASET_MINIO_SECRET_KEY" ]; then
+        printf 'ERROR: catalog source-reader credentials must be distinct\n' >&2
+        exit 1
+    fi
+    if ! mc admin user info bpi-minio "$BPI_DATASET_SOURCE_READER_ACCESS_KEY" >/dev/null 2>&1; then
+        mc admin user add bpi-minio \
+            "$BPI_DATASET_SOURCE_READER_ACCESS_KEY" \
+            "$BPI_DATASET_SOURCE_READER_SECRET_KEY"
+    fi
+    while IFS= read -r policy_line || [ -n "$policy_line" ]; do
+        case "$policy_line" in
+            *__BUCKET__*)
+                policy_prefix=${policy_line%%__BUCKET__*}
+                policy_suffix=${policy_line#*__BUCKET__}
+                printf '%s%s%s\n' "$policy_prefix" "$BPI_DATASET_MINIO_BUCKET" "$policy_suffix"
+                ;;
+            *)
+                printf '%s\n' "$policy_line"
+                ;;
+        esac
+    done </work/source-reader-policy.json >/tmp/bpi-dataset-catalog-source-reader-policy.json
+    mc admin policy create bpi-minio bpi-dataset-catalog-source-reader \
+        /tmp/bpi-dataset-catalog-source-reader-policy.json
+    mc admin policy attach bpi-minio bpi-dataset-catalog-source-reader \
+        --user "$BPI_DATASET_SOURCE_READER_ACCESS_KEY"
+fi
+
 printf 'BPI private dataset bucket bootstrap: PASS\n'

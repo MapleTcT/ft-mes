@@ -1410,6 +1410,76 @@ test('dataset manifests stay immutable while versioned Parquet materialization i
   assert.equal(result.json.data.manifest.phaseBoundary.mlflowRegistered, false);
   assert.equal(result.json.data.manifest.phaseBoundary.modelTrained, false);
 
+  result = await request('GET', `/bpi/v1/dataset-materializations/${materializationId}/catalog-publications`);
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data, null);
+
+  const publicationHeaders = commandHeaders('dataset-catalog-publication-0001', materialized.revision);
+  const publicationBody = { reason: '把精确 Parquet 版本发布到 Iceberg REST Catalog' };
+  result = await request('POST', `/bpi/v1/dataset-materializations/${materializationId}/catalog-publications`, {
+    headers: publicationHeaders,
+    body: publicationBody,
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'QUEUED');
+  assert.equal(result.json.data.sourceContentSha256, materialized.contentSha256);
+  assert.equal(result.json.data.sourceObjectVersionId, materialized.artifactMetadata.objectVersionId);
+  const publicationId = result.json.data.id;
+  const queuedPublicationResponse = result.json;
+
+  result = await request('POST', `/bpi/v1/dataset-materializations/${materializationId}/catalog-publications`, {
+    headers: publicationHeaders,
+    body: publicationBody,
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, queuedPublicationResponse);
+
+  result = await request('GET', `/bpi/v1/dataset-materializations/${materializationId}/catalog-publications`);
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.id, publicationId);
+  assert.equal(result.json.data.state, 'QUEUED');
+
+  result = await request('GET', `/bpi/v1/dataset-catalog-publications/${publicationId}`);
+  assert.equal(result.json.data.state, 'COMMITTING');
+  assert.equal(result.json.data.revision, 2);
+  assert.equal(result.json.data.attemptCount, 1);
+
+  result = await request('POST', '/__simulation/fail-dataset-catalog-publication', {
+    body: {
+      publicationId,
+      failureCode: 'SIMULATED_POLARIS_TIMEOUT',
+      failureDetail: '模拟 Polaris 目录提交超时，用于失败重排队验收。',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'FAILED');
+  assert.equal(result.json.data.revision, 3);
+
+  const publicationRetryHeaders = commandHeaders('dataset-catalog-publication-retry-0002', 3);
+  result = await request('POST', `/bpi/v1/dataset-catalog-publications/${publicationId}/retry`, {
+    headers: publicationRetryHeaders,
+    body: { reason: 'Polaris 恢复后重新排队并复验目录快照' },
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'QUEUED');
+  assert.equal(result.json.data.revision, 4);
+
+  result = await request('GET', `/bpi/v1/dataset-catalog-publications/${publicationId}`);
+  assert.equal(result.json.data.state, 'COMMITTING');
+  result = await request('GET', `/bpi/v1/dataset-catalog-publications/${publicationId}`);
+  assert.equal(result.json.data.state, 'VERIFYING');
+  result = await request('GET', `/bpi/v1/dataset-catalog-publications/${publicationId}`);
+  const published = result.json.data;
+  assert.equal(published.state, 'READY');
+  assert.equal(published.revision, 7);
+  assert.equal(published.attemptCount, 2);
+  assert.equal(published.icebergSnapshotId, '9223372036854775001');
+  assert.equal(published.verifiedRowCount, materialized.rowCount);
+  assert.equal(published.catalogMetadata.catalogSnapshotVerified, true);
+  assert.equal(published.catalogMetadata.sourceVersionVerified, true);
+  assert.match(published.semanticChecksum, /^[a-f0-9]{64}$/);
+  assert.match(published.tableIdentifier, /^ft_mes_bpi\.bpi_training\.tenant_[a-f0-9]{16}\.dataset_[a-f0-9]+$/);
+
   result = await request('POST', `/bpi/v1/dataset-materializations/${materializationId}/retry`, {
     headers: commandHeaders('dataset-materialization-ready-retry-0003', materialized.revision),
     body: { reason: 'READY 对象必须保持不可变，禁止再次排队' },

@@ -8,6 +8,12 @@
 
 2026-06-16 复确认：本项目当前验收口径仍以真实前端功能测试和 PostgreSQL 落库验收为最高优先级；静态检查、治理文档、接口 200、Mapper 推断和页面可打开都只能作为辅助证据，不能替代真实业务动作验收。
 
+2026-07-22 BPI Phase 3B-B 补充边界：V28 已完成目标 PostgreSQL、MinIO 精确对象、Polaris 持久
+metastore、Iceberg snapshot/time-travel、失败重试、重启幂等和清理的后端检查点；由于业务发布态仍是
+V27，真实 `/bpi/#/datasets` 页面 V28 操作和 post-commit fencing 故障注入未执行，所以总状态保持
+`PARTIAL`，不得把后端检查点改写成页面或产品全量 PASS。证据为
+`metadata/bpi-dataset-catalog-publication-acceptance.json`。
+
 这条指令已经固化为项目级规则：后续不能把工作重心降级为继续补治理层、只跑静态检查、只做代码推断或只写报告。前端、后端、PostgreSQL 任一环节启动失败时，启动失败本身就是最高优先级阻断项；不能因为启动失败就跳到写文档结束。
 
 因此后续所有执行线程必须先按功能验收优先推进：

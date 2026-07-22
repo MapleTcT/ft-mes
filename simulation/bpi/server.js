@@ -13,6 +13,8 @@ const DATASET_SPLIT_POLICY = 'PRODUCTION_TIME';
 const DATASET_ARTIFACT_SCHEMA_VERSION = 'bpi.dataset-parquet.v1';
 const DATASET_MATERIALIZER_VERSION = 'bpi-dataset-materializer/0.1.0';
 const DATASET_OBJECT_BUCKET = 'bpi-datasets';
+const DATASET_CATALOG_NAME = 'ft_mes_bpi';
+const DATASET_CATALOG_PUBLISHER_VERSION = 'bpi-dataset-catalog-publisher/0.1.0';
 const DATASET_FEATURE_REFS = new Set([
   'batch.order_id', 'batch.material_code', 'batch.stage_code', 'batch.quantity_unit',
   'rule.version_id', 'topology.version_id', 'point_catalog.snapshot_id',
@@ -756,6 +758,8 @@ function prepareDatasetManifestAcceptance(state) {
   state.pendingDatasetSnapshotIds = new Set();
   state.datasetMaterializations = [];
   state.pendingDatasetMaterializationIds = new Set();
+  state.datasetCatalogPublications = [];
+  state.pendingDatasetCatalogPublicationIds = new Set();
   state.idempotency = new Map();
   return { runId, ruleVersionId: state.rule.id, preparedReviewCount: state.shadowRunReviews.length };
 }
@@ -995,6 +999,58 @@ function progressDatasetMaterialization(state, materialization) {
     return;
   }
   if (materialization.state === 'WRITING') completeDatasetMaterialization(state, materialization);
+}
+
+function latestDatasetCatalogPublication(state, materializationId) {
+  return state.datasetCatalogPublications
+    .filter((item) => item.materializationId === materializationId
+      && item.catalogName === DATASET_CATALOG_NAME
+      && item.publisherVersion === DATASET_CATALOG_PUBLISHER_VERSION)
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt)
+      || right.id.localeCompare(left.id))[0] || null;
+}
+
+function completeDatasetCatalogPublication(state, publication) {
+  publication.state = 'READY';
+  publication.revision += 1;
+  publication.completedAt = FIXED_TIME;
+  publication.verifiedRowCount = publication.sourceRowCount;
+  publication.semanticChecksum = sha256({
+    tableIdentifier: publication.tableIdentifier,
+    icebergSnapshotId: publication.icebergSnapshotId,
+    sourceContentSha256: publication.sourceContentSha256,
+    sourceObjectVersionId: publication.sourceObjectVersionId,
+    rowCount: publication.sourceRowCount,
+  });
+  publication.catalogMetadata = {
+    catalogSnapshotVerified: true,
+    sourceVersionVerified: true,
+    simulationOnly: true,
+  };
+  publication.failureCode = null;
+  publication.failureDetail = null;
+  state.pendingDatasetCatalogPublicationIds.delete(publication.id);
+}
+
+function progressDatasetCatalogPublication(state, publication) {
+  if (!state.pendingDatasetCatalogPublicationIds.has(publication.id)) return;
+  if (publication.state === 'QUEUED') {
+    publication.state = 'COMMITTING';
+    publication.revision += 1;
+    publication.startedAt = FIXED_TIME;
+    publication.attemptCount += 1;
+    return;
+  }
+  if (publication.state === 'COMMITTING') {
+    publication.state = 'VERIFYING';
+    publication.revision += 1;
+    publication.icebergSnapshotId = '9223372036854775001';
+    publication.icebergMetadataLocation = `s3://bpi-iceberg/warehouse/${publication.catalogNamespace}/${publication.tableName}/metadata/v1.metadata.json`;
+    publication.icebergSchemaId = 0;
+    publication.icebergPartitionSpecId = 0;
+    return;
+  }
+  if (publication.state === 'VERIFYING') completeDatasetCatalogPublication(state, publication);
 }
 
 function calibrationEffectiveness(calibration, now = Date.now()) {
@@ -1272,6 +1328,24 @@ function createHandler(state) {
         materialization.failureDetail = String(body.failureDetail || 'Deterministic simulator failure injection.');
         state.pendingDatasetMaterializationIds.delete(materialization.id);
         return send(res, 200, envelope(operationId, materialization), operationId);
+      }
+      if (req.method === 'POST' && path === '/__simulation/fail-dataset-catalog-publication') {
+        const operationId = 'simulationFailDatasetCatalogPublication';
+        const body = await readJson(req);
+        const publication = state.datasetCatalogPublications.find((item) => item.id === body.publicationId);
+        if (!publication) {
+          return send(res, 404, { status: 'DATASET_CATALOG_PUBLICATION_NOT_FOUND' }, operationId);
+        }
+        if (!['COMMITTING', 'VERIFYING'].includes(publication.state)) {
+          return send(res, 409, { status: 'DATASET_CATALOG_PUBLICATION_NOT_ACTIVE' }, operationId);
+        }
+        publication.state = 'FAILED';
+        publication.revision += 1;
+        publication.completedAt = FIXED_TIME;
+        publication.failureCode = String(body.failureCode || 'SIMULATED_CATALOG_FAILURE');
+        publication.failureDetail = String(body.failureDetail || 'Deterministic catalog failure injection.');
+        state.pendingDatasetCatalogPublicationIds.delete(publication.id);
+        return send(res, 200, envelope(operationId, publication), operationId);
       }
       if (req.method === 'POST' && path === '/__simulation/prepare-batch-release') {
         const prepared = prepareBatchReleaseAcceptance(state);
@@ -3051,6 +3125,84 @@ function createHandler(state) {
         progressDatasetMaterialization(state, materialization);
         return send(res, 200, envelope(operationId, materialization), operationId);
       }
+      ids = match(path, /^\/bpi\/v1\/dataset-materializations\/([^/]+)\/catalog-publications$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getDatasetCatalogPublicationForMaterialization';
+        const publication = latestDatasetCatalogPublication(state, ids[0]);
+        if (!publication) {
+          return send(res, 200, envelope(operationId, null), operationId);
+        }
+        return send(res, 200, envelope(operationId, publication), operationId);
+      }
+      if (req.method === 'POST' && ids) {
+        const operationId = 'requestDatasetCatalogPublication';
+        const materialization = state.datasetMaterializations.find((item) => item.id === ids[0]);
+        if (!materialization) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset materialization not found.', operationId), operationId);
+        }
+        const context = commandContext(req, res, operationId, materialization.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (String(body.reason || '').trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'Catalog publication reason must contain at least three characters.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        const objectVersionId = materialization.artifactMetadata?.objectVersionId;
+        if (materialization.state !== 'READY' || !materialization.contentSha256
+            || !objectVersionId || !materialization.schema || materialization.rowCount <= 0) {
+          const response = problem(409, 'Verified Parquet Required', 'Catalog publication requires a verified non-empty Parquet object version.', operationId, materialization.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const existing = latestDatasetCatalogPublication(state, materialization.id);
+        if (existing) {
+          const response = problem(409, 'Catalog Publication Exists', 'The publisher contract already exists for this materialization.', operationId, existing.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const catalogNamespace = `bpi_training.tenant_${sha256(materialization.tenantId).slice(0, 16)}`;
+        const tableName = `dataset_${materialization.datasetId.replaceAll('-', '')}`;
+        const publication = {
+          id: stableUuid({ type: 'dataset-catalog-publication', materializationId: materialization.id }),
+          materializationId: materialization.id,
+          snapshotId: materialization.snapshotId,
+          datasetId: materialization.datasetId,
+          datasetCode: materialization.datasetCode,
+          datasetVersion: materialization.datasetVersion,
+          tenantId: materialization.tenantId,
+          plantId: materialization.plantId,
+          lineIds: clone(materialization.lineIds),
+          catalogName: DATASET_CATALOG_NAME,
+          catalogNamespace,
+          tableName,
+          tableIdentifier: `${DATASET_CATALOG_NAME}.${catalogNamespace}.${tableName}`,
+          publisherVersion: DATASET_CATALOG_PUBLISHER_VERSION,
+          state: 'QUEUED',
+          revision: 1,
+          manifestChecksum: materialization.manifestChecksum,
+          sourceContentSha256: materialization.contentSha256,
+          sourceObjectVersionId: objectVersionId,
+          sourceByteSize: materialization.byteSize,
+          sourceRowCount: materialization.rowCount,
+          sourceSchema: clone(materialization.schema),
+          requestedBy: 'simulated.data.engineer',
+          requestReason: String(body.reason).trim(),
+          createdAt: FIXED_TIME,
+          startedAt: null,
+          completedAt: null,
+          attemptCount: 0,
+          icebergSnapshotId: null,
+          icebergMetadataLocation: null,
+          icebergSchemaId: null,
+          icebergPartitionSpecId: null,
+          verifiedRowCount: null,
+          semanticChecksum: null,
+          catalogMetadata: null,
+          failureCode: null,
+          failureDetail: null,
+        };
+        state.datasetCatalogPublications.push(publication);
+        state.pendingDatasetCatalogPublicationIds.add(publication.id);
+        return rememberAndSend(state, context, res, 202, envelope(operationId, publication), operationId);
+      }
       ids = match(path, /^\/bpi\/v1\/dataset-materializations\/([^/]+)\/retry$/);
       if (req.method === 'POST' && ids) {
         const operationId = 'retryDatasetMaterialization';
@@ -3078,6 +3230,43 @@ function createHandler(state) {
         state.pendingDatasetMaterializationIds.add(materialization.id);
         const response = envelope(operationId, materialization);
         return rememberAndSend(state, context, res, 202, response, operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-catalog-publications\/([^/]+)$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getDatasetCatalogPublication';
+        const publication = state.datasetCatalogPublications.find((item) => item.id === ids[0]);
+        if (!publication) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset catalog publication not found.', operationId), operationId);
+        }
+        progressDatasetCatalogPublication(state, publication);
+        return send(res, 200, envelope(operationId, publication), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-catalog-publications\/([^/]+)\/retry$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'retryDatasetCatalogPublication';
+        const publication = state.datasetCatalogPublications.find((item) => item.id === ids[0]);
+        if (!publication) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset catalog publication not found.', operationId), operationId);
+        }
+        const context = commandContext(req, res, operationId, publication.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (String(body.reason || '').trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'Retry reason must contain at least three characters.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (publication.state !== 'FAILED') {
+          const response = problem(409, 'Invalid Catalog Publication State', 'Only a FAILED dataset catalog publication can be retried.', operationId, publication.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        publication.state = 'QUEUED';
+        publication.revision += 1;
+        publication.startedAt = null;
+        publication.completedAt = null;
+        publication.failureCode = null;
+        publication.failureDetail = null;
+        state.pendingDatasetCatalogPublicationIds.add(publication.id);
+        return rememberAndSend(state, context, res, 202, envelope(operationId, publication), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/integrations/health') {
         return send(res, 200, envelope('getIntegrationHealth', state.integrations), 'getIntegrationHealth');

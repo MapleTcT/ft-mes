@@ -126,11 +126,18 @@ downgrade, Flyway repair, object overwrite and `DROP` rollback are intentionally
 
 The integrated ADP upgrade (`make bpi-integrated-upgrade-expand-only`) also treats deployment
 manifests as release artifacts. Before it resolves the new worker services, it validates the clean
-release Compose file, stores mode-0600 backups of the current runtime Compose and MinIO
-configuration, atomically stages only the release Compose plus the two dataset-bucket bootstrap
-files, and records both backup paths in the JSON report. It does not replace the rest of the ADP
-runtime tree. The materializer and bucket bootstrap still remain disabled and stopped throughout
-the expand-only upgrade.
+release Compose file without changing the runtime. After image builds and protected PostgreSQL/UI
+backups succeed, it stores mode-0600 backups of the current runtime Compose, MinIO and Polaris
+configuration, then stages only those release manifests. It does not replace the rest of the ADP
+runtime tree. The materializer, catalog publisher and their bootstrap services remain disabled and
+stopped throughout the expand-only upgrade.
+
+If an independently verified recovery step already applied the exact target Flyway version, the
+integrated helper can validate the existing schema and redeploy only the applications. This path is
+fail-closed and requires both `BPI_INTEGRATED_ALLOW_ALREADY_MIGRATED=true` and
+`BPI_INTEGRATED_ALREADY_MIGRATED_CONFIRM=REDEPLOY_APPLICATIONS_ON_EXISTING_BPI_SCHEMA`. Flyway still
+runs in no-op validation mode; a checksum mismatch fails the deployment, and a database version
+above the release target is always rejected.
 
 ## Integrated target image rollback
 

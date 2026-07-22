@@ -110,26 +110,40 @@ If a legacy module must temporarily connect to Oracle, copy the relevant values 
 
 The target environment runs BPI inside this single ADP Compose project. Use the integrated expand-only
 helper from a clean release checkout; do not start the isolated `deploy/bpi-runtime` stack beside it.
-The helper builds immutable service, Java 8 adapter, WMS adapter and Python 3.12 dataset materializer
-images, verifies that the service image contains the exact source migration set, then creates a
+The helper builds immutable service, Java 8 adapter, WMS adapter, Python 3.12 dataset materializer
+and catalog publisher images, verifies that the service image contains the exact source migration set, then creates a
 custom-format PostgreSQL backup, a mode-0600 `.env` backup, a UI archive and rollback image tags
 before applying Flyway. It never downgrades or repairs the schema. Phase 2 QCS/WMS, WMS outbox,
-dataset materializer and dataset bucket bootstrap must all remain disabled.
+dataset materializer, Polaris and catalog publisher must all remain disabled.
 
 ```bash
 BPI_INTEGRATED_RUNTIME_ROOT=/home/v6/adp-mes-docker-newbase-20260611-181921 \
-BPI_INTEGRATED_BACKUP_DIR=/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v27 \
-BPI_EXPECTED_FLYWAY_VERSION=27 \
+BPI_INTEGRATED_BACKUP_DIR=/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v28 \
+BPI_EXPECTED_FLYWAY_VERSION=28 \
 BPI_INTEGRATED_UPGRADE_CONFIRM=UPGRADE_INTEGRATED_BPI_EXPAND_ONLY \
   make bpi-integrated-upgrade-expand-only
 ```
 
+If the exact V28 migration was already applied by an independently recorded recovery/acceptance
+step, add both explicit application-redeploy gates:
+
+```bash
+BPI_INTEGRATED_ALLOW_ALREADY_MIGRATED=true \
+BPI_INTEGRATED_ALREADY_MIGRATED_CONFIRM=REDEPLOY_APPLICATIONS_ON_EXISTING_BPI_SCHEMA \
+  make bpi-integrated-upgrade-expand-only
+```
+
+This mode still runs Flyway validation and rejects migration checksum drift; it does not repair,
+downgrade or skip schema verification.
+
 Before running it, replace every `change-me` or `dev-only` value, including
-`BPI_DATABASE_PASSWORD`, `BPI_MIGRATOR_PASSWORD`, `BPI_MATERIALIZER_DATABASE_PASSWORD` and
-`BPI_DATASET_MINIO_SECRET_KEY`; the three database credentials and the two MinIO identities must be
-distinct. Production deployment must also rotate the recovered test MinIO root credential through
-its separate security-hardening gate. For an existing database the helper creates or rotates `bpi_materializer` before V27,
-then verifies its exact SELECT/UPDATE/INSERT allowlist after migration.
+`BPI_DATABASE_PASSWORD`, `BPI_MIGRATOR_PASSWORD`, `BPI_MATERIALIZER_DATABASE_PASSWORD`,
+`BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD` and the MinIO/Polaris credentials. Service, migrator,
+materializer and catalog-publisher database identities must be distinct; source-reader, materializer,
+warehouse and MinIO root identities must also remain separate. Production deployment must rotate the
+recovered test credentials through the security-hardening gate. For an existing database the helper
+creates or rotates both least-privilege worker roles before V28, then verifies their exact table
+allowlists after migration.
 
 The generated JSON report records before/after Flyway versions, the migration-set checksum, exact
 image IDs, rollback image tags, backup paths and the deployed UI checksum. The materializer image is

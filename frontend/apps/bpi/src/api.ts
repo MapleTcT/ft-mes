@@ -10,6 +10,7 @@ import type {
   DataQualitySummary,
   DatasetDefinition,
   DatasetDefinitionCreateCommand,
+  DatasetCatalogPublication,
   DatasetMaterialization,
   DatasetSnapshot,
   DatasetSnapshotCommand,
@@ -265,6 +266,22 @@ export const bpiApi = {
     request<DatasetMaterialization>(`/dataset-materializations/${encodeURIComponent(materialization.id)}/retry`, {
       method: 'POST',
       headers: { 'Idempotency-Key': key, 'If-Match': String(materialization.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  datasetCatalogPublicationForMaterialization: (materializationId: string) =>
+    request<DatasetCatalogPublication | null>(`/dataset-materializations/${encodeURIComponent(materializationId)}/catalog-publications`),
+  requestDatasetCatalogPublication: (materialization: DatasetMaterialization, reason: string, key: string) =>
+    request<DatasetCatalogPublication>(`/dataset-materializations/${encodeURIComponent(materialization.id)}/catalog-publications`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(materialization.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  datasetCatalogPublication: (publicationId: string) =>
+    request<DatasetCatalogPublication>(`/dataset-catalog-publications/${encodeURIComponent(publicationId)}`),
+  retryDatasetCatalogPublication: (publication: DatasetCatalogPublication, reason: string, key: string) =>
+    request<DatasetCatalogPublication>(`/dataset-catalog-publications/${encodeURIComponent(publication.id)}/retry`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(publication.revision) },
       body: JSON.stringify({ reason }),
     }),
   topologies: (plantId: string) =>

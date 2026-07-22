@@ -104,6 +104,7 @@ services:
       BPI_DATABASE_PASSWORD: ${BPI_DATABASE_PASSWORD:-bpi-dev-only-change-me}
       BPI_MIGRATOR_PASSWORD: ${BPI_MIGRATOR_PASSWORD:-bpi-migrator-dev-only-change-me}
       BPI_MATERIALIZER_DATABASE_PASSWORD: ${BPI_MATERIALIZER_DATABASE_PASSWORD:-bpi-materializer-dev-only-change-me}
+      BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD: ${BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD:-bpi-catalog-publisher-dev-only-change-me}
       TZ: ${TZ:-Asia/Shanghai}
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -235,7 +236,7 @@ services:
 
   bpi-dataset-minio-bootstrap:
     image: ${MINIO_MC_IMAGE:-m.daocloud.io/docker.io/minio/mc:latest}
-    profiles: ["bpi"]
+    profiles: ["bpi", "bpi-catalog"]
     restart: "no"
     environment:
       BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED: ${BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED:-false}
@@ -245,13 +246,210 @@ services:
       BPI_DATASET_MINIO_ACCESS_KEY: ${BPI_DATASET_MINIO_ACCESS_KEY:-bpi-materializer}
       BPI_DATASET_MINIO_SECRET_KEY: ${BPI_DATASET_MINIO_SECRET_KEY:-bpi-materializer-dev-only-change-me}
       BPI_DATASET_MINIO_BUCKET: ${BPI_DATASET_MINIO_BUCKET:-bpi-datasets}
+      BPI_DATASET_SOURCE_READER_ENABLED: ${BPI_DATASET_SOURCE_READER_ENABLED:-false}
+      BPI_DATASET_SOURCE_READER_ACCESS_KEY: ${BPI_DATASET_SOURCE_READER_ACCESS_KEY:-bpi-catalog-source-reader}
+      BPI_DATASET_SOURCE_READER_SECRET_KEY: ${BPI_DATASET_SOURCE_READER_SECRET_KEY:-bpi-catalog-source-reader-dev-only-change-me}
     volumes:
       - ../minio/bootstrap-bpi-dataset-bucket.sh:/work/bootstrap.sh:ro
       - ../minio/bpi-dataset-materializer-policy.json:/work/policy.json:ro
+      - ../minio/bpi-dataset-catalog-source-reader-policy.json:/work/source-reader-policy.json:ro
     entrypoint: ["/bin/sh", "/work/bootstrap.sh"]
     depends_on:
       minio:
         condition: service_started
+
+  bpi-iceberg-warehouse-bootstrap:
+    image: ${MINIO_MC_IMAGE:-m.daocloud.io/docker.io/minio/mc:latest}
+    profiles: ["bpi-catalog"]
+    restart: "no"
+    environment:
+      BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED: ${BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED:-false}
+      BPI_ICEBERG_MINIO_ENDPOINT: http://minio:30200
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-adpminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-adpminio123}
+      BPI_ICEBERG_MINIO_ACCESS_KEY: ${BPI_ICEBERG_MINIO_ACCESS_KEY:-bpi-polaris-warehouse}
+      BPI_ICEBERG_MINIO_SECRET_KEY: ${BPI_ICEBERG_MINIO_SECRET_KEY:-bpi-polaris-warehouse-dev-only-change-me}
+      BPI_ICEBERG_WAREHOUSE_BUCKET: ${BPI_ICEBERG_WAREHOUSE_BUCKET:-bpi-iceberg-warehouse}
+    volumes:
+      - ../minio/bootstrap-bpi-iceberg-warehouse.sh:/work/bootstrap.sh:ro
+      - ../minio/bpi-iceberg-warehouse-policy.json:/work/policy.json:ro
+    entrypoint: ["/bin/sh", "/work/bootstrap.sh"]
+    depends_on:
+      minio:
+        condition: service_started
+
+  bpi-polaris-postgres:
+    image: ${BPI_POLARIS_POSTGRES_IMAGE:-m.daocloud.io/docker.io/library/postgres:16.13-alpine}
+    profiles: ["bpi-catalog"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: polaris
+      POSTGRES_USER: polaris
+      POSTGRES_PASSWORD: ${BPI_POLARIS_DATABASE_PASSWORD:-polaris-dev-only-change-me}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - bpi-polaris-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U polaris -d polaris"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+
+  bpi-polaris-bootstrap-check:
+    image: ${BPI_POLARIS_POSTGRES_IMAGE:-m.daocloud.io/docker.io/library/postgres:16.13-alpine}
+    profiles: ["bpi-catalog"]
+    restart: "no"
+    environment:
+      PGHOST: bpi-polaris-postgres
+      PGPORT: "5432"
+      PGDATABASE: polaris
+      PGUSER: polaris
+      PGPASSWORD: ${BPI_POLARIS_DATABASE_PASSWORD:-polaris-dev-only-change-me}
+      BPI_POLARIS_REALM: ${BPI_POLARIS_REALM:-POLARIS}
+      BPI_POLARIS_BOOTSTRAP_CLIENT_ID: ${BPI_POLARIS_BOOTSTRAP_CLIENT_ID:-bpi-polaris-root}
+    volumes:
+      - ../polaris/check_metastore_bootstrap.sh:/work/check-metastore-bootstrap.sh:ro
+      - bpi-polaris-bootstrap-state:/var/run/bpi-polaris-bootstrap
+    entrypoint: ["/bin/sh", "/work/check-metastore-bootstrap.sh"]
+    depends_on:
+      bpi-polaris-postgres:
+        condition: service_healthy
+
+  bpi-polaris-bootstrap:
+    image: ${BPI_POLARIS_ADMIN_IMAGE:-apache/polaris-admin-tool:1.4.1}
+    profiles: ["bpi-catalog"]
+    restart: "no"
+    environment:
+      POLARIS_PERSISTENCE_TYPE: relational-jdbc
+      POLARIS_PERSISTENCE_RELATIONAL_JDBC_MAX_RETRIES: "5"
+      POLARIS_PERSISTENCE_RELATIONAL_JDBC_INITIAL_DELAY_IN_MS: "100"
+      POLARIS_PERSISTENCE_RELATIONAL_JDBC_MAX_DURATION_IN_MS: "5000"
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://bpi-polaris-postgres:5432/polaris
+      QUARKUS_DATASOURCE_USERNAME: polaris
+      QUARKUS_DATASOURCE_PASSWORD: ${BPI_POLARIS_DATABASE_PASSWORD:-polaris-dev-only-change-me}
+      BPI_POLARIS_BOOTSTRAP_STATE_FILE: /var/run/bpi-polaris-bootstrap/metastore-state
+      BPI_POLARIS_REALM: ${BPI_POLARIS_REALM:-POLARIS}
+      BPI_POLARIS_BOOTSTRAP_CLIENT_ID: ${BPI_POLARIS_BOOTSTRAP_CLIENT_ID:-bpi-polaris-root}
+      BPI_POLARIS_BOOTSTRAP_CLIENT_SECRET: ${BPI_POLARIS_BOOTSTRAP_CLIENT_SECRET:-bpi-polaris-root-dev-only-change-me}
+    volumes:
+      - ../polaris/bootstrap_metastore_if_required.sh:/work/bootstrap-metastore-if-required.sh:ro
+      - bpi-polaris-bootstrap-state:/var/run/bpi-polaris-bootstrap:ro
+    entrypoint: ["/bin/sh", "/work/bootstrap-metastore-if-required.sh"]
+    command: ["bootstrap"]
+    depends_on:
+      bpi-polaris-bootstrap-check:
+        condition: service_completed_successfully
+
+  bpi-polaris:
+    image: ${BPI_POLARIS_IMAGE:-apache/polaris:1.4.1}
+    profiles: ["bpi-catalog"]
+    restart: unless-stopped
+    environment:
+      POLARIS_PERSISTENCE_TYPE: relational-jdbc
+      POLARIS_PERSISTENCE_RELATIONAL_JDBC_MAX_RETRIES: "5"
+      POLARIS_PERSISTENCE_RELATIONAL_JDBC_INITIAL_DELAY_IN_MS: "100"
+      POLARIS_PERSISTENCE_RELATIONAL_JDBC_MAX_DURATION_IN_MS: "5000"
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://bpi-polaris-postgres:5432/polaris
+      QUARKUS_DATASOURCE_USERNAME: polaris
+      QUARKUS_DATASOURCE_PASSWORD: ${BPI_POLARIS_DATABASE_PASSWORD:-polaris-dev-only-change-me}
+      POLARIS_REALM_CONTEXT_REALMS: ${BPI_POLARIS_REALM:-POLARIS}
+      POLARIS_REALM_CONTEXT_REQUIRE_HEADER: "true"
+      POLARIS_BOOTSTRAP_CREDENTIALS: ${BPI_POLARIS_REALM:-POLARIS},${BPI_POLARIS_BOOTSTRAP_CLIENT_ID:-bpi-polaris-root},${BPI_POLARIS_BOOTSTRAP_CLIENT_SECRET:-bpi-polaris-root-dev-only-change-me}
+      POLARIS_AUTHENTICATION_TOKEN_BROKER_TYPE: symmetric-key
+      POLARIS_AUTHENTICATION_TOKEN_BROKER_SYMMETRIC_KEY_SECRET: ${BPI_POLARIS_TOKEN_BROKER_SECRET:-bpi-polaris-token-broker-dev-only-change-me}
+      polaris.features."ALLOW_INSECURE_STORAGE_TYPES": ${BPI_POLARIS_ALLOW_INSECURE_STORAGE_TYPES:-false}
+      polaris.readiness.ignore-severe-issues: ${BPI_POLARIS_IGNORE_SEVERE_READINESS_ISSUES:-false}
+      QUARKUS_OTEL_SDK_DISABLED: "true"
+      QUARKUS_LOG_FILE_ENABLED: "false"
+      AWS_REGION: ${BPI_ICEBERG_S3_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${BPI_ICEBERG_MINIO_ACCESS_KEY:-bpi-polaris-warehouse}
+      AWS_SECRET_ACCESS_KEY: ${BPI_ICEBERG_MINIO_SECRET_KEY:-bpi-polaris-warehouse-dev-only-change-me}
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://127.0.0.1:8182/q/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    depends_on:
+      bpi-polaris-bootstrap:
+        condition: service_completed_successfully
+      bpi-iceberg-warehouse-bootstrap:
+        condition: service_completed_successfully
+
+  bpi-polaris-catalog-bootstrap:
+    image: ${BPI_DATASET_CATALOG_PUBLISHER_IMAGE:-ft-mes-bpi-dataset-catalog-publisher:local}
+    profiles: ["bpi-catalog"]
+    build:
+      context: ../..
+      dockerfile: services/bpi-dataset-catalog-publisher/Dockerfile
+      args:
+        PYTHON_IMAGE: ${BPI_DATASET_CATALOG_PUBLISHER_PYTHON_IMAGE:-m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm}
+    user: "0:0"
+    restart: "no"
+    environment:
+      BPI_POLARIS_ENABLED: ${BPI_POLARIS_ENABLED:-false}
+      BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED: ${BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED:-false}
+      BPI_POLARIS_BASE_URL: http://bpi-polaris:8181
+      BPI_POLARIS_REALM: ${BPI_POLARIS_REALM:-POLARIS}
+      BPI_POLARIS_BOOTSTRAP_CLIENT_ID: ${BPI_POLARIS_BOOTSTRAP_CLIENT_ID:-bpi-polaris-root}
+      BPI_POLARIS_BOOTSTRAP_CLIENT_SECRET: ${BPI_POLARIS_BOOTSTRAP_CLIENT_SECRET:-bpi-polaris-root-dev-only-change-me}
+      BPI_POLARIS_PUBLISHER_CREDENTIAL_FILE: /var/run/bpi-polaris-credentials/publisher-credential
+      BPI_POLARIS_PUBLISHER_CREDENTIAL_ROTATION_ENABLED: ${BPI_POLARIS_PUBLISHER_CREDENTIAL_ROTATION_ENABLED:-false}
+      BPI_ICEBERG_WAREHOUSE_BUCKET: ${BPI_ICEBERG_WAREHOUSE_BUCKET:-bpi-iceberg-warehouse}
+      BPI_ICEBERG_S3_ENDPOINT_EXTERNAL: ${BPI_ICEBERG_S3_ENDPOINT_EXTERNAL:-http://minio:30200}
+      BPI_ICEBERG_S3_ENDPOINT_INTERNAL: http://minio:30200
+    volumes:
+      - ../polaris/bootstrap_bpi_catalog.py:/work/bootstrap_bpi_catalog.py:ro
+      - bpi-polaris-publisher-credentials:/var/run/bpi-polaris-credentials
+    entrypoint: ["python", "/work/bootstrap_bpi_catalog.py"]
+    depends_on:
+      bpi-polaris:
+        condition: service_healthy
+
+  bpi-dataset-catalog-publisher:
+    image: ${BPI_DATASET_CATALOG_PUBLISHER_IMAGE:-ft-mes-bpi-dataset-catalog-publisher:local}
+    profiles: ["bpi-catalog"]
+    build:
+      context: ../..
+      dockerfile: services/bpi-dataset-catalog-publisher/Dockerfile
+      args:
+        PYTHON_IMAGE: ${BPI_DATASET_CATALOG_PUBLISHER_PYTHON_IMAGE:-m.daocloud.io/docker.io/library/python:3.12.13-slim-bookworm}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      BPI_DATASET_CATALOG_PUBLISHER_ENABLED: ${BPI_DATASET_CATALOG_PUBLISHER_ENABLED:-false}
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: ${BPI_DATABASE_NAME:-ft_mes_bpi}
+      PGUSER: bpi_catalog_publisher
+      PGPASSWORD: ${BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD:-bpi-catalog-publisher-dev-only-change-me}
+      PGSSLMODE: disable
+      BPI_DATASET_CATALOG_SOURCE_MINIO_ENDPOINT: minio:30200
+      BPI_DATASET_CATALOG_SOURCE_MINIO_SECURE: "false"
+      BPI_DATASET_CATALOG_SOURCE_MINIO_ACCESS_KEY: ${BPI_DATASET_SOURCE_READER_ACCESS_KEY:-bpi-catalog-source-reader}
+      BPI_DATASET_CATALOG_SOURCE_MINIO_SECRET_KEY: ${BPI_DATASET_SOURCE_READER_SECRET_KEY:-bpi-catalog-source-reader-dev-only-change-me}
+      BPI_ICEBERG_CATALOG_URI: http://bpi-polaris:8181/api/catalog
+      BPI_ICEBERG_CATALOG_WAREHOUSE: ft_mes_bpi
+      BPI_ICEBERG_CATALOG_CREDENTIAL_FILE: /var/run/bpi-polaris-credentials/publisher-credential
+      BPI_ICEBERG_CATALOG_OAUTH2_SERVER_URI: http://bpi-polaris:8181/api/catalog/v1/oauth/tokens
+      BPI_ICEBERG_CATALOG_REALM: ${BPI_POLARIS_REALM:-POLARIS}
+      BPI_ICEBERG_S3_ENDPOINT: http://minio:30200
+      BPI_ICEBERG_S3_REGION: ${BPI_ICEBERG_S3_REGION:-us-east-1}
+      BPI_DATASET_CATALOG_PUBLISHER_POLL_SECONDS: ${BPI_DATASET_CATALOG_PUBLISHER_POLL_SECONDS:-2}
+      BPI_DATASET_CATALOG_PUBLISHER_CLAIM_TIMEOUT_SECONDS: ${BPI_DATASET_CATALOG_PUBLISHER_CLAIM_TIMEOUT_SECONDS:-300}
+      BPI_DATASET_CATALOG_PUBLISHER_MAX_ATTEMPTS: ${BPI_DATASET_CATALOG_PUBLISHER_MAX_ATTEMPTS:-3}
+    volumes:
+      - bpi-catalog-publisher-work:/var/lib/bpi-catalog-publisher
+      - bpi-polaris-publisher-credentials:/var/run/bpi-polaris-credentials:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      bpi-migrate:
+        condition: service_completed_successfully
+      bpi-dataset-minio-bootstrap:
+        condition: service_completed_successfully
+      bpi-polaris-catalog-bootstrap:
+        condition: service_completed_successfully
 
   websocket:
     <<: *java-service
@@ -507,7 +705,7 @@ services:
 
   bpi-migrate:
     image: ${BPI_FLYWAY_IMAGE:-m.daocloud.io/docker.io/flyway/flyway:11-alpine}
-    profiles: ["bpi"]
+    profiles: ["bpi", "bpi-catalog"]
     restart: "no"
     environment:
       FLYWAY_URL: jdbc:postgresql://postgres:5432/${BPI_DATABASE_NAME:-ft_mes_bpi}
@@ -882,3 +1080,7 @@ volumes:
   mongo-data:
   minio-data:
   bpi-materializer-work:
+  bpi-polaris-postgres-data:
+  bpi-polaris-bootstrap-state:
+  bpi-polaris-publisher-credentials:
+  bpi-catalog-publisher-work:

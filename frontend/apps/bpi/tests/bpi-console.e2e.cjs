@@ -188,9 +188,51 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   await materializationPanel.getByText('SIMULATED', { exact: true }).waitFor();
   assert.match(await materializationPanel.locator('.dataset-artifact-uri').textContent(), /^s3:\/\/bpi-datasets\/datasets\/.*\.parquet\?versionId=.+$/);
   assert.match(await materializationPanel.locator('.dataset-artifact-sha').textContent(), /^[a-f0-9]{64}$/);
-  assert.deepEqual(await materializationPanel.locator('.dataset-downstream-grid .status').allTextContents(), [
-    'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED',
+  assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
+    'MANIFEST_READY', 'READY', 'NOT_STARTED', 'NOT_STARTED',
   ]);
+
+  await page.getByRole('button', { name: '发布 Iceberg' }).click();
+  await page.getByRole('heading', { name: '发布版本锁定对象' }).waitFor();
+  await page.locator('#dataset-catalog-publication-reason').fill('发布浏览器验收使用的精确 Parquet 版本');
+  await page.locator('#dataset-catalog-publication-submit').click();
+  await page.locator('[data-catalog-state="COMMITTING"]').waitFor();
+
+  let publicationResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-materializations/${materializationId}/catalog-publications`).then((item) => item.json());
+  const publicationId = publicationResponse.data.id;
+  response = await fetch(`${simulatorUrl}/__simulation/fail-dataset-catalog-publication`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      publicationId,
+      failureCode: 'SIMULATED_POLARIS_TIMEOUT',
+      failureDetail: '浏览器验收注入的 Polaris 目录提交超时。',
+    }),
+  });
+  assert.equal(response.status, 200);
+  await page.locator('[data-catalog-state="FAILED"]').waitFor();
+  await page.getByText('SIMULATED_POLARIS_TIMEOUT', { exact: true }).waitFor();
+  await page.getByRole('button', { name: '重试 Iceberg' }).click();
+  await page.getByRole('heading', { name: '重新排队 Iceberg 发布' }).waitFor();
+  await page.locator('#dataset-catalog-publication-reason').fill('目录服务恢复后重新排队并复验快照');
+  await page.locator('#dataset-catalog-publication-submit').click();
+
+  const catalogPanel = page.locator('[data-catalog-state="READY"]');
+  await catalogPanel.waitFor();
+  assert.equal(await catalogPanel.locator('.dataset-iceberg-snapshot').textContent(), '9223372036854775001');
+  assert.match(await catalogPanel.locator('.dataset-table-identifier').textContent(), /^ft_mes_bpi\.bpi_training\.tenant_[a-f0-9]{16}\.dataset_[a-f0-9]+$/);
+  assert.match(await catalogPanel.locator('.dataset-semantic-sha').textContent(), /^[a-f0-9]{64}$/);
+  assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
+    'MANIFEST_READY', 'READY', 'READY', 'NOT_STARTED',
+  ]);
+
+  publicationResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-catalog-publications/${publicationId}`).then((item) => item.json());
+  const materializedResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-materializations/${materializationId}`).then((item) => item.json());
+  assert.equal(publicationResponse.data.state, 'READY');
+  assert.equal(publicationResponse.data.icebergSnapshotId, '9223372036854775001');
+  assert.equal(publicationResponse.data.sourceContentSha256, materializedResponse.data.contentSha256);
+  assert.equal(publicationResponse.data.sourceObjectVersionId, materializedResponse.data.artifactMetadata.objectVersionId);
+  assert.equal(publicationResponse.data.catalogMetadata.catalogSnapshotVerified, true);
 
   const definitions = await fetch(`${simulatorUrl}/bpi/v1/datasets?plantId=PLANT-01&limit=100`).then((item) => item.json());
   assert.equal(definitions.data.length, 1);
@@ -209,7 +251,13 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   assert.equal(snapshot.data.latestMaterialization.id, materializationId);
   assert.equal(snapshot.data.latestMaterialization.artifactMetadata.objectContentVerified, true);
   assert.equal(snapshot.data.latestMaterialization.artifactMetadata.simulationOnly, true);
-  await page.screenshot({ path: '/tmp/bpi-dataset-parquet-desktop.png', fullPage: true });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-dataset-id]').click();
+  await page.getByRole('button', { name: '查看最近快照' }).click();
+  await page.locator('[data-catalog-state="READY"]').waitFor();
+  assert.equal(await page.locator('.dataset-iceberg-snapshot').textContent(), '9223372036854775001',
+    'page reload must rediscover the publication from the materialization');
+  await page.screenshot({ path: '/tmp/bpi-dataset-iceberg-desktop.png', fullPage: true });
   assert.deepEqual(errors, []);
   await desktop.close();
 
@@ -228,9 +276,11 @@ test('data engineer materializes a point-in-time dataset with failed retry and m
   assert.equal(await mobilePage.locator('#detail-drawer').evaluate((element) => element.scrollTop), 0,
     'opening another dataset object must reset the drawer to its header');
   await mobilePage.locator('[data-materialization-state="READY"]').waitFor();
+  await mobilePage.locator('[data-catalog-state="READY"]').waitFor();
+  assert.equal(await mobilePage.locator('.dataset-iceberg-snapshot').textContent(), '9223372036854775001');
   const drawerGeometry = await mobilePage.evaluate(() => ({ body: document.body.scrollWidth, viewport: window.innerWidth }));
   assert.ok(drawerGeometry.body <= drawerGeometry.viewport + 1, `dataset drawer overflows viewport: ${JSON.stringify(drawerGeometry)}`);
-  await mobilePage.screenshot({ path: '/tmp/bpi-dataset-parquet-mobile.png', fullPage: true });
+  await mobilePage.screenshot({ path: '/tmp/bpi-dataset-iceberg-mobile.png', fullPage: true });
   assert.deepEqual(mobileErrors, []);
   await mobile.close();
 });

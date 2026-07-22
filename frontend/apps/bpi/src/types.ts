@@ -745,6 +745,7 @@ export interface RuleSimulation {
 export type DatasetSnapshotState = 'QUEUED' | 'BUILDING' | 'MANIFEST_READY' | 'FAILED';
 export type DatasetMaterializationState = 'QUEUED' | 'WRITING' | 'READY' | 'FAILED';
 export type DatasetMaterializationDisplayState = 'NOT_STARTED' | DatasetMaterializationState;
+export type DatasetCatalogPublicationState = 'QUEUED' | 'COMMITTING' | 'VERIFYING' | 'READY' | 'FAILED';
 
 export interface DatasetSnapshotSummary {
   id: string;
@@ -840,6 +841,46 @@ export interface DatasetMaterialization {
   rowCount?: number | null;
   schema?: Record<string, unknown> | null;
   artifactMetadata?: Record<string, unknown> | null;
+  failureCode?: string | null;
+  failureDetail?: string | null;
+}
+
+export interface DatasetCatalogPublication {
+  id: string;
+  materializationId: string;
+  snapshotId: string;
+  datasetId: string;
+  datasetCode: string;
+  datasetVersion: string;
+  tenantId: string;
+  plantId: string;
+  lineIds: string[];
+  catalogName: string;
+  catalogNamespace: string;
+  tableName: string;
+  tableIdentifier: string;
+  publisherVersion: string;
+  state: DatasetCatalogPublicationState;
+  revision: number;
+  manifestChecksum: string;
+  sourceContentSha256: string;
+  sourceObjectVersionId: string;
+  sourceByteSize: number;
+  sourceRowCount: number;
+  sourceSchema: Record<string, unknown>;
+  requestedBy: string;
+  requestReason: string;
+  createdAt: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  attemptCount: number;
+  icebergSnapshotId?: string | null;
+  icebergMetadataLocation?: string | null;
+  icebergSchemaId?: number | null;
+  icebergPartitionSpecId?: number | null;
+  verifiedRowCount?: number | null;
+  semanticChecksum?: string | null;
+  catalogMetadata?: Record<string, unknown> | null;
   failureCode?: string | null;
   failureDetail?: string | null;
 }

@@ -8,6 +8,7 @@ ENV_FILE=${1:-$DEPLOY_DIR/.env}
 MIGRATIONS="$ROOT_DIR/services/bpi-service/app/src/main/resources/db/migration"
 VERIFY_MIGRATIONS="$ROOT_DIR/scripts/verify-bpi-release-migrations.py"
 MATERIALIZER_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-materializer-role.sh"
+CATALOG_PUBLISHER_ROLE_SCRIPT="$ROOT_DIR/deploy/docker/postgres/ensure-bpi-catalog-publisher-role.sh"
 JAR="$ROOT_DIR/services/bpi-service/app/target/bpi-service-0.1.0-SNAPSHOT-exec.jar"
 WMS_ADAPTER_JAR="$ROOT_DIR/services/bpi-service/wms-adapter/target/bpi-wms-adapter-0.1.0-SNAPSHOT-exec.jar"
 
@@ -34,6 +35,12 @@ compose() {
 compose_expand() {
     BPI_DATASET_MATERIALIZER_ENABLED=false \
     BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED=false \
+    BPI_DATASET_SOURCE_READER_ENABLED=false \
+    BPI_POLARIS_ENABLED=false \
+    BPI_POLARIS_IGNORE_SEVERE_READINESS_ISSUES=false \
+    BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED=false \
+    BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED=false \
+    BPI_DATASET_CATALOG_PUBLISHER_ENABLED=false \
         docker compose --env-file "$ENV_FILE" -f "$DEPLOY_DIR/docker-compose.yml" "$@"
 }
 
@@ -44,6 +51,7 @@ BACKUP_DIR=${BPI_RUNTIME_UPGRADE_BACKUP_DIR:-}
 REPORT=${BPI_RUNTIME_UPGRADE_REPORT:-/tmp/bpi-runtime-expand-upgrade.json}
 HEALTH_TIMEOUT_SECONDS=${BPI_RUNTIME_UPGRADE_HEALTH_TIMEOUT_SECONDS:-180}
 MATERIALIZER_DATABASE_PASSWORD=$(env_value BPI_MATERIALIZER_DATABASE_PASSWORD '')
+CATALOG_PUBLISHER_DATABASE_PASSWORD=$(env_value BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD '')
 POSTGRES_DB=$(env_value POSTGRES_DB postgres)
 MATERIALIZER_IMAGE=$(env_value BPI_DATASET_MATERIALIZER_IMAGE ft-mes-bpi-dataset-materializer:local)
 
@@ -59,7 +67,8 @@ case "$HEALTH_TIMEOUT_SECONDS" in
     ''|*[!0-9]*|0) printf 'ERROR: BPI_RUNTIME_UPGRADE_HEALTH_TIMEOUT_SECONDS must be a positive integer\n' >&2; exit 1 ;;
 esac
 
-for path in "$MIGRATIONS" "$VERIFY_MIGRATIONS" "$MATERIALIZER_ROLE_SCRIPT"; do
+for path in "$MIGRATIONS" "$VERIFY_MIGRATIONS" "$MATERIALIZER_ROLE_SCRIPT" \
+    "$CATALOG_PUBLISHER_ROLE_SCRIPT"; do
     test -e "$path" || {
         printf 'ERROR: required release path is missing: %s\n' "$path" >&2
         exit 1
@@ -75,7 +84,12 @@ done
 sh "$SCRIPT_DIR/preflight.sh" "$ENV_FILE"
 for disabled_key in \
     BPI_DATASET_MATERIALIZER_ENABLED \
-    BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED; do
+    BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED \
+    BPI_DATASET_SOURCE_READER_ENABLED \
+    BPI_POLARIS_ENABLED \
+    BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED \
+    BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED \
+    BPI_DATASET_CATALOG_PUBLISHER_ENABLED; do
     if [ "$(env_value "$disabled_key" false)" != "false" ]; then
         printf 'ERROR: %s must remain false during expand-only upgrade\n' \
             "$disabled_key" >&2
@@ -100,6 +114,16 @@ run_materializer_role_action() {
         -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
         -e "BPI_MATERIALIZER_DATABASE_PASSWORD=$MATERIALIZER_DATABASE_PASSWORD" \
         "$postgres_id" sh -s -- "$action" <"$MATERIALIZER_ROLE_SCRIPT"
+}
+
+run_catalog_publisher_role_action() {
+    action=$1
+    docker exec -i \
+        -e "POSTGRES_USER=$POSTGRES_USER" \
+        -e "POSTGRES_DB=$POSTGRES_DB" \
+        -e "BPI_DATABASE_NAME=$DATABASE_NAME" \
+        -e "BPI_CATALOG_PUBLISHER_DATABASE_PASSWORD=$CATALOG_PUBLISHER_DATABASE_PASSWORD" \
+        "$postgres_id" sh -s -- "$action" <"$CATALOG_PUBLISHER_ROLE_SCRIPT"
 }
 if [ "$(env_value BPI_WMS_ADAPTER_ENABLED false)" != "false" ]; then
     printf 'ERROR: BPI_WMS_ADAPTER_ENABLED must remain false during expand-only upgrade\n' >&2
@@ -286,6 +310,7 @@ fi
 write_report IN_PROGRESS ARTIFACTS_BUILT NOT_RUN
 
 run_materializer_role_action provision
+run_catalog_publisher_role_action provision
 compose_expand up --no-deps --force-recreate --abort-on-container-exit \
     --exit-code-from bpi-migrate bpi-migrate
 
@@ -297,6 +322,8 @@ if [ "$AFTER_VERSION" != "$EXPECTED_VERSION" ]; then
 fi
 run_materializer_role_action grant
 run_materializer_role_action verify
+run_catalog_publisher_role_action grant
+run_catalog_publisher_role_action verify
 write_report IN_PROGRESS MIGRATION_APPLIED NOT_RUN
 
 compose_expand up -d --no-deps --force-recreate bpi-service

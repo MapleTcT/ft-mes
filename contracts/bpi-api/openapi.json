@@ -787,6 +787,53 @@
         }
       }
     },
+    "/bpi/v1/dataset-materializations/{materializationId}/catalog-publications": {
+      "get": {
+        "tags": ["Datasets"], "operationId": "getDatasetCatalogPublicationForMaterialization", "summary": "按 Parquet 物化结果查询当前 Iceberg 目录发布任务",
+        "parameters": [{"$ref": "#/components/parameters/MaterializationId"}],
+        "responses": {
+          "200": {"description": "当前发布器契约对应的 Iceberg 目录发布任务；尚未申请时 data 为 null", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DatasetCatalogPublicationLookupResponse"}}}}
+        }
+      },
+      "post": {
+        "tags": ["Datasets"], "operationId": "requestDatasetCatalogPublication", "summary": "请求把已验证 Parquet 精确版本发布到 Iceberg REST Catalog",
+        "parameters": [{"$ref": "#/components/parameters/MaterializationId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {
+          "202": {"description": "Iceberg 目录发布任务", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DatasetCatalogPublicationResponse"}}}},
+          "403": {"$ref": "#/components/responses/Forbidden"},
+          "404": {"$ref": "#/components/responses/NotFound"},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "422": {"$ref": "#/components/responses/Unprocessable"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/dataset-catalog-publications/{publicationId}": {
+      "get": {
+        "tags": ["Datasets"], "operationId": "getDatasetCatalogPublication", "summary": "查询 Iceberg 目录发布状态和可复验快照证据",
+        "parameters": [{"$ref": "#/components/parameters/PublicationId"}],
+        "responses": {
+          "200": {"description": "Iceberg 目录发布任务", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DatasetCatalogPublicationResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bpi/v1/dataset-catalog-publications/{publicationId}/retry": {
+      "post": {
+        "tags": ["Datasets"], "operationId": "retryDatasetCatalogPublication", "summary": "重新排队失败的 Iceberg 目录发布任务",
+        "parameters": [{"$ref": "#/components/parameters/PublicationId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {
+          "202": {"description": "重新排队的 Iceberg 目录发布任务", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DatasetCatalogPublicationResponse"}}}},
+          "403": {"$ref": "#/components/responses/Forbidden"},
+          "404": {"$ref": "#/components/responses/NotFound"},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "422": {"$ref": "#/components/responses/Unprocessable"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
     "/bpi/v1/integrations/health": {
       "get": {
         "tags": ["Integrations"], "operationId": "getIntegrationHealth", "summary": "查询依赖健康和业务影响",
@@ -838,6 +885,7 @@
       "DatasetId": {"name": "datasetId", "in": "path", "required": true, "schema": {"type": "string"}},
       "SnapshotId": {"name": "snapshotId", "in": "path", "required": true, "schema": {"type": "string"}},
       "MaterializationId": {"name": "materializationId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "PublicationId": {"name": "publicationId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
       "IntegrationId": {"name": "integrationId", "in": "path", "required": true, "schema": {"type": "string"}},
       "FlagKey": {"name": "flagKey", "in": "path", "required": true, "schema": {"type": "string", "enum": ["bpi.ui", "bpi.commands", "bpi.rule-management", "bpi.shadow-only", "bpi.auto-confirm", "bpi.wms-link"]}},
       "AuditId": {"name": "auditId", "in": "path", "required": true, "schema": {"type": "string"}},
@@ -1237,6 +1285,9 @@
       "DatasetMaterializationCommand": {"type": "object", "additionalProperties": false, "required": ["artifactFormat", "reason"], "properties": {"artifactFormat": {"type": "string", "enum": ["PARQUET"]}, "reason": {"type": "string", "minLength": 3, "maxLength": 500}}},
       "DatasetMaterialization": {"type": "object", "required": ["id", "snapshotId", "datasetId", "datasetCode", "datasetVersion", "tenantId", "plantId", "lineIds", "artifactFormat", "artifactSchemaVersion", "materializerVersion", "state", "revision", "manifestChecksum", "requestedBy", "requestReason", "createdAt", "attemptCount"], "properties": {"id": {"type": "string", "format": "uuid"}, "snapshotId": {"type": "string", "format": "uuid"}, "datasetId": {"type": "string", "format": "uuid"}, "datasetCode": {"type": "string"}, "datasetVersion": {"type": "string"}, "tenantId": {"type": "string"}, "plantId": {"type": "string"}, "lineIds": {"type": "array", "items": {"type": "string"}}, "artifactFormat": {"type": "string", "enum": ["PARQUET"]}, "artifactSchemaVersion": {"type": "string"}, "materializerVersion": {"type": "string"}, "state": {"type": "string", "enum": ["QUEUED", "WRITING", "READY", "FAILED"]}, "revision": {"type": "integer", "format": "int64"}, "manifestChecksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "requestedBy": {"type": "string"}, "requestReason": {"type": "string"}, "createdAt": {"type": "string", "format": "date-time"}, "startedAt": {"type": ["string", "null"], "format": "date-time"}, "completedAt": {"type": ["string", "null"], "format": "date-time"}, "attemptCount": {"type": "integer", "minimum": 0}, "artifactUri": {"type": ["string", "null"], "description": "READY 时为带 versionId 查询参数的精确 s3:// 对象版本"}, "objectBucket": {"type": ["string", "null"]}, "objectKey": {"type": ["string", "null"]}, "contentSha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}, "byteSize": {"type": ["integer", "null"], "format": "int64", "minimum": 0}, "rowCount": {"type": ["integer", "null"], "format": "int64", "minimum": 0}, "schema": {"type": ["object", "null"]}, "artifactMetadata": {"type": ["object", "null"]}, "failureCode": {"type": ["string", "null"]}, "failureDetail": {"type": ["string", "null"]}}},
       "DatasetMaterializationResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/DatasetMaterialization"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "DatasetCatalogPublication": {"type": "object", "required": ["id", "materializationId", "snapshotId", "datasetId", "datasetCode", "datasetVersion", "tenantId", "plantId", "lineIds", "catalogName", "catalogNamespace", "tableName", "tableIdentifier", "publisherVersion", "state", "revision", "manifestChecksum", "sourceContentSha256", "sourceObjectVersionId", "sourceByteSize", "sourceRowCount", "sourceSchema", "requestedBy", "requestReason", "createdAt", "attemptCount"], "properties": {"id": {"type": "string", "format": "uuid"}, "materializationId": {"type": "string", "format": "uuid"}, "snapshotId": {"type": "string", "format": "uuid"}, "datasetId": {"type": "string", "format": "uuid"}, "datasetCode": {"type": "string"}, "datasetVersion": {"type": "string"}, "tenantId": {"type": "string"}, "plantId": {"type": "string"}, "lineIds": {"type": "array", "items": {"type": "string"}}, "catalogName": {"type": "string"}, "catalogNamespace": {"type": "string"}, "tableName": {"type": "string"}, "tableIdentifier": {"type": "string"}, "publisherVersion": {"type": "string"}, "state": {"type": "string", "enum": ["QUEUED", "COMMITTING", "VERIFYING", "READY", "FAILED"]}, "revision": {"type": "integer", "format": "int64", "minimum": 1}, "manifestChecksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "sourceContentSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "sourceObjectVersionId": {"type": "string"}, "sourceByteSize": {"type": "integer", "format": "int64", "minimum": 1}, "sourceRowCount": {"type": "integer", "format": "int64", "minimum": 1}, "sourceSchema": {"type": "object"}, "requestedBy": {"type": "string"}, "requestReason": {"type": "string"}, "createdAt": {"type": "string", "format": "date-time"}, "startedAt": {"type": ["string", "null"], "format": "date-time"}, "completedAt": {"type": ["string", "null"], "format": "date-time"}, "attemptCount": {"type": "integer", "minimum": 0}, "icebergSnapshotId": {"type": ["string", "null"], "pattern": "^-?[0-9]+$"}, "icebergMetadataLocation": {"type": ["string", "null"]}, "icebergSchemaId": {"type": ["integer", "null"]}, "icebergPartitionSpecId": {"type": ["integer", "null"]}, "verifiedRowCount": {"type": ["integer", "null"], "format": "int64", "minimum": 1}, "semanticChecksum": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}, "catalogMetadata": {"type": ["object", "null"]}, "failureCode": {"type": ["string", "null"]}, "failureDetail": {"type": ["string", "null"]}}},
+      "DatasetCatalogPublicationResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/DatasetCatalogPublication"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "DatasetCatalogPublicationLookupResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"anyOf": [{"$ref": "#/components/schemas/DatasetCatalogPublication"}, {"type": "null"}]}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "DatasetManifestPhaseBoundary": {"type": "object", "required": ["deliveryState", "materializationState", "artifactUri", "icebergReady", "mlflowRegistered", "modelTrained"], "properties": {"deliveryState": {"type": "string", "enum": ["MANIFEST_ONLY"]}, "materializationState": {"type": "string", "enum": ["NOT_STARTED"]}, "artifactUri": {"type": "null"}, "icebergReady": {"type": "boolean", "enum": [false]}, "mlflowRegistered": {"type": "boolean", "enum": [false]}, "modelTrained": {"type": "boolean", "enum": [false]}}},
       "DatasetManifest": {"type": "object", "required": ["schemaVersion", "definition", "selection", "phaseBoundary", "counts", "samples"], "properties": {"schemaVersion": {"type": "string", "enum": ["bpi.dataset-manifest.v1"]}, "definition": {"type": "object"}, "selection": {"type": "object"}, "phaseBoundary": {"$ref": "#/components/schemas/DatasetManifestPhaseBoundary"}, "counts": {"type": "object"}, "samples": {"type": "array", "maxItems": 10000, "items": {"type": "object"}}}},
       "DatasetSnapshot": {"type": "object", "required": ["id", "datasetId", "datasetCode", "datasetVersion", "datasetName", "tenantId", "plantId", "snapshotVersion", "state", "revision", "freezeAt", "lineIds", "predictionTimePolicy", "ruleVersionIds", "excludeLowConfidence", "definitionChecksum", "materializationState", "requestedBy", "requestReason", "createdAt", "attemptCount"], "properties": {"id": {"type": "string", "format": "uuid"}, "datasetId": {"type": "string", "format": "uuid"}, "datasetCode": {"type": "string"}, "datasetVersion": {"type": "string"}, "datasetName": {"type": "string"}, "tenantId": {"type": "string"}, "plantId": {"type": "string"}, "snapshotVersion": {"type": "integer", "format": "int64"}, "state": {"type": "string", "enum": ["QUEUED", "BUILDING", "MANIFEST_READY", "FAILED"]}, "revision": {"type": "integer", "format": "int64"}, "freezeAt": {"type": "string", "format": "date-time"}, "lineIds": {"type": "array", "items": {"type": "string"}}, "predictionTimePolicy": {"type": "string", "enum": ["AUTOMATIC_BATCH_START"]}, "ruleVersionIds": {"type": "array", "items": {"type": "string", "format": "uuid"}}, "excludeLowConfidence": {"type": "boolean"}, "definitionChecksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "manifestSchemaVersion": {"type": ["string", "null"]}, "manifestChecksum": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}, "manifest": {"anyOf": [{"$ref": "#/components/schemas/DatasetManifest"}, {"type": "null"}]}, "includedCount": {"type": ["integer", "null"], "minimum": 0}, "excludedCount": {"type": ["integer", "null"], "minimum": 0}, "exclusionSummary": {"type": ["object", "null"], "additionalProperties": {"type": "integer", "minimum": 0}}, "materializationState": {"type": "string", "enum": ["NOT_STARTED", "QUEUED", "WRITING", "READY", "FAILED"]}, "artifactUri": {"type": ["string", "null"]}, "requestedBy": {"type": "string"}, "requestReason": {"type": "string"}, "createdAt": {"type": "string", "format": "date-time"}, "startedAt": {"type": ["string", "null"], "format": "date-time"}, "completedAt": {"type": ["string", "null"], "format": "date-time"}, "attemptCount": {"type": "integer", "minimum": 0}, "failureCode": {"type": ["string", "null"]}, "failureDetail": {"type": ["string", "null"]}, "latestMaterialization": {"anyOf": [{"$ref": "#/components/schemas/DatasetMaterialization"}, {"type": "null"}]}}},
