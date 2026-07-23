@@ -5,7 +5,8 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const { spawn, spawnSync } = require("node:child_process");
-const { chromium, request } = require("playwright");
+const printRemoteScript = process.argv.includes("--print-remote-script");
+const { chromium, request } = printRemoteScript ? {} : require("playwright");
 
 const repoRoot = path.resolve(__dirname, "../../..");
 const stamp = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
@@ -44,7 +45,6 @@ const approvedScreenshot = path.resolve(process.env.BPI_FORMAL_IDENTITY_APPROVED
 const completedScreenshot = path.resolve(process.env.BPI_FORMAL_IDENTITY_COMPLETED_SCREENSHOT
   || path.join(repoRoot, `metadata/${reportStem}-completed.png`));
 const nodePath = process.env.NODE_PATH || path.join(repoRoot, "frontend/apps/bpi/node_modules");
-const printRemoteScript = process.argv.includes("--print-remote-script");
 const kafkaSuffix = marker.toLowerCase().replace(/_/g, "-");
 const kafka = {
   blueCommand: `bpi.acceptance.${kafkaSuffix}.blue-command`,
