@@ -355,7 +355,7 @@ Phase 3C-A 把 MLflow Dataset Input 登记作为恢复包之后的第五个独�
 MLflow Tracking Server 健康或 run 存在推导模型可用。
 
 Phase 3C-B 在 Dataset Input 之后增加独立的“离线训练就绪”评估，不训练演示模型。首个目标固定为
-`BATCH_START_BOUNDARY_REVIEW_RISK`，服务端按 `bpi-training-readiness/batch-start-boundary-v1` 核对精确
+`BATCH_START_BOUNDARY_REVIEW_RISK`。V31 历史策略 `bpi-training-readiness/batch-start-boundary-v1` 核对精确
 MLflow 血缘、行数对账、point-in-time 防泄漏、物料/工段/规则/拓扑/点位上下文、至少两类过程信号窗口、
 人工边界标签、200 个独立批次、7 个生产日、生产时间切分、类别覆盖、影子运行周期和关键数据质量事件。
 每次评估生成新的不可变序号和 checksum，结果仅为 `ELIGIBLE/BLOCKED`；页面展示要求值、实际值和阻断码，
@@ -370,8 +370,17 @@ registrar 重启、桌面/移动和精确清理。该证据仍只到 Dataset Inp
 Phase 3C-B 的 Java/PostgreSQL、Java 8 路由、OpenAPI、模拟器和页面链已完成目标验收。marker
 `ADP_E2E_BPI_READINESS_20260723_091500_A1` 已证明真实页面命令、PostgreSQL V31 两次不可变评估、
 幂等重放、相同冻结事实 checksum、重启回读、MLflow 模型表零变化、桌面/移动布局和精确清理。当前结果
-真实为 19 gates / 8 blockers / `BLOCKED`；下一阶段应补过程信号窗口和真实样本，而不是把目标验收通过
+真实为 19 gates / 8 blockers / `BLOCKED`；这是 V31 的历史基线，不能把目标验收通过
 解释为训练资格通过。
+
+Phase 3C-C 把“过程信号窗口”从命名约定变成可执行数据契约。新建定义时，数据工程师至少配置流量、泵态等
+两组预测前窗口；每组明确 `featureRef`、逻辑信号、数值类型、聚合方式、起止偏移、最少样本、最大间隔、
+预期单位、是否要求校准和可接受质量码。窗口引用自动并入 `featureRefs`，服务端归一化并生成定义 checksum。
+生成快照时，PostgreSQL 只读取预测时点和冻结时点之前可见的遥测，按已发布拓扑绑定到物理点位，并失败关闭
+检查点位目录、设备/属性、单位、校准、质量、覆盖率、最大间隔和值类型。每个批次/窗口形成不可更新的事实行；
+Manifest 同时保留聚合特征值与窗口证据。页面显示事实总数、READY/BLOCKED、物理点位、窗口、样本覆盖、
+聚合值和阻断原因。训练资格升级为 `bpi-training-readiness/batch-start-boundary-v2`，第 20 道门槛
+`PROCESS_SIGNAL_WINDOW_FACTS_INCOMPLETE` 要求每个纳入样本的每组声明窗口都存在 READY 事实。
 
 **主要 API：** `listDatasets`、`createDatasetDefinition`、`createDatasetSnapshot`、`getDatasetSnapshot`、
 `requestDatasetMaterialization`、`getDatasetMaterialization`、`retryDatasetMaterialization`、

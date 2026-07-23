@@ -100,9 +100,9 @@
 | 影子验收 | POST | `/bpi/v1/shadow-runs/{shadowRunId}/reject` | `rejectShadowRun` | SERVICE_IMPLEMENTED；独立管理员可在 EVALUATING 驳回并保留证据 |
 | 影子验收 | POST | `/bpi/v1/shadow-runs/{shadowRunId}/cancel` | `cancelShadowRun` | SERVICE_IMPLEMENTED；仅 DRAFT/RUNNING，可审计取消 |
 | 训练数据 | GET | `/bpi/v1/datasets` | `listDatasets` | SERVICE_IMPLEMENTED；按 tenant/plant scope 返回不可变定义及最近快照 |
-| 训练数据 | POST | `/bpi/v1/datasets` | `createDatasetDefinition` | SERVICE_IMPLEMENTED；仅允许受控特征/标签、固定 prediction time/cutoff/split policy |
+| 训练数据 | POST | `/bpi/v1/datasets` | `createDatasetDefinition` | SERVICE_IMPLEMENTED；除受控上下文/标签外，可声明最多 20 组 `processSignalWindows`；每组固定逻辑信号、值类型、聚合、预测前窗口、样本/间隔、单位、校准和质量门槛，且必须与 `process.window.*` 特征引用精确一致 |
 | 训练数据 | POST | `/bpi/v1/datasets/{datasetId}/snapshots` | `createDatasetSnapshot` | SERVICE_IMPLEMENTED；202 后台任务，只接受冻结时点前已批准且有复核的影子运行 |
-| 训练数据 | GET | `/bpi/v1/dataset-snapshots/{snapshotId}` | `getDatasetSnapshot` | SERVICE_IMPLEMENTED；返回 point-in-time manifest、checksum、样本排除原因和失败状态 |
+| 训练数据 | GET | `/bpi/v1/dataset-snapshots/{snapshotId}` | `getDatasetSnapshot` | SERVICE_IMPLEMENTED；返回 point-in-time manifest、checksum、样本排除原因，以及每个批次/窗口的物理点位、覆盖率、单位/校准/质量核验、聚合值、READY/BLOCKED 和事实 checksum |
 | 训练数据 | POST | `/bpi/v1/dataset-snapshots/{snapshotId}/materializations` | `requestDatasetMaterialization` | SERVICE_IMPLEMENTED；仅 `MANIFEST_READY` 快照可请求 PARQUET，任务进入 `QUEUED` |
 | 训练数据 | GET | `/bpi/v1/dataset-materializations/{materializationId}` | `getDatasetMaterialization` | SERVICE_IMPLEMENTED；返回 `QUEUED/WRITING/READY/FAILED`、精确对象版本 URI、SHA、行数和 schema 证据 |
 | 训练数据 | POST | `/bpi/v1/dataset-materializations/{materializationId}/retry` | `retryDatasetMaterialization` | SERVICE_IMPLEMENTED；仅失败任务可按当前 revision 幂等重排队 |
@@ -119,7 +119,7 @@
 | 训练数据 | GET | `/bpi/v1/dataset-mlflow-registrations/{registrationId}` | `getDatasetMlflowRegistration` | TARGET_ACCEPTED；目标已复验 `REGISTERED/r6`、精确 `s3://...?versionId=` source、experiment/run、Dataset Input 和不可变血缘，registrar 重启后不重复 run |
 | 训练数据 | POST | `/bpi/v1/dataset-mlflow-registrations/{registrationId}/retry` | `retryDatasetMlflowRegistration` | TARGET_ACCEPTED；真实页面只对 `FAILED` revision 重试同一任务；`REGISTERED` 只证明 Dataset Input，不代表训练、模型注册、推理或生产激活 |
 | 训练数据 | GET | `/bpi/v1/dataset-mlflow-registrations/{registrationId}/training-readiness-assessments` | `getLatestDatasetTrainingReadinessAssessment` | TARGET_ACCEPTED；目标重启后从真实页面重新发现 sequence 2、同 checksum 和 8 blockers；未评估仍返回 `data=null`，不能从 Dataset Input 登记推导训练就绪 |
-| 训练数据 | POST | `/bpi/v1/dataset-mlflow-registrations/{registrationId}/training-readiness-assessments` | `assessDatasetTrainingReadiness` | TARGET_ACCEPTED；目标真实页面对 `REGISTERED/r6` 输入按 revision 幂等执行 19 门槛，相同 key 不新增行，新 key 追加不可变 sequence；只新增评估事实，MLflow/model 计数不变 |
+| 训练数据 | POST | `/bpi/v1/dataset-mlflow-registrations/{registrationId}/training-readiness-assessments` | `assessDatasetTrainingReadiness` | SERVICE_IMPLEMENTED；V2 按 revision 幂等执行 20 道门槛，新增 `PROCESS_SIGNAL_WINDOW_FACTS_INCOMPLETE`，要求每个纳入样本的每组窗口都有持久化 READY 事实；相同 key 不新增行，新 key 追加不可变 sequence，且只新增评估事实，不启动训练 |
 | 训练数据 | GET | `/bpi/v1/dataset-training-readiness-assessments/{assessmentId}` | `getDatasetTrainingReadinessAssessment` | TARGET_ACCEPTED；按 tenant/plant/line scope 回读指定不可变评估、checksum、要求/实际/阻断证据和全 false 模型阶段边界；目标 UPDATE 反证被 trigger 拒绝 |
 | 集成运行 | GET | `/bpi/v1/integrations/health` | `getIntegrationHealth` | SIMULATED |
 | 集成运行 | POST | `/bpi/v1/integrations/{integrationId}/checks` | `runIntegrationCheck` | CONTRACT_ONLY |

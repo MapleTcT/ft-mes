@@ -749,6 +749,58 @@ export type DatasetCatalogPublicationState = 'QUEUED' | 'COMMITTING' | 'VERIFYIN
 export type DatasetRetentionArchiveState = 'QUEUED' | 'ARCHIVING' | 'VERIFYING' | 'LOCKED' | 'FAILED';
 export type DatasetMlflowRegistrationState = 'QUEUED' | 'REGISTERING' | 'REGISTERED' | 'FAILED';
 export type DatasetTrainingReadinessState = 'ELIGIBLE' | 'BLOCKED';
+export type ProcessSignalValueType = 'NUMERIC' | 'BOOLEAN';
+export type ProcessSignalMetric = 'MEAN' | 'MIN' | 'MAX' | 'LAST' | 'DELTA' | 'SLOPE' | 'TRUE_RATIO';
+export type ProcessSignalQualityCode = 'GOOD' | 'SUBSTITUTED';
+
+export interface ProcessSignalWindowDefinitionCommand {
+  featureRef: string;
+  signal: string;
+  valueType: ProcessSignalValueType;
+  metric: ProcessSignalMetric;
+  startOffsetSeconds: number;
+  endOffsetSeconds: number;
+  minimumSamples: number;
+  maximumGapSeconds: number;
+  expectedUnit: string;
+  requireCalibration: boolean;
+  acceptedQualityCodes: ProcessSignalQualityCode[];
+}
+
+export interface ProcessSignalWindowDefinition extends ProcessSignalWindowDefinitionCommand {
+  checksum: string;
+}
+
+export interface DatasetProcessSignalWindowEvidence {
+  featureRef: string;
+  signal: string;
+  metric: ProcessSignalMetric;
+  valueType: ProcessSignalValueType;
+  windowStart: string;
+  windowEnd: string;
+  predictionTime: string;
+  physicalPoint: {
+    productId?: string | null;
+    deviceId?: string | null;
+    propertyId?: string | null;
+  };
+  expectedUnit: string;
+  minimumSamples: number;
+  maximumGapSeconds: number;
+  sourcePointCount: number;
+  acceptedSampleCount: number;
+  rejectedQualityCount: number;
+  lateAvailabilityCount: number;
+  unitMismatchCount: number;
+  valueTypeMismatchCount: number;
+  calibrationMismatchCount: number;
+  maximumObservedGapSeconds?: number | null;
+  numericValue?: number | null;
+  state: 'READY' | 'BLOCKED';
+  blockerCodes: string[];
+  sourceFingerprint: string;
+  factChecksum: string;
+}
 
 export interface DatasetSnapshotSummary {
   id: string;
@@ -779,6 +831,7 @@ export interface DatasetDefinition {
   predictionTimePolicy: 'AUTOMATIC_BATCH_START';
   featureCutoffPolicy: 'AT_OR_BEFORE_PREDICTION_TIME';
   featureRefs: string[];
+  processSignalWindows: ProcessSignalWindowDefinition[];
   labelRefs: string[];
   maxLabelDelayHours: number;
   minimumConfidence: number;
@@ -799,6 +852,7 @@ export interface DatasetDefinitionCreateCommand {
   predictionTimePolicy: 'AUTOMATIC_BATCH_START';
   featureCutoffPolicy: 'AT_OR_BEFORE_PREDICTION_TIME';
   featureRefs: string[];
+  processSignalWindows: ProcessSignalWindowDefinitionCommand[];
   labelRefs: string[];
   maxLabelDelayHours: number;
   minimumConfidence: number;
@@ -1009,7 +1063,7 @@ export interface DatasetTrainingReadinessAssessment {
   plantId: string;
   lineIds: string[];
   objectiveCode: 'BATCH_START_BOUNDARY_REVIEW_RISK';
-  policyVersion: 'bpi-training-readiness/batch-start-boundary-v1';
+  policyVersion: 'bpi-training-readiness/batch-start-boundary-v2';
   assessmentSequence: number;
   state: DatasetTrainingReadinessState;
   revision: 1;
@@ -1043,18 +1097,28 @@ export interface DatasetManifestSample {
   included: boolean;
   exclusionReasons: string[];
   predictionTime: string;
-  featureCutoffTime: string;
+  featureCutoff: string;
   labelAvailableAt: string;
   confidence: number;
   splitKey: string;
-  features: Record<string, unknown>;
-  labels: Record<string, unknown>;
-  source: Record<string, unknown>;
+  featurePayload: Record<string, unknown>;
+  labelPayload: Record<string, unknown>;
+  sourcePayload: Record<string, unknown> & {
+    processSignalWindows?: DatasetProcessSignalWindowEvidence[];
+  };
+  features?: Record<string, unknown>;
+  labels?: Record<string, unknown>;
+  source?: Record<string, unknown>;
+  featureCutoffTime?: string;
 }
 
 export interface DatasetManifest {
   schemaVersion: 'bpi.dataset-manifest.v1';
-  definition: Record<string, unknown>;
+  definition: Record<string, unknown> & {
+    featureRefs?: string[];
+    processSignalWindows?: ProcessSignalWindowDefinition[];
+    labelRefs?: string[];
+  };
   selection: Record<string, unknown>;
   phaseBoundary: {
     deliveryState: 'MANIFEST_ONLY';

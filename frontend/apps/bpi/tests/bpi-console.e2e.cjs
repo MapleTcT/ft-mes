@@ -138,12 +138,20 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   await page.goto(`${APP_URL}/#/datasets`, { waitUntil: 'networkidle' });
   await page.getByRole('heading', { name: '数据集清单' }).waitFor();
   await page.locator('#open-dataset-definition').click();
+  assert.equal(await page.locator('[data-process-window]').count(), 2);
+  assert.deepEqual(
+    await page.locator('[data-window-field="signal"]').evaluateAll((inputs) =>
+      inputs.map((input) => input.value)),
+    ['flow.instant', 'pump.running'],
+  );
   await page.locator('#dataset-code').fill('ADP-E2E-START-BOUNDARY');
   await page.locator('#dataset-name').fill('ADP E2E 启动边界清单');
   await page.locator('#dataset-reason').fill('建立浏览器到 manifest 的受控验收定义');
+  await page.locator('#dataset-definition-dialog').screenshot({ path: '/tmp/bpi-dataset-process-window-definition-desktop.png' });
   await page.locator('#dataset-definition-submit').click();
 
   await page.getByRole('heading', { name: 'ADP E2E 启动边界清单' }).waitFor();
+  assert.equal(await page.locator('.dataset-window-definition-frame tbody tr').count(), 2);
   await page.locator('#open-dataset-snapshot').click();
   await page.locator('#dataset-snapshot-reason').fill('冻结已批准影子复核记录并生成 point-in-time 清单');
   await page.locator('#dataset-snapshot-submit').click();
@@ -154,6 +162,13 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   await page.locator('.dataset-exclusion-list').getByText('CONFIDENCE_BELOW_THRESHOLD', { exact: true }).waitFor();
   await page.locator('.dataset-exclusion-list').getByText('LABEL_DELAY_EXCEEDED', { exact: true }).waitFor();
   assert.equal(await page.locator('.dataset-sample-frame tbody tr').count(), 3);
+  assert.equal(await page.locator('.dataset-window-evidence-frame tbody tr').count(), 6);
+  assert.deepEqual(await page.locator('.dataset-window-evidence-summary b').allTextContents(), ['6', '6', '0']);
+  assert.deepEqual(
+    [...new Set(await page.locator('.dataset-window-evidence-frame tbody tr td:nth-child(2) strong').allTextContents())],
+    ['process.window.flow_instant.mean_60s', 'process.window.pump_running.true_ratio_30s'],
+  );
+  await page.locator('.dataset-process-evidence-panel').screenshot({ path: '/tmp/bpi-dataset-process-window-evidence-desktop.png' });
   assert.match(await page.locator('.facts-grid .mono-value').last().textContent(), /^[a-f0-9]{64}$/);
 
   await page.getByRole('button', { name: '生成 Parquet' }).click();
@@ -342,7 +357,6 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
 
   const readinessPanel = page.locator('[data-training-readiness-state="BLOCKED"]');
   await readinessPanel.waitFor();
-  await readinessPanel.getByText('PROCESS_SIGNAL_WINDOWS_MISSING', { exact: true }).waitFor();
   await readinessPanel.getByText('START_REJECTED_LABEL_COUNT_BELOW_MINIMUM', { exact: true }).waitFor();
   await readinessPanel.getByText('INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM', { exact: true }).waitFor();
   await readinessPanel.getByText('training=false · registry=false · inference=false · activation=false', { exact: true }).waitFor();
@@ -353,9 +367,16 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   readinessResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-mlflow-registrations/${registrationId}/training-readiness-assessments`).then((item) => item.json());
   assert.equal(readinessResponse.data.state, 'BLOCKED');
   assert.equal(readinessResponse.data.assessmentSequence, 1);
-  assert.equal(readinessResponse.data.gateResults.length, 19);
+  assert.equal(readinessResponse.data.policyVersion, 'bpi-training-readiness/batch-start-boundary-v2');
+  assert.equal(readinessResponse.data.gateResults.length, 20);
   assert.equal(readinessResponse.data.observedMetrics.includedSampleCount, 1);
-  assert.equal(readinessResponse.data.observedMetrics.signalWindowFeatureRefs.length, 0);
+  assert.equal(readinessResponse.data.observedMetrics.signalWindowFeatureRefs.length, 2);
+  assert.equal(readinessResponse.data.observedMetrics.processWindowExpectedFactCount, 2);
+  assert.equal(readinessResponse.data.observedMetrics.processWindowReadyFactCount, 2);
+  assert.equal(readinessResponse.data.observedMetrics.processWindowBlockedFactCount, 0);
+  assert.equal(readinessResponse.data.observedMetrics.processWindowMissingFactCount, 0);
+  assert.equal(readinessResponse.data.blockerCodes.includes('PROCESS_SIGNAL_WINDOWS_MISSING'), false);
+  assert.equal(readinessResponse.data.blockerCodes.includes('PROCESS_SIGNAL_WINDOW_FACTS_INCOMPLETE'), false);
   assert.equal(readinessResponse.data.phaseBoundary.assessmentOnly, true);
   assert.equal(readinessResponse.data.phaseBoundary.trainingStarted, false);
   assert.equal(readinessResponse.data.phaseBoundary.modelCreated, false);
@@ -421,6 +442,7 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   await mobilePage.locator('[data-retention-state="LOCKED"]').waitFor();
   await mobilePage.locator('[data-mlflow-state="REGISTERED"]').waitFor();
   await mobilePage.locator('[data-training-readiness-state="BLOCKED"]').waitFor();
+  await mobilePage.locator('.dataset-process-evidence-panel').screenshot({ path: '/tmp/bpi-dataset-process-window-evidence-mobile.png' });
   assert.equal(await mobilePage.locator('.dataset-iceberg-snapshot').textContent(), '9223372036854775001');
   assert.match(await mobilePage.locator('.dataset-mlflow-source').textContent(), /\?versionId=[a-f0-9-]{36}$/);
   const drawerGeometry = await mobilePage.evaluate(() => ({ body: document.body.scrollWidth, viewport: window.innerWidth }));

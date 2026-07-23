@@ -23,6 +23,7 @@ import {
   Search,
   Settings2,
   ShieldCheck,
+  Trash2,
   Upload,
   X,
   createIcons,
@@ -39,12 +40,14 @@ import type {
   DatasetCatalogPublication,
   DatasetDefinition,
   DatasetDefinitionCreateCommand,
+  DatasetManifestSample,
   DatasetMaterialization,
   DatasetMlflowRegistration,
   DatasetRetentionArchive,
   DatasetSnapshot,
   DatasetSnapshotCommand,
   DatasetTrainingReadinessAssessment,
+  DatasetProcessSignalWindowEvidence,
   Evidence,
   FeatureFlag,
   FeatureFlagOverrideCommand,
@@ -57,6 +60,10 @@ import type {
   PointCatalogView,
   PointCalibration,
   PointCalibrationSubmitCommand,
+  ProcessSignalMetric,
+  ProcessSignalQualityCode,
+  ProcessSignalValueType,
+  ProcessSignalWindowDefinitionCommand,
   ResponseMeta,
   RuleSimulation,
   RuleSimulationCommand,
@@ -520,6 +527,11 @@ function shell(): void {
               <label><input type="checkbox" data-dataset-feature value="topology.version_id" checked />拓扑版本</label>
               <label><input type="checkbox" data-dataset-feature value="point_catalog.snapshot_id" checked />点位目录快照</label>
             </div></fieldset>
+            <fieldset class="dataset-window-fieldset editor-field--wide">
+              <legend>工艺信号窗口</legend>
+              <div class="dataset-window-toolbar"><span>窗口必须位于预测时点之前，点位、单位、校准、质量和覆盖率全部通过后才进入特征。</span><button id="dataset-add-process-window" type="button" class="icon-text-button"><i data-lucide="plus"></i>添加窗口</button></div>
+              <div id="dataset-process-window-list" class="dataset-window-list"></div>
+            </fieldset>
             <fieldset class="dataset-ref-fieldset editor-field--wide"><legend>标签字段</legend><div>
               <label><input type="checkbox" data-dataset-label value="review.manual_start_time" checked />人工开始时间</label>
               <label><input type="checkbox" data-dataset-label value="review.manual_end_time" checked />人工结束时间</label>
@@ -604,7 +616,7 @@ function shell(): void {
 }
 
 function refreshIcons(): void {
-  createIcons({ icons: { Activity, Archive, Boxes, CheckCircle2, ChevronRight, ChevronsDown, CircleAlert, Clock3, Database, Factory, Filter, FlaskConical, Gauge, ListChecks, LockKeyhole, Network, Play, Plus, Power, RefreshCw, RotateCcw, Search, Settings2, ShieldCheck, Upload, X } });
+  createIcons({ icons: { Activity, Archive, Boxes, CheckCircle2, ChevronRight, ChevronsDown, CircleAlert, Clock3, Database, Factory, Filter, FlaskConical, Gauge, ListChecks, LockKeyhole, Network, Play, Plus, Power, RefreshCw, RotateCcw, Search, Settings2, ShieldCheck, Trash2, Upload, X } });
 }
 
 function commandId(): string {
@@ -635,6 +647,7 @@ function bindShellEvents(): void {
   document.querySelector<HTMLFormElement>('#shadow-run-form')?.addEventListener('submit', handleShadowRunCreate);
   document.querySelector<HTMLFormElement>('#shadow-review-form')?.addEventListener('submit', handleShadowRunBatchReview);
   document.querySelector<HTMLFormElement>('#dataset-definition-form')?.addEventListener('submit', handleDatasetDefinitionCreate);
+  document.querySelector('#dataset-add-process-window')?.addEventListener('click', () => appendDatasetProcessWindow());
   document.querySelector<HTMLFormElement>('#dataset-snapshot-form')?.addEventListener('submit', handleDatasetSnapshotCreate);
   document.querySelector<HTMLFormElement>('#dataset-materialization-form')?.addEventListener('submit', handleDatasetMaterializationCommand);
   document.querySelector<HTMLFormElement>('#dataset-catalog-publication-form')?.addEventListener('submit', handleDatasetCatalogPublicationCommand);
@@ -3313,6 +3326,162 @@ function checkedDatasetRefs(selector: string): string[] {
     .sort();
 }
 
+const defaultDatasetProcessWindows: ProcessSignalWindowDefinitionCommand[] = [
+  {
+    featureRef: 'process.window.flow_instant.mean_60s',
+    signal: 'flow.instant',
+    valueType: 'NUMERIC',
+    metric: 'MEAN',
+    startOffsetSeconds: -60,
+    endOffsetSeconds: 0,
+    minimumSamples: 3,
+    maximumGapSeconds: 30,
+    expectedUnit: 't/h',
+    requireCalibration: true,
+    acceptedQualityCodes: ['GOOD'],
+  },
+  {
+    featureRef: 'process.window.pump_running.true_ratio_30s',
+    signal: 'pump.running',
+    valueType: 'BOOLEAN',
+    metric: 'TRUE_RATIO',
+    startOffsetSeconds: -30,
+    endOffsetSeconds: 0,
+    minimumSamples: 2,
+    maximumGapSeconds: 30,
+    expectedUnit: 'bool',
+    requireCalibration: false,
+    acceptedQualityCodes: ['GOOD'],
+  },
+];
+
+let datasetProcessWindowSequence = 0;
+
+function datasetProcessWindowOptions(
+  values: readonly string[],
+  selected: string,
+): string {
+  return values.map((value) => `<option value="${value}"${value === selected ? ' selected' : ''}>${value}</option>`).join('');
+}
+
+function appendDatasetProcessWindow(
+  definition?: ProcessSignalWindowDefinitionCommand,
+): void {
+  const list = document.querySelector<HTMLElement>('#dataset-process-window-list');
+  if (!list) return;
+  if (list.children.length >= 20) {
+    showToast('工艺信号窗口最多 20 组', true);
+    return;
+  }
+  datasetProcessWindowSequence += 1;
+  const value = definition || {
+    featureRef: `process.window.signal_${datasetProcessWindowSequence}.mean_60s`,
+    signal: `signal.${datasetProcessWindowSequence}`,
+    valueType: 'NUMERIC',
+    metric: 'MEAN',
+    startOffsetSeconds: -60,
+    endOffsetSeconds: 0,
+    minimumSamples: 3,
+    maximumGapSeconds: 30,
+    expectedUnit: 'unit',
+    requireCalibration: false,
+    acceptedQualityCodes: ['GOOD'],
+  };
+  const qualityValue = value.acceptedQualityCodes.includes('SUBSTITUTED') ? 'GOOD,SUBSTITUTED' : 'GOOD';
+  const row = document.createElement('div');
+  row.className = 'dataset-window-row';
+  row.dataset.processWindow = String(datasetProcessWindowSequence);
+  row.innerHTML = `
+    <label class="dataset-window-feature"><span>特征引用</span><input data-window-field="featureRef" class="mono-input" value="${escapeHtml(value.featureRef)}" maxlength="128" required /></label>
+    <label class="dataset-window-signal"><span>逻辑信号</span><input data-window-field="signal" class="mono-input" value="${escapeHtml(value.signal)}" maxlength="128" required /></label>
+    <label><span>值类型</span><select data-window-field="valueType">${datasetProcessWindowOptions(['NUMERIC', 'BOOLEAN'], value.valueType)}</select></label>
+    <label><span>聚合</span><select data-window-field="metric">${datasetProcessWindowOptions(['MEAN', 'MIN', 'MAX', 'LAST', 'DELTA', 'SLOPE', 'TRUE_RATIO'], value.metric)}</select></label>
+    <button type="button" class="icon-button dataset-window-remove" aria-label="删除工艺信号窗口" title="删除工艺信号窗口"><i data-lucide="trash-2"></i></button>
+    <label><span>开始偏移（秒）</span><input data-window-field="startOffsetSeconds" type="number" min="-3600" max="-1" value="${value.startOffsetSeconds}" required /></label>
+    <label><span>结束偏移（秒）</span><input data-window-field="endOffsetSeconds" type="number" min="-3599" max="0" value="${value.endOffsetSeconds}" required /></label>
+    <label><span>最少样本</span><input data-window-field="minimumSamples" type="number" min="2" max="900" value="${value.minimumSamples}" required /></label>
+    <label><span>最大间隔（秒）</span><input data-window-field="maximumGapSeconds" type="number" min="1" max="600" value="${value.maximumGapSeconds}" required /></label>
+    <label><span>预期单位</span><input data-window-field="expectedUnit" value="${escapeHtml(value.expectedUnit)}" maxlength="32" required /></label>
+    <label><span>质量范围</span><select data-window-field="acceptedQualityCodes">${datasetProcessWindowOptions(['GOOD', 'GOOD,SUBSTITUTED'], qualityValue)}</select></label>
+    <label class="dataset-window-calibration"><input data-window-field="requireCalibration" type="checkbox"${value.requireCalibration ? ' checked' : ''} /><span>要求有效校准</span></label>`;
+  list.append(row);
+  const valueType = row.querySelector<HTMLSelectElement>('[data-window-field="valueType"]')!;
+  const metric = row.querySelector<HTMLSelectElement>('[data-window-field="metric"]')!;
+  const syncMetrics = (): void => {
+    const booleanValue = valueType.value === 'BOOLEAN';
+    Array.from(metric.options).forEach((option) => {
+      option.disabled = booleanValue ? option.value !== 'TRUE_RATIO' : option.value === 'TRUE_RATIO';
+    });
+    if (booleanValue) metric.value = 'TRUE_RATIO';
+    else if (metric.value === 'TRUE_RATIO') metric.value = 'MEAN';
+  };
+  valueType.addEventListener('change', syncMetrics);
+  row.querySelector('.dataset-window-remove')?.addEventListener('click', () => row.remove());
+  syncMetrics();
+  refreshIcons();
+}
+
+function readDatasetProcessWindows(): ProcessSignalWindowDefinitionCommand[] {
+  const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-process-window]'));
+  if (rows.length < 2) throw new Error('至少配置两组工艺信号窗口');
+  const values = rows.map((row) => {
+    const input = (name: string): HTMLInputElement =>
+      row.querySelector<HTMLInputElement>(`[data-window-field="${name}"]`)!;
+    const select = (name: string): HTMLSelectElement =>
+      row.querySelector<HTMLSelectElement>(`[data-window-field="${name}"]`)!;
+    const featureRef = input('featureRef').value.trim();
+    const signal = input('signal').value.trim();
+    const valueType = select('valueType').value as ProcessSignalValueType;
+    const metric = select('metric').value as ProcessSignalMetric;
+    const startOffsetSeconds = Number(input('startOffsetSeconds').value);
+    const endOffsetSeconds = Number(input('endOffsetSeconds').value);
+    const minimumSamples = Number(input('minimumSamples').value);
+    const maximumGapSeconds = Number(input('maximumGapSeconds').value);
+    const expectedUnit = input('expectedUnit').value.trim();
+    const acceptedQualityCodes = select('acceptedQualityCodes').value
+      .split(',')
+      .map((code) => code as ProcessSignalQualityCode);
+    if (!/^process\.window\.[a-z0-9][a-z0-9._-]*$/.test(featureRef)) {
+      throw new Error(`工艺特征引用不合法：${featureRef || '空值'}`);
+    }
+    if (!/^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(signal)) {
+      throw new Error(`逻辑信号不合法：${signal || '空值'}`);
+    }
+    if (!Number.isInteger(startOffsetSeconds) || !Number.isInteger(endOffsetSeconds)
+      || startOffsetSeconds < -3600 || startOffsetSeconds > -1
+      || endOffsetSeconds < -3599 || endOffsetSeconds > 0
+      || endOffsetSeconds <= startOffsetSeconds) {
+      throw new Error(`${featureRef} 必须定义预测时点前的有效窗口`);
+    }
+    if (!Number.isInteger(minimumSamples) || minimumSamples < 2 || minimumSamples > 900
+      || !Number.isInteger(maximumGapSeconds) || maximumGapSeconds < 1 || maximumGapSeconds > 600) {
+      throw new Error(`${featureRef} 的样本数或最大间隔超出范围`);
+    }
+    if (!expectedUnit) throw new Error(`${featureRef} 必须填写预期单位`);
+    if ((valueType === 'BOOLEAN' && metric !== 'TRUE_RATIO')
+      || (valueType === 'NUMERIC' && metric === 'TRUE_RATIO')) {
+      throw new Error(`${featureRef} 的值类型与聚合方式不匹配`);
+    }
+    return {
+      featureRef,
+      signal,
+      valueType,
+      metric,
+      startOffsetSeconds,
+      endOffsetSeconds,
+      minimumSamples,
+      maximumGapSeconds,
+      expectedUnit,
+      requireCalibration: input('requireCalibration').checked,
+      acceptedQualityCodes,
+    };
+  }).sort((left, right) => left.featureRef.localeCompare(right.featureRef));
+  if (new Set(values.map((item) => item.featureRef)).size !== values.length) {
+    throw new Error('工艺信号窗口的特征引用不能重复');
+  }
+  return values;
+}
+
 function renderDatasets(): void {
   const content = document.querySelector('#content')!;
   const readyCount = state.datasets.filter((dataset) => dataset.latestSnapshot?.state === 'MANIFEST_READY').length;
@@ -3325,10 +3494,12 @@ function renderDatasets(): void {
   const summary = `<div class="dataset-summary"><div><span>数据集定义</span><b>${state.datasets.length}</b></div><div><span>清单已就绪</span><b>${readyCount}</b></div><div><span>Parquet 已就绪</span><b>${parquetReadyCount}</b></div><div><span>后台处理中</span><b>${activeCount}</b></div><div><span>失败任务</span><b>${failedCount}</b></div></div>`;
   const rows = state.datasets.map((dataset) => {
     const latest = dataset.latestSnapshot;
-    return `<tr data-dataset-id="${escapeHtml(dataset.id)}" tabindex="0"><td><strong>${escapeHtml(dataset.name)}</strong><small>${escapeHtml(dataset.datasetCode)}@${escapeHtml(dataset.version)}</small></td><td>${escapeHtml(dataset.lineIds.join(', '))}</td><td>${escapeHtml(dataset.predictionTimePolicy)}</td><td>${dataset.featureRefs.length} / ${dataset.labelRefs.length}</td><td>${number(dataset.minimumConfidence * 100, 0)}%</td><td>${latest ? statusChip(latest.state) : statusChip('NOT_CREATED')}</td><td>${latest ? statusChip(latest.materializationState) : statusChip('NOT_STARTED')}</td><td>${latest ? `v${latest.snapshotVersion} · ${formatTime(latest.freezeAt)}` : '-'}</td><td>${latest?.manifestChecksum ? `<code class="dataset-checksum">${escapeHtml(latest.manifestChecksum.slice(0, 12))}</code>` : '-'}</td><td><button class="icon-text-button dataset-row-action" data-create-dataset-snapshot="${escapeHtml(dataset.id)}"><i data-lucide="play"></i>生成清单</button></td></tr>`;
+    const windows = dataset.processSignalWindows || [];
+    const contextCount = dataset.featureRefs.filter((reference) => !reference.startsWith('process.window.')).length;
+    return `<tr data-dataset-id="${escapeHtml(dataset.id)}" tabindex="0"><td><strong>${escapeHtml(dataset.name)}</strong><small>${escapeHtml(dataset.datasetCode)}@${escapeHtml(dataset.version)}</small></td><td>${escapeHtml(dataset.lineIds.join(', '))}</td><td>${escapeHtml(dataset.predictionTimePolicy)}</td><td><span class="dataset-feature-count">${contextCount} 上下文 · ${windows.length} 窗口 · ${dataset.labelRefs.length} 标签</span></td><td>${number(dataset.minimumConfidence * 100, 0)}%</td><td>${latest ? statusChip(latest.state) : statusChip('NOT_CREATED')}</td><td>${latest ? statusChip(latest.materializationState) : statusChip('NOT_STARTED')}</td><td>${latest ? `v${latest.snapshotVersion} · ${formatTime(latest.freezeAt)}` : '-'}</td><td>${latest?.manifestChecksum ? `<code class="dataset-checksum">${escapeHtml(latest.manifestChecksum.slice(0, 12))}</code>` : '-'}</td><td><button class="icon-text-button dataset-row-action" data-create-dataset-snapshot="${escapeHtml(dataset.id)}"><i data-lucide="play"></i>生成清单</button></td></tr>`;
   }).join('');
   content.innerHTML = state.datasets.length
-    ? `${toolbar}${summary}<div class="table-frame"><table class="dataset-table"><thead><tr><th>数据集</th><th>产线</th><th>预测时点</th><th>特征 / 标签</th><th>最低置信度</th><th>清单状态</th><th>Parquet</th><th>最近快照</th><th>清单校验和</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>`
+    ? `${toolbar}${summary}<div class="table-frame"><table class="dataset-table"><thead><tr><th>数据集</th><th>产线</th><th>预测时点</th><th>上下文 / 窗口 / 标签</th><th>最低置信度</th><th>清单状态</th><th>Parquet</th><th>最近快照</th><th>清单校验和</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>`
     : `${toolbar}${summary}<div class="empty-state"><i data-lucide="boxes"></i><strong>尚未建立数据集定义</strong><span>当前工厂没有不可变数据集定义。</span></div>`;
   content.querySelector('#open-dataset-definition')?.addEventListener('click', openDatasetDefinitionDialog);
   content.querySelectorAll<HTMLElement>('[data-dataset-id]').forEach((row) => row.addEventListener('click', () => {
@@ -3353,12 +3524,25 @@ function openDatasetDefinitionDialog(): void {
   document.querySelector<HTMLInputElement>('#dataset-confidence')!.value = '0.8';
   document.querySelectorAll<HTMLInputElement>('[data-dataset-feature], [data-dataset-label]')
     .forEach((input) => { input.checked = true; });
+  datasetProcessWindowSequence = 0;
+  document.querySelector('#dataset-process-window-list')!.innerHTML = '';
+  defaultDatasetProcessWindows.forEach((definition) => appendDatasetProcessWindow(definition));
   document.querySelector<HTMLDialogElement>('#dataset-definition-dialog')!.showModal();
 }
 
 async function handleDatasetDefinitionCreate(event: SubmitEvent): Promise<void> {
   event.preventDefault();
-  const featureRefs = checkedDatasetRefs('[data-dataset-feature]');
+  let processSignalWindows: ProcessSignalWindowDefinitionCommand[];
+  try {
+    processSignalWindows = readDatasetProcessWindows();
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+    return;
+  }
+  const featureRefs = [
+    ...checkedDatasetRefs('[data-dataset-feature]'),
+    ...processSignalWindows.map((item) => item.featureRef),
+  ].sort();
   const labelRefs = checkedDatasetRefs('[data-dataset-label]');
   if (!featureRefs.length || !labelRefs.length) {
     showToast('特征字段和标签字段都至少选择一项', true);
@@ -3375,6 +3559,7 @@ async function handleDatasetDefinitionCreate(event: SubmitEvent): Promise<void> 
       predictionTimePolicy: 'AUTOMATIC_BATCH_START',
       featureCutoffPolicy: 'AT_OR_BEFORE_PREDICTION_TIME',
       featureRefs,
+      processSignalWindows,
       labelRefs,
       maxLabelDelayHours: Number(document.querySelector<HTMLInputElement>('#dataset-label-delay')!.value),
       minimumConfidence: Number(document.querySelector<HTMLInputElement>('#dataset-confidence')!.value),
@@ -3405,12 +3590,19 @@ async function handleDatasetDefinitionCreate(event: SubmitEvent): Promise<void> 
 function openDatasetDefinition(dataset: DatasetDefinition): void {
   state.selectedDataset = dataset;
   const latest = dataset.latestSnapshot;
-  const featureItems = dataset.featureRefs.map((reference) => `<li><code>${escapeHtml(reference)}</code></li>`).join('');
+  const processSignalWindows = dataset.processSignalWindows || [];
+  const featureItems = dataset.featureRefs
+    .filter((reference) => !reference.startsWith('process.window.'))
+    .map((reference) => `<li><code>${escapeHtml(reference)}</code></li>`).join('');
   const labelItems = dataset.labelRefs.map((reference) => `<li><code>${escapeHtml(reference)}</code></li>`).join('');
+  const windowRows = processSignalWindows.map((window) => `<tr><td><strong>${escapeHtml(window.featureRef)}</strong><small>${escapeHtml(window.signal)}</small></td><td>${escapeHtml(window.valueType)} / ${escapeHtml(window.metric)}</td><td>${window.startOffsetSeconds}s → ${window.endOffsetSeconds}s</td><td>${window.minimumSamples} / ${window.maximumGapSeconds}s</td><td>${escapeHtml(window.expectedUnit)}</td><td>${window.requireCalibration ? '必须' : '不要求'}</td><td><code>${escapeHtml(window.acceptedQualityCodes.join(', '))}</code></td></tr>`).join('');
+  const windowHtml = windowRows
+    ? `<div class="table-frame dataset-window-definition-frame"><table><thead><tr><th>特征 / 信号</th><th>类型 / 聚合</th><th>窗口</th><th>样本 / 间隔</th><th>单位</th><th>校准</th><th>质量</th></tr></thead><tbody>${windowRows}</tbody></table></div>`
+    : '<div class="simulation-empty">该历史定义没有工艺信号窗口，训练资格将失败关闭。</div>';
   const latestHtml = latest
     ? `<div class="dataset-latest"><div><span>v${latest.snapshotVersion}</span>${statusChip(latest.state)}${statusChip(latest.materializationState)}</div><b>${formatTime(latest.freezeAt)}</b><code>${escapeHtml(latest.manifestChecksum || '-')}</code><button id="open-latest-dataset-snapshot" class="button button--secondary">查看最近快照</button></div>`
     : '<div class="simulation-empty">尚未生成快照</div>';
-  openDrawer(`<header><div><span>不可变数据集定义</span><h2>${escapeHtml(dataset.name)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(dataset.state)}<span class="shadow-label">POINT-IN-TIME</span></div><span>revision ${dataset.revision}</span></div><div class="drawer-section facts-grid"><div><span>编码 / 版本</span><b>${escapeHtml(dataset.datasetCode)}@${escapeHtml(dataset.version)}</b></div><div><span>工厂 / 产线</span><b>${escapeHtml(dataset.plantId)} / ${escapeHtml(dataset.lineIds.join(', '))}</b></div><div><span>预测时点</span><b>${escapeHtml(dataset.predictionTimePolicy)}</b></div><div><span>特征截止</span><b>${escapeHtml(dataset.featureCutoffPolicy)}</b></div><div><span>标签最大延迟</span><b>${dataset.maxLabelDelayHours} 小时</b></div><div><span>最低置信度</span><b>${number(dataset.minimumConfidence * 100, 0)}%</b></div><div><span>拆分策略</span><b>${escapeHtml(dataset.splitPolicy)}</b></div><div><span>定义 checksum</span><b class="mono-value">${escapeHtml(dataset.checksum)}</b></div></div><div class="drawer-section dataset-ref-columns"><div><div class="section-title"><h3>特征字段</h3><span>${dataset.featureRefs.length} 项</span></div><ul class="dataset-ref-list">${featureItems}</ul></div><div><div class="section-title"><h3>标签字段</h3><span>${dataset.labelRefs.length} 项</span></div><ul class="dataset-ref-list">${labelItems}</ul></div></div><div class="drawer-section"><div class="section-title"><h3>最近快照</h3><span>${latest ? `v${latest.snapshotVersion}` : '无'}</span></div>${latestHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--primary" id="open-dataset-snapshot"><i data-lucide="play"></i>生成清单</button></footer>`, `dataset:${dataset.id}`);
+  openDrawer(`<header><div><span>不可变数据集定义</span><h2>${escapeHtml(dataset.name)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(dataset.state)}<span class="shadow-label">POINT-IN-TIME</span></div><span>revision ${dataset.revision}</span></div><div class="drawer-section facts-grid"><div><span>编码 / 版本</span><b>${escapeHtml(dataset.datasetCode)}@${escapeHtml(dataset.version)}</b></div><div><span>工厂 / 产线</span><b>${escapeHtml(dataset.plantId)} / ${escapeHtml(dataset.lineIds.join(', '))}</b></div><div><span>预测时点</span><b>${escapeHtml(dataset.predictionTimePolicy)}</b></div><div><span>特征截止</span><b>${escapeHtml(dataset.featureCutoffPolicy)}</b></div><div><span>标签最大延迟</span><b>${dataset.maxLabelDelayHours} 小时</b></div><div><span>最低置信度</span><b>${number(dataset.minimumConfidence * 100, 0)}%</b></div><div><span>拆分策略</span><b>${escapeHtml(dataset.splitPolicy)}</b></div><div><span>定义 checksum</span><b class="mono-value">${escapeHtml(dataset.checksum)}</b></div></div><div class="drawer-section"><div class="section-title"><h3>工艺信号窗口</h3><span>${processSignalWindows.length} 组</span></div>${windowHtml}</div><div class="drawer-section dataset-ref-columns"><div><div class="section-title"><h3>上下文特征</h3><span>${dataset.featureRefs.length - processSignalWindows.length} 项</span></div><ul class="dataset-ref-list">${featureItems}</ul></div><div><div class="section-title"><h3>标签字段</h3><span>${dataset.labelRefs.length} 项</span></div><ul class="dataset-ref-list">${labelItems}</ul></div></div><div class="drawer-section"><div class="section-title"><h3>最近快照</h3><span>${latest ? `v${latest.snapshotVersion}` : '无'}</span></div>${latestHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--primary" id="open-dataset-snapshot"><i data-lucide="play"></i>生成清单</button></footer>`, `dataset:${dataset.id}`);
   document.querySelector('#open-dataset-snapshot')?.addEventListener('click', () => openDatasetSnapshotDialog(dataset));
   document.querySelector('#open-latest-dataset-snapshot')?.addEventListener('click', () => {
     if (latest) void openDatasetSnapshotById(latest.id);
@@ -4094,7 +4286,7 @@ function openDatasetTrainingReadinessDialog(snapshot: DatasetSnapshot): void {
   state.selectedDatasetSnapshot = snapshot;
   document.querySelector('#dataset-training-readiness-title')!.textContent = assessment
     ? '重新评估训练就绪' : '评估训练就绪';
-  document.querySelector('#dataset-training-readiness-summary')!.innerHTML = `<div><span>首个模型目标</span><b>批次起始边界复核风险</b></div><div><span>策略</span><b>bpi-training-readiness/batch-start-boundary-v1</b></div><div><span>当前结果</span><b>${escapeHtml(assessment?.state || 'NOT_ASSESSED')}</b></div><div><span>输入摘要</span><b>${escapeHtml(registration.datasetDigest)}</b></div><div><span>操作边界</span><b>只评估，不训练模型</b></div><div><span>registration revision</span><b>${registration.revision}</b></div>`;
+  document.querySelector('#dataset-training-readiness-summary')!.innerHTML = `<div><span>首个模型目标</span><b>批次起始边界复核风险</b></div><div><span>策略</span><b>bpi-training-readiness/batch-start-boundary-v2</b></div><div><span>当前结果</span><b>${escapeHtml(assessment?.state || 'NOT_ASSESSED')}</b></div><div><span>输入摘要</span><b>${escapeHtml(registration.datasetDigest)}</b></div><div><span>操作边界</span><b>只评估，不训练模型</b></div><div><span>registration revision</span><b>${registration.revision}</b></div>`;
   const reason = document.querySelector<HTMLTextAreaElement>('#dataset-training-readiness-reason')!;
   reason.value = '';
   const button = document.querySelector<HTMLButtonElement>('#dataset-training-readiness-submit')!;
@@ -4342,6 +4534,7 @@ const trainingReadinessGateDetails: Record<string, string> = {
   POINT_IN_TIME_LEAKAGE_DETECTED: '特征截止和标签可用时间不能泄漏未来事实。',
   REQUIRED_CONTEXT_FEATURES_MISSING: '缺少物料、工段或固定规则、拓扑、点位目录上下文。',
   PROCESS_SIGNAL_WINDOWS_MISSING: '至少需要两组边界前过程信号窗口，只有标识符不能训练工艺模型。',
+  PROCESS_SIGNAL_WINDOW_FACTS_INCOMPLETE: '每个纳入样本的每组工艺窗口都必须形成 READY 的不可变事实。',
   BOUNDARY_REVIEW_LABEL_MISSING: '需要人工复核的起始边界标签定义。',
   INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM: '纳入样本不足。',
   DISTINCT_BATCH_COUNT_BELOW_MINIMUM: '独立批次数不足。',
@@ -4379,7 +4572,7 @@ function datasetTrainingReadinessHtml(snapshot: DatasetSnapshot): string {
   const gateHtml = failedGates.length
     ? `<ul class="dataset-readiness-blockers">${failedGates.map((gate) => `<li><div><code>${escapeHtml(gate.code)}</code><span>${escapeHtml(trainingReadinessGateDetail(gate))}</span></div><small>要求 ${escapeHtml(readinessGateValue(gate.expected))} · 实际 ${escapeHtml(readinessGateValue(gate.observed))}</small></li>`).join('')}</ul>`
     : '<div class="dataset-readiness-pass"><i data-lucide="shield-check"></i><div><strong>当前数据已通过离线训练资格门槛</strong><span>这里只放行后续训练申请，模型训练仍未开始。</span></div></div>';
-  return `<div class="drawer-section dataset-training-readiness-panel" data-training-readiness-state="${escapeHtml(assessment.state)}"><div class="section-title"><h3>离线训练就绪</h3><span>${statusChip(assessment.state)} · 第 ${assessment.assessmentSequence} 次</span></div><div class="dataset-readiness-objective"><div><span>首个模型目标</span><strong>批次起始边界复核风险</strong></div><code>${escapeHtml(assessment.policyVersion)}</code></div><div class="dataset-readiness-grid"><div><span>纳入批次</span><b>${readinessMetric(assessment, 'includedSampleCount')} / ${readinessMetric(assessment, 'distinctBatchCount')}</b></div><div><span>生产日期 / 切分组</span><b>${readinessMetric(assessment, 'distinctProductionDayCount')} / ${readinessMetric(assessment, 'productionSplitGroupCount')}</b></div><div><span>过程信号窗口</span><b>${signalFeatureCount}</b></div><div><span>接受 / 拒绝标签</span><b>${readinessMetric(assessment, 'startAcceptedLabelCount')} / ${readinessMetric(assessment, 'startRejectedLabelCount')}</b></div><div><span>排除比例</span><b>${number(excludedRatio, 1)}%</b></div><div><span>连续影子天数</span><b>${number(readinessMetric(assessment, 'maximumContinuousShadowRunDays'), 1)}</b></div><div><span>未决关键质量事件</span><b>${readinessMetric(assessment, 'unresolvedCriticalIncidentCount')}</b></div><div><span>未通过门槛</span><b>${assessment.blockerCodes.length}</b></div></div>${gateHtml}<div class="dataset-artifact-reference"><span>评估 checksum</span><code class="dataset-training-readiness-checksum">${escapeHtml(assessment.assessmentChecksum)}</code><span>评估时间 / 人员</span><code>${escapeHtml(formatTime(assessment.assessedAt))} / ${escapeHtml(assessment.assessedBy)}</code><span>模型边界</span><code>training=false · registry=false · inference=false · activation=false</code></div></div>`;
+  return `<div class="drawer-section dataset-training-readiness-panel" data-training-readiness-state="${escapeHtml(assessment.state)}"><div class="section-title"><h3>离线训练就绪</h3><span>${statusChip(assessment.state)} · 第 ${assessment.assessmentSequence} 次</span></div><div class="dataset-readiness-objective"><div><span>首个模型目标</span><strong>批次起始边界复核风险</strong></div><code>${escapeHtml(assessment.policyVersion)}</code></div><div class="dataset-readiness-grid"><div><span>纳入批次</span><b>${readinessMetric(assessment, 'includedSampleCount')} / ${readinessMetric(assessment, 'distinctBatchCount')}</b></div><div><span>生产日期 / 切分组</span><b>${readinessMetric(assessment, 'distinctProductionDayCount')} / ${readinessMetric(assessment, 'productionSplitGroupCount')}</b></div><div><span>过程信号窗口</span><b>${signalFeatureCount}</b></div><div><span>窗口事实 READY / 应有</span><b>${readinessMetric(assessment, 'processWindowReadyFactCount')} / ${readinessMetric(assessment, 'processWindowExpectedFactCount')}</b></div><div><span>窗口事实阻断 / 缺失</span><b>${readinessMetric(assessment, 'processWindowBlockedFactCount')} / ${readinessMetric(assessment, 'processWindowMissingFactCount')}</b></div><div><span>接受 / 拒绝标签</span><b>${readinessMetric(assessment, 'startAcceptedLabelCount')} / ${readinessMetric(assessment, 'startRejectedLabelCount')}</b></div><div><span>排除比例</span><b>${number(excludedRatio, 1)}%</b></div><div><span>连续影子天数</span><b>${number(readinessMetric(assessment, 'maximumContinuousShadowRunDays'), 1)}</b></div><div><span>未决关键质量事件</span><b>${readinessMetric(assessment, 'unresolvedCriticalIncidentCount')}</b></div><div><span>未通过门槛</span><b>${assessment.blockerCodes.length}</b></div></div>${gateHtml}<div class="dataset-artifact-reference"><span>评估 checksum</span><code class="dataset-training-readiness-checksum">${escapeHtml(assessment.assessmentChecksum)}</code><span>评估时间 / 人员</span><code>${escapeHtml(formatTime(assessment.assessedAt))} / ${escapeHtml(assessment.assessedBy)}</code><span>模型边界</span><code>training=false · registry=false · inference=false · activation=false</code></div></div>`;
 }
 
 function datasetDeliveryActionHtml(snapshot: DatasetSnapshot): string {
@@ -4432,15 +4625,56 @@ function datasetDeliveryActionHtml(snapshot: DatasetSnapshot): string {
   return `<button class="button button--primary" id="open-dataset-training-readiness"><i data-lucide="list-checks"></i>${readiness ? '重新评估训练资格' : '评估训练资格'}</button>`;
 }
 
+function datasetSampleFeaturePayload(sample: DatasetManifestSample): Record<string, unknown> {
+  return sample.featurePayload || sample.features || {};
+}
+
+function datasetSampleSourcePayload(sample: DatasetManifestSample): Record<string, unknown> {
+  return sample.sourcePayload || sample.source || {};
+}
+
+function datasetSampleProcessEvidence(
+  sample: DatasetManifestSample,
+): DatasetProcessSignalWindowEvidence[] {
+  const value = datasetSampleSourcePayload(sample).processSignalWindows;
+  return Array.isArray(value) ? value as DatasetProcessSignalWindowEvidence[] : [];
+}
+
+function datasetProcessEvidenceHtml(samples: DatasetManifestSample[]): string {
+  const rows = samples.flatMap((sample) => datasetSampleProcessEvidence(sample)
+    .map((evidence) => ({ sample, evidence })));
+  if (!rows.length) {
+    return '<div class="simulation-empty">清单没有工艺信号窗口证据；该定义无法通过 V2 训练资格门槛。</div>';
+  }
+  const ready = rows.filter(({ evidence }) => evidence.state === 'READY').length;
+  const blocked = rows.length - ready;
+  const body = rows.slice(0, 100).map(({ sample, evidence }) => {
+    const point = evidence.physicalPoint || {};
+    const pointRef = [point.productId, point.deviceId, point.propertyId].filter(Boolean).join(' / ') || '-';
+    const value = evidence.numericValue === null || evidence.numericValue === undefined
+      ? '-' : `${number(evidence.numericValue, 6)} ${evidence.expectedUnit}`;
+    const blockers = evidence.blockerCodes?.join(', ') || '-';
+    return `<tr><td><strong>${escapeHtml(sample.batchNo)}</strong><small>${escapeHtml(sample.lineId)}</small></td><td><strong>${escapeHtml(evidence.featureRef)}</strong><small>${escapeHtml(evidence.signal)}</small></td><td><span>${formatTime(evidence.windowStart)}</span><small>至 ${formatTime(evidence.windowEnd)}</small></td><td><strong>${escapeHtml(pointRef)}</strong></td><td>${evidence.acceptedSampleCount} / ${evidence.sourcePointCount}<small>最大间隔 ${evidence.maximumObservedGapSeconds ?? '-'}s</small></td><td><strong>${escapeHtml(value)}</strong><small>${escapeHtml(evidence.metric)}</small></td><td>${statusChip(evidence.state)}<small>${escapeHtml(blockers)}</small></td></tr>`;
+  }).join('');
+  return `<div class="dataset-window-evidence-summary"><div><span>事实总数</span><b>${rows.length}</b></div><div><span>READY</span><b>${ready}</b></div><div><span>BLOCKED</span><b>${blocked}</b></div></div><div class="table-frame dataset-window-evidence-frame"><table><thead><tr><th>批次</th><th>特征 / 信号</th><th>窗口</th><th>物理点位</th><th>有效 / 来源样本</th><th>特征值</th><th>状态 / 阻断</th></tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
 function renderDatasetSnapshotDrawer(snapshot: DatasetSnapshot): void {
   const manifest = snapshot.manifest;
   const exclusions = Object.entries(snapshot.exclusionSummary || {})
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([reason, count]) => `<li><code>${escapeHtml(reason)}</code><b>${count}</b></li>`).join('');
-  const samples = (manifest?.samples || []).slice(0, 50).map((sample) => `<tr><td><strong>${escapeHtml(sample.batchNo)}</strong><small>${escapeHtml(sample.lineId)}</small></td><td>${formatTime(sample.predictionTime)}</td><td>${escapeHtml(sample.splitKey)}</td><td>${number(sample.confidence * 100, 0)}%</td><td>${sample.included ? statusChip('INCLUDED') : statusChip('EXCLUDED')}</td><td>${escapeHtml(sample.exclusionReasons.join(', ') || '-')}</td></tr>`).join('');
+  const manifestSamples = manifest?.samples || [];
+  const samples = manifestSamples.slice(0, 50).map((sample) => {
+    const evidence = datasetSampleProcessEvidence(sample);
+    const ready = evidence.filter((item) => item.state === 'READY').length;
+    const selectedProcessFeatureCount = Object.keys(datasetSampleFeaturePayload(sample))
+      .filter((reference) => reference.startsWith('process.window.')).length;
+    return `<tr><td><strong>${escapeHtml(sample.batchNo)}</strong><small>${escapeHtml(sample.lineId)}</small></td><td>${formatTime(sample.predictionTime)}</td><td>${escapeHtml(sample.splitKey)}</td><td>${number(sample.confidence * 100, 0)}%</td><td>${ready} / ${evidence.length}<small>${selectedProcessFeatureCount} 个特征值</small></td><td>${sample.included ? statusChip('INCLUDED') : statusChip('EXCLUDED')}</td><td>${escapeHtml(sample.exclusionReasons.join(', ') || '-')}</td></tr>`;
+  }).join('');
   const phase = manifest?.phaseBoundary;
   const buildHtml = manifest
-    ? `<div class="drawer-section"><div class="section-title"><h3>Manifest 边界</h3><span>不可变</span></div><div class="dataset-phase-grid"><div><span>交付状态</span><b>${escapeHtml(phase?.deliveryState || 'MANIFEST_ONLY')}</b></div><div><span>Manifest 物化声明</span><b>${escapeHtml(phase?.materializationState || 'NOT_STARTED')}</b></div><div><span>Manifest Artifact URI</span><b>${escapeHtml(phase?.artifactUri || '-')}</b></div></div></div>${datasetDeliveryChainHtml(snapshot)}${datasetMaterializationHtml(snapshot)}${datasetCatalogPublicationHtml(snapshot)}${datasetRetentionArchiveHtml(snapshot)}${datasetMlflowRegistrationHtml(snapshot)}${datasetTrainingReadinessHtml(snapshot)}<div class="drawer-section"><div class="section-title"><h3>样本统计</h3><span>${manifest.counts.total} 条</span></div><div class="metric-grid dataset-metrics"><div><span>总样本</span><b>${manifest.counts.total}</b></div><div><span>纳入</span><b>${manifest.counts.included}</b></div><div><span>排除</span><b>${manifest.counts.excluded}</b></div><div><span>排除原因</span><b>${Object.keys(manifest.counts.exclusionSummary).length}</b></div></div>${exclusions ? `<ul class="dataset-exclusion-list">${exclusions}</ul>` : ''}</div><div class="drawer-section"><div class="section-title"><h3>Point-in-time 样本</h3><span>${samples ? `显示 ${Math.min(manifest.samples.length, 50)} / ${manifest.samples.length}` : '无'}</span></div>${samples ? `<div class="table-frame dataset-sample-frame"><table><thead><tr><th>批次</th><th>预测时点</th><th>拆分</th><th>置信度</th><th>结果</th><th>排除原因</th></tr></thead><tbody>${samples}</tbody></table></div>` : '<div class="simulation-empty">没有满足冻结条件的影子复核样本</div>'}</div>`
+    ? `<div class="drawer-section"><div class="section-title"><h3>Manifest 边界</h3><span>不可变</span></div><div class="dataset-phase-grid"><div><span>交付状态</span><b>${escapeHtml(phase?.deliveryState || 'MANIFEST_ONLY')}</b></div><div><span>Manifest 物化声明</span><b>${escapeHtml(phase?.materializationState || 'NOT_STARTED')}</b></div><div><span>Manifest Artifact URI</span><b>${escapeHtml(phase?.artifactUri || '-')}</b></div></div></div>${datasetDeliveryChainHtml(snapshot)}${datasetMaterializationHtml(snapshot)}${datasetCatalogPublicationHtml(snapshot)}${datasetRetentionArchiveHtml(snapshot)}${datasetMlflowRegistrationHtml(snapshot)}${datasetTrainingReadinessHtml(snapshot)}<div class="drawer-section"><div class="section-title"><h3>样本统计</h3><span>${manifest.counts.total} 条</span></div><div class="metric-grid dataset-metrics"><div><span>总样本</span><b>${manifest.counts.total}</b></div><div><span>纳入</span><b>${manifest.counts.included}</b></div><div><span>排除</span><b>${manifest.counts.excluded}</b></div><div><span>排除原因</span><b>${Object.keys(manifest.counts.exclusionSummary).length}</b></div></div>${exclusions ? `<ul class="dataset-exclusion-list">${exclusions}</ul>` : ''}</div><div class="drawer-section dataset-process-evidence-panel"><div class="section-title"><h3>工艺信号窗口事实</h3><span>Point-in-time</span></div>${datasetProcessEvidenceHtml(manifestSamples)}</div><div class="drawer-section"><div class="section-title"><h3>Point-in-time 样本</h3><span>${samples ? `显示 ${Math.min(manifest.samples.length, 50)} / ${manifest.samples.length}` : '无'}</span></div>${samples ? `<div class="table-frame dataset-sample-frame"><table><thead><tr><th>批次</th><th>预测时点</th><th>拆分</th><th>置信度</th><th>窗口 READY</th><th>结果</th><th>排除原因</th></tr></thead><tbody>${samples}</tbody></table></div>` : '<div class="simulation-empty">没有满足冻结条件的影子复核样本</div>'}</div>`
     : `<div class="drawer-section"><div class="batch-detail-loading"><i data-lucide="refresh-cw"></i><div><strong>${snapshot.state === 'FAILED' ? '清单构建失败' : '后台正在构建清单'}</strong><span>${escapeHtml(snapshot.failureDetail || `attempt ${snapshot.attemptCount}`)}</span></div></div></div>`;
   openDrawer(`<header><div><span>数据集快照 v${snapshot.snapshotVersion}</span><h2>${escapeHtml(snapshot.datasetName)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(snapshot.state)}${statusChip(snapshot.materializationState)}<span class="shadow-label">POINT-IN-TIME</span></div><span>snapshot revision ${snapshot.revision}</span></div><div class="drawer-section facts-grid"><div><span>冻结时间</span><b>${formatTime(snapshot.freezeAt)}</b></div><div><span>产线</span><b>${escapeHtml(snapshot.lineIds.join(', '))}</b></div><div><span>规则版本筛选</span><b>${escapeHtml(snapshot.ruleVersionIds.join(', ') || '全部合格版本')}</b></div><div><span>低置信度排除</span><b>${snapshot.excludeLowConfidence ? '是' : '否'}</b></div><div><span>定义 checksum</span><b class="mono-value">${escapeHtml(snapshot.definitionChecksum)}</b></div><div><span>manifest checksum</span><b class="mono-value">${escapeHtml(snapshot.manifestChecksum || '-')}</b></div></div>${buildHtml}<footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${datasetDeliveryActionHtml(snapshot)}</footer>`, `dataset-snapshot:${snapshot.id}`);
   document.querySelector('#refresh-dataset-snapshot')?.addEventListener('click', () => void openDatasetSnapshotById(snapshot.id));
