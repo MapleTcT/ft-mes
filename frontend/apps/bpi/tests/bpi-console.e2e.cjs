@@ -1176,6 +1176,20 @@ test('mobile layout keeps navigation usable without page-level horizontal overfl
   await page.close();
 });
 
+test('hash navigation updates the active view without a document reload', async () => {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/shadowRuns`, { waitUntil: 'networkidle' });
+  await page.getByRole('heading', { name: '影子运行验收' }).waitFor();
+
+  await page.evaluate(() => { window.location.hash = '#/overview'; });
+  await page.getByRole('heading', { name: '实时生产态势' }).waitFor();
+  assert.match(await page.locator('[data-view="overview"]').getAttribute('class'), /is-active/);
+  assert.equal(new URL(page.url()).hash, '#/overview');
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
 test('shift lead rejects a false candidate without creating a batch', async () => {
   const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
   assert.equal(reset.status, 200);

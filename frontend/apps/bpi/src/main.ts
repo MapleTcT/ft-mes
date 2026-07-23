@@ -84,6 +84,7 @@ import type {
 import './styles.css';
 
 type View = 'overview' | 'candidates' | 'batches' | 'shadowRuns' | 'dataQuality' | 'points' | 'rules' | 'datasets' | 'featureFlags';
+const VIEWS: readonly View[] = ['overview', 'candidates', 'batches', 'shadowRuns', 'dataQuality', 'points', 'rules', 'datasets', 'featureFlags'];
 const CALIBRATION_PAGE_SIZE = 50;
 const POINT_CATALOG_PAGE_SIZE = 100;
 const POINT_SEARCH_DEBOUNCE_MS = 250;
@@ -689,7 +690,7 @@ function setCommandBoundaryVisible(visible: boolean, value = ''): void {
   input.value = visible ? value : '';
 }
 
-function navigate(view: View): void {
+function navigate(view: View, syncUrl = true): void {
   if (pointSearchTimer !== null) {
     window.clearTimeout(pointSearchTimer);
     pointSearchTimer = null;
@@ -698,8 +699,13 @@ function navigate(view: View): void {
   state.view = view;
   state.error = null;
   closeDrawer();
-  history.replaceState(null, '', `#/${view}`);
+  if (syncUrl) history.replaceState(null, '', `#/${view}`);
   void loadView();
+}
+
+function viewFromHash(): View | null {
+  const candidate = location.hash.replace('#/', '') as View;
+  return VIEWS.includes(candidate) ? candidate : null;
 }
 
 async function loadView(silent = false): Promise<void> {
@@ -4888,7 +4894,11 @@ function showToast(message: string, error = false): void {
 }
 
 shell();
-const initialView = location.hash.replace('#/', '') as View;
-if (['overview', 'candidates', 'batches', 'shadowRuns', 'dataQuality', 'points', 'rules', 'datasets', 'featureFlags'].includes(initialView)) state.view = initialView;
+const initialView = viewFromHash();
+if (initialView) state.view = initialView;
+window.addEventListener('hashchange', () => {
+  const nextView = viewFromHash();
+  if (nextView && nextView !== state.view) navigate(nextView, false);
+});
 void loadView();
 window.setInterval(() => { if (!document.hidden && state.view === 'overview') void loadView(true); }, 5_000);
