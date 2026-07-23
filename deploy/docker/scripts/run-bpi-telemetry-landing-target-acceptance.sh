@@ -19,6 +19,7 @@ PREHEAT_COUNT=${BPI_MQTT_PREHEAT_COUNT:-3}
 WINDOW_COUNT=${BPI_MQTT_COUNT:-2}
 WAIT_SECONDS=${BPI_TELEMETRY_ACCEPTANCE_WAIT_SECONDS:-240}
 SOURCE_SEQUENCE_EVIDENCE_INTERVAL=${BPI_SOURCE_SEQUENCE_EVIDENCE_ACCEPTANCE_INTERVAL:-5s}
+POINT_CATALOG_INTERVAL=${BPI_POINT_CATALOG_ACCEPTANCE_INTERVAL:-5s}
 MQTT_PUBLISH_ATTEMPTS=${BPI_MQTT_PUBLISH_ATTEMPTS:-3}
 MQTT_TIMEOUT_SECONDS=${BPI_MQTT_TIMEOUT_SECONDS:-20}
 MQTT_SETTLE_SECONDS=${BPI_MQTT_SETTLE_SECONDS:-5}
@@ -76,11 +77,14 @@ for value_name in \
             ;;
     esac
 done
-if ! printf '%s\n' "$SOURCE_SEQUENCE_EVIDENCE_INTERVAL" \
-    | grep -Eq '^[1-9][0-9]*(ms|s|m|h|d)$'; then
-    printf 'ERROR: BPI_SOURCE_SEQUENCE_EVIDENCE_ACCEPTANCE_INTERVAL must be a positive duration\n' >&2
-    exit 1
-fi
+for duration_name in SOURCE_SEQUENCE_EVIDENCE_INTERVAL POINT_CATALOG_INTERVAL; do
+    eval "duration_value=\${$duration_name}"
+    if ! printf '%s\n' "$duration_value" \
+        | grep -Eq '^[1-9][0-9]*(ms|s|m|h|d)$'; then
+        printf 'ERROR: %s must be a positive duration\n' "$duration_name" >&2
+        exit 1
+    fi
+done
 test -n "${ADP_USERNAME:-}" || {
     printf 'ERROR: ADP_USERNAME is required\n' >&2
     exit 1
@@ -287,25 +291,33 @@ restore_iot_state() {
 fixture_applied=false
 mapping_modified=false
 iot_env_modified=false
+cleanup_fixture() {
+    output_path=$1
+    postgres \
+        -v "marker=$MARKER" \
+        -v "plant_id=$PLANT_ID" \
+        -v "line_id=$LINE_ID" \
+        -v "product_id=$PRODUCT_ID" \
+        -v "device_id=$DEVICE_ID" \
+        -v "gateway_id=$GATEWAY_ID" \
+        -v "property_id=$PROPERTY_ID" \
+        -v "calibration_version=$CALIBRATION_VERSION" \
+        -v "preheat_marker=$PREHEAT_MARKER" \
+        -v "window_marker=$WINDOW_MARKER" \
+        <"$CLEANUP_SQL" >"$output_path"
+}
+
 cleanup() {
     exit_code=$?
     trap - EXIT HUP INT TERM
+    if [ "$fixture_applied" = true ]; then
+        cleanup_fixture "$EVIDENCE_DIR/cleanup-pre-restore.json.txt" || exit_code=1
+    fi
     if [ "$mapping_modified" = true ] || [ "$iot_env_modified" = true ]; then
         restore_iot_state || exit_code=1
     fi
     if [ "$fixture_applied" = true ]; then
-        postgres \
-            -v "marker=$MARKER" \
-            -v "plant_id=$PLANT_ID" \
-            -v "line_id=$LINE_ID" \
-            -v "product_id=$PRODUCT_ID" \
-            -v "device_id=$DEVICE_ID" \
-            -v "gateway_id=$GATEWAY_ID" \
-            -v "property_id=$PROPERTY_ID" \
-            -v "calibration_version=$CALIBRATION_VERSION" \
-            -v "preheat_marker=$PREHEAT_MARKER" \
-            -v "window_marker=$WINDOW_MARKER" \
-            <"$CLEANUP_SQL" >"$EVIDENCE_DIR/cleanup.json.txt" || exit_code=1
+        cleanup_fixture "$EVIDENCE_DIR/cleanup.json.txt" || exit_code=1
     fi
     rm -f "$IOT_ENV_BACKUP"
     exit "$exit_code"
@@ -313,26 +325,33 @@ cleanup() {
 trap cleanup EXIT HUP INT TERM
 
 iot_env_modified=true
-python3 - "$IOT_ENV" "$SOURCE_SEQUENCE_EVIDENCE_INTERVAL" <<'PY'
+python3 - \
+    "$IOT_ENV" \
+    "$SOURCE_SEQUENCE_EVIDENCE_INTERVAL" \
+    "$POINT_CATALOG_INTERVAL" <<'PY'
 import os
 import sys
 import tempfile
 from pathlib import Path
 
 path = Path(sys.argv[1])
-interval = sys.argv[2]
-key = "BPI_SOURCE_SEQUENCE_EVIDENCE_PUBLISH_INTERVAL"
+overrides = {
+    "BPI_SOURCE_SEQUENCE_EVIDENCE_PUBLISH_INTERVAL": sys.argv[2],
+    "BPI_POINT_CATALOG_INTERVAL": sys.argv[3],
+}
 lines = path.read_text(encoding="utf-8").splitlines()
 rendered = []
-replaced = False
+replaced = set()
 for line in lines:
-    if line.startswith(f"{key}="):
-        rendered.append(f"{key}={interval}")
-        replaced = True
+    key = line.partition("=")[0]
+    if key in overrides:
+        rendered.append(f"{key}={overrides[key]}")
+        replaced.add(key)
     else:
         rendered.append(line)
-if not replaced:
-    rendered.append(f"{key}={interval}")
+for key, value in overrides.items():
+    if key not in replaced:
+        rendered.append(f"{key}={value}")
 mode = path.stat().st_mode & 0o777
 with tempfile.NamedTemporaryFile(
     "w", encoding="utf-8", dir=path.parent, delete=False
@@ -346,6 +365,9 @@ PY
 printf 'BPI_SOURCE_SEQUENCE_EVIDENCE_PUBLISH_INTERVAL=%s\n' \
     "$SOURCE_SEQUENCE_EVIDENCE_INTERVAL" \
     >"$EVIDENCE_DIR/acceptance-runtime-overrides.txt"
+printf 'BPI_POINT_CATALOG_INTERVAL=%s\n' \
+    "$POINT_CATALOG_INTERVAL" \
+    >>"$EVIDENCE_DIR/acceptance-runtime-overrides.txt"
 
 mapping_modified=true
 python3 - "$MAPPING" "$DEVICE_ID" "$PROPERTY_ID" "$CALIBRATION_VERSION" <<'PY'
