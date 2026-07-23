@@ -78,6 +78,16 @@ public class TelemetryIngestionService {
             throw new BpiForbiddenException(
                     "Telemetry HTTP ingress is disabled; production telemetry must use the approved Kafka path.");
         }
+        return ingestPayload(actor, payload, traceId);
+    }
+
+    @Transactional(timeout = 15)
+    public TelemetryIngestResult ingestKafka(ActorContext actor, JsonNode payload, String traceId) {
+        requireIngestRole(actor);
+        return ingestPayload(actor, payload, traceId);
+    }
+
+    private TelemetryIngestResult ingestPayload(ActorContext actor, JsonNode payload, String traceId) {
         byte[] raw = writeBytes(payload);
         String checksum = Checksums.sha256(writeCanonical(payload));
         String candidateEventId = text(payload, "eventId");

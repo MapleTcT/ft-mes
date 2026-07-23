@@ -35,6 +35,8 @@ alter_topic_config() {
 }
 
 create_topic "${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}" "$DATA_PARTITIONS"
+create_topic "${BPI_TELEMETRY_DLQ_TOPIC:-iot.telemetry.selected.dlq.v1}" "$DATA_PARTITIONS" \
+    --config retention.ms=2592000000
 create_topic "${BPI_POINT_CATALOG_TOPIC:-iot.point-catalog.snapshot.v1}" "$CONTROL_PARTITIONS" \
     --config cleanup.policy=compact \
     --config "max.message.bytes=$POINT_CATALOG_MAX_MESSAGE_BYTES" \
