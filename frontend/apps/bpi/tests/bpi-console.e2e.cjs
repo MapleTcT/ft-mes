@@ -548,7 +548,10 @@ test('shift lead suspends and resumes a batch from the detail drawer', async () 
 test('batch detail completes recoverable two-step force-close without console or network errors', async () => {
   const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
   assert.equal(reset.status, 200);
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const page = await browser.newPage({
+    viewport: { width: 1440, height: 900 },
+    timezoneId: 'Asia/Shanghai',
+  });
   const errors = observe(page);
   await page.goto(`${APP_URL}/#/candidates`, { waitUntil: 'networkidle' });
 
