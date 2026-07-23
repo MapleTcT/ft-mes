@@ -19,6 +19,9 @@ PREHEAT_COUNT=${BPI_MQTT_PREHEAT_COUNT:-3}
 WINDOW_COUNT=${BPI_MQTT_COUNT:-2}
 WAIT_SECONDS=${BPI_TELEMETRY_ACCEPTANCE_WAIT_SECONDS:-240}
 SOURCE_SEQUENCE_EVIDENCE_INTERVAL=${BPI_SOURCE_SEQUENCE_EVIDENCE_ACCEPTANCE_INTERVAL:-5s}
+MQTT_PUBLISH_ATTEMPTS=${BPI_MQTT_PUBLISH_ATTEMPTS:-3}
+MQTT_TIMEOUT_SECONDS=${BPI_MQTT_TIMEOUT_SECONDS:-20}
+MQTT_SETTLE_SECONDS=${BPI_MQTT_SETTLE_SECONDS:-5}
 EVIDENCE_DIR=${BPI_TELEMETRY_ACCEPTANCE_EVIDENCE_DIR:-}
 POSTGRES_CONTAINER=${BPI_POSTGRES_CONTAINER:-adp-mes-newbase-postgres-1}
 POSTGRES_USER=${BPI_POSTGRES_USER:-adp}
@@ -62,7 +65,9 @@ for identifier in \
             ;;
     esac
 done
-for value_name in SOURCE_EPOCH PREHEAT_COUNT WINDOW_COUNT WAIT_SECONDS; do
+for value_name in \
+    SOURCE_EPOCH PREHEAT_COUNT WINDOW_COUNT WAIT_SECONDS \
+    MQTT_PUBLISH_ATTEMPTS MQTT_TIMEOUT_SECONDS MQTT_SETTLE_SECONDS; do
     eval "value=\${$value_name}"
     case "$value" in
         ''|*[!0-9]*|0)
@@ -247,6 +252,9 @@ wait_for_source_sequence() {
                    AND evidence.binding_fingerprint = point.source_sequence_binding_fingerprint
                    AND evidence.status = 'QUALIFIED'
                    AND evidence.sequence_origin = point.source_sequence_origin
+                   AND evidence.source_epoch = $SOURCE_EPOCH
+                   AND evidence.last_sequence >= $PREHEAT_COUNT
+                   AND evidence.observation_count >= $PREHEAT_COUNT
                    AND evidence.observed_at >= snapshot.observed_at
                    AND evidence.valid_until > now()
             );
@@ -389,15 +397,45 @@ fixture_applied=true
 set -a
 . "$IOT_ENV"
 set +a
-python3 "$PUBLISHER" \
-    --mapping "$MAPPING" \
-    --marker "$PREHEAT_MARKER" \
-    --source-epoch "$SOURCE_EPOCH" \
-    --start-sequence 1 \
-    --count "$PREHEAT_COUNT" \
-    --quality GOOD \
-    --value 12.5 \
-    --output "$EVIDENCE_DIR/preheat-mqtt.json"
+sleep "$MQTT_SETTLE_SECONDS"
+PREHEAT_ATTEMPT_SUMMARY="$EVIDENCE_DIR/preheat-publish-attempts.txt"
+: >"$PREHEAT_ATTEMPT_SUMMARY"
+publish_attempt=1
+publish_success=false
+while [ "$publish_attempt" -le "$MQTT_PUBLISH_ATTEMPTS" ]; do
+    attempt_source_epoch=$(( SOURCE_EPOCH + publish_attempt - 1 ))
+    attempt_log="$EVIDENCE_DIR/preheat-mqtt-attempt-$publish_attempt.log"
+    if python3 "$PUBLISHER" \
+        --mapping "$MAPPING" \
+        --marker "$PREHEAT_MARKER" \
+        --source-epoch "$attempt_source_epoch" \
+        --start-sequence 1 \
+        --count "$PREHEAT_COUNT" \
+        --quality GOOD \
+        --value 12.5 \
+        --timeout-seconds "$MQTT_TIMEOUT_SECONDS" \
+        --output "$EVIDENCE_DIR/preheat-mqtt.json" \
+        >"$attempt_log" 2>&1; then
+        SOURCE_EPOCH=$attempt_source_epoch
+        publish_success=true
+        printf 'attempt=%s sourceEpoch=%s result=PASS\n' \
+            "$publish_attempt" "$SOURCE_EPOCH" >>"$PREHEAT_ATTEMPT_SUMMARY"
+        cat "$attempt_log"
+        break
+    fi
+    printf 'attempt=%s sourceEpoch=%s result=RETRY\n' \
+        "$publish_attempt" "$attempt_source_epoch" >>"$PREHEAT_ATTEMPT_SUMMARY"
+    cat "$attempt_log" >&2
+    publish_attempt=$(( publish_attempt + 1 ))
+    if [ "$publish_attempt" -le "$MQTT_PUBLISH_ATTEMPTS" ]; then
+        sleep "$MQTT_SETTLE_SECONDS"
+    fi
+done
+if [ "$publish_success" != true ]; then
+    printf 'ERROR: controlled MQTT preheat failed after %s attempts\n' \
+        "$MQTT_PUBLISH_ATTEMPTS" >&2
+    exit 1
+fi
 wait_for_source_sequence
 
 export BPI_ACCEPTANCE_MARKER="$MARKER"
@@ -438,6 +476,7 @@ sha256sum \
     "$EVIDENCE_DIR/window-mqtt.json" \
     "$EVIDENCE_DIR/postgres-verification.json.txt" \
     "$EVIDENCE_DIR/acceptance-runtime-overrides.txt" \
+    "$EVIDENCE_DIR/preheat-publish-attempts.txt" \
     "$EVIDENCE_DIR/telemetry-landing-desktop.png" \
     "$EVIDENCE_DIR/telemetry-landing-mobile.png" \
     >"$EVIDENCE_DIR/SHA256SUMS"
