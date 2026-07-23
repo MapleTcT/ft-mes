@@ -1938,6 +1938,28 @@ test('shadow run acceptance is version-pinned, review-driven and fail-closed on 
     assert.equal(response.response.status, 200);
     assert.equal(response.json.data.state, 'DRAFT');
     assert.equal(response.json.data.readiness.ready, true);
+    assert.deepEqual(response.json.data.sourceCoverage, {
+      pinnedPointCount: 2,
+      activeRegisteredPointCount: 2,
+      physicalIdentityPointCount: 2,
+      freshSequenceQualifiedPointCount: 2,
+      approvedCalibrationPointCount: 2,
+      readyPointCount: 2,
+      fullyReady: true,
+    });
+    assert.equal(
+      response.json.data.trainingDataCoverage.policyVersion,
+      'bpi-training-data-coverage/batch-start-boundary-v1',
+    );
+    assert.equal(response.json.data.trainingDataCoverage.reviewedBatchCount, 0);
+    assert.equal(response.json.data.trainingDataCoverage.distinctProductionDayCount, 0);
+    assert.equal(response.json.data.trainingDataCoverage.thresholdsMet, false);
+    assert.deepEqual(response.json.data.trainingDataCoverage.blockers, [
+      'TRAINING_REVIEWED_BATCHES_BELOW_MINIMUM',
+      'TRAINING_PRODUCTION_DAYS_BELOW_MINIMUM',
+      'TRAINING_ACCEPTED_START_LABELS_BELOW_MINIMUM',
+      'TRAINING_REJECTED_START_LABELS_BELOW_MINIMUM',
+    ]);
     return response.json.data;
   }
 
@@ -1991,6 +2013,21 @@ test('shadow run acceptance is version-pinned, review-driven and fail-closed on 
     assert.equal(run.metrics.reviewedBatchCount, 10);
     assert.equal(run.metrics.boundaryAgreement, 1);
     assert.equal(run.metrics.cumulativeQuantityDeviationPercent, 0);
+    assert.equal(run.trainingDataCoverage.requiredReviewedBatchCount, 200);
+    assert.equal(run.trainingDataCoverage.reviewedBatchCount, 10);
+    assert.equal(run.trainingDataCoverage.requiredProductionDayCount, 7);
+    assert.equal(run.trainingDataCoverage.distinctProductionDayCount, 6);
+    assert.equal(run.trainingDataCoverage.requiredAcceptedStartLabelCount, 100);
+    assert.equal(run.trainingDataCoverage.acceptedStartLabelCount, 10);
+    assert.equal(run.trainingDataCoverage.requiredRejectedStartLabelCount, 10);
+    assert.equal(run.trainingDataCoverage.rejectedStartLabelCount, 0);
+    assert.equal(run.trainingDataCoverage.thresholdsMet, false);
+    assert.deepEqual(run.trainingDataCoverage.blockers, [
+      'TRAINING_REVIEWED_BATCHES_BELOW_MINIMUM',
+      'TRAINING_PRODUCTION_DAYS_BELOW_MINIMUM',
+      'TRAINING_ACCEPTED_START_LABELS_BELOW_MINIMUM',
+      'TRAINING_REJECTED_START_LABELS_BELOW_MINIMUM',
+    ]);
     response = await request('GET', `/bpi/v1/shadow-runs/${run.id}/batch-reviews`);
     assert.equal(response.json.data.length, 10);
     return run;

@@ -22,6 +22,11 @@ const DATASET_MLFLOW_REGISTRAR_VERSION = 'bpi-dataset-mlflow-registrar/0.1.0';
 const DATASET_MLFLOW_TRACKING_PROFILE = 'bpi-mlflow-dataset-v1';
 const DATASET_TRAINING_OBJECTIVE = 'BATCH_START_BOUNDARY_REVIEW_RISK';
 const DATASET_TRAINING_POLICY = 'bpi-training-readiness/batch-start-boundary-v2';
+const TRAINING_DATA_COVERAGE_POLICY = 'bpi-training-data-coverage/batch-start-boundary-v1';
+const REQUIRED_TRAINING_REVIEWED_BATCHES = 200;
+const REQUIRED_TRAINING_PRODUCTION_DAYS = 7;
+const REQUIRED_TRAINING_ACCEPTED_START_LABELS = 100;
+const REQUIRED_TRAINING_REJECTED_START_LABELS = 10;
 const DATASET_FEATURE_REFS = new Set([
   'batch.order_id', 'batch.material_code', 'batch.stage_code', 'batch.quantity_unit',
   'rule.version_id', 'topology.version_id', 'point_catalog.snapshot_id',
@@ -210,7 +215,48 @@ function batchFromCandidate(candidate) {
   };
 }
 
-function shadowRunReadiness(state, run) {
+function shadowRunSourceCoverage(state, run) {
+  const catalog = state.pointCatalogHistory
+    .find((item) => item.snapshot.id === run.pointCatalogSnapshotId);
+  const points = catalog?.points || [];
+  const activeRegistered = (point) => point.registered === true
+    && point.deviceState === 'ACTIVE'
+    && point.propertyPresent === true
+    && typeof point.unit === 'string'
+    && point.unit.trim().length > 0;
+  const physicalIdentity = (point) => point.sourceSequenceEnabled === true
+    && point.sourceSequenceRequired === true
+    && ['DEVICE', 'GATEWAY'].includes(point.sourceSequenceOrigin)
+    && typeof point.sourceSequenceBindingFingerprint === 'string'
+    && point.sourceSequenceBindingFingerprint.length > 0;
+  const approvedCalibration = (point) => typeof point.calibrationVersion === 'string'
+    && point.calibrationVersion.trim().length > 0
+    && point.calibrationStatus === 'VERIFIED';
+  const count = (predicate) => points.filter(predicate).length;
+  const pinnedPointCount = points.length;
+  const activeRegisteredPointCount = count(activeRegistered);
+  const physicalIdentityPointCount = count((point) =>
+    activeRegistered(point) && physicalIdentity(point));
+  const freshSequenceQualifiedPointCount = count((point) =>
+    activeRegistered(point) && physicalIdentity(point) && point.sourceSequenceQualified === true);
+  const approvedCalibrationPointCount = count((point) =>
+    activeRegistered(point) && approvedCalibration(point));
+  const readyPointCount = count((point) => activeRegistered(point)
+    && physicalIdentity(point)
+    && point.sourceSequenceQualified === true
+    && approvedCalibration(point));
+  return {
+    pinnedPointCount,
+    activeRegisteredPointCount,
+    physicalIdentityPointCount,
+    freshSequenceQualifiedPointCount,
+    approvedCalibrationPointCount,
+    readyPointCount,
+    fullyReady: pinnedPointCount > 0 && readyPointCount === pinnedPointCount,
+  };
+}
+
+function shadowRunReadiness(state, run, sourceCoverage) {
   const rule = state.rules.find((item) => item.id === run.ruleVersionId);
   const topology = state.topologies.find((item) => item.id === run.topologyVersionId);
   const catalog = state.pointCatalog;
@@ -225,8 +271,7 @@ function shadowRunReadiness(state, run) {
       && topology?.validatedPointCatalogChecksum === run.pointCatalogChecksum,
     pointCatalogCurrent: catalog?.snapshot.id === run.pointCatalogSnapshotId
       && catalog?.snapshot.checksum === run.pointCatalogChecksum,
-    pointCatalogReady: Boolean(catalog?.points.length)
-      && catalog.points.every((point) => point.ready),
+    pointCatalogReady: sourceCoverage.fullyReady,
   };
   readiness.ready = Object.values(readiness).every(Boolean);
   return readiness;
@@ -278,9 +323,48 @@ function shadowRunMetrics(state, run) {
   };
 }
 
+function shadowRunTrainingDataCoverage(state, run) {
+  const activeReviews = state.shadowRunReviews
+    .filter((item) => item.shadowRunId === run.id && item.state === 'ACTIVE');
+  const reviewedBatchCount = new Set(activeReviews.map((review) => review.batchId)).size;
+  const distinctProductionDayCount = new Set(activeReviews
+    .map((review) => new Date(review.automaticStartTime).toISOString().slice(0, 10))).size;
+  const acceptedStartLabelCount = activeReviews
+    .filter((review) => review.startBoundaryAccepted).length;
+  const rejectedStartLabelCount = activeReviews.length - acceptedStartLabelCount;
+  const blockers = [];
+  if (reviewedBatchCount < REQUIRED_TRAINING_REVIEWED_BATCHES) {
+    blockers.push('TRAINING_REVIEWED_BATCHES_BELOW_MINIMUM');
+  }
+  if (distinctProductionDayCount < REQUIRED_TRAINING_PRODUCTION_DAYS) {
+    blockers.push('TRAINING_PRODUCTION_DAYS_BELOW_MINIMUM');
+  }
+  if (acceptedStartLabelCount < REQUIRED_TRAINING_ACCEPTED_START_LABELS) {
+    blockers.push('TRAINING_ACCEPTED_START_LABELS_BELOW_MINIMUM');
+  }
+  if (rejectedStartLabelCount < REQUIRED_TRAINING_REJECTED_START_LABELS) {
+    blockers.push('TRAINING_REJECTED_START_LABELS_BELOW_MINIMUM');
+  }
+  return {
+    policyVersion: TRAINING_DATA_COVERAGE_POLICY,
+    requiredReviewedBatchCount: REQUIRED_TRAINING_REVIEWED_BATCHES,
+    reviewedBatchCount,
+    requiredProductionDayCount: REQUIRED_TRAINING_PRODUCTION_DAYS,
+    distinctProductionDayCount,
+    requiredAcceptedStartLabelCount: REQUIRED_TRAINING_ACCEPTED_START_LABELS,
+    acceptedStartLabelCount,
+    requiredRejectedStartLabelCount: REQUIRED_TRAINING_REJECTED_START_LABELS,
+    rejectedStartLabelCount,
+    thresholdsMet: blockers.length === 0,
+    blockers,
+  };
+}
+
 function hydrateShadowRun(state, run) {
-  const readiness = shadowRunReadiness(state, run);
+  const sourceCoverage = shadowRunSourceCoverage(state, run);
+  const readiness = shadowRunReadiness(state, run, sourceCoverage);
   const metrics = shadowRunMetrics(state, run);
+  const trainingDataCoverage = shadowRunTrainingDataCoverage(state, run);
   const blockers = [];
   const readinessBlockers = [
     ['rulePublished', 'RULE_NOT_PUBLISHED'], ['ruleActive', 'RULE_NOT_ACTIVE'],
@@ -298,7 +382,9 @@ function hydrateShadowRun(state, run) {
   return {
     ...run,
     readiness,
+    sourceCoverage,
     metrics,
+    trainingDataCoverage,
     blockers,
     readyForApproval: run.state === 'EVALUATING' && readiness.ready
       && metrics.durationGatePassed && metrics.reviewCountGatePassed
