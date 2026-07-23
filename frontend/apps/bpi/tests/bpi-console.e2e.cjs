@@ -962,6 +962,32 @@ test('team completes a shadow run acceptance and critical data quality blocks ap
   await trainingCoverage.getByText('仅表示现场数据覆盖进度，不代表允许训练', { exact: true }).waitFor();
   const runId = await page.locator('[data-shadow-run-id]').getAttribute('data-shadow-run-id');
   assert.ok(runId);
+
+  const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+  const mobilePage = await mobileContext.newPage();
+  const mobileErrors = observe(mobilePage);
+  await mobilePage.goto(`${APP_URL}/#/shadowRuns`, { waitUntil: 'networkidle' });
+  await mobilePage.locator(`[data-shadow-run-id="${runId}"]`).click();
+  await mobilePage.locator('[data-training-data-coverage]').getByText('仅表示现场数据覆盖进度，不代表允许训练', {
+    exact: true,
+  }).waitFor();
+  await assertDrawerSettled(mobilePage);
+  const mobileDrawerGeometry = await mobilePage.locator('#detail-drawer').evaluate((element) => {
+    const drawer = element.getBoundingClientRect();
+    const actions = [...element.querySelectorAll('.drawer-actions button')].map((button) => {
+      const box = button.getBoundingClientRect();
+      return { label: button.textContent?.trim() || '', left: box.left, right: box.right };
+    });
+    return { viewport: window.innerWidth, left: drawer.left, right: drawer.right, actions };
+  });
+  assert.equal(mobileDrawerGeometry.actions.length, 3);
+  assert.ok(mobileDrawerGeometry.actions.every((action) =>
+    action.left >= mobileDrawerGeometry.left - 1 && action.right <= mobileDrawerGeometry.right + 1),
+  `shadow run actions exceed mobile drawer: ${JSON.stringify(mobileDrawerGeometry)}`);
+  await mobilePage.screenshot({ path: '/tmp/bpi-console-shadow-run-field-coverage-mobile.png', fullPage: true });
+  assert.deepEqual(mobileErrors, []);
+  await mobileContext.close();
+
   await page.getByRole('button', { name: '启动影子运行' }).click();
   await page.getByRole('heading', { name: '启动影子运行' }).waitFor();
   await page.locator('#confirm-reason').fill('确认固定版本的 Kafka、Flink 和点位准入均已就绪');

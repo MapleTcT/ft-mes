@@ -7,7 +7,7 @@ const { chromium, request } = require("playwright");
 
 const marker = required("BPI_ACCEPTANCE_MARKER");
 const adpBaseUrl = required("ADP_BASE_URL").replace(/\/+$/, "");
-const bpiBaseUrl = required("BPI_BROWSER_BASE_URL").replace(/#.*$/, "");
+const bpiBaseUrl = `${required("BPI_BROWSER_BASE_URL").replace(/#.*$/, "").replace(/\/+$/, "")}/`;
 const username = required("ADP_USERNAME");
 const password = required("ADP_PASSWORD");
 const plantId = process.env.BPI_PLANT_ID || "PLANT-01";
@@ -189,6 +189,41 @@ async function assertCoverage(page) {
   }).waitFor();
 }
 
+async function assertDrawerSettled(page) {
+  const drawer = page.locator("#detail-drawer");
+  await drawer.waitFor({ state: "visible" });
+  await page.waitForFunction(() => {
+    const element = document.querySelector("#detail-drawer");
+    if (!element) return false;
+    const box = element.getBoundingClientRect();
+    return box.left >= -1
+      && box.right <= window.innerWidth + 1
+      && Math.abs(box.right - window.innerWidth) <= 1;
+  });
+  const geometry = await drawer.evaluate((element) => {
+    const drawerBox = element.getBoundingClientRect();
+    const actions = [...element.querySelectorAll(".drawer-actions button")].map((button) => {
+      const box = button.getBoundingClientRect();
+      return {
+        label: button.textContent?.trim() || "",
+        left: box.left,
+        right: box.right,
+      };
+    });
+    return {
+      viewport: window.innerWidth,
+      left: drawerBox.left,
+      right: drawerBox.right,
+      width: drawerBox.width,
+      actions,
+    };
+  });
+  assert(geometry.actions.every((action) =>
+    action.left >= geometry.left - 1 && action.right <= geometry.right + 1),
+  `drawer actions exceed viewport: ${JSON.stringify(geometry)}`);
+  return geometry;
+}
+
 async function main() {
   fs.mkdirSync(path.dirname(reportPath), { recursive: true });
   fs.mkdirSync(path.dirname(desktopScreenshot), { recursive: true });
@@ -271,6 +306,7 @@ async function main() {
       name: `${marker} 现场数据覆盖验收`,
     }).waitFor();
     await assertCoverage(desktopPage);
+    const desktopDrawer = await assertDrawerSettled(desktopPage);
     assert(await desktopPage.getByRole("button", { name: "启动影子运行" }).isEnabled(),
       "pinned source readiness should permit starting the shadow run");
 
@@ -312,6 +348,7 @@ async function main() {
     await desktopPage.screenshot({ path: desktopScreenshot, fullPage: true });
     report.browser.desktop = {
       viewport: "1440x900",
+      drawer: desktopDrawer,
       screenshot: desktopScreenshot,
     };
 
@@ -326,6 +363,7 @@ async function main() {
     await mobilePage.goto(`${bpiBaseUrl}#/shadowRuns`, { waitUntil: "networkidle" });
     await mobilePage.locator(`[data-shadow-run-id="${run.id}"]`).click();
     await assertCoverage(mobilePage);
+    const mobileDrawer = await assertDrawerSettled(mobilePage);
     const dimensions = await mobilePage.evaluate(() => ({
       viewport: document.documentElement.clientWidth,
       body: document.body.scrollWidth,
@@ -336,6 +374,7 @@ async function main() {
     await mobilePage.screenshot({ path: mobileScreenshot, fullPage: true });
     report.browser.mobile = {
       ...dimensions,
+      drawer: mobileDrawer,
       screenshot: mobileScreenshot,
     };
     await mobileContext.close();
