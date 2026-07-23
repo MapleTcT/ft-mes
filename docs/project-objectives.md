@@ -156,10 +156,30 @@ marker、source/training/recovery/archive 对象均定向清零，materializer/p
 九个相关开关保持 false。
 
 该纵切只关闭单个已验证 BPI 数据集的不可变恢复包门槛。整站 PostgreSQL/Kafka/MinIO/Keycloak/Nacos
-灾备、生产留存周期决策、跨故障域复制、生产 RPO/RTO、容量、MLflow/模型、物理来源连续 7-14 天、
+灾备、生产留存周期决策、跨故障域复制、生产 RPO/RTO、容量、模型、物理来源连续 7-14 天、
 外部 ERP/WMS 和生产激活仍未完成，因此 G-021 继续为 `PARTIAL`。机器证据为
 `metadata/bpi-dataset-retention-archive-acceptance.json`，完整报告为
 `docs/testing/bpi-dataset-retention-archive-acceptance.md`。
+
+2026-07-23 又完成 Phase 3C-A MLflow Dataset Input 目标纵切。release
+`27ab9a5260c197b30747f405741dcdb6105187b1` 以 expand-only/validate-existing 方式运行在 PostgreSQL
+15.18/Flyway V30。marker `ADP_E2E_BPI_MLFLOW_20260723_022000_A1` 由真实页面申请登记；全新临时
+MLflow backend 被受控停止时，同一任务持久化为 `FAILED/r3/attempt1/MLFLOW_TRANSPORT_ERROR`，且
+MLflow 保持 0 run/0 input。恢复 Tracking Server 后，页面按 revision 重试同一 registration
+`df8653ea-1aac-43c6-bba5-cd7f8c6a5ead` 到 `REGISTERED/r6/attempt2`。PostgreSQL 保存六态审计、
+两个 `COMPLETED/202` 幂等请求和 `sourceFactsVerified/datasetInputVerified/lineageVerified=true`；
+MLflow 只产生 1 个 FINISHED run、1 个 dataset、1 个 `training_candidate` input，精确 source 带
+Object Lock `versionId`。registrar 重启后 run 数仍为 1；MinIO scoped identity 只能列举自身私有
+artifact bucket，不能列举或删除 recovery 对象。
+
+桌面、重启后重发现和 `390x844` 移动页面均无 console/page/request error 或横向溢出。测试
+Polaris table/namespace、源与归档 exact versions、两个临时 MLflow 卷和 V26-V30 marker 均定向清零，
+主 BPI 三服务保持健康，所有可选 sidecar 停止且相关开关为 false。该结论只证明不可变训练数据的
+MLflow Dataset Input 和血缘登记；`registered_models/model_versions/logged_models` 均为 0，模型训练、
+注册、审批、推断和生产激活全部保持 false。G-021 继续为 `PARTIAL`，剩余门槛包括 MLflow 生产
+RBAC/SSO/TLS/HA、Phase 4 模型、整站灾备/容量、物理来源连续 7-14 天和外部 ERP/WMS。机器证据为
+`metadata/bpi-dataset-mlflow-registration-acceptance.json`，完整报告为
+`docs/testing/bpi-dataset-mlflow-registration-acceptance.md`。
 
 2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、

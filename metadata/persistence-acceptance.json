@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-22T22:20:55+08:00",
-  "repoCommit": "ef8036b8b71718f3bb4f65ede3e9ba9cca093a82+target-v29-object-lock-recovery",
+  "generatedAt": "2026-07-23T02:56:00+08:00",
+  "repoCommit": "27ab9a5260c197b30747f405741dcdb6105187b1+target-v30-mlflow-dataset-input",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -215,8 +215,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 241,
-    "pass": 238,
+    "testedFeatures": 247,
+    "pass": 244,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -5260,9 +5260,126 @@
       "status": "PASS",
       "evidence": "metadata/bpi-dataset-retention-archive-acceptance.json; database and object residues were zero, optional running sidecars were zero, the primary BPI services were healthy and all nine relevant flags were false",
       "issues": []
+    },
+    {
+      "module": "BPI V30 MLflow 登记失败与无外部副作用",
+      "route": "/bpi/#/datasets",
+      "operation": "从真实 LOCKED 恢复包请求 Dataset Input 登记，并在 MLflow 停机时持久化受控失败",
+      "api": "POST /bpi-api/dataset-retention-archives/3184209e-f81a-4c54-a23a-10e63755fbbd/mlflow-registrations; GET /bpi-api/dataset-mlflow-registrations/df8653ea-1aac-43c6-bba5-cd7f8c6a5ead",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetMlflowRegistrationController -> DatasetMlflowRegistrationService -> DatasetMlflowRegistrationPostgresRepository.insert; MlflowRegistrarWorker -> fail",
+      "tables": [
+        "bpi.bpi_dataset_mlflow_registrations",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "MLflow PostgreSQL"
+      ],
+      "marker": "ADP_E2E_BPI_MLFLOW_20260723_022000_A1",
+      "verificationSql": "SELECT state, revision, attempt_count, failure_code FROM bpi.bpi_dataset_mlflow_registrations WHERE id='df8653ea-1aac-43c6-bba5-cd7f8c6a5ead'; SELECT count(*) FROM mlflow.runs; SELECT count(*) FROM mlflow.inputs",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-mlflow-registration-acceptance.json; real page POST returned 202, PostgreSQL persisted FAILED/r3/attempt1 with MLFLOW_TRANSPORT_ERROR and the fresh MLflow backend stayed at zero runs and zero inputs",
+      "issues": []
+    },
+    {
+      "module": "BPI V30 页面重试与 REGISTERED 落库",
+      "route": "/bpi/#/datasets",
+      "operation": "恢复 MLflow 后从失败详情重试同一 registration，并等待 Dataset Input 读回验证完成",
+      "api": "POST /bpi-api/dataset-mlflow-registrations/df8653ea-1aac-43c6-bba5-cd7f8c6a5ead/retry; GET /bpi-api/dataset-mlflow-registrations/df8653ea-1aac-43c6-bba5-cd7f8c6a5ead",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetMlflowRegistrationService.retry -> repository.retry; MlflowRegistrarWorker validate/register/readback/complete",
+      "tables": [
+        "bpi.bpi_dataset_mlflow_registrations",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "MLflow PostgreSQL"
+      ],
+      "marker": "ADP_E2E_BPI_MLFLOW_20260723_022000_A1",
+      "verificationSql": "Run deploy/docker/scripts/bpi-dataset-mlflow-target-verification.sql for r1-r6, experiment/run/source/digest/metadata and two COMPLETED/202 idempotency records",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-mlflow-registration-acceptance.json; retry reused the same registration and reached REGISTERED/r6/attempt2 with sourceFactsVerified, datasetInputVerified and lineageVerified true",
+      "issues": []
+    },
+    {
+      "module": "BPI V30 MLflow 精确 Dataset Input 与模型边界",
+      "route": "/bpi/#/datasets",
+      "operation": "直接查询 MLflow backend，核对 experiment/run/dataset/input/source/tags，并反证没有模型事实",
+      "api": "MLflow Tracking REST and PostgreSQL readback",
+      "method": "GET/SQL",
+      "requiresPersistence": true,
+      "backendEntry": "bpi_dataset_mlflow_registrar.mlflow_client.register_dataset_input and verify_registration",
+      "tables": [
+        "MLflow experiments",
+        "MLflow runs",
+        "MLflow datasets",
+        "MLflow inputs",
+        "MLflow registered_models/model_versions/logged_models"
+      ],
+      "marker": "ADP_E2E_BPI_MLFLOW_20260723_022000_A1",
+      "verificationSql": "Require exactly one FINISHED run, one dataset and one input with context training_candidate and exact versioned S3 source; require registered_models, model_versions and logged_models all zero",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-mlflow-registration-acceptance.json; MLflow contained 1 run/1 dataset/1 input with run c84549b0748d413291c9018096da9a80 and zero model rows",
+      "issues": []
+    },
+    {
+      "module": "BPI V30 MinIO MLflow artifact 最小权限",
+      "route": "NOT_APPLICABLE",
+      "operation": "使用 MLflow scoped identity 列举自身 artifact bucket，并反证管理、recovery list 和 exact-version delete 权限",
+      "api": "MinIO S3 list/admin/delete probes",
+      "method": "GET/DELETE",
+      "requiresPersistence": false,
+      "backendEntry": "MinIO bpi-mlflow-artifact policy evaluation",
+      "tables": [],
+      "marker": "ADP_E2E_BPI_MLFLOW_20260723_022000_A1",
+      "verificationSql": "NOT_APPLICABLE; require artifactBucketPrivate=true, scopedListOwnBucket=true, scopedAdmin=false, scopedRecoveryList=false and scopedRecoveryDelete=false",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-mlflow-registration-acceptance.json; the scoped identity could list only its private artifact bucket and could not administer or access recovery objects",
+      "issues": []
+    },
+    {
+      "module": "BPI V30 registrar 重启与浏览器重发现",
+      "route": "/bpi/#/datasets",
+      "operation": "重启 registrar 后在桌面和 390x844 移动页面重新读取同一六阶段交付链",
+      "api": "GET dataset, snapshot, materialization, publication, archive and MLflow registration; MLflow run readback",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "frontend/apps/bpi dataset delivery view; BPI PostgreSQL repository; MLflow exact run lookup",
+      "tables": [],
+      "marker": "ADP_E2E_BPI_MLFLOW_20260723_022000_A1",
+      "verificationSql": "NOT_APPLICABLE; compare registration/run identity before and after restart and measure browser error channels and mobile geometry",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-mlflow-registration-acceptance.json and target screenshots; the same run was rediscovered, run count stayed one, errors were zero and mobile widths were 390/390/390 with drawer 389/389",
+      "issues": []
+    },
+    {
+      "module": "BPI V30 精确清理与默认关闭",
+      "route": "NOT_APPLICABLE",
+      "operation": "精确清除 V26-V30 marker、catalog/object resources、两个临时 MLflow 卷并停止所有可选 sidecar",
+      "api": "PostgreSQL cleanup; Polaris/MinIO exact cleanup; Docker runtime and volume verification",
+      "method": "DELETE/SQL/GET",
+      "requiresPersistence": true,
+      "backendEntry": "bpi-dataset-manifest-target-cleanup.sql; scoped Polaris/MinIO management; Docker Compose state check",
+      "tables": [
+        "bpi V26-V30 dataset lineage tables",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "Polaris PostgreSQL metastore",
+        "MLflow PostgreSQL"
+      ],
+      "marker": "ADP_E2E_BPI_MLFLOW_20260723_022000_A1",
+      "verificationSql": "Require all marker projections, exact source/training/archive versions, temporary MLflow volumes and optional running sidecars to equal zero; require all ML/catalog flags false and primary BPI services healthy",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-mlflow-registration-acceptance.json; database/object/volume residues and optional sidecars were zero, primary services were healthy and all related flags were false",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_BPI_MLFLOW_20260723_022000_A1",
+      "artifact": "metadata/bpi-dataset-mlflow-registration-acceptance.json",
+      "summary": "The V30 target slice closed real ADP failure/retry/REGISTERED interaction, PostgreSQL r1-r6 and idempotency, exact MLflow Dataset Input lineage, transport-failure no-side-effect behavior, restart idempotency, MinIO least privilege and exact zero-residue/default-off cleanup. Model training, registration, approval, inference, MLflow production security/HA, full-site DR, continuous field operation and external ERP/WMS remain open."
+    },
     {
       "marker": "ADP_E2E_BPI_ARCHIVE_20260722_215300_A1",
       "artifact": "metadata/bpi-dataset-retention-archive-acceptance.json",

@@ -4,8 +4,8 @@
 
 ## 摘要
 
-- Generated At：`2026-07-22T15:15:16+00:00`。
-- Repo Commit：`ef8036b8b71718f3bb4f65ede3e9ba9cca093a82`。
+- Generated At：`2026-07-22T23:57:14+00:00`。
+- Repo Commit：`27ab9a5260c197b30747f405741dcdb6105187b1`。
 - CI 阻断问题：`0`。
 - 迁移缺口：`1`。
 - 关注项：`2`。
@@ -29,11 +29,11 @@
 | parent-pom-oracle-legacy-profile | pass | no | defaultOracleDeps=0, legacyProfile=True, legacyOracleDeps=1 | Oracle JDBC 只能放在 `oracle-legacy` profile；默认父 POM 只管理 PostgreSQL/JDK 基线。 |
 | runtime-config-no-oracle-defaults | pass | no | activeOracle=0, source=0, rendered=0, files=88 | Nacos source templates and rendered configs must default to PostgreSQL; Oracle-like defaults can only remain in comments, backlog, or explicit legacy templates. |
 | oracle-legacy-only | watch | no | Oracle migration backlog has 1622 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |
-| oracle-audit-current-and-classified | pass | no | generatedAt=2026-07-22T15:14:40+00:00, repoCommit=ef8036b8b71718f3bb4f65ede3e9ba9cca093a82, unclassified=0, findingCount=1622, categoryTotal=1622 | 先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。 |
+| oracle-audit-current-and-classified | pass | no | generatedAt=2026-07-22T23:55:56+00:00, repoCommit=27ab9a5260c197b30747f405741dcdb6105187b1, unclassified=0, findingCount=1622, categoryTotal=1622 | 先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。 |
 | backend-direct-oracle-deps | gap | no | 250 recovered modules, 2 direct Oracle dependencies, 4 JDBC dependencies. | 模块提升时优先处理直接 Oracle JDBC 依赖，默认路径只保留 PostgreSQL。 |
 | mapper-postgres-audit | pass | no | errors=0, warnings=0, findings=0 | 任何 error 级方言必须先迁移；warning 级 `to_char` 保留人工确认记录。 |
 | postgres-migration-governance | pass | no | 198 scripts, range=001-198, highRisk=0, watch=78 | 新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。 |
-| recovered-source-inventory | pass | no | 250 source jars, 991 frontend files, 76 compose services. | 新增包、服务或 source map 后运行 `make inventory`。 |
+| recovered-source-inventory | pass | no | 250 source jars, 991 frontend files, 80 compose services. | 新增包、服务或 source map 后运行 `make inventory`。 |
 | source-module-promotion | watch | no | `backend/source-modules` currently declares 10 buildable modules. | 按 auth/rbac/organization/configuration/workflow 顺序提升高频维护模块。 |
 | source-module-oracle-policy | pass | no | Source module verification passed. Modules: 10. | 修复 `backend/source-modules` 中的 Oracle JDBC、Oracle 默认配置、Oracle dialect 或 mapper/oracle 资源后重新运行 `make source-module-check`。 |
 | backend-table-audit | planned | no | `docs/backend-table-audit-handoff.md` and issue template exist; detailed table maps remain future work. | 专门线程输出页面/API/服务/Mapper/表/字段映射，避免混进平台工程化任务。 |
@@ -48,7 +48,7 @@
 | decompiledServices | 23 |
 | frontendSourceMaps | 366 |
 | frontendRecoveredFiles | 991 |
-| composeServices | 76 |
+| composeServices | 80 |
 | businessRuntimeServices | 20 |
 
 ## Oracle Backlog 分类

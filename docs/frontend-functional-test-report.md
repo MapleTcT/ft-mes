@@ -979,6 +979,25 @@ materializer、publisher、archiver、Polaris 和 MinIO bootstrap，取证后全
 `metadata/bpi-dataset-retention-locked-mobile-target.png`；完整报告：
 `docs/testing/bpi-dataset-retention-archive-acceptance.md`。
 
+### BPI V30 MLflow Dataset Input（2026-07-23）
+
+本节使用唯一目标环境 `http://10.11.100.17:18080`、真实 ADP 登录和 exact revision
+`27ab9a5260c197b30747f405741dcdb6105187b1`。PostgreSQL 保持 Flyway V30；验收使用全新临时 MLflow
+backend，结束后停止 MLflow/registrar、移除临时卷并恢复所有开关关闭。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI MLflow 登记失败 | `/bpi/#/datasets` | 打开 marker `ADP_E2E_BPI_MLFLOW_20260723_022000_A1` 的 LOCKED 恢复包；停止 MLflow 后点击登记 | `POST /bpi-api/dataset-retention-archives/3184209e-f81a-4c54-a23a-10e63755fbbd/mlflow-registrations`；registration GET | POST `202`；页面显示 `FAILED/r3/attempt1` 和 `MLFLOW_TRANSPORT_ERROR`；console/page/request failure 为 0 | PostgreSQL 持久化 `QUEUED/r1 -> REGISTERING/r2 -> FAILED/r3`；新 MLflow backend 保持 0 run/0 input | `bpi_dataset_mlflow_registrations`、`bpi_audit_events`、`bpi_api_idempotency`；MLflow PostgreSQL | PASS_TARGET_FAILURE_NO_SIDE_EFFECT | 故障为受控停机，恢复后使用正式 registrar 重试 |
+| BPI MLflow 页面重试 | 同一失败详情 | 恢复 MLflow，点击重试并等待同一 registration 到 REGISTERED | `POST /bpi-api/dataset-mlflow-registrations/df8653ea-1aac-43c6-bba5-cd7f8c6a5ead/retry`；registration GET | POST `202`，复用同一 ID；页面显示 `REGISTERED/r6/attempt2`、experiment/run、digest 和精确 source | PostgreSQL 为 `RETRIED/r4 -> REGISTERING/r5 -> REGISTERED/r6`，两条幂等记录 `COMPLETED/202`；MLflow 恰有 1 run/1 dataset/1 input，模型表均 0 | 同上；MinIO artifact bucket | PASS_TARGET_REGISTERED | 只登记 Dataset Input，不代表模型已训练 |
+| BPI MLflow 重启与移动复验 | 同一 REGISTERED 详情；桌面和 `390x844` | 重启 registrar，刷新并重新打开同一六阶段交付链 | dataset/archive/registration GET；MLflow readback | 同一 experiment/run/source 可重发现；桌面/移动 console/page/request error 为 0；viewport/body/document `390/390/390`、drawer `389/389` | registrar 重启后 MLflow run 数仍为 1；`sourceFactsVerified/datasetInputVerified/lineageVerified=true`，所有模型/激活标志 false | BPI PostgreSQL；MLflow PostgreSQL | PASS_TARGET_RESTART_IDEMPOTENT | MLflow 生产 RBAC/SSO/TLS/HA 未在本轮验收 |
+| BPI V30 验收退场 | 不适用 | 精确删除测试 catalog/object/marker 和两个临时 MLflow 卷，停止所有可选 sidecar | cleanup SQL；Polaris/MinIO 管理操作；Docker runtime check | `/bpi/` 仍为 200；页面无测试 marker | V26-V30 marker、对象、临时卷和 optional running sidecar 均为 0；主三服务健康；相关开关全部 false | V26-V30 lineage、Polaris/MLflow PostgreSQL、MinIO | PASS_TARGET_CLEANED | 未删除非 marker 业务数据 |
+
+机器证据：`metadata/bpi-dataset-mlflow-registration-acceptance.json`；截图：
+`metadata/bpi-dataset-mlflow-failed-target.png`、
+`metadata/bpi-dataset-mlflow-registered-target.png`、
+`metadata/bpi-dataset-mlflow-registered-mobile-target.png`；完整报告：
+`docs/testing/bpi-dataset-mlflow-registration-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

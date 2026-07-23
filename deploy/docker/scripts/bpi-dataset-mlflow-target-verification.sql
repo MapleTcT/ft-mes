@@ -86,6 +86,7 @@ SELECT jsonb_pretty(jsonb_build_object(
         'tableIdentifier', table_identifier,
         'icebergSnapshotId', iceberg_snapshot_id::text,
         'catalogSemanticChecksum', catalog_semantic_checksum,
+        'sourceFactsVerified', registration_metadata -> 'sourceFactsVerified',
         'datasetInputVerified', registration_metadata -> 'datasetInputVerified',
         'lineageVerified', registration_metadata -> 'lineageVerified',
         'modelTrained', registration_metadata -> 'modelTrained',

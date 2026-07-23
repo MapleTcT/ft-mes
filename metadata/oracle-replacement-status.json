@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-22T15:15:16+00:00",
-  "repoCommit": "ef8036b8b71718f3bb4f65ede3e9ba9cca093a82",
+  "generatedAt": "2026-07-22T23:57:14+00:00",
+  "repoCommit": "27ab9a5260c197b30747f405741dcdb6105187b1",
   "generatedFrom": [
     "metadata/current-content-inventory.json",
     "metadata/backend-module-dependency-inventory.json",
@@ -39,7 +39,7 @@
     "decompiledServices": 23,
     "frontendSourceMaps": 366,
     "frontendRecoveredFiles": 991,
-    "composeServices": 76,
+    "composeServices": 80,
     "businessRuntimeServices": 20
   },
   "composeDefaults": {
@@ -82,8 +82,8 @@
     "topFiles": []
   },
   "oracleMigrationAudit": {
-    "generatedAt": "2026-07-22T15:14:40+00:00",
-    "repoCommit": "ef8036b8b71718f3bb4f65ede3e9ba9cca093a82",
+    "generatedAt": "2026-07-22T23:55:56+00:00",
+    "repoCommit": "27ab9a5260c197b30747f405741dcdb6105187b1",
     "findingCount": 1622,
     "categoryTotal": 1622,
     "unclassifiedReferenceCount": 0
@@ -178,7 +178,7 @@
       "id": "oracle-audit-current-and-classified",
       "title": "Oracle migration audit 可追溯且无未分类引用",
       "status": "pass",
-      "evidence": "generatedAt=2026-07-22T15:14:40+00:00, repoCommit=ef8036b8b71718f3bb4f65ede3e9ba9cca093a82, unclassified=0, findingCount=1622, categoryTotal=1622",
+      "evidence": "generatedAt=2026-07-22T23:55:56+00:00, repoCommit=27ab9a5260c197b30747f405741dcdb6105187b1, unclassified=0, findingCount=1622, categoryTotal=1622",
       "nextAction": "先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。",
       "blocking": false
     },
@@ -210,7 +210,7 @@
       "id": "recovered-source-inventory",
       "title": "当前恢复内容有机器库存",
       "status": "pass",
-      "evidence": "250 source jars, 991 frontend files, 76 compose services.",
+      "evidence": "250 source jars, 991 frontend files, 80 compose services.",
       "nextAction": "新增包、服务或 source map 后运行 `make inventory`。",
       "blocking": false
     },

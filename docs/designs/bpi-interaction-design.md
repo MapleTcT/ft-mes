@@ -355,8 +355,9 @@ Phase 3C-A 把 MLflow Dataset Input 登记作为恢复包之后的第五个独�
 MLflow Tracking Server 健康或 run 存在推导模型可用。
 
 确定性模拟器只验证交互与契约，模拟 URI/SHA/snapshot/run 不是 MinIO、Polaris 或 MLflow 的真实证据。
-Phase 3C-A 的 Java/PostgreSQL 状态机和 Registrar 组件已实现且默认关闭；真实 MLflow/MinIO/PostgreSQL 联合链路、
-目标 ADP 页面故障重试、重启和清理仍须单独验收。
+Phase 3C-A 的 Java/PostgreSQL 状态机和 Registrar 组件已实现且默认关闭；目标 marker
+`ADP_E2E_BPI_MLFLOW_20260723_022000_A1` 已闭合真实 MLflow/MinIO/PostgreSQL 联合链路、ADP 页面故障重试、
+registrar 重启、桌面/移动和精确清理。该证据仍只到 Dataset Input，不允许把 run 存在推导为模型可用。
 
 **主要 API：** `listDatasets`、`createDatasetDefinition`、`createDatasetSnapshot`、`getDatasetSnapshot`、
 `requestDatasetMaterialization`、`getDatasetMaterialization`、`retryDatasetMaterialization`、

@@ -186,6 +186,13 @@ REQUIRED_FILES = [
     "metadata/bpi-dataset-manifest-acceptance.json",
     "docs/testing/bpi-dataset-materialization-acceptance.md",
     "metadata/bpi-dataset-materialization-acceptance.json",
+    "docs/testing/bpi-dataset-mlflow-registration-acceptance.md",
+    "docs/backend-table-audit/bpi-dataset-mlflow-registration.md",
+    "metadata/bpi-dataset-mlflow-registration-acceptance.json",
+    "metadata/bpi-integrated-upgrade-v30-redeploy-target.json",
+    "metadata/bpi-dataset-mlflow-failed-target.png",
+    "metadata/bpi-dataset-mlflow-registered-target.png",
+    "metadata/bpi-dataset-mlflow-registered-mobile-target.png",
     "deploy/docker/scripts/adp-bpi-dataset-manifest-target-acceptance.js",
     "deploy/docker/scripts/adp-bpi-dataset-materialization-target-acceptance.js",
     "deploy/docker/scripts/bpi-dataset-manifest-target-fixture.sql",
@@ -2042,6 +2049,154 @@ def main() -> int:
             or any(value for key, value in materialization_boundaries.items()
                    if key != "manifestDelivery")):
         fail("BPI dataset materialization overclaims a downstream boundary", failures)
+
+    mlflow_acceptance = json.loads(
+        (ROOT / "metadata/bpi-dataset-mlflow-registration-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if (mlflow_acceptance.get("status")
+            != "PASS_TARGET_BROWSER_API_POSTGRES_MLFLOW_MINIO_RESTART_CLEANED"
+            or mlflow_acceptance.get("database") != "PostgreSQL 15.18"
+            or mlflow_acceptance.get("flywayVersion") != 30
+            or mlflow_acceptance.get("phase")
+                != "3C_A_MLFLOW_DATASET_REGISTRATION"
+            or mlflow_acceptance.get("productionActivationAllowed") is not False
+            or mlflow_acceptance.get("repoBaseCommit")
+                != "27ab9a5260c197b30747f405741dcdb6105187b1"
+            or mlflow_acceptance.get("runtimeRevision")
+                != "27ab9a5260c197b30747f405741dcdb6105187b1"):
+        fail("BPI MLflow Dataset Input target identity is incomplete", failures)
+    mlflow_summary = mlflow_acceptance.get("summary", {})
+    expected_mlflow_summary = {
+        "testedFeatures": 12,
+        "pass": 12,
+        "fail": 0,
+        "blocked": 0,
+        "notApplicable": 0,
+        "targetBrowserRuns": 4,
+        "targetBrowserFailures": 0,
+        "unexpectedConsoleErrors": 0,
+        "pageErrors": 0,
+        "requestFailures": 0,
+        "horizontalOverflowFailures": 0,
+        "postgresAcceptanceRuns": 1,
+        "mlflowAcceptanceRuns": 1,
+        "minioPolicyAcceptanceRuns": 1,
+        "restartAcceptanceRuns": 1,
+        "cleanupRuns": 1,
+    }
+    if mlflow_summary != expected_mlflow_summary:
+        fail("BPI MLflow Dataset Input summary is incomplete", failures)
+    mlflow_items = mlflow_acceptance.get("items", [])
+    if (len(mlflow_items) != 12
+            or sum(item.get("status") == "PASS" for item in mlflow_items) != 12):
+        fail("BPI MLflow Dataset Input item statuses are incomplete", failures)
+    mlflow_run = mlflow_acceptance.get("targetRun", {})
+    if (mlflow_run.get("marker")
+            != "ADP_E2E_BPI_MLFLOW_20260723_022000_A1"
+            or mlflow_run.get("registrationId")
+                != "df8653ea-1aac-43c6-bba5-cd7f8c6a5ead"
+            or mlflow_run.get("runId")
+                != "c84549b0748d413291c9018096da9a80"
+            or mlflow_run.get("stateSequence") != [
+                "QUEUED", "REGISTERING", "FAILED", "QUEUED",
+                "REGISTERING", "REGISTERED"]
+            or mlflow_run.get("finalRevision") != 6
+            or mlflow_run.get("attemptCount") != 2
+            or mlflow_run.get("failureCode") != "MLFLOW_TRANSPORT_ERROR"
+            or len(mlflow_run.get("semanticChecksum", "")) != 64
+            or len(mlflow_run.get("datasetDigest", "")) != 16):
+        fail("BPI MLflow Dataset Input target run is incomplete", failures)
+    mlflow_postgres = mlflow_acceptance.get("postgres", {})
+    mlflow_metadata = mlflow_postgres.get("registrationMetadata", {})
+    if (mlflow_postgres.get("idempotency") != {
+                "rows": 2,
+                "completed": 2,
+                "responseStatuses": [202, 202],
+            }
+            or mlflow_metadata != {
+                "sourceFactsVerified": True,
+                "datasetInputVerified": True,
+                "lineageVerified": True,
+                "modelTrained": False,
+                "modelRegistered": False,
+                "onlineInferenceEnabled": False,
+                "productionActivationAllowed": False,
+            }):
+        fail("BPI MLflow Dataset Input PostgreSQL evidence is incomplete", failures)
+    mlflow_external = mlflow_acceptance.get("mlflow", {})
+    if (mlflow_external.get("version") != "3.14.0"
+            or mlflow_external.get("runStatus") != "FINISHED"
+            or mlflow_external.get("runCount") != 1
+            or mlflow_external.get("datasetCount") != 1
+            or mlflow_external.get("inputCount") != 1
+            or mlflow_external.get("inputContext") != "training_candidate"
+            or "?versionId=" not in mlflow_external.get("source", "")
+            or mlflow_external.get("registeredModelCount") != 0
+            or mlflow_external.get("modelVersionCount") != 0
+            or mlflow_external.get("loggedModelCount") != 0
+            or mlflow_external.get("restartRunCount") != 1):
+        fail("BPI MLflow external readback evidence is incomplete", failures)
+    if mlflow_acceptance.get("minio") != {
+            "artifactBucketPrivate": True,
+            "scopedListOwnBucket": True,
+            "scopedAdmin": False,
+            "scopedRecoveryList": False,
+            "scopedRecoveryDelete": False,
+        }:
+        fail("BPI MLflow MinIO least-privilege evidence is incomplete", failures)
+    mlflow_browser = mlflow_acceptance.get("browser", {})
+    if (mlflow_browser.get("combinedStatus")
+            != "PASS_TARGET_BROWSER_API_POSTGRES_MLFLOW_MINIO_RESTART_CLEANED"
+            or any(mlflow_browser.get(key) for key in (
+                "consoleErrors", "pageErrors", "requestFailures"))
+            or mlflow_browser.get("mobileWidths") != "390/390/390"
+            or mlflow_browser.get("mobileDrawerWidths") != "389/389"):
+        fail("BPI MLflow target browser evidence is incomplete", failures)
+    for screenshot in mlflow_browser.get("evidence", {}).values():
+        screenshot_path = ROOT / screenshot.get("path", "")
+        if not screenshot_path.is_file():
+            fail(f"BPI MLflow screenshot is missing: {screenshot.get('path', '')}", failures)
+        elif hashlib.sha256(screenshot_path.read_bytes()).hexdigest() != screenshot.get(
+                "sha256"):
+            fail(f"BPI MLflow screenshot hash does not match: {screenshot.get('path', '')}", failures)
+    mlflow_cleanup = mlflow_acceptance.get("cleanup", {})
+    if (mlflow_cleanup.get("defaultOffFlagsVerified") is not True
+            or any(value for key, value in mlflow_cleanup.items()
+                   if key != "defaultOffFlagsVerified")):
+        fail("BPI MLflow target cleanup is incomplete", failures)
+    mlflow_target = mlflow_acceptance.get("target", {})
+    if (mlflow_target.get("sshHost") != "10.11.100.17"
+            or mlflow_target.get("composeProject") != "adp-mes-newbase"
+            or mlflow_target.get("flywayVersion") != 30
+            or mlflow_target.get("health", {}).get("optionalRunningSidecars") != 0
+            or any(mlflow_target.get("defaultOff", {}).values())):
+        fail("BPI MLflow target runtime was not restored default-off", failures)
+    mlflow_boundaries = mlflow_acceptance.get("boundaries", {})
+    if (mlflow_boundaries.get("mlflowDatasetInputRegistered") is not True
+            or mlflow_boundaries.get("sourceFactsVerified") is not True
+            or mlflow_boundaries.get("datasetLineageVerified") is not True
+            or any(value for key, value in mlflow_boundaries.items()
+                   if key not in {
+                       "mlflowDatasetInputRegistered",
+                       "sourceFactsVerified",
+                       "datasetLineageVerified",
+                   })):
+        fail("BPI MLflow acceptance overclaims a model or production boundary", failures)
+    mlflow_upgrade = json.loads(
+        (ROOT / "metadata/bpi-integrated-upgrade-v30-redeploy-target.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if (mlflow_upgrade.get("status") != "PASS"
+            or mlflow_upgrade.get("phase") != "COMPLETE"
+            or mlflow_upgrade.get("releaseCommit")
+                != "27ab9a5260c197b30747f405741dcdb6105187b1"
+            or mlflow_upgrade.get("database", {}).get("afterFlywayVersion") != 30
+            or mlflow_upgrade.get("database", {}).get("migrationMode")
+                != "VALIDATE_EXISTING_SCHEMA"):
+        fail("BPI V30 controlled redeploy evidence is incomplete", failures)
 
     formal_reversal = json.loads(
         (ROOT / "metadata/bpi-formal-identity-wms-reversal-acceptance.json").read_text(

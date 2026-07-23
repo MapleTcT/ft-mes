@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T02:56:00+08:00",
+  "repoBaseCommit": "27ab9a5260c197b30747f405741dcdb6105187b1",
+  "runtimeRevision": "27ab9a5260c197b30747f405741dcdb6105187b1",
+  "status": "PASS_TARGET_BROWSER_API_POSTGRES_MLFLOW_MINIO_RESTART_CLEANED",
+  "database": "PostgreSQL 15.18",
+  "databaseName": "ft_mes_bpi",
+  "flywayVersion": 30,
+  "phase": "3C_A_MLFLOW_DATASET_REGISTRATION",
+  "productionActivationAllowed": false,
+  "summary": {
+    "testedFeatures": 12,
+    "pass": 12,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "targetBrowserRuns": 4,
+    "targetBrowserFailures": 0,
+    "unexpectedConsoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "horizontalOverflowFailures": 0,
+    "postgresAcceptanceRuns": 1,
+    "mlflowAcceptanceRuns": 1,
+    "minioPolicyAcceptanceRuns": 1,
+    "restartAcceptanceRuns": 1,
+    "cleanupRuns": 1
+  },
+  "items": [
+    {
+      "operation": "deploy exact V30 release on the sole target BPI stack",
+      "status": "PASS",
+      "evidence": "controlled redeploy report passed with VALIDATE_EXISTING_SCHEMA, Flyway 30 to 30, exact release revision and default-off optional services"
+    },
+    {
+      "operation": "request an MLflow Dataset Input registration from the real ADP page while MLflow is unavailable",
+      "status": "PASS",
+      "evidence": "POST returned 202 and the page persisted FAILED/r3/attempt1 with MLFLOW_TRANSPORT_ERROR"
+    },
+    {
+      "operation": "prove failed registration has no MLflow side effect",
+      "status": "PASS",
+      "evidence": "the fresh MLflow backend remained at zero runs and zero inputs after the transport failure"
+    },
+    {
+      "operation": "retry the same registration from the page after MLflow recovery",
+      "status": "PASS",
+      "evidence": "retry returned 202 and reused registration df8653ea-1aac-43c6-bba5-cd7f8c6a5ead, reaching REGISTERED/r6/attempt2"
+    },
+    {
+      "operation": "verify PostgreSQL state, audit and idempotency facts",
+      "status": "PASS",
+      "evidence": "the six expected state transitions and two COMPLETED/202 idempotency records were persisted"
+    },
+    {
+      "operation": "verify source, dataset input and lineage metadata",
+      "status": "PASS",
+      "evidence": "sourceFactsVerified, datasetInputVerified and lineageVerified were true and all model or activation facts were false"
+    },
+    {
+      "operation": "verify exact MLflow experiment, run, dataset and input facts",
+      "status": "PASS",
+      "evidence": "MLflow contained exactly one FINISHED run, one dataset and one training_candidate input with the exact versioned S3 source"
+    },
+    {
+      "operation": "prove no model registration or training fact was created",
+      "status": "PASS",
+      "evidence": "registered_models, model_versions and logged_models were all zero and model tags remained false"
+    },
+    {
+      "operation": "prove MinIO artifact identity least privilege",
+      "status": "PASS",
+      "evidence": "the scoped identity listed only its private artifact bucket and could not administer, list or delete recovery objects"
+    },
+    {
+      "operation": "restart registrar and rediscover the same external facts",
+      "status": "PASS",
+      "evidence": "the page rediscovered the same registration and run while MLflow run count stayed exactly one"
+    },
+    {
+      "operation": "verify desktop and mobile real-page interaction",
+      "status": "PASS",
+      "evidence": "console, page and request failures were zero; mobile viewport/body/document were 390/390/390 and drawer client/scroll widths were 389/389"
+    },
+    {
+      "operation": "clean exact marker resources, temporary MLflow volumes and restore default-off runtime",
+      "status": "PASS",
+      "evidence": "database projections, catalog/object resources, temporary volumes and optional running sidecars were zero; all related flags were false"
+    }
+  ],
+  "targetRun": {
+    "marker": "ADP_E2E_BPI_MLFLOW_20260723_022000_A1",
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "datasetId": "3873cd7e-656b-42bd-9a47-10ea2b9e3b94",
+    "snapshotId": "d19ca215-06b7-40e6-a83e-440240e22320",
+    "materializationId": "63398485-9bb4-4fb4-ae7b-caec3bd28bee",
+    "catalogPublicationId": "eafaa002-45ee-476e-8298-63d8cc755b0e",
+    "retentionArchiveId": "3184209e-f81a-4c54-a23a-10e63755fbbd",
+    "registrationId": "df8653ea-1aac-43c6-bba5-cd7f8c6a5ead",
+    "experimentId": "1",
+    "runId": "c84549b0748d413291c9018096da9a80",
+    "icebergSnapshotId": "4859061201334947183",
+    "sourceArchiveVersionId": "ea4c2797-b60e-4a22-bafe-3742f182a9d3",
+    "archiveManifestVersionId": "d8a7c29d-7d32-4235-84f8-ebf6bd476917",
+    "semanticChecksum": "17a8dde12ed964b0c3cfe4dcf023b5aedf8ecaf0b7615909787119aa79b34142",
+    "datasetDigest": "17a8dde12ed964b0",
+    "stateSequence": [
+      "QUEUED",
+      "REGISTERING",
+      "FAILED",
+      "QUEUED",
+      "REGISTERING",
+      "REGISTERED"
+    ],
+    "auditSequence": [
+      "DATASET_MLFLOW_REGISTRATION_QUEUED",
+      "DATASET_MLFLOW_REGISTRATION_REGISTERING",
+      "DATASET_MLFLOW_REGISTRATION_FAILED",
+      "DATASET_MLFLOW_REGISTRATION_RETRIED",
+      "DATASET_MLFLOW_REGISTRATION_REGISTERING",
+      "DATASET_MLFLOW_REGISTRATION_REGISTERED"
+    ],
+    "finalRevision": 6,
+    "attemptCount": 2,
+    "failureCode": "MLFLOW_TRANSPORT_ERROR"
+  },
+  "postgres": {
+    "table": "bpi.bpi_dataset_mlflow_registrations",
+    "projection": "REGISTERED|r6|attempt=2|experiment=1|run=c84549b0748d413291c9018096da9a80|digest=17a8dde12ed964b0",
+    "auditCounts": {
+      "DATASET_MLFLOW_REGISTRATION_QUEUED": 1,
+      "DATASET_MLFLOW_REGISTRATION_REGISTERING": 2,
+      "DATASET_MLFLOW_REGISTRATION_FAILED": 1,
+      "DATASET_MLFLOW_REGISTRATION_RETRIED": 1,
+      "DATASET_MLFLOW_REGISTRATION_REGISTERED": 1
+    },
+    "idempotency": {
+      "rows": 2,
+      "completed": 2,
+      "responseStatuses": [202, 202]
+    },
+    "registrationMetadata": {
+      "sourceFactsVerified": true,
+      "datasetInputVerified": true,
+      "lineageVerified": true,
+      "modelTrained": false,
+      "modelRegistered": false,
+      "onlineInferenceEnabled": false,
+      "productionActivationAllowed": false
+    }
+  },
+  "mlflow": {
+    "version": "3.14.0",
+    "backend": "independent PostgreSQL",
+    "experimentId": "1",
+    "runId": "c84549b0748d413291c9018096da9a80",
+    "runStatus": "FINISHED",
+    "runCount": 1,
+    "datasetCount": 1,
+    "inputCount": 1,
+    "inputContext": "training_candidate",
+    "source": "s3://bpi-dataset-recovery/archives/tenant_40510175845988f1/eafaa002-45ee-476e-8298-63d8cc755b0e/3184209e-f81a-4c54-a23a-10e63755fbbd/source.parquet?versionId=ea4c2797-b60e-4a22-bafe-3742f182a9d3",
+    "registrationTag": "df8653ea-1aac-43c6-bba5-cd7f8c6a5ead",
+    "registeredModelCount": 0,
+    "modelVersionCount": 0,
+    "loggedModelCount": 0,
+    "restartRunCount": 1,
+    "metadataOnlyArtifactPrefixVersions": 0
+  },
+  "minio": {
+    "artifactBucketPrivate": true,
+    "scopedListOwnBucket": true,
+    "scopedAdmin": false,
+    "scopedRecoveryList": false,
+    "scopedRecoveryDelete": false
+  },
+  "browser": {
+    "route": "http://10.11.100.17:18080/bpi/#/datasets",
+    "failedRunnerStatus": "PASS_FAILED_STATE_PERSISTED",
+    "registeredRunnerStatus": "PASS_REGISTERED_STATE_REDISCOVERED",
+    "restartRunnerStatus": "PASS_REGISTERED_STATE_REDISCOVERED_AFTER_RESTART",
+    "combinedStatus": "PASS_TARGET_BROWSER_API_POSTGRES_MLFLOW_MINIO_RESTART_CLEANED",
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "mobileWidths": "390/390/390",
+    "mobileDrawerWidths": "389/389",
+    "evidence": {
+      "failedScreenshot": {
+        "path": "metadata/bpi-dataset-mlflow-failed-target.png",
+        "sha256": "d0468be9210048aff8258303207975ed94db75d99dfafdcaf315397a96ec0073"
+      },
+      "registeredScreenshot": {
+        "path": "metadata/bpi-dataset-mlflow-registered-target.png",
+        "sha256": "7711dbcba07507c6e668c774896c8f9875d4cd24b4c3d834e8247bac3559b31a"
+      },
+      "registeredMobileScreenshot": {
+        "path": "metadata/bpi-dataset-mlflow-registered-mobile-target.png",
+        "sha256": "4bc0fd7120e1a16fa358f130e448fc8e41cfc7de73a81ecb70d73afea263c524"
+      }
+    }
+  },
+  "cleanup": {
+    "datasetDefinitionRows": 0,
+    "datasetSnapshotRows": 0,
+    "datasetSampleRows": 0,
+    "datasetMaterializationRows": 0,
+    "datasetCatalogPublicationRows": 0,
+    "datasetRetentionArchiveRows": 0,
+    "datasetMlflowRegistrationRows": 0,
+    "auditRows": 0,
+    "idempotencyRows": 0,
+    "fixtureMarkerRows": 0,
+    "sourceObjectVersions": 0,
+    "trainingWarehouseObjectVersions": 0,
+    "archiveObjectVersions": 0,
+    "mlflowTemporaryVolumes": 0,
+    "optionalRunningSidecars": 0,
+    "defaultOffFlagsVerified": true
+  },
+  "target": {
+    "sshHost": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "composeProject": "adp-mes-newbase",
+    "runtimeDirectory": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "releaseDirectory": "/home/v6/ft-mes-bpi-release-v30-27ab9a52",
+    "upgradeReport": "/home/v6/adp-bpi-backups-v30-redeploy-20260722T185403Z/bpi-integrated-upgrade-20260722T185403Z.json",
+    "upgradeReportArtifact": "metadata/bpi-integrated-upgrade-v30-redeploy-target.json",
+    "upgradeReportSha256": "1f0dd88d51a620a9aa214f700c0a5b841d4d1bfbf6b53ce580bc3d999315a97e",
+    "flywayVersion": 30,
+    "health": {
+      "bpiService": "healthy",
+      "bpiAdapter": "healthy",
+      "bpiWmsAdapter": "healthy",
+      "bpiWebHttpStatus": 200,
+      "optionalRunningSidecars": 0
+    },
+    "defaultOff": {
+      "BPI_DATASET_MATERIALIZER_ENABLED": false,
+      "BPI_POLARIS_ENABLED": false,
+      "BPI_POLARIS_DROP_WITH_PURGE_ENABLED": false,
+      "BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED": false,
+      "BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED": false,
+      "BPI_DATASET_CATALOG_PUBLISHER_ENABLED": false,
+      "BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED": false,
+      "BPI_DATASET_RETENTION_ARCHIVER_ENABLED": false,
+      "BPI_DATASET_RECOVERY_RECONCILE_STALE": false,
+      "BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED": false,
+      "BPI_DATASET_MLFLOW_REGISTRAR_ENABLED": false
+    }
+  },
+  "boundaries": {
+    "mlflowDatasetInputRegistered": true,
+    "sourceFactsVerified": true,
+    "datasetLineageVerified": true,
+    "modelTrained": false,
+    "modelRegistered": false,
+    "modelApproved": false,
+    "onlineInferenceEnabled": false,
+    "productionActivationAllowed": false,
+    "mlflowProductionRbacSsoAccepted": false,
+    "fullSiteDisasterRecoveryAccepted": false,
+    "productionCapacityTested": false,
+    "continuousFieldRunTested": false,
+    "externalErpWmsTested": false
+  }
+}

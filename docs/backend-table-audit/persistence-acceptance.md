@@ -980,6 +980,24 @@ V29 恢复包；PostgreSQL、Object Lock、最小权限、隔离恢复和清理�
 `docs/testing/bpi-dataset-retention-archive-acceptance.md`。本项只关闭单数据集不可变恢复包门槛，
 不关闭整站灾备、生产容量/RPO/RTO、MLflow、模型或现场连续运行。
 
+### BPI V30 MLflow Dataset Input（目标页面/API/PostgreSQL/MLflow/MinIO）
+
+本节使用 marker `ADP_E2E_BPI_MLFLOW_20260723_022000_A1`，在唯一目标栈完成 Flyway V30
+真实页面、失败重试、外部 MLflow 读回、重启幂等、最小权限和清理验收。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 页面请求登记并持久化传输失败 | `/bpi/#/datasets` | `POST /bpi-api/dataset-retention-archives/{archiveId}/mlflow-registrations`；registration GET | `DatasetMlflowRegistrationController -> Service -> Repository.insert`；`MlflowRegistrarWorker -> fail` | `bpi_dataset_mlflow_registrations`、`bpi_audit_events`、`bpi_api_idempotency` | `bpi-dataset-mlflow-target-verification.sql` 查询 state/revision/attempt/failure、审计和幂等 | POST 202；同一任务 `QUEUED/r1 -> REGISTERING/r2 -> FAILED/r3`、attempt 1、`MLFLOW_TRANSPORT_ERROR`；MLflow 0 run/0 input | PASS_TARGET_FAILURE_NO_SIDE_EFFECT |
+| 页面重试并持久化 REGISTERED | 同一失败详情 | `POST /bpi-api/dataset-mlflow-registrations/{registrationId}/retry`；registration GET | service optimistic revision/idempotency；registrar validate/create/log/readback/complete | registration、audit、idempotency；MLflow PostgreSQL | 查询 r4-r6、experiment/run/source/digest/metadata 与两个 `COMPLETED/202` | 同一 registration `df8653ea-1aac-43c6-bba5-cd7f8c6a5ead` 达到 `REGISTERED/r6/attempt2`；三项验证 true，模型/激活 false | PASS_TARGET_REGISTERED |
+| MLflow Dataset Input 精确对账 | REGISTERED 详情 | MLflow Tracking REST/readback | `MlflowClient.register_dataset_input` 与 `verify_registration` | MLflow runs/datasets/inputs/tags；BPI registration | 查询 run/input/dataset/model tables；比对 versioned source、digest、registration tag 和 context | 1 FINISHED run、1 dataset、1 `training_candidate` input；source 带 exact versionId；registered_models/model_versions/logged_models 均 0 | PASS_TARGET_EXACT_LINEAGE |
+| MinIO scoped identity 反证 | 不适用 | S3 list/admin/delete probes | MinIO policy evaluation | 不新增业务表行 | 列举自身 artifact bucket，并尝试 admin、recovery list、recovery exact delete | 仅自身 artifact bucket 可列举；admin/recovery list/recovery delete 全部拒绝 | PASS_TARGET_SECURITY |
+| registrar 重启与页面重发现 | `/bpi/#/datasets` 桌面/移动 | registration 和六阶段 GET；MLflow readback | repository reload；MLflow exact run lookup | BPI/MLflow PostgreSQL | 重启前后查询 registration/run 数、ID 和 source | 同一 `REGISTERED/r6` 和 run 可重发现，run 数保持 1；浏览器错误为 0，移动无溢出 | PASS_TARGET_RESTART_IDEMPOTENT |
+| marker、对象、临时卷与运行时清理 | 不适用 | cleanup SQL；Polaris/MinIO exact cleanup；Docker volume/container verification | `bpi-dataset-manifest-target-cleanup.sql` 与独立管理身份 | V26-V30 lineage、audit/idempotency、Polaris/MLflow PostgreSQL | 要求 marker projection、source/training/archive versions、临时 MLflow volumes、optional sidecars 均为 0，所有相关开关 false | 数据库/对象/临时卷残留均 0；optional running 0；主 BPI 三服务 healthy；开关全部 false | PASS_TARGET_CLEANED |
+
+机器证据：`metadata/bpi-dataset-mlflow-registration-acceptance.json`；完整报告：
+`docs/testing/bpi-dataset-mlflow-registration-acceptance.md`。本项关闭的是 Dataset Input 与来源血缘登记，
+不关闭模型训练/注册/审批/推断、MLflow 生产安全/高可用、整站灾备或现场连续运行。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

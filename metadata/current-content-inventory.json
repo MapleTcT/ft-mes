@@ -587,12 +587,12 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 76,
+    "composeServiceCount": 80,
     "composeServiceKindCounts": {
       "business-runtime": 20,
       "infrastructure": 11,
       "platform-runtime": 28,
-      "support-runtime": 17
+      "support-runtime": 21
     },
     "composeServices": [
       {
@@ -692,6 +692,26 @@
       },
       {
         "service": "bpi-dataset-retention-archiver",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-mlflow-artifact-bootstrap",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-mlflow-postgres",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-mlflow",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-dataset-mlflow-registrar",
         "jarPath": "",
         "kind": "support-runtime"
       },

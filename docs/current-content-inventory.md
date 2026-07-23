@@ -10,7 +10,7 @@
 - 反编译服务 Java：`259` 个文件。
 - 前端 source map：`366` 个。
 - 前端恢复源码：`991` 个文件。
-- Docker Compose 服务：`76` 个。
+- Docker Compose 服务：`80` 个。
 - 默认数据库：`postgresql`。
 - Oracle 模式：`legacy-template-only`。
 
@@ -105,6 +105,10 @@
 | bpi-polaris-catalog-bootstrap | support-runtime | - |
 | bpi-dataset-catalog-publisher | support-runtime | - |
 | bpi-dataset-retention-archiver | support-runtime | - |
+| bpi-mlflow-artifact-bootstrap | support-runtime | - |
+| bpi-mlflow-postgres | support-runtime | - |
+| bpi-mlflow | support-runtime | - |
+| bpi-dataset-mlflow-registrar | support-runtime | - |
 | websocket | platform-runtime | bap-server/base-Server/websocket/supfusion-websocket.jar |
 | i18n | platform-runtime | bap-server/base-Server/i18n/supfusion-i18n.jar |
 | sysmanagement | platform-runtime | bap-server/base-Server/sysmanagement/supfusion-sysmanagement.jar |

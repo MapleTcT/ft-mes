@@ -2343,6 +2343,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/ensure-bpi-mlflow-registrar-role.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/postgres/ensure-bpi-retention-archiver-role.sh",
       "state": "tracked",
       "tracked": true
@@ -3573,6 +3579,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-dataset-mlflow-target-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-dataset-retention-target-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4114,6 +4126,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/bpi-dataset-materialization-target-verification.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-dataset-mlflow-target-verification.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -4755,6 +4773,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/minio/bootstrap-bpi-mlflow-artifact-bucket.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/minio/bpi-dataset-catalog-source-reader-policy.json",
       "state": "tracked",
       "tracked": true
@@ -4774,6 +4798,12 @@
     {
       "ignored": false,
       "path": "deploy/minio/bpi-iceberg-warehouse-policy.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/minio/bpi-mlflow-artifact-policy.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5259,6 +5289,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-dataset-mlflow-registration.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-dataset-retention-archive.md",
       "state": "tracked",
       "tracked": true
@@ -5487,6 +5523,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/plans/2026-07-22-bpi-phase3c-mlflow-dataset-registration-design.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/postgres-migration-index.md",
       "state": "tracked",
       "tracked": true
@@ -5692,6 +5734,12 @@
     {
       "ignored": false,
       "path": "docs/testing/bpi-dataset-materialization-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/bpi-dataset-mlflow-registration-acceptance.md",
       "state": "tracked",
       "tracked": true
     },
@@ -6243,6 +6291,30 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-dataset-mlflow-failed-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-mlflow-registered-mobile-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-mlflow-registered-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-mlflow-registration-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-dataset-retention-archive-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -6418,6 +6490,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-integrated-rollback-restored-stack.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-integrated-upgrade-v30-redeploy-target.json",
       "state": "tracked",
       "tracked": true
     },
@@ -7995,6 +8073,102 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/Dockerfile",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/pyproject.toml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/requirements.runtime.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/src/bpi_dataset_mlflow_registrar/__init__.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/src/bpi_dataset_mlflow_registrar/__main__.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/src/bpi_dataset_mlflow_registrar/config.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/src/bpi_dataset_mlflow_registrar/errors.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/src/bpi_dataset_mlflow_registrar/health.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/src/bpi_dataset_mlflow_registrar/mlflow_client.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/src/bpi_dataset_mlflow_registrar/models.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/src/bpi_dataset_mlflow_registrar/repository.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/src/bpi_dataset_mlflow_registrar/worker.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/tests/test_config.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/tests/test_mlflow_client.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-dataset-mlflow-registrar/tests/test_worker.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-dataset-retention-archiver/Dockerfile",
       "state": "tracked",
       "tracked": true
@@ -8080,6 +8254,24 @@
     {
       "ignored": false,
       "path": "services/bpi-dataset-retention-archiver/tests/test_worker.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-mlflow/Dockerfile",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-mlflow/requirements.runtime.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-mlflow/start-mlflow.sh",
       "state": "tracked",
       "tracked": true
     },
@@ -8224,6 +8416,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetMaterializationService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetMlflowRegistrationService.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8518,6 +8716,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetMaterializationView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetMlflowRegistrationView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -9069,6 +9273,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetMlflowRegistrationPostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetMlflowRegistrationSource.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
       "state": "tracked",
       "tracked": true
@@ -9568,6 +9784,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V2__bpi_tenant_and_runtime_hardening.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V30__bpi_dataset_mlflow_registration.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -10766,16 +10988,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 649
+      "tracked": 654
     },
     "docs": {
-      "tracked": 129
+      "tracked": 132
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 232
+      "tracked": 237
     },
     "package.json": {
       "tracked": 1
@@ -10787,7 +11009,7 @@
       "tracked": 57
     },
     "services": {
-      "tracked": 390
+      "tracked": 414
     },
     "simulation": {
       "tracked": 4
@@ -10799,8 +11021,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1790,
-    "tracked": 1790,
+    "totalFiles": 1827,
+    "tracked": 1827,
     "untracked": 0
   },
   "untrackedByDirectory": []
