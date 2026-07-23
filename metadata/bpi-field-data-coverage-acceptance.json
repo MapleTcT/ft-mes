@@ -1,0 +1,246 @@
+{
+  "generatedAt": "2026-07-23T15:10:09+08:00",
+  "status": "PASS_TARGET_BROWSER_API_POSTGRES_CLEANED",
+  "phase": "BPI_PHASE_3C_D_FIELD_DATA_COVERAGE",
+  "repoCommit": "1a0f3a5144b9a82442fa6b0f937982165fa7ed15",
+  "releaseCommit": "a73a53a0f4f278d70bd85db4b21acb545d14eabf",
+  "target": {
+    "host": "10.11.100.17",
+    "composeProject": "adp-mes-newbase",
+    "runtimeRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "route": "http://10.11.100.17:18080/bpi/#/shadowRuns",
+    "database": "PostgreSQL 15 / ft_mes_bpi",
+    "flywayVersion": 33
+  },
+  "marker": "ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3",
+  "runId": "299d513a-6c9b-4f0a-9d1b-6f61eddbff1e",
+  "summary": {
+    "testedItems": 8,
+    "pass": 8,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "sourceCoverageReady": true,
+    "trainingCoverageReady": false,
+    "readyForApproval": false,
+    "cleanupRemainingRows": 0
+  },
+  "deployment": {
+    "status": "PASS",
+    "phase": "COMPLETE",
+    "strategy": "INTEGRATED_EXPAND_ONLY",
+    "migrationMode": "VALIDATE_EXISTING_SCHEMA",
+    "migrationApplied": false,
+    "beforeFlywayVersion": 33,
+    "afterFlywayVersion": 33,
+    "serviceImage": "ft-mes-bpi-service:20260723t063556z-a73a53a0f4f2",
+    "adapterImage": "ft-mes-bpi-adapter:20260723t063556z-a73a53a0f4f2",
+    "wmsAdapterImage": "ft-mes-bpi-wms-adapter:20260723t063556z-a73a53a0f4f2",
+    "report": "metadata/bpi-integrated-upgrade-field-data-coverage-target.json",
+    "reportSha256": "5968840c310163ac007cd1351626989f80a2da32bd9ac7d88638dc67b1075127"
+  },
+  "browser": {
+    "loginStatus": 200,
+    "responseCount": 20,
+    "non2xxResponseCount": 0,
+    "consoleErrorCount": 0,
+    "pageErrorCount": 0,
+    "requestFailureCount": 0,
+    "desktop": {
+      "viewport": "1440x900",
+      "drawerWidth": 680,
+      "actionsInsideDrawer": true,
+      "screenshot": "metadata/bpi-field-data-coverage-desktop-target.png",
+      "screenshotSha256": "e4fd0fe2fde456457e347ce0a33838403a8228b96e9bdf71bf00ddc045dc17a6"
+    },
+    "mobile": {
+      "viewport": 390,
+      "bodyWidth": 390,
+      "documentWidth": 390,
+      "drawerLeft": 0.5832598805427551,
+      "drawerRight": 390.58325988054276,
+      "drawerWidth": 390,
+      "visibleActions": [
+        "关闭",
+        "取消任务",
+        "启动影子运行"
+      ],
+      "actionsInsideDrawer": true,
+      "screenshot": "metadata/bpi-field-data-coverage-mobile-target.png",
+      "screenshotSha256": "dac72f5601d6f5701b2d352e682fac86737c7984c163ba8d435b0cc59dbae4f5"
+    },
+    "rawReportSha256": "abde862c67f4ded8d939ca1daa7c7ccbd92b40935350d791cc8b80e4aa42305a"
+  },
+  "api": {
+    "create": {
+      "method": "POST",
+      "endpoint": "/bpi-api/shadow-runs",
+      "status": 200,
+      "result": "DRAFT/r1"
+    },
+    "read": {
+      "method": "GET",
+      "endpoint": "/bpi-api/shadow-runs/299d513a-6c9b-4f0a-9d1b-6f61eddbff1e",
+      "status": 200
+    },
+    "cancel": {
+      "method": "POST",
+      "endpoint": "/bpi-api/shadow-runs/299d513a-6c9b-4f0a-9d1b-6f61eddbff1e/cancel",
+      "status": 200,
+      "result": "CANCELLED/r2"
+    }
+  },
+  "sourceCoverage": {
+    "pinnedPointCount": 2,
+    "activeRegisteredPointCount": 2,
+    "physicalIdentityPointCount": 2,
+    "freshSequenceQualifiedPointCount": 2,
+    "approvedCalibrationPointCount": 2,
+    "readyPointCount": 2,
+    "fullyReady": true
+  },
+  "trainingDataCoverage": {
+    "policyVersion": "bpi-training-data-coverage/batch-start-boundary-v1",
+    "requiredReviewedBatchCount": 200,
+    "reviewedBatchCount": 0,
+    "requiredProductionDayCount": 7,
+    "distinctProductionDayCount": 0,
+    "requiredAcceptedStartLabelCount": 100,
+    "acceptedStartLabelCount": 0,
+    "requiredRejectedStartLabelCount": 10,
+    "rejectedStartLabelCount": 0,
+    "thresholdsMet": false,
+    "blockers": [
+      "TRAINING_REVIEWED_BATCHES_BELOW_MINIMUM",
+      "TRAINING_PRODUCTION_DAYS_BELOW_MINIMUM",
+      "TRAINING_ACCEPTED_START_LABELS_BELOW_MINIMUM",
+      "TRAINING_REJECTED_START_LABELS_BELOW_MINIMUM"
+    ]
+  },
+  "postgres": {
+    "verificationScript": "deploy/docker/scripts/bpi-field-data-coverage-acceptance-verification.sql",
+    "verificationSha256": "98abdaec5141a896188f8bef7bdc247469998d8db7da3f8345f683c637181c30",
+    "runState": "CANCELLED",
+    "runRevision": 2,
+    "createdBy": "legacy-ticket:admin",
+    "cancelledBy": "legacy-ticket:admin",
+    "batchRows": 0,
+    "reviewRows": 0,
+    "auditActions": [
+      "SHADOW_RUN_CREATED",
+      "SHADOW_RUN_CANCELLED"
+    ],
+    "idempotencyRows": 2,
+    "tables": [
+      "bpi.bpi_shadow_runs",
+      "bpi.bpi_point_catalog_snapshots",
+      "bpi.bpi_point_catalog_entries",
+      "bpi.bpi_source_sequence_evidence_current",
+      "bpi.bpi_point_calibrations",
+      "bpi.bpi_topology_versions",
+      "bpi.bpi_rule_versions",
+      "bpi.bpi_outbox_events",
+      "bpi.bpi_audit_events",
+      "bpi.bpi_api_idempotency"
+    ]
+  },
+  "cleanup": {
+    "script": "deploy/docker/scripts/bpi-field-data-coverage-acceptance-cleanup.sql",
+    "evidenceSha256": "6915c7839972d009142fff9f19e85686c49f995b784f627af669b14a23d64fcd",
+    "remaining": {
+      "audit": 0,
+      "rules": 0,
+      "outbox": 0,
+      "batches": 0,
+      "reviews": 0,
+      "catalogs": 0,
+      "shadowRuns": 0,
+      "topologies": 0,
+      "idempotency": 0,
+      "calibrations": 0,
+      "pointEntries": 0,
+      "sourceSequenceEvidence": 0
+    }
+  },
+  "runtime": {
+    "bpiHttpStatus": 200,
+    "serviceHealthStatus": 200,
+    "adapterHealthStatus": 200,
+    "wmsAdapterHealthStatus": 200,
+    "coreServicesHealthy": 3,
+    "optionalComposeServicesRunning": 0,
+    "staleStandaloneCatalogPublisher": "STOPPED_AND_AUTO_REMOVED",
+    "modelTrainingStarted": false,
+    "modelRegistered": false,
+    "onlineInferenceEnabled": false,
+    "productionActivationAllowed": false
+  },
+  "resolvedIssues": [
+    {
+      "id": "BPI-FIELD-COVERAGE-IDENTITY-SCOPE",
+      "symptom": "The first synthetic line was outside the admin ticket scope and returned HTTP 403.",
+      "resolution": "The successful acceptance uses the authorized PLANT-01 / LINE-S07-01 scope.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "BPI-FIELD-COVERAGE-BASE-URL",
+      "symptom": "A BPI base URL without a trailing slash redirected /bpi to the unavailable host port 8080.",
+      "resolution": "The acceptance runner now canonicalizes the browser base URL to /bpi/.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "BPI-FIELD-COVERAGE-MOBILE-EVIDENCE",
+      "symptom": "The initial mobile screenshot captured the drawer during its slide-in transition.",
+      "resolution": "Target and local E2E now require settled drawer geometry and all action buttons inside the viewport before capture.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "BPI-STALE-CATALOG-PUBLISHER",
+      "symptom": "A disabled, no-restart catalog publisher was running outside the formal Compose project.",
+      "resolution": "The isolated container was stopped and auto-removed; the three current core BPI services remain healthy.",
+      "status": "RESOLVED"
+    }
+  ],
+  "items": [
+    {
+      "id": "FIELD-COVERAGE-DEPLOY",
+      "status": "PASS",
+      "evidence": "Expand-only release validation completed at Flyway V33 without applying or downgrading schema."
+    },
+    {
+      "id": "FIELD-COVERAGE-SOURCE-PROJECTION",
+      "status": "PASS",
+      "evidence": "All six pinned-source counts are 2 and fullyReady is true."
+    },
+    {
+      "id": "FIELD-COVERAGE-HONEST-DEFICIT",
+      "status": "PASS",
+      "evidence": "All four real training-data counts remain zero and all four blocker codes are returned."
+    },
+    {
+      "id": "FIELD-COVERAGE-BROWSER",
+      "status": "PASS",
+      "evidence": "Desktop and mobile real pages show the source and training coverage with zero browser or HTTP errors."
+    },
+    {
+      "id": "FIELD-COVERAGE-MOBILE-GEOMETRY",
+      "status": "PASS",
+      "evidence": "390px viewport, body and document fit; drawer and all three actions are inside the viewport."
+    },
+    {
+      "id": "FIELD-COVERAGE-PERSISTENCE",
+      "status": "PASS",
+      "evidence": "PostgreSQL contains CANCELLED/r2, two lifecycle audits and two idempotency rows before cleanup."
+    },
+    {
+      "id": "FIELD-COVERAGE-NO-FABRICATION",
+      "status": "PASS",
+      "evidence": "No batch, review, production-day, model, inference or activation facts were fabricated."
+    },
+    {
+      "id": "FIELD-COVERAGE-CLEANUP",
+      "status": "PASS",
+      "evidence": "All 12 marker-scoped projections are zero and only the three healthy current BPI core services remain running."
+    }
+  ]
+}

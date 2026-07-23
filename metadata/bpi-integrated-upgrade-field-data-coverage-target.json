@@ -1,0 +1,98 @@
+{
+  "generatedAt": "2026-07-23T06:47:06.837838+00:00",
+  "status": "PASS",
+  "phase": "COMPLETE",
+  "strategy": "INTEGRATED_EXPAND_ONLY",
+  "releaseCommit": "a73a53a0f4f278d70bd85db4b21acb545d14eabf",
+  "database": {
+    "engine": "PostgreSQL",
+    "beforeFlywayVersion": 33,
+    "afterFlywayVersion": 33,
+    "expectedFlywayVersion": 33,
+    "migrationMode": "VALIDATE_EXISTING_SCHEMA",
+    "migrationApplied": false,
+    "backup": "/home/v6/adp-bpi-upgrade-backups/field-coverage-a73a53a0/ft_mes_bpi-before-v33-20260723T063556Z.dump",
+    "schemaDowngradeAllowed": false
+  },
+  "runtime": {
+    "service": {
+      "beforeImageId": "sha256:d5f4c1facaba63ae29a2f3969b485c1bd8f6e87279a66d0b6b37ec96ce2843af",
+      "afterImageId": "sha256:52cae739f57689762e0f17861e61463ed04466415f797ab6eb62f5c4f3c2fae1",
+      "releaseImage": "ft-mes-bpi-service:20260723t063556z-a73a53a0f4f2",
+      "rollbackImage": "ft-mes-bpi-service:rollback-v33-20260723t063556z"
+    },
+    "adapter": {
+      "beforeImageId": "sha256:361f294fe662fc1c4abdd69c5415dcd02068aa54a27bf558af798863143c02d7",
+      "afterImageId": "sha256:022d9f181da41225eb2f1bde957eb9969ba39a60bd16d17e67c4968e8e445eb4",
+      "releaseImage": "ft-mes-bpi-adapter:20260723t063556z-a73a53a0f4f2",
+      "rollbackImage": "ft-mes-bpi-adapter:rollback-v33-20260723t063556z"
+    },
+    "wmsAdapter": {
+      "beforeImageId": "sha256:00c469c21dc215e8a0d705471d85000f5035b3f6cca7389fbfc6c3ca1ebddabd",
+      "afterImageId": "sha256:80e874c4cc8735bd3d2d130d6fcb46dd7a00baf61a5e83b1fa8082b97fc7ad3d",
+      "releaseImage": "ft-mes-bpi-wms-adapter:20260723t063556z-a73a53a0f4f2",
+      "rollbackImage": "ft-mes-bpi-wms-adapter:rollback-v33-20260723t063556z"
+    },
+    "datasetMaterializer": {
+      "releaseImage": "ft-mes-bpi-dataset-materializer:20260723t063556z-a73a53a0f4f2",
+      "releaseImageId": "sha256:67ab02ecfc974e633456eff41b5991cc323d867f0749526d44bec0520b389521",
+      "runtimeUser": "10001:10001",
+      "enabledDuringUpgrade": false,
+      "bucketBootstrapEnabledDuringUpgrade": false,
+      "postUpgradeState": "STOPPED"
+    },
+    "datasetCatalogPublisher": {
+      "releaseImage": "ft-mes-bpi-dataset-catalog-publisher:20260723t063556z-a73a53a0f4f2",
+      "releaseImageId": "sha256:d38fe3e6a12da5e6608cd585d74a0c8619cebaf0fcd29b48d10f03d44bf5045f",
+      "runtimeUser": "10002:10002",
+      "enabledDuringUpgrade": false,
+      "polarisEnabledDuringUpgrade": false,
+      "postUpgradeState": "STOPPED"
+    },
+    "datasetRetentionArchiver": {
+      "releaseImage": "ft-mes-bpi-dataset-retention-archiver:20260723t063556z-a73a53a0f4f2",
+      "releaseImageId": "sha256:7c9bd3e3fa7013682947ce28dba51ae76b0d789d241779a01cd27954394b6a05",
+      "runtimeUser": "10003:10003",
+      "enabledDuringUpgrade": false,
+      "recoveryBucketBootstrapEnabledDuringUpgrade": false,
+      "postUpgradeState": "STOPPED"
+    },
+    "mlflowTrackingServer": {
+      "releaseImage": "ft-mes-bpi-mlflow:20260723t063556z-a73a53a0f4f2",
+      "releaseImageId": "sha256:b3b40726eacbb55b55cbfdfc929bf69fa9e8fe2d5d5c2528a33fcae3fd71dffe",
+      "runtimeUser": "10004:10004",
+      "artifactBootstrapEnabledDuringUpgrade": false,
+      "postUpgradeState": "STOPPED"
+    },
+    "datasetMlflowRegistrar": {
+      "releaseImage": "ft-mes-bpi-dataset-mlflow-registrar:20260723t063556z-a73a53a0f4f2",
+      "releaseImageId": "sha256:5a39320314f2e71a80b57361d900b9fec7bc81a625870a9aad715f644029343c",
+      "runtimeUser": "10005:10005",
+      "enabledDuringUpgrade": false,
+      "databaseRole": "LEAST_PRIVILEGE_VERIFIED",
+      "postUpgradeState": "STOPPED"
+    },
+    "environmentBackup": "/home/v6/adp-bpi-upgrade-backups/field-coverage-a73a53a0/adp-compose-before-v33-20260723T063556Z.env",
+    "composeBackup": "/home/v6/adp-bpi-upgrade-backups/field-coverage-a73a53a0/docker-compose-before-v33-20260723T063556Z.yml",
+    "minioConfigBackup": "/home/v6/adp-bpi-upgrade-backups/field-coverage-a73a53a0/bpi-minio-runtime-before-v33-20260723T063556Z.tar.gz",
+    "polarisConfigBackup": "/home/v6/adp-bpi-upgrade-backups/field-coverage-a73a53a0/bpi-polaris-runtime-before-v33-20260723T063556Z.tar.gz",
+    "uiBackup": "/home/v6/adp-bpi-upgrade-backups/field-coverage-a73a53a0/bpi-ui-before-v33-20260723T063556Z.tar.gz",
+    "uiIndexSha256": "8f25248514cf19344463a200d8be05226385ff3b4eccd4ee4db0ac4d24df4cbc",
+    "migrationSetSha256": "d3d0641706db567ce686872da294b69b1118d57a0efee87e13ca0aca9066f3a9"
+  },
+  "safety": {
+    "phase2IntegrationDefault": false,
+    "wmsOutboxDefault": false,
+    "wmsAdapterDefault": false,
+    "datasetMaterializerDefault": false,
+    "datasetBucketBootstrapDefault": false,
+    "datasetCatalogPublisherDefault": false,
+    "datasetRetentionArchiverDefault": false,
+    "recoveryBucketBootstrapDefault": false,
+    "staleRecoveryReconcileDefault": false,
+    "mlflowArtifactBootstrapDefault": false,
+    "datasetMlflowRegistrarDefault": false,
+    "polarisDefault": false,
+    "rollbackMethod": "Restore recorded images, UI, Compose, MinIO and Polaris configuration; stop optional WMS/materializer/catalog/MLflow services when required; keep the expanded schema."
+  }
+}

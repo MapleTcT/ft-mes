@@ -1037,6 +1037,25 @@ marker：`ADP_E2E_BPI_WINDOWS_20260723_1235_A1`。机器证据：
 `metadata/bpi-dataset-process-signal-window-mobile-target.png`；完整报告：
 `docs/testing/bpi-dataset-process-signal-window-acceptance.md`。
 
+### BPI Phase 3C-D 现场数据覆盖（2026-07-23）
+
+本节使用唯一目标环境 `http://10.11.100.17:18080`、真实 ADP 登录、release
+`a73a53a0f4f278d70bd85db4b21acb545d14eabf` 和 PostgreSQL/Flyway V33。marker
+`ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3` 仅创建固定来源 fixture 和一个影子验收任务，
+没有创建批次、复核或训练事实。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 固定来源覆盖 | `/bpi/#/shadowRuns` | 新建影子验收并打开详情，核对固定来源可信度 | `POST /bpi-api/shadow-runs`；`GET /bpi-api/shadow-runs/{id}` | POST/GET 均 200；页面六项均为 `2/2`、`READY`；20 个 BPI 响应全为 2xx，console/page/request failure 均为 0 | PostgreSQL 按固定目录聚合 2 个平台注册、物理身份、来源序列、批准校准和完全就绪点位 | `bpi_shadow_runs`、point catalog、source sequence、calibration、topology/rule 表 | PASS_TARGET | fixture 证明软件计算，不替代真实物理点位 |
+| BPI 训练数据缺口 | 同一详情 | 核对复核批次、生产日、START 接受/拒绝标签与 blocker | `GET /bpi-api/shadow-runs/{id}` | 页面显示 `0/200`、`0/7`、`0/100`、`0/10` 和四个明确 blocker；同时显示“不代表允许训练” | `thresholdsMet=false`、`readyForApproval=false`；批次和复核行均为 0，未产生训练、模型、推断或激活副作用 | `bpi_batch_instances`、`bpi_shadow_run_batch_reviews` 只读聚合 | PASS_TARGET_FAIL_CLOSED | 真实现场训练数据仍未积累 |
+| BPI 移动响应式 | 同一详情，桌面 `1440x900` 与移动 `390x844` | 等待抽屉动画稳定后检查标题、内容和三个底部动作 | shadow run GET | 移动 viewport/body/document 为 `390/390/390`，抽屉宽 390；“关闭/取消任务/启动影子运行”均完整落在视口内；无浏览器错误 | 只读同一 run，不新增业务行 | 只读 | PASS_TARGET_RESPONSIVE | 验收脚本已修复 `/bpi` 尾斜杠重定向和过渡帧误截图 |
+| BPI 取消与退场 | 同一详情 | 点击取消任务，查库后按 marker 定向清理 | `POST /bpi-api/shadow-runs/{id}/cancel`；cleanup SQL；`GET /bpi/` | POST 200，页面显示取消成功；清理后 BPI 页面仍为 200 | run 为 `CANCELLED/r2`，审计创建/取消各 1、幂等 2；取证后 12 类 marker 投影全为 0，三项核心服务 healthy，可选服务 0 | shadow run、audit、idempotency 及 fixture 表 | PASS_TARGET_CLEANED | 一个旧 disabled standalone catalog publisher 已停止并自动删除 |
+
+机器证据：`metadata/bpi-field-data-coverage-acceptance.json`；截图：
+`metadata/bpi-field-data-coverage-desktop-target.png`、
+`metadata/bpi-field-data-coverage-mobile-target.png`；完整报告：
+`docs/testing/bpi-field-data-coverage-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

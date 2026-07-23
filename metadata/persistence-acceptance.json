@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-23T12:51:05+08:00",
-  "repoCommit": "f7db2f98e82d481f6c53c5fa7539ac52c812e28f+target-v33-process-windows",
+  "generatedAt": "2026-07-23T15:10:09+08:00",
+  "repoCommit": "1a0f3a5144b9a82442fa6b0f937982165fa7ed15+target-field-data-coverage",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -218,11 +218,17 @@
       "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
       "evidence": "metadata/bpi-dataset-process-signal-window-acceptance.json; docs/testing/bpi-dataset-process-signal-window-acceptance.md",
       "assertions": "exact V33 target release; real ADP definition and snapshot requests; two governed windows; six immutable point-in-time facts with 2 READY and 4 BLOCKED; flow mean 20 and pump true ratio 0.5; late and post-freeze exclusion; V33 least privilege; desktop/mobile errors zero; 19 cleanup categories zero; optional sidecars and all model paths remain off"
+    },
+    "bpiFieldDataCoverage": {
+      "status": "PASS_TARGET_BROWSER_API_POSTGRES_CLEANED",
+      "marker": "ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3",
+      "evidence": "metadata/bpi-field-data-coverage-acceptance.json; docs/testing/bpi-field-data-coverage-acceptance.md",
+      "assertions": "real ADP shadow-run create/read/cancel; six pinned-source counts at 2/2; honest training deficits at 0/200, 0/7, 0/100 and 0/10; four explicit blockers; PostgreSQL CANCELLED/r2 plus two audit and two idempotency rows; desktop/mobile zero errors with settled drawer geometry; 12 cleanup categories zero; no model side effects"
     }
   },
   "summary": {
-    "testedFeatures": 259,
-    "pass": 256,
+    "testedFeatures": 263,
+    "pass": 260,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -5641,9 +5647,92 @@
       "status": "PASS",
       "evidence": "metadata/bpi-dataset-process-signal-window-acceptance.json and desktop/mobile screenshots; all browser and cleanup checks passed and all model boundaries remained false",
       "issues": []
+    },
+    {
+      "module": "BPI Phase 3C-D 固定来源覆盖",
+      "route": "/bpi/#/shadowRuns",
+      "operation": "从真实 ADP 页面创建影子验收并读取固定点位来源覆盖",
+      "api": "POST /bpi-api/shadow-runs; GET /bpi-api/shadow-runs/{runId}",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "BpiProxyController -> ShadowRunController -> ShadowRunService -> ShadowRunPostgresRepository",
+      "tables": [
+        "bpi.bpi_shadow_runs",
+        "bpi.bpi_point_catalog_snapshots",
+        "bpi.bpi_point_catalog_entries",
+        "bpi.bpi_source_sequence_evidence_current",
+        "bpi.bpi_point_calibrations"
+      ],
+      "marker": "ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3",
+      "verificationSql": "deploy/docker/scripts/bpi-field-data-coverage-acceptance-verification.sql; require six independent source-coverage counts at 2 and fullyReady=true",
+      "status": "PASS",
+      "evidence": "POST/GET returned 200; PostgreSQL and the real page showed 2 pinned, registered, physical-identity, source-sequence, approved-calibration and ready points",
+      "issues": []
+    },
+    {
+      "module": "BPI Phase 3C-D 训练数据缺口投影",
+      "route": "/bpi/#/shadowRuns",
+      "operation": "读取同一影子运行的复核批次、生产日和 START 接受/拒绝标签覆盖",
+      "api": "GET /bpi-api/shadow-runs/{runId}",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "ShadowRunPostgresRepository.mapRun -> ShadowRunTrainingDataCoverage",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_shadow_run_batch_reviews"
+      ],
+      "marker": "ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3",
+      "verificationSql": "Require reviewed batches, production days, accepted START labels and rejected START labels to remain 0 with all four deficit blockers",
+      "status": "PASS",
+      "evidence": "real page and API showed 0/200, 0/7, 0/100 and 0/10; thresholdsMet and readyForApproval remained false, with no fabricated batch or review rows",
+      "issues": []
+    },
+    {
+      "module": "BPI Phase 3C-D 取消状态、审计与幂等",
+      "route": "/bpi/#/shadowRuns",
+      "operation": "从真实页面取消影子验收并直接查询 PostgreSQL 状态、审计和幂等",
+      "api": "POST /bpi-api/shadow-runs/{runId}/cancel",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "ShadowRunController.cancel -> ShadowRunService.cancel -> ShadowRunPostgresRepository.cancel/updateState",
+      "tables": [
+        "bpi.bpi_shadow_runs",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3",
+      "verificationSql": "Require CANCELLED/r2, SHADOW_RUN_CREATED and SHADOW_RUN_CANCELLED, and two idempotency rows",
+      "status": "PASS",
+      "evidence": "POST returned 200; run 299d513a-6c9b-4f0a-9d1b-6f61eddbff1e persisted as CANCELLED/r2 with two lifecycle audits and two idempotency rows",
+      "issues": []
+    },
+    {
+      "module": "BPI Phase 3C-D 浏览器与精确清理",
+      "route": "/bpi/#/shadowRuns",
+      "operation": "在桌面和 390x844 移动页面核对覆盖，再按 marker 清理并复核运行态",
+      "api": "shadow-run GET; bpi-field-data-coverage-acceptance-cleanup.sql; GET /bpi/",
+      "method": "GET/DELETE/SQL",
+      "requiresPersistence": true,
+      "backendEntry": "BPI Web through Java 8 adapter; controlled PostgreSQL cleanup; Docker runtime verification",
+      "tables": [
+        "bpi field-data fixture tables",
+        "bpi.bpi_shadow_runs",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3",
+      "verificationSql": "Require 20/20 BPI responses 2xx, browser errors zero, 390/390/390 mobile widths, all three actions in the drawer, 12 cleanup projections zero and three core services healthy",
+      "status": "PASS",
+      "evidence": "metadata/bpi-field-data-coverage-acceptance.json and desktop/mobile screenshots; browser, PostgreSQL cleanup and runtime checks passed while all model boundaries remained false",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3",
+      "artifact": "metadata/bpi-field-data-coverage-acceptance.json",
+      "summary": "The Phase 3C-D target slice closed real ADP shadow-run create/read/cancel, six pinned-source coverage projections, honest 0/200, 0/7, 0/100 and 0/10 training-data deficits, explicit blockers, PostgreSQL lifecycle/audit/idempotency proof, settled desktop/mobile drawer evidence, exact 12-category cleanup and removal of a disabled standalone catalog publisher. Physical field history, formal evidence volume and all model paths remain open."
+    },
     {
       "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
       "artifact": "metadata/bpi-dataset-process-signal-window-acceptance.json",

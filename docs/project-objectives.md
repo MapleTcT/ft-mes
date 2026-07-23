@@ -226,6 +226,25 @@ DEVICE/GATEWAY identity、严格递增来源序列和正式校准替换 fixture�
 机器证据为 `metadata/bpi-dataset-process-signal-window-acceptance.json`，完整报告为
 `docs/testing/bpi-dataset-process-signal-window-acceptance.md`。
 
+2026-07-23 继续完成 Phase 3C-D 现场数据覆盖投影。release
+`a73a53a0f4f278d70bd85db4b21acb545d14eabf` 在唯一目标栈保持 PostgreSQL/Flyway V33，
+marker `ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3` 从真实 `/bpi/#/shadowRuns` 页面创建并
+取消影子运行。固定来源六项均为 `2/2` 且 `fullyReady=true`；训练数据覆盖则如实返回
+`0/200` 个不同复核批次、`0/7` 个 UTC 生产日、`0/100` 个接受 START 标签和 `0/10` 个拒绝
+START 标签，以及四个明确 blocker。`thresholdsMet=false`、`readyForApproval=false`，没有制造
+批次、复核、生产日、训练、模型、推断或激活事实。
+
+PostgreSQL 在清理前保存 `CANCELLED/r2`、创建/取消两条审计和两个幂等请求；20 个真实 BPI 页面
+响应均为 2xx，桌面和 `390x844` 移动端无 console/page/request error，移动抽屉和三个动作按钮均在
+390px 视口内。取证后 12 类 marker 投影全部归零，三个核心服务 healthy，一个遗留的 standalone
+disabled catalog publisher 已停止并自动删除，可选 Compose 服务运行数为 0。
+
+该纵切关闭的是“系统是否能把来源准入和训练数据量拆开、在真实页面展示并由 PostgreSQL 复验”的
+软件缺口，不关闭真实数据量。G-021 继续为 `PARTIAL`：下一步必须让 `MapleTcT/iot` 在正式点位、
+来源序列和批准校准下连续产出，并积累至少 200 个真实复核批次、7 个真实生产日和足量正负 START
+标签，再执行 v2 readiness。机器证据为 `metadata/bpi-field-data-coverage-acceptance.json`，完整报告为
+`docs/testing/bpi-field-data-coverage-acceptance.md`。
+
 2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、
 规则历史回放、精确 simulation 证明提交、同 actor `422` 拒绝、独立管理员批准发布和独立管理员驳回。
@@ -464,6 +483,7 @@ ADP 双会话审批退出 G-021 缺口；现场物理来源、正式校准、连
 - [BPI 完工入库冲销验收](testing/bpi-wms-inbound-reversal-acceptance.md)
 - [BPI 批次受控强制结束目标验收](testing/bpi-force-close-acceptance.md)
 - [BPI 正式身份双管理员强制结束验收](testing/bpi-formal-identity-force-close-acceptance.md)
+- [BPI 现场数据覆盖目标验收](testing/bpi-field-data-coverage-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标

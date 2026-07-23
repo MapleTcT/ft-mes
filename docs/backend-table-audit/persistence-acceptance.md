@@ -1038,6 +1038,23 @@ point-in-time、失败关闭、不可变和精确清理。
 `docs/testing/bpi-dataset-process-signal-window-acceptance.md`。本项只关闭受控过程窗口的实现与验收，不关闭
 物理 DEVICE/GATEWAY、正式校准、200 个复核批次、7 个生产日或模型训练资格。
 
+### BPI Phase 3C-D 现场数据覆盖（目标页面/API/PostgreSQL）
+
+本节使用 marker `ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3`。唯一目标栈运行 release
+`a73a53a0f4f278d70bd85db4b21acb545d14eabf`，PostgreSQL/Flyway 保持 V33。真实页面创建并
+取消影子运行，覆盖投影从固定目录和既有批次/复核事实聚合；取证后完成 marker 定向清理。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 创建固定版本影子验收 | `/bpi/#/shadowRuns` | `POST /bpi-api/shadow-runs` | Java 8 adapter -> `ShadowRunController.create -> ShadowRunService.create -> ShadowRunPostgresRepository.insert` | `bpi.bpi_shadow_runs`、`bpi.bpi_audit_events`、`bpi.bpi_api_idempotency` | `bpi-field-data-coverage-acceptance-verification.sql`，要求 run ID、固定 rule/topology/catalog、`DRAFT/r1` 创建审计和幂等 | HTTP 200；run `299d513a-6c9b-4f0a-9d1b-6f61eddbff1e` 创建成功，固定三个版本 ID | PASS_TARGET |
+| 聚合固定来源与训练数据覆盖 | 同一详情 | `GET /bpi-api/shadow-runs/{runId}` | `ShadowRunController.get -> ShadowRunService.get -> ShadowRunPostgresRepository.mapRun` | shadow run、point catalog、source sequence、calibration、batch、shadow review 表 | 同一 verification SQL，要求六项 source count=2、四项 training count=0、batch/review=0 | 来源 `fullyReady=true`；训练策略四项均不足并返回四个 blocker，`thresholdsMet=false`、`readyForApproval=false` | PASS_TARGET_FAIL_CLOSED |
+| 取消影子验收并持久化审计 | 同一详情 | `POST /bpi-api/shadow-runs/{runId}/cancel` | `ShadowRunController.cancel -> ShadowRunService.cancel -> ShadowRunPostgresRepository.cancel/updateState` | `bpi.bpi_shadow_runs`、`bpi.bpi_audit_events`、`bpi.bpi_api_idempotency` | 要求 `CANCELLED/r2`、createdBy/cancelledBy、`SHADOW_RUN_CREATED/SHADOW_RUN_CANCELLED`、idempotency=2 | HTTP 200；run 为 `CANCELLED/r2`，两条生命周期审计和两条幂等记录均真实落库 | PASS_TARGET |
+| marker 精确清理与零伪造反证 | 不适用 | cleanup SQL；Docker/HTTP readback | `bpi-field-data-coverage-acceptance-cleanup.sql` 与正式 Compose runtime | shadow run、audit/idempotency、rule/topology/catalog/sequence/calibration/outbox fixture 表 | 要求 12 类 marker 投影全为 0、batch/review 始终为 0、三项核心服务 healthy、可选服务 0 | 12 类残留均为 0；没有批次、复核、生产日或模型副作用；旧 standalone disabled publisher 已停止并自动删除 | PASS_TARGET_CLEANED |
+
+机器证据：`metadata/bpi-field-data-coverage-acceptance.json`；完整页面、API、PostgreSQL、移动几何和
+清理证据：`docs/testing/bpi-field-data-coverage-acceptance.md`。本项关闭覆盖投影实现和软件验收，
+不关闭物理现场来源、200 批/7 天、标签数量、模型训练或生产激活。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。
