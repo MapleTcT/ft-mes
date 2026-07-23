@@ -140,8 +140,9 @@ JAVA_HOME=/path/to/jdk17 mvn -f services/bpi-service/pom.xml -pl :bpi-service -a
   -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
-The focused dataset acceptance uses a fresh PostgreSQL schema migrated through V28 and covers the
-Phase 3A manifest facts, Phase 3B-A task state machine and Phase 3B-B catalog-publication contract:
+The focused dataset acceptance uses a fresh PostgreSQL schema migrated through V33 and covers the
+Phase 3A manifest facts, Phase 3B materialization/catalog state machines, Phase 3C training-readiness
+and point-in-time process-signal-window facts, plus the V33 least-privilege function boundary:
 
 ```bash
 JAVA_HOME=/path/to/jdk17 BPI_TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/ft_mes_bpi_test \
