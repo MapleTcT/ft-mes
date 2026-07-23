@@ -293,6 +293,7 @@ async function assertRegisteredPanel(page, registration) {
   const states = await page.locator(".dataset-delivery-grid .status").allTextContents();
   assert(JSON.stringify(states) === JSON.stringify([
     "MANIFEST_READY", "READY", "READY", "LOCKED", "REGISTERED", "NOT_STARTED",
+    "NOT_STARTED",
   ]), `page delivery chain is inconsistent: ${JSON.stringify(states)}`);
 }
 

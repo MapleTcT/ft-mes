@@ -1672,6 +1672,79 @@ test('dataset manifests stay immutable while versioned Parquet materialization i
   assert.equal(registeredDataset.registrationMetadata.onlineInferenceEnabled, false);
   assert.equal(registeredDataset.registrationMetadata.productionActivationAllowed, false);
 
+  result = await request('GET', `/bpi/v1/dataset-mlflow-registrations/${registrationId}/training-readiness-assessments`);
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data, null);
+
+  const readinessBody = {
+    objectiveCode: 'BATCH_START_BOUNDARY_REVIEW_RISK',
+    reason: '核对首个模型离线训练门槛，只评估且不启动训练',
+  };
+  result = await request('POST', `/bpi/v1/dataset-mlflow-registrations/${registrationId}/training-readiness-assessments`, {
+    headers: commandHeaders('dataset-training-readiness-stale-0001', registeredDataset.revision - 1),
+    body: readinessBody,
+  });
+  assert.equal(result.response.status, 409);
+  assert.equal(result.json.currentRevision, registeredDataset.revision);
+
+  const readinessHeaders = commandHeaders('dataset-training-readiness-0002', registeredDataset.revision);
+  result = await request('POST', `/bpi/v1/dataset-mlflow-registrations/${registrationId}/training-readiness-assessments`, {
+    headers: readinessHeaders,
+    body: readinessBody,
+  });
+  assert.equal(result.response.status, 200);
+  const readiness = result.json.data;
+  assert.equal(readiness.state, 'BLOCKED');
+  assert.equal(readiness.assessmentSequence, 1);
+  assert.equal(readiness.sourceRegistrationRevision, registeredDataset.revision);
+  assert.equal(readiness.gateResults.length, 19);
+  assert.ok(readiness.blockerCodes.includes('PROCESS_SIGNAL_WINDOWS_MISSING'));
+  assert.ok(readiness.blockerCodes.includes('START_REJECTED_LABEL_COUNT_BELOW_MINIMUM'));
+  assert.ok(readiness.blockerCodes.includes('INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM'));
+  assert.equal(readiness.observedMetrics.includedSampleCount, 1);
+  assert.equal(readiness.observedMetrics.signalWindowFeatureRefs.length, 0);
+  assert.equal(readiness.observedMetrics.startAcceptedLabelCount, 1);
+  assert.equal(readiness.observedMetrics.startRejectedLabelCount, 0);
+  assert.equal(readiness.observedMetrics.startLabelMissingCount, 0);
+  assert.equal(readiness.phaseBoundary.assessmentOnly, true);
+  assert.equal(readiness.phaseBoundary.trainingStarted, false);
+  assert.equal(readiness.phaseBoundary.modelCreated, false);
+  assert.equal(readiness.phaseBoundary.modelRegistered, false);
+  assert.equal(readiness.phaseBoundary.onlineInferenceEnabled, false);
+  assert.equal(readiness.phaseBoundary.productionActivationAllowed, false);
+  assert.match(readiness.assessmentChecksum, /^[a-f0-9]{64}$/);
+  const readinessResponse = result.json;
+
+  result = await request('POST', `/bpi/v1/dataset-mlflow-registrations/${registrationId}/training-readiness-assessments`, {
+    headers: readinessHeaders,
+    body: readinessBody,
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, readinessResponse);
+  assert.equal(simulatorState.datasetTrainingReadinessAssessments.length, 1);
+
+  result = await request('GET', `/bpi/v1/dataset-mlflow-registrations/${registrationId}/training-readiness-assessments`);
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.id, readiness.id);
+  result = await request('GET', `/bpi/v1/dataset-training-readiness-assessments/${readiness.id}`);
+  assert.equal(result.response.status, 200);
+  assert.deepEqual(result.json.data, readiness);
+
+  result = await request('POST', `/bpi/v1/dataset-mlflow-registrations/${registrationId}/training-readiness-assessments`, {
+    headers: commandHeaders('dataset-training-readiness-0003', registeredDataset.revision),
+    body: { ...readinessBody, reason: '复核数据未变化时仍生成新的不可变评估记录' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'BLOCKED');
+  assert.equal(result.json.data.assessmentSequence, 2);
+  assert.notEqual(result.json.data.id, readiness.id);
+  assert.equal(result.json.data.assessmentChecksum, readiness.assessmentChecksum);
+  assert.equal(simulatorState.datasetTrainingReadinessAssessments.length, 2);
+
+  result = await request('GET', `/bpi/v1/dataset-training-readiness-assessments/${readiness.id}`);
+  assert.equal(result.response.status, 200);
+  assert.deepEqual(result.json.data, readiness);
+
   result = await request('POST', `/bpi/v1/dataset-mlflow-registrations/${registrationId}/retry`, {
     headers: commandHeaders('dataset-mlflow-registration-registered-0004', registeredDataset.revision),
     body: { reason: 'REGISTERED 数据集输入不可再次排队或转为模型' },

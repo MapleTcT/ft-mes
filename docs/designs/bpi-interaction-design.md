@@ -354,17 +354,33 @@ Phase 3C-A 把 MLflow Dataset Input 登记作为恢复包之后的第五个独�
 及血缘复验通过；模型训练、模型注册、在线推理和生产激活作为第六阶段继续显示为 `NOT_STARTED`，不能由
 MLflow Tracking Server 健康或 run 存在推导模型可用。
 
+Phase 3C-B 在 Dataset Input 之后增加独立的“离线训练就绪”评估，不训练演示模型。首个目标固定为
+`BATCH_START_BOUNDARY_REVIEW_RISK`，服务端按 `bpi-training-readiness/batch-start-boundary-v1` 核对精确
+MLflow 血缘、行数对账、point-in-time 防泄漏、物料/工段/规则/拓扑/点位上下文、至少两类过程信号窗口、
+人工边界标签、200 个独立批次、7 个生产日、生产时间切分、类别覆盖、影子运行周期和关键数据质量事件。
+每次评估生成新的不可变序号和 checksum，结果仅为 `ELIGIBLE/BLOCKED`；页面展示要求值、实际值和阻断码，
+并始终明确 `training/model/registry/inference/activation=false`。当前小样本应真实显示 `BLOCKED`，不能为追求
+流程全绿而降低门槛或训练三行演示数据。
+
 确定性模拟器只验证交互与契约，模拟 URI/SHA/snapshot/run 不是 MinIO、Polaris 或 MLflow 的真实证据。
 Phase 3C-A 的 Java/PostgreSQL 状态机和 Registrar 组件已实现且默认关闭；目标 marker
 `ADP_E2E_BPI_MLFLOW_20260723_022000_A1` 已闭合真实 MLflow/MinIO/PostgreSQL 联合链路、ADP 页面故障重试、
 registrar 重启、桌面/移动和精确清理。该证据仍只到 Dataset Input，不允许把 run 存在推导为模型可用。
+
+Phase 3C-B 的 Java/PostgreSQL、Java 8 路由、OpenAPI、模拟器和页面链已完成目标验收。marker
+`ADP_E2E_BPI_READINESS_20260723_091500_A1` 已证明真实页面命令、PostgreSQL V31 两次不可变评估、
+幂等重放、相同冻结事实 checksum、重启回读、MLflow 模型表零变化、桌面/移动布局和精确清理。当前结果
+真实为 19 gates / 8 blockers / `BLOCKED`；下一阶段应补过程信号窗口和真实样本，而不是把目标验收通过
+解释为训练资格通过。
 
 **主要 API：** `listDatasets`、`createDatasetDefinition`、`createDatasetSnapshot`、`getDatasetSnapshot`、
 `requestDatasetMaterialization`、`getDatasetMaterialization`、`retryDatasetMaterialization`、
 `requestDatasetCatalogPublication`、`getDatasetCatalogPublicationForMaterialization`、`getDatasetCatalogPublication`、
 `retryDatasetCatalogPublication`、`getDatasetRetentionArchiveForPublication`、`requestDatasetRetentionArchive`、
 `getDatasetRetentionArchive`、`retryDatasetRetentionArchive`、`getDatasetMlflowRegistrationForArchive`、
-`requestDatasetMlflowRegistration`、`getDatasetMlflowRegistration`、`retryDatasetMlflowRegistration`。
+`requestDatasetMlflowRegistration`、`getDatasetMlflowRegistration`、`retryDatasetMlflowRegistration`、
+`getLatestDatasetTrainingReadinessAssessment`、`assessDatasetTrainingReadiness`、
+`getDatasetTrainingReadinessAssessment`。
 
 ### 5.11 集成运行 `/bpi/integrations`
 

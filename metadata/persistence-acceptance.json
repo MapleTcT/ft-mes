@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-23T02:56:00+08:00",
-  "repoCommit": "27ab9a5260c197b30747f405741dcdb6105187b1+target-v30-mlflow-dataset-input",
+  "generatedAt": "2026-07-23T09:41:00+08:00",
+  "repoCommit": "89044926c1335f8028c624b99fd7ecb57d771f2b+target-v31-training-readiness",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -215,8 +215,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 247,
-    "pass": 244,
+    "testedFeatures": 253,
+    "pass": 250,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -4855,7 +4855,11 @@
       "method": "POST",
       "requiresPersistence": true,
       "backendEntry": "DatasetController.createDefinition -> DatasetService.createDefinition -> DatasetPostgresRepository.insertDefinition",
-      "tables": ["bpi.bpi_dataset_definitions", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "tables": [
+        "bpi.bpi_dataset_definitions",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
       "marker": "ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4",
       "verificationSql": "Query definition state/revision/checksum/policies/refs by tenant and dataset id; replay the same Idempotency-Key and require the same id; invoke with viewer and another-line engineer and require HTTP 403 with no definition row.",
       "status": "PASS",
@@ -4870,7 +4874,12 @@
       "method": "POST/GET",
       "requiresPersistence": true,
       "backendEntry": "DatasetService.createSnapshot -> DatasetManifestProcessor.processOne -> DatasetManifestBuilder.build -> DatasetPostgresRepository.completeManifest",
-      "tables": ["bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_snapshot_samples", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "tables": [
+        "bpi.bpi_dataset_snapshots",
+        "bpi.bpi_dataset_snapshot_samples",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
       "marker": "ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4",
       "verificationSql": "deploy/docker/scripts/bpi-dataset-manifest-target-verification.sql; count total/included/excluded/cutoff_safe/leaked/cross_plant_rows by tenant and snapshot; query exclusion reasons, audits and idempotency statuses.",
       "status": "PASS",
@@ -4885,7 +4894,11 @@
       "method": "GET/SQL",
       "requiresPersistence": true,
       "backendEntry": "DatasetPostgresRepository projection and PostgreSQL dataset triggers",
-      "tables": ["bpi.bpi_dataset_definitions", "bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_snapshot_samples"],
+      "tables": [
+        "bpi.bpi_dataset_definitions",
+        "bpi.bpi_dataset_snapshots",
+        "bpi.bpi_dataset_snapshot_samples"
+      ],
       "marker": "ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4",
       "verificationSql": "Local negative UPDATE requires an immutable exception; target query requires MANIFEST_ONLY/NOT_STARTED/null/false/false/false; deploy/docker/scripts/bpi-dataset-manifest-target-cleanup.sql then counts ten marker projections.",
       "status": "PASS",
@@ -4900,7 +4913,11 @@
       "method": "POST/GET",
       "requiresPersistence": true,
       "backendEntry": "DatasetController.createMaterialization -> DatasetMaterializationService.request -> DatasetMaterializationPostgresRepository.insert; MaterializerWorker._cycle -> MaterializationRepository.fail",
-      "tables": ["bpi.bpi_dataset_materializations", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "tables": [
+        "bpi.bpi_dataset_materializations",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
       "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
       "verificationSql": "SELECT state, revision, attempt_count, failure_code, artifact_uri, content_sha256 FROM bpi.bpi_dataset_materializations WHERE id='02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983'; query QUEUED/WRITING/FAILED audit events and request idempotency.",
       "status": "PASS",
@@ -4915,7 +4932,12 @@
       "method": "POST/GET",
       "requiresPersistence": true,
       "backendEntry": "DatasetController.retryMaterialization -> DatasetMaterializationService.retry -> DatasetMaterializationPostgresRepository; MaterializerWorker claim/build/upload/complete",
-      "tables": ["bpi.bpi_dataset_materializations", "bpi.bpi_dataset_snapshot_samples", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "tables": [
+        "bpi.bpi_dataset_materializations",
+        "bpi.bpi_dataset_snapshot_samples",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
       "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
       "verificationSql": "deploy/docker/scripts/bpi-dataset-materialization-target-verification.sql; require READY/r6, attempt_count=2, six exact audit events and two COMPLETED/202 idempotency rows.",
       "status": "PASS",
@@ -4930,7 +4952,11 @@
       "method": "GET",
       "requiresPersistence": true,
       "backendEntry": "DatasetMaterializationPostgresRepository projection; Minio.stat_object/fget_object; hashlib.sha256; pyarrow.parquet.read_table",
-      "tables": ["bpi.bpi_dataset_materializations", "bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_snapshot_samples"],
+      "tables": [
+        "bpi.bpi_dataset_materializations",
+        "bpi.bpi_dataset_snapshots",
+        "bpi.bpi_dataset_snapshot_samples"
+      ],
       "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
       "verificationSql": "SELECT object_bucket, object_key, artifact_metadata->>'objectVersionId', byte_size, row_count, schema_json, content_sha256 FROM bpi.bpi_dataset_materializations WHERE id='02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983'.",
       "status": "PASS",
@@ -4945,7 +4971,10 @@
       "method": "GET",
       "requiresPersistence": true,
       "backendEntry": "restarted bpi-service -> DatasetPostgresRepository and DatasetMaterializationPostgresRepository",
-      "tables": ["bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_materializations"],
+      "tables": [
+        "bpi.bpi_dataset_snapshots",
+        "bpi.bpi_dataset_materializations"
+      ],
       "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
       "verificationSql": "SELECT state, revision, attempt_count, content_sha256 FROM bpi.bpi_dataset_materializations WHERE id='02a0c765-c0f9-4c1b-a6cc-1e2dc2ca5983'.",
       "status": "PASS",
@@ -4960,7 +4989,14 @@
       "method": "DELETE/SQL/GET",
       "requiresPersistence": true,
       "backendEntry": "MinIO policy evaluation/admin one-shot; bpi-dataset-manifest-target-cleanup.sql; Docker Compose state check",
-      "tables": ["bpi.bpi_dataset_definitions", "bpi.bpi_dataset_snapshots", "bpi.bpi_dataset_snapshot_samples", "bpi.bpi_dataset_materializations", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "tables": [
+        "bpi.bpi_dataset_definitions",
+        "bpi.bpi_dataset_snapshots",
+        "bpi.bpi_dataset_snapshot_samples",
+        "bpi.bpi_dataset_materializations",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
       "marker": "ADP_E2E_BPI_PARQUET_20260722_105844_A1",
       "verificationSql": "Require worker delete AccessDenied; object versions 1 -> 0; eleven marker projections and captured idempotency ids equal zero; materializer container count 0 and materializer/bootstrap flags false.",
       "status": "PASS",
@@ -5371,6 +5407,119 @@
       "verificationSql": "Require all marker projections, exact source/training/archive versions, temporary MLflow volumes and optional running sidecars to equal zero; require all ML/catalog flags false and primary BPI services healthy",
       "status": "PASS",
       "evidence": "metadata/bpi-dataset-mlflow-registration-acceptance.json; database/object/volume residues and optional sidecars were zero, primary services were healthy and all related flags were false",
+      "issues": []
+    },
+    {
+      "module": "BPI V31 真实页面离线训练就绪评估",
+      "route": "/bpi/#/datasets",
+      "operation": "从 REGISTERED Dataset Input 详情填写原因并提交 BATCH_START_BOUNDARY_REVIEW_RISK 评估",
+      "api": "POST /bpi-api/dataset-mlflow-registrations/21edf8aa-b354-41f7-8703-0c42fc2984f1/training-readiness-assessments; latest GET",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetController.assessTrainingReadiness -> DatasetTrainingReadinessService -> DatasetTrainingReadinessPostgresRepository.insert",
+      "tables": [
+        "bpi.bpi_dataset_training_readiness_assessments",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_READINESS_20260723_091500_A1",
+      "verificationSql": "Run deploy/docker/scripts/bpi-dataset-training-readiness-target-verification.sql and require two BLOCKED assessments with 19 gates, 8 blockers and assessment-only phase boundary",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-training-readiness-acceptance.json; the real page persisted sequence 1 as BLOCKED/r1 without starting training",
+      "issues": []
+    },
+    {
+      "module": "BPI V31 幂等、序号与不可变",
+      "route": "/bpi/#/datasets",
+      "operation": "相同幂等键重放首个评估，再用新键对相同冻结事实追加第二次评估，并尝试直接更新旧行",
+      "api": "POST training-readiness-assessments; PostgreSQL immutable-update probe",
+      "method": "POST/UPDATE",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetTrainingReadinessService idempotency replay and next sequence; trg_bpi_dataset_training_readiness_immutable",
+      "tables": [
+        "bpi.bpi_dataset_training_readiness_assessments",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_READINESS_20260723_091500_A1",
+      "verificationSql": "Require sequences 1/2, one distinct assessment checksum, two audit rows, two COMPLETED/200 idempotency rows and immutable UPDATE rejection",
+      "status": "PASS",
+      "evidence": "same-key replay added zero rows; the second key appended sequence 2 with the same checksum; UPDATE was rejected",
+      "issues": []
+    },
+    {
+      "module": "BPI V31 训练资格失败关闭",
+      "route": "/bpi/#/datasets",
+      "operation": "核对 19 个门槛、要求值、实际值和 8 个真实数据阻断项",
+      "api": "GET /bpi-api/dataset-mlflow-registrations/{id}/training-readiness-assessments",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "DatasetTrainingReadinessService deterministic gate evaluation",
+      "tables": [],
+      "marker": "ADP_E2E_BPI_READINESS_20260723_091500_A1",
+      "verificationSql": "NOT_APPLICABLE; compare persisted gate_results, blocker_codes, required_thresholds and observed_metrics",
+      "status": "PASS",
+      "evidence": "the page and PostgreSQL both showed 1 included batch, 1 production day, 0 signal windows and the same eight blocker codes",
+      "issues": [
+        "Current frozen data is correctly not eligible for training."
+      ]
+    },
+    {
+      "module": "BPI V31 MLflow 与模型零副作用",
+      "route": "NOT_APPLICABLE",
+      "operation": "对比评估前后 MLflow run/dataset/input 和三类模型表计数",
+      "api": "MLflow PostgreSQL readback",
+      "method": "GET/SQL",
+      "requiresPersistence": false,
+      "backendEntry": "read-only acceptance query against the isolated MLflow backend",
+      "tables": [
+        "MLflow runs",
+        "MLflow datasets",
+        "MLflow inputs",
+        "MLflow registered_models",
+        "MLflow model_versions",
+        "MLflow logged_models"
+      ],
+      "marker": "ADP_E2E_BPI_READINESS_20260723_091500_A1",
+      "verificationSql": "Require 1/1/1 before and after for run/dataset/input and 0/0/0 before and after for registered_models/model_versions/logged_models",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-training-readiness-acceptance.json; assessment created no external run, artifact or model",
+      "issues": []
+    },
+    {
+      "module": "BPI V31 重启与响应式回读",
+      "route": "/bpi/#/datasets",
+      "operation": "重启 BPI service/adapter 后从桌面与 390x844 页面重新读取最新 BLOCKED 评估",
+      "api": "GET dataset seven-stage delivery chain and latest training-readiness assessment",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "frontend/apps/bpi dataset readiness drawer through Java 8 adapter; PostgreSQL repository reload",
+      "tables": [],
+      "marker": "ADP_E2E_BPI_READINESS_20260723_091500_A1",
+      "verificationSql": "NOT_APPLICABLE; compare assessment ID, sequence, checksum and blocker list before and after restart and measure browser errors/geometry",
+      "status": "PASS",
+      "evidence": "assessment f961a15f-ee22-42c6-9702-7136d9cab007 remained BLOCKED sequence 2; browser errors were zero and mobile widths were 390/390/390 with drawer 389/389",
+      "issues": []
+    },
+    {
+      "module": "BPI V31 精确清理与正式单编排恢复",
+      "route": "NOT_APPLICABLE",
+      "operation": "精确清除 V26-V31 marker、Polaris table/namespace、source/archive/warehouse versions 和临时 MLflow 卷，再停止所有可选服务",
+      "api": "PostgreSQL cleanup; Polaris DROP WITH PURGE; MinIO exact-version delete; Docker runtime verification",
+      "method": "DELETE/SQL/GET",
+      "requiresPersistence": true,
+      "backendEntry": "V31-aware bpi-dataset-manifest-target-cleanup.sql; recovery/admin Polaris identity; MinIO administrator exact cleanup",
+      "tables": [
+        "bpi V26-V31 dataset lineage tables",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "Polaris PostgreSQL metastore",
+        "MLflow PostgreSQL"
+      ],
+      "marker": "ADP_E2E_BPI_READINESS_20260723_091500_A1",
+      "verificationSql": "Require database projections, source/archive/warehouse versions, target table/namespace, temporary volume and optional running services to be zero; require Flyway 31, healthy core services and only the formal compose file",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-training-readiness-acceptance.json; all scoped residues were zero, core services were healthy, /bpi/ returned 200 and Compose referenced only docker-compose.yml",
       "issues": []
     }
   ],

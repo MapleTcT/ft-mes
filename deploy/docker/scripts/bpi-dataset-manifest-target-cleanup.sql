@@ -29,6 +29,11 @@ SELECT id FROM bpi.bpi_dataset_mlflow_registrations
  WHERE tenant_id = '1000'
    AND retention_archive_id IN (SELECT id FROM target_dataset_retention_archives);
 
+CREATE TEMP TABLE target_dataset_training_readiness_assessments AS
+SELECT id FROM bpi.bpi_dataset_training_readiness_assessments
+ WHERE tenant_id = '1000'
+   AND mlflow_registration_id IN (SELECT id FROM target_dataset_mlflow_registrations);
+
 CREATE TEMP TABLE target_dataset_idempotency AS
 SELECT id FROM bpi.bpi_api_idempotency idempotency
  WHERE tenant_id = '1000'
@@ -66,7 +71,11 @@ SELECT id FROM bpi.bpi_api_idempotency idempotency
            SELECT 1 FROM target_dataset_mlflow_registrations registration
             WHERE response_body::text LIKE '%' || registration.id::text || '%'
                OR resource_path = '/bpi/v1/dataset-mlflow-registrations/' || registration.id::text
-               OR resource_path = '/bpi/v1/dataset-mlflow-registrations/' || registration.id::text || '/retry')
+               OR resource_path = '/bpi/v1/dataset-mlflow-registrations/' || registration.id::text || '/retry'
+               OR resource_path = '/bpi/v1/dataset-mlflow-registrations/' || registration.id::text || '/training-readiness-assessments')
+       OR EXISTS (
+           SELECT 1 FROM target_dataset_training_readiness_assessments assessment
+            WHERE response_body::text LIKE '%' || assessment.id::text || '%')
    );
 
 CREATE TEMP TABLE target_shadow_runs AS
@@ -84,10 +93,15 @@ DELETE FROM bpi.bpi_audit_events
        UNION ALL SELECT id FROM target_dataset_materializations
        UNION ALL SELECT id FROM target_dataset_catalog_publications
        UNION ALL SELECT id FROM target_dataset_retention_archives
-       UNION ALL SELECT id FROM target_dataset_mlflow_registrations);
+       UNION ALL SELECT id FROM target_dataset_mlflow_registrations
+       UNION ALL SELECT id FROM target_dataset_training_readiness_assessments);
 
 DELETE FROM bpi.bpi_api_idempotency
  WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_idempotency);
+
+DELETE FROM bpi.bpi_dataset_training_readiness_assessments
+ WHERE tenant_id = '1000'
+   AND id IN (SELECT id FROM target_dataset_training_readiness_assessments);
 
 DELETE FROM bpi.bpi_dataset_mlflow_registrations
  WHERE tenant_id = '1000' AND id IN (SELECT id FROM target_dataset_mlflow_registrations);
@@ -159,6 +173,12 @@ SELECT jsonb_pretty(jsonb_build_object(
                                  WHERE registration.tenant_id = '1000'
                                    AND registration.id IN (
                                        SELECT id FROM target_dataset_mlflow_registrations)),
+        'trainingReadinessAssessments', (SELECT count(*)
+                                           FROM bpi.bpi_dataset_training_readiness_assessments assessment
+                                          WHERE assessment.tenant_id = '1000'
+                                            AND assessment.id IN (
+                                                SELECT id
+                                                  FROM target_dataset_training_readiness_assessments)),
         'shadowRuns', (SELECT count(*) FROM bpi.bpi_shadow_runs
                         WHERE tenant_id = '1000' AND run_code LIKE :'marker' || '_SHADOW_%'),
         'reviews', (SELECT count(*) FROM bpi.bpi_shadow_run_batch_reviews review

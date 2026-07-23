@@ -1,0 +1,47 @@
+package com.mapletct.ftmes.bpi.domain;
+
+import java.util.List;
+import java.util.UUID;
+
+public record DatasetTrainingReadinessEvidence(
+        UUID registrationId,
+        UUID snapshotId,
+        UUID datasetId,
+        String datasetCode,
+        String datasetVersion,
+        String tenantId,
+        String plantId,
+        List<String> lineIds,
+        String registrationState,
+        long registrationRevision,
+        String manifestChecksum,
+        String datasetDigest,
+        long sourceRowCount,
+        boolean datasetInputVerified,
+        boolean lineageVerified,
+        boolean sourceFactsVerified,
+        String predictionTimePolicy,
+        String featureCutoffPolicy,
+        String splitPolicy,
+        List<String> featureRefs,
+        List<String> labelRefs,
+        int snapshotIncludedCount,
+        int snapshotExcludedCount,
+        int persistedSampleCount,
+        int includedSampleCount,
+        int excludedSampleCount,
+        int distinctBatchCount,
+        int distinctProductionDayCount,
+        int productionSplitGroupCount,
+        int leakageRowCount,
+        int startAcceptedLabelCount,
+        int startRejectedLabelCount,
+        int startLabelMissingCount,
+        int distinctShadowRunCount,
+        int approvedShadowRunCount,
+        int shadowRunDurationGateFailureCount,
+        long maximumContinuousShadowRunSeconds,
+        int pointCatalogSnapshotCount,
+        int readyPointCatalogSnapshotCount,
+        int unresolvedCriticalIncidentCount) {
+}

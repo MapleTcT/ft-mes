@@ -181,6 +181,27 @@ RBAC/SSO/TLS/HA、Phase 4 模型、整站灾备/容量、物理来源连续 7-14
 `metadata/bpi-dataset-mlflow-registration-acceptance.json`，完整报告为
 `docs/testing/bpi-dataset-mlflow-registration-acceptance.md`。
 
+2026-07-23 继续完成 Phase 3C-B 离线训练就绪评估目标纵切。release
+`89044926c1335f8028c624b99fd7ecb57d771f2b` 将唯一目标栈 expand-only 到 PostgreSQL 15.18/Flyway
+V31。marker `ADP_E2E_BPI_READINESS_20260723_091500_A1` 从真实 `/bpi/#/datasets` 页面调用
+`BATCH_START_BOUNDARY_REVIEW_RISK` 评估；服务按
+`bpi-training-readiness/batch-start-boundary-v1` 固定执行 19 个门槛，并如实返回 8 个 blocker，而不是训练
+小样本演示模型。两次新请求形成不可变 sequence 1/2、相同 checksum 和 2 条 audit；相同幂等键重放不
+增加行，直接 UPDATE 被 trigger 拒绝。service/adapter 重启后页面仍读到 sequence 2、同 checksum 和
+8 个 blocker，桌面与 `390x844` 移动页面无 console/page/request error 或横向溢出。
+
+评估前后 MLflow 均为 1 run/1 dataset/1 input，`registered_models/model_versions/logged_models` 均为 0，
+`training/model/registry/inference/activation` 全部保持 false。取证后 V26-V31 marker、Polaris test table/
+namespace、source/archive/warehouse exact versions 和临时 MLflow 卷已精确清理，可选 worker/Polaris/
+MLflow 运行数为 0；Flyway 保持 V31，主 BPI 三服务 healthy，`/bpi/` 为 200，Compose 只引用正式文件。
+
+因此“能否按冻结事实、固定门槛和失败关闭策略判断训练资格”退出 G-021 缺口，但训练资格本身仍为
+`BLOCKED`。下一阶段必须先接入预测时刻之前的流量/泵/阀/液位过程信号窗口，并积累至少 200 个真实复核
+批次、7 个生产日和足够 accepted/rejected 标签，再重复同一 policy。G-021 保持 `PARTIAL`；不得降低
+门槛或把本轮功能 PASS 改写为模型 READY。机器证据为
+`metadata/bpi-dataset-training-readiness-acceptance.json`，完整报告为
+`docs/testing/bpi-dataset-training-readiness-acceptance.md`。
+
 2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、
 规则历史回放、精确 simulation 证明提交、同 actor `422` 拒绝、独立管理员批准发布和独立管理员驳回。

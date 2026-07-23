@@ -16,6 +16,7 @@ import type {
   DatasetRetentionArchive,
   DatasetSnapshot,
   DatasetSnapshotCommand,
+  DatasetTrainingReadinessAssessment,
   Evidence,
   FeatureFlag,
   FeatureFlagOverrideCommand,
@@ -317,6 +318,17 @@ export const bpiApi = {
       method: 'POST',
       headers: { 'Idempotency-Key': key, 'If-Match': String(registration.revision) },
       body: JSON.stringify({ reason }),
+    }),
+  datasetTrainingReadinessForRegistration: (registrationId: string) =>
+    request<DatasetTrainingReadinessAssessment | null>(`/dataset-mlflow-registrations/${encodeURIComponent(registrationId)}/training-readiness-assessments`),
+  assessDatasetTrainingReadiness: (registration: DatasetMlflowRegistration, reason: string, key: string) =>
+    request<DatasetTrainingReadinessAssessment>(`/dataset-mlflow-registrations/${encodeURIComponent(registration.id)}/training-readiness-assessments`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(registration.revision) },
+      body: JSON.stringify({
+        objectiveCode: 'BATCH_START_BOUNDARY_REVIEW_RISK',
+        reason,
+      }),
     }),
   topologies: (plantId: string) =>
     request<TopologyVersion[]>(`/topologies?plantId=${encodeURIComponent(plantId)}`),

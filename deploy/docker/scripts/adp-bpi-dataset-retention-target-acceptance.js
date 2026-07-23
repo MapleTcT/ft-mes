@@ -286,6 +286,7 @@ async function assertLockedPanel(page, archive) {
   assert(JSON.stringify(deliveryStates)
     === JSON.stringify([
       "MANIFEST_READY", "READY", "READY", "LOCKED", "NOT_STARTED", "NOT_STARTED",
+      "NOT_STARTED",
     ]),
   `page delivery chain is inconsistent: ${JSON.stringify(deliveryStates)}`);
 }

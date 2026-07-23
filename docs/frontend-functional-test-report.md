@@ -998,6 +998,25 @@ backend，结束后停止 MLflow/registrar、移除临时卷并恢复所有开�
 `metadata/bpi-dataset-mlflow-registered-mobile-target.png`；完整报告：
 `docs/testing/bpi-dataset-mlflow-registration-acceptance.md`。
 
+### BPI V31 离线训练就绪评估（2026-07-23）
+
+本节使用唯一目标环境 `http://10.11.100.17:18080`、真实 ADP 登录和 exact revision
+`89044926c1335f8028c624b99fd7ecb57d771f2b`。功能验收 PASS，但真实数据资格为 `BLOCKED`；
+本轮没有训练或创建模型。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 离线训练就绪 | `/bpi/#/datasets` | 打开 `ADP_E2E_BPI_READINESS_20260723_091500_A1` 的 REGISTERED Dataset Input，填写原因并点击评估 | `POST /bpi-api/dataset-mlflow-registrations/21edf8aa-b354-41f7-8703-0c42fc2984f1/training-readiness-assessments`；latest GET | POST `200`；页面显示 `BLOCKED`、19 个门槛和 8 个明确 blocker；console/page/request failure 均为 0 | PostgreSQL 写入 sequence 1；相同幂等键重放同 ID，不新增行；新 key 追加 sequence 2，checksum 相同 | `bpi_dataset_training_readiness_assessments`、`bpi_audit_events`、`bpi_api_idempotency` | PASS_TARGET_FAIL_CLOSED | 数据只有 1 个 included batch、1 个生产日和 0 个过程信号窗口，因此不具备训练资格 |
+| BPI V31 PostgreSQL 与模型边界 | 同上 | 直查两次评估、尝试更新不可变行，并对比 MLflow 模型表前后 | readiness GET；PostgreSQL/MLflow SQL | 页面明确显示 assessment-only，训练/模型/推理/激活均未开始 | 2 个 `BLOCKED/r1`、序号 1/2、19 gates、8 blockers、2 audit、2 COMPLETED/200；UPDATE 被 trigger 拒绝；MLflow 保持 1 run/1 dataset/1 input 和 0 model rows | 同上；MLflow runs/datasets/inputs/model tables | PASS_TARGET_NO_MODEL_SIDE_EFFECT | 评估通过不等于数据 ELIGIBLE |
+| BPI V31 重启与移动复验 | 同一详情；桌面和 `390x844` | 重启 service/adapter 后刷新，重新打开最新评估 | 数据集七阶段 GET；latest assessment GET | 仍读到 assessment 2、同 checksum 和 8 blockers；viewport/body/document `390/390/390`、drawer `389/389`，无溢出 | PostgreSQL 不新增 assessment/audit/idempotency；MLflow 计数不变 | 只读 | PASS_TARGET_RESTART_IDEMPOTENT | 无 |
+| BPI V31 验收退场 | 不适用 | 精确 purge Polaris 表/namespace、MinIO versions、V26-V31 marker 和临时 MLflow 卷，恢复正式 Compose | cleanup SQL；Polaris/MinIO 管理操作；Docker runtime check | `/bpi/` 仍为 200，页面无测试 marker | marker、对象版本和 optional running 均为 0；主 BPI 三服务 healthy；Flyway 31；Compose 只引用正式文件 | V26-V31 lineage、Polaris/MLflow PostgreSQL、MinIO | PASS_TARGET_CLEANED | 未删除非 marker 业务数据 |
+
+机器证据：`metadata/bpi-dataset-training-readiness-acceptance.json`；截图：
+`metadata/bpi-dataset-training-readiness-blocked-target.png`、
+`metadata/bpi-dataset-training-readiness-blocked-mobile-target.png`、
+`metadata/bpi-dataset-training-readiness-restart-target.png`；完整报告：
+`docs/testing/bpi-dataset-training-readiness-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。
