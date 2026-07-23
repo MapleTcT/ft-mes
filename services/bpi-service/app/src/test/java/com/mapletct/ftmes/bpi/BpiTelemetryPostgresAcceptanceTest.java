@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -32,6 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -71,11 +73,15 @@ class BpiTelemetryPostgresAcceptanceTest {
     @AfterEach
     void cleanupMarker() {
         if (tenantId == null) return;
+        jdbc.update("DELETE FROM bpi.bpi_data_quality_incident_actions WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_data_quality_incident_events WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_data_quality_incidents WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_telemetry_quarantine WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_telemetry_point_rejects WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_telemetry_points WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_telemetry_events WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_telemetry_source_state WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
     }
 
     @Test
@@ -109,6 +115,9 @@ class BpiTelemetryPostgresAcceptanceTest {
                 SELECT property_id FROM bpi.bpi_telemetry_points
                  WHERE tenant_id = ? ORDER BY property_id
                 """, String.class, tenantId)).containsExactly("flow.instant", "pump.running");
+        assertThat(count("bpi_telemetry_point_latest")).isEqualTo(2);
+        assertThat(latestPointState("flow.instant"))
+                .isEqualTo(marker + "-EVT-1|18.6|FIRST|1|GOOD");
 
         mockMvc.perform(post("/internal/bpi/v1/telemetry")
                         .header("Authorization", "Bearer " + ingestToken)
@@ -146,6 +155,8 @@ class BpiTelemetryPostgresAcceptanceTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.sequenceDisposition").value("GAP"));
         assertThat(sourceSequence()).isEqualTo(3L);
+        assertThat(latestPointState("flow.instant"))
+                .isEqualTo(marker + "-EVT-3|20.4|GAP|3|GOOD");
 
         ObjectNode outOfOrder = envelope("EVT-2", 1, 2);
         addDoublePoint(outOfOrder, "flow.instant", 19.8, "t/h", "GOOD");
@@ -156,6 +167,8 @@ class BpiTelemetryPostgresAcceptanceTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.sequenceDisposition").value("OUT_OF_ORDER"));
         assertThat(sourceSequence()).isEqualTo(3L);
+        assertThat(latestPointState("flow.instant"))
+                .isEqualTo(marker + "-EVT-3|20.4|GAP|3|GOOD");
 
         ObjectNode staleEpoch = envelope("EVT-STALE", 0, 8);
         addDoublePoint(staleEpoch, "flow.instant", 17.0, "t/h", "GOOD");
@@ -216,6 +229,111 @@ class BpiTelemetryPostgresAcceptanceTest {
     }
 
     @Test
+    void overviewAndLiveEvidenceExposePersistedTelemetryAndIncidentTruth() throws Exception {
+        String definition = objectMapper.writeValueAsString(Map.of(
+                "bindings", List.of(Map.of(
+                        "signal", "feed.flow",
+                        "productId", "JETLINKS-PRODUCT-SUGAR",
+                        "deviceId", "FLOW-S07-01",
+                        "propertyId", "flow.instant",
+                        "expectedUnit", "t/h")),
+                "requiredSignals", List.of("feed.flow")));
+        jdbc.update("""
+                INSERT INTO bpi.bpi_topology_versions
+                    (id, tenant_id, topology_code, version, state, checksum, definition,
+                     plant_id, line_id, created_by, updated_by, published_by, published_at)
+                VALUES (?, ?, 'TOPO-LIVE', '1', 'PUBLISHED', ?, CAST(? AS jsonb),
+                        'PLANT-01', 'LINE-S07-01', 'acceptance', 'acceptance',
+                        'acceptance', now())
+                """, UUID.randomUUID(), tenantId, "checksum-" + marker, definition);
+
+        ObjectNode first = envelope("EVT-LIVE-1", 3, 1);
+        addDoublePoint(first, "flow.instant", 18.6, "t/h", "GOOD");
+        mockMvc.perform(post("/internal/bpi/v1/telemetry")
+                        .header("Authorization", "Bearer " + ingestToken)
+                        .header("X-Trace-Id", marker + "-LIVE-TRACE")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(first)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.sequenceDisposition").value("FIRST"));
+
+        String viewer = token(
+                tenantId,
+                List.of("BPI_VIEWER"),
+                List.of("PLANT-01"),
+                List.of("LINE-S07-01"));
+        mockMvc.perform(get("/bpi/v1/overview")
+                        .header("Authorization", "Bearer " + viewer)
+                        .param("plantId", "PLANT-01"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].plantId").value("PLANT-01"))
+                .andExpect(jsonPath("$.data[0].lineId").value("LINE-S07-01"))
+                .andExpect(jsonPath("$.data[0].status").value("IDLE"))
+                .andExpect(jsonPath("$.data[0].dataHealth").value("GOOD"))
+                .andExpect(jsonPath("$.data[0].instantFlow").value(18.6))
+                .andExpect(jsonPath("$.data[0].telemetry.topologyBound").value(true))
+                .andExpect(jsonPath("$.data[0].telemetry.primarySignal").value("feed.flow"))
+                .andExpect(jsonPath("$.data[0].telemetry.value").value("18.6"))
+                .andExpect(jsonPath("$.data[0].telemetry.unit").value("t/h"))
+                .andExpect(jsonPath("$.data[0].telemetry.qualityCode").value("GOOD"))
+                .andExpect(jsonPath("$.data[0].telemetry.fresh").value(true))
+                .andExpect(jsonPath("$.data[0].telemetry.expectedSignalCount").value(1))
+                .andExpect(jsonPath("$.data[0].telemetry.observedSignalCount").value(1))
+                .andExpect(jsonPath("$.data[0].telemetry.goodSignalCount").value(1));
+
+        mockMvc.perform(get("/bpi/v1/lines/LINE-S07-01/live-evidence")
+                        .header("Authorization", "Bearer " + viewer)
+                        .param("plantId", "PLANT-01"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.samples.length()").value(1))
+                .andExpect(jsonPath("$.data.samples[0].eventId").value(marker + "-EVT-LIVE-1"))
+                .andExpect(jsonPath("$.data.samples[0].value").value("18.6"))
+                .andExpect(jsonPath("$.data.checks[0].code").value("TOPOLOGY_BOUND"))
+                .andExpect(jsonPath("$.data.checks[0].status").value("PASS"))
+                .andExpect(jsonPath("$.data.incidents.length()").value(0));
+
+        jdbc.update("""
+                INSERT INTO bpi.bpi_data_quality_incidents
+                    (id, tenant_id, plant_id, line_id, source, device_id, property_id,
+                     issue_code, severity, state, revision, event_count, first_seen,
+                     last_seen, last_event_id, last_detail)
+                VALUES (?, ?, 'PLANT-01', 'LINE-S07-01', 'acceptance',
+                        'FLOW-S07-01', 'flow.instant', 'SOURCE_SEQUENCE_GAP',
+                        'CRITICAL', 'OPEN', 1, 1, now(), now(), ?, ?)
+                """, UUID.randomUUID(), tenantId, marker + "-INCIDENT", marker + " sequence gap");
+
+        mockMvc.perform(get("/bpi/v1/lines/LINE-S07-01/current-state")
+                        .header("Authorization", "Bearer " + viewer)
+                        .param("plantId", "PLANT-01"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("BLOCKED"))
+                .andExpect(jsonPath("$.data.dataHealth").value("BAD"))
+                .andExpect(jsonPath("$.data.telemetry.openIncidentCount").value(1))
+                .andExpect(jsonPath("$.data.telemetry.criticalIncidentCount").value(1));
+        mockMvc.perform(get("/bpi/v1/lines/LINE-S07-01/live-evidence")
+                        .header("Authorization", "Bearer " + viewer)
+                        .param("plantId", "PLANT-01"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.incidents.length()").value(1))
+                .andExpect(jsonPath("$.data.incidents[0].issueCode").value("SOURCE_SEQUENCE_GAP"))
+                .andExpect(jsonPath("$.data.incidents[0].severity").value("CRITICAL"))
+                .andExpect(jsonPath(
+                        "$.data.checks[?(@.code == 'NO_UNRESOLVED_CRITICAL_INCIDENT')].status")
+                        .value("FAIL"));
+
+        String wrongLine = token(
+                tenantId,
+                List.of("BPI_VIEWER"),
+                List.of("PLANT-01"),
+                List.of("LINE-OTHER"));
+        mockMvc.perform(get("/bpi/v1/lines/LINE-S07-01/live-evidence")
+                        .header("Authorization", "Bearer " + wrongLine)
+                        .param("plantId", "PLANT-01"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void concurrentIdenticalEnvelopeCreatesOneFactAndReturnsOneReplay() throws Exception {
         ObjectNode envelope = envelope("EVT-CONCURRENT", 9, 1);
         addDoublePoint(envelope, "flow.instant", 22.5, "t/h", "GOOD");
@@ -232,6 +350,7 @@ class BpiTelemetryPostgresAcceptanceTest {
             assertThat(List.of(first.get(), second.get())).containsExactlyInAnyOrder(200, 201);
             assertThat(count("bpi_telemetry_events")).isEqualTo(1);
             assertThat(count("bpi_telemetry_points")).isEqualTo(1);
+            assertThat(count("bpi_telemetry_point_latest")).isEqualTo(1);
             assertThat(sourceSequence()).isEqualTo(1L);
         } finally {
             executor.shutdownNow();
@@ -310,6 +429,17 @@ class BpiTelemetryPostgresAcceptanceTest {
                 SELECT last_sequence::bigint FROM bpi.bpi_telemetry_source_state
                  WHERE tenant_id = ? AND gateway_id = 'GW-S07-01' AND device_id = 'FLOW-S07-01'
                 """, Long.class, tenantId);
+    }
+
+    private String latestPointState(String propertyId) {
+        return jdbc.queryForObject("""
+                SELECT event_id || '|' || numeric_value || '|' || sequence_disposition || '|'
+                       || sequence || '|' || quality_code
+                  FROM bpi.bpi_telemetry_point_latest
+                 WHERE tenant_id = ? AND plant_id = 'PLANT-01' AND line_id = 'LINE-S07-01'
+                   AND product_id = 'JETLINKS-PRODUCT-SUGAR'
+                   AND device_id = 'FLOW-S07-01' AND property_id = ?
+                """, String.class, tenantId, propertyId);
     }
 
     private String token(String tenant, List<String> roles, List<String> plants, List<String> lines) throws Exception {

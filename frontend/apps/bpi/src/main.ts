@@ -53,6 +53,7 @@ import type {
   FeatureFlagOverrideCommand,
   FeatureFlagScopeType,
   ForceCloseTask,
+  LineLiveEvidence,
   LineState,
   PointCatalogPoint,
   PointCatalogPointCommand,
@@ -856,6 +857,78 @@ function overviewToolbar(): string {
   return `<div class="toolbar"><div class="segmented" role="group" aria-label="显示范围"><button data-abnormal="false" class="${state.onlyAbnormal ? '' : 'is-selected'}">全部产线</button><button data-abnormal="true" class="${state.onlyAbnormal ? 'is-selected' : ''}">仅异常</button></div><div class="toolbar-note"><i data-lucide="shield-check"></i>影子模式</div></div>`;
 }
 
+function liveValue(line: LineState): string {
+  const telemetry = line.telemetry;
+  if (telemetry.value === null || telemetry.value === undefined) {
+    return '<b>-</b><small>尚无真实遥测</small>';
+  }
+  return `<b>${escapeHtml(telemetry.value)}</b><small>${escapeHtml(telemetry.unit || '-')} · ${escapeHtml(telemetry.primarySignal || telemetry.propertyId || '未命名信号')}</small>`;
+}
+
+function telemetryHealth(line: LineState): string {
+  const telemetry = line.telemetry;
+  const freshness = telemetry.sampleTime
+    ? telemetry.fresh ? `${telemetry.lagSeconds} 秒前` : '样本已超时'
+    : '尚无样本';
+  return `${statusChip(line.dataHealth)}<small>${telemetry.observedSignalCount}/${telemetry.expectedSignalCount} 必需点位 · ${freshness}</small>`;
+}
+
+function lineTrendHtml(evidence: LineLiveEvidence): string {
+  const samples = evidence.samples.filter((sample) => (
+    sample.numericValue !== null
+    && sample.numericValue !== undefined
+    && Number.isFinite(sample.numericValue)
+  ));
+  if (!samples.length) {
+    return '<div class="live-evidence-empty"><i data-lucide="activity"></i><strong>窗口内没有数值型遥测</strong><span>页面不会补造趋势；待真实点位到达后自动显示。</span></div>';
+  }
+  const values = samples.map((sample) => sample.numericValue as number);
+  const minimum = Math.min(...values);
+  const maximum = Math.max(...values);
+  const spread = maximum - minimum;
+  const bars = samples.map((sample) => {
+    const value = sample.numericValue as number;
+    const height = spread === 0 ? 52 : 18 + ((value - minimum) / spread) * 72;
+    const tone = sample.qualityCode === 'GOOD'
+      && !['GAP', 'OUT_OF_ORDER'].includes(sample.sequenceDisposition)
+      ? 'good'
+      : 'bad';
+    const title = `${formatTime(sample.sampleTime)} · ${sample.value} ${sample.unit} · ${sample.qualityCode}/${sample.sequenceDisposition}`;
+    return `<i data-trend-sample="${escapeHtml(sample.eventId)}" class="trend-bar trend-bar--${tone}" style="--bar-height:${height.toFixed(1)}%" title="${escapeHtml(title)}"></i>`;
+  }).join('');
+  const latest = samples.at(-1)!;
+  return `
+    <div class="trend-plot" role="img" aria-label="${escapeHtml(latest.signal)} 最近遥测趋势">${bars}</div>
+    <div class="trend-scale">
+      <span>${formatTime(evidence.windowStart)}</span>
+      <b>${escapeHtml(latest.value)} ${escapeHtml(latest.unit)}</b>
+      <span>${formatTime(evidence.windowEnd)}</span>
+    </div>`;
+}
+
+function lineChecksHtml(evidence: LineLiveEvidence): string {
+  return evidence.checks.map((check) => {
+    const iconName = check.status === 'PASS' ? 'check-circle-2' : 'circle-alert';
+    return `<li class="check-list__item check-list__item--${check.status.toLowerCase()}">
+      <i data-lucide="${iconName}"></i>
+      <div><strong>${escapeHtml(check.label)}</strong><small>${escapeHtml(check.detail)}</small></div>
+      ${statusChip(check.status)}
+    </li>`;
+  }).join('');
+}
+
+function lineIncidentsHtml(evidence: LineLiveEvidence): string {
+  if (!evidence.incidents.length) {
+    return '<div class="live-evidence-empty live-evidence-empty--compact"><i data-lucide="shield-check"></i><strong>没有未解决事件</strong><span>当前线路没有开放的数据质量事件。</span></div>';
+  }
+  return `<ul class="line-incident-list">${evidence.incidents.map((incident) => `
+    <li>
+      <i data-lucide="circle-alert"></i>
+      <div><strong>${escapeHtml(dataQualityIssueLabel(incident.issueCode))}</strong><small>${escapeHtml(incident.detail)}</small><span>${formatTime(incident.lastSeen)} · ${incident.eventCount} 次</span></div>
+      ${statusChip(incident.severity)}
+    </li>`).join('')}</ul>`;
+}
+
 function renderOverview(): void {
   const content = document.querySelector('#content')!;
   if (!state.lines.length) {
@@ -865,13 +938,13 @@ function renderOverview(): void {
       <tr data-line-id="${escapeHtml(line.lineId)}" tabindex="0">
         <td><strong>${escapeHtml(line.lineName || line.lineId)}</strong><small>${escapeHtml(line.lineId)}</small></td>
         <td>${statusChip(line.status)}</td><td>${escapeHtml(line.orderId || '-')}</td><td>${escapeHtml(line.stageCode)}</td>
-        <td class="metric"><b>${number(line.instantFlow)}</b><small>t/h</small></td>
+        <td class="metric live-value">${liveValue(line)}</td>
         <td class="metric"><b>${number(line.totalizedQuantity)}</b><small>t</small></td>
         <td><span class="confidence"><i style="--value:${Math.round((line.confidence || 0) * 100)}%"></i><b>${number((line.confidence || 0) * 100, 0)}%</b></span></td>
-        <td>${statusChip(line.dataHealth)}</td><td><button class="count-link" data-open-candidates="${escapeHtml(line.lineId)}">${line.pendingCandidates}</button></td>
+        <td class="telemetry-health">${telemetryHealth(line)}</td><td><button class="count-link" data-open-candidates="${escapeHtml(line.lineId)}">${line.pendingCandidates}</button></td>
         <td>${formatTime(line.lastEventTime)}</td><td><i data-lucide="chevron-right"></i></td>
       </tr>`).join('');
-    content.innerHTML = `${overviewToolbar()}<div class="process-strip"><span class="is-complete">原料接收</span><span class="is-active">蒸发浓缩</span><span>结晶</span><span>分蜜</span><span>包装入库</span></div><div class="table-frame"><table><thead><tr><th>产线</th><th>运行状态</th><th>生产指令</th><th>当前工段</th><th>瞬时流量</th><th>累计量</th><th>边界置信度</th><th>数据健康</th><th>待审核</th><th>最后事件</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    content.innerHTML = `${overviewToolbar()}<div class="table-frame"><table><thead><tr><th>产线</th><th>运行状态</th><th>生产指令</th><th>当前工段</th><th>关键工艺值</th><th>累计量</th><th>边界置信度</th><th>数据健康</th><th>待审核</th><th>最后事件</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
   content.querySelectorAll<HTMLButtonElement>('[data-abnormal]').forEach((button) => button.addEventListener('click', () => {
     state.onlyAbnormal = button.dataset.abnormal === 'true';
@@ -886,13 +959,23 @@ function renderOverview(): void {
 
 async function openLine(lineId: string): Promise<void> {
   try {
-    const response = await bpiApi.line(lineId);
-    const line = response.data;
+    const response = await bpiApi.lineEvidence(lineId, state.plantId);
+    const evidence = response.data;
+    const line = evidence.line;
+    const telemetry = line.telemetry;
+    const physicalPoint = telemetry.productId && telemetry.deviceId && telemetry.propertyId
+      ? `${telemetry.productId}/${telemetry.deviceId}/${telemetry.propertyId}`
+      : '-';
     openDrawer(`
       <header><div><span>实时证据</span><h2>${escapeHtml(line.lineName || line.lineId)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header>
-      <div class="drawer-section facts-grid"><div><span>运行状态</span>${statusChip(line.status)}</div><div><span>生产指令</span><b>${escapeHtml(line.orderId || '-')}</b></div><div><span>工段</span><b>${escapeHtml(line.stageCode)}</b></div><div><span>待审核</span><b>${line.pendingCandidates}</b></div></div>
-      <div class="drawer-section"><h3>最近 15 分钟</h3><div class="trend-plot" role="img" aria-label="瞬时流量趋势"><i style="height:28%"></i><i style="height:42%"></i><i style="height:38%"></i><i style="height:55%"></i><i style="height:71%"></i><i style="height:68%"></i><i style="height:79%"></i><i style="height:74%"></i><i style="height:84%"></i><i style="height:82%"></i><i style="height:88%"></i><i style="height:86%"></i></div><div class="trend-scale"><span>15 分钟前</span><b>${number(line.instantFlow)} t/h</b><span>当前</span></div></div>
-      <div class="drawer-section"><h3>运行判据</h3><ul class="check-list"><li><i data-lucide="check-circle-2"></i>生产指令有效</li><li><i data-lucide="check-circle-2"></i>流量持续超过阈值</li><li><i data-lucide="check-circle-2"></i>目标罐液位上升</li></ul></div>`);
+      <div class="drawer-section facts-grid"><div><span>运行状态</span>${statusChip(line.status)}</div><div><span>数据健康</span>${statusChip(line.dataHealth)}</div><div><span>生产指令</span><b>${escapeHtml(line.orderId || '-')}</b></div><div><span>待审核</span><b>${line.pendingCandidates}</b></div></div>
+      <div class="drawer-section telemetry-facts">
+        <div class="section-title"><h3>点位事实</h3><span>${telemetry.observedSignalCount}/${telemetry.expectedSignalCount} 必需点位</span></div>
+        <dl><div><dt>主信号</dt><dd>${escapeHtml(telemetry.primarySignal || '-')}</dd></div><div><dt>物理点位</dt><dd class="mono-value">${escapeHtml(physicalPoint)}</dd></div><div><dt>最新值</dt><dd>${escapeHtml(telemetry.value ?? '-')} ${escapeHtml(telemetry.unit || '')}</dd></div><div><dt>样本时间</dt><dd>${formatTime(telemetry.sampleTime)}</dd></div><div><dt>来源序列</dt><dd>${escapeHtml(telemetry.sequenceOrigin || '-')} / ${escapeHtml(telemetry.sequenceDisposition || '-')}</dd></div><div><dt>校准版本</dt><dd>${escapeHtml(telemetry.calibrationVersion || '-')}</dd></div></dl>
+      </div>
+      <div class="drawer-section"><div class="section-title"><h3>最近 15 分钟真实遥测</h3><span>${evidence.samples.length} 个样本</span></div>${lineTrendHtml(evidence)}</div>
+      <div class="drawer-section"><div class="section-title"><h3>服务端运行判据</h3><span>${evidence.checks.filter((check) => check.status === 'PASS').length}/${evidence.checks.length} 通过</span></div><ul class="check-list">${lineChecksHtml(evidence)}</ul></div>
+      <div class="drawer-section"><div class="section-title"><h3>未解决数据质量事件</h3><span>${evidence.incidents.length} 项</span></div>${lineIncidentsHtml(evidence)}</div>`);
   } catch (error) { showToast(error instanceof Error ? error.message : String(error), true); }
 }
 

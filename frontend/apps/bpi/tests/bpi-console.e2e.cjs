@@ -108,6 +108,22 @@ test('desktop operator confirms a candidate and opens the shadow batch', async (
   await assert.doesNotReject(() => page.getByRole('heading', { name: '实时生产态势' }).waitFor());
   await assert.doesNotReject(() => page.getByText('S07 制糖线').waitFor());
   assert.equal(await page.locator('[data-line-id]').count(), 1);
+  assert.equal(await page.locator('.process-strip').count(), 0);
+  const lineRow = page.locator('[data-line-id]').first();
+  assert.match(await lineRow.textContent(), /18\.6/);
+  assert.match(await lineRow.textContent(), /t\/h/);
+
+  await lineRow.click();
+  await page.getByRole('heading', { name: 'S07 制糖线', exact: true }).waitFor();
+  await page.getByText('最近 15 分钟真实遥测', { exact: true }).waitFor();
+  await page.getByText('已发布拓扑绑定关键工艺信号', { exact: true }).waitFor();
+  await page.getByText('无未解决严重数据质量事件', { exact: true }).waitFor();
+  await page.getByText('设备时钟漂移', { exact: true }).waitFor();
+  assert.equal(await page.locator('[data-trend-sample]').count(), 12);
+  await assertDrawerSettled(page);
+  await page.locator('#detail-drawer').screenshot({ path: '/tmp/bpi-live-evidence-desktop.png' });
+  await page.locator('#detail-drawer [data-close-drawer]').click();
+  await page.locator('#detail-drawer:not(.is-open)').waitFor();
 
   await page.locator('[data-view="candidates"]').click();
   await page.getByRole('heading', { name: '候选批次' }).waitFor();
@@ -493,7 +509,9 @@ test('shift lead confirms the END boundary and closes the raw batch', async () =
   assert.equal(batch.data.state, 'CLOSED_RAW');
   assert.equal(batch.data.revision, 2);
   assert.equal(batch.data.endTime, '2026-07-12T08:29:40.000Z');
-  assert.equal(line.data.status, 'IDLE');
+  assert.equal(line.data.status, 'BLOCKED');
+  assert.equal(line.data.dataHealth, 'BAD');
+  assert.equal(line.data.telemetry.openIncidentCount, 5);
   assert.equal(line.data.currentBatchId, null);
   await page.screenshot({ path: '/tmp/bpi-console-end-boundary.png', fullPage: true });
   assert.deepEqual(errors, []);

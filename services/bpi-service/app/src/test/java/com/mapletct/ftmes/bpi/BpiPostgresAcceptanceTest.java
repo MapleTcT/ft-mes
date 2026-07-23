@@ -499,14 +499,17 @@ class BpiPostgresAcceptanceTest {
         mockMvc.perform(get("/bpi/v1/lines/LINE-S07-01/current-state")
                         .header("Authorization", "Bearer " + shiftToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.status").value("RUNNING"))
+                .andExpect(jsonPath("$.data.status").value("DEGRADED"))
+                .andExpect(jsonPath("$.data.dataHealth").value("PARTIAL"))
                 .andExpect(jsonPath("$.data.currentBatchId").value(batchId.toString()));
         mockMvc.perform(get("/bpi/v1/overview")
                         .header("Authorization", "Bearer " + shiftToken)
                         .param("plantId", "PLANT-01")
                         .param("onlyAbnormal", "true"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(0));
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].status").value("DEGRADED"))
+                .andExpect(jsonPath("$.data[0].dataHealth").value("PARTIAL"));
 
         String wrongLineToken = token(
                 tenantId, List.of("BPI_SHIFT_LEAD"), List.of("PLANT-01"), List.of("LINE-OTHER"));
@@ -729,7 +732,8 @@ class BpiPostgresAcceptanceTest {
         mockMvc.perform(get("/bpi/v1/lines/LINE-S07-01/current-state")
                         .header("Authorization", "Bearer " + requesterToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.status").value("IDLE"))
+                .andExpect(jsonPath("$.data.status").value("DEGRADED"))
+                .andExpect(jsonPath("$.data.dataHealth").value("PARTIAL"))
                 .andExpect(jsonPath("$.data.currentBatchId").doesNotExist());
 
         assertThat(jdbc.queryForObject("""
@@ -865,7 +869,8 @@ class BpiPostgresAcceptanceTest {
         mockMvc.perform(get("/bpi/v1/lines/LINE-S07-01/current-state")
                         .header("Authorization", "Bearer " + shiftToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.status").value("IDLE"))
+                .andExpect(jsonPath("$.data.status").value("DEGRADED"))
+                .andExpect(jsonPath("$.data.dataHealth").value("PARTIAL"))
                 .andExpect(jsonPath("$.data.currentBatchId").doesNotExist());
 
         assertThat(objectMapper.readTree(closed.getResponse().getContentAsString())

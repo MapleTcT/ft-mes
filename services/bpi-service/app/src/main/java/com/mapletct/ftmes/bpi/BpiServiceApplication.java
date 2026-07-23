@@ -13,6 +13,7 @@ import com.mapletct.ftmes.bpi.infrastructure.sourcesequence.BpiSourceSequenceKaf
 import com.mapletct.ftmes.bpi.infrastructure.integration.BpiPhase2IntegrationProperties;
 import com.mapletct.ftmes.bpi.infrastructure.integration.BpiWmsOutboxProperties;
 import com.mapletct.ftmes.bpi.infrastructure.dataset.DatasetManifestProperties;
+import com.mapletct.ftmes.bpi.infrastructure.overview.BpiOverviewProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -33,7 +34,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         RulePublicationOutboxProperties.class,
         BpiPhase2IntegrationProperties.class,
         BpiWmsOutboxProperties.class,
-        DatasetManifestProperties.class
+        DatasetManifestProperties.class,
+        BpiOverviewProperties.class
 })
 public class BpiServiceApplication {
 

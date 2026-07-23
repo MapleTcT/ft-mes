@@ -23,6 +23,7 @@ import type {
   FeatureFlagScopeType,
   ForceCloseCommand,
   ForceCloseTask,
+  LineLiveEvidence,
   LineState,
   PointCatalogSnapshotCommand,
   PointCatalogView,
@@ -98,7 +99,22 @@ export const bpiApi = {
       headers: { 'Idempotency-Key': key, 'If-Match': String(flag.overrideRevision) },
       body: JSON.stringify(command),
     }),
-  line: (lineId: string) => request<LineState>(`/lines/${encodeURIComponent(lineId)}/current-state`),
+  line: (lineId: string, plantId: string) => {
+    const parameters = new URLSearchParams({ plantId });
+    return request<LineState>(
+      `/lines/${encodeURIComponent(lineId)}/current-state?${parameters.toString()}`,
+    );
+  },
+  lineEvidence: (lineId: string, plantId: string, windowMinutes = 15, limit = 120) => {
+    const parameters = new URLSearchParams({
+      plantId,
+      windowMinutes: String(windowMinutes),
+      limit: String(limit),
+    });
+    return request<LineLiveEvidence>(
+      `/lines/${encodeURIComponent(lineId)}/live-evidence?${parameters.toString()}`,
+    );
+  },
   candidates: (plantId: string) =>
     request<Candidate[]>(`/candidates?plantId=${encodeURIComponent(plantId)}&state=PENDING&limit=100`),
   candidate: (id: string) => request<Candidate>(`/candidates/${encodeURIComponent(id)}`),

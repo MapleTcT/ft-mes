@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record LineState(
+        String plantId,
         String lineId,
         String lineName,
         String orderId,
@@ -17,5 +18,6 @@ public record LineState(
         String dataHealth,
         int pendingCandidates,
         int affectedRules,
-        Instant lastEventTime) {
+        Instant lastEventTime,
+        LineTelemetryState telemetry) {
 }

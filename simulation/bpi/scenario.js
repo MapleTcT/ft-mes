@@ -68,11 +68,48 @@ function createScenario() {
     review: null,
   };
 
+  const lineTelemetrySamples = [
+    17.2, 17.6, 18.1, 18.4, 18.8, 19.0, 18.7, 18.5, 18.3, 18.4, 18.5, 18.6,
+  ].map((value, index) => ({
+    eventId: stableEventId('LINE-S07-01|flow.instant', index),
+    signal: 'flow.instant',
+    value: value.toFixed(1),
+    numericValue: value,
+    unit: 't/h',
+    qualityCode: 'GOOD',
+    sequenceDisposition: 'IN_ORDER',
+    sampleTime: new Date(Date.parse('2026-07-12T07:48:58.000Z') + index * 60_000).toISOString(),
+    calibrationVersion: 'CAL-1',
+  }));
+
   const line = {
-    lineId: 'LINE-S07-01', lineName: 'S07 制糖线', status: 'RUNNING', stageCode: 'EVAPORATION',
-    orderId: 'MO-20260712-001', currentBatchId: null, confidence: 0.94,
-    instantFlow: 18.6, totalizedQuantity: 12.4, dataHealth: 'PARTIAL', pendingCandidates: 1,
-    affectedRules: 1, lastEventTime: '2026-07-12T07:59:58.000Z',
+    plantId: 'PLANT-01', lineId: 'LINE-S07-01', lineName: 'S07 制糖线',
+    status: 'BLOCKED', stageCode: 'EVAPORATION', orderId: 'MO-20260712-001',
+    currentBatchId: null, confidence: 0.94, instantFlow: 18.6, totalizedQuantity: 12.4,
+    dataHealth: 'BAD', pendingCandidates: 1, affectedRules: 5,
+    lastEventTime: '2026-07-12T07:59:58.000Z',
+    telemetry: {
+      topologyBound: true,
+      primarySignal: 'flow.instant',
+      productId: 'PRODUCT-SUGAR',
+      deviceId: 'DEVICE-S07-01',
+      propertyId: 'flow.instant',
+      value: '18.6',
+      numericValue: 18.6,
+      unit: 't/h',
+      qualityCode: 'GOOD',
+      sequenceOrigin: 'DEVICE',
+      sequenceDisposition: 'IN_ORDER',
+      sampleTime: '2026-07-12T07:59:58.000Z',
+      calibrationVersion: 'CAL-1',
+      lagSeconds: 2,
+      fresh: true,
+      expectedSignalCount: 2,
+      observedSignalCount: 2,
+      goodSignalCount: 2,
+      openIncidentCount: 5,
+      criticalIncidentCount: 1,
+    },
   };
 
   const topology = {
@@ -323,6 +360,7 @@ function createScenario() {
 
   return {
     line,
+    lineTelemetrySamples,
     candidate,
     endCandidate: null,
     batches: [],

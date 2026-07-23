@@ -78,10 +78,31 @@
         "tags": ["Overview"],
         "operationId": "getCurrentLineState",
         "summary": "查询单条产线实时状态和规则影响",
-        "parameters": [{"$ref": "#/components/parameters/LineId"}],
+        "parameters": [
+          {"$ref": "#/components/parameters/LineId"},
+          {"name": "plantId", "in": "query", "required": false, "schema": {"type": "string", "maxLength": 64}}
+        ],
         "responses": {
           "200": {"description": "产线状态", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/LineStateResponse"}}}},
           "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bpi/v1/lines/{lineId}/live-evidence": {
+      "get": {
+        "tags": ["Overview"],
+        "operationId": "getLineLiveEvidence",
+        "summary": "查询产线真实遥测趋势、服务端判据和未解决事件",
+        "parameters": [
+          {"$ref": "#/components/parameters/LineId"},
+          {"$ref": "#/components/parameters/PlantId"},
+          {"name": "windowMinutes", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 1440, "default": 15}},
+          {"name": "limit", "in": "query", "schema": {"type": "integer", "minimum": 2, "maximum": 500, "default": 120}}
+        ],
+        "responses": {
+          "200": {"description": "真实运行证据", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/LineLiveEvidenceResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"},
+          "422": {"$ref": "#/components/responses/Unprocessable"}
         }
       }
     },
@@ -1118,11 +1139,87 @@
         }
       },
       "LineState": {
-        "type": "object", "required": ["lineId", "lineName", "status", "stageCode", "lastEventTime", "dataHealth"],
-        "properties": {"lineId": {"type": "string"}, "lineName": {"type": "string"}, "orderId": {"type": ["string", "null"]}, "currentBatchId": {"type": ["string", "null"]}, "stageCode": {"type": "string"}, "status": {"type": "string", "enum": ["IDLE", "RUNNING", "DEGRADED", "BLOCKED"]}, "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1}, "instantFlow": {"type": ["number", "null"]}, "totalizedQuantity": {"type": ["number", "null"]}, "dataHealth": {"type": "string", "enum": ["GOOD", "PARTIAL", "BAD"]}, "pendingCandidates": {"type": "integer", "minimum": 0}, "affectedRules": {"type": "integer", "minimum": 0}, "lastEventTime": {"type": "string", "format": "date-time"}}
+        "type": "object", "required": ["plantId", "lineId", "lineName", "status", "stageCode", "lastEventTime", "dataHealth", "telemetry"],
+        "properties": {"plantId": {"type": "string"}, "lineId": {"type": "string"}, "lineName": {"type": "string"}, "orderId": {"type": ["string", "null"]}, "currentBatchId": {"type": ["string", "null"]}, "stageCode": {"type": "string"}, "status": {"type": "string", "enum": ["IDLE", "RUNNING", "DEGRADED", "BLOCKED"]}, "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1}, "instantFlow": {"type": ["number", "null"]}, "totalizedQuantity": {"type": ["number", "null"]}, "dataHealth": {"type": "string", "enum": ["GOOD", "PARTIAL", "BAD"]}, "pendingCandidates": {"type": "integer", "minimum": 0}, "affectedRules": {"type": "integer", "minimum": 0}, "lastEventTime": {"type": "string", "format": "date-time"}, "telemetry": {"$ref": "#/components/schemas/LineTelemetryState"}}
+      },
+      "LineTelemetryState": {
+        "type": "object",
+        "required": ["topologyBound", "lagSeconds", "fresh", "expectedSignalCount", "observedSignalCount", "goodSignalCount", "openIncidentCount", "criticalIncidentCount"],
+        "properties": {
+          "topologyBound": {"type": "boolean"},
+          "primarySignal": {"type": ["string", "null"]},
+          "productId": {"type": ["string", "null"]},
+          "deviceId": {"type": ["string", "null"]},
+          "propertyId": {"type": ["string", "null"]},
+          "value": {"type": ["string", "null"]},
+          "numericValue": {"type": ["number", "null"]},
+          "unit": {"type": ["string", "null"]},
+          "qualityCode": {"type": ["string", "null"], "enum": ["GOOD", "UNCERTAIN", "BAD", "STALE", "SUBSTITUTED", null]},
+          "sequenceOrigin": {"type": ["string", "null"], "enum": ["DEVICE", "GATEWAY", "EXPORTER", null]},
+          "sequenceDisposition": {"type": ["string", "null"]},
+          "sampleTime": {"type": ["string", "null"], "format": "date-time"},
+          "calibrationVersion": {"type": ["string", "null"]},
+          "lagSeconds": {"type": "integer", "minimum": 0},
+          "fresh": {"type": "boolean"},
+          "expectedSignalCount": {"type": "integer", "minimum": 0},
+          "observedSignalCount": {"type": "integer", "minimum": 0},
+          "goodSignalCount": {"type": "integer", "minimum": 0},
+          "openIncidentCount": {"type": "integer", "minimum": 0},
+          "criticalIncidentCount": {"type": "integer", "minimum": 0}
+        }
+      },
+      "LineTelemetrySample": {
+        "type": "object",
+        "required": ["eventId", "signal", "value", "unit", "qualityCode", "sequenceDisposition", "sampleTime"],
+        "properties": {
+          "eventId": {"type": "string"},
+          "signal": {"type": "string"},
+          "value": {"type": "string"},
+          "numericValue": {"type": ["number", "null"]},
+          "unit": {"type": "string"},
+          "qualityCode": {"type": "string", "enum": ["GOOD", "UNCERTAIN", "BAD", "STALE", "SUBSTITUTED"]},
+          "sequenceDisposition": {"type": "string"},
+          "sampleTime": {"type": "string", "format": "date-time"},
+          "calibrationVersion": {"type": ["string", "null"]}
+        }
+      },
+      "LineEvidenceCheck": {
+        "type": "object",
+        "required": ["code", "label", "status", "detail"],
+        "properties": {
+          "code": {"type": "string"},
+          "label": {"type": "string"},
+          "status": {"type": "string", "enum": ["PASS", "WARN", "FAIL"]},
+          "detail": {"type": "string"}
+        }
+      },
+      "LineIncidentSnapshot": {
+        "type": "object",
+        "required": ["issueCode", "severity", "state", "eventCount", "lastSeen", "detail"],
+        "properties": {
+          "issueCode": {"type": "string"},
+          "severity": {"type": "string", "enum": ["INFO", "WARNING", "ERROR", "CRITICAL"]},
+          "state": {"type": "string", "enum": ["OPEN", "ACKNOWLEDGED"]},
+          "eventCount": {"type": "integer", "minimum": 1},
+          "lastSeen": {"type": "string", "format": "date-time"},
+          "detail": {"type": "string"}
+        }
+      },
+      "LineLiveEvidence": {
+        "type": "object",
+        "required": ["line", "windowStart", "windowEnd", "samples", "checks", "incidents"],
+        "properties": {
+          "line": {"$ref": "#/components/schemas/LineState"},
+          "windowStart": {"type": "string", "format": "date-time"},
+          "windowEnd": {"type": "string", "format": "date-time"},
+          "samples": {"type": "array", "items": {"$ref": "#/components/schemas/LineTelemetrySample"}},
+          "checks": {"type": "array", "items": {"$ref": "#/components/schemas/LineEvidenceCheck"}},
+          "incidents": {"type": "array", "items": {"$ref": "#/components/schemas/LineIncidentSnapshot"}}
+        }
       },
       "OverviewResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/LineState"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "LineStateResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/LineState"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "LineLiveEvidenceResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/LineLiveEvidence"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "EvidenceItem": {
         "type": "object", "required": ["eventId", "signal", "classification", "satisfied", "quality", "eventTime"],
         "properties": {"eventId": {"type": "string"}, "signal": {"type": "string"}, "classification": {"type": "string", "enum": ["REQUIRED", "QUORUM", "OPTIONAL"]}, "satisfied": {"type": "boolean"}, "value": {}, "unit": {"type": ["string", "null"]}, "quality": {"type": "string"}, "eventTime": {"type": "string", "format": "date-time"}, "source": {"type": "string"}}

@@ -121,7 +121,31 @@ export interface DataQualitySummary {
   issueCounts: Record<string, number>;
 }
 
+export interface LineTelemetryState {
+  topologyBound: boolean;
+  primarySignal?: string | null;
+  productId?: string | null;
+  deviceId?: string | null;
+  propertyId?: string | null;
+  value?: string | null;
+  numericValue?: number | null;
+  unit?: string | null;
+  qualityCode?: string | null;
+  sequenceOrigin?: string | null;
+  sequenceDisposition?: string | null;
+  sampleTime?: string | null;
+  calibrationVersion?: string | null;
+  lagSeconds: number;
+  fresh: boolean;
+  expectedSignalCount: number;
+  observedSignalCount: number;
+  goodSignalCount: number;
+  openIncidentCount: number;
+  criticalIncidentCount: number;
+}
+
 export interface LineState {
+  plantId: string;
   lineId: string;
   lineName?: string;
   status: BpiStatus;
@@ -135,6 +159,44 @@ export interface LineState {
   pendingCandidates: number;
   affectedRules?: number;
   lastEventTime: string;
+  telemetry: LineTelemetryState;
+}
+
+export interface LineTelemetrySample {
+  eventId: string;
+  signal: string;
+  value: string;
+  numericValue?: number | null;
+  unit: string;
+  qualityCode: string;
+  sequenceDisposition: string;
+  sampleTime: string;
+  calibrationVersion?: string | null;
+}
+
+export interface LineEvidenceCheck {
+  code: string;
+  label: string;
+  status: 'PASS' | 'WARN' | 'FAIL';
+  detail: string;
+}
+
+export interface LineIncidentSnapshot {
+  issueCode: string;
+  severity: string;
+  state: string;
+  eventCount: number;
+  lastSeen: string;
+  detail: string;
+}
+
+export interface LineLiveEvidence {
+  line: LineState;
+  windowStart: string;
+  windowEnd: string;
+  samples: LineTelemetrySample[];
+  checks: LineEvidenceCheck[];
+  incidents: LineIncidentSnapshot[];
 }
 
 export interface Evidence {

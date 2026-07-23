@@ -33,6 +33,10 @@ management:
         enabled: true
 
 bpi:
+  overview:
+    telemetry-freshness: ${BPI_OVERVIEW_TELEMETRY_FRESHNESS:2m}
+    default-trend-window-minutes: ${BPI_OVERVIEW_TREND_WINDOW_MINUTES:15}
+    default-trend-limit: ${BPI_OVERVIEW_TREND_LIMIT:120}
   dataset-manifest:
     enabled: ${BPI_DATASET_MANIFEST_ENABLED:true}
     batch-size: ${BPI_DATASET_MANIFEST_BATCH_SIZE:10}

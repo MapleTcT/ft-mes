@@ -2,6 +2,7 @@ package com.mapletct.ftmes.bpi.interfaces.rest;
 
 import com.mapletct.ftmes.bpi.application.ActorContextFactory;
 import com.mapletct.ftmes.bpi.application.OverviewService;
+import com.mapletct.ftmes.bpi.domain.LineLiveEvidence;
 import com.mapletct.ftmes.bpi.domain.LineState;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,7 +40,28 @@ public class OverviewController {
     public ApiResponse<LineState> current(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable String lineId,
+            @RequestParam(required = false) String plantId,
             HttpServletRequest request) {
-        return ApiResponse.of(overviewService.current(actorContextFactory.from(jwt), lineId), request);
+        return ApiResponse.of(
+                overviewService.current(actorContextFactory.from(jwt), plantId, lineId),
+                request);
+    }
+
+    @GetMapping("/bpi/v1/lines/{lineId}/live-evidence")
+    public ApiResponse<LineLiveEvidence> liveEvidence(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable String lineId,
+            @RequestParam String plantId,
+            @RequestParam(required = false) Integer windowMinutes,
+            @RequestParam(required = false) Integer limit,
+            HttpServletRequest request) {
+        return ApiResponse.of(
+                overviewService.liveEvidence(
+                        actorContextFactory.from(jwt),
+                        plantId,
+                        lineId,
+                        windowMinutes,
+                        limit),
+                request);
     }
 }

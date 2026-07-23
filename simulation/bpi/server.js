@@ -1943,6 +1943,139 @@ function topologyValidation(definition, pointCatalog) {
   return { errors, warnings };
 }
 
+function unresolvedLineIncidents(state, lineId) {
+  return state.dataQualityIncidents
+    .filter((incident) => incident.lineId === lineId && incident.state !== 'RESOLVED');
+}
+
+function lineStateView(state) {
+  const unresolved = unresolvedLineIncidents(state, state.line.lineId);
+  const errorIncidentCount = unresolved
+    .filter((incident) => ['ERROR', 'CRITICAL'].includes(incident.severity)).length;
+  const criticalIncidentCount = unresolved
+    .filter((incident) => incident.severity === 'CRITICAL').length;
+  const telemetry = {
+    ...state.line.telemetry,
+    openIncidentCount: unresolved.length,
+    criticalIncidentCount,
+  };
+  const badSequence = ['GAP', 'OUT_OF_ORDER'].includes(telemetry.sequenceDisposition);
+  let dataHealth = 'GOOD';
+  if (errorIncidentCount > 0
+      || ['BAD', 'STALE'].includes(telemetry.qualityCode)
+      || badSequence) {
+    dataHealth = 'BAD';
+  } else if (!telemetry.topologyBound
+      || !telemetry.sampleTime
+      || !telemetry.fresh
+      || telemetry.expectedSignalCount <= 0
+      || telemetry.observedSignalCount < telemetry.expectedSignalCount
+      || telemetry.goodSignalCount < telemetry.expectedSignalCount
+      || unresolved.length > 0
+      || ['UNCERTAIN', 'SUBSTITUTED'].includes(telemetry.qualityCode)) {
+    dataHealth = 'PARTIAL';
+  }
+  const currentBatch = state.batches.find((batch) => batch.id === state.line.currentBatchId);
+  const status = currentBatch?.state === 'SUSPENDED' || dataHealth === 'BAD'
+    ? 'BLOCKED'
+    : dataHealth === 'PARTIAL'
+      ? 'DEGRADED'
+      : state.line.currentBatchId
+        ? 'RUNNING'
+        : 'IDLE';
+  return {
+    ...state.line,
+    status,
+    dataHealth,
+    affectedRules: unresolved.length,
+    telemetry,
+  };
+}
+
+function lineEvidenceChecks(line) {
+  const telemetry = line.telemetry;
+  const observed = telemetry.expectedSignalCount > 0
+    && telemetry.observedSignalCount >= telemetry.expectedSignalCount;
+  const good = telemetry.expectedSignalCount > 0
+    && telemetry.goodSignalCount >= telemetry.expectedSignalCount;
+  const sequencePresent = Boolean(telemetry.sequenceDisposition);
+  const sequenceBad = ['GAP', 'OUT_OF_ORDER'].includes(telemetry.sequenceDisposition);
+  const context = Boolean(line.currentBatchId || line.orderId);
+  return [
+    {
+      code: 'TOPOLOGY_BOUND',
+      label: '已发布拓扑绑定关键工艺信号',
+      status: telemetry.topologyBound ? 'PASS' : 'FAIL',
+      detail: telemetry.topologyBound
+        ? `${telemetry.primarySignal} -> ${telemetry.productId}/${telemetry.deviceId}/${telemetry.propertyId}`
+        : '当前产线没有可用的已发布拓扑 binding',
+    },
+    {
+      code: 'TELEMETRY_FRESH',
+      label: '遥测仍在允许时效内',
+      status: telemetry.fresh ? 'PASS' : 'FAIL',
+      detail: telemetry.sampleTime ? `最后样本延迟 ${telemetry.lagSeconds} 秒` : '尚未收到真实遥测',
+    },
+    {
+      code: 'REQUIRED_SIGNALS_OBSERVED',
+      label: '必需点位全部到达',
+      status: observed ? 'PASS' : 'FAIL',
+      detail: `${telemetry.observedSignalCount}/${telemetry.expectedSignalCount}`,
+    },
+    {
+      code: 'REQUIRED_SIGNALS_GOOD',
+      label: '必需点位质量为 GOOD',
+      status: good ? 'PASS' : 'FAIL',
+      detail: `${telemetry.goodSignalCount}/${telemetry.expectedSignalCount}`,
+    },
+    {
+      code: 'SOURCE_SEQUENCE_CONTINUOUS',
+      label: '来源序列连续',
+      status: sequenceBad ? 'FAIL' : sequencePresent ? 'PASS' : 'WARN',
+      detail: sequencePresent
+        ? `${telemetry.sequenceOrigin} / ${telemetry.sequenceDisposition}`
+        : '尚无来源序列事实',
+    },
+    {
+      code: 'NO_UNRESOLVED_CRITICAL_INCIDENT',
+      label: '无未解决严重数据质量事件',
+      status: telemetry.criticalIncidentCount === 0 ? 'PASS' : 'FAIL',
+      detail: `${telemetry.criticalIncidentCount} 个 CRITICAL，${telemetry.openIncidentCount} 个未解决事件`,
+    },
+    {
+      code: 'PRODUCTION_CONTEXT_AVAILABLE',
+      label: 'MES 生产上下文可用',
+      status: context ? 'PASS' : 'WARN',
+      detail: context ? `生产指令 ${line.orderId}` : '当前未关联生产指令或活动批次',
+    },
+  ];
+}
+
+function lineLiveEvidence(state, windowMinutes, limit) {
+  const line = lineStateView(state);
+  const windowEnd = FIXED_TIME;
+  const windowStart = new Date(Date.parse(windowEnd) - windowMinutes * 60_000).toISOString();
+  const samples = state.lineTelemetrySamples
+    .filter((sample) => sample.sampleTime >= windowStart && sample.sampleTime <= windowEnd)
+    .slice(-limit);
+  const incidents = unresolvedLineIncidents(state, line.lineId).map((incident) => ({
+    issueCode: incident.issueCode,
+    severity: incident.severity,
+    state: incident.state,
+    eventCount: incident.eventCount,
+    lastSeen: incident.lastSeen,
+    detail: incident.lastDetail,
+  }));
+  return {
+    line,
+    windowStart,
+    windowEnd,
+    samples,
+    checks: lineEvidenceChecks(line),
+    incidents,
+  };
+}
+
 function createHandler(state) {
   return async (req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
@@ -2275,7 +2408,18 @@ function createHandler(state) {
         return send(res, 200, envelope(operationId, state.rule), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/overview') {
-        return send(res, 200, envelope('getBpiOverview', [state.line]), 'getBpiOverview');
+        const operationId = 'getBpiOverview';
+        if (url.searchParams.get('plantId') !== state.line.plantId) {
+          return send(res, 422, problem(422, 'Validation Failed', 'A valid plant is required.', operationId), operationId);
+        }
+        const line = lineStateView(state);
+        const onlyAbnormal = url.searchParams.get('onlyAbnormal') === 'true';
+        const data = onlyAbnormal && line.dataHealth === 'GOOD'
+          && !['BLOCKED', 'DEGRADED'].includes(line.status)
+          && line.pendingCandidates === 0
+          ? []
+          : [line];
+        return send(res, 200, envelope(operationId, data), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/feature-flags') {
         const operationId = 'listFeatureFlags';
@@ -2344,7 +2488,28 @@ function createHandler(state) {
       ids = match(path, /^\/bpi\/v1\/lines\/([^/]+)\/current-state$/);
       if (req.method === 'GET' && ids) {
         if (ids[0] !== state.line.lineId) return send(res, 404, problem(404, 'Not Found', 'Line not found.', 'getCurrentLineState'), 'getCurrentLineState');
-        return send(res, 200, envelope('getCurrentLineState', state.line), 'getCurrentLineState');
+        const plantId = url.searchParams.get('plantId');
+        if (plantId && plantId !== state.line.plantId) {
+          return send(res, 404, problem(404, 'Not Found', 'Line not found.', 'getCurrentLineState'), 'getCurrentLineState');
+        }
+        return send(res, 200, envelope('getCurrentLineState', lineStateView(state)), 'getCurrentLineState');
+      }
+      ids = match(path, /^\/bpi\/v1\/lines\/([^/]+)\/live-evidence$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getLineLiveEvidence';
+        if (ids[0] !== state.line.lineId) {
+          return send(res, 404, problem(404, 'Not Found', 'Line not found.', operationId), operationId);
+        }
+        const plantId = url.searchParams.get('plantId');
+        const windowMinutes = Number(url.searchParams.get('windowMinutes') || 15);
+        const limit = Number(url.searchParams.get('limit') || 120);
+        if (plantId !== state.line.plantId
+            || !Number.isInteger(windowMinutes) || windowMinutes < 1 || windowMinutes > 1_440
+            || !Number.isInteger(limit) || limit < 2 || limit > 500) {
+          return send(res, 422, problem(422, 'Validation Failed', 'Valid plantId, windowMinutes and limit are required.', operationId), operationId);
+        }
+        return send(res, 200, envelope(operationId,
+          lineLiveEvidence(state, windowMinutes, limit)), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/candidates') {
         const requestedState = url.searchParams.get('state');

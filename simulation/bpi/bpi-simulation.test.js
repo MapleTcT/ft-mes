@@ -125,9 +125,21 @@ test('candidate confirmation creates exactly one idempotent shadow batch', async
   let result = await request('GET', '/bpi/v1/overview?plantId=PLANT-01');
   assert.equal(result.response.status, 200);
   assert.equal(result.json.data[0].pendingCandidates, 1);
+  assert.equal(result.json.data[0].status, 'BLOCKED');
+  assert.equal(result.json.data[0].dataHealth, 'BAD');
+  assert.equal(result.json.data[0].telemetry.value, '18.6');
+  assert.equal(result.json.data[0].telemetry.unit, 't/h');
 
   result = await request('GET', '/bpi/v1/lines/LINE-S07-01/current-state');
   assert.equal(result.json.data.currentBatchId, null);
+
+  result = await request('GET', '/bpi/v1/lines/LINE-S07-01/live-evidence?plantId=PLANT-01&windowMinutes=15&limit=120');
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.samples.length, 12);
+  assert.equal(result.json.data.samples.at(-1).value, '18.6');
+  assert.equal(result.json.data.checks.find((item) => item.code === 'TOPOLOGY_BOUND').status, 'PASS');
+  assert.equal(result.json.data.checks.find((item) => item.code === 'NO_UNRESOLVED_CRITICAL_INCIDENT').status, 'FAIL');
+  assert.equal(result.json.data.incidents.length, 5);
 
   result = await request('GET', '/bpi/v1/candidates?plantId=PLANT-01');
   assert.equal(result.json.data.length, 1);
@@ -251,7 +263,7 @@ test('batch lifecycle suspends and resumes with revision and append-only events'
     '3|BATCH_RESUMED',
   ]);
   result = await request('GET', '/bpi/v1/lines/LINE-S07-01/current-state');
-  assert.equal(result.json.data.status, 'RUNNING');
+  assert.equal(result.json.data.status, 'BLOCKED');
 });
 
 test('force-close is recoverable, idempotent and requires a separate approval step', async () => {
@@ -326,7 +338,7 @@ test('force-close is recoverable, idempotent and requires a separate approval st
     '3|BATCH_FORCE_CLOSED',
   ]);
   result = await request('GET', '/bpi/v1/lines/LINE-S07-01/current-state');
-  assert.equal(result.json.data.status, 'IDLE');
+  assert.equal(result.json.data.status, 'BLOCKED');
   assert.equal(result.json.data.currentBatchId, null);
 });
 
@@ -520,7 +532,7 @@ test('end candidate closes the matching shadow batch as CLOSED_RAW', async () =>
   ]);
 
   result = await request('GET', '/bpi/v1/lines/LINE-S07-01/current-state');
-  assert.equal(result.json.data.status, 'IDLE');
+  assert.equal(result.json.data.status, 'BLOCKED');
   assert.equal(result.json.data.currentBatchId, null);
   assert.equal(result.json.data.pendingCandidates, 0);
 });

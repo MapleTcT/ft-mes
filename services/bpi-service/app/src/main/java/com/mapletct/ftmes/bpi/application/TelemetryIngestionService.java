@@ -161,6 +161,20 @@ public class TelemetryIngestionService {
         for (AcceptedPoint item : accepted) {
             repository.insertPoint(UuidV5.from(POINT_NAMESPACE, eventUuid + "|accepted|" + item.index()),
                     actor.tenantId(), eventUuid, envelope.eventId(), item.value());
+            repository.upsertLatestPoint(
+                    eventUuid,
+                    actor.tenantId(),
+                    envelope.plantId(),
+                    envelope.lineId(),
+                    envelope.gatewayId(),
+                    envelope.productId(),
+                    envelope.deviceId(),
+                    envelope.eventId(),
+                    envelope.sourceEpoch(),
+                    envelope.sequence(),
+                    envelope.sequenceOrigin(),
+                    sequence.disposition(),
+                    item.value());
         }
         for (RejectedPoint item : rejected) {
             repository.insertPointReject(UuidV5.from(POINT_NAMESPACE, eventUuid + "|rejected|" + item.index()),

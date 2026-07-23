@@ -38,6 +38,7 @@
 |---|---|---|---|---|
 | 实时态势 | GET | `/bpi/v1/overview` | `getBpiOverview` | SERVICE_IMPLEMENTED |
 | 实时态势 | GET | `/bpi/v1/lines/{lineId}/current-state` | `getCurrentLineState` | SERVICE_IMPLEMENTED |
+| 实时态势 | GET | `/bpi/v1/lines/{lineId}/live-evidence` | `getLineLiveEvidence` | SERVICE_IMPLEMENTED；返回 PostgreSQL 最新点位事实、窗口遥测、服务端判据和未解决事件 |
 | 运行治理 | GET | `/bpi/v1/feature-flags` | `listFeatureFlags` | SERVICE_IMPLEMENTED；同时返回有效值/来源和选中作用域覆盖 |
 | 运行治理 | POST | `/bpi/v1/feature-flags/{flagKey}` | `changeFeatureFlagOverride` | SERVICE_IMPLEMENTED；仅 BPI_ADMIN，可 SET 或 INHERIT，乐观锁和审计落库 |
 | 候选批次 | GET | `/bpi/v1/candidates` | `listBatchCandidates` | SERVICE_IMPLEMENTED |

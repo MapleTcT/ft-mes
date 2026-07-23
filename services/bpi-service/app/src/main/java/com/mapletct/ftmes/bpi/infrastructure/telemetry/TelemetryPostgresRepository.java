@@ -137,6 +137,72 @@ public class TelemetryPostgresRepository {
                 .addValue("calibrationVersion", point.calibrationVersion()));
     }
 
+    public void upsertLatestPoint(
+            UUID telemetryEventId,
+            String tenantId,
+            String plantId,
+            String lineId,
+            String gatewayId,
+            String productId,
+            String deviceId,
+            String eventId,
+            BigInteger sourceEpoch,
+            BigInteger sequence,
+            String sequenceOrigin,
+            String sequenceDisposition,
+            TelemetryValue point) {
+        jdbc.update("""
+                INSERT INTO bpi.bpi_telemetry_point_latest
+                    (tenant_id, plant_id, line_id, gateway_id, product_id, device_id, property_id,
+                     telemetry_event_id, event_id, source_epoch, sequence, sequence_origin,
+                     sequence_disposition, value_type, numeric_value, string_value, boolean_value,
+                     unit, quality_code, sample_time, calibration_version)
+                VALUES (:tenantId, :plantId, :lineId, :gatewayId, :productId, :deviceId, :propertyId,
+                        :telemetryEventId, :eventId, :sourceEpoch, :sequence, :sequenceOrigin,
+                        :sequenceDisposition, :valueType, :numericValue, :stringValue, :booleanValue,
+                        :unit, :qualityCode, :sampleTime, :calibrationVersion)
+                ON CONFLICT (tenant_id, plant_id, line_id, product_id, device_id, property_id)
+                DO UPDATE SET
+                    gateway_id = EXCLUDED.gateway_id,
+                    telemetry_event_id = EXCLUDED.telemetry_event_id,
+                    event_id = EXCLUDED.event_id,
+                    source_epoch = EXCLUDED.source_epoch,
+                    sequence = EXCLUDED.sequence,
+                    sequence_origin = EXCLUDED.sequence_origin,
+                    sequence_disposition = EXCLUDED.sequence_disposition,
+                    value_type = EXCLUDED.value_type,
+                    numeric_value = EXCLUDED.numeric_value,
+                    string_value = EXCLUDED.string_value,
+                    boolean_value = EXCLUDED.boolean_value,
+                    unit = EXCLUDED.unit,
+                    quality_code = EXCLUDED.quality_code,
+                    sample_time = EXCLUDED.sample_time,
+                    calibration_version = EXCLUDED.calibration_version,
+                    updated_at = now()
+                WHERE EXCLUDED.sample_time > bpi_telemetry_point_latest.sample_time
+                   OR (
+                       EXCLUDED.sample_time = bpi_telemetry_point_latest.sample_time
+                       AND EXCLUDED.source_epoch > bpi_telemetry_point_latest.source_epoch
+                   )
+                   OR (
+                       EXCLUDED.sample_time = bpi_telemetry_point_latest.sample_time
+                       AND EXCLUDED.source_epoch = bpi_telemetry_point_latest.source_epoch
+                       AND EXCLUDED.sequence > bpi_telemetry_point_latest.sequence
+                   )
+                """, new MapSqlParameterSource()
+                .addValue("tenantId", tenantId).addValue("plantId", plantId).addValue("lineId", lineId)
+                .addValue("gatewayId", gatewayId).addValue("productId", productId).addValue("deviceId", deviceId)
+                .addValue("propertyId", point.propertyId()).addValue("telemetryEventId", telemetryEventId)
+                .addValue("eventId", eventId).addValue("sourceEpoch", decimal(sourceEpoch))
+                .addValue("sequence", decimal(sequence)).addValue("sequenceOrigin", sequenceOrigin)
+                .addValue("sequenceDisposition", sequenceDisposition).addValue("valueType", point.valueType())
+                .addValue("numericValue", point.numericValue()).addValue("stringValue", point.stringValue())
+                .addValue("booleanValue", point.booleanValue()).addValue("unit", point.unit())
+                .addValue("qualityCode", point.qualityCode())
+                .addValue("sampleTime", Timestamp.from(point.sampleTime()))
+                .addValue("calibrationVersion", point.calibrationVersion()));
+    }
+
     public void insertPointReject(UUID id, String tenantId, UUID telemetryEventId, String eventId,
                                   int pointIndex, String propertyId, String reasonsJson, String rawPointJson) {
         jdbc.update("""

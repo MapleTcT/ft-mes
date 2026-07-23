@@ -6,6 +6,7 @@
     "listFeatureFlags",
     "changeFeatureFlagOverride",
     "getCurrentLineState",
+    "getLineLiveEvidence",
     "listBatchCandidates",
     "getBatchCandidate",
     "confirmBatchCandidate",
