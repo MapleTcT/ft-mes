@@ -474,7 +474,8 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-bpi-rule-retirement-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-runtime-image-rollback-rehearsal.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-integrated-rollback-rehearsal.js
-	BPI_ROLLBACK_SERVICE_IMAGE=static:test BPI_ROLLBACK_ADAPTER_IMAGE=static:test BPI_ROLLBACK_JOB_JAR=/tmp/old.jar BPI_LOAD_CLIENT_JOB_JAR=/tmp/new.jar ADP_BASE_URL=http://127.0.0.1 ADP_USERNAME=static ADP_PASSWORD=static BPI_INTEGRATED_ROLLBACK_CONFIRM=ROLLBACK_BPI_SERVICE_ADAPTER_FLINK_AND_RESTORE $(NODE) deploy/docker/scripts/adp-bpi-integrated-rollback-rehearsal.js --print-remote-script | sh -n
+	BPI_ROLLBACK_SERVICE_IMAGE=static:test BPI_ROLLBACK_ADAPTER_IMAGE=static:test BPI_ROLLBACK_JOB_JAR=/tmp/old.jar BPI_LOAD_CLIENT_JOB_JAR=/tmp/new.jar ADP_BASE_URL=http://127.0.0.1 ADP_USERNAME=static ADP_PASSWORD=static BPI_INTEGRATED_ROLLBACK_CONFIRM=ROLLBACK_BPI_SERVICE_ADAPTER_FLINK_AND_RESTORE $(NODE) deploy/docker/scripts/adp-bpi-integrated-rollback-rehearsal.js --print-remote-script > /tmp/adp-bpi-integrated-rollback-remote-script.sh
+	sh -n /tmp/adp-bpi-integrated-rollback-remote-script.sh
 	$(NODE) --check deploy/docker/scripts/adp-bpi-quality-release-target-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-dataset-manifest-target-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-dataset-materialization-target-acceptance.js
@@ -608,13 +609,16 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-force-close-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-formal-identity-force-close-acceptance.js
-	ADP_BASE_URL=http://127.0.0.1 ADP_USERNAME=static ADP_PASSWORD=static NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" $(NODE) deploy/docker/scripts/adp-bpi-formal-identity-force-close-acceptance.js --print-remote-script | sh -n
+	ADP_BASE_URL=http://127.0.0.1 ADP_USERNAME=static ADP_PASSWORD=static NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" $(NODE) deploy/docker/scripts/adp-bpi-formal-identity-force-close-acceptance.js --print-remote-script > /tmp/adp-bpi-formal-identity-force-close-remote-script.sh
+	sh -n /tmp/adp-bpi-formal-identity-force-close-remote-script.sh
 	$(NODE) --check deploy/docker/scripts/adp-bpi-wms-inbound-reversal-target-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-formal-identity-wms-reversal-acceptance.js
 	$(NODE) --check deploy/docker/scripts/apply-material-wms-reversal-expand-only-target.js
 	$(NODE) --check deploy/docker/scripts/deploy-material-wms-target.js
-	$(NODE) deploy/docker/scripts/deploy-material-wms-target.js --print-remote-script | sh -n
-	ADP_BASE_URL=http://127.0.0.1 ADP_USERNAME=static ADP_PASSWORD=static NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" $(NODE) deploy/docker/scripts/adp-bpi-formal-identity-wms-reversal-acceptance.js --print-remote-script | sh -n
+	$(NODE) deploy/docker/scripts/deploy-material-wms-target.js --print-remote-script > /tmp/adp-bpi-material-wms-deploy-remote-script.sh
+	sh -n /tmp/adp-bpi-material-wms-deploy-remote-script.sh
+	ADP_BASE_URL=http://127.0.0.1 ADP_USERNAME=static ADP_PASSWORD=static NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" $(NODE) deploy/docker/scripts/adp-bpi-formal-identity-wms-reversal-acceptance.js --print-remote-script > /tmp/adp-bpi-formal-identity-wms-reversal-remote-script.sh
+	sh -n /tmp/adp-bpi-formal-identity-wms-reversal-remote-script.sh
 	$(NODE) --check deploy/docker/scripts/test-adp-production-export-readiness-smoke.js
 	$(NODE) deploy/docker/scripts/test-adp-production-export-readiness-smoke.js
 	mkdir -p /tmp/adp-rm-export-compat-check

@@ -39,10 +39,6 @@ for (const [label, value, pattern] of [
 ]) {
   if (!pattern.test(value)) throw new Error(`Unsafe ${label}: ${value}`);
 }
-if (!fs.existsSync(localJar) || fs.statSync(localJar).size < 1024) {
-  throw new Error(`Packaged material-wms JAR is missing or empty: ${localJar}`);
-}
-
 function shellQuote(value) {
   return `'${String(value).replace(/'/g, `'"'"'`)}'`;
 }
@@ -76,7 +72,6 @@ function sha256(file) {
   return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 }
 
-const localSha256 = sha256(localJar);
 const stagedJar = `${backupDir}/material-wms.new.jar`;
 const previousJar = `${backupDir}/material-wms.previous.jar`;
 const remoteScript = String.raw`set -eu
@@ -160,6 +155,11 @@ if (printRemoteScript) {
   process.stdout.write(remoteScript);
   process.exit(0);
 }
+
+if (!fs.existsSync(localJar) || fs.statSync(localJar).size < 1024) {
+  throw new Error(`Packaged material-wms JAR is missing or empty: ${localJar}`);
+}
+const localSha256 = sha256(localJar);
 
 const report = {
   schemaVersion: 1,
