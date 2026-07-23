@@ -200,6 +200,14 @@ async function main() {
     await page.goto(browserBaseUrl, { waitUntil: "networkidle" });
     await page.getByRole("heading", { name: "数据集清单" }).waitFor();
     await page.locator("#open-dataset-definition").click();
+    assert(await page.locator("[data-process-window]").count() === 2,
+      "dataset definition dialog did not render the two governed process windows");
+    assert(JSON.stringify(
+      await page.locator('[data-window-field="signal"]').evaluateAll(
+        (inputs) => inputs.map((input) => input.value),
+      ),
+    ) === JSON.stringify(["flow.instant", "pump.running"]),
+    "dataset definition dialog rendered unexpected process signals");
     await page.locator("#dataset-code").fill(marker);
     await page.locator("#dataset-name").fill(`${marker} 目标清单`);
     await page.locator("#dataset-version").fill("1.0.0");
@@ -222,12 +230,21 @@ async function main() {
     assert(definition?.plantId === plantId, "dataset definition response has the wrong plant");
     assert(definition?.lineIds?.length === 1 && definition.lineIds[0] === lineId,
       "dataset definition response has the wrong line scope");
+    assert(definition?.processSignalWindows?.length === 2,
+      "dataset definition response lost the governed process windows");
+    assert(JSON.stringify(definition.processSignalWindows.map((item) => item.featureRef).sort())
+      === JSON.stringify([
+        "process.window.flow_instant.mean_60s",
+        "process.window.pump_running.true_ratio_30s",
+      ]),
+    "dataset definition response contains unexpected process-window feature refs");
     report.cleanupRequired = true;
     report.definition = {
       id: definition.id,
       revision: definition.revision,
       checksum: definition.checksum,
       state: definition.state,
+      processSignalWindows: definition.processSignalWindows,
     };
 
     const row = page.locator(`[data-dataset-id="${definition.id}"]`);
@@ -260,6 +277,23 @@ async function main() {
       .getByText("LABEL_DELAY_EXCEEDED", { exact: true }).waitFor();
     assert(await page.locator(".dataset-sample-frame tbody tr").count() === 3,
       "dataset drawer did not render exactly three in-plant samples");
+    assert(await page.locator(".dataset-window-evidence-frame tbody tr").count() === 6,
+      "dataset drawer did not render the six immutable process-window facts");
+    assert(JSON.stringify(await page.locator(".dataset-window-evidence-summary b").allTextContents())
+      === JSON.stringify(["6", "2", "4"]),
+    "dataset drawer rendered unexpected process-window READY/BLOCKED totals");
+    const highFlowRow = page.locator(".dataset-window-evidence-frame tbody tr")
+      .filter({ hasText: `${marker}_HIGH` })
+      .filter({ hasText: "process.window.flow_instant.mean_60s" });
+    const highPumpRow = page.locator(".dataset-window-evidence-frame tbody tr")
+      .filter({ hasText: `${marker}_HIGH` })
+      .filter({ hasText: "process.window.pump_running.true_ratio_30s" });
+    assert(await highFlowRow.count() === 1 && await highFlowRow.locator("td").nth(5)
+      .getByText(/20(?:\.0+)? t\/h/).count() === 1,
+    "dataset drawer did not expose the point-in-time flow mean");
+    assert(await highPumpRow.count() === 1 && await highPumpRow.locator("td").nth(5)
+      .getByText(/0\.5(?:0+)? bool/).count() === 1,
+    "dataset drawer did not expose the point-in-time pump true ratio");
     assert(await page.getByText("MANIFEST_ONLY", { exact: true }).count() > 0,
       "dataset drawer does not expose the MANIFEST_ONLY boundary");
     assert(await page.getByText("NOT_STARTED", { exact: true }).count() > 0,
@@ -268,6 +302,9 @@ async function main() {
     report.browser.desktop = {
       sampleRows: await page.locator(".dataset-sample-frame tbody tr").count(),
       exclusionRows: await page.locator(".dataset-exclusion-list li").count(),
+      processWindowFactRows: await page.locator(".dataset-window-evidence-frame tbody tr").count(),
+      processWindowSummary: await page.locator(".dataset-window-evidence-summary b")
+        .allTextContents(),
     };
     await desktopContext.close();
 
@@ -284,6 +321,30 @@ async function main() {
       && ready?.manifest?.phaseBoundary?.mlflowRegistered === false
       && ready?.manifest?.phaseBoundary?.modelTrained === false,
     "snapshot API claims unsupported downstream delivery");
+    assert(ready?.manifest?.definition?.processSignalWindows?.length === 2,
+      "snapshot API lost the immutable process-window definitions");
+    const processWindowFacts = ready.manifest.samples.flatMap((sample) => {
+      const source = sample.sourcePayload || sample.source || {};
+      return Array.isArray(source.processSignalWindows) ? source.processSignalWindows : [];
+    });
+    assert(processWindowFacts.length === 6,
+      "snapshot API did not return six process-window facts");
+    assert(processWindowFacts.filter((item) => item.state === "READY").length === 2
+      && processWindowFacts.filter((item) => item.state === "BLOCKED").length === 4,
+    "snapshot API returned unexpected process-window READY/BLOCKED totals");
+    const flowFact = processWindowFacts.find((item) =>
+      item.featureRef === "process.window.flow_instant.mean_60s" && item.state === "READY");
+    const pumpFact = processWindowFacts.find((item) =>
+      item.featureRef === "process.window.pump_running.true_ratio_30s" && item.state === "READY");
+    assert(flowFact?.numericValue === 20
+      && flowFact.sourcePointCount === 4
+      && flowFact.acceptedSampleCount === 3
+      && flowFact.lateAvailabilityCount === 1,
+    "snapshot API flow fact does not prove point-in-time late-arrival exclusion");
+    assert(pumpFact?.numericValue === 0.5
+      && pumpFact.sourcePointCount === 2
+      && pumpFact.acceptedSampleCount === 2,
+    "snapshot API pump fact does not prove the governed true ratio");
     report.snapshot = {
       ...report.snapshot,
       readyRevision: ready.revision,
@@ -304,6 +365,15 @@ async function main() {
       snapshotStatus: ready.state,
       phaseBoundary: ready.manifest.phaseBoundary,
       counts: ready.manifest.counts,
+      processWindows: {
+        definitions: ready.manifest.definition.processSignalWindows.length,
+        facts: processWindowFacts.length,
+        ready: processWindowFacts.filter((item) => item.state === "READY").length,
+        blocked: processWindowFacts.filter((item) => item.state === "BLOCKED").length,
+        flowMean: flowFact.numericValue,
+        pumpTrueRatio: pumpFact.numericValue,
+        lateAvailabilityCount: flowFact.lateAvailabilityCount,
+      },
     };
 
     const mobileContext = await prepareContext(browser, auth, { width: 390, height: 844 });
@@ -326,11 +396,15 @@ async function main() {
     await mobilePage.locator("#detail-drawer")
       .getByText("MANIFEST_READY", { exact: true }).first().waitFor();
     await mobilePage.locator(".dataset-sample-frame tbody tr").nth(2).waitFor();
+    await mobilePage.locator(".dataset-window-evidence-frame tbody tr").nth(5).waitFor();
     await mobilePage.screenshot({ path: mobileScreenshot, fullPage: true });
     report.browser.mobile = {
       ...geometry,
       readyDrawer: true,
       sampleRows: await mobilePage.locator(".dataset-sample-frame tbody tr").count(),
+      processWindowFactRows: await mobilePage.locator(
+        ".dataset-window-evidence-frame tbody tr",
+      ).count(),
     };
     await mobileContext.close();
     await browser.close();
@@ -342,6 +416,10 @@ async function main() {
     const writeResponses = report.browser.network.filter((item) => item.method === "POST");
     assert(writeResponses.some((item) => item.status === 200 && item.url.endsWith("/bpi-api/datasets")),
       "browser evidence is missing the dataset-definition POST");
+    assert(writeResponses.some((item) => item.status === 200
+      && item.url.endsWith("/bpi-api/datasets")
+      && item.payload?.processSignalWindows?.length === 2),
+    "browser evidence is missing the two process-window definitions");
     assert(writeResponses.some((item) => item.status === 202 && item.url.includes("/snapshots")),
       "browser evidence is missing the dataset-snapshot POST");
     report.status = "PASS_PENDING_DATABASE_VERIFICATION_AND_CLEANUP";

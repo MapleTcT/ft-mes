@@ -1,0 +1,368 @@
+{
+  "generatedAt": "2026-07-23T04:40:52Z",
+  "status": "PASS_TARGET_BROWSER_API_POSTGRES_PROCESS_WINDOWS_CLEANED_DEFAULT_OFF",
+  "phase": "3C_C_PROCESS_SIGNAL_WINDOWS",
+  "repoCommit": "f7db2f98e82d481f6c53c5fa7539ac52c812e28f",
+  "releaseCommit": "f7db2f98e82d481f6c53c5fa7539ac52c812e28f",
+  "target": {
+    "host": "10.11.100.17",
+    "composeProject": "adp-mes-newbase",
+    "browserRoute": "http://10.11.100.17:18080/bpi/#/datasets",
+    "database": "PostgreSQL 15.18",
+    "databaseName": "ft_mes_bpi",
+    "flywayVersion": 33
+  },
+  "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+  "summary": {
+    "testedFeatures": 12,
+    "pass": 12,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "browserRuns": 1,
+    "browserFailures": 0,
+    "postgresVerificationRuns": 1,
+    "postgresVerificationFailures": 0,
+    "unexpectedConsoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "horizontalOverflowFailures": 0
+  },
+  "deployment": {
+    "strategy": "INTEGRATED_EXPAND_ONLY",
+    "databaseBefore": 32,
+    "databaseAfter": 33,
+    "upgradeStatus": "PASS",
+    "upgradePhase": "COMPLETE",
+    "upgradeReport": "metadata/bpi-integrated-upgrade-v33-target.json",
+    "upgradeReportSha256": "c08445946b1abc309920fde99d2a50770e8c41b9c13d998a55cfc009da2ea342",
+    "serviceImage": "ft-mes-bpi-service:20260723t042135z-f7db2f98e82d",
+    "adapterImage": "ft-mes-bpi-adapter:20260723t042135z-f7db2f98e82d",
+    "wmsAdapterImage": "ft-mes-bpi-wms-adapter:20260723t042135z-f7db2f98e82d",
+    "activeServicesHealthy": 3,
+    "optionalServicesRunning": 0,
+    "webStatus": 200
+  },
+  "browser": {
+    "definitionId": "9e59e8fa-c3f7-4c5c-a1a8-53c1d0996092",
+    "snapshotId": "bc14794e-f388-47cd-9265-3c707bf3035c",
+    "definitionStatus": 200,
+    "snapshotStatus": 202,
+    "snapshotState": "MANIFEST_READY",
+    "snapshotRevision": 3,
+    "definitionChecksum": "8f7ff89ccd2b17d386ca7076995869fad158e0458151b3102a8a09835ce34da1",
+    "manifestChecksum": "4d0586bd42213d6270cee89102d3409ae498c66c196a6688ab9dd0c75bb04ed7",
+    "processWindowDefinitions": 2,
+    "processWindowFacts": 6,
+    "readyFacts": 2,
+    "blockedFacts": 4,
+    "desktop": {
+      "viewport": "1440x900",
+      "sampleRows": 3,
+      "processWindowFactRows": 6,
+      "screenshot": "metadata/bpi-dataset-process-signal-window-desktop-target.png",
+      "sha256": "4930b44880db1f69f803c851c9941551bb7223894294950fabef9de69f35099f"
+    },
+    "mobile": {
+      "viewport": 390,
+      "bodyWidth": 390,
+      "documentWidth": 390,
+      "sampleRows": 3,
+      "processWindowFactRows": 6,
+      "screenshot": "metadata/bpi-dataset-process-signal-window-mobile-target.png",
+      "sha256": "69b0ac4131954fda8187ba3509db2d0045374a46c21d0f7bc8dbe7873b61d5e9"
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": []
+  },
+  "postgres": {
+    "definitions": 1,
+    "snapshots": 1,
+    "samples": {
+      "total": 3,
+      "included": 1,
+      "excluded": 2,
+      "cutoffSafe": 3,
+      "labelLeakageRows": 0,
+      "crossPlantRows": 0
+    },
+    "processWindows": {
+      "total": 6,
+      "ready": 2,
+      "blocked": 4,
+      "cutoffSafe": 6,
+      "checksumsValid": 6,
+      "blockedForMissingSamples": 4
+    },
+    "flow": {
+      "featureRef": "process.window.flow_instant.mean_60s",
+      "sourcePointCount": 4,
+      "acceptedSampleCount": 3,
+      "lateAvailabilityCount": 1,
+      "maximumObservedGapSeconds": 30,
+      "numericValue": 20,
+      "unitMismatchCount": 0,
+      "valueTypeMismatchCount": 0,
+      "calibrationMismatchCount": 0
+    },
+    "pump": {
+      "featureRef": "process.window.pump_running.true_ratio_30s",
+      "sourcePointCount": 2,
+      "acceptedSampleCount": 2,
+      "maximumObservedGapSeconds": 30,
+      "numericValue": 0.5
+    },
+    "telemetryEvents": 7,
+    "telemetryPoints": 7,
+    "auditRows": 3,
+    "idempotencyRows": 2,
+    "idempotencyStatuses": [
+      200,
+      202
+    ],
+    "immutableUpdateRejected": true,
+    "immutableError": "BPI dataset process signal window facts are immutable"
+  },
+  "cleanup": {
+    "definitions": 0,
+    "snapshots": 0,
+    "samples": 0,
+    "processWindowFacts": 0,
+    "materializations": 0,
+    "catalogPublications": 0,
+    "retentionArchives": 0,
+    "mlflowRegistrations": 0,
+    "trainingReadinessAssessments": 0,
+    "shadowRuns": 0,
+    "reviews": 0,
+    "batches": 0,
+    "telemetryEvents": 0,
+    "telemetryPoints": 0,
+    "rules": 0,
+    "topologies": 0,
+    "catalogs": 0,
+    "catalogEntries": 0,
+    "calibrations": 0,
+    "idempotency": 0
+  },
+  "items": [
+    {
+      "module": "BPI dataset",
+      "route": "/bpi/#/datasets",
+      "operation": "Create dataset definition with two governed process signal windows",
+      "api": "/bpi-api/datasets",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetController -> DatasetService -> DatasetPostgresRepository",
+      "tables": [
+        "bpi.bpi_dataset_definitions",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "bpi-dataset-manifest-target-verification.sql definition.processWindowCount = 2",
+      "status": "PASS",
+      "evidence": "HTTP 200; revision 1; two immutable window checksums",
+      "issues": []
+    },
+    {
+      "module": "BPI dataset",
+      "route": "/bpi/#/datasets",
+      "operation": "Freeze point-in-time manifest",
+      "api": "/bpi-api/datasets/{datasetId}/snapshots",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetController -> DatasetService -> DatasetManifestProcessor",
+      "tables": [
+        "bpi.bpi_dataset_snapshots",
+        "bpi.bpi_dataset_snapshot_samples",
+        "bpi.bpi_dataset_process_signal_window_facts"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "bpi-dataset-manifest-target-verification.sql snapshot.state = MANIFEST_READY",
+      "status": "PASS",
+      "evidence": "HTTP 202 -> MANIFEST_READY/r3; 3 samples; 6 process-window facts",
+      "issues": []
+    },
+    {
+      "module": "BPI process windows",
+      "route": "/bpi/#/datasets",
+      "operation": "Compute calibrated flow mean before prediction time",
+      "api": "/bpi-api/dataset-snapshots/{snapshotId}",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "ProcessSignalWindowPostgresRepository -> ProcessSignalWindowBuilder -> DatasetPostgresRepository",
+      "tables": [
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_dataset_process_signal_window_facts"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "highFlow.numeric_value = 20 and late_availability_count = 1",
+      "status": "PASS",
+      "evidence": "3 accepted samples; one late sample excluded; one post-freeze sample absent",
+      "issues": []
+    },
+    {
+      "module": "BPI process windows",
+      "route": "/bpi/#/datasets",
+      "operation": "Compute pump running true ratio",
+      "api": "/bpi-api/dataset-snapshots/{snapshotId}",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "ProcessSignalWindowPostgresRepository -> ProcessSignalWindowBuilder -> DatasetPostgresRepository",
+      "tables": [
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_dataset_process_signal_window_facts"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "highPump.numeric_value = 0.5",
+      "status": "PASS",
+      "evidence": "2 accepted BOOLEAN samples; maximum gap 30 seconds",
+      "issues": []
+    },
+    {
+      "module": "BPI process windows",
+      "route": "/bpi/#/datasets",
+      "operation": "Fail closed when window samples are missing",
+      "api": "/bpi-api/dataset-snapshots/{snapshotId}",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetManifestBuilder",
+      "tables": [
+        "bpi.bpi_dataset_snapshot_samples",
+        "bpi.bpi_dataset_process_signal_window_facts"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "processWindows.blocked = 4",
+      "status": "PASS",
+      "evidence": "4 BLOCKED facts carry sample-count, maximum-gap and metric-unavailable blockers",
+      "issues": []
+    },
+    {
+      "module": "BPI process windows",
+      "route": "/bpi/#/datasets",
+      "operation": "Reject mutation of persisted process-window fact",
+      "api": "PostgreSQL direct negative verification",
+      "method": "UPDATE",
+      "requiresPersistence": true,
+      "backendEntry": "trg_bpi_dataset_process_signal_window_immutable",
+      "tables": [
+        "bpi.bpi_dataset_process_signal_window_facts"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "UPDATE numeric_value = 999",
+      "status": "PASS",
+      "evidence": "PostgreSQL rejected UPDATE with immutable exception",
+      "issues": []
+    },
+    {
+      "module": "BPI UI",
+      "route": "/bpi/#/datasets",
+      "operation": "Render process-window definition and evidence on desktop",
+      "api": "/bpi-api/datasets; /bpi-api/dataset-snapshots/{snapshotId}",
+      "method": "GET/POST",
+      "requiresPersistence": false,
+      "backendEntry": "BPI Web",
+      "tables": [],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "NOT_APPLICABLE",
+      "status": "PASS",
+      "evidence": "1440x900; 6 evidence rows; console/page/request errors = 0",
+      "issues": []
+    },
+    {
+      "module": "BPI UI",
+      "route": "/bpi/#/datasets",
+      "operation": "Render snapshot drawer on mobile without page overflow",
+      "api": "/bpi-api/dataset-snapshots/{snapshotId}",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "BPI Web",
+      "tables": [],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "NOT_APPLICABLE",
+      "status": "PASS",
+      "evidence": "viewport/body/document = 390/390/390; 6 evidence rows",
+      "issues": []
+    },
+    {
+      "module": "BPI deployment",
+      "route": "/bpi/",
+      "operation": "Expand-only V32 to V33 deployment",
+      "api": "/bpi/",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "upgrade-bpi-integrated-expand-only.sh",
+      "tables": [
+        "bpi.flyway_schema_history"
+      ],
+      "marker": "",
+      "verificationSql": "latest Flyway version = 33",
+      "status": "PASS",
+      "evidence": "Three active services healthy; web HTTP 200; image revision exact",
+      "issues": []
+    },
+    {
+      "module": "BPI security",
+      "route": "database role verification",
+      "operation": "Verify least-privilege BPI worker roles after V33",
+      "api": "PostgreSQL role scripts",
+      "method": "VERIFY",
+      "requiresPersistence": true,
+      "backendEntry": "ensure-bpi-*-role.sh",
+      "tables": [
+        "PostgreSQL role privileges"
+      ],
+      "marker": "",
+      "verificationSql": "has_function_privilege(worker, bpi functions, EXECUTE) = false",
+      "status": "PASS",
+      "evidence": "materializer, catalog publisher, retention archiver and MLflow registrar all PASS",
+      "issues": []
+    },
+    {
+      "module": "BPI safety",
+      "route": "Docker Compose",
+      "operation": "Keep optional training and catalog sidecars disabled",
+      "api": "Docker runtime inspection",
+      "method": "READ",
+      "requiresPersistence": false,
+      "backendEntry": "docker compose",
+      "tables": [],
+      "marker": "",
+      "verificationSql": "NOT_APPLICABLE",
+      "status": "PASS",
+      "evidence": "Optional service running count = 0; all dangerous defaults remain false",
+      "issues": []
+    },
+    {
+      "module": "BPI cleanup",
+      "route": "target acceptance cleanup",
+      "operation": "Remove exact marker and all dependent facts",
+      "api": "bpi-dataset-manifest-target-cleanup.sql",
+      "method": "DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "PostgreSQL controlled cleanup",
+      "tables": [
+        "V26-V33 dataset lineage and fixture tables"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "all 19 cleanup projections = 0",
+      "status": "PASS",
+      "evidence": "Exact marker cleanup completed; production data was not broadened",
+      "issues": []
+    }
+  ],
+  "boundaries": {
+    "modelTrainingStarted": false,
+    "modelCreated": false,
+    "modelRegistered": false,
+    "onlineInferenceEnabled": false,
+    "productionActivationAllowed": false,
+    "physicalDeviceEvidence": false,
+    "formalCalibrationCertificateEvidence": false,
+    "minimumReviewedBatchesMet": false,
+    "minimumProductionDaysMet": false
+  }
+}

@@ -4143,6 +4143,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/bpi-dataset-process-window-target-fixture.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/bpi-dataset-training-readiness-target-verification.sql",
       "state": "tracked",
       "tracked": true
@@ -5307,6 +5313,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-dataset-process-signal-window.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-dataset-retention-archive.md",
       "state": "tracked",
       "tracked": true
@@ -5553,6 +5565,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/plans/2026-07-23-bpi-phase3cc-process-signal-windows-design.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/postgres-migration-index.md",
       "state": "tracked",
       "tracked": true
@@ -5764,6 +5782,12 @@
     {
       "ignored": false,
       "path": "docs/testing/bpi-dataset-mlflow-registration-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/bpi-dataset-process-signal-window-acceptance.md",
       "state": "tracked",
       "tracked": true
     },
@@ -6345,6 +6369,24 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-dataset-process-signal-window-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-process-signal-window-desktop-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-process-signal-window-mobile-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-dataset-retention-archive-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -6568,6 +6610,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-integrated-upgrade-v31-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-integrated-upgrade-v33-target.json",
       "state": "tracked",
       "tracked": true
     },
@@ -8571,6 +8619,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/ProcessSignalWindowBuilder.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleApplicationReceiptService.java",
       "state": "tracked",
       "tracked": true
@@ -8920,6 +8974,24 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/PointCatalogView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ProcessSignalWindowDefinition.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ProcessSignalWindowEvidence.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ProcessSignalWindowFact.java",
       "state": "tracked",
       "tracked": true
     },
@@ -9441,6 +9513,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ProcessSignalWindowPostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
       "state": "tracked",
       "tracked": true
@@ -9670,6 +9748,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCatalogSnapshotCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ProcessSignalWindowDefinitionCommand.java",
       "state": "tracked",
       "tracked": true
     },
@@ -9915,6 +9999,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V32__bpi_dataset_process_signal_windows.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V33__bpi_function_execution_privilege_hardening.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V3__bpi_telemetry_ingress.sql",
       "state": "tracked",
       "tracked": true
@@ -10126,6 +10222,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/DatasetTrainingReadinessBuilderTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/ProcessSignalWindowBuilderTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -11114,16 +11216,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 656
+      "tracked": 657
     },
     "docs": {
-      "tracked": 135
+      "tracked": 138
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 244
+      "tracked": 248
     },
     "package.json": {
       "tracked": 1
@@ -11135,7 +11237,7 @@
       "tracked": 57
     },
     "services": {
-      "tracked": 423
+      "tracked": 432
     },
     "simulation": {
       "tracked": 4
@@ -11147,8 +11249,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1848,
-    "tracked": 1848,
+    "totalFiles": 1865,
+    "tracked": 1865,
     "untracked": 0
   },
   "untrackedByDirectory": []

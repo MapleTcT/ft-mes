@@ -82,6 +82,9 @@ CREATE TEMP TABLE target_shadow_runs AS
 SELECT id FROM bpi.bpi_shadow_runs
  WHERE tenant_id = '1000' AND run_code LIKE :'marker' || '_SHADOW_%';
 
+DELETE FROM bpi.bpi_dataset_process_signal_window_facts
+ WHERE tenant_id = '1000' AND snapshot_id IN (SELECT id FROM target_dataset_snapshots);
+
 DELETE FROM bpi.bpi_dataset_snapshot_samples
  WHERE tenant_id = '1000' AND snapshot_id IN (SELECT id FROM target_dataset_snapshots);
 
@@ -130,11 +133,25 @@ DELETE FROM bpi.bpi_shadow_runs
 DELETE FROM bpi.bpi_batch_instances
  WHERE tenant_id = '1000' AND batch_no LIKE :'marker' || '_%';
 
+DELETE FROM bpi.bpi_telemetry_points
+ WHERE tenant_id = '1000' AND event_id LIKE :'marker' || '_EVENT_%';
+
+DELETE FROM bpi.bpi_telemetry_events
+ WHERE tenant_id = '1000' AND event_id LIKE :'marker' || '_EVENT_%';
+
 DELETE FROM bpi.bpi_rule_versions
  WHERE tenant_id = '1000' AND rule_code = :'marker' || '_RULE';
 
 DELETE FROM bpi.bpi_topology_versions
  WHERE tenant_id = '1000' AND topology_code = :'marker' || '_TOPOLOGY';
+
+DELETE FROM bpi.bpi_point_catalog_entries
+ WHERE tenant_id = '1000'
+   AND snapshot_id = md5(:'marker' || ':catalog')::uuid;
+
+DELETE FROM bpi.bpi_point_calibrations
+ WHERE tenant_id = '1000'
+   AND certificate_reference = 'urn:adp:calibration:' || :'marker';
 
 DELETE FROM bpi.bpi_point_catalog_snapshots
  WHERE tenant_id = '1000' AND source_revision = :'marker';
@@ -154,6 +171,10 @@ SELECT jsonb_pretty(jsonb_build_object(
         'samples', (SELECT count(*) FROM bpi.bpi_dataset_snapshot_samples sample
                      WHERE sample.tenant_id = '1000'
                        AND sample.batch_no LIKE :'marker' || '_%'),
+        'processWindowFacts', (SELECT count(*)
+                                 FROM bpi.bpi_dataset_process_signal_window_facts fact
+                                WHERE fact.tenant_id = '1000'
+                                  AND fact.batch_no LIKE :'marker' || '_%'),
         'materializations', (SELECT count(*) FROM bpi.bpi_dataset_materializations materialization
                               WHERE materialization.tenant_id = '1000'
                                 AND materialization.snapshot_id IN (
@@ -186,12 +207,25 @@ SELECT jsonb_pretty(jsonb_build_object(
                        AND review.review_reason LIKE :'marker' || '%'),
         'batches', (SELECT count(*) FROM bpi.bpi_batch_instances
                      WHERE tenant_id = '1000' AND batch_no LIKE :'marker' || '_%'),
+        'telemetryPoints', (SELECT count(*) FROM bpi.bpi_telemetry_points
+                             WHERE tenant_id = '1000'
+                               AND event_id LIKE :'marker' || '_EVENT_%'),
+        'telemetryEvents', (SELECT count(*) FROM bpi.bpi_telemetry_events
+                             WHERE tenant_id = '1000'
+                               AND event_id LIKE :'marker' || '_EVENT_%'),
         'rules', (SELECT count(*) FROM bpi.bpi_rule_versions
                    WHERE tenant_id = '1000' AND rule_code = :'marker' || '_RULE'),
         'topologies', (SELECT count(*) FROM bpi.bpi_topology_versions
                         WHERE tenant_id = '1000' AND topology_code = :'marker' || '_TOPOLOGY'),
         'catalogs', (SELECT count(*) FROM bpi.bpi_point_catalog_snapshots
                       WHERE tenant_id = '1000' AND source_revision = :'marker'),
+        'catalogEntries', (SELECT count(*) FROM bpi.bpi_point_catalog_entries
+                            WHERE tenant_id = '1000'
+                              AND snapshot_id = md5(:'marker' || ':catalog')::uuid),
+        'calibrations', (SELECT count(*) FROM bpi.bpi_point_calibrations
+                          WHERE tenant_id = '1000'
+                            AND certificate_reference =
+                                'urn:adp:calibration:' || :'marker'),
         'idempotency', (SELECT count(*) FROM bpi.bpi_api_idempotency
                          WHERE tenant_id = '1000'
                            AND id IN (SELECT id FROM target_dataset_idempotency))

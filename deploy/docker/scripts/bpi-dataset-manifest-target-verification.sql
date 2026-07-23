@@ -32,6 +32,57 @@ WITH target_definition AS (
       FROM bpi.bpi_dataset_snapshot_samples
      WHERE tenant_id = '1000'
        AND snapshot_id = (SELECT id FROM target_snapshot)
+), process_window_projection AS (
+    SELECT count(*)::integer AS total,
+           count(*) FILTER (WHERE state = 'READY')::integer AS ready,
+           count(*) FILTER (WHERE state = 'BLOCKED')::integer AS blocked,
+           count(*) FILTER (
+               WHERE state = 'BLOCKED'
+                 AND jsonb_exists(blocker_codes, 'WINDOW_SAMPLE_COUNT_BELOW_MINIMUM')
+                 AND jsonb_exists(blocker_codes, 'WINDOW_MAX_GAP_EXCEEDED')
+                 AND jsonb_exists(blocker_codes, 'WINDOW_METRIC_UNAVAILABLE'))::integer
+               AS blocked_for_missing_samples,
+           count(*) FILTER (
+               WHERE latest_ingest_time IS NULL
+                  OR latest_ingest_time <= prediction_time)::integer AS cutoff_safe,
+           count(*) FILTER (
+               WHERE length(source_fingerprint) = 32
+                 AND length(fact_checksum) = 64)::integer AS checksums_valid
+      FROM bpi.bpi_dataset_process_signal_window_facts
+     WHERE tenant_id = '1000'
+       AND snapshot_id = (SELECT id FROM target_snapshot)
+), high_flow_projection AS (
+    SELECT source_point_count, accepted_sample_count, rejected_quality_count,
+           late_availability_count, unit_mismatch_count,
+           value_type_mismatch_count, calibration_mismatch_count,
+           maximum_observed_gap_seconds, numeric_value,
+           product_id, device_id, property_id
+      FROM bpi.bpi_dataset_process_signal_window_facts
+     WHERE tenant_id = '1000'
+       AND snapshot_id = (SELECT id FROM target_snapshot)
+       AND batch_no = :'marker' || '_HIGH'
+       AND feature_ref = 'process.window.flow_instant.mean_60s'
+), high_pump_projection AS (
+    SELECT source_point_count, accepted_sample_count,
+           maximum_observed_gap_seconds, numeric_value,
+           product_id, device_id, property_id
+      FROM bpi.bpi_dataset_process_signal_window_facts
+     WHERE tenant_id = '1000'
+       AND snapshot_id = (SELECT id FROM target_snapshot)
+       AND batch_no = :'marker' || '_HIGH'
+       AND feature_ref = 'process.window.pump_running.true_ratio_30s'
+), included_feature_projection AS (
+    SELECT (feature_payload ->> 'process.window.flow_instant.mean_60s')::numeric
+               AS flow_mean,
+           (feature_payload ->> 'process.window.pump_running.true_ratio_30s')::numeric
+               AS pump_true_ratio,
+           jsonb_array_length(source_payload -> 'processSignalWindows')
+               AS evidence_count
+      FROM bpi.bpi_dataset_snapshot_samples
+     WHERE tenant_id = '1000'
+       AND snapshot_id = (SELECT id FROM target_snapshot)
+       AND batch_no = :'marker' || '_HIGH'
+       AND included
 )
 SELECT jsonb_pretty(jsonb_build_object(
     'marker', :'marker',
@@ -39,7 +90,9 @@ SELECT jsonb_pretty(jsonb_build_object(
     'definition', (SELECT jsonb_build_object(
         'rows', count(*), 'id', min(id::text), 'revision', min(revision),
         'plantId', min(plant_id), 'lineIds', min(line_ids::text)::jsonb,
-        'checksumLength', min(length(checksum))) FROM target_definition),
+        'checksumLength', min(length(checksum)),
+        'processWindowCount', min(jsonb_array_length(process_signal_windows)))
+        FROM target_definition),
     'snapshot', (SELECT jsonb_build_object(
         'rows', count(*), 'id', min(id::text), 'state', min(state),
         'revision', min(revision), 'manifestChecksumLength', min(length(manifest_checksum)),
@@ -48,6 +101,19 @@ SELECT jsonb_pretty(jsonb_build_object(
         FROM target_snapshot),
     'samples', (SELECT to_jsonb(sample_projection) FROM sample_projection),
     'exclusions', (SELECT to_jsonb(exclusion_projection) FROM exclusion_projection),
+    'processWindows', (SELECT to_jsonb(process_window_projection)
+                         FROM process_window_projection),
+    'highFlow', (SELECT to_jsonb(high_flow_projection) FROM high_flow_projection),
+    'highPump', (SELECT to_jsonb(high_pump_projection) FROM high_pump_projection),
+    'includedFeatures', (SELECT to_jsonb(included_feature_projection)
+                           FROM included_feature_projection),
+    'telemetry', jsonb_build_object(
+        'events', (SELECT count(*) FROM bpi.bpi_telemetry_events
+                    WHERE tenant_id = '1000'
+                      AND event_id LIKE :'marker' || '_EVENT_%'),
+        'points', (SELECT count(*) FROM bpi.bpi_telemetry_points
+                    WHERE tenant_id = '1000'
+                      AND event_id LIKE :'marker' || '_EVENT_%')),
     'auditRows', (SELECT count(*) FROM bpi.bpi_audit_events
                    WHERE tenant_id = '1000'
                      AND object_id IN (

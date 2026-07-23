@@ -202,6 +202,30 @@ MLflow 运行数为 0；Flyway 保持 V31，主 BPI 三服务 healthy，`/bpi/` 
 `metadata/bpi-dataset-training-readiness-acceptance.json`，完整报告为
 `docs/testing/bpi-dataset-training-readiness-acceptance.md`。
 
+2026-07-23 随后完成 Phase 3C-C 工艺信号窗口纵切。Flyway V32 在数据集定义中保存受治理窗口，
+并新增按 snapshot/review/feature 唯一的不可变 point-in-time 事实；V33 撤销 BPI schema 函数的
+`PUBLIC EXECUTE`，同时锁定后续默认函数权限。第一次受控 V32 部署被最小权限门禁正确停止且没有切换
+运行容器；没有改写已经落库的 V32 校验和，而是追加 V33，并在现有 V32 库、全新 V1-V33 库和四个
+可选 worker 角色上复验通过。
+
+exact release `f7db2f98e82d481f6c53c5fa7539ac52c812e28f` 已将唯一目标栈升级到 PostgreSQL
+15.18/Flyway V33。marker `ADP_E2E_BPI_WINDOWS_20260723_1235_A1` 从真实
+`/bpi/#/datasets` 页面创建两个受控窗口：`flow.instant` 的 60 秒 MEAN 和 `pump.running` 的
+30 秒 TRUE_RATIO。快照达到 `MANIFEST_READY/r3`，3 个样本形成 6 条不可变窗口事实，其中
+2 READY、4 BLOCKED。PostgreSQL 证明流量 `source=4/accepted=3/late=1/mean=20`，迟到值 999
+未进入聚合，冻结后值 888 完全未进入快照；泵状态 `source=2/accepted=2/trueRatio=0.5`。
+低置信度与标签延迟样本因为缺测保留 4 条明确 blocker，直接 UPDATE 被不可变触发器拒绝。
+桌面和移动页面无 console/page/request error 或横向溢出；取证后 19 类 marker 投影归零，主 BPI
+三服务 healthy，可选 sidecar 为 0，全部模型路径继续关闭。
+
+该纵切关闭的是“系统能否从冻结遥测和生产上下文构建可复现过程窗口事实”，不是现场数据资格。
+V31 的 `0 个过程窗口` 仍是当时 v1 readiness 快照的历史事实；V32/V33 受控窗口不能倒写旧评估，也
+不能冒充物理设备和正式校准证据。G-021 继续为 `PARTIAL`：下一门槛是用 `MapleTcT/iot` 的真实
+DEVICE/GATEWAY identity、严格递增来源序列和正式校准替换 fixture，连续积累至少 200 个复核批次、
+7 个生产日以及 accepted/rejected 标签覆盖，再按 v2 policy 重新评估；在 `ELIGIBLE` 前不得启动训练。
+机器证据为 `metadata/bpi-dataset-process-signal-window-acceptance.json`，完整报告为
+`docs/testing/bpi-dataset-process-signal-window-acceptance.md`。
+
 2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、
 规则历史回放、精确 simulation 证明提交、同 actor `422` 拒绝、独立管理员批准发布和独立管理员驳回。

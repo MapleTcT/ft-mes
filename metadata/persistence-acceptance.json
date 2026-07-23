@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-23T09:41:00+08:00",
-  "repoCommit": "89044926c1335f8028c624b99fd7ecb57d771f2b+target-v31-training-readiness",
+  "generatedAt": "2026-07-23T12:51:05+08:00",
+  "repoCommit": "f7db2f98e82d481f6c53c5fa7539ac52c812e28f+target-v33-process-windows",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -212,11 +212,17 @@
       ],
       "evidence": "metadata/bpi-dataset-catalog-publication-acceptance.json; docs/testing/bpi-dataset-catalog-publication-acceptance.md",
       "assertions": "clean V28 target release; real desktop/mobile ADP publication and rediscovery; exact source version and Iceberg time-travel; controlled FAILED then same-task retry READY; real post-commit exit 86 and stale-claim reconcile to the same single snapshot; least privilege; exact cleanup and seven default-off flags"
+    },
+    "bpiDatasetProcessSignalWindows": {
+      "status": "PASS_TARGET_BROWSER_API_POSTGRES_PROCESS_WINDOWS_CLEANED_DEFAULT_OFF",
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "evidence": "metadata/bpi-dataset-process-signal-window-acceptance.json; docs/testing/bpi-dataset-process-signal-window-acceptance.md",
+      "assertions": "exact V33 target release; real ADP definition and snapshot requests; two governed windows; six immutable point-in-time facts with 2 READY and 4 BLOCKED; flow mean 20 and pump true ratio 0.5; late and post-freeze exclusion; V33 least privilege; desktop/mobile errors zero; 19 cleanup categories zero; optional sidecars and all model paths remain off"
     }
   },
   "summary": {
-    "testedFeatures": 253,
-    "pass": 250,
+    "testedFeatures": 259,
+    "pass": 256,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -5521,9 +5527,128 @@
       "status": "PASS",
       "evidence": "metadata/bpi-dataset-training-readiness-acceptance.json; all scoped residues were zero, core services were healthy, /bpi/ returned 200 and Compose referenced only docker-compose.yml",
       "issues": []
+    },
+    {
+      "module": "BPI V32/V33 真实页面工艺信号窗口定义",
+      "route": "/bpi/#/datasets",
+      "operation": "从真实 ADP 数据集页面创建包含 flow MEAN 和 pump TRUE_RATIO 的两组受控窗口定义",
+      "api": "POST /bpi-api/datasets",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "BpiProxyController -> DatasetController.createDataset -> DatasetService -> DatasetPostgresRepository.insertDefinition",
+      "tables": [
+        "bpi.bpi_dataset_definitions",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "deploy/docker/scripts/bpi-dataset-manifest-target-verification.sql; require processWindowCount=2 and completed HTTP 200 idempotency",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-process-signal-window-acceptance.json; real page returned HTTP 200, ACTIVE/r1 and two immutable window definitions",
+      "issues": []
+    },
+    {
+      "module": "BPI V32/V33 point-in-time 窗口事实",
+      "route": "/bpi/#/datasets",
+      "operation": "冻结 snapshot 并从真实页面轮询到 MANIFEST_READY，核对 3 个样本和 6 条窗口事实",
+      "api": "POST /bpi-api/datasets/{datasetId}/snapshots; GET /bpi-api/dataset-snapshots/{snapshotId}",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetManifestProcessor -> ProcessSignalWindowPostgresRepository -> ProcessSignalWindowBuilder -> DatasetPostgresRepository.completeSnapshot",
+      "tables": [
+        "bpi.bpi_dataset_snapshots",
+        "bpi.bpi_dataset_snapshot_samples",
+        "bpi.bpi_dataset_process_signal_window_facts",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "deploy/docker/scripts/bpi-dataset-manifest-target-verification.sql; require MANIFEST_READY/r3, samples=3 and process windows=6/2 READY/4 BLOCKED",
+      "status": "PASS",
+      "evidence": "HTTP 202 completed as MANIFEST_READY/r3; PostgreSQL and the real page both returned six checksum-valid immutable facts",
+      "issues": []
+    },
+    {
+      "module": "BPI V32/V33 过程测点聚合与迟到隔离",
+      "route": "/bpi/#/datasets",
+      "operation": "核对流量与泵状态窗口值、迟到数据、冻结后数据、单位、类型和校准门禁",
+      "api": "GET /bpi-api/dataset-snapshots/{snapshotId}",
+      "method": "GET/SQL",
+      "requiresPersistence": true,
+      "backendEntry": "ProcessSignalWindowPostgresRepository.findEvidence -> ProcessSignalWindowBuilder.build",
+      "tables": [
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_dataset_process_signal_window_facts"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "Require flow source/accepted/late/value=4/3/1/20, pump source/accepted/value=2/2/0.5, and unit/type/calibration mismatches=0",
+      "status": "PASS",
+      "evidence": "late value 999 did not enter the mean, post-freeze value 888 did not enter the frozen source set, and both governed metrics matched PostgreSQL",
+      "issues": []
+    },
+    {
+      "module": "BPI V32/V33 失败关闭与事实不可变",
+      "route": "/bpi/#/datasets",
+      "operation": "核对缺测样本的 blocker，并直接尝试更新已持久化窗口事实",
+      "api": "GET snapshot; PostgreSQL direct UPDATE negative probe",
+      "method": "GET/UPDATE",
+      "requiresPersistence": true,
+      "backendEntry": "DatasetManifestBuilder blocker evaluation; trg_bpi_dataset_process_signal_window_immutable",
+      "tables": [
+        "bpi.bpi_dataset_snapshot_samples",
+        "bpi.bpi_dataset_process_signal_window_facts"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "Require four BLOCKED facts with sample-count/max-gap/metric-unavailable reasons, then UPDATE numeric_value=999 and require immutable rejection",
+      "status": "PASS",
+      "evidence": "four facts failed closed with explicit blockers; PostgreSQL rejected UPDATE with BPI dataset process signal window facts are immutable",
+      "issues": []
+    },
+    {
+      "module": "BPI V33 数据库函数最小权限",
+      "route": "NOT_APPLICABLE",
+      "operation": "在首次 V32 权限门禁止损后追加 V33，并验证四个可选 worker 角色不能执行 BPI 函数",
+      "api": "PostgreSQL role provision/grant/verify scripts",
+      "method": "SQL/VERIFY",
+      "requiresPersistence": true,
+      "backendEntry": "V33__bpi_function_execution_privilege_hardening.sql and ensure-bpi-*-role.sh",
+      "tables": [
+        "PostgreSQL function ACL and default privileges",
+        "bpi.flyway_schema_history"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "Require latest Flyway version 33 and has_function_privilege(worker, bpi functions, EXECUTE)=false for materializer, catalog publisher, retention archiver and MLflow registrar",
+      "status": "PASS",
+      "evidence": "the first upgrade stopped before container switch; existing V32 plus V33, fresh V1-V33 and all four scoped role verifications passed",
+      "issues": []
+    },
+    {
+      "module": "BPI V32/V33 浏览器与精确清理",
+      "route": "/bpi/#/datasets",
+      "operation": "在桌面和 390x844 移动页面复读同一窗口事实，再精确清除 marker 并恢复默认关闭运行面",
+      "api": "dataset/snapshot GET; bpi-dataset-manifest-target-cleanup.sql; GET /bpi/",
+      "method": "GET/DELETE/SQL",
+      "requiresPersistence": true,
+      "backendEntry": "BPI Web through Java 8 adapter; controlled PostgreSQL cleanup; Docker runtime verification",
+      "tables": [
+        "bpi V26-V33 dataset lineage and fixture tables",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "verificationSql": "Require console/page/request/overflow failures=0, all 19 cleanup projections=0, three core services healthy, web=200 and optional sidecars=0",
+      "status": "PASS",
+      "evidence": "metadata/bpi-dataset-process-signal-window-acceptance.json and desktop/mobile screenshots; all browser and cleanup checks passed and all model boundaries remained false",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_BPI_WINDOWS_20260723_1235_A1",
+      "artifact": "metadata/bpi-dataset-process-signal-window-acceptance.json",
+      "summary": "The V32/V33 target slice closed real ADP creation and snapshot interaction, six immutable point-in-time process-window facts, explicit READY/BLOCKED evidence, late/post-freeze exclusion, deterministic flow and pump metrics, function least privilege, desktop/mobile rendering and exact zero-residue/default-off cleanup. Physical DEVICE/GATEWAY evidence, formal calibration, 200 reviewed batches, seven production days and all model paths remain open."
+    },
     {
       "marker": "ADP_E2E_BPI_MLFLOW_20260723_022000_A1",
       "artifact": "metadata/bpi-dataset-mlflow-registration-acceptance.json",
