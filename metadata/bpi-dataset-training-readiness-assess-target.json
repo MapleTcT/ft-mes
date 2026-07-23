@@ -1,0 +1,682 @@
+{
+  "generatedAt": "2026-07-23T01:21:47.279Z",
+  "status": "PASS_PENDING_DATABASE_MLFLOW_RESTART_VERIFICATION_AND_CLEANUP",
+  "marker": "ADP_E2E_BPI_READINESS_20260723_091500_A1",
+  "action": "assess-blocked",
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "login": {
+    "status": 200,
+    "username": "admin"
+  },
+  "source": {
+    "datasetId": "9f1d384e-ff7b-4183-a8f1-5a6ed3c901dd",
+    "snapshotId": "39885522-9531-4177-a671-f330742ff2ce",
+    "materializationId": "5142b48a-14a2-4b59-b71a-3e87fef623df",
+    "publicationId": "05b377d4-f35a-4310-a8e3-3a27dc6c5f19",
+    "archiveId": "3b4adef5-8323-4378-ac49-86a507228c5b",
+    "registrationId": "21edf8aa-b354-41f7-8703-0c42fc2984f1",
+    "registrationRevision": 6,
+    "mlflowRunId": "11bc3662fe474c07b2e2285b64754bc1",
+    "datasetDigest": "2a22db670c85a302"
+  },
+  "assessment": {
+    "id": "f961a15f-ee22-42c6-9702-7136d9cab007",
+    "mlflowRegistrationId": "21edf8aa-b354-41f7-8703-0c42fc2984f1",
+    "sourceSnapshotId": "39885522-9531-4177-a671-f330742ff2ce",
+    "datasetId": "9f1d384e-ff7b-4183-a8f1-5a6ed3c901dd",
+    "datasetCode": "ADP_E2E_BPI_READINESS_20260723_091500_A1",
+    "datasetVersion": "1.0.0",
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineIds": [
+      "LINE-S07-01"
+    ],
+    "objectiveCode": "BATCH_START_BOUNDARY_REVIEW_RISK",
+    "policyVersion": "bpi-training-readiness/batch-start-boundary-v1",
+    "assessmentSequence": 2,
+    "state": "BLOCKED",
+    "revision": 1,
+    "sourceRegistrationRevision": 6,
+    "manifestChecksum": "35412574325b3ef02a41da9f91df5640f9a8ac344de047d300f865368e05c2ae",
+    "datasetDigest": "2a22db670c85a302",
+    "requiredThresholds": {
+      "requiredLabelRef": "review.boundary_acceptance",
+      "maximumLeakageRows": 0,
+      "requiredSplitPolicy": "PRODUCTION_TIME",
+      "maximumExcludedRatio": 0.2,
+      "minimumProductionDays": 7,
+      "minimumDistinctBatches": 200,
+      "minimumIncludedSamples": 200,
+      "requiredRegistrationState": "REGISTERED",
+      "minimumStartAcceptedLabels": 100,
+      "minimumStartRejectedLabels": 10,
+      "requiredContextFeatureRefs": [
+        "batch.material_code",
+        "batch.stage_code",
+        "rule.version_id",
+        "topology.version_id",
+        "point_catalog.snapshot_id"
+      ],
+      "requiredFeatureCutoffPolicy": "AT_OR_BEFORE_PREDICTION_TIME",
+      "minimumProductionSplitGroups": 2,
+      "requiredDatasetInputEvidence": true,
+      "requiredPredictionTimePolicy": "AUTOMATIC_BATCH_START",
+      "minimumContinuousShadowRunDays": 7,
+      "minimumSignalWindowFeatureRefs": 2,
+      "maximumUnresolvedCriticalIncidents": 0
+    },
+    "observedMetrics": {
+      "labelRefs": [
+        "batch.automatic_end_time",
+        "batch.automatic_quantity",
+        "review.boundary_acceptance",
+        "review.manual_end_time",
+        "review.manual_start_time",
+        "review.quantity_acceptance",
+        "review.reference_quantity"
+      ],
+      "featureRefs": [
+        "batch.material_code",
+        "batch.order_id",
+        "batch.quantity_unit",
+        "batch.stage_code",
+        "point_catalog.snapshot_id",
+        "rule.version_id",
+        "topology.version_id"
+      ],
+      "excludedRatio": 0.666667,
+      "sourceRowCount": 1,
+      "leakageRowCount": 0,
+      "lineageVerified": true,
+      "registrationState": "REGISTERED",
+      "distinctBatchCount": 1,
+      "excludedSampleCount": 2,
+      "includedSampleCount": 1,
+      "sourceFactsVerified": true,
+      "datasetInputVerified": true,
+      "persistedSampleCount": 3,
+      "registrationRevision": 6,
+      "snapshotExcludedCount": 2,
+      "snapshotIncludedCount": 1,
+      "approvedShadowRunCount": 1,
+      "distinctShadowRunCount": 1,
+      "startLabelMissingCount": 0,
+      "signalWindowFeatureRefs": [],
+      "startAcceptedLabelCount": 1,
+      "startRejectedLabelCount": 0,
+      "missingContextFeatureRefs": [],
+      "pointCatalogSnapshotCount": 1,
+      "productionSplitGroupCount": 1,
+      "distinctProductionDayCount": 1,
+      "maximumContinuousShadowRunDays": 7.916,
+      "readyPointCatalogSnapshotCount": 1,
+      "unresolvedCriticalIncidentCount": 0,
+      "shadowRunDurationGateFailureCount": 0
+    },
+    "gateResults": [
+      {
+        "code": "MLFLOW_DATASET_INPUT_NOT_VERIFIED",
+        "detail": "MLflow Dataset Input must be immutable and fully reconciled before assessment.",
+        "passed": true,
+        "expected": "REGISTERED with verified input, lineage and source facts",
+        "observed": "REGISTERED|true|true|true"
+      },
+      {
+        "code": "DATASET_POLICY_MISMATCH",
+        "detail": "The first model must use point-in-time safe features and production-time splits.",
+        "passed": true,
+        "expected": "AUTOMATIC_BATCH_START|AT_OR_BEFORE_PREDICTION_TIME|PRODUCTION_TIME",
+        "observed": "AUTOMATIC_BATCH_START|AT_OR_BEFORE_PREDICTION_TIME|PRODUCTION_TIME"
+      },
+      {
+        "code": "SOURCE_ROW_RECONCILIATION_FAILED",
+        "detail": "Training must use the exact rows registered in MLflow.",
+        "passed": true,
+        "expected": "source rows = included rows; snapshot counts = persisted rows",
+        "observed": "1|1|1+2|3"
+      },
+      {
+        "code": "POINT_IN_TIME_LEAKAGE_DETECTED",
+        "detail": "Feature cutoff and label availability must not leak future facts.",
+        "passed": true,
+        "expected": 0,
+        "observed": 0
+      },
+      {
+        "code": "REQUIRED_CONTEXT_FEATURES_MISSING",
+        "detail": "Material, stage and immutable rule/topology/catalog lineage are required.",
+        "passed": true,
+        "expected": [],
+        "observed": []
+      },
+      {
+        "code": "PROCESS_SIGNAL_WINDOWS_MISSING",
+        "detail": "At least two pre-boundary flow, pump, valve or level windows are required; identifiers alone cannot train a process model.",
+        "passed": false,
+        "expected": 2,
+        "observed": 0
+      },
+      {
+        "code": "BOUNDARY_REVIEW_LABEL_MISSING",
+        "detail": "The objective requires the reviewed start-boundary acceptance label.",
+        "passed": true,
+        "expected": "review.boundary_acceptance",
+        "observed": "review.boundary_acceptance"
+      },
+      {
+        "code": "INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM",
+        "detail": "The pilot model needs enough reviewed batches to avoid a demo-only fit.",
+        "passed": false,
+        "expected": 200,
+        "observed": 1
+      },
+      {
+        "code": "DISTINCT_BATCH_COUNT_BELOW_MINIMUM",
+        "detail": "Repeated rows from the same batch do not increase independent evidence.",
+        "passed": false,
+        "expected": 200,
+        "observed": 1
+      },
+      {
+        "code": "PRODUCTION_DAY_COVERAGE_BELOW_MINIMUM",
+        "detail": "The dataset must cover at least seven production dates.",
+        "passed": false,
+        "expected": 7,
+        "observed": 1
+      },
+      {
+        "code": "PRODUCTION_SPLIT_GROUPS_BELOW_MINIMUM",
+        "detail": "At least two production-time groups are required for train/validation isolation.",
+        "passed": false,
+        "expected": 2,
+        "observed": 1
+      },
+      {
+        "code": "EXCLUDED_RATIO_ABOVE_MAXIMUM",
+        "detail": "High exclusion rates indicate an unstable label or source-quality process.",
+        "passed": false,
+        "expected": 0.2,
+        "observed": 0.666667
+      },
+      {
+        "code": "START_ACCEPTED_LABEL_COUNT_BELOW_MINIMUM",
+        "detail": "The accepted class must contain enough reviewed examples.",
+        "passed": false,
+        "expected": 100,
+        "observed": 1
+      },
+      {
+        "code": "START_REJECTED_LABEL_COUNT_BELOW_MINIMUM",
+        "detail": "The minority rejection class must be represented before risk training.",
+        "passed": false,
+        "expected": 10,
+        "observed": 0
+      },
+      {
+        "code": "START_LABEL_VALUES_MISSING",
+        "detail": "Every included row must have a reviewed start-boundary label.",
+        "passed": true,
+        "expected": 0,
+        "observed": 0
+      },
+      {
+        "code": "SHADOW_RUN_SOURCE_NOT_APPROVED",
+        "detail": "Every included row must originate from an approved shadow run.",
+        "passed": true,
+        "expected": 1,
+        "observed": 1
+      },
+      {
+        "code": "SHADOW_RUN_DURATION_GATE_FAILED",
+        "detail": "Each source run must satisfy its governed 7-14 day field window.",
+        "passed": true,
+        "expected": 0,
+        "observed": 0
+      },
+      {
+        "code": "POINT_CATALOG_READINESS_UNPROVEN",
+        "detail": "All pinned point catalogs must preserve their source readiness claim.",
+        "passed": true,
+        "expected": 1,
+        "observed": 1
+      },
+      {
+        "code": "UNRESOLVED_CRITICAL_DATA_QUALITY",
+        "detail": "Critical incidents overlapping source runs must be resolved before training.",
+        "passed": true,
+        "expected": 0,
+        "observed": 0
+      }
+    ],
+    "blockerCodes": [
+      "PROCESS_SIGNAL_WINDOWS_MISSING",
+      "INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM",
+      "DISTINCT_BATCH_COUNT_BELOW_MINIMUM",
+      "PRODUCTION_DAY_COVERAGE_BELOW_MINIMUM",
+      "PRODUCTION_SPLIT_GROUPS_BELOW_MINIMUM",
+      "EXCLUDED_RATIO_ABOVE_MAXIMUM",
+      "START_ACCEPTED_LABEL_COUNT_BELOW_MINIMUM",
+      "START_REJECTED_LABEL_COUNT_BELOW_MINIMUM"
+    ],
+    "phaseBoundary": {
+      "modelCreated": false,
+      "assessmentOnly": true,
+      "modelRegistered": false,
+      "trainingStarted": false,
+      "onlineInferenceEnabled": false,
+      "productionActivationAllowed": false
+    },
+    "assessmentChecksum": "91d8726c265720758ed796a7dac297f6fd15b61329cef8464e2afe80f5d0ef98",
+    "assessedBy": "legacy-ticket:admin",
+    "assessmentReason": "ADP_E2E_BPI_READINESS_20260723_091500_A1 重复相同冻结事实，验证评估序号与 checksum",
+    "assessedAt": "2026-07-23T01:21:51.109326Z"
+  },
+  "api": {
+    "idempotentReplay": {
+      "status": 200,
+      "sameAssessmentId": true
+    },
+    "secondAssessment": {
+      "status": 200,
+      "id": "f961a15f-ee22-42c6-9702-7136d9cab007",
+      "sequence": 2,
+      "sameChecksum": true
+    }
+  },
+  "browser": {
+    "route": "http://10.11.100.17:18080/bpi/#/datasets",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "network": [
+      {
+        "method": "GET",
+        "url": "/bpi-api/datasets?plantId=PLANT-01&limit=100",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/39885522-9531-4177-a671-f330742ff2ce",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-materializations/5142b48a-14a2-4b59-b71a-3e87fef623df/catalog-publications",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-catalog-publications/05b377d4-f35a-4310-a8e3-3a27dc6c5f19/retention-archives",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-retention-archives/3b4adef5-8323-4378-ac49-86a507228c5b/mlflow-registrations",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-mlflow-registrations/21edf8aa-b354-41f7-8703-0c42fc2984f1/training-readiness-assessments",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "POST",
+        "url": "/bpi-api/dataset-mlflow-registrations/21edf8aa-b354-41f7-8703-0c42fc2984f1/training-readiness-assessments",
+        "status": 200,
+        "payload": {
+          "objectiveCode": "BATCH_START_BOUNDARY_REVIEW_RISK",
+          "reason": "ADP_E2E_BPI_READINESS_20260723_091500_A1 真实页面核对离线训练资格，不启动模型"
+        },
+        "headers": {
+          "idempotencyKey": "7823ad86-6381-458a-b3dd-fe33488c49a5",
+          "ifMatch": "6",
+          "traceId": null
+        },
+        "response": {
+          "id": "3b4bb80a-5a96-4fcb-81a3-0230340fb311",
+          "mlflowRegistrationId": "21edf8aa-b354-41f7-8703-0c42fc2984f1",
+          "sourceSnapshotId": "39885522-9531-4177-a671-f330742ff2ce",
+          "datasetId": "9f1d384e-ff7b-4183-a8f1-5a6ed3c901dd",
+          "datasetCode": "ADP_E2E_BPI_READINESS_20260723_091500_A1",
+          "datasetVersion": "1.0.0",
+          "tenantId": "1000",
+          "plantId": "PLANT-01",
+          "lineIds": [
+            "LINE-S07-01"
+          ],
+          "objectiveCode": "BATCH_START_BOUNDARY_REVIEW_RISK",
+          "policyVersion": "bpi-training-readiness/batch-start-boundary-v1",
+          "assessmentSequence": 1,
+          "state": "BLOCKED",
+          "revision": 1,
+          "sourceRegistrationRevision": 6,
+          "manifestChecksum": "35412574325b3ef02a41da9f91df5640f9a8ac344de047d300f865368e05c2ae",
+          "datasetDigest": "2a22db670c85a302",
+          "requiredThresholds": {
+            "requiredLabelRef": "review.boundary_acceptance",
+            "maximumLeakageRows": 0,
+            "requiredSplitPolicy": "PRODUCTION_TIME",
+            "maximumExcludedRatio": 0.2,
+            "minimumProductionDays": 7,
+            "minimumDistinctBatches": 200,
+            "minimumIncludedSamples": 200,
+            "requiredRegistrationState": "REGISTERED",
+            "minimumStartAcceptedLabels": 100,
+            "minimumStartRejectedLabels": 10,
+            "requiredContextFeatureRefs": [
+              "batch.material_code",
+              "batch.stage_code",
+              "rule.version_id",
+              "topology.version_id",
+              "point_catalog.snapshot_id"
+            ],
+            "requiredFeatureCutoffPolicy": "AT_OR_BEFORE_PREDICTION_TIME",
+            "minimumProductionSplitGroups": 2,
+            "requiredDatasetInputEvidence": true,
+            "requiredPredictionTimePolicy": "AUTOMATIC_BATCH_START",
+            "minimumContinuousShadowRunDays": 7,
+            "minimumSignalWindowFeatureRefs": 2,
+            "maximumUnresolvedCriticalIncidents": 0
+          },
+          "observedMetrics": {
+            "labelRefs": [
+              "batch.automatic_end_time",
+              "batch.automatic_quantity",
+              "review.boundary_acceptance",
+              "review.manual_end_time",
+              "review.manual_start_time",
+              "review.quantity_acceptance",
+              "review.reference_quantity"
+            ],
+            "featureRefs": [
+              "batch.material_code",
+              "batch.order_id",
+              "batch.quantity_unit",
+              "batch.stage_code",
+              "point_catalog.snapshot_id",
+              "rule.version_id",
+              "topology.version_id"
+            ],
+            "excludedRatio": 0.666667,
+            "sourceRowCount": 1,
+            "leakageRowCount": 0,
+            "lineageVerified": true,
+            "registrationState": "REGISTERED",
+            "distinctBatchCount": 1,
+            "excludedSampleCount": 2,
+            "includedSampleCount": 1,
+            "sourceFactsVerified": true,
+            "datasetInputVerified": true,
+            "persistedSampleCount": 3,
+            "registrationRevision": 6,
+            "snapshotExcludedCount": 2,
+            "snapshotIncludedCount": 1,
+            "approvedShadowRunCount": 1,
+            "distinctShadowRunCount": 1,
+            "startLabelMissingCount": 0,
+            "signalWindowFeatureRefs": [],
+            "startAcceptedLabelCount": 1,
+            "startRejectedLabelCount": 0,
+            "missingContextFeatureRefs": [],
+            "pointCatalogSnapshotCount": 1,
+            "productionSplitGroupCount": 1,
+            "distinctProductionDayCount": 1,
+            "maximumContinuousShadowRunDays": 7.916,
+            "readyPointCatalogSnapshotCount": 1,
+            "unresolvedCriticalIncidentCount": 0,
+            "shadowRunDurationGateFailureCount": 0
+          },
+          "gateResults": [
+            {
+              "code": "MLFLOW_DATASET_INPUT_NOT_VERIFIED",
+              "detail": "MLflow Dataset Input must be immutable and fully reconciled before assessment.",
+              "passed": true,
+              "expected": "REGISTERED with verified input, lineage and source facts",
+              "observed": "REGISTERED|true|true|true"
+            },
+            {
+              "code": "DATASET_POLICY_MISMATCH",
+              "detail": "The first model must use point-in-time safe features and production-time splits.",
+              "passed": true,
+              "expected": "AUTOMATIC_BATCH_START|AT_OR_BEFORE_PREDICTION_TIME|PRODUCTION_TIME",
+              "observed": "AUTOMATIC_BATCH_START|AT_OR_BEFORE_PREDICTION_TIME|PRODUCTION_TIME"
+            },
+            {
+              "code": "SOURCE_ROW_RECONCILIATION_FAILED",
+              "detail": "Training must use the exact rows registered in MLflow.",
+              "passed": true,
+              "expected": "source rows = included rows; snapshot counts = persisted rows",
+              "observed": "1|1|1+2|3"
+            },
+            {
+              "code": "POINT_IN_TIME_LEAKAGE_DETECTED",
+              "detail": "Feature cutoff and label availability must not leak future facts.",
+              "passed": true,
+              "expected": 0,
+              "observed": 0
+            },
+            {
+              "code": "REQUIRED_CONTEXT_FEATURES_MISSING",
+              "detail": "Material, stage and immutable rule/topology/catalog lineage are required.",
+              "passed": true,
+              "expected": [],
+              "observed": []
+            },
+            {
+              "code": "PROCESS_SIGNAL_WINDOWS_MISSING",
+              "detail": "At least two pre-boundary flow, pump, valve or level windows are required; identifiers alone cannot train a process model.",
+              "passed": false,
+              "expected": 2,
+              "observed": 0
+            },
+            {
+              "code": "BOUNDARY_REVIEW_LABEL_MISSING",
+              "detail": "The objective requires the reviewed start-boundary acceptance label.",
+              "passed": true,
+              "expected": "review.boundary_acceptance",
+              "observed": "review.boundary_acceptance"
+            },
+            {
+              "code": "INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM",
+              "detail": "The pilot model needs enough reviewed batches to avoid a demo-only fit.",
+              "passed": false,
+              "expected": 200,
+              "observed": 1
+            },
+            {
+              "code": "DISTINCT_BATCH_COUNT_BELOW_MINIMUM",
+              "detail": "Repeated rows from the same batch do not increase independent evidence.",
+              "passed": false,
+              "expected": 200,
+              "observed": 1
+            },
+            {
+              "code": "PRODUCTION_DAY_COVERAGE_BELOW_MINIMUM",
+              "detail": "The dataset must cover at least seven production dates.",
+              "passed": false,
+              "expected": 7,
+              "observed": 1
+            },
+            {
+              "code": "PRODUCTION_SPLIT_GROUPS_BELOW_MINIMUM",
+              "detail": "At least two production-time groups are required for train/validation isolation.",
+              "passed": false,
+              "expected": 2,
+              "observed": 1
+            },
+            {
+              "code": "EXCLUDED_RATIO_ABOVE_MAXIMUM",
+              "detail": "High exclusion rates indicate an unstable label or source-quality process.",
+              "passed": false,
+              "expected": 0.2,
+              "observed": 0.666667
+            },
+            {
+              "code": "START_ACCEPTED_LABEL_COUNT_BELOW_MINIMUM",
+              "detail": "The accepted class must contain enough reviewed examples.",
+              "passed": false,
+              "expected": 100,
+              "observed": 1
+            },
+            {
+              "code": "START_REJECTED_LABEL_COUNT_BELOW_MINIMUM",
+              "detail": "The minority rejection class must be represented before risk training.",
+              "passed": false,
+              "expected": 10,
+              "observed": 0
+            },
+            {
+              "code": "START_LABEL_VALUES_MISSING",
+              "detail": "Every included row must have a reviewed start-boundary label.",
+              "passed": true,
+              "expected": 0,
+              "observed": 0
+            },
+            {
+              "code": "SHADOW_RUN_SOURCE_NOT_APPROVED",
+              "detail": "Every included row must originate from an approved shadow run.",
+              "passed": true,
+              "expected": 1,
+              "observed": 1
+            },
+            {
+              "code": "SHADOW_RUN_DURATION_GATE_FAILED",
+              "detail": "Each source run must satisfy its governed 7-14 day field window.",
+              "passed": true,
+              "expected": 0,
+              "observed": 0
+            },
+            {
+              "code": "POINT_CATALOG_READINESS_UNPROVEN",
+              "detail": "All pinned point catalogs must preserve their source readiness claim.",
+              "passed": true,
+              "expected": 1,
+              "observed": 1
+            },
+            {
+              "code": "UNRESOLVED_CRITICAL_DATA_QUALITY",
+              "detail": "Critical incidents overlapping source runs must be resolved before training.",
+              "passed": true,
+              "expected": 0,
+              "observed": 0
+            }
+          ],
+          "blockerCodes": [
+            "PROCESS_SIGNAL_WINDOWS_MISSING",
+            "INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM",
+            "DISTINCT_BATCH_COUNT_BELOW_MINIMUM",
+            "PRODUCTION_DAY_COVERAGE_BELOW_MINIMUM",
+            "PRODUCTION_SPLIT_GROUPS_BELOW_MINIMUM",
+            "EXCLUDED_RATIO_ABOVE_MAXIMUM",
+            "START_ACCEPTED_LABEL_COUNT_BELOW_MINIMUM",
+            "START_REJECTED_LABEL_COUNT_BELOW_MINIMUM"
+          ],
+          "phaseBoundary": {
+            "modelCreated": false,
+            "assessmentOnly": true,
+            "modelRegistered": false,
+            "trainingStarted": false,
+            "onlineInferenceEnabled": false,
+            "productionActivationAllowed": false
+          },
+          "assessmentChecksum": "91d8726c265720758ed796a7dac297f6fd15b61329cef8464e2afe80f5d0ef98",
+          "assessedBy": "legacy-ticket:admin",
+          "assessmentReason": "ADP_E2E_BPI_READINESS_20260723_091500_A1 真实页面核对离线训练资格，不启动模型",
+          "assessedAt": "2026-07-23T01:21:50.938137Z"
+        }
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/39885522-9531-4177-a671-f330742ff2ce",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-materializations/5142b48a-14a2-4b59-b71a-3e87fef623df/catalog-publications",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-catalog-publications/05b377d4-f35a-4310-a8e3-3a27dc6c5f19/retention-archives",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-retention-archives/3b4adef5-8323-4378-ac49-86a507228c5b/mlflow-registrations",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-mlflow-registrations/21edf8aa-b354-41f7-8703-0c42fc2984f1/training-readiness-assessments",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/datasets?plantId=PLANT-01&limit=100",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-snapshots/39885522-9531-4177-a671-f330742ff2ce",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-materializations/5142b48a-14a2-4b59-b71a-3e87fef623df/catalog-publications",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-catalog-publications/05b377d4-f35a-4310-a8e3-3a27dc6c5f19/retention-archives",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-retention-archives/3b4adef5-8323-4378-ac49-86a507228c5b/mlflow-registrations",
+        "status": 200,
+        "payload": null
+      },
+      {
+        "method": "GET",
+        "url": "/bpi-api/dataset-mlflow-registrations/21edf8aa-b354-41f7-8703-0c42fc2984f1/training-readiness-assessments",
+        "status": 200,
+        "payload": null
+      }
+    ],
+    "mobile": {
+      "viewport": 390,
+      "body": 390,
+      "document": 390,
+      "drawerClientWidth": 389,
+      "drawerScrollWidth": 389
+    }
+  },
+  "screenshots": {
+    "desktop": "/tmp/ADP_E2E_BPI_READINESS_20260723_091500_A1-dataset-training-readiness-assess-blocked.png",
+    "mobile": "/tmp/ADP_E2E_BPI_READINESS_20260723_091500_A1-dataset-training-readiness-assess-blocked-mobile.png"
+  },
+  "databaseVerificationRequired": true,
+  "mlflowNoSideEffectVerificationRequired": true,
+  "restartVerificationRequired": true,
+  "cleanupRequired": true,
+  "error": null
+}

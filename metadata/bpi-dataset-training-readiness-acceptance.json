@@ -1,0 +1,291 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T09:41:00+08:00",
+  "repoBaseCommit": "89044926c1335f8028c624b99fd7ecb57d771f2b",
+  "runtimeRevision": "89044926c1335f8028c624b99fd7ecb57d771f2b",
+  "status": "PASS_TARGET_BROWSER_API_POSTGRES_RESTART_NO_MODEL_SIDE_EFFECT_CLEANED",
+  "database": "PostgreSQL 15.18",
+  "databaseName": "ft_mes_bpi",
+  "flywayVersion": 31,
+  "phase": "3C_B_OFFLINE_TRAINING_READINESS_ASSESSMENT",
+  "productionActivationAllowed": false,
+  "summary": {
+    "testedFeatures": 12,
+    "pass": 12,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "targetBrowserRuns": 2,
+    "targetBrowserFailures": 0,
+    "unexpectedConsoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "horizontalOverflowFailures": 0,
+    "postgresAcceptanceRuns": 1,
+    "mlflowNoSideEffectRuns": 1,
+    "restartAcceptanceRuns": 1,
+    "cleanupRuns": 1
+  },
+  "items": [
+    {
+      "operation": "deploy the exact V31 release on the sole target ADP stack",
+      "status": "PASS",
+      "evidence": "expand-only migration advanced Flyway 30 to 31 with release 89044926c133 and no schema downgrade"
+    },
+    {
+      "operation": "assess offline training readiness from the real ADP dataset page",
+      "status": "PASS",
+      "evidence": "the page POST returned 200 and persisted BLOCKED sequence 1 instead of starting training"
+    },
+    {
+      "operation": "evaluate all fail-closed readiness gates against frozen source facts",
+      "status": "PASS",
+      "evidence": "19 gates were evaluated and the eight real data-volume, signal-window, split and class-coverage blockers remained visible"
+    },
+    {
+      "operation": "replay the same idempotency key",
+      "status": "PASS",
+      "evidence": "the replay returned the same sequence-1 assessment and did not add a row"
+    },
+    {
+      "operation": "create a second immutable assessment from identical source facts",
+      "status": "PASS",
+      "evidence": "sequence 2 was appended with the same deterministic checksum and no mutation of sequence 1"
+    },
+    {
+      "operation": "verify PostgreSQL assessment, audit and idempotency facts",
+      "status": "PASS",
+      "evidence": "two BLOCKED assessments, two audit events and two COMPLETED/200 idempotency records were persisted"
+    },
+    {
+      "operation": "prove assessment rows are immutable",
+      "status": "PASS",
+      "evidence": "a direct update was rejected by trg_bpi_dataset_training_readiness_immutable"
+    },
+    {
+      "operation": "prove the assessment has no MLflow or model side effect",
+      "status": "PASS",
+      "evidence": "MLflow remained at one existing run, one dataset and one input; registered_models, model_versions and logged_models stayed zero"
+    },
+    {
+      "operation": "restart BPI service and adapter and rediscover the latest assessment",
+      "status": "PASS",
+      "evidence": "the real page rediscovered assessment f961a15f-ee22-42c6-9702-7136d9cab007 as BLOCKED sequence 2 with the same checksum"
+    },
+    {
+      "operation": "verify desktop and mobile real-page interaction",
+      "status": "PASS",
+      "evidence": "console, page and request failures were zero; the 390px viewport and drawer had no horizontal overflow"
+    },
+    {
+      "operation": "clean exact PostgreSQL, Polaris and MinIO marker resources",
+      "status": "PASS",
+      "evidence": "V26-V31 database rows, source/archive/warehouse object versions, the test table and its namespaces were all removed"
+    },
+    {
+      "operation": "restore the formal single-compose default-off runtime",
+      "status": "PASS",
+      "evidence": "optional workers, Polaris and MLflow were absent, the temporary MLflow volume was removed, core BPI services were healthy and Compose referenced only the formal file"
+    }
+  ],
+  "targetRun": {
+    "marker": "ADP_E2E_BPI_READINESS_20260723_091500_A1",
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "datasetId": "9f1d384e-ff7b-4183-a8f1-5a6ed3c901dd",
+    "snapshotId": "39885522-9531-4177-a671-f330742ff2ce",
+    "materializationId": "5142b48a-14a2-4b59-b71a-3e87fef623df",
+    "catalogPublicationId": "05b377d4-f35a-4310-a8e3-3a27dc6c5f19",
+    "retentionArchiveId": "3b4adef5-8323-4378-ac49-86a507228c5b",
+    "registrationId": "21edf8aa-b354-41f7-8703-0c42fc2984f1",
+    "mlflowRunId": "11bc3662fe474c07b2e2285b64754bc1",
+    "assessmentIds": [
+      "3b4bb80a-5a96-4fcb-81a3-0230340fb311",
+      "f961a15f-ee22-42c6-9702-7136d9cab007"
+    ],
+    "objectiveCode": "BATCH_START_BOUNDARY_REVIEW_RISK",
+    "policyVersion": "bpi-training-readiness/batch-start-boundary-v1",
+    "stateSequence": [
+      "BLOCKED",
+      "BLOCKED"
+    ],
+    "assessmentSequences": [
+      1,
+      2
+    ],
+    "assessmentChecksum": "91d8726c265720758ed796a7dac297f6fd15b61329cef8464e2afe80f5d0ef98",
+    "gateCount": 19,
+    "blockerCount": 8,
+    "blockerCodes": [
+      "PROCESS_SIGNAL_WINDOWS_MISSING",
+      "INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM",
+      "DISTINCT_BATCH_COUNT_BELOW_MINIMUM",
+      "PRODUCTION_DAY_COVERAGE_BELOW_MINIMUM",
+      "PRODUCTION_SPLIT_GROUPS_BELOW_MINIMUM",
+      "EXCLUDED_RATIO_ABOVE_MAXIMUM",
+      "START_ACCEPTED_LABEL_COUNT_BELOW_MINIMUM",
+      "START_REJECTED_LABEL_COUNT_BELOW_MINIMUM"
+    ],
+    "observed": {
+      "includedSampleCount": 1,
+      "distinctBatchCount": 1,
+      "distinctProductionDayCount": 1,
+      "productionSplitGroupCount": 1,
+      "excludedRatio": 0.666667,
+      "startAcceptedLabelCount": 1,
+      "startRejectedLabelCount": 0,
+      "signalWindowFeatureCount": 0
+    },
+    "required": {
+      "minimumIncludedSamples": 200,
+      "minimumDistinctBatches": 200,
+      "minimumProductionDays": 7,
+      "minimumProductionSplitGroups": 2,
+      "maximumExcludedRatio": 0.2,
+      "minimumStartAcceptedLabels": 100,
+      "minimumStartRejectedLabels": 10,
+      "minimumSignalWindowFeatureRefs": 2
+    },
+    "phaseBoundary": {
+      "assessmentOnly": true,
+      "trainingStarted": false,
+      "modelCreated": false,
+      "modelRegistered": false,
+      "onlineInferenceEnabled": false,
+      "productionActivationAllowed": false
+    }
+  },
+  "postgres": {
+    "table": "bpi.bpi_dataset_training_readiness_assessments",
+    "projection": "BLOCKED/BLOCKED|sequence=1,2|revision=1,1|gates=19,19|blockers=8,8|included=1,1|signalWindows=0,0",
+    "assessmentRows": 2,
+    "auditRows": 2,
+    "idempotency": {
+      "rows": 2,
+      "completed": 2,
+      "responseStatuses": [
+        200,
+        200
+      ],
+      "sameKeyReplayAddedRows": 0
+    },
+    "immutableUpdateRejected": true
+  },
+  "mlflow": {
+    "runCountBefore": 1,
+    "runCountAfter": 1,
+    "datasetCountBefore": 1,
+    "datasetCountAfter": 1,
+    "inputCountBefore": 1,
+    "inputCountAfter": 1,
+    "registeredModelCountBefore": 0,
+    "registeredModelCountAfter": 0,
+    "modelVersionCountBefore": 0,
+    "modelVersionCountAfter": 0,
+    "loggedModelCountBefore": 0,
+    "loggedModelCountAfter": 0,
+    "assessmentCreatedExternalRun": false,
+    "assessmentCreatedModel": false
+  },
+  "browser": {
+    "route": "http://10.11.100.17:18080/bpi/#/datasets",
+    "assessmentRunnerStatus": "PASS_PENDING_DATABASE_MLFLOW_RESTART_VERIFICATION_AND_CLEANUP",
+    "restartRunnerStatus": "PASS_BLOCKED_STATE_REDISCOVERED_AFTER_RESTART",
+    "combinedStatus": "PASS_TARGET_BROWSER_API_POSTGRES_RESTART_NO_MODEL_SIDE_EFFECT_CLEANED",
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "mobileWidths": "390/390/390",
+    "mobileDrawerWidths": "389/389",
+    "evidence": {
+      "blockedScreenshot": {
+        "path": "metadata/bpi-dataset-training-readiness-blocked-target.png",
+        "sha256": "4bb2c8a14e19baf1cb082f03535818f9c1cce9ff03e6a7f42f6f805d2d428093"
+      },
+      "blockedMobileScreenshot": {
+        "path": "metadata/bpi-dataset-training-readiness-blocked-mobile-target.png",
+        "sha256": "730a69536b3364b980079674662c1ebca61896ab60b58777ff51fe5665ebc0a4"
+      },
+      "restartScreenshot": {
+        "path": "metadata/bpi-dataset-training-readiness-restart-target.png",
+        "sha256": "77c52e075185a9a726f9dc9d21b7e11c9772600ae9c4f85b851b3c6a17d3a683"
+      }
+    }
+  },
+  "cleanup": {
+    "datasetDefinitionRows": 0,
+    "datasetSnapshotRows": 0,
+    "datasetSampleRows": 0,
+    "datasetMaterializationRows": 0,
+    "datasetCatalogPublicationRows": 0,
+    "datasetRetentionArchiveRows": 0,
+    "datasetMlflowRegistrationRows": 0,
+    "datasetTrainingReadinessRows": 0,
+    "auditRows": 0,
+    "idempotencyRows": 0,
+    "fixtureMarkerRows": 0,
+    "sourceObjectVersions": 0,
+    "trainingWarehouseObjectVersions": 0,
+    "archiveObjectVersions": 0,
+    "polarisTargetTableExists": false,
+    "polarisTargetNamespaceExists": false,
+    "mlflowTemporaryVolumes": 0,
+    "optionalRunningSidecars": 0,
+    "defaultOffFlagsVerified": true,
+    "formalComposeOnly": true
+  },
+  "target": {
+    "sshHost": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "composeProject": "adp-mes-newbase",
+    "runtimeDirectory": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "releaseDirectory": "/home/v6/ft-mes-bpi-release-v31-89044926",
+    "upgradeReport": "/home/v6/adp-backups/bpi-v31-89044926-20260723/bpi-integrated-upgrade-20260723T005528Z.json",
+    "upgradeReportArtifact": "metadata/bpi-integrated-upgrade-v31-target.json",
+    "upgradeReportSha256": "9016ef2d947af5cb8cae3ca2bf745e9817be553134b69c59c3bbbf82ab62fff1",
+    "flywayVersion": 31,
+    "composeConfigFiles": [
+      "/home/v6/adp-mes-docker-newbase-20260611-181921/deploy/docker/docker-compose.yml"
+    ],
+    "health": {
+      "bpiService": "healthy",
+      "bpiAdapter": "healthy",
+      "bpiWmsAdapter": "healthy",
+      "bpiWebHttpStatus": 200,
+      "optionalRunningSidecars": 0
+    },
+    "defaultOff": {
+      "BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED": false,
+      "BPI_DATASET_SOURCE_READER_ENABLED": false,
+      "BPI_DATASET_MATERIALIZER_ENABLED": false,
+      "BPI_POLARIS_ENABLED": false,
+      "BPI_POLARIS_DROP_WITH_PURGE_ENABLED": false,
+      "BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED": false,
+      "BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED": false,
+      "BPI_DATASET_CATALOG_PUBLISHER_ENABLED": false,
+      "BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED": false,
+      "BPI_DATASET_RETENTION_ARCHIVER_ENABLED": false,
+      "BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED": false,
+      "BPI_DATASET_MLFLOW_REGISTRAR_ENABLED": false
+    }
+  },
+  "boundaries": {
+    "offlineTrainingReadinessAssessed": true,
+    "offlineTrainingEligible": false,
+    "assessmentOnly": true,
+    "trainingStarted": false,
+    "modelCreated": false,
+    "modelRegistered": false,
+    "modelApproved": false,
+    "onlineInferenceEnabled": false,
+    "productionActivationAllowed": false,
+    "processSignalWindowFeaturesAvailable": false,
+    "productionVolumeAccepted": false,
+    "mlflowProductionRbacSsoAccepted": false,
+    "fullSiteDisasterRecoveryAccepted": false,
+    "productionCapacityTested": false,
+    "continuousFieldRunTested": false,
+    "externalErpWmsTested": false
+  }
+}

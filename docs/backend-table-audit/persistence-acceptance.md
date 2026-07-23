@@ -998,6 +998,25 @@ V29 恢复包；PostgreSQL、Object Lock、最小权限、隔离恢复和清理�
 `docs/testing/bpi-dataset-mlflow-registration-acceptance.md`。本项关闭的是 Dataset Input 与来源血缘登记，
 不关闭模型训练/注册/审批/推断、MLflow 生产安全/高可用、整站灾备或现场连续运行。
 
+### BPI V31 离线训练就绪评估（目标页面/API/PostgreSQL/MLflow 反证）
+
+本节使用 marker `ADP_E2E_BPI_READINESS_20260723_091500_A1`，在唯一目标栈完成 Flyway V31
+真实页面、不可变评估、幂等、重启回读、零模型副作用和精确清理。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 页面创建首个训练就绪评估 | `/bpi/#/datasets` | `POST /bpi-api/dataset-mlflow-registrations/{registrationId}/training-readiness-assessments`；latest GET | `DatasetController.assessTrainingReadiness -> DatasetTrainingReadinessService.assess -> DatasetTrainingReadinessPostgresRepository.insert` | `bpi_dataset_training_readiness_assessments`、`bpi_audit_events`、`bpi_api_idempotency` | `bpi-dataset-training-readiness-target-verification.sql` 查询 state/sequence/gates/blockers/checksum/phase | POST 200；sequence 1 为 BLOCKED/r1，19 gates、8 blockers；没有启动训练 | PASS_TARGET_FAIL_CLOSED |
+| 幂等重放与第二次不可变评估 | 同一详情 | 同一 POST；相同 key 重放，再使用新 key | idempotency fingerprint/replay；service next sequence | 同上 | 查询 assessment 2 行、序号 1/2、checksum distinct=1、idempotency 2 行 | 相同 key 返回同 assessment 且不新增；新 key 追加 sequence 2，同冻结事实得到同 checksum | PASS_TARGET_IDEMPOTENT |
+| 不可变约束 | 不适用 | PostgreSQL direct UPDATE 反证 | `trg_bpi_dataset_training_readiness_immutable` | readiness assessment | 尝试修改 assessment reason，并要求事务捕获 immutable exception | UPDATE 被明确拒绝；旧评估保持 r1，不存在覆盖写 | PASS_TARGET_IMMUTABLE |
+| MLflow/model 副作用反证 | 同一 BLOCKED 页面 | MLflow/PostgreSQL readback | readiness service 只读 registration/source facts | MLflow runs/datasets/inputs/registered_models/model_versions/logged_models | 比较评估前后六类计数 | 1 run/1 dataset/1 input 保持不变；三类模型表均为 0；phase 五个模型标志 false | PASS_TARGET_NO_MODEL_SIDE_EFFECT |
+| service/adapter 重启回读 | `/bpi/#/datasets` 桌面/移动 | latest assessment GET | repository reload | 只读 | 比较重启前后 assessment ID/sequence/checksum/blockers | 同 assessment 2、sequence 2、checksum 和 8 blockers 可重新发现；浏览器错误 0 | PASS_TARGET_RESTART |
+| marker、对象、临时卷与运行时清理 | 不适用 | V31-aware cleanup SQL；Polaris/MinIO exact purge；Docker verification | `bpi-dataset-manifest-target-cleanup.sql` 与受控 recovery/admin identity | V26-V31 lineage、audit/idempotency、Polaris/MLflow PostgreSQL | 要求所有 marker projection、source/archive/warehouse versions、target table/namespace、临时卷和 optional sidecars 为 0 | 全部为 0；Flyway 31、主 BPI 三服务 healthy、`/bpi/` 200、正式单 compose 文件 | PASS_TARGET_CLEANED |
+
+机器证据：`metadata/bpi-dataset-training-readiness-acceptance.json`；表级报告：
+`docs/backend-table-audit/bpi-dataset-training-readiness.md`；完整页面和运行证据：
+`docs/testing/bpi-dataset-training-readiness-acceptance.md`。本项证明评估机制真实可用；当前数据仍被 8 个
+门槛阻断，因此不关闭模型训练、注册、推断或生产激活。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

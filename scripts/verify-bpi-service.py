@@ -52,6 +52,11 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V24__bpi_batch_force_close_workflow.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V25__bpi_wms_inbound_reversal_workflow.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V26__bpi_dataset_manifest_workbench.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V27__bpi_dataset_parquet_materialization.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V28__bpi_dataset_iceberg_catalog_publication.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V29__bpi_dataset_object_lock_recovery_archive.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V30__bpi_dataset_mlflow_registration.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V31__bpi_dataset_training_readiness.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -123,10 +128,14 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetService.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilder.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestProcessor.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetTrainingReadinessBuilder.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetTrainingReadinessService.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataset/DatasetManifestDispatcher.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataset/DatasetManifestProperties.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetTrainingReadinessPostgresRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetController.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetTrainingReadinessCommand.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/WmsInboundReversalTaskView.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/WmsInboundReversalPostgresRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/WmsInboundReversalCommand.java",
@@ -137,6 +146,7 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfigurationTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilderTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDatasetManifestPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/DatasetTrainingReadinessBuilderTest.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
     "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluatorTest.java",
     "contracts/bpi-api/service-phase1-profile.json",
@@ -193,11 +203,23 @@ REQUIRED_FILES = [
     "metadata/bpi-dataset-mlflow-failed-target.png",
     "metadata/bpi-dataset-mlflow-registered-target.png",
     "metadata/bpi-dataset-mlflow-registered-mobile-target.png",
+    "docs/plans/2026-07-23-bpi-phase3cb-training-readiness-design.md",
+    "docs/testing/bpi-dataset-training-readiness-acceptance.md",
+    "docs/backend-table-audit/bpi-dataset-training-readiness.md",
+    "metadata/bpi-dataset-training-readiness-acceptance.json",
+    "metadata/bpi-dataset-training-readiness-assess-target.json",
+    "metadata/bpi-dataset-training-readiness-restart-target.json",
+    "metadata/bpi-integrated-upgrade-v31-target.json",
+    "metadata/bpi-dataset-training-readiness-blocked-target.png",
+    "metadata/bpi-dataset-training-readiness-blocked-mobile-target.png",
+    "metadata/bpi-dataset-training-readiness-restart-target.png",
     "deploy/docker/scripts/adp-bpi-dataset-manifest-target-acceptance.js",
     "deploy/docker/scripts/adp-bpi-dataset-materialization-target-acceptance.js",
+    "deploy/docker/scripts/adp-bpi-dataset-training-readiness-target-acceptance.js",
     "deploy/docker/scripts/bpi-dataset-manifest-target-fixture.sql",
     "deploy/docker/scripts/bpi-dataset-manifest-target-verification.sql",
     "deploy/docker/scripts/bpi-dataset-materialization-target-verification.sql",
+    "deploy/docker/scripts/bpi-dataset-training-readiness-target-verification.sql",
     "deploy/docker/scripts/bpi-dataset-manifest-target-cleanup.sql",
     "docs/testing/bpi-formal-identity-wms-reversal-acceptance.md",
     "metadata/bpi-formal-identity-wms-reversal-acceptance.json",
@@ -2197,6 +2219,321 @@ def main() -> int:
             or mlflow_upgrade.get("database", {}).get("migrationMode")
                 != "VALIDATE_EXISTING_SCHEMA"):
         fail("BPI V30 controlled redeploy evidence is incomplete", failures)
+
+    readiness_acceptance = json.loads(
+        (ROOT / "metadata/bpi-dataset-training-readiness-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    readiness_commit = "89044926c1335f8028c624b99fd7ecb57d771f2b"
+    if (readiness_acceptance.get("schemaVersion") != 1
+            or readiness_acceptance.get("status")
+                != "PASS_TARGET_BROWSER_API_POSTGRES_RESTART_NO_MODEL_SIDE_EFFECT_CLEANED"
+            or readiness_acceptance.get("database") != "PostgreSQL 15.18"
+            or readiness_acceptance.get("databaseName") != "ft_mes_bpi"
+            or readiness_acceptance.get("flywayVersion") != 31
+            or readiness_acceptance.get("phase")
+                != "3C_B_OFFLINE_TRAINING_READINESS_ASSESSMENT"
+            or readiness_acceptance.get("repoBaseCommit") != readiness_commit
+            or readiness_acceptance.get("runtimeRevision") != readiness_commit
+            or readiness_acceptance.get("productionActivationAllowed") is not False):
+        fail("BPI training-readiness target identity is incomplete", failures)
+    expected_readiness_summary = {
+        "testedFeatures": 12,
+        "pass": 12,
+        "fail": 0,
+        "blocked": 0,
+        "notApplicable": 0,
+        "targetBrowserRuns": 2,
+        "targetBrowserFailures": 0,
+        "unexpectedConsoleErrors": 0,
+        "pageErrors": 0,
+        "requestFailures": 0,
+        "horizontalOverflowFailures": 0,
+        "postgresAcceptanceRuns": 1,
+        "mlflowNoSideEffectRuns": 1,
+        "restartAcceptanceRuns": 1,
+        "cleanupRuns": 1,
+    }
+    if readiness_acceptance.get("summary") != expected_readiness_summary:
+        fail("BPI training-readiness summary is incomplete", failures)
+    readiness_items = readiness_acceptance.get("items", [])
+    if (len(readiness_items) != 12
+            or sum(item.get("status") == "PASS" for item in readiness_items) != 12):
+        fail("BPI training-readiness item statuses are incomplete", failures)
+
+    readiness_run = readiness_acceptance.get("targetRun", {})
+    expected_readiness_blockers = [
+        "PROCESS_SIGNAL_WINDOWS_MISSING",
+        "INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM",
+        "DISTINCT_BATCH_COUNT_BELOW_MINIMUM",
+        "PRODUCTION_DAY_COVERAGE_BELOW_MINIMUM",
+        "PRODUCTION_SPLIT_GROUPS_BELOW_MINIMUM",
+        "EXCLUDED_RATIO_ABOVE_MAXIMUM",
+        "START_ACCEPTED_LABEL_COUNT_BELOW_MINIMUM",
+        "START_REJECTED_LABEL_COUNT_BELOW_MINIMUM",
+    ]
+    expected_readiness_observed = {
+        "includedSampleCount": 1,
+        "distinctBatchCount": 1,
+        "distinctProductionDayCount": 1,
+        "productionSplitGroupCount": 1,
+        "excludedRatio": 0.666667,
+        "startAcceptedLabelCount": 1,
+        "startRejectedLabelCount": 0,
+        "signalWindowFeatureCount": 0,
+    }
+    expected_readiness_required = {
+        "minimumIncludedSamples": 200,
+        "minimumDistinctBatches": 200,
+        "minimumProductionDays": 7,
+        "minimumProductionSplitGroups": 2,
+        "maximumExcludedRatio": 0.2,
+        "minimumStartAcceptedLabels": 100,
+        "minimumStartRejectedLabels": 10,
+        "minimumSignalWindowFeatureRefs": 2,
+    }
+    expected_readiness_phase_boundary = {
+        "assessmentOnly": True,
+        "trainingStarted": False,
+        "modelCreated": False,
+        "modelRegistered": False,
+        "onlineInferenceEnabled": False,
+        "productionActivationAllowed": False,
+    }
+    if (readiness_run.get("marker")
+            != "ADP_E2E_BPI_READINESS_20260723_091500_A1"
+            or readiness_run.get("tenantId") != "1000"
+            or readiness_run.get("plantId") != "PLANT-01"
+            or readiness_run.get("lineId") != "LINE-S07-01"
+            or readiness_run.get("datasetId")
+                != "9f1d384e-ff7b-4183-a8f1-5a6ed3c901dd"
+            or readiness_run.get("snapshotId")
+                != "39885522-9531-4177-a671-f330742ff2ce"
+            or readiness_run.get("materializationId")
+                != "5142b48a-14a2-4b59-b71a-3e87fef623df"
+            or readiness_run.get("catalogPublicationId")
+                != "05b377d4-f35a-4310-a8e3-3a27dc6c5f19"
+            or readiness_run.get("retentionArchiveId")
+                != "3b4adef5-8323-4378-ac49-86a507228c5b"
+            or readiness_run.get("registrationId")
+                != "21edf8aa-b354-41f7-8703-0c42fc2984f1"
+            or readiness_run.get("mlflowRunId")
+                != "11bc3662fe474c07b2e2285b64754bc1"
+            or readiness_run.get("assessmentIds") != [
+                "3b4bb80a-5a96-4fcb-81a3-0230340fb311",
+                "f961a15f-ee22-42c6-9702-7136d9cab007",
+            ]
+            or readiness_run.get("objectiveCode")
+                != "BATCH_START_BOUNDARY_REVIEW_RISK"
+            or readiness_run.get("policyVersion")
+                != "bpi-training-readiness/batch-start-boundary-v1"
+            or readiness_run.get("stateSequence") != ["BLOCKED", "BLOCKED"]
+            or readiness_run.get("assessmentSequences") != [1, 2]
+            or readiness_run.get("assessmentChecksum")
+                != "91d8726c265720758ed796a7dac297f6fd15b61329cef8464e2afe80f5d0ef98"
+            or readiness_run.get("gateCount") != 19
+            or readiness_run.get("blockerCount") != 8
+            or readiness_run.get("blockerCodes") != expected_readiness_blockers
+            or readiness_run.get("observed") != expected_readiness_observed
+            or readiness_run.get("required") != expected_readiness_required
+            or readiness_run.get("phaseBoundary")
+                != expected_readiness_phase_boundary):
+        fail("BPI training-readiness immutable gate evidence is incomplete", failures)
+
+    if readiness_acceptance.get("postgres") != {
+            "table": "bpi.bpi_dataset_training_readiness_assessments",
+            "projection": (
+                "BLOCKED/BLOCKED|sequence=1,2|revision=1,1|gates=19,19|"
+                "blockers=8,8|included=1,1|signalWindows=0,0"
+            ),
+            "assessmentRows": 2,
+            "auditRows": 2,
+            "idempotency": {
+                "rows": 2,
+                "completed": 2,
+                "responseStatuses": [200, 200],
+                "sameKeyReplayAddedRows": 0,
+            },
+            "immutableUpdateRejected": True,
+        }:
+        fail("BPI training-readiness PostgreSQL evidence is incomplete", failures)
+    if readiness_acceptance.get("mlflow") != {
+            "runCountBefore": 1,
+            "runCountAfter": 1,
+            "datasetCountBefore": 1,
+            "datasetCountAfter": 1,
+            "inputCountBefore": 1,
+            "inputCountAfter": 1,
+            "registeredModelCountBefore": 0,
+            "registeredModelCountAfter": 0,
+            "modelVersionCountBefore": 0,
+            "modelVersionCountAfter": 0,
+            "loggedModelCountBefore": 0,
+            "loggedModelCountAfter": 0,
+            "assessmentCreatedExternalRun": False,
+            "assessmentCreatedModel": False,
+        }:
+        fail("BPI training-readiness MLflow no-side-effect evidence is incomplete", failures)
+
+    readiness_browser = readiness_acceptance.get("browser", {})
+    if (readiness_browser.get("route")
+            != "http://10.11.100.17:18080/bpi/#/datasets"
+            or readiness_browser.get("assessmentRunnerStatus")
+                != "PASS_PENDING_DATABASE_MLFLOW_RESTART_VERIFICATION_AND_CLEANUP"
+            or readiness_browser.get("restartRunnerStatus")
+                != "PASS_BLOCKED_STATE_REDISCOVERED_AFTER_RESTART"
+            or readiness_browser.get("combinedStatus")
+                != "PASS_TARGET_BROWSER_API_POSTGRES_RESTART_NO_MODEL_SIDE_EFFECT_CLEANED"
+            or any(readiness_browser.get(key) for key in (
+                "consoleErrors", "pageErrors", "requestFailures"))
+            or readiness_browser.get("mobileWidths") != "390/390/390"
+            or readiness_browser.get("mobileDrawerWidths") != "389/389"):
+        fail("BPI training-readiness browser evidence is incomplete", failures)
+    expected_readiness_screenshots = {
+        "blockedScreenshot": {
+            "path": "metadata/bpi-dataset-training-readiness-blocked-target.png",
+            "sha256": "4bb2c8a14e19baf1cb082f03535818f9c1cce9ff03e6a7f42f6f805d2d428093",
+        },
+        "blockedMobileScreenshot": {
+            "path": "metadata/bpi-dataset-training-readiness-blocked-mobile-target.png",
+            "sha256": "730a69536b3364b980079674662c1ebca61896ab60b58777ff51fe5665ebc0a4",
+        },
+        "restartScreenshot": {
+            "path": "metadata/bpi-dataset-training-readiness-restart-target.png",
+            "sha256": "77c52e075185a9a726f9dc9d21b7e11c9772600ae9c4f85b851b3c6a17d3a683",
+        },
+    }
+    if readiness_browser.get("evidence") != expected_readiness_screenshots:
+        fail("BPI training-readiness screenshot manifest is incomplete", failures)
+    for screenshot in expected_readiness_screenshots.values():
+        screenshot_path = ROOT / screenshot.get("path", "")
+        if not screenshot_path.is_file():
+            fail(
+                f"BPI training-readiness screenshot is missing: "
+                f"{screenshot.get('path', '')}",
+                failures,
+            )
+        elif hashlib.sha256(screenshot_path.read_bytes()).hexdigest() != screenshot.get(
+                "sha256"):
+            fail(
+                f"BPI training-readiness screenshot hash does not match: "
+                f"{screenshot.get('path', '')}",
+                failures,
+            )
+
+    expected_readiness_cleanup = {
+        "datasetDefinitionRows": 0,
+        "datasetSnapshotRows": 0,
+        "datasetSampleRows": 0,
+        "datasetMaterializationRows": 0,
+        "datasetCatalogPublicationRows": 0,
+        "datasetRetentionArchiveRows": 0,
+        "datasetMlflowRegistrationRows": 0,
+        "datasetTrainingReadinessRows": 0,
+        "auditRows": 0,
+        "idempotencyRows": 0,
+        "fixtureMarkerRows": 0,
+        "sourceObjectVersions": 0,
+        "trainingWarehouseObjectVersions": 0,
+        "archiveObjectVersions": 0,
+        "polarisTargetTableExists": False,
+        "polarisTargetNamespaceExists": False,
+        "mlflowTemporaryVolumes": 0,
+        "optionalRunningSidecars": 0,
+        "defaultOffFlagsVerified": True,
+        "formalComposeOnly": True,
+    }
+    if readiness_acceptance.get("cleanup") != expected_readiness_cleanup:
+        fail("BPI training-readiness cleanup evidence is incomplete", failures)
+    expected_readiness_boundaries = {
+        "offlineTrainingReadinessAssessed": True,
+        "offlineTrainingEligible": False,
+        "assessmentOnly": True,
+        "trainingStarted": False,
+        "modelCreated": False,
+        "modelRegistered": False,
+        "modelApproved": False,
+        "onlineInferenceEnabled": False,
+        "productionActivationAllowed": False,
+        "processSignalWindowFeaturesAvailable": False,
+        "productionVolumeAccepted": False,
+        "mlflowProductionRbacSsoAccepted": False,
+        "fullSiteDisasterRecoveryAccepted": False,
+        "productionCapacityTested": False,
+        "continuousFieldRunTested": False,
+        "externalErpWmsTested": False,
+    }
+    if readiness_acceptance.get("boundaries") != expected_readiness_boundaries:
+        fail("BPI training-readiness acceptance overclaims a phase boundary", failures)
+
+    readiness_target = readiness_acceptance.get("target", {})
+    expected_readiness_default_off = {
+        "BPI_DATASET_BUCKET_BOOTSTRAP_ENABLED": False,
+        "BPI_DATASET_SOURCE_READER_ENABLED": False,
+        "BPI_DATASET_MATERIALIZER_ENABLED": False,
+        "BPI_POLARIS_ENABLED": False,
+        "BPI_POLARIS_DROP_WITH_PURGE_ENABLED": False,
+        "BPI_POLARIS_CATALOG_BOOTSTRAP_ENABLED": False,
+        "BPI_ICEBERG_WAREHOUSE_BOOTSTRAP_ENABLED": False,
+        "BPI_DATASET_CATALOG_PUBLISHER_ENABLED": False,
+        "BPI_DATASET_RECOVERY_BUCKET_BOOTSTRAP_ENABLED": False,
+        "BPI_DATASET_RETENTION_ARCHIVER_ENABLED": False,
+        "BPI_MLFLOW_ARTIFACT_BOOTSTRAP_ENABLED": False,
+        "BPI_DATASET_MLFLOW_REGISTRAR_ENABLED": False,
+    }
+    if (readiness_target.get("sshHost") != "10.11.100.17"
+            or readiness_target.get("adpBaseUrl")
+                != "http://10.11.100.17:18080"
+            or readiness_target.get("composeProject") != "adp-mes-newbase"
+            or readiness_target.get("runtimeDirectory")
+                != "/home/v6/adp-mes-docker-newbase-20260611-181921"
+            or readiness_target.get("releaseDirectory")
+                != "/home/v6/ft-mes-bpi-release-v31-89044926"
+            or readiness_target.get("flywayVersion") != 31
+            or readiness_target.get("composeConfigFiles") != [
+                "/home/v6/adp-mes-docker-newbase-20260611-181921/"
+                "deploy/docker/docker-compose.yml"
+            ]
+            or readiness_target.get("health") != {
+                "bpiService": "healthy",
+                "bpiAdapter": "healthy",
+                "bpiWmsAdapter": "healthy",
+                "bpiWebHttpStatus": 200,
+                "optionalRunningSidecars": 0,
+            }
+            or readiness_target.get("defaultOff") != expected_readiness_default_off):
+        fail("BPI training-readiness target runtime was not restored", failures)
+
+    readiness_upgrade_path = ROOT / readiness_target.get(
+        "upgradeReportArtifact", ""
+    )
+    if not readiness_upgrade_path.is_file():
+        fail("BPI V31 controlled upgrade artifact is missing", failures)
+    else:
+        readiness_upgrade_bytes = readiness_upgrade_path.read_bytes()
+        if hashlib.sha256(readiness_upgrade_bytes).hexdigest() != readiness_target.get(
+                "upgradeReportSha256"):
+            fail("BPI V31 controlled upgrade artifact hash does not match", failures)
+        readiness_upgrade = json.loads(readiness_upgrade_bytes)
+        if (readiness_upgrade.get("status") != "PASS"
+                or readiness_upgrade.get("phase") != "COMPLETE"
+                or readiness_upgrade.get("releaseCommit") != readiness_commit
+                or readiness_upgrade.get("database", {}).get("engine")
+                    != "PostgreSQL"
+                or readiness_upgrade.get("database", {}).get("beforeFlywayVersion")
+                    != 30
+                or readiness_upgrade.get("database", {}).get("afterFlywayVersion")
+                    != 31
+                or readiness_upgrade.get("database", {}).get("expectedFlywayVersion")
+                    != 31
+                or readiness_upgrade.get("database", {}).get("migrationMode")
+                    != "APPLY_EXPANSION"
+                or readiness_upgrade.get("database", {}).get("migrationApplied")
+                    is not True
+                or readiness_upgrade.get("database", {}).get("schemaDowngradeAllowed")
+                    is not False):
+            fail("BPI V31 controlled upgrade evidence is incomplete", failures)
 
     formal_reversal = json.loads(
         (ROOT / "metadata/bpi-formal-identity-wms-reversal-acceptance.json").read_text(

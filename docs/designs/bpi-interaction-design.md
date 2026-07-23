@@ -367,8 +367,11 @@ Phase 3C-A 的 Java/PostgreSQL 状态机和 Registrar 组件已实现且默认�
 `ADP_E2E_BPI_MLFLOW_20260723_022000_A1` 已闭合真实 MLflow/MinIO/PostgreSQL 联合链路、ADP 页面故障重试、
 registrar 重启、桌面/移动和精确清理。该证据仍只到 Dataset Input，不允许把 run 存在推导为模型可用。
 
-Phase 3C-B 的 Java/PostgreSQL、Java 8 路由、OpenAPI、模拟器和页面本地链已实现。目标环境验收必须再证明
-真实页面命令、PostgreSQL V31 落表、幂等、重启回读及 MLflow 模型表零变化；未完成前只记为本地通过。
+Phase 3C-B 的 Java/PostgreSQL、Java 8 路由、OpenAPI、模拟器和页面链已完成目标验收。marker
+`ADP_E2E_BPI_READINESS_20260723_091500_A1` 已证明真实页面命令、PostgreSQL V31 两次不可变评估、
+幂等重放、相同冻结事实 checksum、重启回读、MLflow 模型表零变化、桌面/移动布局和精确清理。当前结果
+真实为 19 gates / 8 blockers / `BLOCKED`；下一阶段应补过程信号窗口和真实样本，而不是把目标验收通过
+解释为训练资格通过。
 
 **主要 API：** `listDatasets`、`createDatasetDefinition`、`createDatasetSnapshot`、`getDatasetSnapshot`、
 `requestDatasetMaterialization`、`getDatasetMaterialization`、`retryDatasetMaterialization`、

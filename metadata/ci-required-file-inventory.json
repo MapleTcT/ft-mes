@@ -3591,6 +3591,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-dataset-training-readiness-target-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-flink-data-quality-browser-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4132,6 +4138,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/bpi-dataset-mlflow-target-verification.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-dataset-training-readiness-target-verification.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -5301,6 +5313,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-dataset-training-readiness.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-iot-replay-runtime-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5529,6 +5547,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/plans/2026-07-23-bpi-phase3cb-training-readiness-design.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/postgres-migration-index.md",
       "state": "tracked",
       "tracked": true
@@ -5746,6 +5770,12 @@
     {
       "ignored": false,
       "path": "docs/testing/bpi-dataset-retention-archive-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/bpi-dataset-training-readiness-acceptance.md",
       "state": "tracked",
       "tracked": true
     },
@@ -6345,6 +6375,42 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-dataset-training-readiness-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-training-readiness-assess-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-training-readiness-blocked-mobile-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-training-readiness-blocked-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-training-readiness-restart-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-training-readiness-restart-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-external-wms-protocol-contract-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -6496,6 +6562,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-integrated-upgrade-v30-redeploy-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-integrated-upgrade-v31-target.json",
       "state": "tracked",
       "tracked": true
     },
@@ -8439,6 +8511,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetTrainingReadinessBuilder.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetTrainingReadinessService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/FeatureFlagService.java",
       "state": "tracked",
       "tracked": true
@@ -8746,6 +8830,24 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetSnapshotView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetTrainingReadinessBuild.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetTrainingReadinessEvidence.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/DatasetTrainingReadinessView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -9303,6 +9405,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetTrainingReadinessPostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/FeatureFlagPostgresRepository.java",
       "state": "tracked",
       "tracked": true
@@ -9472,6 +9580,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetSnapshotCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetTrainingReadinessCommand.java",
       "state": "tracked",
       "tracked": true
     },
@@ -9795,6 +9909,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V31__bpi_dataset_training_readiness.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V3__bpi_telemetry_ingress.sql",
       "state": "tracked",
       "tracked": true
@@ -10000,6 +10120,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilderTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/DatasetTrainingReadinessBuilderTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -10988,16 +11114,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 654
+      "tracked": 656
     },
     "docs": {
-      "tracked": 132
+      "tracked": 135
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 237
+      "tracked": 244
     },
     "package.json": {
       "tracked": 1
@@ -11009,7 +11135,7 @@
       "tracked": 57
     },
     "services": {
-      "tracked": 414
+      "tracked": 423
     },
     "simulation": {
       "tracked": 4
@@ -11021,8 +11147,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1827,
-    "tracked": 1827,
+    "totalFiles": 1848,
+    "tracked": 1848,
     "untracked": 0
   },
   "untrackedByDirectory": []

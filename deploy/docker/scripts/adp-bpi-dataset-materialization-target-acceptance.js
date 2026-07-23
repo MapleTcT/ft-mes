@@ -211,6 +211,7 @@ async function assertMaterializationDeliveryChain(page) {
   assert(JSON.stringify(deliveryStates)
     === JSON.stringify([
       "MANIFEST_READY", "READY", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED", "NOT_STARTED",
+      "NOT_STARTED",
     ]),
   `target page claims unsupported downstream delivery: ${JSON.stringify(deliveryStates)}`);
 }

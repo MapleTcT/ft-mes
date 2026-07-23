@@ -31,7 +31,7 @@
 | `bpi-dataset-manifest.md` | 已恢复并验收 | Flyway V26-V28 数据集定义、快照、样本、Parquet、Iceberg、审计和幂等链已由真实 ADP 页面/API/PostgreSQL/MinIO/Polaris marker 闭合；V28 post-commit fencing 已恢复到同一 snapshot |
 | `bpi-dataset-retention-archive.md` | 已恢复并验收 | Flyway V29 Object Lock 恢复包已完成真实页面失败/重试、PostgreSQL r1-r7、精确对象版本、最小权限、隔离 Polaris 恢复/物理清除和零残留退场；不替代整站灾备 |
 | `bpi-dataset-mlflow-registration.md` | 已恢复并验收 | Flyway V30 MLflow Dataset Input 已完成真实页面失败/重试、PostgreSQL r1-r6、精确 source、1 run/1 input、重启不重复、最小权限和零残留退场；不声明模型训练或投产 |
-| `bpi-dataset-training-readiness.md` | 本地已实现，目标待验收 | Flyway V31 对 REGISTERED Dataset Input 生成不可变离线训练就绪评估；19 门槛失败关闭，模型训练/注册/推理/激活均保持 false |
+| `bpi-dataset-training-readiness.md` | 已恢复并验收 | Flyway V31 已完成真实 ADP 页面、PostgreSQL 两次不可变评估、幂等、重启回读、MLflow 模型表零变化和精确清理；19 门槛真实返回 8 个 blocker，训练/注册/推理/激活均保持 false |
 | [`../testing/bpi-rule-retirement-acceptance.md`](../testing/bpi-rule-retirement-acceptance.md) | V15 受控影子验收 PASS | 规则退役、typed inactive、savepoint 有状态升级、回滚草稿、延迟候选落库和 11 类 marker 清理；不声明现场 READY 或生产写回 |
 | `bpi-iot-replay-runtime-acceptance.md` | 已恢复并验收 | IoT 信号经边界引擎、Protobuf、候选确认到 PostgreSQL 的跨模块闭环 |
 | `persistence-acceptance.md` | 模板已建立 | 真实前端动作到 PostgreSQL 落库证明 |
