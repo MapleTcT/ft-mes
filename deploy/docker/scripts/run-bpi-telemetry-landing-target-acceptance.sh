@@ -133,6 +133,44 @@ for command_name in docker node python3 sha256sum; do
     }
 done
 
+PLAYWRIGHT_NODE_PATH=${NODE_PATH:-$RELEASE_ROOT/frontend/apps/bpi/node_modules}
+test -f "$PLAYWRIGHT_NODE_PATH/playwright/package.json" || {
+    printf 'ERROR: Playwright is missing under NODE_PATH: %s\n' \
+        "$PLAYWRIGHT_NODE_PATH" >&2
+    exit 1
+}
+if [ -n "${BPI_CHROMIUM_EXECUTABLE:-}" ]; then
+    CHROMIUM_PREFLIGHT_PATH=$BPI_CHROMIUM_EXECUTABLE
+else
+    CHROMIUM_PREFLIGHT_PATH=$(
+        NODE_PATH="$PLAYWRIGHT_NODE_PATH" node -e \
+            "process.stdout.write(require('playwright').chromium.executablePath())"
+    )
+fi
+test -x "$CHROMIUM_PREFLIGHT_PATH" || {
+    printf '%s\n' \
+        "ERROR: Chromium is not executable at $CHROMIUM_PREFLIGHT_PATH" \
+        'Set BPI_CHROMIUM_EXECUTABLE to a verified compatible browser before the acceptance mutates IoT runtime configuration.' \
+        >&2
+    exit 1
+}
+NODE_PATH="$PLAYWRIGHT_NODE_PATH" \
+BPI_CHROMIUM_EXECUTABLE="$CHROMIUM_PREFLIGHT_PATH" \
+node - <<'NODE'
+const { chromium } = require("playwright");
+
+(async () => {
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath: process.env.BPI_CHROMIUM_EXECUTABLE,
+  });
+  await browser.close();
+})().catch((error) => {
+  console.error(`ERROR: Chromium preflight failed: ${error.message}`);
+  process.exit(1);
+});
+NODE
+
 if [ -z "$EVIDENCE_DIR" ]; then
     EVIDENCE_DIR="$RUNTIME_ROOT/backups/bpi-telemetry-landing-$MARKER"
 fi
@@ -572,7 +610,7 @@ export BPI_DESKTOP_SCREENSHOT="$EVIDENCE_DIR/telemetry-landing-desktop.png"
 export BPI_MOBILE_SCREENSHOT="$EVIDENCE_DIR/telemetry-landing-mobile.png"
 export BPI_LIVE_OVERVIEW_SCREENSHOT="$EVIDENCE_DIR/live-operations-overview.png"
 export BPI_LIVE_DRAWER_SCREENSHOT="$EVIDENCE_DIR/live-operations-drawer.png"
-export NODE_PATH=${NODE_PATH:-$RELEASE_ROOT/frontend/apps/bpi/node_modules}
+export NODE_PATH=$PLAYWRIGHT_NODE_PATH
 node "$BROWSER_SCRIPT"
 
 postgres \

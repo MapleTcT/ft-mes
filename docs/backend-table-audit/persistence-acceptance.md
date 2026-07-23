@@ -1074,6 +1074,24 @@ JetLinks、六分区 Kafka 和精确 scope BPI consumer 事务落表，再由真
 `docs/testing/bpi-iot-telemetry-landing-acceptance.md`。本项不关闭物理设备、正式计量、连续
 7-14 天、200 个复核批次、生产容量、模型训练或生产激活。
 
+### BPI Phase 3C-F 实时运行事实投影（目标页面/API/PostgreSQL）
+
+本节使用 marker `ADP_E2E_20260723_BPI_LIVE_V35_07`。Flyway V35 新增
+`bpi.bpi_telemetry_point_latest`，原始事件/点位与 latest 在同一事务内写入。真实 ADP 页面从
+影子验收同页切换到 overview，并打开点位事实抽屉；接口成功后直接查 PostgreSQL 验证。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 窗口遥测与 latest 同事务落表 | 受控 MQTT；`/bpi/#/shadowRuns` 运行窗口 | MQTT -> Kafka；shadow run GET | `TelemetryKafkaListener -> TelemetryKafkaRecordProcessor -> TelemetryIngestionService -> TelemetryPostgresRepository` | `bpi_telemetry_events`、`bpi_telemetry_points`、`bpi_telemetry_point_latest` | `bpi-telemetry-landing-acceptance-verification.sql` 要求 2 events/2 points/1 latest、0 rejects、sequence 4/5 | `12.5/12.5`、`GOOD/GOOD`、`IN_ORDER/IN_ORDER`；latest 为 `12.5 m3/h`，精确校准匹配 | PASS_TARGET_POSTGRES |
+| 实时生产态势读取 | `/bpi/#/overview` | `GET /bpi-api/overview?plantId=PLANT-01&onlyAbnormal=false` | Java 8 adapter -> `OverviewController.overview -> OverviewService.overview -> OverviewPostgresRepository.findOverview` | latest + topology/batch/candidate/data-quality 只读联查 | 对比 API 物理点位、值、单位、质量、序列、采样时间与 latest 行 | HTTP 200；页面和 API 均显示真实 `12.5 m3/h`、`GOOD/IN_ORDER`；7 个历史事件使 `BAD/BLOCKED` | PASS_TARGET_LIVE |
+| 最近点位事实与服务端判据 | overview 产线行 | `GET /bpi-api/lines/LINE-S07-01/live-evidence?...` | adapter -> `OverviewController.liveEvidence -> OverviewService.liveEvidence -> OverviewPostgresRepository` | latest、最近 telemetry points、data-quality incidents | 要求 5 samples、拓扑/时效/覆盖/GOOD/序列/无 CRITICAL 六项 PASS | HTTP 200；5 samples、6 PASS、生产上下文 1 WARN、7 incidents；抽屉真实渲染 | PASS_TARGET_LIVE_EVIDENCE |
+| marker 清理与恢复 | 页面取消后 | cancel；cleanup SQL；Docker readback | `ShadowRunController.cancel`；runner finally | telemetry/latest/run/rule/topology/catalog/calibration | cleanup 要求 7 类 remaining=0；容器环境要求来源序列 `10m`、目录 `5m` | 全部为 0；IoT、service、adapter、PostgreSQL healthy；模型/WMS 副作用为 0/false | PASS_TARGET_CLEANED |
+
+机器证据：`metadata/bpi-live-operations-evidence-acceptance.json`；表级报告：
+`docs/backend-table-audit/bpi-live-telemetry-projection.md`；完整页面、API、PostgreSQL、截图、失败诊断、
+精确恢复和边界见 `docs/testing/bpi-live-operations-evidence-acceptance.md`。本项关闭 Phase 3C-F
+受控实时事实投影，不关闭物理来源、正式校准、多产线容量、7-14 天现场运行或训练资格。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

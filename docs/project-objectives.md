@@ -485,6 +485,19 @@ marker 和作用域清理为 0，Adapter 镜像/基线 scope 精确恢复，六�
 ADP 双会话审批退出 G-021 缺口；现场物理来源、正式校准、连续 7-14 天和外部 ERP/WMS 仍未完成。
 证据见 [BPI 正式身份双管理员强制结束验收](testing/bpi-formal-identity-force-close-acceptance.md)。
 
+2026-07-23 Phase 3C-F 又把“实时生产态势仍显示前端示意数据”退出软件缺口。BPI service
+`67b728dabedbf350499accabd85929952733086e` 通过 Flyway V35 增加一点一行的
+`bpi_telemetry_point_latest`，与原始 event/point 同事务更新；adapter `316e04d9` 精确放行
+`live-evidence`，前端 `8622196d` 修复同页 hash 路由，IoT `21618eae` 将目录与来源序列证据调度
+解耦。marker `ADP_E2E_20260723_BPI_LIVE_V35_07` 经受控 MQTT -> JetLinks -> Kafka ->
+PostgreSQL -> 真实 `/bpi/#/overview`：窗口 2 events/2 GOOD points/0 rejects，latest 1 行；
+页面显示 `12.5 m3/h`，抽屉读取 5 条最近遥测和服务端判据；36 个响应全为 2xx，浏览器错误 0。
+取证后 rules/catalogs/shadowRuns/topologies/calibrations/telemetryEvents/telemetryLatest 全为 0，
+IoT 周期恢复为 `10m/5m`。测试线已有 7 个历史未解决事件且无活动生产指令，页面因此诚实保留
+`BAD/BLOCKED` 和生产上下文 WARN。该结果关闭受控实时事实投影，不代表物理设备、正式校准、
+多产线容量、7-14 天现场运行或训练资格；G-021 继续保持 `PARTIAL`。证据见
+[BPI 实时生产态势目标验收](testing/bpi-live-operations-evidence-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -511,6 +524,7 @@ ADP 双会话审批退出 G-021 缺口；现场物理来源、正式校准、连
 - [BPI 正式身份双管理员强制结束验收](testing/bpi-formal-identity-force-close-acceptance.md)
 - [BPI 现场数据覆盖目标验收](testing/bpi-field-data-coverage-acceptance.md)
 - [BPI IoT 遥测落表目标验收](testing/bpi-iot-telemetry-landing-acceptance.md)
+- [BPI 实时生产态势目标验收](testing/bpi-live-operations-evidence-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标

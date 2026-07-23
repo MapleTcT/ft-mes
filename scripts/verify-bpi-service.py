@@ -61,6 +61,19 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V33__bpi_function_execution_privilege_hardening.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V34__bpi_shadow_run_telemetry_coverage_indexes.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V35__bpi_live_telemetry_projection.sql",
+    "frontend/apps/bpi/src/main.ts",
+    "frontend/apps/bpi/tests/bpi-console.e2e.cjs",
+    "deploy/docker/scripts/adp-bpi-telemetry-landing-acceptance.js",
+    "deploy/docker/scripts/run-bpi-telemetry-landing-target-acceptance.sh",
+    "deploy/docker/scripts/bpi-telemetry-landing-acceptance-fixture.sql",
+    "deploy/docker/scripts/bpi-telemetry-landing-acceptance-verification.sql",
+    "deploy/docker/scripts/bpi-telemetry-landing-acceptance-cleanup.sql",
+    "docs/plans/2026-07-23-bpi-phase3cf-live-operations-evidence-design.md",
+    "docs/testing/bpi-live-operations-evidence-acceptance.md",
+    "docs/backend-table-audit/bpi-live-telemetry-projection.md",
+    "metadata/bpi-live-operations-evidence-acceptance.json",
+    "metadata/bpi-live-operations-overview-target.png",
+    "metadata/bpi-live-operations-drawer-target.png",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -3633,6 +3646,112 @@ def main() -> int:
     elif hashlib.sha256(outage_screenshot.read_bytes()).hexdigest() != outage_browser.get(
             "screenshotSha256"):
         fail("BPI WMS outage recovery screenshot hash does not match", failures)
+
+    live_operations = json.loads(
+        (ROOT / "metadata/bpi-live-operations-evidence-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    live_target = live_operations.get("target", {})
+    live_summary = live_operations.get("summary", {})
+    live_source = live_operations.get("controlledSource", {})
+    live_persistence = live_operations.get("persistence", {})
+    live_api = live_operations.get("api", {})
+    live_browser = live_operations.get("browser", {})
+    live_cleanup = live_operations.get("cleanup", {})
+    live_safety = live_operations.get("safety", {})
+    if (live_operations.get("status")
+            != "PASS_TARGET_CONTROLLED_MQTT_KAFKA_POSTGRES_LIVE_BROWSER_CLEANED"
+            or live_operations.get("phase") != "BPI_PHASE_3C_F_LIVE_OPERATIONS_EVIDENCE"
+            or live_operations.get("database") != "PostgreSQL"
+            or live_target.get("host") != "10.11.100.17"
+            or live_target.get("composeProject") != "adp-mes-newbase"
+            or live_target.get("flywayVersion") != 35
+            or live_target.get("marker") != "ADP_E2E_20260723_BPI_LIVE_V35_07"):
+        fail("BPI live-operations target identity evidence is incomplete", failures)
+    if (live_summary.get("testedItems") != live_summary.get("pass")
+            or any(live_summary.get(key) != 0 for key in (
+                "fail", "blocked", "notApplicable", "browserNon2xxCount",
+                "consoleErrorCount", "pageErrorCount", "requestFailureCount",
+                "cleanupRemainingRows"))):
+        fail("BPI live-operations summary is not fully passing and cleaned", failures)
+    if (live_source.get("controlledSimulator") is not True
+            or live_source.get("fieldDeviceClaimed") is not False
+            or live_source.get("productionReadyClaimed") is not False
+            or live_source.get("sequences") != [4, 5]
+            or live_source.get("value") != 12.5
+            or live_source.get("unit") != "m3/h"
+            or live_source.get("quality") != "GOOD"):
+        fail("BPI live-operations controlled-source boundary is incomplete", failures)
+    if (live_persistence.get("eventRows") != 2
+            or live_persistence.get("pointRows") != 2
+            or live_persistence.get("rejectedRows") != 0
+            or live_persistence.get("latestProjectionRows") != 1
+            or live_persistence.get("latestValue") != 12.5
+            or live_persistence.get("latestUnit") != "m3/h"
+            or live_persistence.get("latestQuality") != "GOOD"
+            or live_persistence.get("latestSequenceDisposition") != "IN_ORDER"
+            or live_persistence.get("latestEventIsControlled") is not True
+            or live_persistence.get("allPersistedInsideWindow") is not True):
+        fail("BPI live-operations PostgreSQL projection evidence is incomplete", failures)
+    overview_api = live_api.get("overview", {})
+    evidence_api = live_api.get("liveEvidence", {})
+    coverage_api = live_api.get("shadowRunCoverage", {})
+    if (overview_api.get("status") != 200
+            or overview_api.get("value") != 12.5
+            or overview_api.get("unit") != "m3/h"
+            or overview_api.get("quality") != "GOOD"
+            or overview_api.get("sequenceDisposition") != "IN_ORDER"
+            or evidence_api.get("status") != 200
+            or evidence_api.get("sampleCount") != 5
+            or evidence_api.get("checkSummary") != {"pass": 6, "warn": 1, "fail": 0}
+            or coverage_api.get("fullyCovered") is not True
+            or coverage_api.get("acceptedEventCount") != 2
+            or coverage_api.get("acceptedObservationCount") != 2
+            or coverage_api.get("readyForApproval") is not False):
+        fail("BPI live-operations API evidence is incomplete or overclaims approval", failures)
+    if (live_browser.get("route") != "#/overview"
+            or live_browser.get("responseCount") != 36
+            or live_browser.get("non2xxCount") != 0
+            or any(live_browser.get(key) for key in (
+                "consoleErrors", "pageErrors", "requestFailures"))
+            or live_browser.get("drawer", {}).get("heading") != "点位事实"):
+        fail("BPI live-operations browser evidence is incomplete", failures)
+    if (any(live_cleanup.get("remaining", {}).get(key) != 0 for key in (
+            "rules", "catalogs", "shadowRuns", "topologies", "calibrations",
+            "telemetryEvents", "telemetryLatest"))
+            or live_cleanup.get("sourceSequenceEvidencePublishIntervalRestored") != "10m"
+            or live_cleanup.get("pointCatalogIntervalRestored") != "5m"
+            or live_cleanup.get("iotHealthyAfterRestore") is not True):
+        fail("BPI live-operations cleanup or runtime restoration is incomplete", failures)
+    if (live_safety.get("externalWmsWrites") != 0
+            or any(live_safety.get(key) is not False for key in (
+                "modelRegistered", "modelTrainingStarted", "onlineInferenceEnabled",
+                "productionActivationAllowed", "automaticBatchConfirmationEnabled"))):
+        fail("BPI live-operations safety boundary is open", failures)
+    live_evidence = live_operations.get("evidence", {})
+    for screenshot_key in ("overviewScreenshot", "drawerScreenshot"):
+        screenshot = live_evidence.get(screenshot_key, {})
+        screenshot_path = ROOT / screenshot.get("path", "")
+        if not screenshot_path.is_file():
+            fail(f"BPI live-operations screenshot is missing: {screenshot_key}", failures)
+        elif hashlib.sha256(screenshot_path.read_bytes()).hexdigest() != screenshot.get(
+                "sha256"):
+            fail(f"BPI live-operations screenshot hash does not match: {screenshot_key}", failures)
+    if any(len(live_evidence.get(key, "")) != 64 for key in (
+            "browserReportSha256", "postgresVerificationSha256")):
+        fail("BPI live-operations raw evidence hashes are incomplete", failures)
+    if live_operations.get("scopeBoundary", {}).get("goalStatus") != "G-021 remains PARTIAL":
+        fail("BPI live-operations evidence must preserve the G-021 PARTIAL boundary", failures)
+    require_text(
+        ROOT / "deploy/docker/scripts/run-bpi-telemetry-landing-target-acceptance.sh",
+        [
+            "CHROMIUM_PREFLIGHT_PATH",
+            "Set BPI_CHROMIUM_EXECUTABLE to a verified compatible browser",
+            "restored-runtime-env.txt",
+        ],
+        failures,
+    )
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

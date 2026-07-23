@@ -4209,6 +4209,24 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/bpi-telemetry-landing-acceptance-cleanup.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-telemetry-landing-acceptance-fixture.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-telemetry-landing-acceptance-verification.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/bpi-version-lifecycle-cleanup.sql",
       "state": "tracked",
       "tracked": true
@@ -5355,6 +5373,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-live-telemetry-projection.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-phase1-persistence.md",
       "state": "tracked",
       "tracked": true
@@ -5944,6 +5968,12 @@
     {
       "ignored": false,
       "path": "docs/testing/bpi-live-mqtt-wom-start-end-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/bpi-live-operations-evidence-acceptance.md",
       "state": "tracked",
       "tracked": true
     },
@@ -6772,6 +6802,24 @@
     {
       "ignored": false,
       "path": "metadata/bpi-live-mqtt-wom-unit-mismatch-resolved.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-live-operations-drawer-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-live-operations-evidence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-live-operations-overview-target.png",
       "state": "tracked",
       "tracked": true
     },
@@ -11438,16 +11486,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 660
+      "tracked": 663
     },
     "docs": {
-      "tracked": 145
+      "tracked": 147
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 256
+      "tracked": 259
     },
     "package.json": {
       "tracked": 1
@@ -11471,8 +11519,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1902,
-    "tracked": 1902,
+    "totalFiles": 1910,
+    "tracked": 1910,
     "untracked": 0
   },
   "untrackedByDirectory": []

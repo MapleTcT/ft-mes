@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-23T18:00:42+08:00",
-  "repoCommit": "8c9c4192b17953c48208efd31ef6528de04d96c6+target-telemetry-landing-harness-988868f539cfd9ed5b0127edb621e799a509bad0",
+  "generatedAt": "2026-07-23T21:20:53+08:00",
+  "repoCommit": "67b728dabedbf350499accabd85929952733086e+adapter-316e04d9+frontend-8622196d+iot-21618eae",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -230,11 +230,17 @@
       "marker": "ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3",
       "evidence": "metadata/bpi-field-data-coverage-acceptance.json; docs/testing/bpi-field-data-coverage-acceptance.md",
       "assertions": "real ADP shadow-run create/read/cancel; six pinned-source counts at 2/2; honest training deficits at 0/200, 0/7, 0/100 and 0/10; four explicit blockers; PostgreSQL CANCELLED/r2 plus two audit and two idempotency rows; desktop/mobile zero errors with settled drawer geometry; 12 cleanup categories zero; no model side effects"
+    },
+    "bpiLiveOperationsV35": {
+      "status": "PASS_TARGET_CONTROLLED_MQTT_KAFKA_POSTGRES_LIVE_BROWSER_CLEANED",
+      "marker": "ADP_E2E_20260723_BPI_LIVE_V35_07",
+      "evidence": "metadata/bpi-live-operations-evidence-acceptance.json; docs/testing/bpi-live-operations-evidence-acceptance.md",
+      "assertions": "V35 latest projection stored exactly one controlled latest row from 2 events/2 GOOD points/0 rejects; real overview displayed 12.5 m3/h and opened a five-sample point-evidence drawer; overview/live-evidence APIs were 200; 36 browser responses were all 2xx with zero console/page/request failures; seven marker categories cleaned to zero; 10m/5m IoT cadence restored; no model, inference, activation or external WMS side effect"
     }
   },
   "summary": {
-    "testedFeatures": 267,
-    "pass": 264,
+    "testedFeatures": 269,
+    "pass": 266,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -5814,9 +5820,56 @@
       "status": "PASS",
       "evidence": "desktop/mobile telemetry was visible with zero browser failures; cancel returned 200; post-restore cleanup left zero marker telemetry/run/rule/topology/calibration/catalog rows and no model or external WMS side effect",
       "issues": []
+    },
+    {
+      "module": "BPI Phase 3C-F V35 实时遥测 latest 投影",
+      "route": "/bpi/#/overview",
+      "operation": "发送窗口 MQTT 并验证原始事件、点位事实和每点最新态在同一链路真实落库",
+      "api": "MQTT -> Kafka; GET /bpi-api/overview?plantId=PLANT-01&onlyAbnormal=false",
+      "method": "MQTT/GET",
+      "requiresPersistence": true,
+      "backendEntry": "TelemetryKafkaListener -> TelemetryKafkaRecordProcessor -> TelemetryIngestionService -> TelemetryPostgresRepository; OverviewController -> OverviewService -> OverviewPostgresRepository",
+      "tables": [
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_telemetry_point_rejects",
+        "bpi.bpi_telemetry_point_latest"
+      ],
+      "marker": "ADP_E2E_20260723_BPI_LIVE_V35_07",
+      "verificationSql": "deploy/docker/scripts/bpi-telemetry-landing-acceptance-verification.sql; require 2 events, 2 points, 0 rejects, 1 latest row, value 12.5 m3/h, GOOD, IN_ORDER and exact calibration",
+      "status": "PASS",
+      "evidence": "PostgreSQL stored 2 window events, 2 points and exactly 1 V35 latest projection; API and real overview showed the same 12.5 m3/h GOOD/IN_ORDER fact and sample time",
+      "issues": []
+    },
+    {
+      "module": "BPI Phase 3C-F 实时生产态势与点位事实抽屉",
+      "route": "/bpi/#/overview",
+      "operation": "同页 hash 导航进入 overview，点击产线并核对最近 15 分钟真实遥测、服务端判据和事件",
+      "api": "GET /bpi-api/overview; GET /bpi-api/lines/LINE-S07-01/live-evidence",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "Java 8 adapter -> OverviewController -> OverviewService -> OverviewPostgresRepository",
+      "tables": [
+        "bpi.bpi_telemetry_point_latest",
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_data_quality_incidents"
+      ],
+      "marker": "ADP_E2E_20260723_BPI_LIVE_V35_07",
+      "verificationSql": "Read-only comparison against the same marker latest row and five recent point samples; cleanup requires seven marker categories zero and restored 10m/5m cadence",
+      "status": "PASS",
+      "evidence": "Overview and live-evidence returned 200; real page displayed 12.5 m3/h and a five-sample point-fact drawer with six PASS and one production-context WARN; 36 responses were all 2xx and browser error arrays were empty",
+      "issues": [
+        "Seven pre-existing unresolved data-quality incidents correctly keep dataHealth BAD and line status BLOCKED.",
+        "The controlled simulator and temporary calibration do not establish physical field qualification."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260723_BPI_LIVE_V35_07",
+      "artifact": "metadata/bpi-live-operations-evidence-acceptance.json",
+      "summary": "The Phase 3C-F target slice closed the V35 latest projection and real live-operations read path. Two controlled window events produced two GOOD points and one latest row; the real overview showed 12.5 m3/h, the drawer read five PostgreSQL samples and server checks, all 36 browser responses were 2xx, marker cleanup was zero and IoT cadence was restored. Existing incidents remain visible and physical field qualification is not claimed."
+    },
     {
       "marker": "BPI_TLANDING_20260723_094606",
       "artifact": "metadata/bpi-iot-telemetry-landing-acceptance.json",

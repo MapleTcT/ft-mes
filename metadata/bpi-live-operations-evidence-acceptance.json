@@ -1,0 +1,249 @@
+{
+  "generatedAt": "2026-07-23T21:20:53+08:00",
+  "status": "PASS_TARGET_CONTROLLED_MQTT_KAFKA_POSTGRES_LIVE_BROWSER_CLEANED",
+  "phase": "BPI_PHASE_3C_F_LIVE_OPERATIONS_EVIDENCE",
+  "database": "PostgreSQL",
+  "componentRevisions": {
+    "bpiService": "67b728dabedbf350499accabd85929952733086e",
+    "adapterAndHarness": "316e04d9",
+    "frontendHashRouting": "8622196d",
+    "iotExporter": "21618eae"
+  },
+  "target": {
+    "host": "10.11.100.17",
+    "composeProject": "adp-mes-newbase",
+    "route": "http://10.11.100.17:18080/bpi/#/overview",
+    "runtimeRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "releaseRoot": "/home/v6/ft-mes-bpi-release-live-v35-67b728da-bundle",
+    "databaseVersion": "PostgreSQL 15.18",
+    "databaseName": "ft_mes_bpi",
+    "schema": "bpi",
+    "flywayVersion": 35,
+    "marker": "ADP_E2E_20260723_BPI_LIVE_V35_07",
+    "shadowRunId": "0d0e4c4a-97a4-4627-9428-657270cfa3dc",
+    "remoteEvidenceDirectory": "/home/v6/adp-mes-backups/bpi-v35-live-67b728da/acceptance-ADP_E2E_20260723_BPI_LIVE_V35_07"
+  },
+  "deployment": {
+    "serviceImage": "ft-mes-bpi-service:20260723t115310z-67b728dabedb",
+    "adapterImage": "ft-mes-bpi-adapter:20260723-live-evidence-316e04d9",
+    "iotImage": "mapletct/jetlinks-bpi-pilot:20260723-evidence-sync-21618eae",
+    "frontendAsset": "assets/index-D7lzrKo0.js",
+    "frontendBackup": "/home/v6/adp-mes-backups/bpi-v35-live-67b728da/frontend-before-8622196d",
+    "coreServicesHealthy": true
+  },
+  "summary": {
+    "testedItems": 9,
+    "pass": 9,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "browserResponseCount": 36,
+    "browserNon2xxCount": 0,
+    "consoleErrorCount": 0,
+    "pageErrorCount": 0,
+    "requestFailureCount": 0,
+    "cleanupRemainingRows": 0
+  },
+  "controlledSource": {
+    "productId": "bpi-mqtt-pilot-product-01",
+    "deviceId": "bpi-mqtt-pilot-device-01",
+    "propertyId": "flow.instant",
+    "sourceInstance": "jetlinks-pilot-node-01",
+    "sourceOrigin": "DEVICE",
+    "sourceEpoch": 20260723131944,
+    "sequences": [
+      4,
+      5
+    ],
+    "value": 12.5,
+    "unit": "m3/h",
+    "quality": "GOOD",
+    "calibrationVersion": "pilot-telemetry-ADP_E2E_20260723_BPI_LIVE_V35_07",
+    "qos": 1,
+    "allPubAck": true,
+    "controlledSimulator": true,
+    "fieldDeviceClaimed": false,
+    "productionReadyClaimed": false
+  },
+  "persistence": {
+    "eventRows": 2,
+    "pointRows": 2,
+    "rejectedRows": 0,
+    "latestProjectionRows": 1,
+    "latestValue": 12.5,
+    "latestUnit": "m3/h",
+    "latestQuality": "GOOD",
+    "latestSequenceDisposition": "IN_ORDER",
+    "latestEventIsControlled": true,
+    "allPersistedInsideWindow": true,
+    "tables": [
+      "bpi.bpi_telemetry_source_state",
+      "bpi.bpi_telemetry_events",
+      "bpi.bpi_telemetry_points",
+      "bpi.bpi_telemetry_point_rejects",
+      "bpi.bpi_telemetry_point_latest",
+      "bpi.bpi_shadow_runs",
+      "bpi.bpi_point_catalog_snapshots",
+      "bpi.bpi_point_catalog_entries",
+      "bpi.bpi_source_sequence_evidence_current",
+      "bpi.bpi_point_calibrations",
+      "bpi.bpi_topology_versions",
+      "bpi.bpi_rule_versions"
+    ]
+  },
+  "api": {
+    "overview": {
+      "method": "GET",
+      "endpoint": "/bpi-api/overview?plantId=PLANT-01&onlyAbnormal=false",
+      "status": 200,
+      "lineId": "LINE-S07-01",
+      "lineStatus": "BLOCKED",
+      "dataHealth": "BAD",
+      "value": 12.5,
+      "unit": "m3/h",
+      "quality": "GOOD",
+      "sequenceDisposition": "IN_ORDER",
+      "expectedSignalCount": 1,
+      "observedSignalCount": 1,
+      "goodSignalCount": 1,
+      "openIncidentCount": 7,
+      "criticalIncidentCount": 0
+    },
+    "liveEvidence": {
+      "method": "GET",
+      "endpoint": "/bpi-api/lines/LINE-S07-01/live-evidence?plantId=PLANT-01&windowMinutes=15&limit=120",
+      "status": 200,
+      "sampleCount": 5,
+      "checkSummary": {
+        "pass": 6,
+        "warn": 1,
+        "fail": 0
+      },
+      "warning": "PRODUCTION_CONTEXT_AVAILABLE: no current production order or active batch",
+      "incidentCount": 7
+    },
+    "shadowRunCoverage": {
+      "status": 200,
+      "pinnedPointCount": 1,
+      "observedPointCount": 1,
+      "authoritativeSequencePointCount": 1,
+      "calibratedPointCount": 1,
+      "goodQualityPointCount": 1,
+      "acceptedEventCount": 2,
+      "acceptedObservationCount": 2,
+      "rejectedObservationCount": 0,
+      "gapEventCount": 0,
+      "outOfOrderEventCount": 0,
+      "fullyCovered": true,
+      "readyForApproval": false,
+      "approvalBlockers": [
+        "MINIMUM_DURATION_NOT_REACHED",
+        "MINIMUM_BATCH_REVIEWS_NOT_REACHED",
+        "BOUNDARY_AGREEMENT_BELOW_THRESHOLD",
+        "CUMULATIVE_QUANTITY_DEVIATION_OUT_OF_TOLERANCE"
+      ]
+    }
+  },
+  "browser": {
+    "route": "#/overview",
+    "rowContains": [
+      "LINE-S07-01",
+      "12.5",
+      "m3/h",
+      "flow.instant",
+      "BAD"
+    ],
+    "drawer": {
+      "heading": "点位事实",
+      "physicalPoint": "bpi-mqtt-pilot-product-01/bpi-mqtt-pilot-device-01/flow.instant",
+      "trend": "最近 15 分钟真实遥测",
+      "serverChecks": "服务端运行判据",
+      "sampleCountAtLeast": 2,
+      "viewport": 1440,
+      "left": 760,
+      "right": 1440,
+      "width": 680
+    },
+    "responseCount": 36,
+    "non2xxCount": 0,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": []
+  },
+  "safety": {
+    "externalWmsWrites": 0,
+    "modelRegistered": false,
+    "modelTrainingStarted": false,
+    "onlineInferenceEnabled": false,
+    "productionActivationAllowed": false,
+    "automaticBatchConfirmationEnabled": false
+  },
+  "cleanup": {
+    "remaining": {
+      "rules": 0,
+      "catalogs": 0,
+      "shadowRuns": 0,
+      "topologies": 0,
+      "calibrations": 0,
+      "telemetryEvents": 0,
+      "telemetryLatest": 0
+    },
+    "sourceSequenceEvidencePublishIntervalRestored": "10m",
+    "pointCatalogIntervalRestored": "5m",
+    "iotHealthyAfterRestore": true
+  },
+  "evidence": {
+    "browserReportSha256": "993d4f489ddfb6a7cf3557c723ee17df31ba68f89571dab718e2d0319febe3d4",
+    "postgresVerificationSha256": "73fa524b092a3f8fa1dbd5f91d3488faaf8a44b5bbd4f6446d13a781ad009ff4",
+    "overviewScreenshot": {
+      "path": "metadata/bpi-live-operations-overview-target.png",
+      "sha256": "97daafcd967eaadf5347f9f53d31e4d75cadfd0e80dd3f47bf977139cd9922ad"
+    },
+    "drawerScreenshot": {
+      "path": "metadata/bpi-live-operations-drawer-target.png",
+      "sha256": "00c4d49b2b6d6f8ac737920f89e44626704c8dce0127020c11bdd048a89dd678"
+    }
+  },
+  "diagnostics": [
+    {
+      "attempt": "_01",
+      "result": "FAIL_DIAGNOSTIC",
+      "reason": "point catalog identity race",
+      "closedBy": "strict catalog readiness wait"
+    },
+    {
+      "attempt": "_02/_03",
+      "result": "FAIL_DIAGNOSTIC",
+      "reason": "source sequence evidence was coupled to catalog cadence and target config missed the interval binding",
+      "closedBy": "IoT revision 21618eae plus current application-bpi-pilot.yml"
+    },
+    {
+      "attempt": "_04",
+      "result": "FAIL_DIAGNOSTIC",
+      "reason": "Java 8 adapter rejected live-evidence",
+      "closedBy": "adapter allowlist and route tests in 316e04d9"
+    },
+    {
+      "attempt": "_05",
+      "result": "FAIL_DIAGNOSTIC",
+      "reason": "same-document hash change did not update the active BPI view",
+      "closedBy": "hashchange synchronization and E2E regression in 8622196d"
+    },
+    {
+      "attempt": "_06",
+      "result": "FAIL_DIAGNOSTIC",
+      "reason": "Playwright-managed Chromium revision was absent on Ubuntu 26.04",
+      "closedBy": "verified explicit Chromium 149 and pre-mutation runner preflight"
+    }
+  ],
+  "scopeBoundary": {
+    "controlledSimulator": true,
+    "fieldDeviceClaimed": false,
+    "formalCalibrationClaimed": false,
+    "multiLineCapacityClaimed": false,
+    "continuousFieldRunClaimed": false,
+    "trainingReadyClaimed": false,
+    "productionReadyClaimed": false,
+    "goalStatus": "G-021 remains PARTIAL"
+  }
+}

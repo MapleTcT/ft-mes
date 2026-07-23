@@ -43,6 +43,7 @@ EXPECTED_INDEX_ROWS = {
     "business-quality-lims-qcs.md",
     "business-production.md",
     "business-equipment-energy-ehs.md",
+    "bpi-live-telemetry-projection.md",
     "persistence-acceptance.md",
     "wom-consumption-record-analysis.md",
     "wom-public-produce-task-created-analysis.md",
@@ -53,6 +54,7 @@ EXPECTED_INDEX_ROWS = {
 REQUIRED_STARTED_REPORTS = {
     "business-quality-lims-qcs.md",
     "business-production.md",
+    "bpi-live-telemetry-projection.md",
     "persistence-acceptance.md",
     "wom-consumption-record-analysis.md",
     "wom-public-produce-task-created-analysis.md",
@@ -76,6 +78,7 @@ ALLOWED_REPORT_STATUSES = {
     "已恢复并验收",
     "核心主线已验收",
     "已完成退役验收",
+    "持续更新",
 }
 
 

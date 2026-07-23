@@ -1075,6 +1075,24 @@ IoT 映射与同步周期已恢复。
 `metadata/bpi-iot-telemetry-landing-mobile-target.png`；完整报告：
 `docs/testing/bpi-iot-telemetry-landing-acceptance.md`。
 
+### BPI Phase 3C-F 实时运行事实（2026-07-23）
+
+本节使用唯一目标环境 `http://10.11.100.17:18080`、真实 ADP 登录、PostgreSQL 15.18/Flyway
+V35 和 marker `ADP_E2E_20260723_BPI_LIVE_V35_07`。受控 MQTT 输入经真实
+JetLinks/Kafka/BPI 链落库后，由 `/bpi/#/overview` 和点位事实抽屉直接读取。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 实时生产态势 | `/bpi/#/overview` | 从影子验收同页切换到 overview，核对产线行关键工艺值 | `GET /bpi-api/overview?plantId=PLANT-01&onlyAbnormal=false` | 页面显示 `LINE-S07-01`、`12.5 m3/h · flow.instant`、真实时间和 `BAD/BLOCKED`；hash 路由同步已修复 | API 200；主信号物理点位、`GOOD/IN_ORDER`、校准和覆盖均来自 PostgreSQL | `bpi_telemetry_point_latest` 联查 topology/batch/candidate/data-quality | PASS_TARGET_LIVE | 7 个历史未解决事件使健康度为 BAD，不得为演示清除 |
+| BPI 点位事实抽屉 | 同一产线行 | 点击行，核对物理点位、最近 15 分钟样本、服务端判据和事件 | `GET /bpi-api/lines/LINE-S07-01/live-evidence?plantId=PLANT-01&windowMinutes=15&limit=120` | 抽屉显示精确物理点位、5 条真实样本、6 PASS/1 WARN 和 7 个事件；几何为 `760..1440/680px` | API 200；窗口样本来自原始 points，latest 和服务端判据来自同一事实链 | latest、telemetry points、data-quality incidents | PASS_TARGET_LIVE_EVIDENCE | `PRODUCTION_CONTEXT_AVAILABLE=WARN`，因无活动指令/批次 |
+| BPI 浏览器/API 无错误 | 同一页面 | 截图并收集所有响应、console、page error 和 request failure | overview/live-evidence/shadow-run API | 36 个响应全部 2xx，console/page/request/non-2xx 均为 0 | 只读，没有额外业务写入 | 只读 | PASS_TARGET_BROWSER | Ubuntu 26.04 使用已验证 Chromium 149，runner 已增加修改配置前预检 |
+| BPI marker 退场 | 页面取消影子运行后 | 直接查 PostgreSQL，定向清理并恢复 IoT 周期 | cancel + verification/cleanup SQL | 页面终态 `CANCELLED/r3`；清理后 `/bpi/` 仍可用 | 2 events/2 points/1 latest 的取证完成；7 类 marker 残留为 0；来源序列/目录周期恢复 `10m/5m` | telemetry/latest/run/rule/topology/catalog/calibration | PASS_TARGET_CLEANED | 单点短窗口不代表物理现场或容量 |
+
+机器证据：`metadata/bpi-live-operations-evidence-acceptance.json`；截图：
+`metadata/bpi-live-operations-overview-target.png`、
+`metadata/bpi-live-operations-drawer-target.png`；完整报告：
+`docs/testing/bpi-live-operations-evidence-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

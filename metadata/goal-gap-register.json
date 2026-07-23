@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-23T11:40:32+00:00",
-  "repoCommit": "5bffe0f5631ddeac4c67fc4a6b5df337932b13bf",
+  "generatedAt": "2026-07-23T13:47:08+00:00",
+  "repoCommit": "8622196dbe3bd68c34ffc7936fdb7a3b93007d0f",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -431,7 +431,7 @@
         "production module test matrix has 44 cases: 44 PASS, 0 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks 0 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and is CLEAR with 0 active items; legacy public produceTaskCreated is retired as NOT_APPLICABLE with explicit rejection/no-persistence evidence.",
-        "persistence acceptance ledger has 267 tested features: 264 PASS, 0 FAIL, 0 BLOCKED, 3 NOT_APPLICABLE",
+        "persistence acceptance ledger has 269 tested features: 266 PASS, 0 FAIL, 0 BLOCKED, 3 NOT_APPLICABLE",
         "BPI V27 marker ADP_E2E_BPI_PARQUET_20260722_105844_A1 passed the real ADP page, controlled FAILED/r3 persistence, same-task retry to READY/r6, exact MinIO versionId/SHA/bytes/rows/schema verification, service restart readback, least-privilege deletion denial and zero-residue/default-off cleanup.",
         "BPI V28 markers ADP_E2E_BPI_ICEBERG_20260722_175829_A1, ADP_E2E_BPI_ICEBERG_RETRY_20260722_181106_A1 and ADP_E2E_BPI_ICEBERG_FENCE_20260722_181629_A1 passed the clean target ADP desktop/mobile page, exact MinIO source and Polaris/PyIceberg snapshot checks, controlled failure and same-task retry, real post-commit exit 86 and stale-claim reconcile to the same single snapshot, least privilege and zero-residue/default-off cleanup.",
         "BPI V29 marker ADP_E2E_BPI_ARCHIVE_20260722_215300_A1 passed the real target page FAILED/retry/LOCKED flow, PostgreSQL revision and idempotency checks, exact versioned Object Lock source/manifest verification, least-privilege denials, isolated recovery rehearsal, physical recovery-warehouse purge, original publication preservation, responsive browser checks and zero-residue/default-off cleanup.",
@@ -439,6 +439,7 @@
         "BPI V32/V33 marker ADP_E2E_BPI_WINDOWS_20260723_1235_A1 passed the real target definition/snapshot page, PostgreSQL 2-window/6-fact projection, exact flow mean and pump true ratio, late/post-freeze exclusion, explicit READY/BLOCKED evidence, immutable rejection, V33 function least privilege, responsive desktop/mobile checks and 19-category zero-residue/default-off cleanup; physical devices, formal calibration and model eligibility remain open.",
         "BPI Phase 3C-D marker ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3 passed real target shadow-run create/read/cancel, six independent pinned-source 2/2 projections, honest 0/200, 0/7, 0/100 and 0/10 training-data deficits with four blockers, PostgreSQL CANCELLED/r2 plus two audit and two idempotency rows, settled desktop/mobile drawer geometry, 12-category zero cleanup and stale disabled standalone publisher removal; all model paths remain false.",
         "BPI Phase 3C-E marker BPI_TLANDING_20260723_094606 passed the controlled target MQTT -> JetLinks -> Kafka -> scoped BPI consumer -> PostgreSQL -> real shadow-run page chain. Three preheat events were persisted but excluded from the run window; sequences 4/5 produced 2 events, 2 GOOD calibrated points and 0 rejects, five coverage counts were 1/1, event/observation was 2/2, gap/out-of-order was 0/0, all 29 BPI browser responses were 2xx, cleanup was zero and IoT defaults were restored; this is not physical field qualification.",
+        "BPI Phase 3C-F marker ADP_E2E_20260723_BPI_LIVE_V35_07 passed the target controlled MQTT -> JetLinks -> Kafka -> PostgreSQL V35 latest -> real overview and point-evidence drawer chain. Two window events produced two GOOD points and one latest row; the page showed 12.5 m3/h, the drawer read five samples and six PASS/one WARN checks, all 36 browser responses were 2xx, seven marker categories cleaned to zero and 10m/5m IoT cadence was restored. Existing incidents remain visible and physical field qualification is not claimed.",
         "entity-model controlled deletion marker ADP_E2E_20260721101217_PG_FIELD_DELETE passed 18/18 through the real parent page, explicit APIs and PostgreSQL with soft-delete preservation, DROP COLUMN RESTRICT, dependency/drift protection, transaction rollback, protected fields and zero cleanup.",
         "entity-model OBJECT association marker ADP_E2E_20260721084718_PG_OBJECT_ASSOC passed 10/10 through the real page, API and PostgreSQL with one-to-one/many-to-one metadata, LONG/TEXT/BAPCODE storage, four logical joins, invalid-target rollback and zero cleanup.",
         "BPI marker ADP_E2E_20260720193226_WMS_OUTAGE passed the real target material-wms stop, command DLQ, service recovery, browser original-command reconciliation, BPI/material PostgreSQL verification and zero-residue cleanup; this is an internal target recovery proof and does not close external ERP/WMS protocol compensation.",
@@ -568,7 +569,13 @@
         "metadata/bpi-iot-telemetry-landing-acceptance.json",
         "metadata/bpi-integrated-upgrade-v34-target.json",
         "metadata/bpi-iot-telemetry-landing-desktop-target.png",
-        "metadata/bpi-iot-telemetry-landing-mobile-target.png"
+        "metadata/bpi-iot-telemetry-landing-mobile-target.png",
+        "services/bpi-service/app/src/main/resources/db/migration/V35__bpi_live_telemetry_projection.sql",
+        "docs/testing/bpi-live-operations-evidence-acceptance.md",
+        "docs/backend-table-audit/bpi-live-telemetry-projection.md",
+        "metadata/bpi-live-operations-evidence-acceptance.json",
+        "metadata/bpi-live-operations-overview-target.png",
+        "metadata/bpi-live-operations-drawer-target.png"
       ]
     },
     {
@@ -578,7 +585,7 @@
       "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 267 tested features: 264 PASS, 0 FAIL, 0 BLOCKED, 3 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED.",
+        "metadata/persistence-acceptance.json currently has 269 tested features: 266 PASS, 0 FAIL, 0 BLOCKED, 3 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED.",
         "Target marker ADP_E2E_20260720193226_WMS_OUTAGE directly verified the BPI and material PostgreSQL tables across a real internal material-wms outage and recovery: no material row during the outage, one durable document/line/transaction/stock after recovery, and zero marker residue after cleanup.",
         "metadata/postgres-migration-inventory.json currently has 198 scripts, highRiskStatementCount=0, watchStatementCount=78, watchSafetyIssueCount=0, with no missing, duplicate, invalid, or unguarded structural migration statements.",
         "PATROL migration 186 restores the hidden-danger/EAM risk projection and repairs supfusion_i18n_resource.modifier from the legacy varchar shape to the java.util.Date-compatible PostgreSQL timestamp shape; target migration, i18n restart, browser/API and PostgreSQL marker verification passed.",
@@ -601,7 +608,8 @@
         "2026-07-23 BPI Flyway V31 adds PostgreSQL-owned immutable offline training-readiness assessments, audit and idempotency facts. Target marker ADP_E2E_BPI_READINESS_20260723_091500_A1 persisted two BLOCKED assessments with 19 gates and eight blockers, rejected direct mutation, preserved zero model side effects and cleaned all marker rows without adding an Oracle runtime path.",
         "2026-07-23 BPI Flyway V32/V33 adds governed process-window definitions, immutable point-in-time window facts and function privilege hardening. Target marker ADP_E2E_BPI_WINDOWS_20260723_1235_A1 persisted six facts with exact late/freeze exclusion, explicit READY/BLOCKED status, immutable rejection, least-privilege verification and zero marker cleanup without adding an Oracle runtime path.",
         "2026-07-23 BPI Phase 3C-D reuses the V33 PostgreSQL model and adds no duplicate collection tables. Target marker ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3 persisted the shadow-run create/cancel lifecycle, two audits and two idempotency rows, computed six source and four training-volume counts directly from existing catalog/sequence/calibration/batch/review facts, and cleaned 12 marker categories to zero without adding an Oracle runtime path.",
-        "2026-07-23 BPI Phase 3C-E adds only V34 shadow-window indexes and a default-off scoped Kafka consumer over existing PostgreSQL telemetry tables. Target marker BPI_TLANDING_20260723_094606 persisted controlled MQTT sequences 1..5, excluded three preheat records, projected two in-window events/two points/zero rejects into the real page, cancelled the run and cleaned all marker rows without adding a duplicate lifecycle table or Oracle runtime path."
+        "2026-07-23 BPI Phase 3C-E adds only V34 shadow-window indexes and a default-off scoped Kafka consumer over existing PostgreSQL telemetry tables. Target marker BPI_TLANDING_20260723_094606 persisted controlled MQTT sequences 1..5, excluded three preheat records, projected two in-window events/two points/zero rejects into the real page, cancelled the run and cleaned all marker rows without adding a duplicate lifecycle table or Oracle runtime path.",
+        "2026-07-23 BPI Phase 3C-F adds V35 bpi_telemetry_point_latest as a rebuildable one-row-per-point projection while preserving events/points as history. Target marker ADP_E2E_20260723_BPI_LIVE_V35_07 persisted two events/two points/one latest/zero rejects, read the same fact through overview/live-evidence and the real page, then cleaned all marker rows without adding an Oracle runtime path."
       ],
       "blockingIssues": [
         "只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。"
@@ -832,14 +840,15 @@
         "2026-07-23，源码与目标运行版本 89044926c1335f8028c624b99fd7ecb57d771f2b、Flyway V31 已闭合 Phase 3C-B 离线训练准备度评估。marker ADP_E2E_BPI_READINESS_20260723_091500_A1 从真实 ADP 数据集页面追加两条不可变 BLOCKED 评估，sequence 为 1/2、确定性 checksum 相同，19 项门槛全部执行并保留 8 个真实阻断。PostgreSQL 的 assessment/audit/idempotency、同键重放和不可变触发器均通过；MLflow 保持既有 1 run/1 dataset/1 input，模型表为 0；服务重启、桌面/移动页面、PostgreSQL/Polaris/MinIO/临时卷定向清理和单一正式 Compose 默认关闭状态均通过。证据为 metadata/bpi-dataset-training-readiness-acceptance.json 和 docs/testing/bpi-dataset-training-readiness-acceptance.md；训练、模型创建/登记、推断和生产激活均未启动。",
         "2026-07-23，release f7db2f98e82d481f6c53c5fa7539ac52c812e28f 将唯一目标栈 expand-only 到 PostgreSQL 15.18/Flyway V33，闭合 Phase 3C-C 受控工艺信号窗口。第一次 V32 部署因新函数仍有 PUBLIC EXECUTE 被最小权限门禁主动停止，旧容器未切换；追加 V33 后现有 V32 库、全新 V1-V33 库和 materializer/catalog publisher/retention archiver/MLflow registrar 四角色均通过。marker ADP_E2E_BPI_WINDOWS_20260723_1235_A1 从真实 ADP 页面创建 flow MEAN 和 pump TRUE_RATIO 两组定义，3 个样本形成 6 条不可变事实（2 READY/4 BLOCKED）；流量 source/accepted/late/mean 为 4/3/1/20，冻结后值未进入快照，泵运行比例为 0.5。桌面/移动错误为 0，直接 UPDATE 被拒绝，19 类 marker 投影清零，主三服务 healthy、可选 sidecar 为 0。证据为 metadata/bpi-dataset-process-signal-window-acceptance.json 和 docs/testing/bpi-dataset-process-signal-window-acceptance.md；物理点位、正式校准、200 批/7 天和所有模型路径仍未关闭。",
         "2026-07-23，release a73a53a0f4f278d70bd85db4b21acb545d14eabf 和验收脚本修订 1a0f3a5144b9a82442fa6b0f937982165fa7ed15 闭合 Phase 3C-D 现场数据覆盖投影。marker ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3 从真实影子验收页面创建/读取/取消任务；固定来源六项均为 2/2/READY，训练量按 policy 如实为 0/200、0/7、0/100、0/10 并保留四个 blocker。20 个 BPI 响应全为 2xx，桌面/移动错误为 0，390px 抽屉与三个动作均完整；PostgreSQL 保存 CANCELLED/r2、两条审计和两个幂等请求，取证后 12 类 marker 投影归零，一个旧 standalone disabled publisher 已停止并自动删除。训练、模型、推断和生产激活仍为 false。证据为 metadata/bpi-field-data-coverage-acceptance.json 和 docs/testing/bpi-field-data-coverage-acceptance.md。",
-        "2026-07-23，产品提交 8c9c4192b17953c48208efd31ef6528de04d96c6 和验收脚本提交 988868f539cfd9ed5b0127edb621e799a509bad0 闭合 Phase 3C-E 受控 IoT 遥测窗口落表。唯一目标栈 expand-only 到 PostgreSQL 15.18/Flyway V34；marker BPI_TLANDING_20260723_094606 的五条 MQTT QoS1 消息全部 PUBACK，来源证据达到 QUALIFIED/DEVICE/1..5/count5。三条预热事件真实落表但被 started_at 双时间门禁排除；窗口 sequence 4/5 形成 2 events/2 GOOD calibrated points/0 rejects，页面五项覆盖均为 1/1、event/observation 2/2、gap/out-of-order 0/0。29 个 BPI 响应全为 2xx，桌面/移动错误为 0，run 取消为 CANCELLED/r3；取证后 marker 清零，5m/10m 与未验证 UNCERTAIN 映射恢复，Kafka lag 为 0。训练、模型、推断、生产激活和外部 WMS 写入仍为 false。证据为 metadata/bpi-iot-telemetry-landing-acceptance.json 和 docs/testing/bpi-iot-telemetry-landing-acceptance.md。"
+        "2026-07-23，产品提交 8c9c4192b17953c48208efd31ef6528de04d96c6 和验收脚本提交 988868f539cfd9ed5b0127edb621e799a509bad0 闭合 Phase 3C-E 受控 IoT 遥测窗口落表。唯一目标栈 expand-only 到 PostgreSQL 15.18/Flyway V34；marker BPI_TLANDING_20260723_094606 的五条 MQTT QoS1 消息全部 PUBACK，来源证据达到 QUALIFIED/DEVICE/1..5/count5。三条预热事件真实落表但被 started_at 双时间门禁排除；窗口 sequence 4/5 形成 2 events/2 GOOD calibrated points/0 rejects，页面五项覆盖均为 1/1、event/observation 2/2、gap/out-of-order 0/0。29 个 BPI 响应全为 2xx，桌面/移动错误为 0，run 取消为 CANCELLED/r3；取证后 marker 清零，5m/10m 与未验证 UNCERTAIN 映射恢复，Kafka lag 为 0。训练、模型、推断、生产激活和外部 WMS 写入仍为 false。证据为 metadata/bpi-iot-telemetry-landing-acceptance.json 和 docs/testing/bpi-iot-telemetry-landing-acceptance.md。",
+        "2026-07-23，BPI service 67b728dabedbf350499accabd85929952733086e、adapter/harness 316e04d9、前端 8622196d 和 IoT 21618eae 闭合 Phase 3C-F 实时运行事实投影。唯一目标栈为 PostgreSQL 15.18/Flyway V35；marker ADP_E2E_20260723_BPI_LIVE_V35_07 形成 2 events/2 GOOD points/1 latest/0 rejects，真实 /bpi/#/overview 显示 12.5 m3/h，点位事实抽屉读取 5 samples 和服务端 6 PASS/1 WARN。36 个响应全为 2xx，console/page/request failure 为 0；7 类 marker 投影清零，来源序列/点位目录周期恢复 10m/5m。7 个历史未解决事件和无生产上下文被诚实保留为 BAD/BLOCKED/WARN；训练、模型、推断、生产激活和外部 WMS 写入仍为 false。证据为 metadata/bpi-live-operations-evidence-acceptance.json 和 docs/testing/bpi-live-operations-evidence-acceptance.md。"
       ],
       "blockingIssues": [
         "拓扑/规则、点位目录/校准治理、影子验收、运行回执、savepoint、数据质量、broker/组件回退、真实候选/批次负载下的 Service/Adapter/Flink 整体回切、同指令 START/END、正式 ADP 双会话强制结束四眼审批、真实目标 QCS 页面/事务 outbox/Kafka/BPI 首发与幂等重放、受控 QCS -> Kafka -> query-first material-wms -> durable receipt -> INBOUNDED/r4、同 event/同幂等键 WMS 原单核对与重新排队、目标内部 material-wms 停机/DLQ/恢复，以及 V25 正式身份申请/四眼审批/蓝红 Kafka/双 PostgreSQL/durable receipt/INBOUND_REVERSED/净库存归零/浏览器与清理整链均已通过。Phase 2 最终继续关闭；尚缺真实连续 7-14 天、物理设备来源和外部 ERP/WMS 实例的消费、查单、回执及协议补偿。",
         "JetLinks 试点产品、设备、instantFlow metadata 和标准单位已经注册激活并自动落入 MES 目录，MES 校准证据提交/四眼审批/驳回/撤销工作流及受控 MQTT + MES 同一生产指令 START/END candidate/batch 已完成。当前仍缺与目录 calibrationVersion 精确匹配的真实现场证书、物理 DEVICE/GATEWAY epoch/sequence、断电恢复及同等整链复验；测试专用校准和模拟器不能替代现场证据。",
         "Phase 1 的影子任务、10 批人工复核、19/20 边界认同、累计量偏差 0%、关键数据质量阻断和四眼批准已通过受控时间压缩验收；仍缺选定产线使用真实来源数据连续运行 7-14 天，以及真实工况下的边界认同率和累计量偏差证据。",
         "Phase 2 已通过内部正向与蓝红 durable-receipt 软件链，但仍不是外部 ERP/WMS 或连续生产激活。Phase 3A 数据集清单、Phase 3B-A 版本锁定 Parquet、Phase 3B-B Iceberg/Polaris、V29 单数据集 Object Lock 恢复包与 Phase 3C-A MLflow Dataset Input 均已闭合页面、API、PostgreSQL、外部存储、失败恢复、重启、最小权限和清理证据。V30 证据只登记训练候选数据，不等于模型或 MLflow 生产平台已完成；剩余缺口为跨故障域全站备份恢复、正式保留策略、容量/RPO/RTO 演练、MLflow 生产 RBAC/SSO/TLS/HA、Phase 4 建议型模型、物理来源连续 7-14 天、外部 ERP/WMS 以及生产激活。",
-        "Phase 3C-B 已证明系统会在训练前失败关闭；V31 不可变 v1 快照当时缺少工艺信号窗口，且纳入样本、批次、生产日和生产切分组不足、排除率过高、START 接受/拒绝标签不足。Phase 3C-C/D/E 已关闭受控窗口、来源/训练量覆盖和 MQTT 到 PostgreSQL 窗口落表，但受控模拟器与临时校准不能替代物理 DEVICE/GATEWAY、正式计量证书、真实时间跨度、容量或数据资格，也不能倒写 V31 历史评估。当前目标证据明确为 0/200 个复核批次、0/7 个生产日、0/100 个 accepted START 和 0/10 个 rejected START；仍需连续 7-14 天、真实类别平衡及 MLflow 生产治理，不得绕过这些门槛。"
+        "Phase 3C-B 已证明系统会在训练前失败关闭；V31 不可变 v1 快照当时缺少工艺信号窗口，且纳入样本、批次、生产日和生产切分组不足、排除率过高、START 接受/拒绝标签不足。Phase 3C-C/D/E/F 已关闭受控窗口、来源/训练量覆盖、MQTT 到 PostgreSQL 窗口落表和实时事实页面读取，但受控模拟器与临时校准不能替代物理 DEVICE/GATEWAY、正式计量证书、真实时间跨度、容量或数据资格，也不能倒写 V31 历史评估。当前目标证据明确为 0/200 个复核批次、0/7 个生产日、0/100 个 accepted START 和 0/10 个 rejected START；仍需连续 7-14 天、真实类别平衡及 MLflow 生产治理，不得绕过这些门槛。"
       ],
       "nextActions": [
         "把 BPI_LIVE_20260720_123058、ADP_E2E_20260721021607_QCS_BPI、ADP_E2E_20260721053253_BPI_FORCE_CLOSE、ADP_BPI_FORMAL_IDENTITY_20260721134944、ADP_E2E_20260720_215500_BPI_WMS、ADP_E2E_20260721_015610_WMS_RECON、ADP_E2E_20260720193226_WMS_OUTAGE、ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054、ADP_BPI_FORMAL_WMS_REVERSAL_20260721175536、ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630、ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4、ADP_E2E_BPI_PARQUET_20260722_105844_A1 及对应迁移/部署/整链机器报告固定为发布回归基线；保持 Phase 2 关闭，先在选定产线用物理来源和正式校准连续运行 7-14 天，再接入真实外部 ERP/WMS 完成消费、查单、响应丢失、拒绝、冲销和补偿。",
@@ -847,7 +856,7 @@
         "平台注册、设备激活、instantFlow metadata、单位、MQTT ingress、校准治理工作台以及受控 MQTT + MES 同一生产指令 START/END 已完成；下一步由现场计量人员提交真实证书和校验和，由独立管理员审核其与当前目录 calibrationVersion 精确匹配，并用物理 DEVICE/GATEWAY epoch、连续单调 sequence 和断电恢复重跑同一整链。自动同步生成现场 READY revision 后进入 7-14 天影子验收，禁止手工伪造 READY 快照。",
         "使用已通过软件验收的影子运行工作台执行真实连续 7-14 天现场运行；达到真实边界人工认同率、累计量偏差和数据质量门槛后再进入 QCS/WMS 生产写回，禁止提前改变既有生产状态。",
         "保持 bpi.qcs-link=false、bpi.wms-link=false 和所有集成开关/allowlist 关闭；下一阶段把已通过的真实 QCS outbox 链纳入生产等价维护窗口，并在外部 ERP/WMS 端点完成同 marker 的查单、超时、拒绝、冲销、补偿、浏览器、PostgreSQL 和清理验收后，才允许提出 Phase 2 激活申请。",
-        "固定 ADP_E2E_BPI_READINESS_20260723_091500_A1、ADP_E2E_BPI_WINDOWS_20260723_1235_A1、ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3、BPI_TLANDING_20260723_094606 与 V31-V34 报告为 Phase 3C-B/C/D/E 回归基线。下一产品切片在正式点位和批准计量校准下，用 MapleTcT/iot 的物理 DEVICE/GATEWAY identity、严格递增来源序列和断电重连重复 MQTT -> JetLinks -> Kafka -> BPI PostgreSQL -> 页面窗口验收，并执行多点/多产线容量与 7-14 天稳定性测试；随后让同一覆盖页积累至少 200 个不同真实复核批次、7 个生产日以及至少 100 accepted/10 rejected START 标签，再执行 v2 readiness 评估。在这些事实及 MLflow 生产 RBAC/SSO/TLS/HA 独立验收前，保持 assessmentOnly=true 并关闭全部训练、模型、推断和激活路径。"
+        "固定 ADP_E2E_BPI_READINESS_20260723_091500_A1、ADP_E2E_BPI_WINDOWS_20260723_1235_A1、ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3、BPI_TLANDING_20260723_094606、ADP_E2E_20260723_BPI_LIVE_V35_07 与 V31-V35 报告为 Phase 3C-B/C/D/E/F 回归基线。下一产品切片在正式点位和批准计量校准下，用 MapleTcT/iot 的物理 DEVICE/GATEWAY identity、严格递增来源序列和断电重连重复 MQTT -> JetLinks -> Kafka -> BPI PostgreSQL -> 页面窗口验收，并执行多点/多产线容量与 7-14 天稳定性测试；随后让同一覆盖页积累至少 200 个不同真实复核批次、7 个生产日以及至少 100 accepted/10 rejected START 标签，再执行 v2 readiness 评估。在这些事实及 MLflow 生产 RBAC/SSO/TLS/HA 独立验收前，保持 assessmentOnly=true 并关闭全部训练、模型、推断和激活路径。"
       ],
       "artifacts": [
         "docs/designs/batch-process-intelligence.md",
@@ -1237,7 +1246,13 @@
         "metadata/bpi-iot-telemetry-landing-acceptance.json",
         "metadata/bpi-integrated-upgrade-v34-target.json",
         "metadata/bpi-iot-telemetry-landing-desktop-target.png",
-        "metadata/bpi-iot-telemetry-landing-mobile-target.png"
+        "metadata/bpi-iot-telemetry-landing-mobile-target.png",
+        "services/bpi-service/app/src/main/resources/db/migration/V35__bpi_live_telemetry_projection.sql",
+        "docs/testing/bpi-live-operations-evidence-acceptance.md",
+        "docs/backend-table-audit/bpi-live-telemetry-projection.md",
+        "metadata/bpi-live-operations-evidence-acceptance.json",
+        "metadata/bpi-live-operations-overview-target.png",
+        "metadata/bpi-live-operations-drawer-target.png"
       ]
     }
   ],
