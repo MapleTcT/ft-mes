@@ -236,7 +236,12 @@ async function waitForCoverage(api, ticket, runId) {
   let latest;
   while (Date.now() < deadline) {
     latest = await adapterGet(api, ticket, `/shadow-runs/${runId}`);
-    if (latest?.telemetryCoverage?.fullyCovered) return latest;
+    const coverage = latest?.telemetryCoverage;
+    if (coverage?.fullyCovered
+      && coverage.acceptedEventCount >= mqttCount
+      && coverage.acceptedObservationCount >= mqttCount) {
+      return latest;
+    }
     await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
   }
   throw new Error(`telemetry coverage did not become ready: ${JSON.stringify(latest?.telemetryCoverage)}`);
