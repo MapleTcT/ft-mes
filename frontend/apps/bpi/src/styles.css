@@ -258,6 +258,10 @@ td > svg { width: 16px; color: #8b96a1; }
 .shadow-coverage-grid span { color: var(--muted); font-size: 10px; }
 .shadow-coverage-grid b { overflow-wrap: anywhere; font-size: 12px; font-variant-numeric: tabular-nums; }
 .shadow-coverage-note { margin: 10px 0 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
+.shadow-telemetry-window { display: grid; grid-template-columns: 145px minmax(0, 1fr); gap: 10px; margin-top: 12px; padding: 9px 10px; border-left: 3px solid var(--blue); background: #f4f8fb; }
+.shadow-telemetry-window span { color: var(--muted); font-size: 10px; }
+.shadow-telemetry-window b { overflow-wrap: anywhere; color: #31556f; font-size: 10px; font-weight: 650; }
+.shadow-telemetry-facts { margin-top: 10px; }
 .shadow-training-policy { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 10px; margin-top: 12px; padding: 9px 10px; border-left: 3px solid var(--blue); background: #f4f8fb; }
 .shadow-training-policy span { color: var(--muted); font-size: 10px; }
 .shadow-training-policy code { overflow-wrap: anywhere; color: #31556f; font-size: 9px; }
@@ -683,6 +687,7 @@ td > svg { width: 16px; color: #8b96a1; }
   .shadow-run-toolbar .icon-text-button { grid-column: 1 / -1; }
   .shadow-metric-grid { grid-template-columns: 1fr; }
   .shadow-coverage-grid { grid-template-columns: 1fr; }
+  .shadow-telemetry-window { grid-template-columns: 1fr; }
   .shadow-training-policy { grid-template-columns: 1fr; }
   .data-quality-state-summary > div { border-bottom: 1px solid var(--line); }
   .data-quality-category-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }

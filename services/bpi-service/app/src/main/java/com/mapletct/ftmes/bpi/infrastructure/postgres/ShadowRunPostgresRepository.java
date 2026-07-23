@@ -9,6 +9,7 @@ import com.mapletct.ftmes.bpi.domain.ShadowRunBatchSource;
 import com.mapletct.ftmes.bpi.domain.ShadowRunMetrics;
 import com.mapletct.ftmes.bpi.domain.ShadowRunReadiness;
 import com.mapletct.ftmes.bpi.domain.ShadowRunSourceCoverage;
+import com.mapletct.ftmes.bpi.domain.ShadowRunTelemetryCoverage;
 import com.mapletct.ftmes.bpi.domain.ShadowRunTrainingDataCoverage;
 import com.mapletct.ftmes.bpi.domain.ShadowRunView;
 import com.mapletct.ftmes.bpi.interfaces.rest.ShadowRunCreateCommand;
@@ -57,6 +58,31 @@ public class ShadowRunPostgresRepository {
                    COALESCE(source_coverage.approved_calibration_point_count, 0)
                        AS approved_calibration_point_count,
                    COALESCE(source_coverage.ready_point_count, 0) AS ready_point_count,
+                   sr.started_at IS NOT NULL AS telemetry_window_started,
+                   sr.started_at AS telemetry_window_start,
+                   CASE WHEN sr.started_at IS NULL THEN NULL
+                        ELSE COALESCE(sr.completed_at, now())
+                   END AS telemetry_window_end,
+                   COALESCE(telemetry_coverage.observed_point_count, 0)
+                       AS telemetry_observed_point_count,
+                   COALESCE(telemetry_coverage.authoritative_sequence_point_count, 0)
+                       AS telemetry_authoritative_sequence_point_count,
+                   COALESCE(telemetry_coverage.calibrated_point_count, 0)
+                       AS telemetry_calibrated_point_count,
+                   COALESCE(telemetry_coverage.good_quality_point_count, 0)
+                       AS telemetry_good_quality_point_count,
+                   COALESCE(telemetry_coverage.accepted_event_count, 0)
+                       AS telemetry_accepted_event_count,
+                   COALESCE(telemetry_coverage.accepted_observation_count, 0)
+                       AS telemetry_accepted_observation_count,
+                   COALESCE(telemetry_coverage.rejected_observation_count, 0)
+                       AS telemetry_rejected_observation_count,
+                   COALESCE(telemetry_coverage.gap_event_count, 0)
+                       AS telemetry_gap_event_count,
+                   COALESCE(telemetry_coverage.out_of_order_event_count, 0)
+                       AS telemetry_out_of_order_event_count,
+                   telemetry_coverage.first_observed_at AS telemetry_first_observed_at,
+                   telemetry_coverage.last_observed_at AS telemetry_last_observed_at,
                    current_snapshot.id AS current_point_catalog_snapshot_id,
                    COALESCE(lifecycle.lifecycle_action, 'NOT_PUBLISHED') AS lifecycle_action,
                    COALESCE(lifecycle.lifecycle_active, false) AS lifecycle_active,
@@ -169,6 +195,72 @@ public class ShadowRunPostgresRepository {
                            AND entry.snapshot_id = snapshot.id
                     ) point
               ) source_coverage ON true
+              LEFT JOIN LATERAL (
+                  SELECT (count(DISTINCT entry.id) FILTER (
+                             WHERE telemetry_point.id IS NOT NULL))::integer
+                             AS observed_point_count,
+                         (count(DISTINCT entry.id) FILTER (
+                             WHERE telemetry_point.id IS NOT NULL
+                               AND telemetry_event.sequence_origin = entry.source_sequence_origin
+                               AND telemetry_event.source_epoch > 0
+                               AND telemetry_event.sequence > 0))::integer
+                             AS authoritative_sequence_point_count,
+                         (count(DISTINCT entry.id) FILTER (
+                             WHERE telemetry_point.id IS NOT NULL
+                               AND entry.calibration_version IS NOT NULL
+                               AND btrim(entry.calibration_version) <> ''
+                               AND telemetry_point.calibration_version
+                                   = entry.calibration_version))::integer
+                             AS calibrated_point_count,
+                         (count(DISTINCT entry.id) FILTER (
+                             WHERE telemetry_point.id IS NOT NULL
+                               AND telemetry_point.quality_code = 'GOOD'))::integer
+                             AS good_quality_point_count,
+                         count(DISTINCT telemetry_event.id) FILTER (
+                             WHERE telemetry_point.id IS NOT NULL
+                               AND telemetry_event.accepted_point_count > 0)
+                             AS accepted_event_count,
+                         count(DISTINCT telemetry_point.id) AS accepted_observation_count,
+                         count(DISTINCT telemetry_reject.id) AS rejected_observation_count,
+                         count(DISTINCT telemetry_event.id) FILTER (
+                             WHERE telemetry_point.id IS NOT NULL
+                               AND telemetry_event.sequence_disposition = 'GAP')
+                             AS gap_event_count,
+                         count(DISTINCT telemetry_event.id) FILTER (
+                             WHERE telemetry_point.id IS NOT NULL
+                               AND telemetry_event.sequence_disposition = 'OUT_OF_ORDER')
+                             AS out_of_order_event_count,
+                         min(telemetry_point.sample_time) AS first_observed_at,
+                         max(telemetry_point.sample_time) AS last_observed_at
+                    FROM bpi.bpi_point_catalog_entries entry
+                    LEFT JOIN bpi.bpi_telemetry_events telemetry_event
+                      ON sr.started_at IS NOT NULL
+                     AND telemetry_event.tenant_id = entry.tenant_id
+                     AND telemetry_event.plant_id = entry.plant_id
+                     AND telemetry_event.line_id = entry.line_id
+                     AND telemetry_event.product_id = entry.product_id
+                     AND telemetry_event.device_id = entry.device_id
+                     AND telemetry_event.event_time >= sr.started_at
+                     AND telemetry_event.event_time <= COALESCE(sr.completed_at, now())
+                     AND telemetry_event.created_at >= sr.started_at
+                     AND telemetry_event.created_at <= COALESCE(sr.completed_at, now())
+                    LEFT JOIN bpi.bpi_telemetry_points telemetry_point
+                      ON telemetry_point.tenant_id = telemetry_event.tenant_id
+                     AND telemetry_point.telemetry_event_id = telemetry_event.id
+                     AND telemetry_point.property_id = entry.property_id
+                     AND telemetry_point.sample_time >= sr.started_at
+                     AND telemetry_point.sample_time <= COALESCE(sr.completed_at, now())
+                     AND telemetry_point.created_at >= sr.started_at
+                     AND telemetry_point.created_at <= COALESCE(sr.completed_at, now())
+                    LEFT JOIN bpi.bpi_telemetry_point_rejects telemetry_reject
+                      ON telemetry_reject.tenant_id = telemetry_event.tenant_id
+                     AND telemetry_reject.telemetry_event_id = telemetry_event.id
+                     AND telemetry_reject.property_id = entry.property_id
+                     AND telemetry_reject.created_at >= sr.started_at
+                     AND telemetry_reject.created_at <= COALESCE(sr.completed_at, now())
+                   WHERE entry.tenant_id = snapshot.tenant_id
+                     AND entry.snapshot_id = snapshot.id
+              ) telemetry_coverage ON true
               LEFT JOIN LATERAL (
                   SELECT event.lifecycle_action, event.lifecycle_active, event.status,
                          event.application_status, event.runtime_readiness_status
@@ -600,6 +692,8 @@ public class ShadowRunPostgresRepository {
                         && equalString(rs, "validated_point_catalog_checksum", "point_catalog_checksum"),
                 equalUuid(rs, "current_point_catalog_snapshot_id", "point_catalog_snapshot_id"),
                 sourceCoverage.fullyReady());
+        ShadowRunTelemetryCoverage telemetryCoverage = telemetryCoverage(
+                rs, pinnedPointCount);
 
         long duration = rs.getLong("observed_duration_seconds");
         int reviewed = rs.getInt("reviewed_batch_count");
@@ -642,7 +736,7 @@ public class ShadowRunPostgresRepository {
                 REQUIRED_TRAINING_REJECTED_START_LABELS, rejectedStartLabels,
                 trainingCoverageBlockers.isEmpty(), List.copyOf(trainingCoverageBlockers));
 
-        List<String> blockers = blockers(readiness, metrics);
+        List<String> blockers = blockers(readiness, telemetryCoverage, metrics);
         String state = rs.getString("state");
         boolean readyForApproval = "EVALUATING".equals(state) && blockers.isEmpty();
         return new ShadowRunView(
@@ -658,8 +752,61 @@ public class ShadowRunPostgresRepository {
                 rs.getString("completed_by"), instant(rs, "completed_at"), rs.getString("decided_by"),
                 instant(rs, "decided_at"), rs.getString("decision_reason"), rs.getString("cancelled_by"),
                 instant(rs, "cancelled_at"), rs.getString("cancellation_reason"),
-                readiness, sourceCoverage, metrics, trainingDataCoverage,
+                readiness, sourceCoverage, telemetryCoverage, metrics, trainingDataCoverage,
                 List.copyOf(blockers), readyForApproval);
+    }
+
+    private ShadowRunTelemetryCoverage telemetryCoverage(
+            ResultSet rs, int pinnedPointCount) throws SQLException {
+        boolean windowStarted = rs.getBoolean("telemetry_window_started");
+        int observedPointCount = rs.getInt("telemetry_observed_point_count");
+        int authoritativeSequencePointCount =
+                rs.getInt("telemetry_authoritative_sequence_point_count");
+        int calibratedPointCount = rs.getInt("telemetry_calibrated_point_count");
+        int goodQualityPointCount = rs.getInt("telemetry_good_quality_point_count");
+        long gapEventCount = rs.getLong("telemetry_gap_event_count");
+        long outOfOrderEventCount = rs.getLong("telemetry_out_of_order_event_count");
+        List<String> blockers = new ArrayList<>();
+        if (!windowStarted) {
+            blockers.add("TELEMETRY_WINDOW_NOT_STARTED");
+        } else {
+            if (pinnedPointCount <= 0 || observedPointCount < pinnedPointCount) {
+                blockers.add("TELEMETRY_POINTS_NOT_OBSERVED");
+            }
+            if (pinnedPointCount <= 0 || authoritativeSequencePointCount < pinnedPointCount) {
+                blockers.add("TELEMETRY_AUTHORITATIVE_SEQUENCE_INCOMPLETE");
+            }
+            if (pinnedPointCount <= 0 || calibratedPointCount < pinnedPointCount) {
+                blockers.add("TELEMETRY_CALIBRATION_INCOMPLETE");
+            }
+            if (pinnedPointCount <= 0 || goodQualityPointCount < pinnedPointCount) {
+                blockers.add("TELEMETRY_GOOD_QUALITY_INCOMPLETE");
+            }
+            if (gapEventCount > 0) {
+                blockers.add("TELEMETRY_SEQUENCE_GAP_DETECTED");
+            }
+            if (outOfOrderEventCount > 0) {
+                blockers.add("TELEMETRY_OUT_OF_ORDER_DETECTED");
+            }
+        }
+        return new ShadowRunTelemetryCoverage(
+                windowStarted,
+                instant(rs, "telemetry_window_start"),
+                instant(rs, "telemetry_window_end"),
+                pinnedPointCount,
+                observedPointCount,
+                authoritativeSequencePointCount,
+                calibratedPointCount,
+                goodQualityPointCount,
+                rs.getLong("telemetry_accepted_event_count"),
+                rs.getLong("telemetry_accepted_observation_count"),
+                rs.getLong("telemetry_rejected_observation_count"),
+                gapEventCount,
+                outOfOrderEventCount,
+                instant(rs, "telemetry_first_observed_at"),
+                instant(rs, "telemetry_last_observed_at"),
+                windowStarted && pinnedPointCount > 0 && blockers.isEmpty(),
+                List.copyOf(blockers));
     }
 
     private List<String> trainingDataCoverageBlockers(
@@ -683,7 +830,10 @@ public class ShadowRunPostgresRepository {
         return blockers;
     }
 
-    private List<String> blockers(ShadowRunReadiness readiness, ShadowRunMetrics metrics) {
+    private List<String> blockers(
+            ShadowRunReadiness readiness,
+            ShadowRunTelemetryCoverage telemetryCoverage,
+            ShadowRunMetrics metrics) {
         List<String> blockers = new ArrayList<>();
         if (!readiness.rulePublished()) blockers.add("RULE_NOT_PUBLISHED");
         if (!readiness.ruleActive()) blockers.add("RULE_NOT_ACTIVE");
@@ -694,6 +844,7 @@ public class ShadowRunPostgresRepository {
         if (!readiness.topologySnapshotPinned()) blockers.add("TOPOLOGY_POINT_CATALOG_MISMATCH");
         if (!readiness.pointCatalogCurrent()) blockers.add("POINT_CATALOG_NOT_CURRENT");
         if (!readiness.pointCatalogReady()) blockers.add("POINT_CATALOG_NOT_READY");
+        blockers.addAll(telemetryCoverage.blockers());
         if (!metrics.durationGatePassed()) blockers.add("MINIMUM_DURATION_NOT_REACHED");
         if (!metrics.reviewCountGatePassed()) blockers.add("MINIMUM_BATCH_REVIEWS_NOT_REACHED");
         if (!metrics.boundaryAgreementGatePassed()) blockers.add("BOUNDARY_AGREEMENT_BELOW_THRESHOLD");

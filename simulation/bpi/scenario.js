@@ -334,6 +334,7 @@ function createScenario() {
     forceCloseTasks: new Map(),
     shadowRuns: [],
     shadowRunReviews: [],
+    telemetryEvents: [],
     topology,
     topologies: [topology],
     pointCatalog,

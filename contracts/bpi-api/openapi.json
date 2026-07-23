@@ -1222,6 +1222,29 @@
           "fullyReady": {"type": "boolean"}
         }
       },
+      "ShadowRunTelemetryCoverage": {
+        "type": "object",
+        "required": ["windowStarted", "windowStart", "windowEnd", "pinnedPointCount", "observedPointCount", "authoritativeSequencePointCount", "calibratedPointCount", "goodQualityPointCount", "acceptedEventCount", "acceptedObservationCount", "rejectedObservationCount", "gapEventCount", "outOfOrderEventCount", "firstObservedAt", "lastObservedAt", "fullyCovered", "blockers"],
+        "properties": {
+          "windowStarted": {"type": "boolean"},
+          "windowStart": {"type": ["string", "null"], "format": "date-time"},
+          "windowEnd": {"type": ["string", "null"], "format": "date-time"},
+          "pinnedPointCount": {"type": "integer", "minimum": 0},
+          "observedPointCount": {"type": "integer", "minimum": 0},
+          "authoritativeSequencePointCount": {"type": "integer", "minimum": 0},
+          "calibratedPointCount": {"type": "integer", "minimum": 0},
+          "goodQualityPointCount": {"type": "integer", "minimum": 0},
+          "acceptedEventCount": {"type": "integer", "format": "int64", "minimum": 0},
+          "acceptedObservationCount": {"type": "integer", "format": "int64", "minimum": 0},
+          "rejectedObservationCount": {"type": "integer", "format": "int64", "minimum": 0},
+          "gapEventCount": {"type": "integer", "format": "int64", "minimum": 0},
+          "outOfOrderEventCount": {"type": "integer", "format": "int64", "minimum": 0},
+          "firstObservedAt": {"type": ["string", "null"], "format": "date-time"},
+          "lastObservedAt": {"type": ["string", "null"], "format": "date-time"},
+          "fullyCovered": {"type": "boolean"},
+          "blockers": {"type": "array", "items": {"type": "string"}}
+        }
+      },
       "ShadowRunMetrics": {
         "type": "object",
         "required": ["observedDurationSeconds", "reviewedBatchCount", "acceptedBoundaryCount", "totalBoundaryCount", "boundaryAgreement", "quantitySampleCount", "automaticQuantityTotal", "referenceQuantityTotal", "quantityUnit", "cumulativeQuantityDeviationPercent", "meanQuantityDeviationPercent", "maximumQuantityDeviationPercent", "unresolvedCriticalIncidentCount", "durationGatePassed", "reviewCountGatePassed", "boundaryAgreementGatePassed", "quantityGatePassed", "dataQualityGatePassed"],
@@ -1254,7 +1277,7 @@
       },
       "ShadowRun": {
         "type": "object",
-        "required": ["id", "runCode", "name", "tenantId", "plantId", "lineId", "state", "revision", "ruleVersionId", "ruleVersion", "topologyVersionId", "topologyVersion", "pointCatalogSnapshotId", "pointCatalogChecksum", "minimumDurationDays", "minimumReviewedBatches", "boundaryToleranceSeconds", "minimumBoundaryAgreement", "quantityTolerancePercent", "createdBy", "createdAt", "readiness", "sourceCoverage", "metrics", "trainingDataCoverage", "blockers", "readyForApproval"],
+        "required": ["id", "runCode", "name", "tenantId", "plantId", "lineId", "state", "revision", "ruleVersionId", "ruleVersion", "topologyVersionId", "topologyVersion", "pointCatalogSnapshotId", "pointCatalogChecksum", "minimumDurationDays", "minimumReviewedBatches", "boundaryToleranceSeconds", "minimumBoundaryAgreement", "quantityTolerancePercent", "createdBy", "createdAt", "readiness", "sourceCoverage", "telemetryCoverage", "metrics", "trainingDataCoverage", "blockers", "readyForApproval"],
         "properties": {
           "id": {"type": "string", "format": "uuid"}, "runCode": {"type": "string"}, "name": {"type": "string"}, "tenantId": {"type": "string"},
           "plantId": {"type": "string"}, "lineId": {"type": "string"}, "state": {"type": "string", "enum": ["DRAFT", "RUNNING", "EVALUATING", "APPROVED", "REJECTED", "CANCELLED"]},
@@ -1265,7 +1288,7 @@
           "createdBy": {"type": "string"}, "createdAt": {"type": "string", "format": "date-time"}, "startedBy": {"type": ["string", "null"]}, "startedAt": {"type": ["string", "null"], "format": "date-time"},
           "completedBy": {"type": ["string", "null"]}, "completedAt": {"type": ["string", "null"], "format": "date-time"}, "decidedBy": {"type": ["string", "null"]}, "decidedAt": {"type": ["string", "null"], "format": "date-time"},
           "decisionReason": {"type": ["string", "null"]}, "cancelledBy": {"type": ["string", "null"]}, "cancelledAt": {"type": ["string", "null"], "format": "date-time"}, "cancellationReason": {"type": ["string", "null"]},
-          "readiness": {"$ref": "#/components/schemas/ShadowRunReadiness"}, "sourceCoverage": {"$ref": "#/components/schemas/ShadowRunSourceCoverage"},
+          "readiness": {"$ref": "#/components/schemas/ShadowRunReadiness"}, "sourceCoverage": {"$ref": "#/components/schemas/ShadowRunSourceCoverage"}, "telemetryCoverage": {"$ref": "#/components/schemas/ShadowRunTelemetryCoverage"},
           "metrics": {"$ref": "#/components/schemas/ShadowRunMetrics"}, "trainingDataCoverage": {"$ref": "#/components/schemas/ShadowRunTrainingDataCoverage"},
           "blockers": {"type": "array", "items": {"type": "string"}}, "readyForApproval": {"type": "boolean"}
         }

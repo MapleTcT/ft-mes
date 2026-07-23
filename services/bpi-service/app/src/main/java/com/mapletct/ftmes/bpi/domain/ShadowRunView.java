@@ -39,6 +39,7 @@ public record ShadowRunView(
         String cancellationReason,
         ShadowRunReadiness readiness,
         ShadowRunSourceCoverage sourceCoverage,
+        ShadowRunTelemetryCoverage telemetryCoverage,
         ShadowRunMetrics metrics,
         ShadowRunTrainingDataCoverage trainingDataCoverage,
         List<String> blockers,

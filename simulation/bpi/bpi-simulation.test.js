@@ -1947,6 +1947,13 @@ test('shadow run acceptance is version-pinned, review-driven and fail-closed on 
       readyPointCount: 2,
       fullyReady: true,
     });
+    assert.equal(response.json.data.telemetryCoverage.windowStarted, false);
+    assert.equal(response.json.data.telemetryCoverage.pinnedPointCount, 2);
+    assert.equal(response.json.data.telemetryCoverage.observedPointCount, 0);
+    assert.equal(response.json.data.telemetryCoverage.fullyCovered, false);
+    assert.deepEqual(response.json.data.telemetryCoverage.blockers, [
+      'TELEMETRY_WINDOW_NOT_STARTED',
+    ]);
     assert.equal(
       response.json.data.trainingDataCoverage.policyVersion,
       'bpi-training-data-coverage/batch-start-boundary-v1',
@@ -1972,6 +1979,17 @@ test('shadow run acceptance is version-pinned, review-driven and fail-closed on 
     run = response.json.data;
     assert.equal(run.state, 'RUNNING');
     assert.equal(run.metrics.durationGatePassed, true);
+    assert.equal(run.telemetryCoverage.windowStarted, true);
+    assert.equal(run.telemetryCoverage.observedPointCount, 2);
+    assert.equal(run.telemetryCoverage.authoritativeSequencePointCount, 2);
+    assert.equal(run.telemetryCoverage.calibratedPointCount, 2);
+    assert.equal(run.telemetryCoverage.goodQualityPointCount, 2);
+    assert.equal(run.telemetryCoverage.acceptedEventCount, 1);
+    assert.equal(run.telemetryCoverage.acceptedObservationCount, 2);
+    assert.equal(run.telemetryCoverage.gapEventCount, 0);
+    assert.equal(run.telemetryCoverage.outOfOrderEventCount, 0);
+    assert.equal(run.telemetryCoverage.fullyCovered, true);
+    assert.deepEqual(run.telemetryCoverage.blockers, []);
 
     response = await request('GET', `/bpi/v1/shadow-runs/${run.id}/batch-reviews`);
     assert.deepEqual(response.json.data, []);

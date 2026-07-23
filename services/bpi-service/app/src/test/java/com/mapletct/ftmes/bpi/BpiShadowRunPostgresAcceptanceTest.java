@@ -155,6 +155,10 @@ class BpiShadowRunPostgresAcceptanceTest {
         if (tenantId == null) return;
         jdbc.update("DELETE FROM bpi.bpi_shadow_run_batch_reviews WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_shadow_runs WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_telemetry_point_rejects WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_telemetry_points WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_telemetry_events WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_telemetry_source_state WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_data_quality_incident_actions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_data_quality_incident_events WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_data_quality_incidents WHERE tenant_id = ?", tenantId);
@@ -211,6 +215,12 @@ class BpiShadowRunPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.sourceCoverage.approvedCalibrationPointCount").value(1))
                 .andExpect(jsonPath("$.data.sourceCoverage.readyPointCount").value(1))
                 .andExpect(jsonPath("$.data.sourceCoverage.fullyReady").value(true))
+                .andExpect(jsonPath("$.data.telemetryCoverage.windowStarted").value(false))
+                .andExpect(jsonPath("$.data.telemetryCoverage.pinnedPointCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.observedPointCount").value(0))
+                .andExpect(jsonPath("$.data.telemetryCoverage.fullyCovered").value(false))
+                .andExpect(jsonPath("$.data.telemetryCoverage.blockers[*]")
+                        .value(hasItem("TELEMETRY_WINDOW_NOT_STARTED")))
                 .andExpect(jsonPath("$.data.trainingDataCoverage.policyVersion")
                         .value("bpi-training-data-coverage/batch-start-boundary-v1"))
                 .andExpect(jsonPath("$.data.trainingDataCoverage.reviewedBatchCount").value(0))
@@ -253,7 +263,11 @@ class BpiShadowRunPostgresAcceptanceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.state").value("RUNNING"))
                 .andExpect(jsonPath("$.data.revision").value(2))
-                .andExpect(jsonPath("$.data.readiness.ready").value(true));
+                .andExpect(jsonPath("$.data.readiness.ready").value(true))
+                .andExpect(jsonPath("$.data.telemetryCoverage.windowStarted").value(true))
+                .andExpect(jsonPath("$.data.telemetryCoverage.observedPointCount").value(0))
+                .andExpect(jsonPath("$.data.blockers[*]")
+                        .value(hasItem("TELEMETRY_POINTS_NOT_OBSERVED")));
 
         List<BatchFixture> batches = insertClosedShadowBatches();
         long revision = 2;
@@ -309,6 +323,9 @@ class BpiShadowRunPostgresAcceptanceTest {
                        started_at = now() - interval '7 days 1 minute'
                  WHERE tenant_id = ? AND id = ?
                 """, tenantId, runId);
+        insertTelemetryObservation(
+                "MAIN", Instant.now().minusSeconds(30), Instant.now(),
+                100L, "IN_ORDER", "GOOD", "CAL-SHADOW-1");
         UUID incidentId = insertCriticalIncident();
         mockMvc.perform(post("/bpi/v1/shadow-runs/{id}/complete", runId)
                         .header("Authorization", "Bearer " + authorToken)
@@ -325,6 +342,16 @@ class BpiShadowRunPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.metrics.boundaryAgreement").value(0.95))
                 .andExpect(jsonPath("$.data.metrics.quantityGatePassed").value(true))
                 .andExpect(jsonPath("$.data.metrics.unresolvedCriticalIncidentCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.observedPointCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.authoritativeSequencePointCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.calibratedPointCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.goodQualityPointCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.acceptedEventCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.acceptedObservationCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.gapEventCount").value(0))
+                .andExpect(jsonPath("$.data.telemetryCoverage.outOfOrderEventCount").value(0))
+                .andExpect(jsonPath("$.data.telemetryCoverage.fullyCovered").value(true))
+                .andExpect(jsonPath("$.data.telemetryCoverage.blockers.length()").value(0))
                 .andExpect(jsonPath("$.data.trainingDataCoverage.reviewedBatchCount").value(10))
                 .andExpect(jsonPath("$.data.trainingDataCoverage.acceptedStartLabelCount").value(9))
                 .andExpect(jsonPath("$.data.trainingDataCoverage.rejectedStartLabelCount").value(1))
@@ -392,6 +419,52 @@ class BpiShadowRunPostgresAcceptanceTest {
                                   'SHADOW_RUN_BATCH_REVIEWED', 'SHADOW_RUN_COMPLETED',
                                   'SHADOW_RUN_APPROVED')
                 """, Integer.class, tenantId)).isEqualTo(14);
+    }
+
+    @Test
+    void telemetryCoverageRejectsPreWindowPersistenceAndSurfacesSequenceGaps() throws Exception {
+        UUID runId = UUID.randomUUID();
+        Instant createdAt = Instant.now().minusSeconds(7_200);
+        Instant startedAt = Instant.now().minusSeconds(3_600);
+        jdbc.update("""
+                INSERT INTO bpi.bpi_shadow_runs
+                    (id, tenant_id, run_code, name, plant_id, line_id, state, revision,
+                     rule_version_id, topology_version_id, point_catalog_snapshot_id,
+                     minimum_duration_days, minimum_reviewed_batches,
+                     boundary_tolerance_seconds, minimum_boundary_agreement,
+                     quantity_tolerance_percent, created_by, created_at, updated_by,
+                     started_by, started_at)
+                VALUES (?, ?, ?, 'Telemetry coverage projection', ?, ?, 'RUNNING', 1,
+                        ?, ?, ?, 7, 10, 60, 0.950000, 2.000000,
+                        'fixture-author', ?, 'fixture-author', 'fixture-author', ?)
+                """, runId, tenantId, "TELEMETRY-" + tenantId.substring(tenantId.length() - 12),
+                PLANT_ID, LINE_ID, ruleId, topologyId, snapshotId,
+                Timestamp.from(createdAt), Timestamp.from(startedAt));
+
+        insertTelemetryObservation(
+                "OLD-REPLAY", startedAt.plusSeconds(1_200), startedAt.minusSeconds(60),
+                200L, "IN_ORDER", "GOOD", "CAL-SHADOW-1");
+        insertTelemetryObservation(
+                "GAP", startedAt.plusSeconds(1_800), startedAt.plusSeconds(1_801),
+                202L, "GAP", "GOOD", "CAL-SHADOW-1");
+
+        mockMvc.perform(get("/bpi/v1/shadow-runs/{id}", runId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.telemetryCoverage.windowStarted").value(true))
+                .andExpect(jsonPath("$.data.telemetryCoverage.pinnedPointCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.observedPointCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.authoritativeSequencePointCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.calibratedPointCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.goodQualityPointCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.acceptedEventCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.acceptedObservationCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.gapEventCount").value(1))
+                .andExpect(jsonPath("$.data.telemetryCoverage.fullyCovered").value(false))
+                .andExpect(jsonPath("$.data.telemetryCoverage.blockers[*]")
+                        .value(hasItem("TELEMETRY_SEQUENCE_GAP_DETECTED")))
+                .andExpect(jsonPath("$.data.blockers[*]")
+                        .value(hasItem("TELEMETRY_SEQUENCE_GAP_DETECTED")));
     }
 
     @Test
@@ -505,6 +578,38 @@ class BpiShadowRunPostgresAcceptanceTest {
                         now() - interval '1 hour', now(), ?, 'Sequence gap during shadow run')
                 """, id, tenantId, PLANT_ID, LINE_ID, tenantId + "_DQ");
         return id;
+    }
+
+    private void insertTelemetryObservation(
+            String suffix,
+            Instant eventTime,
+            Instant createdAt,
+            long sequence,
+            String sequenceDisposition,
+            String qualityCode,
+            String calibrationVersion) {
+        UUID eventRowId = UUID.randomUUID();
+        String eventId = tenantId + "_TELEMETRY_" + suffix;
+        jdbc.update("""
+                INSERT INTO bpi.bpi_telemetry_events
+                    (id, tenant_id, plant_id, line_id, gateway_id, product_id, device_id,
+                     event_id, message_id, event_time, ingest_time, source_epoch, sequence,
+                     sequence_origin, sequence_disposition, payload_checksum, headers,
+                     point_count, accepted_point_count, rejected_point_count, status, created_at)
+                VALUES (?, ?, ?, ?, 'GATEWAY-SHADOW', 'PRODUCT-SUGAR', 'DEVICE-SHADOW',
+                        ?, ?, ?, ?, 7, ?, 'DEVICE', ?, ?, '{}'::jsonb,
+                        1, 1, 0, 'ACCEPTED', ?)
+                """, eventRowId, tenantId, PLANT_ID, LINE_ID, eventId, eventId + "_MESSAGE",
+                Timestamp.from(eventTime), Timestamp.from(eventTime), BigDecimal.valueOf(sequence),
+                sequenceDisposition, "e".repeat(64), Timestamp.from(createdAt));
+        jdbc.update("""
+                INSERT INTO bpi.bpi_telemetry_points
+                    (id, tenant_id, telemetry_event_id, event_id, property_id, value_type,
+                     numeric_value, unit, quality_code, sample_time, calibration_version, created_at)
+                VALUES (?, ?, ?, ?, 'flow.instant', 'DOUBLE', 18.600000,
+                        't/h', ?, ?, ?, ?)
+                """, UUID.randomUUID(), tenantId, eventRowId, eventId, qualityCode,
+                Timestamp.from(eventTime), calibrationVersion, Timestamp.from(createdAt));
     }
 
     private void resolveCriticalIncident(UUID incidentId) {
