@@ -1,0 +1,392 @@
+#!/bin/sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+RELEASE_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/../../.." && pwd)
+RUNTIME_ROOT=${BPI_INTEGRATED_RUNTIME_ROOT:-}
+IOT_ROOT=${BPI_IOT_PILOT_ROOT:-}
+MARKER=${BPI_ACCEPTANCE_MARKER:-}
+CONFIRM=${BPI_TELEMETRY_ACCEPTANCE_CONFIRM:-}
+PLANT_ID=${BPI_PLANT_ID:-PLANT-01}
+LINE_ID=${BPI_LINE_ID:-LINE-S07-01}
+PRODUCT_ID=${BPI_PRODUCT_ID:-bpi-mqtt-pilot-product-01}
+DEVICE_ID=${BPI_DEVICE_ID:-bpi-mqtt-pilot-device-01}
+GATEWAY_ID=${BPI_GATEWAY_ID:-bpi-pilot-mqtt-gateway-01}
+PROPERTY_ID=${BPI_PROPERTY_ID:-flow.instant}
+CALIBRATION_VERSION=${BPI_CALIBRATION_VERSION:-pilot-telemetry-${MARKER}}
+SOURCE_EPOCH=${BPI_MQTT_SOURCE_EPOCH:-$(date -u +%Y%m%d%H%M%S)}
+PREHEAT_COUNT=${BPI_MQTT_PREHEAT_COUNT:-3}
+WINDOW_COUNT=${BPI_MQTT_COUNT:-2}
+WAIT_SECONDS=${BPI_TELEMETRY_ACCEPTANCE_WAIT_SECONDS:-240}
+EVIDENCE_DIR=${BPI_TELEMETRY_ACCEPTANCE_EVIDENCE_DIR:-}
+POSTGRES_CONTAINER=${BPI_POSTGRES_CONTAINER:-adp-mes-newbase-postgres-1}
+POSTGRES_USER=${BPI_POSTGRES_USER:-adp}
+POSTGRES_DATABASE=${BPI_POSTGRES_DATABASE:-ft_mes_bpi}
+
+if [ "$CONFIRM" != "RUN_CONTROLLED_TELEMETRY_LANDING_ACCEPTANCE" ]; then
+    printf '%s\n' \
+        'ERROR: set BPI_TELEMETRY_ACCEPTANCE_CONFIRM=RUN_CONTROLLED_TELEMETRY_LANDING_ACCEPTANCE' >&2
+    exit 1
+fi
+case "$RUNTIME_ROOT" in
+    /*) ;;
+    *) printf 'ERROR: BPI_INTEGRATED_RUNTIME_ROOT must be absolute\n' >&2; exit 1 ;;
+esac
+case "$IOT_ROOT" in
+    /*) ;;
+    *) printf 'ERROR: BPI_IOT_PILOT_ROOT must be absolute\n' >&2; exit 1 ;;
+esac
+case "$MARKER" in
+    ''|*[!A-Za-z0-9_-]*)
+        printf 'ERROR: BPI_ACCEPTANCE_MARKER must use letters, digits, underscores or hyphens\n' >&2
+        exit 1
+        ;;
+esac
+if [ "${#MARKER}" -lt 8 ] || [ "${#MARKER}" -gt 80 ]; then
+    printf 'ERROR: BPI_ACCEPTANCE_MARKER must contain 8-80 characters\n' >&2
+    exit 1
+fi
+case "$CALIBRATION_VERSION" in
+    ''|*[!A-Za-z0-9_.:-]*)
+        printf 'ERROR: BPI_CALIBRATION_VERSION contains unsupported characters\n' >&2
+        exit 1
+        ;;
+esac
+for identifier in \
+    "$PLANT_ID" "$LINE_ID" "$PRODUCT_ID" "$DEVICE_ID" "$GATEWAY_ID" "$PROPERTY_ID"; do
+    case "$identifier" in
+        ''|*[!A-Za-z0-9_.:-]*)
+            printf 'ERROR: scope and point identifiers contain unsupported characters\n' >&2
+            exit 1
+            ;;
+    esac
+done
+for value_name in SOURCE_EPOCH PREHEAT_COUNT WINDOW_COUNT WAIT_SECONDS; do
+    eval "value=\${$value_name}"
+    case "$value" in
+        ''|*[!0-9]*|0)
+            printf 'ERROR: %s must be a positive integer\n' "$value_name" >&2
+            exit 1
+            ;;
+    esac
+done
+test -n "${ADP_USERNAME:-}" || {
+    printf 'ERROR: ADP_USERNAME is required\n' >&2
+    exit 1
+}
+test -n "${ADP_PASSWORD:-}" || {
+    printf 'ERROR: ADP_PASSWORD is required\n' >&2
+    exit 1
+}
+
+RUNTIME_ENV="$RUNTIME_ROOT/deploy/docker/.env"
+IOT_ENV="$IOT_ROOT/.env"
+IOT_COMPOSE="$IOT_ROOT/docker-compose.yml"
+MAPPING="$IOT_ROOT/runtime/pilot-mapping.json"
+MAPPING_PROPERTIES="$IOT_ROOT/runtime/application-bpi-mapping.properties"
+RENDERER="$IOT_ROOT/scripts/render-pilot-mapping.py"
+PUBLISHER="$IOT_ROOT/scripts/publish-pilot-mqtt-telemetry.py"
+FIXTURE_SQL="$SCRIPT_DIR/bpi-telemetry-landing-acceptance-fixture.sql"
+VERIFY_SQL="$SCRIPT_DIR/bpi-telemetry-landing-acceptance-verification.sql"
+CLEANUP_SQL="$SCRIPT_DIR/bpi-telemetry-landing-acceptance-cleanup.sql"
+BROWSER_SCRIPT="$SCRIPT_DIR/adp-bpi-telemetry-landing-acceptance.js"
+PREHEAT_MARKER="${MARKER}_PREHEAT"
+WINDOW_MARKER="${MARKER}_WINDOW"
+
+for path in \
+    "$RUNTIME_ENV" "$IOT_ENV" "$IOT_COMPOSE" "$MAPPING" "$MAPPING_PROPERTIES" \
+    "$RENDERER" "$PUBLISHER" "$FIXTURE_SQL" "$VERIFY_SQL" "$CLEANUP_SQL" \
+    "$BROWSER_SCRIPT"; do
+    test -f "$path" || {
+        printf 'ERROR: required acceptance path is missing: %s\n' "$path" >&2
+        exit 1
+    }
+done
+for command_name in docker node python3 sha256sum; do
+    command -v "$command_name" >/dev/null 2>&1 || {
+        printf 'ERROR: required command is unavailable: %s\n' "$command_name" >&2
+        exit 1
+    }
+done
+
+if [ -z "$EVIDENCE_DIR" ]; then
+    EVIDENCE_DIR="$RUNTIME_ROOT/backups/bpi-telemetry-landing-$MARKER"
+fi
+case "$EVIDENCE_DIR" in
+    /*) ;;
+    *) printf 'ERROR: BPI_TELEMETRY_ACCEPTANCE_EVIDENCE_DIR must be absolute\n' >&2; exit 1 ;;
+esac
+mkdir -p "$EVIDENCE_DIR"
+chmod 700 "$EVIDENCE_DIR"
+MAPPING_BACKUP="$EVIDENCE_DIR/pilot-mapping-before.json"
+PROPERTIES_BACKUP="$EVIDENCE_DIR/application-bpi-mapping-before.properties"
+cp "$MAPPING" "$MAPPING_BACKUP"
+cp "$MAPPING_PROPERTIES" "$PROPERTIES_BACKUP"
+chmod 600 "$MAPPING_BACKUP" "$PROPERTIES_BACKUP"
+
+ORIGINAL_CALIBRATION_VERSION=$(python3 - "$MAPPING_BACKUP" "$DEVICE_ID" "$PROPERTY_ID" <<'PY'
+import json
+import sys
+
+mapping = json.load(open(sys.argv[1], encoding="utf-8"))
+matches = [
+    point
+    for device in mapping["devices"]
+    if device["deviceId"] == sys.argv[2]
+    for point in device["points"]
+    if point["targetPropertyId"] == sys.argv[3]
+]
+if len(matches) != 1:
+    raise SystemExit("controlled mapping does not contain exactly one target point")
+print(matches[0]["calibrationVersion"])
+PY
+)
+
+iot_compose() {
+    docker compose --env-file "$IOT_ENV" -f "$IOT_COMPOSE" "$@"
+}
+
+postgres() {
+    docker exec -i "$POSTGRES_CONTAINER" \
+        psql -X -U "$POSTGRES_USER" -d "$POSTGRES_DATABASE" "$@"
+}
+
+wait_for_jetlinks() {
+    deadline=$(( $(date +%s) + WAIT_SECONDS ))
+    while [ "$(date +%s)" -lt "$deadline" ]; do
+        container_id=$(iot_compose ps -q jetlinks)
+        if [ -n "$container_id" ]; then
+            state=$(docker inspect --format \
+                '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' \
+                "$container_id" 2>/dev/null || true)
+            if [ "$state" = healthy ]; then
+                return 0
+            fi
+        fi
+        sleep 2
+    done
+    printf 'ERROR: JetLinks did not become healthy within %s seconds\n' "$WAIT_SECONDS" >&2
+    iot_compose logs --tail 160 jetlinks >&2 || true
+    return 1
+}
+
+wait_for_catalog_version() {
+    expected=$1
+    deadline=$(( $(date +%s) + WAIT_SECONDS ))
+    while [ "$(date +%s)" -lt "$deadline" ]; do
+        current=$(postgres -Atc "
+            WITH snapshot AS (
+                SELECT *
+                  FROM bpi.bpi_point_catalog_snapshots
+                 WHERE tenant_id = '1000'
+                   AND plant_id = '$PLANT_ID'
+                   AND line_id = '$LINE_ID'
+                 ORDER BY observed_at DESC, imported_at DESC, id
+                 LIMIT 1
+            )
+            SELECT COALESCE(entry.calibration_version, '')
+              FROM snapshot
+              JOIN bpi.bpi_point_catalog_entries entry
+                ON entry.tenant_id = snapshot.tenant_id
+               AND entry.snapshot_id = snapshot.id
+             WHERE entry.product_id = '$PRODUCT_ID'
+               AND entry.device_id = '$DEVICE_ID'
+               AND entry.property_id = '$PROPERTY_ID';
+        " 2>/dev/null || true)
+        if [ "$current" = "$expected" ]; then
+            return 0
+        fi
+        sleep 2
+    done
+    printf 'ERROR: latest point catalog did not reach calibration version %s\n' "$expected" >&2
+    return 1
+}
+
+wait_for_source_sequence() {
+    deadline=$(( $(date +%s) + WAIT_SECONDS ))
+    while [ "$(date +%s)" -lt "$deadline" ]; do
+        qualified=$(postgres -Atc "
+            WITH snapshot AS (
+                SELECT *
+                  FROM bpi.bpi_point_catalog_snapshots
+                 WHERE tenant_id = '1000'
+                   AND plant_id = '$PLANT_ID'
+                   AND line_id = '$LINE_ID'
+                 ORDER BY observed_at DESC, imported_at DESC, id
+                 LIMIT 1
+            ), point AS (
+                SELECT entry.*
+                  FROM snapshot
+                  JOIN bpi.bpi_point_catalog_entries entry
+                    ON entry.tenant_id = snapshot.tenant_id
+                   AND entry.snapshot_id = snapshot.id
+                 WHERE entry.product_id = '$PRODUCT_ID'
+                   AND entry.device_id = '$DEVICE_ID'
+                   AND entry.property_id = '$PROPERTY_ID'
+            )
+            SELECT EXISTS (
+                SELECT 1
+                  FROM snapshot
+                  JOIN point ON true
+                  JOIN bpi.bpi_source_sequence_evidence_current evidence
+                    ON evidence.tenant_id = point.tenant_id
+                   AND evidence.source = snapshot.source
+                   AND evidence.source_instance = snapshot.source_instance
+                   AND evidence.plant_id = point.plant_id
+                   AND evidence.line_id = point.line_id
+                   AND evidence.product_id = point.product_id
+                   AND evidence.device_id = point.device_id
+                   AND evidence.binding_fingerprint = point.source_sequence_binding_fingerprint
+                   AND evidence.status = 'QUALIFIED'
+                   AND evidence.sequence_origin = point.source_sequence_origin
+                   AND evidence.observed_at >= snapshot.observed_at
+                   AND evidence.valid_until > now()
+            );
+        " 2>/dev/null || true)
+        if [ "$qualified" = t ]; then
+            return 0
+        fi
+        sleep 2
+    done
+    printf 'ERROR: source sequence evidence did not become QUALIFIED\n' >&2
+    return 1
+}
+
+restore_mapping() {
+    cp "$MAPPING_BACKUP" "$MAPPING"
+    cp "$PROPERTIES_BACKUP" "$MAPPING_PROPERTIES"
+    chmod 600 "$MAPPING_PROPERTIES"
+    iot_compose up -d --no-deps --force-recreate jetlinks >/dev/null
+    wait_for_jetlinks
+    wait_for_catalog_version "$ORIGINAL_CALIBRATION_VERSION"
+}
+
+fixture_applied=false
+mapping_modified=false
+cleanup() {
+    exit_code=$?
+    trap - EXIT HUP INT TERM
+    if [ "$mapping_modified" = true ]; then
+        restore_mapping || exit_code=1
+    fi
+    if [ "$fixture_applied" = true ]; then
+        postgres \
+            -v "marker=$MARKER" \
+            -v "plant_id=$PLANT_ID" \
+            -v "line_id=$LINE_ID" \
+            -v "product_id=$PRODUCT_ID" \
+            -v "device_id=$DEVICE_ID" \
+            -v "gateway_id=$GATEWAY_ID" \
+            -v "property_id=$PROPERTY_ID" \
+            -v "calibration_version=$CALIBRATION_VERSION" \
+            -v "preheat_marker=$PREHEAT_MARKER" \
+            -v "window_marker=$WINDOW_MARKER" \
+            <"$CLEANUP_SQL" >"$EVIDENCE_DIR/cleanup.json.txt" || exit_code=1
+    fi
+    exit "$exit_code"
+}
+trap cleanup EXIT HUP INT TERM
+
+python3 - "$MAPPING" "$DEVICE_ID" "$PROPERTY_ID" "$CALIBRATION_VERSION" <<'PY'
+import json
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+path = Path(sys.argv[1])
+mapping = json.loads(path.read_text(encoding="utf-8"))
+matches = [
+    point
+    for device in mapping["devices"]
+    if device["deviceId"] == sys.argv[2]
+    for point in device["points"]
+    if point["targetPropertyId"] == sys.argv[3]
+]
+if len(matches) != 1:
+    raise SystemExit("controlled mapping does not contain exactly one target point")
+matches[0]["calibrationVersion"] = sys.argv[4]
+matches[0]["calibrationVerified"] = True
+matches[0]["defaultQuality"] = "GOOD"
+with tempfile.NamedTemporaryFile(
+    "w", encoding="utf-8", dir=path.parent, delete=False
+) as handle:
+    json.dump(mapping, handle, ensure_ascii=False, indent=2)
+    handle.write("\n")
+    temporary = Path(handle.name)
+os.chmod(temporary, 0o600)
+os.replace(temporary, path)
+PY
+mapping_modified=true
+python3 "$RENDERER" "$MAPPING" "$MAPPING_PROPERTIES"
+iot_compose up -d --no-deps --force-recreate jetlinks
+wait_for_jetlinks
+wait_for_catalog_version "$CALIBRATION_VERSION"
+
+postgres \
+    -v "marker=$MARKER" \
+    -v "plant_id=$PLANT_ID" \
+    -v "line_id=$LINE_ID" \
+    -v "product_id=$PRODUCT_ID" \
+    -v "device_id=$DEVICE_ID" \
+    -v "property_id=$PROPERTY_ID" \
+    -v "calibration_version=$CALIBRATION_VERSION" \
+    <"$FIXTURE_SQL" >"$EVIDENCE_DIR/fixture.json.txt"
+fixture_applied=true
+
+set -a
+. "$IOT_ENV"
+set +a
+python3 "$PUBLISHER" \
+    --mapping "$MAPPING" \
+    --marker "$PREHEAT_MARKER" \
+    --source-epoch "$SOURCE_EPOCH" \
+    --start-sequence 1 \
+    --count "$PREHEAT_COUNT" \
+    --quality GOOD \
+    --value 12.5 \
+    --output "$EVIDENCE_DIR/preheat-mqtt.json"
+wait_for_source_sequence
+
+export BPI_ACCEPTANCE_MARKER="$MARKER"
+export BPI_PLANT_ID="$PLANT_ID"
+export BPI_LINE_ID="$LINE_ID"
+export BPI_PRODUCT_ID="$PRODUCT_ID"
+export BPI_DEVICE_ID="$DEVICE_ID"
+export BPI_PROPERTY_ID="$PROPERTY_ID"
+export BPI_CALIBRATION_VERSION="$CALIBRATION_VERSION"
+export BPI_MQTT_WORKDIR="$IOT_ROOT"
+export BPI_MQTT_PUBLISH_SCRIPT="$PUBLISHER"
+export BPI_MQTT_MAPPING_PATH="$MAPPING"
+export BPI_MQTT_SOURCE_EPOCH="$SOURCE_EPOCH"
+export BPI_MQTT_START_SEQUENCE=$(( PREHEAT_COUNT + 1 ))
+export BPI_MQTT_COUNT="$WINDOW_COUNT"
+export BPI_POSTGRES_CONTAINER="$POSTGRES_CONTAINER"
+export BPI_POSTGRES_USER="$POSTGRES_USER"
+export BPI_POSTGRES_DATABASE="$POSTGRES_DATABASE"
+export ADP_BASE_URL=${ADP_BASE_URL:-http://10.11.100.17:18080}
+export BPI_BROWSER_BASE_URL=${BPI_BROWSER_BASE_URL:-http://10.11.100.17:18080/bpi/}
+export BPI_BROWSER_TIMEOUT_MS=$(( WAIT_SECONDS * 1000 ))
+export BPI_BROWSER_REPORT="$EVIDENCE_DIR/browser-acceptance.json"
+export BPI_MQTT_REPORT="$EVIDENCE_DIR/window-mqtt.json"
+export BPI_DESKTOP_SCREENSHOT="$EVIDENCE_DIR/telemetry-landing-desktop.png"
+export BPI_MOBILE_SCREENSHOT="$EVIDENCE_DIR/telemetry-landing-mobile.png"
+export NODE_PATH=${NODE_PATH:-$RELEASE_ROOT/frontend/apps/bpi/node_modules}
+node "$BROWSER_SCRIPT"
+
+postgres \
+    -v "marker=$MARKER" \
+    -v "preheat_marker=$PREHEAT_MARKER" \
+    -v "window_marker=$WINDOW_MARKER" \
+    <"$VERIFY_SQL" >"$EVIDENCE_DIR/postgres-verification.json.txt"
+
+sha256sum \
+    "$EVIDENCE_DIR/browser-acceptance.json" \
+    "$EVIDENCE_DIR/preheat-mqtt.json" \
+    "$EVIDENCE_DIR/window-mqtt.json" \
+    "$EVIDENCE_DIR/postgres-verification.json.txt" \
+    "$EVIDENCE_DIR/telemetry-landing-desktop.png" \
+    "$EVIDENCE_DIR/telemetry-landing-mobile.png" \
+    >"$EVIDENCE_DIR/SHA256SUMS"
+
+printf 'BPI controlled telemetry landing acceptance PASS: %s\n' "$EVIDENCE_DIR"
