@@ -1065,6 +1065,10 @@ function shadowRunBlockerLabel(code: string): string {
     BOUNDARY_AGREEMENT_BELOW_THRESHOLD: '边界一致率低于验收阈值',
     CUMULATIVE_QUANTITY_DEVIATION_OUT_OF_TOLERANCE: '累计数量偏差超过验收阈值',
     UNRESOLVED_CRITICAL_DATA_QUALITY: '运行窗口内仍有未解决的严重数据质量事件',
+    TRAINING_REVIEWED_BATCHES_BELOW_MINIMUM: '可用于训练准备度评估的独立复核批次不足',
+    TRAINING_PRODUCTION_DAYS_BELOW_MINIMUM: '复核样本覆盖的 UTC 生产日期不足',
+    TRAINING_ACCEPTED_START_LABELS_BELOW_MINIMUM: '起始边界接受标签不足',
+    TRAINING_REJECTED_START_LABELS_BELOW_MINIMUM: '起始边界拒绝标签不足',
   };
   return labels[code] || code;
 }
@@ -1090,6 +1094,7 @@ function renderShadowRuns(): void {
       <td>${statusChip(run.state)}</td>
       <td><strong>${formatObservedDays(run.metrics.observedDurationSeconds)}</strong><small>目标 ${run.minimumDurationDays} 天</small></td>
       <td><strong>${run.metrics.reviewedBatchCount} / ${run.minimumReviewedBatches}</strong><small>${run.metrics.acceptedBoundaryCount} / ${run.metrics.totalBoundaryCount} 边界通过</small></td>
+      <td><strong>${run.trainingDataCoverage.reviewedBatchCount} / ${run.trainingDataCoverage.requiredReviewedBatchCount} 批</strong><small>${run.trainingDataCoverage.distinctProductionDayCount} / ${run.trainingDataCoverage.requiredProductionDayCount} 个生产日</small></td>
       <td><strong>${number(run.metrics.boundaryAgreement * 100, 1)}%</strong><small>阈值 ${number(run.minimumBoundaryAgreement * 100, 1)}%</small></td>
       <td><strong>${number(run.metrics.cumulativeQuantityDeviationPercent, 2)}%</strong><small>容差 ${number(run.quantityTolerancePercent, 2)}%</small></td>
       <td>${run.readiness.ready ? statusChip('READY') : statusChip('BLOCKED')}<small>${run.blockers.length} 个阻断项</small></td>
@@ -1115,7 +1120,7 @@ function renderShadowRuns(): void {
         <button id="new-shadow-run" class="icon-text-button"><i data-lucide="plus"></i><span>新建影子运行</span></button>
       </div>
     </div>
-    ${rows ? `<div class="table-frame"><table class="shadow-run-table"><thead><tr><th>验收任务</th><th>产线</th><th>状态</th><th>观察周期</th><th>复核批次</th><th>边界一致率</th><th>累计数量偏差</th><th>运行准入</th><th>审批门禁</th><th>版本</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="flask-conical"></i><strong>当前筛选范围没有影子运行</strong><span>从已发布、已应用且运行就绪的规则版本创建受控验收任务。</span></div>`}`;
+    ${rows ? `<div class="table-frame"><table class="shadow-run-table"><thead><tr><th>验收任务</th><th>产线</th><th>状态</th><th>观察周期</th><th>验收复核</th><th>现场数据</th><th>边界一致率</th><th>累计数量偏差</th><th>运行准入</th><th>审批门禁</th><th>版本</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="flask-conical"></i><strong>当前筛选范围没有影子运行</strong><span>从已发布、已应用且运行就绪的规则版本创建受控验收任务。</span></div>`}`;
   content.querySelectorAll<HTMLElement>('[data-shadow-run-id]').forEach((row) => row.addEventListener('click', () => void openShadowRun(String(row.dataset.shadowRunId))));
   const applyFilter = () => {
     state.shadowRunLineId = document.querySelector<HTMLInputElement>('#shadow-run-line-filter')!.value.trim();
@@ -1324,6 +1329,26 @@ async function openShadowRun(runId: string): Promise<void> {
       ['严重数据质量事件', `${run.metrics.unresolvedCriticalIncidentCount} 个未解决`, run.metrics.dataQualityGatePassed],
     ];
     const metricHtml = metricChecks.map(([label, value, passed]) => `<div class="${passed ? 'is-pass' : 'is-fail'}"><span>${label}</span><b>${value}</b><small>${passed ? 'PASS' : 'BLOCKED'}</small></div>`).join('');
+    const sourceCoverageChecks: Array<[string, number]> = [
+      ['固定点位', run.sourceCoverage.pinnedPointCount],
+      ['活跃注册', run.sourceCoverage.activeRegisteredPointCount],
+      ['物理身份', run.sourceCoverage.physicalIdentityPointCount],
+      ['新鲜序列证据', run.sourceCoverage.freshSequenceQualifiedPointCount],
+      ['有效校准证据', run.sourceCoverage.approvedCalibrationPointCount],
+      ['完全就绪', run.sourceCoverage.readyPointCount],
+    ];
+    const sourceCoverageHtml = sourceCoverageChecks.map(([label, value]) =>
+      `<div><span>${label}</span><b>${value} / ${run.sourceCoverage.pinnedPointCount}</b></div>`).join('');
+    const trainingCoverage = run.trainingDataCoverage;
+    const trainingCoverageHtml = [
+      ['独立复核批次', trainingCoverage.reviewedBatchCount, trainingCoverage.requiredReviewedBatchCount],
+      ['UTC 生产日期', trainingCoverage.distinctProductionDayCount, trainingCoverage.requiredProductionDayCount],
+      ['START 接受标签', trainingCoverage.acceptedStartLabelCount, trainingCoverage.requiredAcceptedStartLabelCount],
+      ['START 拒绝标签', trainingCoverage.rejectedStartLabelCount, trainingCoverage.requiredRejectedStartLabelCount],
+    ].map(([label, observed, required]) =>
+      `<div><span>${label}</span><b>${observed} / ${required}</b></div>`).join('');
+    const trainingCoverageBlockers = trainingCoverage.blockers.map((code) =>
+      `<li><div><strong>${escapeHtml(shadowRunBlockerLabel(code))}</strong><code>${escapeHtml(code)}</code></div></li>`).join('');
     const blockers = run.blockers.map((code) => `<li><i data-lucide="circle-alert"></i><div><strong>${escapeHtml(shadowRunBlockerLabel(code))}</strong><code>${escapeHtml(code)}</code></div></li>`).join('');
     const reviews = state.shadowRunReviews.map((review) => `<tr><td><strong>${escapeHtml(review.batchNo)}</strong><small>#${review.reviewSequence}</small></td><td>${formatTime(review.reviewedAt)}</td><td>${review.startDeviationSeconds}s / ${review.endDeviationSeconds}s</td><td>${review.startBoundaryAccepted && review.endBoundaryAccepted ? statusChip('PASS') : statusChip('FAIL')}</td><td>${number(review.automaticQuantity, 3)} / ${number(review.referenceQuantity, 3)} ${escapeHtml(review.quantityUnit)}</td><td>${number(review.quantityDeviationPercent, 3)}%</td><td>${review.quantityWithinTolerance ? statusChip('PASS') : statusChip('FAIL')}</td><td>${escapeHtml(review.reviewedBy)}</td></tr>`).join('');
     let actions = '';
@@ -1335,7 +1360,9 @@ async function openShadowRun(runId: string): Promise<void> {
       <div class="batch-state-band"><div>${statusChip(run.state)}<span class="shadow-label">SHADOW ONLY</span></div><span>revision ${run.revision}</span></div>
       <div class="drawer-section facts-grid"><div><span>验收编码</span><b>${escapeHtml(run.runCode)}</b></div><div><span>工厂 / 产线</span><b>${escapeHtml(run.plantId)} / ${escapeHtml(run.lineId)}</b></div><div><span>固定规则</span><b>${escapeHtml(run.ruleVersion)}</b></div><div><span>固定拓扑</span><b>${escapeHtml(run.topologyVersion)}</b></div><div><span>点位目录快照</span><b class="mono-value">${escapeHtml(run.pointCatalogSnapshotId)}</b></div><div><span>创建人 / 时间</span><b>${escapeHtml(run.createdBy)} · ${formatTime(run.createdAt)}</b></div></div>
       <div class="drawer-section"><div class="section-title"><h3>固定运行版本准入</h3>${run.readiness.ready ? statusChip('READY') : statusChip('BLOCKED')}</div><ul class="shadow-readiness-list">${readinessHtml}</ul></div>
+      <div class="drawer-section shadow-source-coverage" data-source-coverage><div class="section-title"><h3>固定来源可信度</h3>${run.sourceCoverage.fullyReady ? statusChip('READY') : statusChip('BLOCKED')}</div><div class="shadow-coverage-grid">${sourceCoverageHtml}</div><p class="shadow-coverage-note">按本次运行固定的点位目录快照统计，后续目录变化不会改写本次验收来源。</p></div>
       <div class="drawer-section"><div class="section-title"><h3>验收指标</h3>${run.readyForApproval ? statusChip('READY') : '<span>全部通过后才能批准</span>'}</div><div class="shadow-metric-grid">${metricHtml}</div><div class="facts-grid shadow-metric-detail"><div><span>数量样本</span><b>${run.metrics.quantitySampleCount}</b></div><div><span>自动 / 参考累计</span><b>${number(run.metrics.automaticQuantityTotal, 3)} / ${number(run.metrics.referenceQuantityTotal, 3)} ${escapeHtml(run.metrics.quantityUnit || '')}</b></div><div><span>单批平均偏差</span><b>${number(run.metrics.meanQuantityDeviationPercent, 3)}%</b></div><div><span>单批最大偏差</span><b>${number(run.metrics.maximumQuantityDeviationPercent, 3)}%</b></div></div></div>
+      <div class="drawer-section shadow-training-coverage" data-training-data-coverage><div class="section-title"><h3>现场数据覆盖</h3>${trainingCoverage.thresholdsMet ? statusChip('READY') : statusChip('BLOCKED')}</div><div class="shadow-training-policy"><span>覆盖策略</span><code>${escapeHtml(trainingCoverage.policyVersion)}</code></div><div class="shadow-coverage-grid">${trainingCoverageHtml}</div>${trainingCoverageBlockers ? `<ul class="shadow-training-blockers">${trainingCoverageBlockers}</ul>` : '<div class="shadow-training-covered"><i data-lucide="check-circle-2"></i><span>基础数量覆盖已达到当前策略阈值。</span></div>'}<div class="shadow-training-boundary"><i data-lucide="shield-alert"></i><div><strong>仅表示现场数据覆盖进度，不代表允许训练</strong><span>训练仍未启动；后续还必须通过过程窗口、时点约束、数据质量和数据集版本治理门禁。</span></div></div></div>
       ${blockers ? `<div class="drawer-section shadow-blockers"><div class="section-title"><h3>当前阻断</h3><span>${run.blockers.length} 项</span></div><ul>${blockers}</ul></div>` : ''}
       <div class="drawer-section"><div class="section-title"><h3>批次复核记录</h3><span>${state.shadowRunReviews.length} 个当前样本</span></div>${reviews ? `<div class="table-frame shadow-review-frame"><table class="shadow-review-table"><thead><tr><th>批次</th><th>复核时间</th><th>起止偏差</th><th>边界</th><th>自动 / 参考数量</th><th>偏差</th><th>数量</th><th>复核人</th></tr></thead><tbody>${reviews}</tbody></table></div>` : '<div class="simulation-empty">尚未提交人工批次复核</div>'}</div>
       <div class="drawer-section"><div class="section-title"><h3>审批责任</h3><span>双人控制</span></div><p>批准人必须是不同于创建人的 BPI 管理员；系统重新计算全部指标和数据质量门禁，不接受前端提交的“通过”结论。</p>${run.decidedBy ? `<div class="facts-grid"><div><span>决定人</span><b>${escapeHtml(run.decidedBy)}</b></div><div><span>决定时间</span><b>${formatTime(run.decidedAt)}</b></div><div><span>决定依据</span><b>${escapeHtml(run.decisionReason || '-')}</b></div></div>` : ''}</div>

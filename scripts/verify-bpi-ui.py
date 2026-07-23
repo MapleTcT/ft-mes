@@ -62,6 +62,26 @@ def main() -> int:
         for required in ("const API_ROOT = '/bpi-api'", "localStorage.getItem('ticket')", "Idempotency-Key", "If-Match", "rejectCandidate", "suspendBatch", "resumeBatch", "forceCloseTask", "forceCloseBatch", "batchRelease", "featureFlags", "changeFeatureFlag", "simulateRule", "publishRule", "topologies", "createTopologyDraft", "validateTopology", "publishTopology", "createRuleDraft", "currentPointCatalog", "options?.cursor", "options?.search", "listPointCalibrations", "submitPointCalibration", "approvePointCalibration", "rejectPointCalibration", "revokePointCalibration", "shadowRuns", "createShadowRun", "reviewShadowRunBatch", "startShadowRun", "completeShadowRun", "approveShadowRun", "rejectShadowRun", "cancelShadowRun", "datasets", "createDatasetDefinition", "createDatasetSnapshot", "datasetSnapshot", "requestDatasetMaterialization", "datasetMaterialization", "retryDatasetMaterialization", "datasetMlflowRegistrationForArchive", "requestDatasetMlflowRegistration", "datasetMlflowRegistration", "retryDatasetMlflowRegistration"):
             if required not in api:
                 failures.append(f"BPI UI API client is missing {required!r}")
+        main_source = (UI / "src/main.ts").read_text(encoding="utf-8")
+        for required in (
+            "固定来源可信度",
+            "现场数据覆盖",
+            "仅表示现场数据覆盖进度，不代表允许训练",
+            "TRAINING_REVIEWED_BATCHES_BELOW_MINIMUM",
+            "TRAINING_PRODUCTION_DAYS_BELOW_MINIMUM",
+            "TRAINING_ACCEPTED_START_LABELS_BELOW_MINIMUM",
+            "TRAINING_REJECTED_START_LABELS_BELOW_MINIMUM",
+        ):
+            if required not in main_source:
+                failures.append(f"BPI UI shadow-run coverage is missing {required!r}")
+        types_source = (UI / "src/types.ts").read_text(encoding="utf-8")
+        for required in (
+            "ShadowRunSourceCoverage",
+            "ShadowRunTrainingDataCoverage",
+            "bpi-training-data-coverage/batch-start-boundary-v1",
+        ):
+            if required not in types_source:
+                failures.append(f"BPI UI shadow-run coverage type is missing {required!r}")
         forbidden = ("BPI_INTERNAL_JWT_SECRET", "http://bpi-service", "https://bpi-service")
         for path in (UI / "src").rglob("*"):
             if path.is_file() and path.suffix in {".ts", ".css", ".html"}:
@@ -71,7 +91,7 @@ def main() -> int:
                         failures.append(f"{path.relative_to(ROOT)} exposes forbidden marker {marker!r}")
 
         e2e = (UI / "tests/bpi-console.e2e.cjs").read_text(encoding="utf-8")
-        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "/tmp/bpi-console-candidate-rejected.png", "/tmp/bpi-console-batch-lifecycle.png", "/tmp/bpi-console-force-close.png", "/tmp/bpi-console-end-boundary.png", "/tmp/bpi-console-feature-flags.png", "/tmp/bpi-console-point-catalog-pagination.png", "/tmp/bpi-console-point-calibration-governance.png", "/tmp/bpi-console-rule-published.png", "/tmp/bpi-console-rule-application-applied.png", "/tmp/bpi-console-rule-publication-blocked.png", "/tmp/bpi-console-shadow-run-approved.png", "/tmp/bpi-console-batch-quality-inventory.png", "/tmp/bpi-console-batch-quality-inventory-mobile.png", "/tmp/bpi-dataset-iceberg-desktop.png", "/tmp/bpi-dataset-iceberg-mobile.png", "/tmp/bpi-dataset-object-lock-desktop.png", "/tmp/bpi-dataset-object-lock-mobile.png", "/tmp/bpi-dataset-mlflow-desktop.png", "/tmp/bpi-dataset-mlflow-mobile.png", "/tmp/bpi-dataset-training-readiness-desktop.png", "/tmp/bpi-dataset-training-readiness-mobile.png", "getBatchRelease", "WMS_LOCATION_LOCKED", "ADP-E2E-RELEASE-TRACE-503", "CLOSED_RAW", "END_BOUNDARY_CONFIRMED", "PENDING_APPROVAL", "批准并强制结束", "bpi.wms-link", "overrideRevision", "sourceCalibrationStatus", "calibrationEvidenceId", "REVOKED", "point catalog incrementally loads a pinned snapshot", "property.0204", "wrongSearch.status, 422", "rule-runtime-readiness", "DEGRADED", "runtimeReadinessStatus", "UNRESOLVED_CRITICAL_DATA_QUALITY", "boundaryAgreement", "externalWrites", "data engineer delivers a version-locked MLflow Dataset Input with failed retries and mobile evidence", "SIMULATED_MINIO_TIMEOUT", "SIMULATED_MLFLOW_TIMEOUT", "PROCESS_SIGNAL_WINDOWS_MISSING", "data-training-readiness-state", "REGISTERED", "MANIFEST_READY", "MANIFEST_ONLY", "versionId", "simulationOnly", "modelTrained", "modelRegistered", "productionActivationAllowed", "document.documentElement.scrollWidth"):
+        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "/tmp/bpi-console-candidate-rejected.png", "/tmp/bpi-console-batch-lifecycle.png", "/tmp/bpi-console-force-close.png", "/tmp/bpi-console-end-boundary.png", "/tmp/bpi-console-feature-flags.png", "/tmp/bpi-console-point-catalog-pagination.png", "/tmp/bpi-console-point-calibration-governance.png", "/tmp/bpi-console-rule-published.png", "/tmp/bpi-console-rule-application-applied.png", "/tmp/bpi-console-rule-publication-blocked.png", "/tmp/bpi-console-shadow-run-approved.png", "/tmp/bpi-console-batch-quality-inventory.png", "/tmp/bpi-console-batch-quality-inventory-mobile.png", "/tmp/bpi-dataset-iceberg-desktop.png", "/tmp/bpi-dataset-iceberg-mobile.png", "/tmp/bpi-dataset-object-lock-desktop.png", "/tmp/bpi-dataset-object-lock-mobile.png", "/tmp/bpi-dataset-mlflow-desktop.png", "/tmp/bpi-dataset-mlflow-mobile.png", "/tmp/bpi-dataset-training-readiness-desktop.png", "/tmp/bpi-dataset-training-readiness-mobile.png", "getBatchRelease", "WMS_LOCATION_LOCKED", "ADP-E2E-RELEASE-TRACE-503", "CLOSED_RAW", "END_BOUNDARY_CONFIRMED", "PENDING_APPROVAL", "批准并强制结束", "bpi.wms-link", "overrideRevision", "sourceCalibrationStatus", "calibrationEvidenceId", "REVOKED", "point catalog incrementally loads a pinned snapshot", "property.0204", "wrongSearch.status, 422", "rule-runtime-readiness", "DEGRADED", "runtimeReadinessStatus", "UNRESOLVED_CRITICAL_DATA_QUALITY", "boundaryAgreement", "sourceCoverage.fullyReady", "trainingDataCoverage.thresholdsMet", "TRAINING_REJECTED_START_LABELS_BELOW_MINIMUM", "externalWrites", "data engineer delivers a version-locked MLflow Dataset Input with failed retries and mobile evidence", "SIMULATED_MINIO_TIMEOUT", "SIMULATED_MLFLOW_TIMEOUT", "PROCESS_SIGNAL_WINDOWS_MISSING", "data-training-readiness-state", "REGISTERED", "MANIFEST_READY", "MANIFEST_ONLY", "versionId", "simulationOnly", "modelTrained", "modelRegistered", "productionActivationAllowed", "document.documentElement.scrollWidth"):
             if required not in e2e:
                 failures.append(f"BPI UI E2E is missing {required!r} evidence")
 

@@ -319,6 +319,16 @@ export interface ShadowRunReadiness {
   ready: boolean;
 }
 
+export interface ShadowRunSourceCoverage {
+  pinnedPointCount: number;
+  activeRegisteredPointCount: number;
+  physicalIdentityPointCount: number;
+  freshSequenceQualifiedPointCount: number;
+  approvedCalibrationPointCount: number;
+  readyPointCount: number;
+  fullyReady: boolean;
+}
+
 export interface ShadowRunMetrics {
   observedDurationSeconds: number;
   reviewedBatchCount: number;
@@ -338,6 +348,20 @@ export interface ShadowRunMetrics {
   boundaryAgreementGatePassed: boolean;
   quantityGatePassed: boolean;
   dataQualityGatePassed: boolean;
+}
+
+export interface ShadowRunTrainingDataCoverage {
+  policyVersion: 'bpi-training-data-coverage/batch-start-boundary-v1';
+  requiredReviewedBatchCount: number;
+  reviewedBatchCount: number;
+  requiredProductionDayCount: number;
+  distinctProductionDayCount: number;
+  requiredAcceptedStartLabelCount: number;
+  acceptedStartLabelCount: number;
+  requiredRejectedStartLabelCount: number;
+  rejectedStartLabelCount: number;
+  thresholdsMet: boolean;
+  blockers: string[];
 }
 
 export interface ShadowRun {
@@ -373,7 +397,9 @@ export interface ShadowRun {
   cancelledAt?: string | null;
   cancellationReason?: string | null;
   readiness: ShadowRunReadiness;
+  sourceCoverage: ShadowRunSourceCoverage;
   metrics: ShadowRunMetrics;
+  trainingDataCoverage: ShadowRunTrainingDataCoverage;
   blockers: string[];
   readyForApproval: boolean;
 }
