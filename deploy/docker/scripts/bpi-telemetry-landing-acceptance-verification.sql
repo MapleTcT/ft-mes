@@ -15,6 +15,12 @@ WITH target_run AS (
       JOIN target_events event
         ON event.tenant_id = point.tenant_id
        AND event.id = point.telemetry_event_id
+), target_latest AS (
+    SELECT latest.*
+      FROM bpi.bpi_telemetry_point_latest latest
+      JOIN target_events event
+        ON event.tenant_id = latest.tenant_id
+       AND event.id = latest.telemetry_event_id
 ), preheat_events AS (
     SELECT event.*
       FROM bpi.bpi_telemetry_events event
@@ -141,6 +147,23 @@ SELECT jsonb_pretty(jsonb_build_object(
               JOIN target_events event
                 ON event.tenant_id = reject.tenant_id
                AND event.id = reject.telemetry_event_id
+        ),
+        'latestProjectionRows', (SELECT count(*) FROM target_latest),
+        'latestProjection', (
+            SELECT jsonb_build_object(
+                'plantId', latest.plant_id,
+                'lineId', latest.line_id,
+                'productId', latest.product_id,
+                'deviceId', latest.device_id,
+                'propertyId', latest.property_id,
+                'numericValue', latest.numeric_value,
+                'unit', latest.unit,
+                'qualityCode', latest.quality_code,
+                'sequenceDisposition', latest.sequence_disposition,
+                'calibrationVersion', latest.calibration_version,
+                'sampleTime', latest.sample_time
+            )
+              FROM target_latest latest
         )
     ),
     'coverageProjection', (

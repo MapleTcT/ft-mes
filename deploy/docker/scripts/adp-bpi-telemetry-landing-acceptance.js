@@ -45,6 +45,12 @@ const desktopScreenshot = path.resolve(
 const mobileScreenshot = path.resolve(
   process.env.BPI_MOBILE_SCREENSHOT || `/tmp/${marker}-telemetry-landing-mobile.png`,
 );
+const liveOverviewScreenshot = path.resolve(
+  process.env.BPI_LIVE_OVERVIEW_SCREENSHOT || `/tmp/${marker}-live-overview.png`,
+);
+const liveDrawerScreenshot = path.resolve(
+  process.env.BPI_LIVE_DRAWER_SCREENSHOT || `/tmp/${marker}-live-evidence-drawer.png`,
+);
 
 if (!/^[A-Za-z0-9_-]{8,80}$/.test(marker)) {
   throw new Error("BPI_ACCEPTANCE_MARKER must use 8-80 letters, digits, underscores or hyphens");
@@ -262,10 +268,34 @@ function postgresEvidence(runId) {
         JOIN events event
           ON event.tenant_id = point.tenant_id
          AND event.id = point.telemetry_event_id
+    ), latest AS (
+      SELECT latest.*
+        FROM bpi.bpi_telemetry_point_latest latest
+       WHERE latest.tenant_id = '1000'
+         AND latest.plant_id = '${plantId}'
+         AND latest.line_id = '${lineId}'
+         AND latest.product_id = '${productId}'
+         AND latest.device_id = '${deviceId}'
+         AND latest.property_id = '${propertyId}'
     )
     SELECT jsonb_build_object(
       'eventRows', (SELECT count(*) FROM events),
       'pointRows', (SELECT count(*) FROM points),
+      'latestRows', (SELECT count(*) FROM latest),
+      'latestValue', (SELECT numeric_value FROM latest),
+      'latestUnit', (SELECT unit FROM latest),
+      'latestQuality', (SELECT quality_code FROM latest),
+      'latestSequenceDisposition', (SELECT sequence_disposition FROM latest),
+      'latestCalibrationVersion', (SELECT calibration_version FROM latest),
+      'latestEventIsControlled', (
+        SELECT EXISTS (
+          SELECT 1
+            FROM latest
+            JOIN events
+              ON events.tenant_id = latest.tenant_id
+             AND events.id = latest.telemetry_event_id
+        )
+      ),
       'rejectedRows', (
         SELECT count(*) FROM bpi.bpi_telemetry_point_rejects reject
          WHERE reject.tenant_id = '1000'
@@ -297,6 +327,18 @@ function postgresEvidence(runId) {
   const evidence = JSON.parse(output.split("\n").at(-1));
   assert(Number(evidence.eventRows) === mqttCount, `PostgreSQL event rows are ${evidence.eventRows}`);
   assert(Number(evidence.pointRows) === mqttCount, `PostgreSQL point rows are ${evidence.pointRows}`);
+  assert(Number(evidence.latestRows) === 1, `PostgreSQL latest rows are ${evidence.latestRows}`);
+  assert(Number(evidence.latestValue) === 12.5,
+    `PostgreSQL latest value is ${evidence.latestValue}`);
+  assert(Boolean(evidence.latestUnit), "PostgreSQL latest unit is empty");
+  assert(evidence.latestQuality === "GOOD",
+    `PostgreSQL latest quality is ${evidence.latestQuality}`);
+  assert(evidence.latestSequenceDisposition === "IN_ORDER",
+    `PostgreSQL latest sequence disposition is ${evidence.latestSequenceDisposition}`);
+  assert(evidence.latestCalibrationVersion === calibrationVersion,
+    `PostgreSQL latest calibration is ${evidence.latestCalibrationVersion}`);
+  assert(evidence.latestEventIsControlled === true,
+    "PostgreSQL latest projection does not reference the controlled window");
   assert(Number(evidence.rejectedRows) === 0, `PostgreSQL rejected rows are ${evidence.rejectedRows}`);
   assert(evidence.allPersistedInsideWindow === true, "telemetry escaped the Shadow Run window");
   assert(evidence.qualities.every((quality) => quality === "GOOD"),
@@ -306,6 +348,50 @@ function postgresEvidence(runId) {
   assert(evidence.dispositions.every((value) => value === "IN_ORDER"),
     `unexpected sequence dispositions: ${JSON.stringify(evidence.dispositions)}`);
   return evidence;
+}
+
+async function liveProjectionEvidence(api, ticket) {
+  const overview = await adapterGet(
+    api,
+    ticket,
+    `/overview?plantId=${encodeURIComponent(plantId)}&onlyAbnormal=false`,
+  );
+  assert(Array.isArray(overview), "overview response is not an array");
+  const line = overview.find((item) => item.lineId === lineId);
+  assert(line, `overview does not contain ${lineId}`);
+  assert(Number(line.telemetry?.value) === 12.5,
+    `overview latest value is ${line.telemetry?.value}`);
+  assert(Boolean(line.telemetry?.unit), "overview latest unit is empty");
+  assert(line.telemetry?.qualityCode === "GOOD",
+    `overview quality is ${line.telemetry?.qualityCode}`);
+  assert(line.telemetry?.productId === productId
+    && line.telemetry?.deviceId === deviceId
+    && line.telemetry?.propertyId === propertyId,
+  `overview physical point is unexpected: ${JSON.stringify(line.telemetry)}`);
+  assert(line.telemetry?.calibrationVersion === calibrationVersion,
+    `overview calibration is ${line.telemetry?.calibrationVersion}`);
+
+  const liveEvidence = await adapterGet(
+    api,
+    ticket,
+    `/lines/${encodeURIComponent(lineId)}/live-evidence`
+      + `?plantId=${encodeURIComponent(plantId)}&windowMinutes=15&limit=120`,
+  );
+  assert(liveEvidence?.line?.lineId === lineId, "live evidence line scope is unexpected");
+  assert(Number(liveEvidence.line.telemetry?.value) === 12.5,
+    `live evidence latest value is ${liveEvidence.line.telemetry?.value}`);
+  assert(Array.isArray(liveEvidence.samples) && liveEvidence.samples.length >= mqttCount,
+    `live evidence sample count is ${liveEvidence.samples?.length}`);
+  assert(liveEvidence.samples.some((sample) =>
+    Number(sample.numericValue) === 12.5
+      && sample.qualityCode === "GOOD"
+      && sample.calibrationVersion === calibrationVersion),
+  "live evidence does not contain the controlled calibrated sample");
+  assert(Array.isArray(liveEvidence.checks)
+    && liveEvidence.checks.some((check) =>
+      check.code === "TOPOLOGY_BOUND" && check.status === "PASS"),
+  "live evidence does not prove the published topology binding");
+  return { overview, line, liveEvidence };
 }
 
 async function assertCoverageUi(page, expectedEventCount) {
@@ -338,7 +424,14 @@ async function assertDrawerSettled(page) {
 }
 
 async function main() {
-  for (const outputPath of [reportPath, mqttReportPath, desktopScreenshot, mobileScreenshot]) {
+  for (const outputPath of [
+    reportPath,
+    mqttReportPath,
+    desktopScreenshot,
+    mobileScreenshot,
+    liveOverviewScreenshot,
+    liveDrawerScreenshot,
+  ]) {
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   }
   const api = await request.newContext({ ignoreHTTPSErrors: true });
@@ -368,6 +461,7 @@ async function main() {
       executable: executablePath || "playwright-managed",
       desktop: null,
       mobile: null,
+      liveOperations: null,
       responses: [],
       consoleErrors: [],
       pageErrors: [],
@@ -498,6 +592,21 @@ async function main() {
       blockers: run.blockers,
     };
     report.postgres = postgresEvidence(run.id);
+    const liveProjection = await liveProjectionEvidence(api, auth.ticket);
+    report.api.overview = {
+      method: "GET",
+      path: `/bpi-api/overview?plantId=${plantId}&onlyAbnormal=false`,
+      status: 200,
+      line: liveProjection.line,
+    };
+    report.api.liveEvidence = {
+      method: "GET",
+      path: `/bpi-api/lines/${lineId}/live-evidence?plantId=${plantId}&windowMinutes=15&limit=120`,
+      status: 200,
+      sampleCount: liveProjection.liveEvidence.samples.length,
+      checks: liveProjection.liveEvidence.checks,
+      incidentCount: liveProjection.liveEvidence.incidents.length,
+    };
 
     await page.locator("#detail-drawer [data-close-drawer]").first().click();
     await page.getByRole("button", { name: "刷新" }).click();
@@ -510,6 +619,40 @@ async function main() {
       drawer: desktopDrawer,
       screenshot: desktopScreenshot,
     };
+    await page.locator("#detail-drawer [data-close-drawer]").first().click();
+    await page.goto(`${bpiBaseUrl}#/overview`, { waitUntil: "networkidle" });
+    await page.getByRole("heading", { name: "实时生产态势" }).waitFor();
+    const liveRow = page.locator(`[data-line-id="${lineId}"]`);
+    await liveRow.waitFor();
+    const liveRowText = await liveRow.textContent();
+    assert(liveRowText?.includes("12.5"),
+      `overview row does not show the controlled value: ${liveRowText}`);
+    assert(liveRowText?.includes(liveProjection.line.telemetry.unit),
+      `overview row does not show the controlled unit: ${liveRowText}`);
+    await page.screenshot({ path: liveOverviewScreenshot, fullPage: true });
+    await liveRow.click();
+    const liveDrawer = page.locator("#detail-drawer");
+    await liveDrawer.getByRole("heading", { name: "点位事实" }).waitFor();
+    await liveDrawer.getByText(
+      `${productId}/${deviceId}/${propertyId}`,
+      { exact: true },
+    ).waitFor();
+    await liveDrawer.getByText("最近 15 分钟真实遥测", { exact: true }).waitFor();
+    await liveDrawer.getByText("服务端运行判据", { exact: true }).waitFor();
+    assert(await liveDrawer.locator("[data-trend-sample]").count() >= mqttCount,
+      "live evidence drawer does not render the controlled samples");
+    const liveDrawerGeometry = await assertDrawerSettled(page);
+    await liveDrawer.screenshot({ path: liveDrawerScreenshot });
+    report.browser.liveOperations = {
+      route: "#/overview",
+      rowText: liveRowText,
+      drawer: liveDrawerGeometry,
+      overviewScreenshot: liveOverviewScreenshot,
+      drawerScreenshot: liveDrawerScreenshot,
+    };
+    await liveDrawer.locator("[data-close-drawer]").first().click();
+    await page.goto(`${bpiBaseUrl}#/shadowRuns`, { waitUntil: "networkidle" });
+    await page.locator(`[data-shadow-run-id="${run.id}"]`).click();
 
     const mobileContext = await newContext(browser, auth, { width: 390, height: 844 });
     const mobilePage = await mobileContext.newPage();

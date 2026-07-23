@@ -136,6 +136,17 @@ SELECT jsonb_pretty(jsonb_build_object(
                    OR message_id LIKE :'window_marker' || ':%'
                )
         ),
+        'telemetryLatest', (
+            SELECT count(*)
+              FROM bpi.bpi_telemetry_point_latest latest
+             WHERE latest.tenant_id = '1000'
+               AND latest.plant_id = :'plant_id'
+               AND latest.line_id = :'line_id'
+               AND latest.product_id = :'product_id'
+               AND latest.device_id = :'device_id'
+               AND latest.property_id = :'property_id'
+               AND latest.calibration_version = :'calibration_version'
+        ),
         'catalogs', (
             SELECT count(*)
               FROM bpi.bpi_point_catalog_snapshots snapshot

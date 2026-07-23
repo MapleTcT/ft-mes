@@ -31,6 +31,31 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 public class BpiProxyControllerTest {
 
     @Test
+    public void forwardsLiveLineEvidenceWithBoundedQueryParameters() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/lines/LINE-S07-01/live-evidence"
+                        + "?plantId=PLANT-01&windowMinutes=15&limit=120"))
+                .andExpect(method(org.springframework.http.HttpMethod.GET))
+                .andRespond(withSuccess("{\"data\":{\"lineId\":\"LINE-S07-01\"}}",
+                        MediaType.APPLICATION_JSON));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "GET", "/bpi-api/lines/LINE-S07-01/live-evidence");
+        request.setQueryString("plantId=PLANT-01&windowMinutes=15&limit=120");
+
+        ResponseEntity<byte[]> response = controller.proxy(jwt(), request, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(BpiProxyController.ADAPTER_CONTRACT_VERSION,
+                response.getHeaders().getFirst(BpiProxyController.ADAPTER_CONTRACT_HEADER));
+        upstream.verify();
+    }
+
+    @Test
     public void replacesLegacyTokenAndForwardsCommandContractToFixedUpstream() {
         BpiAdapterProperties properties = properties();
         RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();

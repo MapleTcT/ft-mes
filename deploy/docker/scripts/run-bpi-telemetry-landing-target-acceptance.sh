@@ -19,7 +19,7 @@ PREHEAT_COUNT=${BPI_MQTT_PREHEAT_COUNT:-3}
 WINDOW_COUNT=${BPI_MQTT_COUNT:-2}
 WAIT_SECONDS=${BPI_TELEMETRY_ACCEPTANCE_WAIT_SECONDS:-240}
 SOURCE_SEQUENCE_EVIDENCE_INTERVAL=${BPI_SOURCE_SEQUENCE_EVIDENCE_ACCEPTANCE_INTERVAL:-5s}
-POINT_CATALOG_INTERVAL=${BPI_POINT_CATALOG_ACCEPTANCE_INTERVAL:-5s}
+POINT_CATALOG_INTERVAL=${BPI_POINT_CATALOG_ACCEPTANCE_INTERVAL:-1h}
 MQTT_PUBLISH_ATTEMPTS=${BPI_MQTT_PUBLISH_ATTEMPTS:-3}
 MQTT_TIMEOUT_SECONDS=${BPI_MQTT_TIMEOUT_SECONDS:-20}
 MQTT_SETTLE_SECONDS=${BPI_MQTT_SETTLE_SECONDS:-5}
@@ -97,6 +97,7 @@ test -n "${ADP_PASSWORD:-}" || {
 RUNTIME_ENV="$RUNTIME_ROOT/deploy/docker/.env"
 IOT_ENV="$IOT_ROOT/.env"
 IOT_COMPOSE="$IOT_ROOT/docker-compose.yml"
+IOT_APPLICATION_CONFIG="$IOT_ROOT/application-bpi-pilot.yml"
 MAPPING="$IOT_ROOT/runtime/pilot-mapping.json"
 MAPPING_PROPERTIES="$IOT_ROOT/runtime/application-bpi-mapping.properties"
 RENDERER="$IOT_ROOT/scripts/render-pilot-mapping.py"
@@ -109,7 +110,8 @@ PREHEAT_MARKER="${MARKER}_PREHEAT"
 WINDOW_MARKER="${MARKER}_WINDOW"
 
 for path in \
-    "$RUNTIME_ENV" "$IOT_ENV" "$IOT_COMPOSE" "$MAPPING" "$MAPPING_PROPERTIES" \
+    "$RUNTIME_ENV" "$IOT_ENV" "$IOT_COMPOSE" "$IOT_APPLICATION_CONFIG" \
+    "$MAPPING" "$MAPPING_PROPERTIES" \
     "$RENDERER" "$PUBLISHER" "$FIXTURE_SQL" "$VERIFY_SQL" "$CLEANUP_SQL" \
     "$BROWSER_SCRIPT"; do
     test -f "$path" || {
@@ -117,6 +119,13 @@ for path in \
         exit 1
     }
 done
+if ! grep -Fq \
+    'source-sequence-evidence-publish-interval: ${BPI_SOURCE_SEQUENCE_EVIDENCE_PUBLISH_INTERVAL:10m}' \
+    "$IOT_APPLICATION_CONFIG"; then
+    printf '%s\n' \
+        'ERROR: pilot application config does not bind BPI_SOURCE_SEQUENCE_EVIDENCE_PUBLISH_INTERVAL' >&2
+    exit 1
+fi
 for command_name in docker node python3 sha256sum; do
     command -v "$command_name" >/dev/null 2>&1 || {
         printf 'ERROR: required command is unavailable: %s\n' "$command_name" >&2
@@ -136,6 +145,35 @@ chmod 700 "$EVIDENCE_DIR"
 MAPPING_BACKUP="$EVIDENCE_DIR/pilot-mapping-before.json"
 PROPERTIES_BACKUP="$EVIDENCE_DIR/application-bpi-mapping-before.properties"
 IOT_ENV_BACKUP="$EVIDENCE_DIR/.iot-env-before"
+
+env_value() {
+    key=$1
+    file=$2
+    awk -v key="$key" '
+        index($0, key "=") == 1 {
+            value = substr($0, length(key) + 2)
+        }
+        END {
+            print value
+        }
+    ' "$file"
+}
+
+ORIGINAL_SOURCE_SEQUENCE_EVIDENCE_INTERVAL=$(
+    env_value BPI_SOURCE_SEQUENCE_EVIDENCE_PUBLISH_INTERVAL "$IOT_ENV"
+)
+ORIGINAL_POINT_CATALOG_INTERVAL=$(
+    env_value BPI_POINT_CATALOG_INTERVAL "$IOT_ENV"
+)
+test -n "$ORIGINAL_SOURCE_SEQUENCE_EVIDENCE_INTERVAL" || {
+    printf 'ERROR: original source-sequence evidence interval is missing\n' >&2
+    exit 1
+}
+test -n "$ORIGINAL_POINT_CATALOG_INTERVAL" || {
+    printf 'ERROR: original point-catalog interval is missing\n' >&2
+    exit 1
+}
+
 cp "$MAPPING" "$MAPPING_BACKUP"
 cp "$MAPPING_PROPERTIES" "$PROPERTIES_BACKUP"
 cp -p "$IOT_ENV" "$IOT_ENV_BACKUP"
@@ -187,6 +225,34 @@ wait_for_jetlinks() {
     return 1
 }
 
+capture_runtime_intervals() {
+    output_path=$1
+    expected_source_sequence_interval=$2
+    expected_point_catalog_interval=$3
+    container_id=$(iot_compose ps -q jetlinks)
+    test -n "$container_id" || {
+        printf 'ERROR: JetLinks container is missing while verifying runtime intervals\n' >&2
+        return 1
+    }
+    docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$container_id" \
+        | grep -E '^BPI_(SOURCE_SEQUENCE_EVIDENCE_PUBLISH_INTERVAL|POINT_CATALOG_INTERVAL)=' \
+        >"$output_path"
+    if ! grep -Fxq \
+        "BPI_SOURCE_SEQUENCE_EVIDENCE_PUBLISH_INTERVAL=$expected_source_sequence_interval" \
+        "$output_path"; then
+        printf 'ERROR: JetLinks runtime source-sequence interval is not %s\n' \
+            "$expected_source_sequence_interval" >&2
+        return 1
+    fi
+    if ! grep -Fxq \
+        "BPI_POINT_CATALOG_INTERVAL=$expected_point_catalog_interval" \
+        "$output_path"; then
+        printf 'ERROR: JetLinks runtime point-catalog interval is not %s\n' \
+            "$expected_point_catalog_interval" >&2
+        return 1
+    fi
+}
+
 wait_for_catalog_version() {
     expected=$1
     deadline=$(( $(date +%s) + WAIT_SECONDS ))
@@ -202,6 +268,16 @@ wait_for_catalog_version() {
                  LIMIT 1
             )
             SELECT COALESCE(entry.calibration_version, '')
+                   || '|' ||
+                   (
+                       entry.registered
+                       AND entry.property_present
+                       AND entry.device_state = 'ACTIVE'
+                       AND entry.source_sequence_enabled
+                       AND entry.source_sequence_required
+                       AND entry.source_sequence_origin IN ('DEVICE', 'GATEWAY')
+                       AND entry.source_sequence_binding_fingerprint IS NOT NULL
+                   )::text
               FROM snapshot
               JOIN bpi.bpi_point_catalog_entries entry
                 ON entry.tenant_id = snapshot.tenant_id
@@ -210,12 +286,13 @@ wait_for_catalog_version() {
                AND entry.device_id = '$DEVICE_ID'
                AND entry.property_id = '$PROPERTY_ID';
         " 2>/dev/null || true)
-        if [ "$current" = "$expected" ]; then
+        if [ "$current" = "$expected|true" ]; then
             return 0
         fi
         sleep 2
     done
-    printf 'ERROR: latest point catalog did not reach calibration version %s\n' "$expected" >&2
+    printf 'ERROR: latest point catalog did not reach calibration/identity readiness %s|true (last=%s)\n' \
+        "$expected" "${current:-missing}" >&2
     return 1
 }
 
@@ -281,8 +358,14 @@ restore_iot_state() {
     if [ "$iot_env_modified" = true ]; then
         cp -p "$IOT_ENV_BACKUP" "$IOT_ENV"
     fi
+    unset BPI_SOURCE_SEQUENCE_EVIDENCE_PUBLISH_INTERVAL
+    unset BPI_POINT_CATALOG_INTERVAL
     iot_compose up -d --no-deps --force-recreate jetlinks >/dev/null
     wait_for_jetlinks
+    capture_runtime_intervals \
+        "$EVIDENCE_DIR/restored-runtime-env.txt" \
+        "$ORIGINAL_SOURCE_SEQUENCE_EVIDENCE_INTERVAL" \
+        "$ORIGINAL_POINT_CATALOG_INTERVAL"
     if [ "$mapping_modified" = true ]; then
         wait_for_catalog_version "$ORIGINAL_CALIBRATION_VERSION"
     fi
@@ -403,6 +486,10 @@ PY
 python3 "$RENDERER" "$MAPPING" "$MAPPING_PROPERTIES"
 iot_compose up -d --no-deps --force-recreate jetlinks
 wait_for_jetlinks
+capture_runtime_intervals \
+    "$EVIDENCE_DIR/active-runtime-env.txt" \
+    "$SOURCE_SEQUENCE_EVIDENCE_INTERVAL" \
+    "$POINT_CATALOG_INTERVAL"
 wait_for_catalog_version "$CALIBRATION_VERSION"
 
 postgres \
@@ -483,6 +570,8 @@ export BPI_BROWSER_REPORT="$EVIDENCE_DIR/browser-acceptance.json"
 export BPI_MQTT_REPORT="$EVIDENCE_DIR/window-mqtt.json"
 export BPI_DESKTOP_SCREENSHOT="$EVIDENCE_DIR/telemetry-landing-desktop.png"
 export BPI_MOBILE_SCREENSHOT="$EVIDENCE_DIR/telemetry-landing-mobile.png"
+export BPI_LIVE_OVERVIEW_SCREENSHOT="$EVIDENCE_DIR/live-operations-overview.png"
+export BPI_LIVE_DRAWER_SCREENSHOT="$EVIDENCE_DIR/live-operations-drawer.png"
 export NODE_PATH=${NODE_PATH:-$RELEASE_ROOT/frontend/apps/bpi/node_modules}
 node "$BROWSER_SCRIPT"
 
@@ -498,9 +587,12 @@ sha256sum \
     "$EVIDENCE_DIR/window-mqtt.json" \
     "$EVIDENCE_DIR/postgres-verification.json.txt" \
     "$EVIDENCE_DIR/acceptance-runtime-overrides.txt" \
+    "$EVIDENCE_DIR/active-runtime-env.txt" \
     "$EVIDENCE_DIR/preheat-publish-attempts.txt" \
     "$EVIDENCE_DIR/telemetry-landing-desktop.png" \
     "$EVIDENCE_DIR/telemetry-landing-mobile.png" \
+    "$EVIDENCE_DIR/live-operations-overview.png" \
+    "$EVIDENCE_DIR/live-operations-drawer.png" \
     >"$EVIDENCE_DIR/SHA256SUMS"
 
 printf 'BPI controlled telemetry landing acceptance PASS: %s\n' "$EVIDENCE_DIR"
