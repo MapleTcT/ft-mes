@@ -482,6 +482,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-bpi-dataset-retention-target-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-dataset-mlflow-target-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-dataset-training-readiness-target-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-bpi-field-data-coverage-acceptance.js
 	$(PYTHON) -m py_compile deploy/docker/scripts/bpi-dataset-catalog-post-commit-failure-injection.py
 	$(NODE) --check deploy/docker/scripts/run-qcs-bpi-quality-gate-target.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-wms-outage-recovery-acceptance.js
