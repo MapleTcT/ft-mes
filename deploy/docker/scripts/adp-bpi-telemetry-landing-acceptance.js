@@ -513,6 +513,20 @@ async function main() {
     await mobilePage.goto(`${bpiBaseUrl}#/shadowRuns`, { waitUntil: "networkidle" });
     await mobilePage.locator(`[data-shadow-run-id="${run.id}"]`).click();
     await assertCoverageUi(mobilePage, mqttCount);
+    const mobileTelemetry = mobilePage.locator("[data-telemetry-coverage]");
+    await mobileTelemetry.scrollIntoViewIfNeeded();
+    await mobilePage.waitForTimeout(200);
+    const mobileTelemetryGeometry = await mobileTelemetry.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      return {
+        viewportHeight: window.innerHeight,
+        top: box.top,
+        bottom: box.bottom,
+        visible: box.top < window.innerHeight && box.bottom > 0,
+      };
+    });
+    assert(mobileTelemetryGeometry.visible,
+      `mobile telemetry coverage is outside the viewport: ${JSON.stringify(mobileTelemetryGeometry)}`);
     const mobileDrawer = await assertDrawerSettled(mobilePage);
     const mobileGeometry = await mobilePage.evaluate(() => ({
       viewport: document.documentElement.clientWidth,
@@ -526,6 +540,7 @@ async function main() {
     report.browser.mobile = {
       ...mobileGeometry,
       drawer: mobileDrawer,
+      telemetry: mobileTelemetryGeometry,
       screenshot: mobileScreenshot,
     };
     await mobileContext.close();
