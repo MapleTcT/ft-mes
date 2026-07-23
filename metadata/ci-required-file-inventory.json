@@ -3597,6 +3597,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-field-data-coverage-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-flink-data-quality-browser-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -5835,6 +5841,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-field-data-coverage-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-flink-data-quality-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -6495,6 +6507,24 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-field-data-coverage-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-field-data-coverage-desktop-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-field-data-coverage-mobile-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-flink-data-quality-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -6610,6 +6640,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-integrated-rollback-restored-stack.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-integrated-upgrade-field-data-coverage-target.json",
       "state": "tracked",
       "tracked": true
     },
@@ -11240,16 +11276,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 657
+      "tracked": 658
     },
     "docs": {
-      "tracked": 140
+      "tracked": 141
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 248
+      "tracked": 252
     },
     "package.json": {
       "tracked": 1
@@ -11273,8 +11309,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1869,
-    "tracked": 1869,
+    "totalFiles": 1875,
+    "tracked": 1875,
     "untracked": 0
   },
   "untrackedByDirectory": []
