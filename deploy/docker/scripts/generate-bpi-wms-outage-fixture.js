@@ -47,12 +47,33 @@ function commandPath(command) {
   return lookup.status === 0 ? lookup.stdout.trim() : "";
 }
 
+function platformClassifier() {
+  const platform = process.platform === "darwin" ? "osx" : process.platform;
+  const architecture = process.arch === "x64"
+    ? "x86_64"
+    : process.arch === "arm64"
+      ? "aarch_64"
+      : process.arch;
+  return `${platform}-${architecture}`;
+}
+
+function contractBuildProtocCandidates() {
+  const directory = path.join(
+    repoRoot,
+    "contracts/bpi-events/target/protoc-plugins",
+  );
+  if (!fs.existsSync(directory)) return [];
+  const preferredSuffix = `-${platformClassifier()}.exe`;
+  return fs.readdirSync(directory)
+    .filter((name) => name.startsWith("protoc-") && name.endsWith(preferredSuffix))
+    .map((name) => path.join(directory, name));
+}
+
 function mavenProtocCandidates() {
   const base = path.join(os.homedir(), ".m2/repository/com/google/protobuf/protoc");
   if (!fs.existsSync(base)) return [];
-  const platform = process.platform === "darwin" ? "osx" : process.platform;
-  const architecture = process.arch === "x64" ? "x86_64" : process.arch === "arm64" ? "aarch_64" : process.arch;
-  const preferredSuffix = `-${platform}-${architecture}.exe`;
+  const preferredSuffix = `-${platformClassifier()}.exe`;
+  const platform = platformClassifier().split("-")[0];
   const platformToken = `-${platform}-`;
   const candidates = fs.readdirSync(base, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
@@ -72,7 +93,12 @@ function mavenProtocCandidates() {
 
 function locateProtoc() {
   const configured = process.env.BPI_PROTOC?.trim();
-  const candidates = [configured, commandPath("protoc"), ...mavenProtocCandidates()]
+  const candidates = [
+    configured,
+    commandPath("protoc"),
+    ...contractBuildProtocCandidates(),
+    ...mavenProtocCandidates(),
+  ]
     .filter(Boolean);
   const found = candidates.find(executable);
   if (!found) {
