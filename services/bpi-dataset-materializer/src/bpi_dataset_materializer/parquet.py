@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Callable
 
@@ -18,6 +18,13 @@ class DatasetContractError(RuntimeError):
 
 
 ROW_ORDER = "line_id,prediction_time,batch_id,review_id"
+PARQUET_V1 = "bpi.dataset-parquet.v1"
+PARQUET_V2 = "bpi.dataset-parquet.v2"
+MATERIALIZER_V1 = "bpi-dataset-materializer/0.1.0"
+MATERIALIZER_V2 = "bpi-dataset-materializer/0.2.0"
+PROCESS_WINDOW_PREFIX = "process.window."
+PROCESS_WINDOW_COLUMN = "feature_process_window_values"
+PROCESS_WINDOW_LAYOUT = "MAP_STRING_DECIMAL_24_6"
 
 
 def _canonical_json(value: Any) -> str:
@@ -38,6 +45,21 @@ def _decimal(value: Any) -> Decimal | None:
     if value is None:
         return None
     return Decimal(str(value)).quantize(Decimal("0.000001"))
+
+
+def _process_window_decimal(reference: str, value: Any) -> Decimal:
+    if value is None or isinstance(value, bool):
+        raise DatasetContractError(
+            f"process window feature {reference} must be a finite numeric value")
+    try:
+        converted = Decimal(str(value))
+        if not converted.is_finite():
+            raise InvalidOperation
+        return converted.quantize(Decimal("0.000001"))
+    except (InvalidOperation, ValueError) as exception:
+        raise DatasetContractError(
+            f"process window feature {reference} must be a finite numeric value"
+        ) from exception
 
 
 def _boolean(value: Any) -> bool | None:
@@ -77,8 +99,35 @@ LABEL_COLUMNS: dict[str, tuple[tuple[str, pa.DataType, Callable[[Any], Any]], ..
 }
 
 
+def _process_window_refs(claim: MaterializationClaim) -> tuple[str, ...]:
+    return tuple(sorted(
+        reference
+        for reference in claim.feature_refs
+        if reference.startswith(PROCESS_WINDOW_PREFIX)
+    ))
+
+
+def _validate_contract(claim: MaterializationClaim) -> None:
+    contract = (claim.artifact_schema_version, claim.materializer_version)
+    if contract not in {
+        (PARQUET_V1, MATERIALIZER_V1),
+        (PARQUET_V2, MATERIALIZER_V2),
+    }:
+        raise DatasetContractError(
+            "unsupported dataset Parquet schema and materializer version pair")
+    if claim.artifact_schema_version == PARQUET_V1 and _process_window_refs(claim):
+        raise DatasetContractError(
+            "bpi.dataset-parquet.v1 does not support process.window.* features")
+    if len(claim.feature_refs) != len(set(claim.feature_refs)):
+        raise DatasetContractError("dataset feature refs must be unique")
+
+
 def _schema(claim: MaterializationClaim) -> pa.Schema:
-    unknown_features = set(claim.feature_refs) - set(FEATURE_COLUMNS)
+    _validate_contract(claim)
+    process_window_refs = set(_process_window_refs(claim))
+    unknown_features = (
+        set(claim.feature_refs) - set(FEATURE_COLUMNS) - process_window_refs
+    )
     unknown_labels = set(claim.label_refs) - set(LABEL_COLUMNS)
     if unknown_features or unknown_labels:
         raise DatasetContractError(
@@ -98,6 +147,12 @@ def _schema(claim: MaterializationClaim) -> pa.Schema:
         pa.field("split_key", pa.string(), nullable=False),
     ]
     fields.extend(pa.field(column[0], column[1]) for column in FEATURE_COLUMNS.values())
+    if claim.artifact_schema_version == PARQUET_V2:
+        fields.append(pa.field(
+            PROCESS_WINDOW_COLUMN,
+            pa.map_(pa.string(), pa.decimal128(24, 6)),
+            nullable=False,
+        ))
     for columns in LABEL_COLUMNS.values():
         fields.extend(pa.field(column[0], column[1]) for column in columns)
 
@@ -111,6 +166,10 @@ def _schema(claim: MaterializationClaim) -> pa.Schema:
         b"bpi.label_refs": _canonical_json(list(claim.label_refs)).encode(),
         b"bpi.row_order": ROW_ORDER.encode(),
     }
+    if claim.artifact_schema_version == PARQUET_V2:
+        metadata[b"bpi.process_window_feature_layout"] = (
+            PROCESS_WINDOW_LAYOUT.encode()
+        )
     return pa.schema(fields, metadata=metadata)
 
 
@@ -136,6 +195,12 @@ def _row(claim: MaterializationClaim, sample: DatasetSample) -> dict[str, Any]:
     for ref, (column_name, _data_type, converter) in FEATURE_COLUMNS.items():
         value = sample.feature_payload.get(ref) if ref in claim.feature_refs else None
         row[column_name] = converter(value)
+    if claim.artifact_schema_version == PARQUET_V2:
+        row[PROCESS_WINDOW_COLUMN] = [
+            (reference, _process_window_decimal(
+                reference, sample.feature_payload.get(reference)))
+            for reference in _process_window_refs(claim)
+        ]
     for ref, columns in LABEL_COLUMNS.items():
         selected = ref in claim.label_refs
         value = sample.label_payload.get(ref) if selected else None
@@ -188,6 +253,7 @@ def build_parquet(
             for field in schema
         ],
         "selectedFeatureRefs": list(claim.feature_refs),
+        "processWindowFeatureRefs": list(_process_window_refs(claim)),
         "selectedLabelRefs": list(claim.label_refs),
     }
     metadata = {
@@ -197,6 +263,11 @@ def build_parquet(
         "manifestChecksum": claim.manifest_checksum,
         "definitionChecksum": claim.definition_checksum,
         "rowOrder": ROW_ORDER,
+        "processWindowFeatureLayout": (
+            PROCESS_WINDOW_LAYOUT
+            if claim.artifact_schema_version == PARQUET_V2
+            else None
+        ),
         "compression": "zstd:3",
         "sourcePayloadIncluded": False,
         "excludedSamplesIncluded": False,

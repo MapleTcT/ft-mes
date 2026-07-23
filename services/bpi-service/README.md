@@ -90,12 +90,16 @@ checksum. Definitions, terminal snapshots and samples are immutable. The immutab
 its original `MANIFEST_ONLY/NOT_STARTED` phase boundary even when later projections advance.
 
 Flyway V27 adds the Phase 3B-A materialization task boundary. Authorized engineers can queue one
-logical `PARQUET_V1` task for a `MANIFEST_READY` snapshot, read its state and explicitly retry only a
-`FAILED` revision. A separate Python 3.12 worker claims tasks with `FOR UPDATE SKIP LOCKED`, writes a
-deterministic PyArrow Parquet object to a private versioned MinIO bucket, downloads the exact object
-version and verifies SHA-256 before publishing `READY`. Snapshot reads project the latest task without
-mutating the V26 manifest. Iceberg, MLflow and model readiness remain `NOT_STARTED`; the worker and all
-Phase 2 integration switches remain disabled by default.
+logical Parquet task for a `MANIFEST_READY` snapshot, read its state and explicitly retry only a
+`FAILED` revision. Historical tasks and objects retain `bpi.dataset-parquet.v1` with materializer
+`0.1.0`. New requests use `bpi.dataset-parquet.v2` with materializer `0.2.0`; v2 preserves fixed
+context columns and carries governed `process.window.*` values in a deterministic
+`map<string, decimal128(24, 6)>`. A separate Python 3.12 worker claims tasks with
+`FOR UPDATE SKIP LOCKED`, writes a deterministic PyArrow Parquet object to a private versioned MinIO
+bucket, downloads the exact object version and verifies SHA-256 before publishing `READY`. Snapshot
+reads project the latest task without mutating the V26 manifest. Iceberg, MLflow and model readiness
+remain separate delivery boundaries; the worker and all Phase 2 integration switches remain disabled
+by default.
 
 Flyway V28 adds the Phase 3B-B Iceberg catalog-publication boundary without mutating either the V26
 manifest or the V27 Parquet fact. Authorized engineers can queue one logical publication for a verified,

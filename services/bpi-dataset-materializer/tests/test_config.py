@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from bpi_dataset_materializer import ARTIFACT_SCHEMA_VERSION, MATERIALIZER_VERSION
 from bpi_dataset_materializer.config import ConfigurationError, Settings
 
 
@@ -23,6 +24,10 @@ class SettingsTest(unittest.TestCase):
             settings = Settings.from_environment()
         self.assertFalse(settings.enabled)
         self.assertIsNone(settings.database_url)
+        self.assertEqual("bpi.dataset-parquet.v2", ARTIFACT_SCHEMA_VERSION)
+        self.assertEqual("bpi-dataset-materializer/0.2.0", MATERIALIZER_VERSION)
+        self.assertEqual(ARTIFACT_SCHEMA_VERSION, settings.artifact_schema_version)
+        self.assertEqual(MATERIALIZER_VERSION, settings.materializer_version)
 
     def test_enabled_worker_requires_database_and_object_store(self):
         with patch.dict(os.environ, {"BPI_DATASET_MATERIALIZER_ENABLED": "true"}, clear=True):

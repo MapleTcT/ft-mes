@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ft-mes-bpi-dataset-materializer"
-version = "0.1.0"
-description = "Deterministic Parquet materializer for frozen FT MES BPI datasets"
+version = "0.2.0"
+description = "Deterministic Parquet materializer for frozen FT MES BPI datasets and process windows"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "minio==7.2.20",

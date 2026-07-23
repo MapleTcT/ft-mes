@@ -524,9 +524,9 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.revision").value(1))
                 .andExpect(jsonPath("$.data.artifactFormat").value("PARQUET"))
                 .andExpect(jsonPath("$.data.artifactSchemaVersion")
-                        .value("bpi.dataset-parquet.v1"))
+                        .value("bpi.dataset-parquet.v2"))
                 .andExpect(jsonPath("$.data.materializerVersion")
-                        .value("bpi-dataset-materializer/0.1.0"))
+                        .value("bpi-dataset-materializer/0.2.0"))
                 .andExpect(jsonPath("$.data.artifactUri").doesNotExist())
                 .andReturn();
         UUID materializationId = UUID.fromString(
@@ -657,7 +657,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                     .andExpect(jsonPath("$.data.revision").value(4));
 
             contentSha = "d".repeat(64);
-            objectKey = "datasets/%s/%s/bpi-dataset-materializer-0.1.0/%s.parquet"
+            objectKey = "datasets/%s/%s/bpi-dataset-materializer-0.2.0/%s.parquet"
                     .formatted(firstSnapshotId, firstChecksum, contentSha);
             String objectVersionId = "acceptance-version-1";
             artifactUri = "s3://bpi-datasets/" + objectKey
@@ -681,7 +681,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                      WHERE tenant_id = ? AND id = ? AND state = 'WRITING'
                        AND claim_token = ?
                     """, "s3://bpi-datasets/" + objectKey, objectKey, contentSha,
-                    "{\"version\":\"bpi.dataset-parquet.v1\"}",
+                    "{\"version\":\"bpi.dataset-parquet.v2\"}",
                     "{\"objectContentVerified\":false}",
                     tenantId, materializationId, readyClaim))
                     .isInstanceOf(DataAccessException.class)
@@ -697,7 +697,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                      WHERE tenant_id = ? AND id = ? AND state = 'WRITING'
                        AND claim_token = ?
                     """, artifactUri, objectKey, contentSha,
-                    "{\"version\":\"bpi.dataset-parquet.v1\"}",
+                    "{\"version\":\"bpi.dataset-parquet.v2\"}",
                     "{\"compression\":\"zstd\","
                             + "\"objectVersionId\":\"" + objectVersionId + "\","
                             + "\"objectContentVerified\":true,\"icebergReady\":false,"

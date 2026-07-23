@@ -487,6 +487,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-bpi-field-data-coverage-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-telemetry-landing-acceptance.js
 	$(PYTHON) -m py_compile deploy/docker/scripts/bpi-dataset-catalog-post-commit-failure-injection.py
+	$(PYTHON) -m py_compile deploy/docker/scripts/verify-bpi-dataset-parquet-v2-object.py
 	$(NODE) --check deploy/docker/scripts/run-qcs-bpi-quality-gate-target.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-wms-outage-recovery-acceptance.js
 	$(NODE) --check deploy/docker/scripts/generate-bpi-wms-outage-fixture.js

@@ -23,8 +23,8 @@ import java.util.regex.Pattern;
 
 @Service
 public class DatasetMaterializationService {
-    public static final String ARTIFACT_SCHEMA_VERSION = "bpi.dataset-parquet.v1";
-    public static final String MATERIALIZER_VERSION = "bpi-dataset-materializer/0.1.0";
+    public static final String ARTIFACT_SCHEMA_VERSION = "bpi.dataset-parquet.v2";
+    public static final String MATERIALIZER_VERSION = "bpi-dataset-materializer/0.2.0";
 
     private static final Pattern REVISION_HEADER = Pattern.compile("^(?:W/)?\\\"?(\\d+)\\\"?$");
 

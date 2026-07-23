@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 from dataclasses import replace
 from datetime import UTC, datetime
+from decimal import Decimal
 from pathlib import Path
 from types import SimpleNamespace
 from uuid import uuid4
@@ -134,9 +135,7 @@ class FakeCatalog:
                     [
                         pa.field(
                             field.name,
-                            pa.large_string()
-                            if pa.types.is_string(field.type)
-                            else field.type,
+                            iceberg_arrow_type(field.type),
                             nullable=field.nullable,
                         )
                         for field in schema
@@ -149,6 +148,17 @@ class FakeCatalog:
         if self.table is None:
             raise AssertionError("table is missing")
         return self.table
+
+
+def iceberg_arrow_type(data_type: pa.DataType) -> pa.DataType:
+    if pa.types.is_string(data_type):
+        return pa.large_string()
+    if pa.types.is_map(data_type):
+        return pa.map_(
+            iceberg_arrow_type(data_type.key_type),
+            iceberg_arrow_type(data_type.item_type),
+        )
+    return data_type
 
 
 def settings() -> Settings:
@@ -182,6 +192,10 @@ def source_and_claim():
                 "batch_id": "BATCH-001",
                 "prediction_time": datetime(2026, 7, 22, 4, 0, tzinfo=UTC),
                 "plant_id": "PLANT-01",
+                "feature_process_window_values": [
+                    ("process.window.flow.mean_60s", Decimal("12.500000")),
+                    ("process.window.pump.true_ratio_30s", Decimal("1.000000")),
+                ],
                 "source_materialization_id": str(materialization_id),
             }
         ],
@@ -194,6 +208,11 @@ def source_and_claim():
                     nullable=False,
                 ),
                 pa.field("plant_id", pa.string(), nullable=False),
+                pa.field(
+                    "feature_process_window_values",
+                    pa.map_(pa.string(), pa.decimal128(24, 6)),
+                    nullable=False,
+                ),
                 pa.field("source_materialization_id", pa.string(), nullable=False),
             ]
         ),

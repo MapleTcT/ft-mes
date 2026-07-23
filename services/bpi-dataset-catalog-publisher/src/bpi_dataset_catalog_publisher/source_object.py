@@ -22,9 +22,35 @@ class SourceObjectContractError(RuntimeError):
 
 def _schema_contract(schema: pa.Schema) -> list[dict[str, Any]]:
     return [
-        {"name": field.name, "type": str(field.type), "nullable": field.nullable}
+        {
+            "name": field.name,
+            "type": _parquet_logical_type(field.type),
+            "nullable": field.nullable,
+        }
         for field in schema
     ]
+
+
+def _parquet_logical_type(data_type: pa.DataType) -> str:
+    """Normalize nested physical field aliases added during Parquet round trips."""
+    if pa.types.is_map(data_type):
+        return (
+            "map<"
+            f"{_parquet_logical_type(data_type.key_type)}, "
+            f"{_parquet_logical_type(data_type.item_type)}"
+            ">"
+        )
+    if pa.types.is_list(data_type):
+        return f"list<{_parquet_logical_type(data_type.value_type)}>"
+    if pa.types.is_large_list(data_type):
+        return f"large_list<{_parquet_logical_type(data_type.value_type)}>"
+    if pa.types.is_struct(data_type):
+        fields = ", ".join(
+            f"{field.name}: {_parquet_logical_type(field.type)}"
+            for field in data_type
+        )
+        return f"struct<{fields}>"
+    return str(data_type)
 
 
 def iceberg_schema_contract(schema: pa.Schema) -> list[tuple[str, str, bool]]:
@@ -41,6 +67,21 @@ def _iceberg_logical_type(data_type: pa.DataType) -> str:
         return "string"
     if pa.types.is_binary(data_type) or pa.types.is_large_binary(data_type):
         return "binary"
+    if pa.types.is_map(data_type):
+        return (
+            "map<"
+            f"{_iceberg_logical_type(data_type.key_type)},"
+            f"{_iceberg_logical_type(data_type.item_type)}"
+            ">"
+        )
+    if pa.types.is_list(data_type) or pa.types.is_large_list(data_type):
+        return f"list<{_iceberg_logical_type(data_type.value_type)}>"
+    if pa.types.is_struct(data_type):
+        fields = ",".join(
+            f"{field.name}:{_iceberg_logical_type(field.type)}"
+            for field in data_type
+        )
+        return f"struct<{fields}>"
     return str(data_type)
 
 

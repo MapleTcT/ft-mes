@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from dataclasses import replace
 from datetime import UTC, datetime
+from decimal import Decimal
 from pathlib import Path
 from types import SimpleNamespace
 from uuid import uuid4
@@ -86,6 +87,11 @@ def parquet_fixture(directory: Path):
             pa.field("snapshot_id", pa.string(), nullable=False),
             pa.field("batch_id", pa.string(), nullable=False),
             pa.field("prediction_time", pa.timestamp("us", tz="UTC"), nullable=False),
+            pa.field(
+                "feature_process_window_values",
+                pa.map_(pa.string(), pa.decimal128(24, 6)),
+                nullable=False,
+            ),
         ],
         metadata={
             b"bpi.snapshot_id": str(snapshot_id).encode(),
@@ -98,6 +104,10 @@ def parquet_fixture(directory: Path):
                 "snapshot_id": str(snapshot_id),
                 "batch_id": "BATCH-001",
                 "prediction_time": datetime(2026, 7, 22, 4, 0, tzinfo=UTC),
+                "feature_process_window_values": [
+                    ("process.window.flow.mean_60s", Decimal("12.500000")),
+                    ("process.window.pump.true_ratio_30s", Decimal("1.000000")),
+                ],
             }
         ],
         schema=schema,
@@ -158,6 +168,44 @@ class SourceObjectStoreTest(unittest.TestCase):
 
         self.assertEqual(
             semantic_checksum(small_string), semantic_checksum(large_string)
+        )
+
+    def test_semantic_checksum_normalizes_nested_iceberg_string_types(self) -> None:
+        values = [[("process.window.flow.mean_60s", Decimal("12.500000"))]]
+        small_string_keys = pa.Table.from_arrays(
+            [
+                pa.array(
+                    values,
+                    type=pa.map_(pa.string(), pa.decimal128(24, 6)),
+                )
+            ],
+            schema=pa.schema([
+                pa.field(
+                    "feature_process_window_values",
+                    pa.map_(pa.string(), pa.decimal128(24, 6)),
+                    nullable=False,
+                )
+            ]),
+        )
+        large_string_keys = pa.Table.from_arrays(
+            [
+                pa.array(
+                    values,
+                    type=pa.map_(pa.large_string(), pa.decimal128(24, 6)),
+                )
+            ],
+            schema=pa.schema([
+                pa.field(
+                    "feature_process_window_values",
+                    pa.map_(pa.large_string(), pa.decimal128(24, 6)),
+                    nullable=False,
+                )
+            ]),
+        )
+
+        self.assertEqual(
+            semantic_checksum(small_string_keys),
+            semantic_checksum(large_string_keys),
         )
 
     def test_exact_version_bytes_schema_and_identity_are_verified(self) -> None:
