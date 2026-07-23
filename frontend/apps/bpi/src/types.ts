@@ -329,6 +329,26 @@ export interface ShadowRunSourceCoverage {
   fullyReady: boolean;
 }
 
+export interface ShadowRunTelemetryCoverage {
+  windowStarted: boolean;
+  windowStart?: string | null;
+  windowEnd?: string | null;
+  pinnedPointCount: number;
+  observedPointCount: number;
+  authoritativeSequencePointCount: number;
+  calibratedPointCount: number;
+  goodQualityPointCount: number;
+  acceptedEventCount: number;
+  acceptedObservationCount: number;
+  rejectedObservationCount: number;
+  gapEventCount: number;
+  outOfOrderEventCount: number;
+  firstObservedAt?: string | null;
+  lastObservedAt?: string | null;
+  fullyCovered: boolean;
+  blockers: string[];
+}
+
 export interface ShadowRunMetrics {
   observedDurationSeconds: number;
   reviewedBatchCount: number;
@@ -398,6 +418,7 @@ export interface ShadowRun {
   cancellationReason?: string | null;
   readiness: ShadowRunReadiness;
   sourceCoverage: ShadowRunSourceCoverage;
+  telemetryCoverage: ShadowRunTelemetryCoverage;
   metrics: ShadowRunMetrics;
   trainingDataCoverage: ShadowRunTrainingDataCoverage;
   blockers: string[];

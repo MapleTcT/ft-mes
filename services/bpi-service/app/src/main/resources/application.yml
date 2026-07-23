@@ -173,3 +173,19 @@ bpi:
     max-future-skew: ${BPI_TELEMETRY_MAX_FUTURE_SKEW:2m}
     accepted-units: ${BPI_TELEMETRY_ACCEPTED_UNITS:1,bool,%,t/h,kg/h,m3/h,m3/s,kg/s,degC,kPa,MPa,Be,Baume,Brix}
     accepted-qualities: GOOD,UNCERTAIN,BAD,STALE,SUBSTITUTED
+  telemetry-kafka:
+    enabled: ${BPI_TELEMETRY_KAFKA_ENABLED:false}
+    bootstrap-servers: ${BPI_TELEMETRY_KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:29092}
+    topic: ${BPI_TELEMETRY_KAFKA_TOPIC:iot.telemetry.selected.v1}
+    dlq-topic: ${BPI_TELEMETRY_KAFKA_DLQ_TOPIC:iot.telemetry.selected.dlq.v1}
+    group-id: ${BPI_TELEMETRY_KAFKA_GROUP_ID:ft-mes-bpi-service-telemetry-v1}
+    client-id: ${BPI_TELEMETRY_KAFKA_CLIENT_ID:ft-mes-bpi-telemetry}
+    actor-id: ${BPI_TELEMETRY_KAFKA_ACTOR_ID:jetlinks-telemetry-sync}
+    allowed-tenant-ids: ${BPI_TELEMETRY_KAFKA_ALLOWED_TENANT_IDS:_DENY_ALL_}
+    allowed-plant-ids: ${BPI_TELEMETRY_KAFKA_ALLOWED_PLANT_IDS:_DENY_ALL_}
+    allowed-line-ids: ${BPI_TELEMETRY_KAFKA_ALLOWED_LINE_IDS:_DENY_ALL_}
+    concurrency: ${BPI_TELEMETRY_KAFKA_CONCURRENCY:3}
+    max-attempts: ${BPI_TELEMETRY_KAFKA_MAX_ATTEMPTS:4}
+    retry-backoff: ${BPI_TELEMETRY_KAFKA_RETRY_BACKOFF:2s}
+    max-payload-bytes: ${BPI_TELEMETRY_KAFKA_MAX_PAYLOAD_BYTES:524288}
+    auto-offset-reset: ${BPI_TELEMETRY_KAFKA_AUTO_OFFSET_RESET:latest}

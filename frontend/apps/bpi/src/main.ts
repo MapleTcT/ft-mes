@@ -1060,6 +1060,13 @@ function shadowRunBlockerLabel(code: string): string {
     TOPOLOGY_POINT_CATALOG_MISMATCH: '拓扑校验使用了不同的点位目录快照',
     POINT_CATALOG_NOT_CURRENT: '固定点位目录已不是产线当前快照',
     POINT_CATALOG_NOT_READY: '固定点位目录仍有未准入点位',
+    TELEMETRY_WINDOW_NOT_STARTED: '影子运行尚未启动，现场遥测窗口未建立',
+    TELEMETRY_POINTS_NOT_OBSERVED: '固定点位尚未全部产生 PostgreSQL 落表观测',
+    TELEMETRY_AUTHORITATIVE_SEQUENCE_INCOMPLETE: '固定点位的权威来源序列观测不完整',
+    TELEMETRY_CALIBRATION_INCOMPLETE: '落表观测未全部匹配固定目录的校准版本',
+    TELEMETRY_GOOD_QUALITY_INCOMPLETE: '固定点位尚未全部产生 GOOD 质量观测',
+    TELEMETRY_SEQUENCE_GAP_DETECTED: '运行窗口内检测到遥测序列断档',
+    TELEMETRY_OUT_OF_ORDER_DETECTED: '运行窗口内检测到遥测乱序',
     MINIMUM_DURATION_NOT_REACHED: '尚未达到最短影子运行周期',
     MINIMUM_BATCH_REVIEWS_NOT_REACHED: '人工复核批次数不足',
     BOUNDARY_AGREEMENT_BELOW_THRESHOLD: '边界一致率低于验收阈值',
@@ -1339,6 +1346,16 @@ async function openShadowRun(runId: string): Promise<void> {
     ];
     const sourceCoverageHtml = sourceCoverageChecks.map(([label, value]) =>
       `<div><span>${label}</span><b>${value} / ${run.sourceCoverage.pinnedPointCount}</b></div>`).join('');
+    const telemetryCoverage = run.telemetryCoverage;
+    const telemetryCoverageHtml = [
+      ['实际落表点位', telemetryCoverage.observedPointCount],
+      ['权威序列点位', telemetryCoverage.authoritativeSequencePointCount],
+      ['校准一致点位', telemetryCoverage.calibratedPointCount],
+      ['GOOD 质量点位', telemetryCoverage.goodQualityPointCount],
+    ].map(([label, value]) =>
+      `<div><span>${label}</span><b>${value} / ${telemetryCoverage.pinnedPointCount}</b></div>`).join('');
+    const telemetryCoverageBlockers = telemetryCoverage.blockers.map((code) =>
+      `<li><div><strong>${escapeHtml(shadowRunBlockerLabel(code))}</strong><code>${escapeHtml(code)}</code></div></li>`).join('');
     const trainingCoverage = run.trainingDataCoverage;
     const trainingCoverageHtml = [
       ['独立复核批次', trainingCoverage.reviewedBatchCount, trainingCoverage.requiredReviewedBatchCount],
@@ -1361,6 +1378,7 @@ async function openShadowRun(runId: string): Promise<void> {
       <div class="drawer-section facts-grid"><div><span>验收编码</span><b>${escapeHtml(run.runCode)}</b></div><div><span>工厂 / 产线</span><b>${escapeHtml(run.plantId)} / ${escapeHtml(run.lineId)}</b></div><div><span>固定规则</span><b>${escapeHtml(run.ruleVersion)}</b></div><div><span>固定拓扑</span><b>${escapeHtml(run.topologyVersion)}</b></div><div><span>点位目录快照</span><b class="mono-value">${escapeHtml(run.pointCatalogSnapshotId)}</b></div><div><span>创建人 / 时间</span><b>${escapeHtml(run.createdBy)} · ${formatTime(run.createdAt)}</b></div></div>
       <div class="drawer-section"><div class="section-title"><h3>固定运行版本准入</h3>${run.readiness.ready ? statusChip('READY') : statusChip('BLOCKED')}</div><ul class="shadow-readiness-list">${readinessHtml}</ul></div>
       <div class="drawer-section shadow-source-coverage" data-source-coverage><div class="section-title"><h3>固定来源可信度</h3>${run.sourceCoverage.fullyReady ? statusChip('READY') : statusChip('BLOCKED')}</div><div class="shadow-coverage-grid">${sourceCoverageHtml}</div><p class="shadow-coverage-note">按本次运行固定的点位目录快照统计，后续目录变化不会改写本次验收来源。</p></div>
+      <div class="drawer-section shadow-telemetry-coverage" data-telemetry-coverage><div class="section-title"><h3>现场遥测落表</h3>${telemetryCoverage.fullyCovered ? statusChip('READY') : statusChip('BLOCKED')}</div><div class="shadow-telemetry-window"><span>PostgreSQL 验收窗口</span><b>${telemetryCoverage.windowStarted ? `${formatTime(telemetryCoverage.windowStart)} 至 ${formatTime(telemetryCoverage.windowEnd)}` : '尚未启动'}</b></div><div class="shadow-coverage-grid">${telemetryCoverageHtml}</div><div class="facts-grid shadow-telemetry-facts"><div><span>接受事件 / 观测</span><b>${telemetryCoverage.acceptedEventCount} / ${telemetryCoverage.acceptedObservationCount}</b></div><div><span>拒绝观测</span><b>${telemetryCoverage.rejectedObservationCount}</b></div><div><span>断档 / 乱序事件</span><b>${telemetryCoverage.gapEventCount} / ${telemetryCoverage.outOfOrderEventCount}</b></div><div><span>首条 / 末条采样</span><b>${formatTime(telemetryCoverage.firstObservedAt)} / ${formatTime(telemetryCoverage.lastObservedAt)}</b></div></div>${telemetryCoverageBlockers ? `<ul class="shadow-training-blockers">${telemetryCoverageBlockers}</ul>` : '<div class="shadow-training-covered"><i data-lucide="database-zap"></i><span>固定点位已在本次窗口内形成可核验的 PostgreSQL 遥测证据。</span></div>'}<div class="shadow-training-boundary"><i data-lucide="shield-alert"></i><div><strong>落表覆盖不等于现场验收完成</strong><span>仍需满足真实设备来源、连续 7–14 天运行、人工批次复核和数据质量门禁；本状态不开放训练或生产自动执行。</span></div></div></div>
       <div class="drawer-section"><div class="section-title"><h3>验收指标</h3>${run.readyForApproval ? statusChip('READY') : '<span>全部通过后才能批准</span>'}</div><div class="shadow-metric-grid">${metricHtml}</div><div class="facts-grid shadow-metric-detail"><div><span>数量样本</span><b>${run.metrics.quantitySampleCount}</b></div><div><span>自动 / 参考累计</span><b>${number(run.metrics.automaticQuantityTotal, 3)} / ${number(run.metrics.referenceQuantityTotal, 3)} ${escapeHtml(run.metrics.quantityUnit || '')}</b></div><div><span>单批平均偏差</span><b>${number(run.metrics.meanQuantityDeviationPercent, 3)}%</b></div><div><span>单批最大偏差</span><b>${number(run.metrics.maximumQuantityDeviationPercent, 3)}%</b></div></div></div>
       <div class="drawer-section shadow-training-coverage" data-training-data-coverage><div class="section-title"><h3>现场数据覆盖</h3>${trainingCoverage.thresholdsMet ? statusChip('READY') : statusChip('BLOCKED')}</div><div class="shadow-training-policy"><span>覆盖策略</span><code>${escapeHtml(trainingCoverage.policyVersion)}</code></div><div class="shadow-coverage-grid">${trainingCoverageHtml}</div>${trainingCoverageBlockers ? `<ul class="shadow-training-blockers">${trainingCoverageBlockers}</ul>` : '<div class="shadow-training-covered"><i data-lucide="check-circle-2"></i><span>基础数量覆盖已达到当前策略阈值。</span></div>'}<div class="shadow-training-boundary"><i data-lucide="shield-alert"></i><div><strong>仅表示现场数据覆盖进度，不代表允许训练</strong><span>训练仍未启动；后续还必须通过过程窗口、时点约束、数据质量和数据集版本治理门禁。</span></div></div></div>
       ${blockers ? `<div class="drawer-section shadow-blockers"><div class="section-title"><h3>当前阻断</h3><span>${run.blockers.length} 项</span></div><ul>${blockers}</ul></div>` : ''}

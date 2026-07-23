@@ -6,9 +6,9 @@
 
 ## 摘要
 
-- Generated At：`2026-07-23T07:33:32+00:00`。
-- Repo Commit：`6dbdb28da96a9717952e83814b30981837674915`。
-- 总引用数：`1624`。
+- Generated At：`2026-07-23T10:15:57+00:00`。
+- Repo Commit：`988868f539cfd9ed5b0127edb621e799a509bad0`。
+- 总引用数：`1627`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
@@ -19,13 +19,13 @@
 | --- | --- | --- |
 | allowed-legacy-contract | 6 | Oracle is explicit legacy compatibility, not the default runtime path. |
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
-| documentation-or-workflow | 189 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
+| documentation-or-workflow | 191 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
 | java-row-index-noise | 90 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
 | postgres-compat-reference | 575 | PostgreSQL compatibility SQL may mention Oracle as source context. |
-| postgres-conversion-tooling | 47 | Runtime conversion script; Oracle references should convert away from Oracle defaults. |
+| postgres-conversion-tooling | 48 | Runtime conversion script; Oracle references should convert away from Oracle defaults. |
 | recovered-source-backlog | 253 | Recovered source contains Oracle-specific branch or keyword; verify during module promotion. |
 | runtime-patch-backlog | 9 | Runtime patch still contains Oracle branch logic that should be retired after source promotion. |
 | tooling-or-audit-code | 269 | Tooling may mention Oracle to generate or check migration audit outputs. |
@@ -44,8 +44,8 @@
 | scripts/verify-module-intake-precheck.py | 33 |
 | docs/oracle-to-postgres-transition.md | 30 |
 | scripts/generate-backend-dependency-inventory.py | 24 |
+| docs/project-objectives.md | 21 |
 | backend/modules/com/supcon/supfusion/flow/flow-dao/1.0.0-RELEASE/META-INF/oracle/flow_1.sql | 20 |
-| docs/project-objectives.md | 20 |
 | scripts/precheck-module-intake.py | 20 |
 | backend/modules/com/supcon/supfusion/notification/admin-dao/1.0.0-SNAPSHOT/META-INF/oracle/ntfm_1.sql | 17 |
 | scripts/verify-source-modules.py | 17 |

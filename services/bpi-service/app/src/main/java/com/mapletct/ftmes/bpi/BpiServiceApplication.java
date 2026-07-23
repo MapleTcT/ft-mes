@@ -4,6 +4,7 @@ import com.mapletct.ftmes.bpi.infrastructure.security.BpiSecurityProperties;
 import com.mapletct.ftmes.bpi.infrastructure.candidate.BpiCandidateEventProperties;
 import com.mapletct.ftmes.bpi.infrastructure.candidate.BpiCandidateKafkaProperties;
 import com.mapletct.ftmes.bpi.infrastructure.telemetry.BpiTelemetryProperties;
+import com.mapletct.ftmes.bpi.infrastructure.telemetry.BpiTelemetryKafkaProperties;
 import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxProperties;
 import com.mapletct.ftmes.bpi.infrastructure.application.BpiRuleApplicationKafkaProperties;
 import com.mapletct.ftmes.bpi.infrastructure.pointcatalog.BpiPointCatalogKafkaProperties;
@@ -22,6 +23,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableConfigurationProperties({
         BpiSecurityProperties.class,
         BpiTelemetryProperties.class,
+        BpiTelemetryKafkaProperties.class,
         BpiCandidateEventProperties.class,
         BpiCandidateKafkaProperties.class,
         BpiDataQualityKafkaProperties.class,

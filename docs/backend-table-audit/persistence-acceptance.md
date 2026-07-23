@@ -1055,6 +1055,25 @@ point-in-time、失败关闭、不可变和精确清理。
 清理证据：`docs/testing/bpi-field-data-coverage-acceptance.md`。本项关闭覆盖投影实现和软件验收，
 不关闭物理现场来源、200 批/7 天、标签数量、模型训练或生产激活。
 
+### BPI Phase 3C-E IoT 遥测落表（目标 MQTT/Kafka/PostgreSQL）
+
+本节使用 marker `BPI_TLANDING_20260723_094606`。产品提交
+`8c9c4192b17953c48208efd31ef6528de04d96c6` 将唯一目标栈 expand-only 到 Flyway V34；
+验收脚本提交 `988868f539cfd9ed5b0127edb621e799a509bad0` 从受控 MQTT 设备发送 QoS1 遥测，经
+JetLinks、六分区 Kafka 和精确 scope BPI consumer 事务落表，再由真实影子运行页面读取。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| V34 expand-only 部署与 scoped consumer | 不适用，部署前置 | Kafka `iot.telemetry.selected.v1` / DLQ `iot.telemetry.selected.dlq.v1` | `BpiTelemetryKafkaConfiguration -> TelemetryKafkaListener` | `bpi.flyway_schema_history`；telemetry 四表索引 | `metadata/bpi-integrated-upgrade-v34-target.json`；consumer group describe | V33 -> V34；三项核心服务 healthy；consumer 只允许 `1000/PLANT-01/LINE-S07-01`，3 consumers/6 partitions/final lag 0 | PASS_TARGET |
+| 预热遥测真实落表但排除出影子窗口 | `/bpi/#/shadowRuns` 创建/启动前 | MQTT -> Kafka；`POST /bpi-api/shadow-runs`；`POST .../{id}/start` | `TelemetryKafkaListener -> TelemetryKafkaRecordProcessor -> TelemetryIngestionService -> TelemetryPostgresRepository` | `bpi_telemetry_source_state`、`bpi_telemetry_events`、`bpi_telemetry_points`、`bpi_shadow_runs` | `bpi-telemetry-landing-acceptance-verification.sql` 查询 preheat count 和 `created_at < started_at` | sequence `1..3` 三条均 PUBACK 并落表；run `DRAFT/r1 -> RUNNING/r2`，窗口内 event 在新消息前保持 0 | PASS_TARGET_WINDOW_ISOLATION |
+| 窗口内遥测落表与覆盖投影 | 同一影子运行详情 | MQTT -> Kafka；`GET /bpi-api/shadow-runs/{id}` | 上述 ingest 链；`ShadowRunController -> ShadowRunService -> ShadowRunPostgresRepository -> ShadowRunTelemetryCoverage` | telemetry source/event/point/reject、catalog entry/snapshot、source sequence、calibration、shadow run | 同一 verification SQL，以 run `started_at` 同时约束 event/sample time 与 event/point `created_at` | sequence `4,5` 为 2 events/2 points/0 rejects，均 `IN_ORDER/GOOD/12.5` 且匹配临时校准；覆盖五项 `1/1`、event/observation `2/2`、gap/out-of-order `0/0`、`fullyCovered=true` | PASS_TARGET_CONTROLLED_MQTT_KAFKA_POSTGRES |
+| 页面取消、marker 清理与运行配置恢复 | 同一详情 | `POST /bpi-api/shadow-runs/{id}/cancel`；cleanup SQL | `ShadowRunController.cancel -> ShadowRunService -> ShadowRunPostgresRepository`；受控 runner `finally` | shadow run、audit/idempotency、telemetry 与 marker fixture 表 | verification/cleanup SQL；pre/post restore 计数与 Docker health | run `CANCELLED/r3`；marker telemetry/run/rule/topology/calibration/catalog 均为 0；IoT 5m/10m、未验证校准和 UNCERTAIN 精确恢复；外部 WMS 写入 0 | PASS_TARGET_CLEANED |
+
+机器证据：`metadata/bpi-iot-telemetry-landing-acceptance.json`；升级证据：
+`metadata/bpi-integrated-upgrade-v34-target.json`；完整 MQTT、Kafka、页面、SQL 和清理边界见
+`docs/testing/bpi-iot-telemetry-landing-acceptance.md`。本项不关闭物理设备、正式计量、连续
+7-14 天、200 个复核批次、生产容量、模型训练或生产激活。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

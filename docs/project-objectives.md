@@ -245,6 +245,32 @@ disabled catalog publisher 已停止并自动删除，可选 Compose 服务运�
 标签，再执行 v2 readiness。机器证据为 `metadata/bpi-field-data-coverage-acceptance.json`，完整报告为
 `docs/testing/bpi-field-data-coverage-acceptance.md`。
 
+2026-07-23 随后完成 Phase 3C-E IoT 遥测窗口落表纵切。产品提交
+`8c9c4192b17953c48208efd31ef6528de04d96c6` 将唯一目标栈 expand-only 到 PostgreSQL
+15.18/Flyway V34；新增 default-off、默认无 scope 的 `iot.telemetry.selected.v1` consumer，
+严格校验 Protobuf、topic、`plantId|deviceId` key、payload 和 tenant/plant/line allowlist，事务
+落库成功后才 ack，毒消息进入独立 DLQ。V34 只增加影子窗口联查索引，不新增重复采集表或 Oracle
+运行路径。
+
+marker `BPI_TLANDING_20260723_094606` 从受控 MQTT 3.1.1/QoS1 设备发出 5 条消息，全部收到
+PUBACK。前三条 sequence `1..3` 先落 PostgreSQL，再从真实 `/bpi/#/shadowRuns` 页面创建并启动
+run `63c90d77-cb4a-4982-be55-74378399742a`；窗口消息发送前投影保持 0，证明预热数据被排除。
+启动后 sequence `4,5` 落为 2 events/2 points/0 rejects，均为 `IN_ORDER/GOOD/12.5` 且匹配
+验收校准。页面与 API 显示 pinned/observed/authoritative/calibrated/GOOD 均 `1/1`、
+event/observation `2/2`、gap/out-of-order `0/0`、`fullyCovered=true`。
+
+真实浏览器共观察 29 个 BPI 响应，全部为 2xx；console/page/request failure 均为 0，桌面和 390px
+移动页面均直接显示遥测区且无横向溢出。页面取消后 run 为 `CANCELLED/r3`；marker telemetry、
+shadow run、rule、topology、calibration 和 catalog 均清零，IoT 周期恢复 `5m/10m`，映射恢复
+`pilot-unverified-20260714 / UNCERTAIN`，三项核心服务与 JetLinks/Kafka 保持健康。
+
+该纵切关闭的是“受控 MQTT 是否能真实经过 JetLinks/Kafka/BPI 落入 PostgreSQL，并由影子运行
+窗口读取”的软件缺口。它不替代物理 DEVICE/GATEWAY、断电恢复、正式计量证书、多产线容量或
+7-14 天连续现场证据。G-021 继续为 `PARTIAL`；下一步应在正式点位和批准校准下重复同一脚本，
+再积累 200 个复核批次、7 个生产日和足量正负标签。训练、模型登记、在线推断、生产激活和外部
+WMS 写入均保持 false。机器证据为 `metadata/bpi-iot-telemetry-landing-acceptance.json`，完整报告为
+`docs/testing/bpi-iot-telemetry-landing-acceptance.md`。
+
 2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、
 规则历史回放、精确 simulation 证明提交、同 actor `422` 拒绝、独立管理员批准发布和独立管理员驳回。
@@ -484,6 +510,7 @@ ADP 双会话审批退出 G-021 缺口；现场物理来源、正式校准、连
 - [BPI 批次受控强制结束目标验收](testing/bpi-force-close-acceptance.md)
 - [BPI 正式身份双管理员强制结束验收](testing/bpi-formal-identity-force-close-acceptance.md)
 - [BPI 现场数据覆盖目标验收](testing/bpi-field-data-coverage-acceptance.md)
+- [BPI IoT 遥测落表目标验收](testing/bpi-iot-telemetry-landing-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标
@@ -660,8 +687,8 @@ ADP 双会话审批退出 G-021 缺口；现场物理来源、正式校准、连
 1. 保持已通过的同一 marker `UI -> Outbox -> Kafka -> Flink -> application receipt -> PostgreSQL -> candidate confirm -> batch/evidence/audit` 联合验收，以及 `selected telemetry -> Flink data quality -> Kafka -> PostgreSQL -> browser` 自动质量链，作为每次发布的回归基线。
 2. 保持已通过的目标环境 Flyway V24、savepoint 恢复、点位目录与来源序列证据自动同步、真实 ADP 会话、页面拓扑创建/校验、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、正式 ADP 双会话强制结束四眼审批、typed inactive、PostgreSQL revision、运行开关治理和重启读取作为发布回归；日常配置不得回退到 SQL fixture、直接改表或手工伪造 READY 快照。
 3. 保持已通过的单 broker 故障、service/adapter/Flink 双 savepoint 整栈回切、入口流量恢复、真实候选确认和 PostgreSQL 不变性为发布回归；生产切换前只需在生产等价维护窗口复跑并取得业务签字。
-4. 以已通过的 `MapleTcT/iot` 受控 MQTT 双会话链和 `mes-production-context-outbox` 为基线配置试点产线；当前产品、设备、`instantFlow` metadata、单位及受控 `source_epoch + sequence` 重连语义已进入自动链，下一步补真实校准并用物理 DEVICE/GATEWAY 重复同等验收。
-5. 受控 MQTT 与 WOM context 的同指令 START/END 已通过；下一步用物理设备和正式校准替换受控来源，按同一生产指令重复 Kafka、Flink、BPI PostgreSQL candidate/batch、自动 END 和浏览器证据链，再连续运行 7-14 天影子批次。
+4. 以已通过的 `MapleTcT/iot` 受控 MQTT 双会话链、V34 遥测窗口落表和 `mes-production-context-outbox` 为基线配置试点产线；当前产品、设备、`instantFlow` metadata、单位、受控 `source_epoch + sequence` 和 PostgreSQL 窗口隔离已进入自动链，下一步补真实校准并用物理 DEVICE/GATEWAY 重复同等验收。
+5. 受控 MQTT 与 WOM context 的同指令 START/END、以及 MQTT -> JetLinks -> Kafka -> BPI PostgreSQL -> 影子页面已通过；下一步用物理设备和正式校准替换受控来源，按同一生产指令重复 candidate/batch、自动 END、窗口落表和浏览器证据链，再连续运行 7-14 天影子批次。
 6. 达到现场边界人工认同率、累计量偏差和数据质量门槛后，才接入外部 QCS 主动事件及外部 ERP/WMS 写回、查单、拒绝、冲销和补偿。
 
 ### 主线 B：既有生产/质量核心链

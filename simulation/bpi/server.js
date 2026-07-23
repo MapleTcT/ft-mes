@@ -277,6 +277,115 @@ function shadowRunReadiness(state, run, sourceCoverage) {
   return readiness;
 }
 
+function shadowRunTelemetryCoverage(state, run, sourceCoverage) {
+  const windowStart = run.startedAt || null;
+  const windowEnd = windowStart
+    ? (run.completedAt || run.decidedAt || run.cancelledAt || FIXED_TIME) : null;
+  const pinnedPoints = state.pointCatalog.points.filter((point) =>
+    point.snapshotId === run.pointCatalogSnapshotId
+      && point.plantId === run.plantId
+      && point.lineId === run.lineId);
+  const observedPoints = new Set();
+  const authoritativeSequencePoints = new Set();
+  const calibratedPoints = new Set();
+  const goodQualityPoints = new Set();
+  const acceptedEvents = new Set();
+  const acceptedObservations = new Set();
+  const rejectedObservations = new Set();
+  const gapEvents = new Set();
+  const outOfOrderEvents = new Set();
+  const observedTimes = [];
+
+  if (windowStart) {
+    const startMs = Date.parse(windowStart);
+    const endMs = Date.parse(windowEnd);
+    pinnedPoints.forEach((entry) => {
+      const pointKey = `${entry.productId}|${entry.deviceId}|${entry.propertyId}`;
+      state.telemetryEvents.filter((event) =>
+        event.plantId === run.plantId
+          && event.lineId === run.lineId
+          && event.productId === entry.productId
+          && event.deviceId === entry.deviceId
+          && Date.parse(event.eventTime) >= startMs
+          && Date.parse(event.eventTime) <= endMs
+          && Date.parse(event.createdAt) >= startMs
+          && Date.parse(event.createdAt) <= endMs)
+        .forEach((event) => {
+          event.points.filter((point) =>
+            point.propertyId === entry.propertyId
+              && Date.parse(point.sampleTime) >= startMs
+              && Date.parse(point.sampleTime) <= endMs
+              && Date.parse(point.createdAt) >= startMs
+              && Date.parse(point.createdAt) <= endMs)
+            .forEach((point) => {
+              observedPoints.add(pointKey);
+              acceptedEvents.add(event.id);
+              acceptedObservations.add(point.id);
+              observedTimes.push(point.sampleTime);
+              if (event.sequenceOrigin === entry.sourceSequenceOrigin
+                  && event.sourceEpoch > 0 && event.sequence > 0) {
+                authoritativeSequencePoints.add(pointKey);
+              }
+              if (entry.calibrationVersion
+                  && point.calibrationVersion === entry.calibrationVersion) {
+                calibratedPoints.add(pointKey);
+              }
+              if (point.qualityCode === 'GOOD') goodQualityPoints.add(pointKey);
+              if (event.sequenceDisposition === 'GAP') gapEvents.add(event.id);
+              if (event.sequenceDisposition === 'OUT_OF_ORDER') outOfOrderEvents.add(event.id);
+            });
+          event.rejects.filter((reject) => reject.propertyId === entry.propertyId)
+            .forEach((reject) => rejectedObservations.add(reject.id));
+        });
+    });
+  }
+
+  const blockers = [];
+  if (!windowStart) {
+    blockers.push('TELEMETRY_WINDOW_NOT_STARTED');
+  } else {
+    if (sourceCoverage.pinnedPointCount <= 0
+        || observedPoints.size < sourceCoverage.pinnedPointCount) {
+      blockers.push('TELEMETRY_POINTS_NOT_OBSERVED');
+    }
+    if (sourceCoverage.pinnedPointCount <= 0
+        || authoritativeSequencePoints.size < sourceCoverage.pinnedPointCount) {
+      blockers.push('TELEMETRY_AUTHORITATIVE_SEQUENCE_INCOMPLETE');
+    }
+    if (sourceCoverage.pinnedPointCount <= 0
+        || calibratedPoints.size < sourceCoverage.pinnedPointCount) {
+      blockers.push('TELEMETRY_CALIBRATION_INCOMPLETE');
+    }
+    if (sourceCoverage.pinnedPointCount <= 0
+        || goodQualityPoints.size < sourceCoverage.pinnedPointCount) {
+      blockers.push('TELEMETRY_GOOD_QUALITY_INCOMPLETE');
+    }
+    if (gapEvents.size > 0) blockers.push('TELEMETRY_SEQUENCE_GAP_DETECTED');
+    if (outOfOrderEvents.size > 0) blockers.push('TELEMETRY_OUT_OF_ORDER_DETECTED');
+  }
+  observedTimes.sort();
+  return {
+    windowStarted: Boolean(windowStart),
+    windowStart,
+    windowEnd,
+    pinnedPointCount: sourceCoverage.pinnedPointCount,
+    observedPointCount: observedPoints.size,
+    authoritativeSequencePointCount: authoritativeSequencePoints.size,
+    calibratedPointCount: calibratedPoints.size,
+    goodQualityPointCount: goodQualityPoints.size,
+    acceptedEventCount: acceptedEvents.size,
+    acceptedObservationCount: acceptedObservations.size,
+    rejectedObservationCount: rejectedObservations.size,
+    gapEventCount: gapEvents.size,
+    outOfOrderEventCount: outOfOrderEvents.size,
+    firstObservedAt: observedTimes[0] || null,
+    lastObservedAt: observedTimes.at(-1) || null,
+    fullyCovered: Boolean(windowStart)
+      && sourceCoverage.pinnedPointCount > 0 && blockers.length === 0,
+    blockers,
+  };
+}
+
 function shadowRunMetrics(state, run) {
   const activeReviews = state.shadowRunReviews.filter((item) => item.shadowRunId === run.id && item.state === 'ACTIVE');
   const endTime = run.completedAt || run.decidedAt || run.cancelledAt || FIXED_TIME;
@@ -363,6 +472,7 @@ function shadowRunTrainingDataCoverage(state, run) {
 function hydrateShadowRun(state, run) {
   const sourceCoverage = shadowRunSourceCoverage(state, run);
   const readiness = shadowRunReadiness(state, run, sourceCoverage);
+  const telemetryCoverage = shadowRunTelemetryCoverage(state, run, sourceCoverage);
   const metrics = shadowRunMetrics(state, run);
   const trainingDataCoverage = shadowRunTrainingDataCoverage(state, run);
   const blockers = [];
@@ -374,6 +484,7 @@ function hydrateShadowRun(state, run) {
     ['pointCatalogReady', 'POINT_CATALOG_NOT_READY'],
   ];
   readinessBlockers.forEach(([field, code]) => { if (!readiness[field]) blockers.push(code); });
+  blockers.push(...telemetryCoverage.blockers);
   if (!metrics.durationGatePassed) blockers.push('MINIMUM_DURATION_NOT_REACHED');
   if (!metrics.reviewCountGatePassed) blockers.push('MINIMUM_BATCH_REVIEWS_NOT_REACHED');
   if (!metrics.boundaryAgreementGatePassed) blockers.push('BOUNDARY_AGREEMENT_BELOW_THRESHOLD');
@@ -383,13 +494,11 @@ function hydrateShadowRun(state, run) {
     ...run,
     readiness,
     sourceCoverage,
+    telemetryCoverage,
     metrics,
     trainingDataCoverage,
     blockers,
-    readyForApproval: run.state === 'EVALUATING' && readiness.ready
-      && metrics.durationGatePassed && metrics.reviewCountGatePassed
-      && metrics.boundaryAgreementGatePassed && metrics.quantityGatePassed
-      && metrics.dataQualityGatePassed,
+    readyForApproval: run.state === 'EVALUATING' && blockers.length === 0,
   };
 }
 
@@ -427,6 +536,30 @@ function prepareShadowRunAcceptance(state) {
   });
   state.shadowRuns = [];
   state.shadowRunReviews = [];
+  state.telemetryEvents = [{
+    id: stableUuid('shadow-telemetry-event-1'),
+    eventId: 'SHADOW-TELEMETRY-001',
+    tenantId: FEATURE_FLAG_TENANT,
+    plantId: 'PLANT-01',
+    lineId: 'LINE-S07-01',
+    productId: 'PRODUCT-SUGAR',
+    deviceId: 'DEVICE-S07-01',
+    eventTime: '2026-07-10T08:00:00.000Z',
+    createdAt: '2026-07-10T08:00:01.000Z',
+    sourceEpoch: 7,
+    sequence: 1017,
+    sequenceOrigin: 'DEVICE',
+    sequenceDisposition: 'IN_ORDER',
+    points: state.pointCatalog.points.map((point, index) => ({
+      id: stableUuid(`shadow-telemetry-point-${index + 1}`),
+      propertyId: point.propertyId,
+      qualityCode: 'GOOD',
+      calibrationVersion: point.calibrationVersion,
+      sampleTime: '2026-07-10T08:00:00.000Z',
+      createdAt: '2026-07-10T08:00:01.000Z',
+    })),
+    rejects: [],
+  }];
   state.batchEvents = [];
   state.batchEventsById = new Map();
   state.batchEvidenceById = new Map();

@@ -1,27 +1,27 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-23T07:33:32+00:00",
-  "repoCommit": "6dbdb28da96a9717952e83814b30981837674915",
-  "findingCount": 1624,
+  "generatedAt": "2026-07-23T10:15:57+00:00",
+  "repoCommit": "988868f539cfd9ed5b0127edb621e799a509bad0",
+  "findingCount": 1627,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 189,
+    "documentation-or-workflow": 191,
     "frontend-row-index-noise": 4,
     "java-row-index-noise": 90,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 575,
-    "postgres-conversion-tooling": 47,
+    "postgres-conversion-tooling": 48,
     "recovered-source-backlog": 253,
     "runtime-patch-backlog": 9,
     "tooling-or-audit-code": 269
   },
   "patternCounts": {
-    "decode-sql": 4,
+    "decode-sql": 5,
     "from-dual": 140,
     "ojdbc": 15,
-    "oracle-keyword": 639,
+    "oracle-keyword": 641,
     "rownum": 691,
     "sysdate": 135
   },
@@ -67,11 +67,11 @@
       "findingCount": 24
     },
     {
-      "file": "backend/modules/com/supcon/supfusion/flow/flow-dao/1.0.0-RELEASE/META-INF/oracle/flow_1.sql",
-      "findingCount": 20
+      "file": "docs/project-objectives.md",
+      "findingCount": 21
     },
     {
-      "file": "docs/project-objectives.md",
+      "file": "backend/modules/com/supcon/supfusion/flow/flow-dao/1.0.0-RELEASE/META-INF/oracle/flow_1.sql",
       "findingCount": 20
     },
     {
@@ -286,7 +286,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1088,
+      "line": 1090,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -294,7 +294,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1089,
+      "line": 1091,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -302,7 +302,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1091,
+      "line": 1093,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -310,7 +310,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1092,
+      "line": 1094,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -318,7 +318,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1100,
+      "line": 1102,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -326,7 +326,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1101,
+      "line": 1103,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -334,7 +334,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1103,
+      "line": 1105,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -342,7 +342,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1104,
+      "line": 1106,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -9077,6 +9077,14 @@
       "excerpt": "'bpi.boundary.rule-publication.v1', :'marker' || '_RULE_KEY', decode('010203', 'hex'),"
     },
     {
+      "file": "deploy/docker/scripts/bpi-telemetry-landing-acceptance-fixture.sql",
+      "line": 119,
+      "pattern": "decode-sql",
+      "category": "postgres-conversion-tooling",
+      "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",
+      "excerpt": ":'marker' || '_RULE_KEY', decode('010203', 'hex'),"
+    },
+    {
       "file": "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-fixture.sql",
       "line": 60,
       "pattern": "decode-sql",
@@ -10122,7 +10130,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `263` 项，其中 `260 PASS / 0 FAIL / 0 BLOCKED / 3 NOT_APPLICABLE`；"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `267` 项，其中 `264 PASS / 0 FAIL / 0 BLOCKED / 3 NOT_APPLICABLE`；"
     },
     {
       "file": "docs/project-objectives.md",
@@ -10158,27 +10166,11 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 495,
+      "line": 252,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- 不把 Oracle 当默认数据库继续适配。"
-    },
-    {
-      "file": "docs/project-objectives.md",
-      "line": 517,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- `scripts/verify-source-modules.py` 校验已提升后端源码模块，并阻止默认源码路径重新带入 Oracle 驱动、配置和 mapper 资源。"
-    },
-    {
-      "file": "docs/project-objectives.md",
-      "line": 520,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- `scripts/generate-oracle-migration-audit.py` 生成 Oracle 迁移 backlog。"
+      "excerpt": "落库成功后才 ack，毒消息进入独立 DLQ。V34 只增加影子窗口联查索引，不新增重复采集表或 Oracle"
     },
     {
       "file": "docs/project-objectives.md",
@@ -10186,55 +10178,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- `scripts/generate-oracle-replacement-status.py` 生成 Oracle 替换状态总账。"
-    },
-    {
-      "file": "docs/project-objectives.md",
-      "line": 529,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- 已存在的 `MES包/最新基础模块` 先按准入账本处理 7z 不可检查包和 `DataSet_6.1.2.2` 中的 `jdbc:oracle:thin` 阻断项，再进入默认源码区。"
-    },
-    {
-      "file": "docs/project-objectives.md",
-      "line": 532,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "### 2. Oracle 替换"
-    },
-    {
-      "file": "docs/project-objectives.md",
-      "line": 534,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "目标：逐步把运行环境、Mapper、SQL、配置从 Oracle 默认切换到 PostgreSQL。"
-    },
-    {
-      "file": "docs/project-objectives.md",
-      "line": 539,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- Oracle 只允许显式 legacy profile 或 `.env.oracle-legacy.example`。"
-    },
-    {
-      "file": "docs/project-objectives.md",
-      "line": 540,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- 父 POM 默认 `dependencyManagement` 不管理 Oracle JDBC，Oracle 驱动只能在 `oracle-legacy` profile 下出现。"
-    },
-    {
-      "file": "docs/project-objectives.md",
-      "line": 542,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- 可编译源码模块的默认 `src/main` 不允许带入 Oracle JDBC URL、driver、Hibernate dialect 或 `mapper/oracle` 资源。"
+      "excerpt": "- 不把 Oracle 当默认数据库继续适配。"
     },
     {
       "file": "docs/project-objectives.md",
@@ -10242,11 +10186,83 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- `scripts/verify-source-modules.py` 校验已提升后端源码模块，并阻止默认源码路径重新带入 Oracle 驱动、配置和 mapper 资源。"
+    },
+    {
+      "file": "docs/project-objectives.md",
+      "line": 547,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- `scripts/generate-oracle-migration-audit.py` 生成 Oracle 迁移 backlog。"
+    },
+    {
+      "file": "docs/project-objectives.md",
+      "line": 549,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- `scripts/generate-oracle-replacement-status.py` 生成 Oracle 替换状态总账。"
+    },
+    {
+      "file": "docs/project-objectives.md",
+      "line": 556,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- 已存在的 `MES包/最新基础模块` 先按准入账本处理 7z 不可检查包和 `DataSet_6.1.2.2` 中的 `jdbc:oracle:thin` 阻断项，再进入默认源码区。"
+    },
+    {
+      "file": "docs/project-objectives.md",
+      "line": 559,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "### 2. Oracle 替换"
+    },
+    {
+      "file": "docs/project-objectives.md",
+      "line": 561,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "目标：逐步把运行环境、Mapper、SQL、配置从 Oracle 默认切换到 PostgreSQL。"
+    },
+    {
+      "file": "docs/project-objectives.md",
+      "line": 566,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- Oracle 只允许显式 legacy profile 或 `.env.oracle-legacy.example`。"
+    },
+    {
+      "file": "docs/project-objectives.md",
+      "line": 567,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- 父 POM 默认 `dependencyManagement` 不管理 Oracle JDBC，Oracle 驱动只能在 `oracle-legacy` profile 下出现。"
+    },
+    {
+      "file": "docs/project-objectives.md",
+      "line": 569,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- 可编译源码模块的默认 `src/main` 不允许带入 Oracle JDBC URL、driver、Hibernate dialect 或 `mapper/oracle` 资源。"
+    },
+    {
+      "file": "docs/project-objectives.md",
+      "line": 571,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
       "excerpt": "- 每个 PostgreSQL 缺表、缺列、类型不兼容或 Oracle 方言残留，都落到幂等 SQL 或模块 backlog，不用清库重建掩盖；`make postgres-migration-check` 会阻断清库类高风险语句，并要求 watch 语句是 `DROP ... IF EXISTS` 或 `DELETE ... WHERE`。"
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 608,
+      "line": 635,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10254,7 +10270,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 612,
+      "line": 639,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10262,7 +10278,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 614,
+      "line": 641,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10270,7 +10286,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 618,
+      "line": 645,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10278,7 +10294,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 619,
+      "line": 646,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10459,6 +10475,14 @@
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
       "excerpt": "- 更新任一 Oracle 退场相关清单后，运行 `make oracle-replacement-status` 更新 [Oracle 替换状态总账](oracle-replacement-status.md)。"
+    },
+    {
+      "file": "docs/testing/bpi-iot-telemetry-landing-acceptance.md",
+      "line": 105,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "不新增重复采集表或 Oracle 路径。"
     },
     {
       "file": "docs/testing/bpi-source-sequence-readiness-acceptance.md",
@@ -13054,7 +13078,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ShadowRunPostgresRepository.java",
-      "line": 313,
+      "line": 405,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -13062,7 +13086,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ShadowRunPostgresRepository.java",
-      "line": 330,
+      "line": 422,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -13070,7 +13094,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ShadowRunPostgresRepository.java",
-      "line": 403,
+      "line": 495,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -13078,7 +13102,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ShadowRunPostgresRepository.java",
-      "line": 426,
+      "line": 518,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -13086,7 +13110,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ShadowRunPostgresRepository.java",
-      "line": 521,
+      "line": 613,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -13094,7 +13118,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ShadowRunPostgresRepository.java",
-      "line": 529,
+      "line": 621,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",

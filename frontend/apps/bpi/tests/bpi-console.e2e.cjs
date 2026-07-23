@@ -953,6 +953,11 @@ test('team completes a shadow run acceptance and critical data quality blocks ap
   const sourceCoverage = page.locator('[data-source-coverage]');
   await sourceCoverage.getByRole('heading', { name: '固定来源可信度' }).waitFor();
   assert.equal(await sourceCoverage.getByText('2 / 2', { exact: true }).count(), 6);
+  const telemetryCoverage = page.locator('[data-telemetry-coverage]');
+  await telemetryCoverage.getByRole('heading', { name: '现场遥测落表' }).waitFor();
+  await telemetryCoverage.getByText('尚未启动', { exact: true }).waitFor();
+  assert.equal(await telemetryCoverage.getByText('0 / 2', { exact: true }).count(), 4);
+  await telemetryCoverage.getByText('落表覆盖不等于现场验收完成', { exact: true }).waitFor();
   const trainingCoverage = page.locator('[data-training-data-coverage]');
   await trainingCoverage.getByRole('heading', { name: '现场数据覆盖' }).waitFor();
   await trainingCoverage.getByText('0 / 200', { exact: true }).waitFor();
@@ -969,6 +974,9 @@ test('team completes a shadow run acceptance and critical data quality blocks ap
   await mobilePage.goto(`${APP_URL}/#/shadowRuns`, { waitUntil: 'networkidle' });
   await mobilePage.locator(`[data-shadow-run-id="${runId}"]`).click();
   await mobilePage.locator('[data-training-data-coverage]').getByText('仅表示现场数据覆盖进度，不代表允许训练', {
+    exact: true,
+  }).waitFor();
+  await mobilePage.locator('[data-telemetry-coverage]').getByText('落表覆盖不等于现场验收完成', {
     exact: true,
   }).waitFor();
   await assertDrawerSettled(mobilePage);
@@ -994,6 +1002,12 @@ test('team completes a shadow run acceptance and critical data quality blocks ap
   await page.getByRole('button', { name: '确认启动' }).click();
   await page.getByText('影子运行已启动').waitFor();
   await page.locator('.batch-state-band').getByText('RUNNING', { exact: true }).waitFor();
+  assert.equal(await page.locator('[data-telemetry-coverage]').getByText('2 / 2', { exact: true }).count(), 4);
+  await page.locator('[data-telemetry-coverage]').getByText('1 / 2', { exact: true }).waitFor();
+  await page.locator('[data-telemetry-coverage]').getByText(
+    '固定点位已在本次窗口内形成可核验的 PostgreSQL 遥测证据。',
+    { exact: true },
+  ).waitFor();
 
   await page.getByRole('button', { name: '复核批次' }).click();
   await page.getByRole('heading', { name: '复核影子批次' }).waitFor();
@@ -1092,6 +1106,13 @@ test('team completes a shadow run acceptance and critical data quality blocks ap
   assert.equal(run.metrics.unresolvedCriticalIncidentCount, 0);
   assert.equal(run.sourceCoverage.fullyReady, true);
   assert.equal(run.sourceCoverage.readyPointCount, 2);
+  assert.equal(run.telemetryCoverage.fullyCovered, true);
+  assert.equal(run.telemetryCoverage.observedPointCount, 2);
+  assert.equal(run.telemetryCoverage.authoritativeSequencePointCount, 2);
+  assert.equal(run.telemetryCoverage.calibratedPointCount, 2);
+  assert.equal(run.telemetryCoverage.goodQualityPointCount, 2);
+  assert.equal(run.telemetryCoverage.acceptedEventCount, 1);
+  assert.equal(run.telemetryCoverage.acceptedObservationCount, 2);
   assert.equal(run.trainingDataCoverage.reviewedBatchCount, 10);
   assert.equal(run.trainingDataCoverage.distinctProductionDayCount, 6);
   assert.equal(run.trainingDataCoverage.acceptedStartLabelCount, 10);
