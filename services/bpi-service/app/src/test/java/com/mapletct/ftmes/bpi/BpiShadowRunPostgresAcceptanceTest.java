@@ -204,6 +204,19 @@ class BpiShadowRunPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.revision").value(1))
                 .andExpect(jsonPath("$.data.readiness.applicationApplied").value(false))
                 .andExpect(jsonPath("$.data.readiness.runtimeReady").value(false))
+                .andExpect(jsonPath("$.data.sourceCoverage.pinnedPointCount").value(1))
+                .andExpect(jsonPath("$.data.sourceCoverage.activeRegisteredPointCount").value(1))
+                .andExpect(jsonPath("$.data.sourceCoverage.physicalIdentityPointCount").value(1))
+                .andExpect(jsonPath("$.data.sourceCoverage.freshSequenceQualifiedPointCount").value(1))
+                .andExpect(jsonPath("$.data.sourceCoverage.approvedCalibrationPointCount").value(1))
+                .andExpect(jsonPath("$.data.sourceCoverage.readyPointCount").value(1))
+                .andExpect(jsonPath("$.data.sourceCoverage.fullyReady").value(true))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.policyVersion")
+                        .value("bpi-training-data-coverage/batch-start-boundary-v1"))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.reviewedBatchCount").value(0))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.thresholdsMet").value(false))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.blockers[*]")
+                        .value(hasItem("TRAINING_REVIEWED_BATCHES_BELOW_MINIMUM")))
                 .andExpect(jsonPath("$.data.blockers[*]").value(hasItem("RULE_APPLICATION_NOT_APPLIED")))
                 .andReturn();
         UUID runId = UUID.fromString(response(createdResult).path("data").path("id").asText());
@@ -312,6 +325,12 @@ class BpiShadowRunPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.metrics.boundaryAgreement").value(0.95))
                 .andExpect(jsonPath("$.data.metrics.quantityGatePassed").value(true))
                 .andExpect(jsonPath("$.data.metrics.unresolvedCriticalIncidentCount").value(1))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.reviewedBatchCount").value(10))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.acceptedStartLabelCount").value(9))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.rejectedStartLabelCount").value(1))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.thresholdsMet").value(false))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.blockers[*]")
+                        .value(hasItem("TRAINING_PRODUCTION_DAYS_BELOW_MINIMUM")))
                 .andExpect(jsonPath("$.data.blockers[*]")
                         .value(hasItem("UNRESOLVED_CRITICAL_DATA_QUALITY")));
         revision++;
@@ -373,6 +392,84 @@ class BpiShadowRunPostgresAcceptanceTest {
                                   'SHADOW_RUN_BATCH_REVIEWED', 'SHADOW_RUN_COMPLETED',
                                   'SHADOW_RUN_APPROVED')
                 """, Integer.class, tenantId)).isEqualTo(14);
+    }
+
+    @Test
+    void trainingDataCoverageUsesDistinctActiveBatchesAndUtcProductionDates() throws Exception {
+        UUID runId = UUID.randomUUID();
+        Instant createdAt = Instant.parse("2026-06-29T00:00:00Z");
+        Instant startedAt = Instant.parse("2026-06-30T00:00:00Z");
+        jdbc.update("""
+                INSERT INTO bpi.bpi_shadow_runs
+                    (id, tenant_id, run_code, name, plant_id, line_id, state, revision,
+                     rule_version_id, topology_version_id, point_catalog_snapshot_id,
+                     minimum_duration_days, minimum_reviewed_batches,
+                     boundary_tolerance_seconds, minimum_boundary_agreement,
+                     quantity_tolerance_percent, created_by, created_at, updated_by,
+                     started_by, started_at)
+                VALUES (?, ?, ?, 'Field data coverage projection', ?, ?, 'RUNNING', 1,
+                        ?, ?, ?, 7, 10, 60, 0.950000, 2.000000,
+                        'fixture-author', ?, 'fixture-author', 'fixture-author', ?)
+                """, runId, tenantId, "COVERAGE-" + tenantId.substring(tenantId.length() - 12),
+                PLANT_ID, LINE_ID, ruleId, topologyId, snapshotId,
+                Timestamp.from(createdAt), Timestamp.from(startedAt));
+
+        Instant firstProductionDay = Instant.parse("2026-07-01T00:00:00Z");
+        for (int index = 0; index < 200; index++) {
+            UUID batchId = UUID.randomUUID();
+            Instant start = firstProductionDay
+                    .plusSeconds((index % 7) * 86_400L)
+                    .plusSeconds((index / 7) * 60L);
+            Instant end = start.plusSeconds(300);
+            jdbc.update("""
+                    INSERT INTO bpi.bpi_batch_instances
+                        (id, tenant_id, plant_id, batch_no, line_id, stage_code, order_id,
+                         material_code, state, revision, is_shadow, start_time, end_time,
+                         quantity, quantity_unit, topology_version_id, rule_version_id, created_by)
+                    VALUES (?, ?, ?, ?, ?, 'SUGAR-STAGE', ?, 'SUGAR', 'CLOSED_RAW', 2, true,
+                            ?, ?, 100.000000, 't', ?, ?, 'fixture')
+                    """, batchId, tenantId, PLANT_ID,
+                    "COVERAGE-BATCH-" + String.format("%03d", index), LINE_ID,
+                    "COVERAGE-ORDER-" + index, Timestamp.from(start), Timestamp.from(end),
+                    topologyId, ruleId);
+            boolean startAccepted = index < 100;
+            jdbc.update("""
+                    INSERT INTO bpi.bpi_shadow_run_batch_reviews
+                        (id, tenant_id, shadow_run_id, batch_id, review_sequence, state,
+                         automatic_start_time, automatic_end_time, manual_start_time, manual_end_time,
+                         start_deviation_seconds, end_deviation_seconds,
+                         start_boundary_accepted, end_boundary_accepted,
+                         automatic_quantity, reference_quantity, quantity_unit,
+                         quantity_deviation_percent, quantity_within_tolerance,
+                         reviewed_by, review_reason, reviewed_at)
+                    VALUES (?, ?, ?, ?, 1, 'ACTIVE', ?, ?, ?, ?,
+                            ?, 0, ?, true, 100.000000, 100.000000, 't',
+                            0.000000000, true, 'fixture-reviewer',
+                            'Field data coverage projection fixture', ?)
+                    """, UUID.randomUUID(), tenantId, runId, batchId,
+                    Timestamp.from(start), Timestamp.from(end),
+                    Timestamp.from(startAccepted ? start : start.plusSeconds(61)), Timestamp.from(end),
+                    startAccepted ? 0 : 61, startAccepted, Timestamp.from(end.plusSeconds(60)));
+        }
+
+        mockMvc.perform(get("/bpi/v1/shadow-runs/{id}", runId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("RUNNING"))
+                .andExpect(jsonPath("$.data.readyForApproval").value(false))
+                .andExpect(jsonPath("$.data.sourceCoverage.pinnedPointCount").value(1))
+                .andExpect(jsonPath("$.data.sourceCoverage.readyPointCount").value(1))
+                .andExpect(jsonPath("$.data.sourceCoverage.fullyReady").value(true))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.requiredReviewedBatchCount").value(200))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.reviewedBatchCount").value(200))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.requiredProductionDayCount").value(7))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.distinctProductionDayCount").value(7))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.requiredAcceptedStartLabelCount").value(100))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.acceptedStartLabelCount").value(100))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.requiredRejectedStartLabelCount").value(10))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.rejectedStartLabelCount").value(100))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.thresholdsMet").value(true))
+                .andExpect(jsonPath("$.data.trainingDataCoverage.blockers.length()").value(0));
     }
 
     private List<BatchFixture> insertClosedShadowBatches() {

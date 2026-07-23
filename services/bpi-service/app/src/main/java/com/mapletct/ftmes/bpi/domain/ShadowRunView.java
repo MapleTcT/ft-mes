@@ -38,7 +38,9 @@ public record ShadowRunView(
         Instant cancelledAt,
         String cancellationReason,
         ShadowRunReadiness readiness,
+        ShadowRunSourceCoverage sourceCoverage,
         ShadowRunMetrics metrics,
+        ShadowRunTrainingDataCoverage trainingDataCoverage,
         List<String> blockers,
         boolean readyForApproval) {
 }

@@ -1209,6 +1209,19 @@
           "ready": {"type": "boolean"}
         }
       },
+      "ShadowRunSourceCoverage": {
+        "type": "object",
+        "required": ["pinnedPointCount", "activeRegisteredPointCount", "physicalIdentityPointCount", "freshSequenceQualifiedPointCount", "approvedCalibrationPointCount", "readyPointCount", "fullyReady"],
+        "properties": {
+          "pinnedPointCount": {"type": "integer", "minimum": 0},
+          "activeRegisteredPointCount": {"type": "integer", "minimum": 0},
+          "physicalIdentityPointCount": {"type": "integer", "minimum": 0},
+          "freshSequenceQualifiedPointCount": {"type": "integer", "minimum": 0},
+          "approvedCalibrationPointCount": {"type": "integer", "minimum": 0},
+          "readyPointCount": {"type": "integer", "minimum": 0},
+          "fullyReady": {"type": "boolean"}
+        }
+      },
       "ShadowRunMetrics": {
         "type": "object",
         "required": ["observedDurationSeconds", "reviewedBatchCount", "acceptedBoundaryCount", "totalBoundaryCount", "boundaryAgreement", "quantitySampleCount", "automaticQuantityTotal", "referenceQuantityTotal", "quantityUnit", "cumulativeQuantityDeviationPercent", "meanQuantityDeviationPercent", "maximumQuantityDeviationPercent", "unresolvedCriticalIncidentCount", "durationGatePassed", "reviewCountGatePassed", "boundaryAgreementGatePassed", "quantityGatePassed", "dataQualityGatePassed"],
@@ -1222,9 +1235,26 @@
           "reviewCountGatePassed": {"type": "boolean"}, "boundaryAgreementGatePassed": {"type": "boolean"}, "quantityGatePassed": {"type": "boolean"}, "dataQualityGatePassed": {"type": "boolean"}
         }
       },
+      "ShadowRunTrainingDataCoverage": {
+        "type": "object",
+        "required": ["policyVersion", "requiredReviewedBatchCount", "reviewedBatchCount", "requiredProductionDayCount", "distinctProductionDayCount", "requiredAcceptedStartLabelCount", "acceptedStartLabelCount", "requiredRejectedStartLabelCount", "rejectedStartLabelCount", "thresholdsMet", "blockers"],
+        "properties": {
+          "policyVersion": {"type": "string", "enum": ["bpi-training-data-coverage/batch-start-boundary-v1"]},
+          "requiredReviewedBatchCount": {"type": "integer", "minimum": 0},
+          "reviewedBatchCount": {"type": "integer", "minimum": 0},
+          "requiredProductionDayCount": {"type": "integer", "minimum": 0},
+          "distinctProductionDayCount": {"type": "integer", "minimum": 0},
+          "requiredAcceptedStartLabelCount": {"type": "integer", "minimum": 0},
+          "acceptedStartLabelCount": {"type": "integer", "minimum": 0},
+          "requiredRejectedStartLabelCount": {"type": "integer", "minimum": 0},
+          "rejectedStartLabelCount": {"type": "integer", "minimum": 0},
+          "thresholdsMet": {"type": "boolean"},
+          "blockers": {"type": "array", "items": {"type": "string"}}
+        }
+      },
       "ShadowRun": {
         "type": "object",
-        "required": ["id", "runCode", "name", "tenantId", "plantId", "lineId", "state", "revision", "ruleVersionId", "ruleVersion", "topologyVersionId", "topologyVersion", "pointCatalogSnapshotId", "pointCatalogChecksum", "minimumDurationDays", "minimumReviewedBatches", "boundaryToleranceSeconds", "minimumBoundaryAgreement", "quantityTolerancePercent", "createdBy", "createdAt", "readiness", "metrics", "blockers", "readyForApproval"],
+        "required": ["id", "runCode", "name", "tenantId", "plantId", "lineId", "state", "revision", "ruleVersionId", "ruleVersion", "topologyVersionId", "topologyVersion", "pointCatalogSnapshotId", "pointCatalogChecksum", "minimumDurationDays", "minimumReviewedBatches", "boundaryToleranceSeconds", "minimumBoundaryAgreement", "quantityTolerancePercent", "createdBy", "createdAt", "readiness", "sourceCoverage", "metrics", "trainingDataCoverage", "blockers", "readyForApproval"],
         "properties": {
           "id": {"type": "string", "format": "uuid"}, "runCode": {"type": "string"}, "name": {"type": "string"}, "tenantId": {"type": "string"},
           "plantId": {"type": "string"}, "lineId": {"type": "string"}, "state": {"type": "string", "enum": ["DRAFT", "RUNNING", "EVALUATING", "APPROVED", "REJECTED", "CANCELLED"]},
@@ -1235,7 +1265,8 @@
           "createdBy": {"type": "string"}, "createdAt": {"type": "string", "format": "date-time"}, "startedBy": {"type": ["string", "null"]}, "startedAt": {"type": ["string", "null"], "format": "date-time"},
           "completedBy": {"type": ["string", "null"]}, "completedAt": {"type": ["string", "null"], "format": "date-time"}, "decidedBy": {"type": ["string", "null"]}, "decidedAt": {"type": ["string", "null"], "format": "date-time"},
           "decisionReason": {"type": ["string", "null"]}, "cancelledBy": {"type": ["string", "null"]}, "cancelledAt": {"type": ["string", "null"], "format": "date-time"}, "cancellationReason": {"type": ["string", "null"]},
-          "readiness": {"$ref": "#/components/schemas/ShadowRunReadiness"}, "metrics": {"$ref": "#/components/schemas/ShadowRunMetrics"},
+          "readiness": {"$ref": "#/components/schemas/ShadowRunReadiness"}, "sourceCoverage": {"$ref": "#/components/schemas/ShadowRunSourceCoverage"},
+          "metrics": {"$ref": "#/components/schemas/ShadowRunMetrics"}, "trainingDataCoverage": {"$ref": "#/components/schemas/ShadowRunTrainingDataCoverage"},
           "blockers": {"type": "array", "items": {"type": "string"}}, "readyForApproval": {"type": "boolean"}
         }
       },

@@ -124,6 +124,58 @@ def main() -> int:
     )
     if readiness_policy != ["bpi-training-readiness/batch-start-boundary-v2"]:
         failures.append("training-readiness API policy must be the V2 process-fact gate")
+    shadow_run = schemas.get("ShadowRun", {})
+    shadow_run_required = set(shadow_run.get("required", []))
+    if not {"sourceCoverage", "trainingDataCoverage"}.issubset(shadow_run_required):
+        failures.append("ShadowRun must require sourceCoverage and trainingDataCoverage")
+    shadow_run_properties = shadow_run.get("properties", {})
+    if (
+        shadow_run_properties.get("sourceCoverage", {}).get("$ref")
+        != "#/components/schemas/ShadowRunSourceCoverage"
+    ):
+        failures.append("ShadowRun sourceCoverage must use the typed source coverage schema")
+    if (
+        shadow_run_properties.get("trainingDataCoverage", {}).get("$ref")
+        != "#/components/schemas/ShadowRunTrainingDataCoverage"
+    ):
+        failures.append(
+            "ShadowRun trainingDataCoverage must use the typed training data coverage schema"
+        )
+    source_coverage_required = set(
+        schemas.get("ShadowRunSourceCoverage", {}).get("required", [])
+    )
+    expected_source_coverage = {
+        "pinnedPointCount",
+        "activeRegisteredPointCount",
+        "physicalIdentityPointCount",
+        "freshSequenceQualifiedPointCount",
+        "approvedCalibrationPointCount",
+        "readyPointCount",
+        "fullyReady",
+    }
+    if source_coverage_required != expected_source_coverage:
+        failures.append("ShadowRunSourceCoverage fields changed unexpectedly")
+    training_coverage = schemas.get("ShadowRunTrainingDataCoverage", {})
+    expected_training_coverage = {
+        "policyVersion",
+        "requiredReviewedBatchCount",
+        "reviewedBatchCount",
+        "requiredProductionDayCount",
+        "distinctProductionDayCount",
+        "requiredAcceptedStartLabelCount",
+        "acceptedStartLabelCount",
+        "requiredRejectedStartLabelCount",
+        "rejectedStartLabelCount",
+        "thresholdsMet",
+        "blockers",
+    }
+    if set(training_coverage.get("required", [])) != expected_training_coverage:
+        failures.append("ShadowRunTrainingDataCoverage fields changed unexpectedly")
+    coverage_policy = (
+        training_coverage.get("properties", {}).get("policyVersion", {}).get("enum")
+    )
+    if coverage_policy != ["bpi-training-data-coverage/batch-start-boundary-v1"]:
+        failures.append("shadow-run training data coverage policy must remain V1")
 
     operations: dict[str, tuple[str, str, dict]] = {}
     for path, path_item in openapi.get("paths", {}).items():
