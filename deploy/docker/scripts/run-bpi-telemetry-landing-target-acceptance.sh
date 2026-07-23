@@ -18,6 +18,7 @@ SOURCE_EPOCH=${BPI_MQTT_SOURCE_EPOCH:-$(date -u +%Y%m%d%H%M%S)}
 PREHEAT_COUNT=${BPI_MQTT_PREHEAT_COUNT:-3}
 WINDOW_COUNT=${BPI_MQTT_COUNT:-2}
 WAIT_SECONDS=${BPI_TELEMETRY_ACCEPTANCE_WAIT_SECONDS:-240}
+SOURCE_SEQUENCE_EVIDENCE_INTERVAL=${BPI_SOURCE_SEQUENCE_EVIDENCE_ACCEPTANCE_INTERVAL:-5s}
 EVIDENCE_DIR=${BPI_TELEMETRY_ACCEPTANCE_EVIDENCE_DIR:-}
 POSTGRES_CONTAINER=${BPI_POSTGRES_CONTAINER:-adp-mes-newbase-postgres-1}
 POSTGRES_USER=${BPI_POSTGRES_USER:-adp}
@@ -70,6 +71,11 @@ for value_name in SOURCE_EPOCH PREHEAT_COUNT WINDOW_COUNT WAIT_SECONDS; do
             ;;
     esac
 done
+if ! printf '%s\n' "$SOURCE_SEQUENCE_EVIDENCE_INTERVAL" \
+    | grep -Eq '^[1-9][0-9]*(ms|s|m|h|d)$'; then
+    printf 'ERROR: BPI_SOURCE_SEQUENCE_EVIDENCE_ACCEPTANCE_INTERVAL must be a positive duration\n' >&2
+    exit 1
+fi
 test -n "${ADP_USERNAME:-}" || {
     printf 'ERROR: ADP_USERNAME is required\n' >&2
     exit 1
@@ -120,9 +126,11 @@ mkdir -p "$EVIDENCE_DIR"
 chmod 700 "$EVIDENCE_DIR"
 MAPPING_BACKUP="$EVIDENCE_DIR/pilot-mapping-before.json"
 PROPERTIES_BACKUP="$EVIDENCE_DIR/application-bpi-mapping-before.properties"
+IOT_ENV_BACKUP="$EVIDENCE_DIR/.iot-env-before"
 cp "$MAPPING" "$MAPPING_BACKUP"
 cp "$MAPPING_PROPERTIES" "$PROPERTIES_BACKUP"
-chmod 600 "$MAPPING_BACKUP" "$PROPERTIES_BACKUP"
+cp -p "$IOT_ENV" "$IOT_ENV_BACKUP"
+chmod 600 "$MAPPING_BACKUP" "$PROPERTIES_BACKUP" "$IOT_ENV_BACKUP"
 
 ORIGINAL_CALIBRATION_VERSION=$(python3 - "$MAPPING_BACKUP" "$DEVICE_ID" "$PROPERTY_ID" <<'PY'
 import json
@@ -252,22 +260,30 @@ wait_for_source_sequence() {
     return 1
 }
 
-restore_mapping() {
-    cp "$MAPPING_BACKUP" "$MAPPING"
-    cp "$PROPERTIES_BACKUP" "$MAPPING_PROPERTIES"
-    chmod 600 "$MAPPING_PROPERTIES"
+restore_iot_state() {
+    if [ "$mapping_modified" = true ]; then
+        cp "$MAPPING_BACKUP" "$MAPPING"
+        cp "$PROPERTIES_BACKUP" "$MAPPING_PROPERTIES"
+        chmod 600 "$MAPPING_PROPERTIES"
+    fi
+    if [ "$iot_env_modified" = true ]; then
+        cp -p "$IOT_ENV_BACKUP" "$IOT_ENV"
+    fi
     iot_compose up -d --no-deps --force-recreate jetlinks >/dev/null
     wait_for_jetlinks
-    wait_for_catalog_version "$ORIGINAL_CALIBRATION_VERSION"
+    if [ "$mapping_modified" = true ]; then
+        wait_for_catalog_version "$ORIGINAL_CALIBRATION_VERSION"
+    fi
 }
 
 fixture_applied=false
 mapping_modified=false
+iot_env_modified=false
 cleanup() {
     exit_code=$?
     trap - EXIT HUP INT TERM
-    if [ "$mapping_modified" = true ]; then
-        restore_mapping || exit_code=1
+    if [ "$mapping_modified" = true ] || [ "$iot_env_modified" = true ]; then
+        restore_iot_state || exit_code=1
     fi
     if [ "$fixture_applied" = true ]; then
         postgres \
@@ -283,10 +299,47 @@ cleanup() {
             -v "window_marker=$WINDOW_MARKER" \
             <"$CLEANUP_SQL" >"$EVIDENCE_DIR/cleanup.json.txt" || exit_code=1
     fi
+    rm -f "$IOT_ENV_BACKUP"
     exit "$exit_code"
 }
 trap cleanup EXIT HUP INT TERM
 
+iot_env_modified=true
+python3 - "$IOT_ENV" "$SOURCE_SEQUENCE_EVIDENCE_INTERVAL" <<'PY'
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+path = Path(sys.argv[1])
+interval = sys.argv[2]
+key = "BPI_SOURCE_SEQUENCE_EVIDENCE_PUBLISH_INTERVAL"
+lines = path.read_text(encoding="utf-8").splitlines()
+rendered = []
+replaced = False
+for line in lines:
+    if line.startswith(f"{key}="):
+        rendered.append(f"{key}={interval}")
+        replaced = True
+    else:
+        rendered.append(line)
+if not replaced:
+    rendered.append(f"{key}={interval}")
+mode = path.stat().st_mode & 0o777
+with tempfile.NamedTemporaryFile(
+    "w", encoding="utf-8", dir=path.parent, delete=False
+) as handle:
+    handle.write("\n".join(rendered))
+    handle.write("\n")
+    temporary = Path(handle.name)
+os.chmod(temporary, mode)
+os.replace(temporary, path)
+PY
+printf 'BPI_SOURCE_SEQUENCE_EVIDENCE_PUBLISH_INTERVAL=%s\n' \
+    "$SOURCE_SEQUENCE_EVIDENCE_INTERVAL" \
+    >"$EVIDENCE_DIR/acceptance-runtime-overrides.txt"
+
+mapping_modified=true
 python3 - "$MAPPING" "$DEVICE_ID" "$PROPERTY_ID" "$CALIBRATION_VERSION" <<'PY'
 import json
 import os
@@ -317,7 +370,6 @@ with tempfile.NamedTemporaryFile(
 os.chmod(temporary, 0o600)
 os.replace(temporary, path)
 PY
-mapping_modified=true
 python3 "$RENDERER" "$MAPPING" "$MAPPING_PROPERTIES"
 iot_compose up -d --no-deps --force-recreate jetlinks
 wait_for_jetlinks
@@ -385,6 +437,7 @@ sha256sum \
     "$EVIDENCE_DIR/preheat-mqtt.json" \
     "$EVIDENCE_DIR/window-mqtt.json" \
     "$EVIDENCE_DIR/postgres-verification.json.txt" \
+    "$EVIDENCE_DIR/acceptance-runtime-overrides.txt" \
     "$EVIDENCE_DIR/telemetry-landing-desktop.png" \
     "$EVIDENCE_DIR/telemetry-landing-mobile.png" \
     >"$EVIDENCE_DIR/SHA256SUMS"
