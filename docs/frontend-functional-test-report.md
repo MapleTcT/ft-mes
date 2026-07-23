@@ -1056,6 +1056,25 @@ marker：`ADP_E2E_BPI_WINDOWS_20260723_1235_A1`。机器证据：
 `metadata/bpi-field-data-coverage-mobile-target.png`；完整报告：
 `docs/testing/bpi-field-data-coverage-acceptance.md`。
 
+### BPI Phase 3C-E IoT 遥测落表（2026-07-23）
+
+本节使用唯一目标环境 `http://10.11.100.17:18080`、真实 ADP 登录、产品提交
+`8c9c4192b17953c48208efd31ef6528de04d96c6`、PostgreSQL 15.18/Flyway V34 和受控
+MQTT 3.1.1/QoS1。marker `BPI_TLANDING_20260723_094606` 的所有业务投影在取证后定向清零，
+IoT 映射与同步周期已恢复。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 遥测窗口隔离 | `/bpi/#/shadowRuns` | 先发送 3 条预热 MQTT，再从页面创建并启动影子运行 | `POST /bpi-api/shadow-runs`；`POST /bpi-api/shadow-runs/{id}/start` | 创建/启动均 200，依次为 `DRAFT/r1`、`RUNNING/r2`；窗口消息发送前页面事件数保持 0 | 预热 sequence `1..3` 已落 PostgreSQL，但 `created_at/event_time` 均早于 run window，不进入覆盖投影 | `bpi_telemetry_events`、`bpi_telemetry_points`、`bpi_shadow_runs` | PASS_TARGET_WINDOW_ISOLATION | 来源为受控 MQTT，不是物理现场 |
+| BPI 现场遥测落表 | 同一详情 | 启动后发送 sequence `4,5` 两条窗口遥测并等待页面覆盖 | `GET /bpi-api/shadow-runs/63c90d77-cb4a-4982-be55-74378399742a` | 页面显示 pinned/observed/sequence/calibration/GOOD 均 `1/1`、event/observation `2/2`、reject/gap/out-of-order `0/0/0`、`fullyCovered=true` | Kafka group 六分区 lag 0；PostgreSQL 为 2 events/2 points/0 rejects，sequence `4,5`、质量 GOOD、校准精确匹配 | telemetry source/event/point/reject、catalog、sequence、calibration、shadow run | PASS_TARGET_CONTROLLED_MQTT_KAFKA_POSTGRES | 单点短窗口不代表现场容量 |
+| BPI 桌面/移动复验 | 同一详情，桌面 `1440x900` 与移动 390px | 打开“现场遥测落表”区并检查内容、抽屉和响应式几何 | shadow run GET | 29 个 BPI 响应全部 2xx；console/page/request failure 均为 0；移动 viewport/body/document 和 drawer 均为 390px，遥测区真实可见 | 只读返回同一 PostgreSQL 投影，没有新增业务行 | 只读 | PASS_TARGET_RESPONSIVE | Ubuntu 26.04 使用目标现有 Chromium 149 |
+| BPI 取消与退场 | 同一详情 | 页面取消影子运行，随后 marker 清理并恢复 IoT 配置 | `POST /bpi-api/shadow-runs/{id}/cancel`；cleanup SQL；`GET /bpi/` | POST 200，页面终态为 `CANCELLED/r3`；清理后页面仍可访问 | marker telemetry/run/rule/topology/calibration/catalog 均为 0；周期恢复 5m/10m，校准恢复未验证、默认质量 UNCERTAIN；三个核心服务 healthy | shadow run、audit/idempotency、telemetry 与 fixture 表 | PASS_TARGET_CLEANED | 模型、推断、生产激活和外部 WMS 写入均未发生 |
+
+机器证据：`metadata/bpi-iot-telemetry-landing-acceptance.json`；截图：
+`metadata/bpi-iot-telemetry-landing-desktop-target.png`、
+`metadata/bpi-iot-telemetry-landing-mobile-target.png`；完整报告：
+`docs/testing/bpi-iot-telemetry-landing-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

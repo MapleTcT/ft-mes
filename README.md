@@ -2,7 +2,7 @@
 
 这是一个从 Windows ADP/MES 交付资产恢复、面向 Linux/Docker 和 PostgreSQL 持续演进的工程仓库，同时包含新建的智能批次与工艺数据中心（BPI）。仓库的目标不是让旧运行包“勉强启动”，而是逐步形成可编译、可测试、可部署、可落库验收、可回滚的 MES 产品代码基线。
 
-> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 唯一测试栈 `adp-mes-newbase` 的 BPI PostgreSQL、Java 17 service、Java 8 adapter 和 Web 已 expand-only 到 Flyway V33 / revision `f7db2f98e82d`。受控 MQTT/WOM START-END、影子批次、QCS 质量放行、内部 material-wms 蓝/红单，以及 V26 manifest、V27 精确版本 Parquet、V28 Iceberg/Polaris、V29 Object Lock 恢复包、V30 MLflow Dataset Input、V31 离线训练就绪评估和 V32/V33 工艺信号窗口/权限加固均有真实页面、API 和 PostgreSQL 等外部系统证据。V31 当时以 19 个固定门槛真实返回 `BLOCKED`：其不可变 v1 快照只有 1 个 included batch、1 个生产日和 0 个过程信号窗口。V32/V33 随后以受控 marker 形成 2 个窗口定义和 6 条 point-in-time 事实（2 READY / 4 BLOCKED），证明流量均值 20、泵运行比例 0.5、迟到/冻结后数据排除、不可变、最小权限及精确清理；它不会倒写 V31 历史评估，也不等于现场数据已达标。真实物理点位与正式校准、200 个复核批次、7 个生产日、模型训练/注册/审批/推断、MLflow 生产安全与高可用、整站灾备、生产 RPO/RTO/容量、连续 7-14 天现场运行、外部 ERP/WMS 和生产迁移条件仍未完成，因此不能标记生产 READY。Phase 2/WMS、materializer、Polaris、catalog publisher、retention archiver、MLflow/registrar 及危险管理开关保持默认关闭。
+> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 唯一测试栈 `adp-mes-newbase` 的 BPI PostgreSQL、Java 17 service、Java 8 adapter 和 Web 已 expand-only 到 Flyway V34 / revision `8c9c4192b179`。受控 MQTT/WOM START-END、影子批次、QCS 质量放行、内部 material-wms 蓝/红单，以及 V26 manifest、V27 精确版本 Parquet、V28 Iceberg/Polaris、V29 Object Lock 恢复包、V30 MLflow Dataset Input、V31 离线训练就绪评估、V32/V33 工艺信号窗口/权限加固和 V34 遥测窗口落表均有真实页面、API 和 PostgreSQL 等外部系统证据。marker `BPI_TLANDING_20260723_094606` 已证明受控 MQTT 经 JetLinks、Kafka、精确 scope consumer 落为窗口内 2 events/2 points，并在影子页面显示五项 `1/1`、event/observation `2/2` 和零拒绝/GAP/乱序；预热数据被正确排除，取证后 marker 清零、IoT 默认配置恢复。该结果仍不是物理设备和正式计量证书。真实物理点位与正式校准、200 个复核批次、7 个生产日、模型训练/注册/审批/推断、MLflow 生产安全与高可用、整站灾备、生产 RPO/RTO/容量、连续 7-14 天现场运行、外部 ERP/WMS 和生产迁移条件仍未完成，因此不能标记生产 READY。Phase 2/WMS、materializer、Polaris、catalog publisher、retention archiver、MLflow/registrar 及危险管理开关保持默认关闭。
 
 ## 项目定位
 
@@ -25,8 +25,8 @@
 | RM 批控配方 Web 编辑 | `PASS_WITH_EXTERNAL_DCS_BLOCKED` | `rm-formula-editor` 源码模块、迁移 190、可见 `Web编辑` 入口；marker `ADP_E2E_20260717120436_RM_WEB_FORMULA` 连续三轮完成桌面/移动页面、API、六表 PostgreSQL 回读、失败重试和清理 | 配置真实现场 Batch/DCS HTTPS 端点，加载生产主数据并完成投递确认与回滚签字 |
 | PATROL 共享巡检 | `TARGET_HIDDEN_DANGER_PASS_PARTIAL` | 455 个 Java 文件构建 PASS；目标 37 表、24 菜单、102 操作、2 工作流验收 PASS；EamMs JAR SHA `af01d6a7...97f753`；异常隐患 marker `ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER` 为 45/45 PASS，明细关联、幂等和 EAM 来源“巡检”复显均有证据 | 继续统计监控；完整隐患治理需真实 SESH；目标回滚需维护窗口确认 |
 | EMS 能源管理 | `BLOCKED_MISSING_INDICATOR` | `supEMS`、`energyPlan`、`EnergyConBase`、`EnergyPred` 四个源码包和依赖关系已恢复 | 取得 Indicator `6.0.4.0` api/core，补 PostgreSQL 迁移，逐服务构建与验收 |
-| BPI 产品链 | `PARTIAL` | Phase 1 影子批次、数据质量、规则治理和真实 WOM context 已验收；内部 QCS/WMS 蓝红链与正式身份职责分离已在目标闭合；V26-V33 已闭合 manifest、Parquet、Iceberg、Object Lock、MLflow Dataset Input、失败关闭的训练就绪评估、受控工艺信号窗口和函数权限加固 | 用物理 DEVICE/GATEWAY、正式校准、200 个复核批次和 7 个生产日替换受控窗口 fixture；外部 ERP/WMS、整站灾备/容量、MLflow 生产安全与 Phase 4 模型仍未完成 |
-| 目标测试环境 | `PASS_CONTROLLED_BPI_V33_PROCESS_WINDOWS_DEFAULT_OFF` | 同一 WOM marker 闭合 START/END；受控 QCS/WMS、V25 蓝红 durable receipt、V26-V33 数据集链、19 门槛评估、2 个窗口/6 条事实、最小权限、幂等/重启/零模型副作用和精确清理均闭合 | V31 历史训练资格仍为 BLOCKED，V32/V33 只关闭受控窗口实现；可选 sidecar 和危险开关已退回关闭，不是模型投产、现场连续运行、整站灾备或生产 READY |
+| BPI 产品链 | `PARTIAL` | Phase 1 影子批次、数据质量、规则治理和真实 WOM context 已验收；内部 QCS/WMS 蓝红链与正式身份职责分离已在目标闭合；V26-V34 已闭合 manifest、Parquet、Iceberg、Object Lock、MLflow Dataset Input、失败关闭的训练就绪评估、受控工艺信号窗口、权限加固和受控 MQTT 窗口落表 | 用物理 DEVICE/GATEWAY、正式校准、200 个复核批次和 7 个生产日替换受控来源；外部 ERP/WMS、整站灾备/容量、MLflow 生产安全与 Phase 4 模型仍未完成 |
+| 目标测试环境 | `PASS_CONTROLLED_BPI_V34_TELEMETRY_LANDING_DEFAULT_OFF` | 受控 QCS/WMS、V25 蓝红 durable receipt、V26-V34 数据集/遥测链、19 门槛评估、窗口事实、MQTT -> PostgreSQL -> 页面、最小权限、幂等、零模型副作用和精确清理均闭合 | V34 只关闭受控单点短窗口落表；物理设备、正式校准、连续运行、容量和生产写回仍未完成 |
 | 生产迁移 | `BLOCKED` | 迁移、回滚和签字门禁已经建立 | 数据、MinIO、Keycloak、TLS、安全、license、回滚演练和业务签字均需 READY |
 
 权威状态以 [项目总目标验收总账](docs/project-goal-acceptance.md)、[目标缺口总账](docs/goal-gap-register.md)、[模块包缺口审计](docs/module-package-gap-audit.md)、[PATROL 恢复验收](docs/testing/patrol-module-recovery-acceptance.md) 和 [机器可读目标账本](metadata/project-goal-acceptance.json) 为准。当前模块包审计确认 PATROL 已从“部署中”进入“异常发现到 EAM 待治理台账 PASS、统计和完整 SESH 治理继续验收”；四个 EMS 源码包已恢复，但 `Indicator 6.0.4.0`、`packConfigManag`、`SESGISConfig` 仍是依赖缺口；WMS 与 ProcessAnalysis 已由可维护自研模块接续。README 是接手入口，不替代验收证据。
@@ -35,7 +35,7 @@
 
 当前以 BPI Phase 1 可信批次事实、Phase 3A 可复现数据集清单、Phase 3B-A 版本锁定 Parquet 制品、
 Phase 3B-B 可核验 Iceberg/Object Lock 恢复包、Phase 3C-A MLflow Dataset Input、Phase 3C-B
-离线训练就绪评估和 Phase 3C-C 工艺信号窗口为同一条开发主线：
+离线训练就绪评估、Phase 3C-C 工艺信号窗口以及 Phase 3C-D/E 现场覆盖和遥测落表为同一条开发主线：
 
 ```text
 JetLinks/IoT 测点 + MES 生产指令/生产上下文
@@ -75,6 +75,9 @@ JetLinks/IoT 测点 + MES 生产指令/生产上下文
                     |
                     v
  point-in-time 工艺信号窗口（受控目标已验收）
+                    |
+                    v
+ MQTT/JetLinks/Kafka 遥测落 PostgreSQL 并按影子窗口覆盖（受控目标已验收）
                     |
                     v
  离线训练就绪评估（目标真实 BLOCKED；不启动训练）
@@ -124,6 +127,7 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 - Phase 3C-A 已完成 Flyway V30、四个 scoped/idempotent API、Java 8 精确路由、独立 MLflow `3.14.0` PostgreSQL backend、metadata-only Dataset Input registrar、私有 artifact bucket 和默认关闭编排。目标 marker `ADP_E2E_BPI_MLFLOW_20260723_022000_A1` 在 Tracking Server 停止时真实进入 `FAILED/r3/attempt1/MLFLOW_TRANSPORT_ERROR` 且 MLflow 保持 0 run/0 input；恢复后页面重试同一 registration 到 `REGISTERED/r6/attempt2`，MLflow 恰有 1 run/1 dataset/1 input，重启后仍为 1。精确 versioned S3 source、PostgreSQL 六态审计/幂等、MinIO 最小权限、桌面/移动零错误和定向清理均通过；模型相关表为 0，所有训练/注册/推断/激活标志为 false。
 - Phase 3C-B 已完成 Flyway V31、三个 scoped/idempotent API、Java 8 精确路由、19 门槛确定性服务、不可变 sequence/checksum、桌面/移动评估抽屉和默认不训练边界。目标 marker `ADP_E2E_BPI_READINESS_20260723_091500_A1` 从真实页面得到两次 `BLOCKED/r1` 评估，序号 1/2、19 gates、8 blockers、同 checksum、2 audit、2 COMPLETED/200；相同 key 重放不增加行，UPDATE 被 trigger 拒绝，service/adapter 重启后可重发现。MLflow 评估前后均为 1 run/1 dataset/1 input，三类模型表均为 0；marker、Polaris/MinIO 对象、临时 MLflow 卷和 sidecar 已精确归零。该 v1 评估当时缺少窗口；后续 V32/V33 只关闭受控窗口实现，仍不能降低真实样本和现场证据门槛。
 - Phase 3C-C 已完成 Flyway V32 工艺信号窗口事实和 V33 函数权限加固。第一次 V32 升级被最小权限门禁正确停止且未切换运行容器；追加 V33 后现有库、全新 V1-V33 库和四个 worker 角色校验均通过。目标 marker `ADP_E2E_BPI_WINDOWS_20260723_1235_A1` 从真实页面创建流量 MEAN 与泵 TRUE_RATIO 两组窗口，3 个样本形成 6 条不可变事实（2 READY / 4 BLOCKED）；流量 `source=4/accepted=3/late=1/mean=20`，冻结后值不入快照，泵运行比例为 0.5。桌面/移动零错误，19 类 marker 投影归零，主三服务 healthy、可选 sidecar 为 0。该受控结果只关闭窗口实现与失败关闭；下一步是接入真实 `MapleTcT/iot` identity、正式校准并积累 200 批/7 天后重跑 v2 readiness，不启动模型。
+- Phase 3C-D/E 已完成现场来源/数据量覆盖投影和 Flyway V34 遥测窗口索引。目标 marker `BPI_TLANDING_20260723_094606` 以受控 MQTT QoS1 经 JetLinks、Kafka 和 default-off 精确 scope consumer 落入 PostgreSQL；3 条预热事件被影子运行窗口排除，sequence `4,5` 形成 2 events/2 points/0 rejects，页面显示五项 `1/1`、event/observation `2/2`、gap/out-of-order `0/0`。29 个 BPI 请求全为 2xx，桌面/390px 移动错误为 0，取消后 marker 清零并恢复 5m/10m、未验证校准和 UNCERTAIN。该证据只关闭受控落表纵切，不声明物理设备、正式计量、现场容量或模型资格。
 - Kafka + PostgreSQL 回执消费验收：`read_committed`、回滚不可见、重启重放、`DEGRADED -> READY` 落库、旧事件抑制、精确幂等和双 source DLQ。
 - Kafka 4.2 + Flink 2.2.1 MiniCluster 验收：成功 checkpoint 后 `APPLIED + READY` 可见、未完成事务不可见、停用提交 `APPLIED + INACTIVE`、TaskManager 重启恢复规则终态、同版本规则禁止重新启用且两类回执无重复。
 - 目标测试环境独立 BPI 运行栈：真实 ADP `suposTicket` 经可信网关校验，Java 8 适配器签发短期内部 JWT，Java 17 服务读取独立 PostgreSQL。
@@ -135,13 +139,13 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 
 ## 目标测试环境（更新至 2026-07-23）
 
-当前 ADP/PATROL 运维与验收入口为公司内网 `10.11.100.17`。运行面只保留一个 ADP Compose project：`adp-mes-newbase`；BPI service、adapter、Web 和 PostgreSQL 已并入该 Compose，Kafka/Flink/MinIO 仍由隔离侧车栈承载，不是第二套 ADP。BPI PostgreSQL 当前为 PostgreSQL 15.18/Flyway V33，业务 service、adapter 和 WMS adapter 均为 revision `f7db2f98e82d481f6c53c5fa7539ac52c812e28f`。Polaris、materializer、publisher、retention archiver、MLflow 和 registrar 只在受保护验收窗口临时启动，V33 取证后运行数为 0，源码和目标开关保持 false；Compose project 只引用正式 `docker-compose.yml`。Flink REST 仅绑定测试机 Tailscale 地址 `100.99.133.43:18081`，不作为业务前端入口。
+当前 ADP/PATROL 运维与验收入口为公司内网 `10.11.100.17`。运行面只保留一个 ADP Compose project：`adp-mes-newbase`；BPI service、adapter、Web 和 PostgreSQL 已并入该 Compose，Kafka/Flink/MinIO 仍由隔离侧车栈承载，不是第二套 ADP。BPI PostgreSQL 当前为 PostgreSQL 15.18/Flyway V34，业务 service、adapter 和 WMS adapter 均为 revision `8c9c4192b17953c48208efd31ef6528de04d96c6`。遥测 consumer 只在显式 allowlist 下运行，HTTP ingress 仍默认关闭；Polaris、materializer、publisher、retention archiver、MLflow 和 registrar 仍只在受保护验收窗口临时启动。V34 取证后 marker 为 0，IoT 试点映射恢复未验证/UNCERTAIN，模型和生产开关保持 false；Compose project 只引用正式 `docker-compose.yml`。Flink REST 仅绑定测试机 Tailscale 地址 `100.99.133.43:18081`，不作为业务前端入口。
 
 | 入口/运行面 | 地址或项目 | 当前结果 |
 |---|---|---|
 | 既有 ADP/MES + PATROL | `http://10.11.100.17:18080` | 当前公司内网入口；PATROL 配置、任务执行、异常结果、待治理隐患生成和 EAM 台账复显链 PASS |
 | BPI 操作台 | `http://10.11.100.17:18080/bpi/#/overview` | 复用真实 ADP 登录；规则和候选页面均已在当前地址复验 |
-| BPI Java/PostgreSQL/MinIO/Polaris | service `http://10.11.100.17:19091`；DB `ft_mes_bpi`；buckets `bpi-datasets` / `bpi-iceberg-warehouse` / `bpi-dataset-recovery` | PostgreSQL 15.18/Flyway V33；V28-V33 catalog、恢复包、MLflow Input、训练就绪评估、过程窗口和函数权限加固均通过目标验收；可选 sidecar 0、本轮 marker 0、相关开关 false |
+| BPI Java/PostgreSQL/MinIO/Polaris | service `http://10.11.100.17:19091`；DB `ft_mes_bpi`；buckets `bpi-datasets` / `bpi-iceberg-warehouse` / `bpi-dataset-recovery` | PostgreSQL 15.18/Flyway V34；V28-V34 catalog、恢复包、MLflow Input、训练就绪、过程窗口、权限和遥测落表均通过受控目标验收；本轮 marker 0，模型/生产开关 false |
 | Kafka/Flink/MinIO | `ft-mes-bpi-streaming`；REST `http://100.99.133.43:18081` | Kafka 4.2 三 broker；Flink 2.2.1 job `ffe9ab719bbf7250b682f77f75641f17` 为 RUNNING/36-of-36，最新复验 checkpoint `5533` |
 | 固定 marker 回放 | `ADP_E2E_20260714_071034_1503790` | 只产生 1 个候选，数据质量错误 0 |
 | TaskManager 恢复 | 带负载重启 1 个 TaskManager | 30/30 task 恢复，重启后继续完成 checkpoint |
@@ -170,11 +174,12 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 | V30 MLflow Dataset Input | `ADP_E2E_BPI_MLFLOW_20260723_022000_A1` | 真实页面 `FAILED -> retry -> REGISTERED`、PostgreSQL r1-r6/幂等、MLflow 精确 source 的 1 run/1 dataset/1 input、停机无副作用、重启不重复、MinIO 最小权限及零残留/default-off PASS；不声明模型已训练或投产 |
 | V31 离线训练就绪评估 | `ADP_E2E_BPI_READINESS_20260723_091500_A1` | 真实页面两次 `BLOCKED`、19 gates/8 blockers、幂等重放、不可变 trigger、重启回读、移动布局、MLflow/model 零副作用、Polaris/MinIO/PostgreSQL 精确清理和正式单编排恢复 PASS；数据资格仍为 BLOCKED |
 | V32/V33 工艺信号窗口 | `ADP_E2E_BPI_WINDOWS_20260723_1235_A1` | 真实页面创建 2 个窗口，PostgreSQL 固化 6 条不可变事实（2 READY / 4 BLOCKED）；流量 mean 20、泵 true ratio 0.5，迟到/冻结后点被排除；首次权限门禁正确止损，V33 四角色最小权限、桌面/移动和 19 类清理 PASS；不声明物理来源、正式校准或模型资格 |
+| V34 IoT 遥测窗口落表 | `BPI_TLANDING_20260723_094606` | 受控 MQTT 5/5 PUBACK；JetLinks -> Kafka -> scoped BPI consumer -> PostgreSQL；预热 3 条不计窗口，窗口内 2 events/2 points/0 rejects，页面五项 `1/1` 与 2/2、零 GAP/乱序；29 个请求全 2xx、桌面/移动零错误、marker 清零和 IoT 默认恢复 PASS；不声明物理现场 |
 | 验收清理 | typed inactive + 定向 SQL + consumer deny-all | Flink 确认 inactive；marker topology/rule/candidate/batch 均为 0；读路径复验 PASS |
 
 访问 BPI 前需要先在同一浏览器完成 ADP 登录，BPI 不保存或复制旧平台密码。适配器接受真实旧平台不透明会话票据，也保留严格 issuer/audience 校验的 JWT 路径；角色和租户/工厂/产线范围均由服务端映射，未配置映射时默认拒绝。
 
-详细证据和结论边界见 [V32/V33 工艺信号窗口验收](docs/testing/bpi-dataset-process-signal-window-acceptance.md)、[V31 离线训练就绪验收](docs/testing/bpi-dataset-training-readiness-acceptance.md)、[V30 MLflow Dataset Input 验收](docs/testing/bpi-dataset-mlflow-registration-acceptance.md)、[Phase 3C-A 设计](docs/plans/2026-07-22-bpi-phase3c-mlflow-dataset-registration-design.md)、[V29 Object Lock 恢复包验收](docs/testing/bpi-dataset-retention-archive-acceptance.md)、[Iceberg 目录发布验收](docs/testing/bpi-dataset-catalog-publication-acceptance.md)、[Parquet 目标验收](docs/testing/bpi-dataset-materialization-acceptance.md)、[数据集清单验收](docs/testing/bpi-dataset-manifest-acceptance.md)、[受控强制结束验收](docs/testing/bpi-force-close-acceptance.md)、[完工入库冲销验收](docs/testing/bpi-wms-inbound-reversal-acceptance.md)、[内部 WMS 蓝红整链验收](docs/testing/bpi-formal-identity-wms-roundtrip-acceptance.md)、[MQTT 与 WOM START/END 联合验收](docs/testing/bpi-live-mqtt-wom-start-end-acceptance.md)、[影子运行验收](docs/testing/bpi-shadow-run-acceptance.md)和 [IoT 仓库 MQTT 接入验收](https://github.com/MapleTcT/iot/tree/main/docs/testing)。BPI 产品总目标仍为 `PARTIAL`：V26-V33 单数据集纵切、真实失败关闭与受控工艺窗口已闭合，剩余的是物理点位/正式校准下的窗口证据、200 个真实复核批次、7 个生产日、物理设备来源序列、外部 ERP/WMS、整站灾备/容量、MLflow 生产安全/高可用和 Phase 4 模型。
+详细证据和结论边界见 [V34 IoT 遥测落表验收](docs/testing/bpi-iot-telemetry-landing-acceptance.md)、[V32/V33 工艺信号窗口验收](docs/testing/bpi-dataset-process-signal-window-acceptance.md)、[V31 离线训练就绪验收](docs/testing/bpi-dataset-training-readiness-acceptance.md)、[V30 MLflow Dataset Input 验收](docs/testing/bpi-dataset-mlflow-registration-acceptance.md)、[V29 Object Lock 恢复包验收](docs/testing/bpi-dataset-retention-archive-acceptance.md)、[Iceberg 目录发布验收](docs/testing/bpi-dataset-catalog-publication-acceptance.md)、[Parquet 目标验收](docs/testing/bpi-dataset-materialization-acceptance.md)、[数据集清单验收](docs/testing/bpi-dataset-manifest-acceptance.md)、[受控强制结束验收](docs/testing/bpi-force-close-acceptance.md)、[完工入库冲销验收](docs/testing/bpi-wms-inbound-reversal-acceptance.md)、[内部 WMS 蓝红整链验收](docs/testing/bpi-formal-identity-wms-roundtrip-acceptance.md)、[MQTT 与 WOM START/END 联合验收](docs/testing/bpi-live-mqtt-wom-start-end-acceptance.md)、[影子运行验收](docs/testing/bpi-shadow-run-acceptance.md)和 [IoT 仓库 MQTT 接入验收](https://github.com/MapleTcT/iot/tree/main/docs/testing)。BPI 产品总目标仍为 `PARTIAL`：V26-V34 的受控数据与遥测纵切已闭合，剩余的是物理点位/正式校准下的窗口证据、200 个真实复核批次、7 个生产日、物理设备来源序列、外部 ERP/WMS、整站灾备/容量、MLflow 生产安全/高可用和 Phase 4 模型。
 
 ## 第一次接手
 

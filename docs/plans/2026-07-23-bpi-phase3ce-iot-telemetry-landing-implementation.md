@@ -6,7 +6,13 @@
 
 **Tech Stack:** Java 17, Spring Boot, Spring Kafka, Protobuf, PostgreSQL 15, OpenAPI, TypeScript/Vite, Node simulation, Playwright, JetLinks/MQTT.
 
+**Status:** Implementation and controlled target acceptance are complete at product commit
+`8c9c4192b17953c48208efd31ef6528de04d96c6` and acceptance-harness commit
+`988868f539cfd9ed5b0127edb621e799a509bad0`. Physical field qualification remains a later gate.
+
 ## Task 1: Kafka ingress contract and persistence
+
+Status: `COMPLETED`
 
 Files:
 
@@ -26,6 +32,8 @@ Acceptance:
 
 ## Task 2: PostgreSQL telemetry coverage projection
 
+Status: `COMPLETED`
+
 Files:
 
 - `services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ShadowRunTelemetryCoverage.java`
@@ -42,6 +50,8 @@ Acceptance:
 5. No duplicate lifecycle or editable coverage table is added.
 
 ## Task 3: API, simulation and operator UI
+
+Status: `COMPLETED`
 
 Files:
 
@@ -61,6 +71,8 @@ Acceptance:
 
 ## Task 4: Target MQTT/PostgreSQL acceptance
 
+Status: `COMPLETED_CONTROLLED_SOURCE`
+
 Files:
 
 - target acceptance scripts under `deploy/docker/scripts/`
@@ -76,7 +88,8 @@ Acceptance:
 
 ## Task 5: Governance and landing
 
+Status: `IN_PROGRESS`
+
 1. Update project objective, gap, persistence and frontend ledgers.
 2. Run focused Java/PostgreSQL/simulation/browser checks and full `make ci`.
 3. Review the diff, commit, push, merge `main`, and verify GitHub Verify.
-

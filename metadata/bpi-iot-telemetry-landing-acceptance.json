@@ -1,0 +1,272 @@
+{
+  "generatedAt": "2026-07-23T17:47:14+08:00",
+  "status": "PASS_TARGET_CONTROLLED_MQTT_KAFKA_POSTGRES_BROWSER_CLEANED",
+  "phase": "BPI_PHASE_3C_E_IOT_TELEMETRY_LANDING",
+  "implementationCommit": "8c9c4192b17953c48208efd31ef6528de04d96c6",
+  "acceptanceHarnessCommit": "988868f539cfd9ed5b0127edb621e799a509bad0",
+  "database": "PostgreSQL",
+  "target": {
+    "host": "10.11.100.17",
+    "route": "http://10.11.100.17:18080/bpi/#/shadowRuns",
+    "runtimeRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "releaseRoot": "/home/v6/ft-mes-bpi-release-telemetry-v34-8c9c4192",
+    "databaseVersion": "PostgreSQL 15.18",
+    "databaseName": "ft_mes_bpi",
+    "schema": "bpi",
+    "flywayVersion": 34,
+    "marker": "BPI_TLANDING_20260723_094606",
+    "shadowRunId": "63c90d77-cb4a-4982-be55-74378399742a",
+    "remoteEvidenceDirectory": "/home/v6/adp-deploy-backups/20260723-bpi-telemetry-v34/acceptance-BPI_TLANDING_20260723_094606"
+  },
+  "summary": {
+    "testedItems": 12,
+    "pass": 12,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "browserResponseCount": 29,
+    "browserNon2xxCount": 0,
+    "consoleErrorCount": 0,
+    "pageErrorCount": 0,
+    "requestFailureCount": 0,
+    "cleanupRemainingRows": 0
+  },
+  "deployment": {
+    "status": "PASS",
+    "strategy": "INTEGRATED_EXPAND_ONLY",
+    "beforeFlywayVersion": 33,
+    "afterFlywayVersion": 34,
+    "migrationApplied": true,
+    "schemaDowngradeAllowed": false,
+    "serviceImage": "ft-mes-bpi-service:20260723t085720z-8c9c4192b179",
+    "adapterImage": "ft-mes-bpi-adapter:20260723t085720z-8c9c4192b179",
+    "wmsAdapterImage": "ft-mes-bpi-wms-adapter:20260723t085720z-8c9c4192b179",
+    "coreServicesHealthy": 3,
+    "report": "metadata/bpi-integrated-upgrade-v34-target.json",
+    "reportSha256": "af015338793972426f4b940f2ff78b76df6be4bc43ef2e25c0056797137a4774"
+  },
+  "kafkaConsumer": {
+    "enabled": true,
+    "topic": "iot.telemetry.selected.v1",
+    "dlqTopic": "iot.telemetry.selected.dlq.v1",
+    "groupId": "ft-mes-bpi-service-telemetry-v1",
+    "autoOffsetReset": "latest",
+    "concurrency": 3,
+    "partitions": 6,
+    "activeConsumers": 3,
+    "totalLagAfterAcceptance": 0,
+    "scope": {
+      "tenantIds": [
+        "1000"
+      ],
+      "plantIds": [
+        "PLANT-01"
+      ],
+      "lineIds": [
+        "LINE-S07-01"
+      ]
+    }
+  },
+  "controlledSource": {
+    "productId": "bpi-mqtt-pilot-product-01",
+    "deviceId": "bpi-mqtt-pilot-device-01",
+    "propertyId": "flow.instant",
+    "sourceInstance": "jetlinks-pilot-node-01",
+    "sourceOrigin": "DEVICE",
+    "sourceEpoch": 20260723094606,
+    "firstSequence": 1,
+    "lastSequence": 5,
+    "observationCount": 5,
+    "sourceEvidenceStatus": "QUALIFIED",
+    "preheatMessages": 3,
+    "windowMessages": 2,
+    "qos": 1,
+    "allPubAck": true,
+    "publishAttempts": 1,
+    "controlledSimulator": true,
+    "fieldDeviceClaimed": false
+  },
+  "windowIsolation": {
+    "preheatEventRows": 3,
+    "preheatPersistedBeforeRun": true,
+    "draftAcceptedEventCount": 0,
+    "startedAcceptedEventCountBeforePublish": 0,
+    "windowEventRows": 2,
+    "windowPointRows": 2,
+    "windowPersistedAfterRunStart": true,
+    "allPersistedInsideWindow": true
+  },
+  "telemetryCoverage": {
+    "windowStarted": true,
+    "pinnedPointCount": 1,
+    "observedPointCount": 1,
+    "authoritativeSequencePointCount": 1,
+    "calibratedPointCount": 1,
+    "goodQualityPointCount": 1,
+    "acceptedEventCount": 2,
+    "acceptedObservationCount": 2,
+    "rejectedObservationCount": 0,
+    "gapEventCount": 0,
+    "outOfOrderEventCount": 0,
+    "fullyCovered": true,
+    "blockers": []
+  },
+  "api": {
+    "create": {
+      "method": "POST",
+      "endpoint": "/bpi-api/shadow-runs",
+      "status": 200,
+      "result": "DRAFT/r1"
+    },
+    "start": {
+      "method": "POST",
+      "endpoint": "/bpi-api/shadow-runs/63c90d77-cb4a-4982-be55-74378399742a/start",
+      "status": 200,
+      "result": "RUNNING/r2"
+    },
+    "readCoverage": {
+      "method": "GET",
+      "endpoint": "/bpi-api/shadow-runs/63c90d77-cb4a-4982-be55-74378399742a",
+      "status": 200,
+      "result": "fullyCovered=true"
+    },
+    "cancel": {
+      "method": "POST",
+      "endpoint": "/bpi-api/shadow-runs/63c90d77-cb4a-4982-be55-74378399742a/cancel",
+      "status": 200,
+      "result": "CANCELLED/r3"
+    }
+  },
+  "postgres": {
+    "eventRows": 2,
+    "pointRows": 2,
+    "rejectedRows": 0,
+    "sequences": [
+      4,
+      5
+    ],
+    "sequenceDispositions": [
+      "IN_ORDER",
+      "IN_ORDER"
+    ],
+    "qualities": [
+      "GOOD",
+      "GOOD"
+    ],
+    "values": [
+      12.5,
+      12.5
+    ],
+    "calibrationVersion": "pilot-telemetry-BPI_TLANDING_20260723_094606",
+    "runState": "CANCELLED",
+    "runRevision": 3,
+    "externalWmsWrites": 0,
+    "tables": [
+      "bpi.bpi_telemetry_source_state",
+      "bpi.bpi_telemetry_events",
+      "bpi.bpi_telemetry_points",
+      "bpi.bpi_telemetry_point_rejects",
+      "bpi.bpi_shadow_runs",
+      "bpi.bpi_point_catalog_snapshots",
+      "bpi.bpi_point_catalog_entries",
+      "bpi.bpi_source_sequence_evidence_current",
+      "bpi.bpi_point_calibrations",
+      "bpi.bpi_topology_versions",
+      "bpi.bpi_rule_versions",
+      "bpi.bpi_audit_events",
+      "bpi.bpi_api_idempotency"
+    ],
+    "verificationScript": "deploy/docker/scripts/bpi-telemetry-landing-acceptance-verification.sql",
+    "verificationSha256": "f4fc1d1cb4b77dbff8f27449c6528a7bdbdc89d6d5ebfd41d4cb50f8708c7452"
+  },
+  "browser": {
+    "loginStatus": 200,
+    "executable": "Chromium 149.0.7827.55",
+    "rawReportSha256": "fe4fb9b0e5503db677ea9fbca2338bbc814ec0a149fed82e552d60206c4d12a9",
+    "desktop": {
+      "viewport": "1440x900",
+      "drawerLeft": 760,
+      "drawerRight": 1440,
+      "drawerWidth": 680,
+      "screenshot": "metadata/bpi-iot-telemetry-landing-desktop-target.png",
+      "screenshotSha256": "cf9c0e029a4bde39ed2a44ddb4cd30ac1a7d2c209e2815524e1344c756b5c993"
+    },
+    "mobile": {
+      "viewport": 390,
+      "bodyWidth": 390,
+      "documentWidth": 390,
+      "drawerLeft": 0,
+      "drawerRight": 390,
+      "drawerWidth": 390,
+      "telemetryVisible": true,
+      "telemetryTop": 36.5,
+      "telemetryBottom": 749.5,
+      "screenshot": "metadata/bpi-iot-telemetry-landing-mobile-target.png",
+      "screenshotSha256": "9ff44f4282fc918593b87201799db91b5b82e8e1a09162e960c20eecabf58dd1"
+    }
+  },
+  "cleanup": {
+    "preRestoreCleanupSha256": "c065e67fd5d059aa53fe9071e43e88ac968729bff91d08b327e137e54d7df460",
+    "postRestoreCleanupSha256": "e894fd61327885aeb63010801e2f00e93c9b2ab6c0abda00cf5dd0d9e67fb846",
+    "markerTelemetryRows": 0,
+    "shadowRuns": 0,
+    "rules": 0,
+    "topologies": 0,
+    "calibrations": 0,
+    "catalogs": 0,
+    "jetlinksHealth": "healthy",
+    "restoredPointCatalogInterval": "5m",
+    "restoredSourceEvidencePublishInterval": "10m",
+    "restoredCalibrationVersion": "pilot-unverified-20260714",
+    "restoredCalibrationVerified": false,
+    "restoredDefaultQuality": "UNCERTAIN",
+    "secretBearingEnvironmentBackupRemoved": true
+  },
+  "resolvedIssues": [
+    {
+      "id": "BPI-TELEMETRY-SOURCE-EVIDENCE-CADENCE",
+      "symptom": "Changing only the evidence heartbeat did not accelerate publication because synchronization is scheduled by the point-catalog interval.",
+      "resolution": "The controlled runner temporarily sets both intervals to 5s, then restores 5m/10m exactly.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "BPI-TELEMETRY-COVERAGE-RACE",
+      "symptom": "fullyCovered became true after the first event and the browser runner returned before the expected second event landed.",
+      "resolution": "The runner now waits for fullyCovered and the expected event and observation counts.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "BPI-TELEMETRY-MQTT-STARTUP-RACE",
+      "symptom": "JetLinks health could become ready before the MQTT gateway consistently returned PUBACK.",
+      "resolution": "The runner adds a settle period, longer MQTT timeout and bounded fresh-epoch retries.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "BPI-TELEMETRY-UBUNTU26-PLAYWRIGHT",
+      "symptom": "Playwright refused to install its pinned browser on Ubuntu 26.04.",
+      "resolution": "The browser runner accepts an explicit executable and validated the existing Chromium 149 against the real BPI route.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "BPI-TELEMETRY-MOBILE-EVIDENCE",
+      "symptom": "The first mobile screenshot asserted telemetry content but captured the top of the fixed drawer.",
+      "resolution": "The runner scrolls the telemetry section into view, verifies its geometry and then captures evidence.",
+      "status": "RESOLVED"
+    }
+  ],
+  "safety": {
+    "oracleDefaultPathAdded": false,
+    "modelTrainingStarted": false,
+    "modelRegistered": false,
+    "onlineInferenceEnabled": false,
+    "productionActivationAllowed": false,
+    "externalWmsWrites": 0
+  },
+  "limitations": [
+    "The source was the controlled MQTT pilot, not a physical field device.",
+    "The approved calibration was a short-lived acceptance fixture, not a formal metrology certificate.",
+    "The run proves one short telemetry window, not continuous 7-14 day field operation or production capacity.",
+    "The source-sequence current row is operational heartbeat state and expires automatically; the pilot mapping was restored to unverified UNCERTAIN.",
+    "No model training, model registration, online inference, production activation or external WMS write was performed."
+  ]
+}

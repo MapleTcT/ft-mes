@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-23T15:10:09+08:00",
-  "repoCommit": "1a0f3a5144b9a82442fa6b0f937982165fa7ed15+target-field-data-coverage",
+  "generatedAt": "2026-07-23T18:00:42+08:00",
+  "repoCommit": "8c9c4192b17953c48208efd31ef6528de04d96c6+target-telemetry-landing-harness-988868f539cfd9ed5b0127edb621e799a509bad0",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
-    "generatedAt": "2026-07-21T17:57:08.442Z",
+    "generatedAt": "2026-07-23T10:00:42.000Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -51,6 +51,12 @@
       "status": "PASS_TARGET_GUARD_WITH_BLOCKED_SOURCE",
       "marker": "source-sequence-evidence-131c777051feb15ff81af2d4a1918a28b551ebafcc9e53b46fcf65a11edbf67d",
       "evidence": "metadata/bpi-source-sequence-readiness-acceptance.json"
+    },
+    "bpiTelemetryLandingV34": {
+      "status": "PASS_TARGET_CONTROLLED_MQTT_KAFKA_POSTGRES_BROWSER_CLEANED",
+      "marker": "BPI_TLANDING_20260723_094606",
+      "evidence": "metadata/bpi-iot-telemetry-landing-acceptance.json",
+      "assertions": "V33->V34 expand-only; controlled MQTT QoS1 5/5 PUBACK; exact source QUALIFIED; preheat excluded; run-window PostgreSQL 2 events/2 points/0 rejects; coverage 1/1 and 2/2 with zero gap/out-of-order; 29 browser responses all 2xx; browser errors zero; marker cleanup zero; IoT cadence and unverified calibration restored; no model or external WMS side effect"
     },
     "patrolRoute": {
       "status": "PASS",
@@ -227,8 +233,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 263,
-    "pass": 260,
+    "testedFeatures": 267,
+    "pass": 264,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -5725,9 +5731,97 @@
       "status": "PASS",
       "evidence": "metadata/bpi-field-data-coverage-acceptance.json and desktop/mobile screenshots; browser, PostgreSQL cleanup and runtime checks passed while all model boundaries remained false",
       "issues": []
+    },
+    {
+      "module": "BPI Phase 3C-E V34 与遥测 Kafka consumer",
+      "route": "/bpi/#/shadowRuns",
+      "operation": "expand-only 到 Flyway V34，并仅对精确 tenant/plant/line scope 启用遥测 consumer",
+      "api": "Kafka iot.telemetry.selected.v1; DLQ iot.telemetry.selected.dlq.v1",
+      "method": "KAFKA/SQL",
+      "requiresPersistence": true,
+      "backendEntry": "BpiTelemetryKafkaConfiguration -> TelemetryKafkaListener",
+      "tables": [
+        "bpi.flyway_schema_history",
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_telemetry_point_rejects"
+      ],
+      "marker": "BPI_TLANDING_20260723_094606",
+      "verificationSql": "metadata/bpi-integrated-upgrade-v34-target.json plus Kafka group describe; require Flyway 34, three healthy core services, 3 consumers over 6 partitions and final lag zero",
+      "status": "PASS",
+      "evidence": "V33 upgraded to V34 without downgrade; consumer scope was exactly 1000/PLANT-01/LINE-S07-01 and the target group finished at zero lag",
+      "issues": []
+    },
+    {
+      "module": "BPI Phase 3C-E 预热遥测窗口隔离",
+      "route": "/bpi/#/shadowRuns",
+      "operation": "发送三条预热 MQTT，创建并启动影子运行，确认启动前事实不计入当前窗口",
+      "api": "MQTT -> Kafka; POST /bpi-api/shadow-runs; POST /bpi-api/shadow-runs/{runId}/start",
+      "method": "MQTT/POST",
+      "requiresPersistence": true,
+      "backendEntry": "TelemetryKafkaListener -> TelemetryKafkaRecordProcessor -> TelemetryIngestionService -> TelemetryPostgresRepository; ShadowRunController -> ShadowRunService -> ShadowRunPostgresRepository",
+      "tables": [
+        "bpi.bpi_telemetry_source_state",
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_shadow_runs"
+      ],
+      "marker": "BPI_TLANDING_20260723_094606",
+      "verificationSql": "deploy/docker/scripts/bpi-telemetry-landing-acceptance-verification.sql; require preheat count 3, created_at before started_at and run-window event count zero before window publish",
+      "status": "PASS",
+      "evidence": "sequences 1..3 received PUBACK and persisted before run start; create/start returned 200 as DRAFT/r1 and RUNNING/r2 while preheat facts remained outside the coverage window",
+      "issues": []
+    },
+    {
+      "module": "BPI Phase 3C-E 窗口遥测落表与覆盖",
+      "route": "/bpi/#/shadowRuns",
+      "operation": "启动后发送两条 MQTT，并由真实页面读取 PostgreSQL 遥测覆盖",
+      "api": "MQTT -> Kafka; GET /bpi-api/shadow-runs/63c90d77-cb4a-4982-be55-74378399742a",
+      "method": "MQTT/GET",
+      "requiresPersistence": true,
+      "backendEntry": "Telemetry ingestion chain; ShadowRunController -> ShadowRunService -> ShadowRunPostgresRepository -> ShadowRunTelemetryCoverage",
+      "tables": [
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_telemetry_point_rejects",
+        "bpi.bpi_point_catalog_entries",
+        "bpi.bpi_source_sequence_evidence_current",
+        "bpi.bpi_point_calibrations",
+        "bpi.bpi_shadow_runs"
+      ],
+      "marker": "BPI_TLANDING_20260723_094606",
+      "verificationSql": "deploy/docker/scripts/bpi-telemetry-landing-acceptance-verification.sql; require sequences 4/5, two IN_ORDER GOOD points, zero rejects/gaps/out-of-order and exact run-window timestamps",
+      "status": "PASS",
+      "evidence": "PostgreSQL stored 2 events/2 points/0 rejects with values 12.5, exact temporary calibration and sequences 4/5; API/page showed five 1/1 coverage counts, 2/2 events/observations and fullyCovered=true",
+      "issues": []
+    },
+    {
+      "module": "BPI Phase 3C-E 取消、浏览器与精确清理",
+      "route": "/bpi/#/shadowRuns",
+      "operation": "桌面/移动复验遥测区，从页面取消任务，再按 marker 清理并恢复 IoT 映射",
+      "api": "GET/POST /bpi-api/shadow-runs/{runId}; cleanup SQL; GET /bpi/",
+      "method": "GET/POST/DELETE/SQL",
+      "requiresPersistence": true,
+      "backendEntry": "BPI Web through Java 8 adapter; ShadowRunController.cancel; controlled PostgreSQL and IoT restore runner",
+      "tables": [
+        "bpi.bpi_shadow_runs",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "bpi telemetry and marker fixture tables"
+      ],
+      "marker": "BPI_TLANDING_20260723_094606",
+      "verificationSql": "Require CANCELLED/r3, 29 BPI responses all 2xx, browser errors zero, 390px geometry, marker residual zero, 5m/10m cadence and unverified UNCERTAIN mapping restored",
+      "status": "PASS",
+      "evidence": "desktop/mobile telemetry was visible with zero browser failures; cancel returned 200; post-restore cleanup left zero marker telemetry/run/rule/topology/calibration/catalog rows and no model or external WMS side effect",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "BPI_TLANDING_20260723_094606",
+      "artifact": "metadata/bpi-iot-telemetry-landing-acceptance.json",
+      "summary": "The Phase 3C-E target slice expanded PostgreSQL to Flyway V34 and closed controlled MQTT QoS1 through JetLinks, six-partition Kafka, an exact-scope transactional BPI consumer, PostgreSQL telemetry tables and the real shadow-run page. Three preheat records were excluded from the run window; two window records produced exact 1/1 and 2/2 coverage with zero rejects/gaps/out-of-order, 29 browser responses were all 2xx, marker cleanup was zero and IoT defaults were restored. Physical devices, formal calibration, continuous field operation, capacity and all model paths remain open."
+    },
     {
       "marker": "ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3",
       "artifact": "metadata/bpi-field-data-coverage-acceptance.json",
