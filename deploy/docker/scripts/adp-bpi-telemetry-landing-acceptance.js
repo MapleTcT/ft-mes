@@ -27,6 +27,9 @@ const mqttMarker = `${marker}_WINDOW`;
 const timeoutMs = Number(process.env.BPI_BROWSER_TIMEOUT_MS || 180_000);
 const pollIntervalMs = Number(process.env.BPI_BROWSER_POLL_INTERVAL_MS || 2_000);
 const headless = process.env.BPI_HEADLESS !== "false";
+const executablePath = process.env.BPI_CHROMIUM_EXECUTABLE
+  ? path.resolve(process.env.BPI_CHROMIUM_EXECUTABLE)
+  : undefined;
 const postgresContainer = process.env.BPI_POSTGRES_CONTAINER || "adp-mes-newbase-postgres-1";
 const postgresUser = process.env.BPI_POSTGRES_USER || "adp";
 const postgresDatabase = process.env.BPI_POSTGRES_DATABASE || "ft_mes_bpi";
@@ -57,6 +60,13 @@ if (!Number.isInteger(pollIntervalMs) || pollIntervalMs < 250) {
 }
 if (!fs.existsSync(mqttScript) || !fs.existsSync(mqttMapping)) {
   throw new Error("controlled MQTT publisher or mapping is missing");
+}
+if (executablePath) {
+  try {
+    fs.accessSync(executablePath, fs.constants.X_OK);
+  } catch (_error) {
+    throw new Error(`BPI_CHROMIUM_EXECUTABLE is not executable: ${executablePath}`);
+  }
 }
 
 function required(key) {
@@ -350,6 +360,7 @@ async function main() {
     mqtt: null,
     postgres: null,
     browser: {
+      executable: executablePath || "playwright-managed",
       desktop: null,
       mobile: null,
       responses: [],
@@ -371,7 +382,11 @@ async function main() {
   try {
     const auth = await login(api);
     report.loginStatus = auth.status;
-    browser = await chromium.launch({ headless });
+    browser = await chromium.launch({
+      headless,
+      executablePath,
+      args: ["--no-proxy-server"],
+    });
     const desktopContext = await newContext(browser, auth, { width: 1440, height: 900 });
     const page = await desktopContext.newPage();
     page.setDefaultTimeout(timeoutMs);
