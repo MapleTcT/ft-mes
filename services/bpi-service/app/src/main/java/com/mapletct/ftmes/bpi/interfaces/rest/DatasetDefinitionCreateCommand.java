@@ -1,5 +1,6 @@
 package com.mapletct.ftmes.bpi.interfaces.rest;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
@@ -24,6 +25,8 @@ public record DatasetDefinitionCreateCommand(
         @NotBlank @Size(max = 64) String predictionTimePolicy,
         @NotBlank @Size(max = 64) String featureCutoffPolicy,
         @NotEmpty @Size(max = 50) List<@NotBlank @Size(max = 128) String> featureRefs,
+        @Size(max = 20)
+        List<@Valid ProcessSignalWindowDefinitionCommand> processSignalWindows,
         @NotEmpty @Size(max = 50) List<@NotBlank @Size(max = 128) String> labelRefs,
         @Min(1) @Max(2160) int maxLabelDelayHours,
         @NotNull @DecimalMin("0.000000") @DecimalMax("1.000000") BigDecimal minimumConfidence,

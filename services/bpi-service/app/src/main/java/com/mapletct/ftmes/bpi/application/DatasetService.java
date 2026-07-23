@@ -8,11 +8,13 @@ import com.mapletct.ftmes.bpi.application.error.BpiPreconditionRequiredException
 import com.mapletct.ftmes.bpi.application.error.BpiValidationException;
 import com.mapletct.ftmes.bpi.domain.DatasetDefinitionView;
 import com.mapletct.ftmes.bpi.domain.DatasetSnapshotView;
+import com.mapletct.ftmes.bpi.domain.ProcessSignalWindowDefinition;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.BpiPostgresRepository;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.DatasetPostgresRepository;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.IdempotencyRecord;
 import com.mapletct.ftmes.bpi.interfaces.rest.DatasetDefinitionCreateCommand;
 import com.mapletct.ftmes.bpi.interfaces.rest.DatasetSnapshotCommand;
+import com.mapletct.ftmes.bpi.interfaces.rest.ProcessSignalWindowDefinitionCommand;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,9 +85,11 @@ public class DatasetService {
         }
         List<String> lineIds = normalizeStrings(command.lineIds(), "lineIds");
         List<String> featureRefs = normalizeStrings(command.featureRefs(), "featureRefs");
+        List<ProcessSignalWindowDefinition> processSignalWindows =
+                normalizeProcessSignalWindows(command.processSignalWindows());
         List<String> labelRefs = normalizeStrings(command.labelRefs(), "labelRefs");
         assertScopes(actor, command.plantId(), lineIds);
-        manifestBuilder.validateDefinition(featureRefs, labelRefs,
+        manifestBuilder.validateDefinition(featureRefs, processSignalWindows, labelRefs,
                 command.predictionTimePolicy(), command.featureCutoffPolicy(), command.splitPolicy());
 
         String path = "/bpi/v1/datasets";
@@ -104,6 +108,7 @@ public class DatasetService {
         controlled.put("predictionTimePolicy", command.predictionTimePolicy());
         controlled.put("featureCutoffPolicy", command.featureCutoffPolicy());
         controlled.put("featureRefs", featureRefs);
+        controlled.put("processSignalWindows", processSignalWindows);
         controlled.put("labelRefs", labelRefs);
         controlled.put("maxLabelDelayHours", command.maxLabelDelayHours());
         controlled.put("minimumConfidence", command.minimumConfidence());
@@ -111,8 +116,8 @@ public class DatasetService {
         String definitionChecksum = Checksums.sha256(canonicalJson.write(controlled));
 
         UUID id = UUID.randomUUID();
-        repository.insertDefinition(actor, id, command, lineIds, featureRefs, labelRefs,
-                definitionChecksum);
+        repository.insertDefinition(actor, id, command, lineIds, featureRefs,
+                processSignalWindows, labelRefs, definitionChecksum);
         DatasetDefinitionView created = repository.findDefinition(actor, id);
         repository.insertAudit(actor, created.plantId(), null, "DATASET_DEFINITION", id,
                 "DATASET_DEFINITION_CREATED", 0L, created.revision(), command.reason(), traceId,
@@ -121,6 +126,7 @@ public class DatasetService {
                         "predictionTimePolicy", created.predictionTimePolicy(),
                         "featureCutoffPolicy", created.featureCutoffPolicy(),
                         "splitPolicy", created.splitPolicy(),
+                        "processSignalWindowCount", created.processSignalWindows().size(),
                         "lineIds", created.lineIds()));
         complete(actor, idempotencyKey, 200, created);
         return new CommandResult<>(created, false);
@@ -238,6 +244,51 @@ public class DatasetService {
         List<UUID> normalized = values.stream().sorted().toList();
         if (new LinkedHashSet<>(normalized).size() != normalized.size()) {
             throw new BpiValidationException("ruleVersionIds must not contain duplicates.");
+        }
+        return normalized;
+    }
+
+    private List<ProcessSignalWindowDefinition> normalizeProcessSignalWindows(
+            List<ProcessSignalWindowDefinitionCommand> commands) {
+        if (commands == null || commands.isEmpty()) return List.of();
+        if (commands.size() > 20) {
+            throw new BpiValidationException(
+                    "processSignalWindows must not contain more than 20 definitions.");
+        }
+        List<ProcessSignalWindowDefinition> normalized = commands.stream()
+                .map(command -> {
+                    List<String> qualityCodes = command.acceptedQualityCodes() == null
+                            ? List.of()
+                            : command.acceptedQualityCodes().stream()
+                            .map(String::trim).sorted().toList();
+                    Map<String, Object> controlled = new LinkedHashMap<>();
+                    controlled.put("featureRef", command.featureRef().trim());
+                    controlled.put("signal", command.signal().trim());
+                    controlled.put("valueType", command.valueType().trim());
+                    controlled.put("metric", command.metric().trim());
+                    controlled.put("startOffsetSeconds", command.startOffsetSeconds());
+                    controlled.put("endOffsetSeconds", command.endOffsetSeconds());
+                    controlled.put("minimumSamples", command.minimumSamples());
+                    controlled.put("maximumGapSeconds", command.maximumGapSeconds());
+                    controlled.put("expectedUnit", command.expectedUnit().trim());
+                    controlled.put("requireCalibration", command.requireCalibration());
+                    controlled.put("acceptedQualityCodes", qualityCodes);
+                    return new ProcessSignalWindowDefinition(
+                            command.featureRef().trim(), command.signal().trim(),
+                            command.valueType().trim(), command.metric().trim(),
+                            command.startOffsetSeconds(), command.endOffsetSeconds(),
+                            command.minimumSamples(), command.maximumGapSeconds(),
+                            command.expectedUnit().trim(), command.requireCalibration(),
+                            qualityCodes, Checksums.sha256(canonicalJson.write(controlled)));
+                })
+                .sorted(java.util.Comparator.comparing(
+                        ProcessSignalWindowDefinition::featureRef))
+                .toList();
+        if (new LinkedHashSet<>(normalized.stream()
+                .map(ProcessSignalWindowDefinition::featureRef).toList()).size()
+                != normalized.size()) {
+            throw new BpiValidationException(
+                    "processSignalWindows must not contain duplicate featureRef values.");
         }
         return normalized;
     }

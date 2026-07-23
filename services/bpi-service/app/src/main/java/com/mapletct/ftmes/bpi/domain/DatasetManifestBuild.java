@@ -5,6 +5,7 @@ import java.util.Map;
 
 public record DatasetManifestBuild(
         List<DatasetManifestSample> samples,
+        List<ProcessSignalWindowFact> processSignalWindowFacts,
         Map<String, Object> manifest,
         String manifestChecksum,
         int includedCount,

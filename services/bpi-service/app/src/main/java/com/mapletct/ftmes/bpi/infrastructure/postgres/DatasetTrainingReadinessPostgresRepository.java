@@ -77,6 +77,14 @@ public class DatasetTrainingReadinessPostgresRepository {
                        AS production_split_group_count,
                    COALESCE(sample_metrics.leakage_row_count, 0)
                        AS leakage_row_count,
+                   COALESCE(process_window_metrics.expected_fact_count, 0)
+                       AS process_window_expected_fact_count,
+                   COALESCE(process_window_metrics.ready_fact_count, 0)
+                       AS process_window_ready_fact_count,
+                   COALESCE(process_window_metrics.blocked_fact_count, 0)
+                       AS process_window_blocked_fact_count,
+                   COALESCE(process_window_metrics.missing_fact_count, 0)
+                       AS process_window_missing_fact_count,
                    COALESCE(sample_metrics.start_accepted_label_count, 0)
                        AS start_accepted_label_count,
                    COALESCE(sample_metrics.start_rejected_label_count, 0)
@@ -144,6 +152,48 @@ public class DatasetTrainingReadinessPostgresRepository {
                    WHERE sample.tenant_id = registration.tenant_id
                      AND sample.snapshot_id = registration.source_snapshot_id
               ) sample_metrics ON true
+              LEFT JOIN LATERAL (
+                  SELECT expected.expected_fact_count,
+                         COALESCE(actual.ready_fact_count, 0)::integer
+                             AS ready_fact_count,
+                         COALESCE(actual.blocked_fact_count, 0)::integer
+                             AS blocked_fact_count,
+                         GREATEST(
+                             expected.expected_fact_count
+                             - COALESCE(actual.ready_fact_count, 0)
+                             - COALESCE(actual.blocked_fact_count, 0),
+                             0)::integer AS missing_fact_count
+                    FROM (
+                        SELECT (
+                            (SELECT count(*)
+                               FROM bpi.bpi_dataset_snapshot_samples sample
+                              WHERE sample.tenant_id = registration.tenant_id
+                                AND sample.snapshot_id = registration.source_snapshot_id
+                                AND sample.included)
+                            *
+                            (SELECT count(*)
+                               FROM jsonb_array_elements_text(definition.feature_refs) ref
+                              WHERE ref.value LIKE 'signal.%'
+                                 OR ref.value LIKE 'telemetry.%'
+                                 OR ref.value LIKE 'process.window.%'
+                                 OR ref.value LIKE 'parameter.window.%')
+                        )::integer AS expected_fact_count
+                    ) expected
+                    LEFT JOIN LATERAL (
+                        SELECT count(*) FILTER (WHERE fact.state = 'READY')::integer
+                                   AS ready_fact_count,
+                               count(*) FILTER (WHERE fact.state = 'BLOCKED')::integer
+                                   AS blocked_fact_count
+                          FROM bpi.bpi_dataset_process_signal_window_facts fact
+                          JOIN bpi.bpi_dataset_snapshot_samples sample
+                            ON sample.snapshot_id = fact.snapshot_id
+                           AND sample.review_id = fact.review_id
+                           AND sample.tenant_id = fact.tenant_id
+                         WHERE fact.tenant_id = registration.tenant_id
+                           AND fact.snapshot_id = registration.source_snapshot_id
+                           AND sample.included
+                    ) actual ON true
+              ) process_window_metrics ON true
               LEFT JOIN LATERAL (
                   SELECT count(*)::integer AS distinct_shadow_run_count,
                          count(*) FILTER (WHERE run.state = 'APPROVED')::integer
@@ -386,6 +436,10 @@ public class DatasetTrainingReadinessPostgresRepository {
                 rs.getInt("excluded_sample_count"), rs.getInt("distinct_batch_count"),
                 rs.getInt("distinct_production_day_count"),
                 rs.getInt("production_split_group_count"), rs.getInt("leakage_row_count"),
+                rs.getInt("process_window_expected_fact_count"),
+                rs.getInt("process_window_ready_fact_count"),
+                rs.getInt("process_window_blocked_fact_count"),
+                rs.getInt("process_window_missing_fact_count"),
                 rs.getInt("start_accepted_label_count"),
                 rs.getInt("start_rejected_label_count"),
                 rs.getInt("start_label_missing_count"),

@@ -85,6 +85,7 @@ class DatasetManifestBuilderTest {
                 "a".repeat(64), DatasetManifestBuilder.PREDICTION_TIME_POLICY,
                 DatasetManifestBuilder.FEATURE_CUTOFF_POLICY,
                 List.of("batch.order_id", "rule.version_id"),
+                List.of(),
                 List.of("review.manual_start_time", "review.reference_quantity"),
                 maxLabelDelayHours, BigDecimal.ONE, DatasetManifestBuilder.SPLIT_POLICY);
     }

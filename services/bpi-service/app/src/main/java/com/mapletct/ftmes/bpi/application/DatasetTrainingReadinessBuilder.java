@@ -15,7 +15,7 @@ import java.util.Map;
 public class DatasetTrainingReadinessBuilder {
     public static final String OBJECTIVE_CODE = "BATCH_START_BOUNDARY_REVIEW_RISK";
     public static final String POLICY_VERSION =
-            "bpi-training-readiness/batch-start-boundary-v1";
+            "bpi-training-readiness/batch-start-boundary-v2";
 
     private static final int MINIMUM_INCLUDED_SAMPLES = 200;
     private static final int MINIMUM_DISTINCT_BATCHES = 200;
@@ -96,6 +96,14 @@ public class DatasetTrainingReadinessBuilder {
         metrics.put("labelRefs", evidence.labelRefs());
         metrics.put("missingContextFeatureRefs", missingContextFeatures);
         metrics.put("signalWindowFeatureRefs", signalWindowFeatures);
+        metrics.put("processWindowExpectedFactCount",
+                evidence.processWindowExpectedFactCount());
+        metrics.put("processWindowReadyFactCount",
+                evidence.processWindowReadyFactCount());
+        metrics.put("processWindowBlockedFactCount",
+                evidence.processWindowBlockedFactCount());
+        metrics.put("processWindowMissingFactCount",
+                evidence.processWindowMissingFactCount());
         metrics.put("startAcceptedLabelCount", evidence.startAcceptedLabelCount());
         metrics.put("startRejectedLabelCount", evidence.startRejectedLabelCount());
         metrics.put("startLabelMissingCount", evidence.startLabelMissingCount());
@@ -151,6 +159,18 @@ public class DatasetTrainingReadinessBuilder {
                 signalWindowFeatures.size(),
                 "At least two pre-boundary flow, pump, valve or level windows are required; identifiers alone cannot train a process model.",
                 signalWindowFeatures.size() >= MINIMUM_SIGNAL_WINDOW_FEATURES);
+        gate(gates, "PROCESS_SIGNAL_WINDOW_FACTS_INCOMPLETE",
+                evidence.processWindowExpectedFactCount(),
+                Map.of(
+                        "ready", evidence.processWindowReadyFactCount(),
+                        "blocked", evidence.processWindowBlockedFactCount(),
+                        "missing", evidence.processWindowMissingFactCount()),
+                "Every included sample must have a persisted READY fact for each declared process signal window.",
+                evidence.processWindowExpectedFactCount() > 0
+                        && evidence.processWindowReadyFactCount()
+                        == evidence.processWindowExpectedFactCount()
+                        && evidence.processWindowBlockedFactCount() == 0
+                        && evidence.processWindowMissingFactCount() == 0);
         gate(gates, "BOUNDARY_REVIEW_LABEL_MISSING", REQUIRED_LABEL,
                 requiredLabelPresent ? REQUIRED_LABEL : evidence.labelRefs(),
                 "The objective requires the reviewed start-boundary acceptance label.",

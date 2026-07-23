@@ -18,6 +18,7 @@ public record DatasetDefinitionView(
         String predictionTimePolicy,
         String featureCutoffPolicy,
         List<String> featureRefs,
+        List<ProcessSignalWindowDefinition> processSignalWindows,
         List<String> labelRefs,
         int maxLabelDelayHours,
         BigDecimal minimumConfidence,
