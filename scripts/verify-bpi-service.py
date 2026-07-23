@@ -57,6 +57,8 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V29__bpi_dataset_object_lock_recovery_archive.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V30__bpi_dataset_mlflow_registration.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V31__bpi_dataset_training_readiness.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V32__bpi_dataset_process_signal_windows.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V33__bpi_function_execution_privilege_hardening.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -553,10 +555,30 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V32__bpi_dataset_process_signal_windows.sql",
+        [
+            "process_signal_windows jsonb",
+            "bpi_dataset_process_signal_window_facts",
+            "reject_dataset_process_signal_window_mutation",
+            "bpi-training-readiness/batch-start-boundary-v2",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/resources/db/migration/V33__bpi_function_execution_privilege_hardening.sql",
+        [
+            "REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA bpi FROM PUBLIC",
+            "ALTER DEFAULT PRIVILEGES IN SCHEMA bpi",
+            "REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilder.java",
         [
-            "ALLOWED_FEATURE_REFS",
+            "ALLOWED_CONTEXT_FEATURE_REFS",
             "ALLOWED_LABEL_REFS",
+            "processSignalWindows and process.window.* featureRefs must match exactly.",
             "AT_OR_BEFORE_PREDICTION_TIME",
             "LABEL_DELAY_EXCEEDED",
             "CONFIDENCE_BELOW_THRESHOLD",
