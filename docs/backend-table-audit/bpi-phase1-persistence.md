@@ -135,11 +135,16 @@ V4 同时创建 `uq_bpi_open_batch_per_line` 部分唯一索引，仅约束 `ACT
 
 ## 未覆盖范围
 
-- Kafka listener、重复投递和 DLQ 已在本地嵌入式 broker 验证；目标三节点集群仍未联合验收。
-- Flink 逻辑与确定性回放已有独立测试；目标集群 event-time、checkpoint 和恢复仍未联合验收。
+- Kafka listener、重复投递和 DLQ 在本报告中使用本地嵌入式 broker；后续目标环境已独立通过三 broker、
+  24-topic smoke，以及浏览器/Kafka/Flink/PostgreSQL 同 marker 联合验收。
+- Flink 逻辑与确定性回放在本报告中仍是本地证据；后续目标 smoke 已证明 RUNNING job 与 checkpoint，
+  但这不追溯改变本报告的原始测试范围。
 - 候选输入来自验收回放 payload，不是真实 IoT/JetLinks 测点流。
-- 已通过模拟浏览器确认 START/END、拒绝候选和暂停/恢复批次；尚未完成目标环境浏览器到 PostgreSQL 的联合落库验收。
+- 本报告通过模拟浏览器确认 START/END、拒绝候选和暂停/恢复批次；后续受控目标链已完成浏览器到
+  PostgreSQL 的联合落库和 marker 清理，物理 IoT 来源仍需单独验收。
 - 影子批次不写 WOM、QCS、WMS；`wmsStatus=NOT_REQUESTED` 是本阶段的预期行为。
 - 验收 JWT 使用短时 HS256 内部测试密钥；生产 JWKS/非对称签名和密钥轮换尚未完成。
-- 本地 Docker 已完成隔离 PostgreSQL 16.13 验收；目标机因根分区约 0.51 GiB 可用而未启动新容器。
+- 本地 Docker 已完成隔离 PostgreSQL 16.13 验收；目标机当前根分区约 73.38 GiB、Docker 独立盘约
+  1552 GiB 可用，容量预检为 `READY`。证据见
+  [`metadata/bpi-test-host-capacity-preflight.json`](../../metadata/bpi-test-host-capacity-preflight.json)。
 - 未验证生产级部署、并发压测、故障注入、备份恢复或长时间运行。

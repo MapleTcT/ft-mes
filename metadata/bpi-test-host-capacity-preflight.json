@@ -1,61 +1,67 @@
 {
-  "generatedAt": "2026-07-13T01:15:00+08:00",
-  "sourceRepoCommit": "03e3f56",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-23T22:08:57+08:00",
+  "sourceRepoCommit": "d6bfaa5a507f4f8bad5ade45baa744b19a583828",
   "host": {
     "handle": "ubuntu-test",
-    "address": "100.99.133.43",
+    "address": "10.11.100.17",
+    "privateAlias": "100.99.133.43",
     "hostname": "v6-2288H-V6"
   },
-  "status": "BLOCKED_DISK",
+  "status": "READY",
   "deploymentStarted": false,
   "destructiveActionsPerformed": false,
   "thresholds": {
     "minimumFreeDiskGiB": 25
   },
   "observations": {
-    "rootFilesystemSizeGiB": 438,
-    "rootFilesystemUsedGiB": 415,
-    "rootFilesystemSizeKiB": 458761360,
-    "rootFilesystemUsedKiB": 434845820,
-    "rootFilesystemAvailableKiB": 538288,
-    "rootFilesystemAvailableGiB": 0.51,
-    "rootFilesystemUsePercent": 100,
-    "dockerImagesCount": 235,
-    "dockerImagesSizeGB": 134.2,
-    "dockerImagesReportedReclaimableGB": 63.24,
-    "dockerContainersCount": 158,
-    "dockerContainersActive": 108,
-    "dockerContainersSizeGB": 14.83,
-    "dockerContainersReportedReclaimableGB": 1.281,
-    "dockerVolumesCount": 38,
-    "dockerVolumesActive": 30,
-    "dockerVolumesSizeGB": 96.36,
-    "dockerVolumesReportedReclaimableGB": 6.799,
-    "dockerBuildCacheCount": 466,
-    "dockerBuildCacheSizeGB": 0.728,
-    "dockerBuildCacheReportedReclaimableGB": 0.728
+    "rootFilesystem": {
+      "sizeKiB": 458761360,
+      "usedKiB": 372451692,
+      "availableKiB": 76948936,
+      "availableGiB": 73.38,
+      "usePercent": 83
+    },
+    "docker": {
+      "serverVersion": "29.1.3",
+      "root": "/data/docker/docker",
+      "availableKiB": 1628310508,
+      "availableGiB": 1552
+    },
+    "cpuCount": 64,
+    "memoryTotalGiB": 247.08,
+    "memoryAvailableGiB": 138.22
   },
-  "largePathCandidates": [
-    {
-      "path": "/home/v6/adp-mes-docker-newbase-20260611-181921",
-      "reportedSize": "101G",
-      "approvedForDeletion": false
+  "preflight": {
+    "status": "READY",
+    "environmentFile": "/home/v6/adp-bpi-stream-v15/deploy/bpi-streaming/.env",
+    "jobJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-308cca82-job.jar",
+    "failures": [],
+    "remoteReport": "/home/v6/adp-mes-backups/bpi-v35-live-67b728da/bpi-streaming-preflight-d6bfaa5a.json",
+    "sha256": "34395b52322f498d10e970ae537db40028adef45504d2136d53da83fd541200d"
+  },
+  "currentClusterSmoke": {
+    "generatedAt": "2026-07-23T14:07:54.366182+00:00",
+    "status": "PASS",
+    "scriptSha256": "7c0d2ae4bff32a577e0a22f461eea17dc3e30b51c93a3186dc309832c86db119",
+    "kafka": {
+      "brokers": 3,
+      "topics": 24,
+      "replicationFactor": 3,
+      "minInSyncReplicas": 2,
+      "pointCatalogMaxMessageBytes": 6291456,
+      "sourceSequenceConfigPresent": true
     },
-    {
-      "path": "/home/v6/codex-validation",
-      "reportedSize": "35G",
-      "approvedForDeletion": false
+    "flink": {
+      "restUrl": "http://100.99.133.43:18081",
+      "jobName": "ft-mes-bpi-batch-boundary-v1",
+      "jobId": "40f36698aeee4aaae17eac52608c7939",
+      "taskManagers": 2,
+      "latestCompletedCheckpointId": 14905
     },
-    {
-      "path": "/home/v6/new-datahub-submenu-qa-d932b2f5-20260621133804",
-      "reportedSize": "14G",
-      "approvedForDeletion": false
-    },
-    {
-      "path": "/home/v6/adp-mes-docker",
-      "reportedSize": "9.3G",
-      "approvedForDeletion": false
-    }
-  ],
-  "nextGate": "Free or add storage until Docker storage has at least 25 GiB available, then rerun the read-only preflight."
+    "remoteReport": "/home/v6/adp-mes-backups/bpi-v35-live-67b728da/bpi-streaming-smoke-current-d6bfaa5a.json",
+    "sha256": "baaf0d963107c0f4f6f4afe5df7774d2b5779098cb18390e0f70e585ad48e6af"
+  },
+  "failures": [],
+  "nextGate": "Capacity and current 24-topic cluster smoke are ready. Physical-source coverage, production HA and sustained qualification remain separate gates."
 }

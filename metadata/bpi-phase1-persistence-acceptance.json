@@ -493,13 +493,13 @@
   ],
   "limitations": [
     "This is only the BPI Phase 1 shadow-batch vertical slice and is not a full Phase 1 production acceptance.",
-    "Kafka listener, duplicate delivery and DLQ were tested with a local embedded broker; the target three-broker cluster remains blocked by host disk capacity.",
-    "Flink logic and deterministic replay are covered separately, but target-cluster event-time, checkpoint and recovery acceptance remains blocked by host disk capacity.",
+    "Kafka listener, duplicate delivery and DLQ in this artifact used a local embedded broker; later evidence independently accepted the target three-broker, 24-topic cluster.",
+    "Flink logic and deterministic replay in this artifact are local; later target smoke and controlled same-marker evidence accepted checkpointed Flink and PostgreSQL persistence.",
     "The candidate payload came from an acceptance replay and not from a real IoT or JetLinks source.",
-    "Browser START/END confirmation, rejection and batch suspend/resume were exercised against the deterministic simulator; browser-to-PostgreSQL target acceptance is still pending.",
+    "Browser START/END confirmation, rejection and batch suspend/resume here used the deterministic simulator; a later controlled browser-to-PostgreSQL target chain passed with a separate marker.",
     "No WOM, QCS or WMS write was executed; wmsStatus=NOT_REQUESTED is expected for this slice.",
     "Acceptance JWTs use a short-lived HS256 internal test secret; production JWKS/asymmetric signing and key rotation remain pending.",
-    "Local PostgreSQL 16.13 ran in an isolated Docker network; this does not replace target-host Compose deployment acceptance.",
+    "Local PostgreSQL 16.13 here ran in an isolated Docker network; later target evidence is linked separately and does not change this artifact's original scope.",
     "Production deployment, concurrency load, fault injection, backup restore and soak testing remain out of scope."
   ]
 }

@@ -1,8 +1,9 @@
 {
-  "generatedAt": "2026-07-14T11:43:11+08:00",
+  "generatedAt": "2026-07-23T22:08:57+08:00",
   "repoCommit": "44df18fd",
   "workingTree": "uncommitted",
-  "status": "LOCAL_MINICLUSTER_ACCEPTED_TARGET_CLUSTER_PENDING",
+  "evidenceRefreshedAtCommit": "d6bfaa5a507f4f8bad5ade45baa744b19a583828",
+  "status": "LOCAL_MINICLUSTER_AND_TARGET_CLUSTER_ACCEPTED",
   "runtime": "streaming/bpi-stream-engine",
   "java": "17",
   "flink": "2.2.1",
@@ -20,7 +21,22 @@
     "flinkKafkaRuntimeAcceptanceRun": 1,
     "flinkKafkaRuntimeAcceptancePass": 1,
     "localMiniClusterAccepted": true,
-    "targetClusterAccepted": false
+    "targetClusterAccepted": true
+  },
+  "targetCluster": {
+    "host": "10.11.100.17",
+    "privateAlias": "100.99.133.43",
+    "status": "PASS",
+    "brokers": 3,
+    "governedTopics": 24,
+    "replicationFactor": 3,
+    "minInSyncReplicas": 2,
+    "flinkJobName": "ft-mes-bpi-batch-boundary-v1",
+    "flinkJobId": "40f36698aeee4aaae17eac52608c7939",
+    "taskManagers": 2,
+    "latestCompletedCheckpointId": 14905,
+    "smokeReportSha256": "baaf0d963107c0f4f6f4afe5df7774d2b5779098cb18390e0f70e585ad48e6af",
+    "evidence": "metadata/bpi-test-host-capacity-preflight.json"
   },
   "topics": {
     "sources": [
@@ -60,11 +76,11 @@
     "TaskManager restart checkpoint restore and terminal rule lifecycle protection"
   ],
   "limitations": [
-    "The accepted local broker is a disposable single-process Kafka KRaft server, not the target three-broker cluster.",
-    "No target Flink HA, RocksDB/MinIO checkpoint, savepoint upgrade, chaos, lag or backpressure acceptance was performed.",
+    "The historical local acceptance still uses a disposable single-process Kafka KRaft server; a later target smoke independently accepted the three-broker cluster.",
+    "The target acceptance does not provide JobManager HA, cross-host disaster recovery, sustained lag/backpressure qualification or production SLO evidence.",
     "No 100k-point load benchmark was performed.",
     "Schema Registry compatibility was not exercised against a live registry.",
-    "PostgreSQL receipt consumption has separate local evidence; browser-to-Java/Kafka/Flink/PostgreSQL joint acceptance remains pending."
+    "A later controlled browser-to-Java/Kafka/Flink/PostgreSQL same-marker chain passed, but its deterministic telemetry does not replace physical-source qualification."
   ],
   "evidence": [
     "docs/testing/bpi-kafka-flink-topology-acceptance.md",
@@ -73,6 +89,8 @@
     "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.BoundaryRulePublicationLifecycleHarnessTest.xml",
     "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.BoundaryRuleRoutingBroadcastHarnessTest.xml",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiRuleApplicationFlinkKafkaAcceptanceTest.java",
-    "metadata/bpi-rule-application-flink-kafka-acceptance.json"
+    "metadata/bpi-rule-application-flink-kafka-acceptance.json",
+    "metadata/bpi-test-host-capacity-preflight.json",
+    "metadata/bpi-browser-kafka-postgres-joint-acceptance.json"
   ]
 }

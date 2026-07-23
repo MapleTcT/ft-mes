@@ -7,6 +7,7 @@ ROOT_DIR=$(CDPATH= cd -- "$STREAM_DIR/../.." && pwd)
 ADP_DIR=$ROOT_DIR/deploy/docker
 STREAM_ENV=${1:-$STREAM_DIR/.env}
 ADP_ENV=${2:-$ADP_DIR/.env}
+LEGACY_COMPATIBILITY_ACK=${BPI_LEGACY_POSTGRES_REPLAY_COMPATIBILITY_ACK:-}
 
 for file in "$STREAM_ENV" "$ADP_ENV"; do
     if [ ! -f "$file" ]; then
@@ -14,6 +15,15 @@ for file in "$STREAM_ENV" "$ADP_ENV"; do
         exit 1
     fi
 done
+
+if [ "$LEGACY_COMPATIBILITY_ACK" != "ISOLATED_POINT_CATALOG_AND_TELEMETRY_CONSUMERS" ]; then
+    printf '%s\n' \
+        'ERROR: the legacy PostgreSQL replay must not run beside current point-catalog or telemetry consumers.' \
+        'Use the current browser/Kafka/Flink/PostgreSQL joint acceptance instead.' \
+        'For an isolated compatibility environment only, set BPI_LEGACY_POSTGRES_REPLAY_COMPATIBILITY_ACK=ISOLATED_POINT_CATALOG_AND_TELEMETRY_CONSUMERS.' >&2
+    exit 1
+fi
+export BPI_LEGACY_REPLAY_COMPATIBILITY_ACK=ISOLATED_BPI_SOURCE_CONSUMERS
 
 env_value() {
     python3 - "$1" "$2" "$3" <<'PY'

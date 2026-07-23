@@ -4,6 +4,7 @@ set -eu
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 DEPLOY_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 ENV_FILE=${1:-$DEPLOY_DIR/.env}
+LEGACY_COMPATIBILITY_ACK=${BPI_LEGACY_REPLAY_COMPATIBILITY_ACK:-}
 
 if [ ! -f "$ENV_FILE" ]; then
     printf 'ERROR: BPI deployment env file not found: %s\n' "$ENV_FILE" >&2
@@ -26,6 +27,14 @@ load_env_file() {
 }
 
 load_env_file
+
+if [ "$LEGACY_COMPATIBILITY_ACK" != "ISOLATED_BPI_SOURCE_CONSUMERS" ]; then
+    printf '%s\n' \
+        'ERROR: the legacy cluster replay fixture does not satisfy the current canonical point-catalog envelope.' \
+        'Run the current browser/Kafka/Flink/PostgreSQL joint acceptance instead.' \
+        'For an isolated compatibility environment only, set BPI_LEGACY_REPLAY_COMPATIBILITY_ACK=ISOLATED_BPI_SOURCE_CONSUMERS.' >&2
+    exit 1
+fi
 
 MARKER=${BPI_REPLAY_MARKER:-ADP_E2E_$(date -u +%Y%m%d_%H%M%S)_$$}
 EVIDENCE_DIR=${BPI_REPLAY_EVIDENCE_DIR:-/tmp/bpi-streaming-evidence}

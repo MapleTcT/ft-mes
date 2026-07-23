@@ -51,9 +51,7 @@ checkpoint，不替代下面的三 broker、MinIO 和目标环境验收。
 ```bash
 make up-bpi-stream
 make bpi-stream-cluster-smoke
-make bpi-stream-cluster-replay
 make bpi-stream-data-quality-replay
-make bpi-stream-postgres-replay
 make down-bpi-stream
 ```
 
@@ -64,18 +62,28 @@ make down-bpi-stream
 Smoke 必须同时满足：
 
 1. 三个 Kafka broker 正常运行；
-2. 十四个配置内 BPI 业务 topic（包含点位目录 source/DLQ、来源序列证据 source/DLQ、rule application 回执/DLQ、独立 runtime readiness 回执/DLQ 与 candidate DLQ）均为副本 3、最小同步副本 2；
+2. 二十四个配置内 BPI 业务 topic（包含 telemetry source/DLQ、点位目录 source/DLQ、来源序列证据
+   source/DLQ、rule application 回执/DLQ、独立 runtime readiness 回执/DLQ、candidate/DLQ、
+   QCS 放行 source/DLQ、WMS 入库 command/receipt/DLQ 和 WMS 冲销 command/receipt/DLQ）均为副本 3、
+   最小同步副本 2；
 3. Flink 作业状态为 `RUNNING`；
 4. 至少存在一个成功 checkpoint。
 
 点位目录消息上限为 5 MiB，broker/topic 信封为 6 MiB；修改该信封必须同时更新 producer、consumer、
 broker、topic 和部署检查，不能只放宽单侧限制。
 
-`bpi-stream-cluster-replay` 在 smoke 通过后生成唯一 `ADP_E2E_*` marker，向 Kafka 发布规则、
+`bpi-stream-cluster-replay` 是 2026-07-13 之前的兼容性夹具。它在 smoke 通过后生成唯一
+`ADP_E2E_*` marker，向 Kafka 发布规则、
 生产上下文和三条遥测，等待 read-committed 候选，验证候选只出现一次且没有 marker 关联的
 数据质量错误；遥测默认间隔 2 秒以覆盖真实调度，随后发布同版本 `INACTIVE` 规则移除测试路由。输入和输出 partition/offset、
 candidate key、Flink job ID 和 checkpoint ID 写入
 `${BPI_REPLAY_EVIDENCE_DIR}/bpi-kafka-replay.json`。
+
+该夹具的点位目录 revision、event ID、Kafka key 和 headers 不满足当前 canonical point-catalog
+消费者契约。两个旧入口因此默认 fail-closed，禁止在当前目标服务旁直接运行并制造 DLQ。只在点位目录和
+telemetry 消费者均已隔离的专用兼容环境中，才可一次性设置
+`BPI_LEGACY_REPLAY_COMPATIBILITY_ACK=ISOLATED_BPI_SOURCE_CONSUMERS`。当前版本的产品整链必须使用下文
+“浏览器联合验收”，不能用这个兼容性夹具替代。
 
 `bpi-stream-data-quality-replay` 不直接写 `bpi.data-quality.v1`。它只向 production-context 和
 selected telemetry topic 写入唯一 marker，要求运行中的 Flink 状态算子通过 checkpoint 后恰好产生
@@ -91,7 +99,8 @@ allowlist，禁止使用 `*` 绕过租户隔离。
 脚本只把该路径注入 `--no-deps` 一次性容器，并在报告中记录 SHA-256，不修改或重建运行中的
 JobManager/TaskManager。脚本会比较回放前后 job ID 和 checkpoint，发现重启或状态回退即失败。
 
-`bpi-stream-postgres-replay` 在上述回放外再要求运行中的 BPI 服务已显式启用 candidate consumer，
+`bpi-stream-postgres-replay` 是建立在上述旧回放之上的兼容性入口，并要求运行中的 BPI 服务已显式启用
+candidate consumer，
 并且仅允许测试租户/工厂：
 
 ```dotenv
@@ -110,6 +119,9 @@ offset 前后不变。默认退出时只清理本 marker 的 candidate/inbox/rul
 
 该 replay 证明 Kafka -> Flink -> Kafka 候选数据面。BPI 服务已经具备默认关闭的 candidate consumer
 和 PostgreSQL 幂等落库实现；它仍是独立数据面测试，不等于浏览器联合链路。
+运行前还必须确认 point-catalog 和 telemetry 消费者已隔离，并一次性设置
+`BPI_LEGACY_POSTGRES_REPLAY_COMPATIBILITY_ACK=ISOLATED_POINT_CATALOG_AND_TELEMETRY_CONSUMERS`；
+禁止把确认值持久化到 `.env` 或生产编排。
 
 ## 浏览器联合验收
 

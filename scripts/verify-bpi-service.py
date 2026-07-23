@@ -1508,6 +1508,13 @@ def main() -> int:
         fail("BPI Kafka candidate acceptance must identify PostgreSQL", failures)
     if kafka_acceptance.get("summary", {}).get("fail") != 0:
         fail("BPI Kafka candidate acceptance must not contain failed items", failures)
+    if kafka_acceptance.get("status") != "LOCAL_ACCEPTED_TARGET_CHAIN_ACCEPTED_LATER":
+        fail("BPI Kafka candidate acceptance must link the later target chain", failures)
+    if (
+        kafka_acceptance.get("summary", {}).get("blocked") != 0
+        or kafka_acceptance.get("summary", {}).get("superseded") != 1
+    ):
+        fail("BPI Kafka candidate acceptance must retire the stale disk blocker truthfully", failures)
     rule_acceptance = json.loads(
         (ROOT / "metadata/bpi-rule-management-acceptance.json").read_text(encoding="utf-8")
     )
@@ -1524,6 +1531,13 @@ def main() -> int:
         fail("BPI rule publication outbox acceptance must identify Kafka", failures)
     if outbox_acceptance.get("summary", {}).get("fail") != 0:
         fail("BPI rule publication outbox acceptance must not contain failed items", failures)
+    if outbox_acceptance.get("status") != "LOCAL_ACCEPTED_TARGET_CHAIN_ACCEPTED_LATER":
+        fail("BPI rule publication outbox acceptance must link the later target chain", failures)
+    if (
+        outbox_acceptance.get("summary", {}).get("blocked") != 0
+        or outbox_acceptance.get("summary", {}).get("superseded") != 1
+    ):
+        fail("BPI rule publication outbox acceptance must retire the stale disk blocker truthfully", failures)
 
     data_quality_acceptance = json.loads(
         (ROOT / "metadata/bpi-data-quality-workbench-acceptance.json").read_text(encoding="utf-8")

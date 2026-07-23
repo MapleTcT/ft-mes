@@ -1,11 +1,12 @@
 {
-  "generatedAt": "2026-07-13T01:10:00+08:00",
-  "repoCommit": "ce5cace",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-23T22:08:57+08:00",
+  "repoCommit": "d6bfaa5a507f4f8bad5ade45baa744b19a583828",
   "database": "PostgreSQL",
-  "status": "HARNESS_READY_CLUSTER_BLOCKED_DISK",
+  "status": "LEGACY_HARNESS_SUPERSEDED_TARGET_ACCEPTED",
   "entrypoint": "make bpi-stream-postgres-replay",
   "script": "deploy/bpi-streaming/scripts/run-postgres-replay.sh",
-  "localEvidence": {
+  "historicalLocalEvidence": {
     "kafkaBroker": "embedded Kafka 3.8.1",
     "postgresql": "16.13",
     "serviceTests": 14,
@@ -19,24 +20,64 @@
       "same-partition poison DLQ"
     ]
   },
+  "legacyHarness": {
+    "executedOnCurrentTarget": false,
+    "compatibleWithCurrentPointCatalogContract": false,
+    "defaultExecution": "FAIL_CLOSED",
+    "compatibilityAck": "BPI_LEGACY_POSTGRES_REPLAY_COMPATIBILITY_ACK=ISOLATED_POINT_CATALOG_AND_TELEMETRY_CONSUMERS",
+    "reason": "The upstream legacy cluster fixture predates canonical point-catalog key, header, event ID and source revision validation."
+  },
   "targetEvidence": {
-    "host": "100.99.133.43",
+    "host": "10.11.100.17",
+    "privateAlias": "100.99.133.43",
     "minimumFreeDiskGiB": 25,
-    "observedFreeDiskGiB": 0.51,
-    "deploymentStarted": false,
-    "destructiveActionsPerformed": false
+    "rootFreeDiskGiB": 73.38,
+    "dockerFreeDiskGiB": 1552,
+    "deploymentStartedByPreflight": false,
+    "destructiveActionsPerformed": false,
+    "capacityStatus": "READY",
+    "clusterSmokeStatus": "PASS",
+    "clusterTopics": 24,
+    "clusterSmokeReportSha256": "baaf0d963107c0f4f6f4afe5df7774d2b5779098cb18390e0f70e585ad48e6af"
   },
-  "liveAcceptance": {
-    "flinkCandidate": "BLOCKED_DISK",
-    "postgresInbox": "BLOCKED_DISK",
-    "postgresCandidate": "BLOCKED_DISK",
-    "candidateDlq": "BLOCKED_DISK",
-    "browserConfirmation": "BLOCKED_DISK"
+  "replacementAcceptance": {
+    "status": "PASS",
+    "marker": "ADP_E2E_20260714_091536_BPI_JOINT",
+    "browserAuth": "PASS",
+    "rulePublication": "PASS",
+    "flinkRuleApplication": "PASS",
+    "singleCandidate": "PASS",
+    "postgresPersistence": "PASS",
+    "browserCandidateConfirmation": "PASS",
+    "typedRuleDeactivation": "PASS",
+    "markerCleanup": "PASS",
+    "consumerRestoreDenyAll": "PASS",
+    "tables": [
+      "bpi_rule_versions",
+      "bpi_rule_simulations",
+      "bpi_outbox_events",
+      "bpi_inbox_events",
+      "bpi_batch_candidates",
+      "bpi_batch_instances",
+      "bpi_boundary_evidence",
+      "bpi_batch_state_events",
+      "bpi_audit_events",
+      "bpi_api_idempotency"
+    ],
+    "verificationSql": "deploy/bpi-runtime/sql/joint-acceptance-verify.sql",
+    "cleanupSql": "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql",
+    "evidence": "metadata/bpi-browser-kafka-postgres-joint-acceptance.json"
   },
+  "limitations": [
+    "The exact historical bpi-stream-postgres-replay script was not executed on the current target.",
+    "The replacement acceptance used deterministic context and telemetry, not a physical IoT source.",
+    "Production HA, sustained load and 7-14 day physical shadow qualification remain outside this artifact."
+  ],
   "evidence": [
     "docs/testing/bpi-kafka-postgres-replay-acceptance.md",
-    "docs/backend-table-audit/bpi-candidate-kafka-ingress.md",
-    "metadata/bpi-candidate-kafka-persistence-acceptance.json",
-    "metadata/bpi-test-host-capacity-preflight.json"
+    "metadata/bpi-test-host-capacity-preflight.json",
+    "metadata/bpi-browser-kafka-postgres-joint-acceptance.json",
+    "metadata/bpi-flink-data-quality-acceptance.json",
+    "deploy/bpi-streaming/scripts/run-postgres-replay.sh"
   ]
 }

@@ -113,6 +113,10 @@ Kafka 4.2 KRaft server，checkpoint 存储为测试拥有的本地目录；可�
 
 ## 目标环境增量验收与尚未完成
 
+- 2026-07-23 使用当前仓库 `smoke-cluster.sh` 在 `10.11.100.17` 重新核验 24 个治理 topic：
+  3 broker、副本 3、`min.insync.replicas=2`、点位目录/来源序列配置、2 个 TaskManager、运行中 job
+  `40f36698aeee4aaae17eac52608c7939` 和 checkpoint `14905` 全部通过；报告 SHA256 为
+  `baaf0d963107c0f4f6f4afe5df7774d2b5779098cb18390e0f70e585ad48e6af`。
 - 目标环境已连接 3 broker Kafka 4.2、Flink 2.2.1、RocksDB state、MinIO checkpoint/savepoint；
   TaskManager 带负载恢复和 V12 -> V13 savepoint 升级已经通过。Schema Registry、JobManager HA 和跨主机容灾仍未部署。
 - 2026-07-19 marker `ADP_BPI_BROKER_CHAOS_20260719_1129` 真实停止 `kafka-2`：151 个分区

@@ -58,6 +58,14 @@ REQUIRED_FILES = [
 ]
 
 
+def is_sha256(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
 def main() -> int:
     failures: list[str] = []
     for relative in REQUIRED_FILES:
@@ -117,6 +125,17 @@ def main() -> int:
     for forbidden in ("docker system prune", "docker volume prune", "rm -rf"):
         if forbidden in preflight:
             failures.append(f"BPI preflight contains destructive command: {forbidden}")
+
+    legacy_replay = (
+        ROOT / "deploy/bpi-streaming/scripts/run-replay.sh"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "BPI_LEGACY_REPLAY_COMPATIBILITY_ACK",
+        "ISOLATED_BPI_SOURCE_CONSUMERS",
+        "legacy cluster replay fixture does not satisfy the current canonical point-catalog envelope",
+    ):
+        if marker not in legacy_replay:
+            failures.append(f"BPI legacy replay is missing fail-closed marker: {marker}")
 
     jobmanager_entrypoint = (
         ROOT / "deploy/bpi-streaming/scripts/start-jobmanager.sh"
@@ -282,6 +301,8 @@ def main() -> int:
     for marker in (
         "TENANT=TENANT-E2E",
         "BPI_PERSISTENCE_REPLAY_KEEP_MARKER",
+        "BPI_LEGACY_POSTGRES_REPLAY_COMPATIBILITY_ACK",
+        "ISOLATED_POINT_CATALOG_AND_TELEMETRY_CONSUMERS",
         "DLQ_BEFORE",
         "candidateCount",
         "bpi.bpi_inbox_events",
@@ -569,22 +590,72 @@ def main() -> int:
     evidence = json.loads(
         (ROOT / "metadata/bpi-test-host-capacity-preflight.json").read_text(encoding="utf-8")
     )
-    if evidence.get("status") != "BLOCKED_DISK":
-        failures.append("test-host capacity evidence must remain BLOCKED_DISK until a live rerun passes")
+    if evidence.get("status") != "READY":
+        failures.append("test-host capacity evidence must record the live READY preflight")
     if evidence.get("deploymentStarted") is not False:
         failures.append("capacity evidence cannot claim that deployment started")
     if evidence.get("destructiveActionsPerformed") is not False:
         failures.append("capacity evidence cannot claim destructive cleanup")
     if evidence.get("thresholds", {}).get("minimumFreeDiskGiB", 0) < 25:
         failures.append("BPI streaming free-disk gate must be at least 25 GiB")
+    host = evidence.get("host", {})
+    if host.get("address") != "10.11.100.17" or host.get("hostname") != "v6-2288H-V6":
+        failures.append("capacity evidence must retain the verified target host identity")
+    observations = evidence.get("observations", {})
+    root_filesystem = observations.get("rootFilesystem", {})
+    docker_observation = observations.get("docker", {})
+    minimum_free = evidence.get("thresholds", {}).get("minimumFreeDiskGiB", 0)
+    if root_filesystem.get("availableGiB", 0) < minimum_free:
+        failures.append("target root filesystem must retain at least the configured free-disk floor")
+    if docker_observation.get("availableGiB", 0) < minimum_free:
+        failures.append("target Docker root must retain at least the configured free-disk floor")
+    preflight_evidence = evidence.get("preflight", {})
+    if preflight_evidence.get("status") != "READY" or preflight_evidence.get("failures") != []:
+        failures.append("target preflight evidence must be READY with no failures")
+    if not is_sha256(preflight_evidence.get("sha256")):
+        failures.append("target preflight evidence must retain a valid SHA-256")
+    cluster_smoke = evidence.get("currentClusterSmoke", {})
+    kafka_smoke = cluster_smoke.get("kafka", {})
+    flink_smoke = cluster_smoke.get("flink", {})
+    if cluster_smoke.get("status") != "PASS":
+        failures.append("current target cluster smoke must remain PASS")
+    if (
+        kafka_smoke.get("brokers") != 3
+        or kafka_smoke.get("topics") != 24
+        or kafka_smoke.get("replicationFactor") != 3
+        or kafka_smoke.get("minInSyncReplicas") != 2
+        or kafka_smoke.get("sourceSequenceConfigPresent") is not True
+    ):
+        failures.append("current target smoke must retain all 24 governed replicated topics")
+    if (
+        flink_smoke.get("jobName") != "ft-mes-bpi-batch-boundary-v1"
+        or flink_smoke.get("taskManagers", 0) < 2
+        or flink_smoke.get("latestCompletedCheckpointId", 0) <= 0
+    ):
+        failures.append("current target smoke must retain a running checkpointed BPI Flink job")
+    if not is_sha256(cluster_smoke.get("sha256")):
+        failures.append("current target cluster smoke must retain a valid report SHA-256")
 
     persistence = json.loads(
         (ROOT / "metadata/bpi-kafka-postgres-replay-acceptance.json").read_text(encoding="utf-8")
     )
-    if persistence.get("status") != "HARNESS_READY_CLUSTER_BLOCKED_DISK":
-        failures.append("Kafka/Flink/PostgreSQL replay must remain blocked until a live target rerun passes")
+    if persistence.get("status") != "LEGACY_HARNESS_SUPERSEDED_TARGET_ACCEPTED":
+        failures.append("legacy Kafka/Flink/PostgreSQL replay must record truthful target supersession")
+    legacy_harness = persistence.get("legacyHarness", {})
+    if legacy_harness.get("executedOnCurrentTarget") is not False:
+        failures.append("legacy PostgreSQL replay must not claim current-target execution")
+    if legacy_harness.get("compatibleWithCurrentPointCatalogContract") is not False:
+        failures.append("legacy PostgreSQL replay must retain its current point-catalog incompatibility")
+    if legacy_harness.get("defaultExecution") != "FAIL_CLOSED":
+        failures.append("legacy PostgreSQL replay must remain fail-closed")
     if persistence.get("targetEvidence", {}).get("destructiveActionsPerformed") is not False:
         failures.append("Kafka/Flink/PostgreSQL replay cannot claim destructive cleanup")
+    if (
+        persistence.get("targetEvidence", {}).get("capacityStatus") != "READY"
+        or persistence.get("targetEvidence", {}).get("clusterSmokeStatus") != "PASS"
+        or persistence.get("targetEvidence", {}).get("clusterTopics") != 24
+    ):
+        failures.append("Kafka/Flink/PostgreSQL supersession must retain current capacity and cluster evidence")
 
     target_acceptance = json.loads(
         (ROOT / "metadata/bpi-test-environment-acceptance.json").read_text(encoding="utf-8")
@@ -600,6 +671,38 @@ def main() -> int:
         failures.append("target BPI acceptance must pass the browser-to-batch write chain")
     if target_checks.get("topology-rule-productization-target") != "PASS":
         failures.append("target BPI acceptance must pass topology/rule productization on V9")
+
+    joint_acceptance = json.loads(
+        (ROOT / "metadata/bpi-browser-kafka-postgres-joint-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if joint_acceptance.get("status") != "PASS" or joint_acceptance.get("summary") != {
+        "checks": 11,
+        "pass": 11,
+        "fail": 0,
+        "blocked": 0,
+    }:
+        failures.append("replacement browser/Kafka/Flink/PostgreSQL acceptance must remain 11/11 PASS")
+    if joint_acceptance.get("scope", {}).get("marker") != persistence.get(
+        "replacementAcceptance", {}
+    ).get("marker"):
+        failures.append("PostgreSQL supersession marker must match the accepted browser joint chain")
+    joint_checks = {
+        check.get("id"): check.get("status")
+        for check in joint_acceptance.get("checks", [])
+        if isinstance(check, dict)
+    }
+    for check_id in (
+        "flink-rule-application",
+        "single-candidate",
+        "postgres-persistence",
+        "browser-candidate-confirmation",
+        "marker-cleanup",
+        "post-cleanup-read-and-consumer-restore",
+    ):
+        if joint_checks.get(check_id) != "PASS":
+            failures.append(f"replacement browser joint acceptance must retain PASS: {check_id}")
 
     productization_target = json.loads(
         (ROOT / "metadata/bpi-target-topology-rule-acceptance.json").read_text(

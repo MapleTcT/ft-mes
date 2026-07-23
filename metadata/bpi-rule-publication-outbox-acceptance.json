@@ -2,6 +2,8 @@
   "generatedAt": "2026-07-13T08:35:10+08:00",
   "repoCommit": "9362be0a",
   "workingTree": "uncommitted",
+  "evidenceRefreshedAt": "2026-07-23T22:08:57+08:00",
+  "status": "LOCAL_ACCEPTED_TARGET_CHAIN_ACCEPTED_LATER",
   "database": "PostgreSQL",
   "databaseVersion": "16.14",
   "transport": "Kafka",
@@ -11,7 +13,8 @@
     "testedFeatures": 9,
     "pass": 9,
     "fail": 0,
-    "blocked": 1,
+    "blocked": 0,
+    "superseded": 1,
     "notApplicable": 0,
     "postgresRuleTests": 3,
     "dispatcherUnitTests": 2,
@@ -27,7 +30,7 @@
     {"operation": "real PostgreSQL to Kafka dispatch", "tables": ["bpi.bpi_outbox_events"], "result": "embedded broker received the marker Protobuf and PostgreSQL became PUBLISHED|1 with published_at", "status": "PASS"},
     {"operation": "published event is not resent", "tables": ["bpi.bpi_outbox_events"], "result": "second dispatcher poll emitted no matching marker record", "status": "PASS"},
     {"operation": "truthful API and UI status", "result": "API and console distinguish rule PUBLISHED from outbox PENDING/DISPATCHING/Kafka-confirmed/FAILED and do not claim Flink activation", "status": "PASS"},
-    {"operation": "target Kafka/Flink/PostgreSQL activation acceptance", "result": "target host remains below the required free-space floor", "status": "BLOCKED_DISK"}
+    {"operation": "target Kafka/Flink/PostgreSQL activation acceptance", "result": "Superseded by later target evidence: browser publication, PostgreSQL outbox, Flink APPLIED receipt, candidate persistence, browser confirmation and cleanup passed.", "status": "SUPERSEDED_BY_TARGET_ACCEPTANCE", "evidence": "metadata/bpi-browser-kafka-postgres-joint-acceptance.json"}
   ],
   "marker": "ADP_E2E_BPI_OUTBOX_<UUID>",
   "verificationSql": "SELECT status,attempt_count,published_at,last_error FROM bpi.bpi_outbox_events WHERE tenant_id=:tenant_marker AND aggregate_id=:rule_version_id;",
@@ -41,6 +44,7 @@
   "limitations": [
     "The embedded broker is local single-process test infrastructure, not the target replicated Kafka cluster.",
     "Kafka PUBLISHED does not prove that Flink Broadcast State applied the rule; runtime activation acknowledgment remains unimplemented.",
-    "Target deployment and recovery rehearsal remain blocked by target-host disk capacity."
+    "Current target capacity and 24-topic cluster smoke pass; this historical local artifact was not itself rerun.",
+    "The later controlled target chain proves Flink application acknowledgement, but physical-source and production HA qualification remain separate."
   ]
 }

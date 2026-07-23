@@ -269,17 +269,28 @@ def main() -> int:
     topology_acceptance = json.loads(
         (ROOT / "metadata/bpi-kafka-flink-topology-acceptance.json").read_text(encoding="utf-8")
     )
-    if topology_acceptance.get("status") != "LOCAL_MINICLUSTER_ACCEPTED_TARGET_CLUSTER_PENDING":
-        failures.append("BPI Kafka/Flink topology acceptance status must remain explicit")
+    if topology_acceptance.get("status") != "LOCAL_MINICLUSTER_AND_TARGET_CLUSTER_ACCEPTED":
+        failures.append("BPI Kafka/Flink topology acceptance must retain local and target acceptance")
     topology_summary = topology_acceptance.get("summary", {})
     if topology_summary.get("streamFail") != 0:
         failures.append("BPI Kafka/Flink topology acceptance must not contain failed stream tests")
     if topology_summary.get("localMiniClusterAccepted") is not True:
         failures.append("BPI Kafka/Flink topology acceptance must record local MiniCluster acceptance")
-    if topology_summary.get("targetClusterAccepted") is not False:
-        failures.append("BPI Kafka/Flink topology acceptance must not claim target cluster acceptance")
+    if topology_summary.get("targetClusterAccepted") is not True:
+        failures.append("BPI Kafka/Flink topology acceptance must retain target cluster acceptance")
     if topology_summary.get("flinkKafkaRuntimeAcceptancePass") != 1:
         failures.append("BPI Kafka/Flink topology acceptance must record the runtime acceptance pass")
+    target_cluster = topology_acceptance.get("targetCluster", {})
+    if (
+        target_cluster.get("status") != "PASS"
+        or target_cluster.get("brokers") != 3
+        or target_cluster.get("governedTopics") != 24
+        or target_cluster.get("replicationFactor") != 3
+        or target_cluster.get("minInSyncReplicas") != 2
+        or target_cluster.get("taskManagers", 0) < 2
+        or target_cluster.get("latestCompletedCheckpointId", 0) <= 0
+    ):
+        failures.append("BPI target Kafka/Flink acceptance must retain the current 24-topic smoke")
 
     rule_application_acceptance = json.loads(
         (ROOT / "metadata/bpi-rule-application-flink-kafka-acceptance.json").read_text(
@@ -311,12 +322,33 @@ def main() -> int:
     cluster_replay = json.loads(
         (ROOT / "metadata/bpi-kafka-cluster-replay-acceptance.json").read_text(encoding="utf-8")
     )
-    if cluster_replay.get("status") != "HARNESS_READY_CLUSTER_BLOCKED_DISK":
-        failures.append("BPI Kafka cluster replay must not claim live acceptance while disk is blocked")
-    if cluster_replay.get("summary", {}).get("liveClusterAccepted") is not False:
-        failures.append("BPI Kafka cluster replay cannot claim live cluster acceptance")
-    if cluster_replay.get("summary", {}).get("postgresMarkerAccepted") is not False:
-        failures.append("BPI Kafka cluster replay cannot claim PostgreSQL marker acceptance")
+    if cluster_replay.get("status") != "LEGACY_HARNESS_SUPERSEDED_TARGET_ACCEPTED":
+        failures.append("BPI legacy Kafka replay must record truthful target supersession")
+    legacy_harness = cluster_replay.get("legacyHarness", {})
+    if legacy_harness.get("executedOnCurrentTarget") is not False:
+        failures.append("BPI legacy Kafka replay must not claim current-target execution")
+    if legacy_harness.get("compatibleWithCurrentPointCatalogContract") is not False:
+        failures.append("BPI legacy Kafka replay must retain its point-catalog incompatibility")
+    if legacy_harness.get("defaultExecution") != "FAIL_CLOSED":
+        failures.append("BPI legacy Kafka replay must remain fail-closed")
+    replacement = cluster_replay.get("replacementAcceptance", {})
+    current_smoke = replacement.get("currentClusterSmoke", {})
+    browser_joint = replacement.get("browserKafkaFlinkPostgres", {})
+    if (
+        current_smoke.get("status") != "PASS"
+        or current_smoke.get("topics") != 24
+        or current_smoke.get("brokers") != 3
+        or current_smoke.get("latestCompletedCheckpointId", 0) <= 0
+    ):
+        failures.append("BPI legacy replay supersession must retain current target cluster smoke")
+    if (
+        browser_joint.get("status") != "PASS"
+        or browser_joint.get("checks") != 11
+        or browser_joint.get("pass") != 11
+        or browser_joint.get("fail") != 0
+        or browser_joint.get("cleanup") != "PASS"
+    ):
+        failures.append("BPI legacy replay supersession must retain the accepted browser joint chain")
 
     target_data_quality = json.loads(
         (ROOT / "metadata/bpi-flink-data-quality-acceptance.json").read_text(encoding="utf-8")

@@ -1,38 +1,77 @@
 {
-  "generatedAt": "2026-07-13T00:08:00+08:00",
-  "sourceRepoCommit": "0b9f0de",
-  "status": "HARNESS_READY_CLUSTER_BLOCKED_DISK",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-23T22:08:57+08:00",
+  "sourceRepoCommit": "d6bfaa5a507f4f8bad5ade45baa744b19a583828",
+  "status": "LEGACY_HARNESS_SUPERSEDED_TARGET_ACCEPTED",
   "java": "17",
   "flink": "2.2.1",
   "kafka": "4.2.0",
-  "summary": {
+  "historicalLocalEvidence": {
     "replayTestsRun": 4,
     "replayPass": 4,
     "streamTestsRun": 75,
     "streamPass": 75,
     "reactorTestsRun": 98,
-    "reactorPass": 98,
-    "liveClusterAccepted": false,
-    "postgresMarkerAccepted": false
+    "reactorPass": 98
+  },
+  "legacyHarness": {
+    "entrypoint": "make bpi-stream-cluster-replay",
+    "executedOnCurrentTarget": false,
+    "compatibleWithCurrentPointCatalogContract": false,
+    "defaultExecution": "FAIL_CLOSED",
+    "compatibilityAck": "BPI_LEGACY_REPLAY_COMPATIBILITY_ACK=ISOLATED_BPI_SOURCE_CONSUMERS",
+    "reasons": [
+      "The historical point-catalog sourceRevision is sha256:<marker>, not the canonical payload SHA-256.",
+      "The historical event ID is marker-based, not point-catalog-<canonical digest>.",
+      "The historical Kafka key and headers do not carry the current tenant|plant|line|source_instance and source metadata contract."
+    ]
+  },
+  "replacementAcceptance": {
+    "capacity": {
+      "status": "READY",
+      "evidence": "metadata/bpi-test-host-capacity-preflight.json"
+    },
+    "currentClusterSmoke": {
+      "status": "PASS",
+      "brokers": 3,
+      "topics": 24,
+      "replicationFactor": 3,
+      "minInSyncReplicas": 2,
+      "flinkJobId": "40f36698aeee4aaae17eac52608c7939",
+      "latestCompletedCheckpointId": 14905,
+      "reportSha256": "baaf0d963107c0f4f6f4afe5df7774d2b5779098cb18390e0f70e585ad48e6af"
+    },
+    "browserKafkaFlinkPostgres": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260714_091536_BPI_JOINT",
+      "checks": 11,
+      "pass": 11,
+      "fail": 0,
+      "cleanup": "PASS",
+      "evidence": "metadata/bpi-browser-kafka-postgres-joint-acceptance.json"
+    },
+    "flinkDataQualityLifecycle": {
+      "status": "PASS_TARGET_FLINK_KAFKA_POSTGRES_BROWSER_CLEANUP",
+      "marker": "ADP_E2E_DQ_FLINK_20260719_2344_3ca0fff3",
+      "evidence": "metadata/bpi-flink-data-quality-acceptance.json"
+    }
   },
   "assertions": [
-    "unique marker rule, context and telemetry contracts are valid",
-    "consumer begins at topic end and uses read_committed isolation",
-    "matching candidate is scoped by tenant, plant, line, rule and order",
-    "exactly one matching candidate is required",
-    "zero marker-related data-quality issues are required",
-    "active replay rule is retired with a typed inactive publication",
-    "cluster smoke checkpoint evidence is merged into the replay report"
+    "current target cluster has three brokers, 24 governed topics and a running checkpointed Flink job",
+    "newer same-marker browser publication, Kafka/Flink application, candidate, PostgreSQL confirmation and cleanup passed",
+    "newer Flink data-quality marker persisted exactly four issues and cleaned all scoped PostgreSQL rows",
+    "legacy replay execution is not claimed"
   ],
   "limitations": [
-    "The target host is still blocked by less than one GiB free root filesystem space.",
-    "No Kafka/Flink containers were started for this milestone.",
-    "Kafka candidate to BPI inbox and PostgreSQL marker persistence is not yet live-accepted."
+    "The exact 2026-07-13 legacy replay fixture was not rerun against the current target.",
+    "This supersession does not prove physical IoT source coverage, production JobManager HA, cross-host disaster recovery or 100k-point capacity.",
+    "The compatibility acknowledgement must never be stored in a production environment file."
   ],
   "evidence": [
     "docs/testing/bpi-kafka-cluster-replay-acceptance.md",
-    "deploy/bpi-streaming/scripts/run-replay.sh",
-    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceReplay.java",
-    "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceScenarioTest.java"
+    "metadata/bpi-test-host-capacity-preflight.json",
+    "metadata/bpi-browser-kafka-postgres-joint-acceptance.json",
+    "metadata/bpi-flink-data-quality-acceptance.json",
+    "deploy/bpi-streaming/scripts/run-replay.sh"
   ]
 }

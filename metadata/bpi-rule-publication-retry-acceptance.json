@@ -2,6 +2,7 @@
   "generatedAt": "2026-07-13T09:05:00+08:00",
   "repoBaseCommit": "c348aa86",
   "workingTree": "uncommitted",
+  "evidenceRefreshedAt": "2026-07-23T22:08:57+08:00",
   "database": "PostgreSQL",
   "databaseVersion": "16.13",
   "operation": "POST /bpi/v1/rules/{ruleId}/publication/retry",
@@ -32,7 +33,7 @@
   ],
   "limitations": [
     "This acceptance used a local PostgreSQL container and deterministic browser simulator.",
-    "Flink application acknowledgment is the next milestone; PENDING or Kafka PUBLISHED is not online activation.",
-    "Target-host deployment remains blocked by insufficient disk capacity."
+    "PENDING or Kafka PUBLISHED is still not online activation; a later controlled target chain separately proved Flink APPLIED.",
+    "Current target capacity and 24-topic cluster smoke pass; this historical retry artifact was not itself rerun."
   ]
 }
