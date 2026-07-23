@@ -1246,6 +1246,36 @@ test('dataset manifests stay immutable while versioned Parquet materialization i
     featureRefs: [
       'batch.order_id', 'batch.material_code', 'batch.stage_code',
       'rule.version_id', 'topology.version_id', 'point_catalog.snapshot_id',
+      'process.window.flow_instant.mean_60s',
+      'process.window.pump_running.true_ratio_30s',
+    ],
+    processSignalWindows: [
+      {
+        featureRef: 'process.window.flow_instant.mean_60s',
+        signal: 'flow.instant',
+        valueType: 'NUMERIC',
+        metric: 'MEAN',
+        startOffsetSeconds: -60,
+        endOffsetSeconds: 0,
+        minimumSamples: 3,
+        maximumGapSeconds: 30,
+        expectedUnit: 't/h',
+        requireCalibration: true,
+        acceptedQualityCodes: ['GOOD'],
+      },
+      {
+        featureRef: 'process.window.pump_running.true_ratio_30s',
+        signal: 'pump.running',
+        valueType: 'BOOLEAN',
+        metric: 'TRUE_RATIO',
+        startOffsetSeconds: -30,
+        endOffsetSeconds: 0,
+        minimumSamples: 2,
+        maximumGapSeconds: 30,
+        expectedUnit: 'bool',
+        requireCalibration: false,
+        acceptedQualityCodes: ['GOOD'],
+      },
     ],
     labelRefs: [
       'review.manual_start_time', 'review.manual_end_time',
@@ -1266,6 +1296,9 @@ test('dataset manifests stay immutable while versioned Parquet materialization i
   const definition = result.json.data;
   assert.equal(definition.revision, 1);
   assert.equal(definition.latestSnapshot, null);
+  assert.equal(definition.processSignalWindows.length, 2);
+  assert.equal(definition.processSignalWindows.every((window) =>
+    /^[a-f0-9]{64}$/.test(window.checksum)), true);
   assert.match(definition.checksum, /^[a-f0-9]{64}$/);
 
   result = await request('POST', '/bpi/v1/datasets', {
@@ -1315,9 +1348,17 @@ test('dataset manifests stay immutable while versioned Parquet materialization i
   assert.equal(ready.manifest.phaseBoundary.icebergReady, false);
   assert.equal(ready.manifest.phaseBoundary.mlflowRegistered, false);
   assert.equal(ready.manifest.phaseBoundary.modelTrained, false);
-  assert.equal(ready.manifest.samples.every((sample) => sample.predictionTime === sample.featureCutoffTime), true);
-  assert.equal(ready.manifest.samples.every((sample) => !Object.keys(sample.features)
+  assert.equal(ready.manifest.definition.processSignalWindows.length, 2);
+  assert.equal(ready.manifest.samples.every((sample) => sample.predictionTime === sample.featureCutoff), true);
+  assert.equal(ready.manifest.samples.every((sample) => !Object.keys(sample.featurePayload)
     .some((reference) => reference.startsWith('review.'))), true);
+  assert.equal(ready.manifest.samples.every((sample) =>
+    sample.sourcePayload.processSignalWindows.length === 2), true);
+  assert.equal(ready.manifest.samples.every((sample) =>
+    sample.sourcePayload.processSignalWindows.every((fact) => fact.state === 'READY')), true);
+  assert.equal(ready.manifest.samples.every((sample) =>
+    Object.keys(sample.featurePayload).filter((reference) =>
+      reference.startsWith('process.window.')).length === 2), true);
   assert.match(ready.manifestChecksum, /^[a-f0-9]{64}$/);
 
   const materializationHeaders = commandHeaders('dataset-materialization-0001', ready.revision);
@@ -1697,12 +1738,18 @@ test('dataset manifests stay immutable while versioned Parquet materialization i
   assert.equal(readiness.state, 'BLOCKED');
   assert.equal(readiness.assessmentSequence, 1);
   assert.equal(readiness.sourceRegistrationRevision, registeredDataset.revision);
-  assert.equal(readiness.gateResults.length, 19);
-  assert.ok(readiness.blockerCodes.includes('PROCESS_SIGNAL_WINDOWS_MISSING'));
+  assert.equal(readiness.policyVersion, 'bpi-training-readiness/batch-start-boundary-v2');
+  assert.equal(readiness.gateResults.length, 20);
+  assert.equal(readiness.blockerCodes.includes('PROCESS_SIGNAL_WINDOWS_MISSING'), false);
+  assert.equal(readiness.blockerCodes.includes('PROCESS_SIGNAL_WINDOW_FACTS_INCOMPLETE'), false);
   assert.ok(readiness.blockerCodes.includes('START_REJECTED_LABEL_COUNT_BELOW_MINIMUM'));
   assert.ok(readiness.blockerCodes.includes('INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM'));
   assert.equal(readiness.observedMetrics.includedSampleCount, 1);
-  assert.equal(readiness.observedMetrics.signalWindowFeatureRefs.length, 0);
+  assert.equal(readiness.observedMetrics.signalWindowFeatureRefs.length, 2);
+  assert.equal(readiness.observedMetrics.processWindowExpectedFactCount, 2);
+  assert.equal(readiness.observedMetrics.processWindowReadyFactCount, 2);
+  assert.equal(readiness.observedMetrics.processWindowBlockedFactCount, 0);
+  assert.equal(readiness.observedMetrics.processWindowMissingFactCount, 0);
   assert.equal(readiness.observedMetrics.startAcceptedLabelCount, 1);
   assert.equal(readiness.observedMetrics.startRejectedLabelCount, 0);
   assert.equal(readiness.observedMetrics.startLabelMissingCount, 0);
@@ -1772,6 +1819,94 @@ test('dataset manifests stay immutable while versioned Parquet materialization i
   assert.equal(result.json.data.length, 1);
   assert.equal(result.json.data[0].latestSnapshot.snapshotVersion, 2);
   assert.equal(result.json.data[0].latestSnapshot.state, 'MANIFEST_READY');
+});
+
+test('dataset process windows fail closed when topology binding is missing', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+  result = await request('POST', '/__simulation/prepare-dataset-manifest');
+  const ruleVersionId = result.json.ruleVersionId;
+  result = await request('POST', '/bpi/v1/datasets', {
+    headers: commandHeaders('dataset-window-blocked-definition-0001', 0),
+    body: {
+      datasetCode: 'BPI-WINDOW-BLOCKED',
+      version: '1.0.0',
+      name: '缺失拓扑绑定失败关闭',
+      plantId: 'PLANT-01',
+      lineIds: ['LINE-S07-01'],
+      predictionTimePolicy: 'AUTOMATIC_BATCH_START',
+      featureCutoffPolicy: 'AT_OR_BEFORE_PREDICTION_TIME',
+      featureRefs: [
+        'batch.material_code',
+        'batch.stage_code',
+        'point_catalog.snapshot_id',
+        'process.window.flow_instant.mean_60s',
+        'process.window.unknown_signal.mean_60s',
+        'rule.version_id',
+        'topology.version_id',
+      ],
+      processSignalWindows: [
+        {
+          featureRef: 'process.window.flow_instant.mean_60s',
+          signal: 'flow.instant',
+          valueType: 'NUMERIC',
+          metric: 'MEAN',
+          startOffsetSeconds: -60,
+          endOffsetSeconds: 0,
+          minimumSamples: 3,
+          maximumGapSeconds: 30,
+          expectedUnit: 't/h',
+          requireCalibration: true,
+          acceptedQualityCodes: ['GOOD'],
+        },
+        {
+          featureRef: 'process.window.unknown_signal.mean_60s',
+          signal: 'unknown.signal',
+          valueType: 'NUMERIC',
+          metric: 'MEAN',
+          startOffsetSeconds: -60,
+          endOffsetSeconds: 0,
+          minimumSamples: 3,
+          maximumGapSeconds: 30,
+          expectedUnit: 't/h',
+          requireCalibration: true,
+          acceptedQualityCodes: ['GOOD'],
+        },
+      ],
+      labelRefs: ['review.boundary_acceptance'],
+      maxLabelDelayHours: 96,
+      minimumConfidence: 0,
+      splitPolicy: 'PRODUCTION_TIME',
+      reason: '验证未知逻辑信号不会被模拟器伪造为 READY',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  const definition = result.json.data;
+  result = await request('POST', `/bpi/v1/datasets/${definition.id}/snapshots`, {
+    headers: commandHeaders('dataset-window-blocked-snapshot-0001', definition.revision),
+    body: {
+      freezeAt: '2026-07-12T08:00:00.000Z',
+      lineIds: ['LINE-S07-01'],
+      predictionTimePolicy: 'AUTOMATIC_BATCH_START',
+      ruleVersionIds: [ruleVersionId],
+      excludeLowConfidence: false,
+      reason: '冻结缺失拓扑绑定的窗口事实',
+    },
+  });
+  assert.equal(result.response.status, 202);
+  result = await request('GET', `/bpi/v1/dataset-snapshots/${result.json.data.id}`);
+  assert.equal(result.json.data.state, 'MANIFEST_READY');
+  assert.equal(result.json.data.includedCount, 0);
+  assert.equal(result.json.data.excludedCount, 3);
+  assert.equal(result.json.data.exclusionSummary.PROCESS_SIGNAL_WINDOW_NOT_READY, 3);
+  assert.equal(result.json.data.exclusionSummary.WINDOW_BINDING_MISSING, 3);
+  assert.equal(result.json.data.manifest.samples.every((sample) =>
+    sample.featurePayload['process.window.unknown_signal.mean_60s'] === null), true);
+  assert.equal(result.json.data.manifest.samples.every((sample) =>
+    sample.sourcePayload.processSignalWindows.some((fact) =>
+      fact.featureRef === 'process.window.unknown_signal.mean_60s'
+        && fact.state === 'BLOCKED'
+        && fact.blockerCodes.includes('WINDOW_BINDING_MISSING'))), true);
 });
 
 test('shadow run acceptance is version-pinned, review-driven and fail-closed on critical data quality', async () => {

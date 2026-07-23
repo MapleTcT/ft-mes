@@ -1,0 +1,52 @@
+package com.mapletct.ftmes.bpi.domain;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.UUID;
+
+public record ProcessSignalWindowEvidence(
+        UUID reviewId,
+        UUID shadowRunId,
+        UUID batchId,
+        String batchNo,
+        String plantId,
+        String lineId,
+        UUID ruleVersionId,
+        UUID topologyVersionId,
+        UUID pointCatalogSnapshotId,
+        ProcessSignalWindowDefinition definition,
+        Instant predictionTime,
+        Instant windowStart,
+        Instant windowEnd,
+        int bindingCount,
+        String bindingExpectedUnit,
+        String bindingCalibrationVersion,
+        String productId,
+        String deviceId,
+        String propertyId,
+        String pointCatalogUnit,
+        String pointCatalogCalibrationVersion,
+        String pointCatalogDeviceState,
+        Boolean pointCatalogRegistered,
+        Boolean pointCatalogPropertyPresent,
+        String pointCatalogCalibrationStatus,
+        int sourcePointCount,
+        int acceptedSampleCount,
+        int rejectedQualityCount,
+        int lateAvailabilityCount,
+        int unitMismatchCount,
+        int valueTypeMismatchCount,
+        int calibrationMismatchCount,
+        Instant firstSampleTime,
+        Instant lastSampleTime,
+        Instant latestIngestTime,
+        BigDecimal maximumObservedGapSeconds,
+        BigDecimal meanValue,
+        BigDecimal minimumValue,
+        BigDecimal maximumValue,
+        BigDecimal firstValue,
+        BigDecimal lastValue,
+        BigDecimal slopeValue,
+        BigDecimal trueRatioValue,
+        String sourceFingerprint) {
+}

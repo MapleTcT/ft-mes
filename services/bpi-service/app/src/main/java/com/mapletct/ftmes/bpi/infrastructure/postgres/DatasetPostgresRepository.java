@@ -13,6 +13,8 @@ import com.mapletct.ftmes.bpi.domain.DatasetMaterializationView;
 import com.mapletct.ftmes.bpi.domain.DatasetSampleSource;
 import com.mapletct.ftmes.bpi.domain.DatasetSnapshotSummary;
 import com.mapletct.ftmes.bpi.domain.DatasetSnapshotView;
+import com.mapletct.ftmes.bpi.domain.ProcessSignalWindowDefinition;
+import com.mapletct.ftmes.bpi.domain.ProcessSignalWindowFact;
 import com.mapletct.ftmes.bpi.interfaces.rest.DatasetDefinitionCreateCommand;
 import com.mapletct.ftmes.bpi.interfaces.rest.DatasetSnapshotCommand;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -160,6 +162,7 @@ public class DatasetPostgresRepository {
             DatasetDefinitionCreateCommand command,
             List<String> lineIds,
             List<String> featureRefs,
+            List<ProcessSignalWindowDefinition> processSignalWindows,
             List<String> labelRefs,
             String checksum) {
         try {
@@ -167,11 +170,13 @@ public class DatasetPostgresRepository {
                     INSERT INTO bpi.bpi_dataset_definitions
                         (id, tenant_id, dataset_code, version, name, plant_id, line_ids,
                          prediction_time_policy, feature_cutoff_policy, feature_refs, label_refs,
+                         process_signal_windows,
                          max_label_delay_hours, minimum_confidence, split_policy, checksum,
                          created_by, create_reason)
                     VALUES (:id, :tenantId, :datasetCode, :version, :name, :plantId,
                             CAST(:lineIds AS jsonb), :predictionTimePolicy, :featureCutoffPolicy,
                             CAST(:featureRefs AS jsonb), CAST(:labelRefs AS jsonb),
+                            CAST(:processSignalWindows AS jsonb),
                             :maxLabelDelayHours, :minimumConfidence, :splitPolicy, :checksum,
                             :createdBy, :reason)
                     """, new MapSqlParameterSource()
@@ -186,6 +191,7 @@ public class DatasetPostgresRepository {
                     .addValue("featureCutoffPolicy", command.featureCutoffPolicy())
                     .addValue("featureRefs", writeJson(featureRefs))
                     .addValue("labelRefs", writeJson(labelRefs))
+                    .addValue("processSignalWindows", writeJson(processSignalWindows))
                     .addValue("maxLabelDelayHours", command.maxLabelDelayHours())
                     .addValue("minimumConfidence", command.minimumConfidence())
                     .addValue("splitPolicy", command.splitPolicy())
@@ -402,6 +408,48 @@ public class DatasetPostgresRepository {
                             CAST(:sourcePayload AS jsonb))
                     """, samples);
         }
+        SqlParameterSource[] windowFacts = build.processSignalWindowFacts().stream()
+                .map(fact -> processWindowFactParameters(claim, fact))
+                .toArray(SqlParameterSource[]::new);
+        if (windowFacts.length > 0) {
+            jdbc.batchUpdate("""
+                    INSERT INTO bpi.bpi_dataset_process_signal_window_facts
+                        (snapshot_id, review_id, feature_ref, tenant_id, shadow_run_id,
+                         batch_id, batch_no, plant_id, line_id, rule_version_id,
+                         topology_version_id, point_catalog_snapshot_id, signal, value_type,
+                         metric, start_offset_seconds, end_offset_seconds, minimum_samples,
+                         maximum_gap_seconds, expected_unit, require_calibration,
+                         accepted_quality_codes, window_definition_checksum, prediction_time,
+                         window_start, window_end, product_id, device_id, property_id,
+                         binding_calibration_version, point_catalog_calibration_version,
+                         point_catalog_device_state, point_catalog_registered,
+                         point_catalog_property_present, point_catalog_calibration_status,
+                         source_point_count, accepted_sample_count, rejected_quality_count,
+                         late_availability_count, unit_mismatch_count,
+                         value_type_mismatch_count, calibration_mismatch_count,
+                         first_sample_time, last_sample_time, latest_ingest_time,
+                         maximum_observed_gap_seconds, numeric_value, source_fingerprint,
+                         state, blocker_codes, fact_checksum)
+                    VALUES
+                        (:snapshotId, :reviewId, :featureRef, :tenantId, :shadowRunId,
+                         :batchId, :batchNo, :plantId, :lineId, :ruleVersionId,
+                         :topologyVersionId, :pointCatalogSnapshotId, :signal, :valueType,
+                         :metric, :startOffsetSeconds, :endOffsetSeconds, :minimumSamples,
+                         :maximumGapSeconds, :expectedUnit, :requireCalibration,
+                         CAST(:acceptedQualityCodes AS jsonb), :windowDefinitionChecksum,
+                         :predictionTime, :windowStart, :windowEnd, :productId, :deviceId,
+                         :propertyId, :bindingCalibrationVersion,
+                         :pointCatalogCalibrationVersion, :pointCatalogDeviceState,
+                         :pointCatalogRegistered, :pointCatalogPropertyPresent,
+                         :pointCatalogCalibrationStatus, :sourcePointCount,
+                         :acceptedSampleCount, :rejectedQualityCount,
+                         :lateAvailabilityCount, :unitMismatchCount,
+                         :valueTypeMismatchCount, :calibrationMismatchCount,
+                         :firstSampleTime, :lastSampleTime, :latestIngestTime,
+                         :maximumObservedGapSeconds, :numericValue, :sourceFingerprint,
+                         :state, CAST(:blockerCodes AS jsonb), :factChecksum)
+                    """, windowFacts);
+        }
         int updated = jdbc.update("""
                 UPDATE bpi.bpi_dataset_snapshots
                    SET state = 'MANIFEST_READY', revision = revision + 1,
@@ -522,6 +570,7 @@ public class DatasetPostgresRepository {
                        definition.plant_id, definition.prediction_time_policy,
                        definition.feature_cutoff_policy,
                        definition.feature_refs::text AS feature_refs,
+                       definition.process_signal_windows::text AS process_signal_windows,
                        definition.label_refs::text AS label_refs,
                        definition.max_label_delay_hours, definition.minimum_confidence,
                        definition.split_policy
@@ -542,7 +591,9 @@ public class DatasetPostgresRepository {
                         readUuids(rs.getString("rule_version_ids")),
                         rs.getBoolean("exclude_low_confidence"), rs.getString("definition_checksum"),
                         rs.getString("prediction_time_policy"), rs.getString("feature_cutoff_policy"),
-                        readStrings(rs.getString("feature_refs")), readStrings(rs.getString("label_refs")),
+                        readStrings(rs.getString("feature_refs")),
+                        readProcessSignalWindows(rs.getString("process_signal_windows")),
+                        readStrings(rs.getString("label_refs")),
                         rs.getInt("max_label_delay_hours"), rs.getBigDecimal("minimum_confidence"),
                         rs.getString("split_policy")));
     }
@@ -564,7 +615,9 @@ public class DatasetPostgresRepository {
                 rs.getString("plant_id"), readStrings(rs.getString("line_ids")),
                 rs.getString("state"), rs.getLong("revision"),
                 rs.getString("prediction_time_policy"), rs.getString("feature_cutoff_policy"),
-                readStrings(rs.getString("feature_refs")), readStrings(rs.getString("label_refs")),
+                readStrings(rs.getString("feature_refs")),
+                readProcessSignalWindows(rs.getString("process_signal_windows")),
+                readStrings(rs.getString("label_refs")),
                 rs.getInt("max_label_delay_hours"), rs.getBigDecimal("minimum_confidence"),
                 rs.getString("split_policy"), rs.getString("checksum"), rs.getString("created_by"),
                 rs.getString("create_reason"), instant(rs, "created_at"), latest);
@@ -665,6 +718,74 @@ public class DatasetPostgresRepository {
                 .addValue("sourcePayload", writeJson(sample.sourcePayload()));
     }
 
+    private MapSqlParameterSource processWindowFactParameters(
+            DatasetManifestClaim claim,
+            ProcessSignalWindowFact fact) {
+        ProcessSignalWindowDefinition definition = fact.definition();
+        return new MapSqlParameterSource()
+                .addValue("snapshotId", claim.snapshotId())
+                .addValue("reviewId", fact.reviewId())
+                .addValue("featureRef", definition.featureRef())
+                .addValue("tenantId", claim.tenantId())
+                .addValue("shadowRunId", fact.shadowRunId())
+                .addValue("batchId", fact.batchId())
+                .addValue("batchNo", fact.batchNo())
+                .addValue("plantId", fact.plantId())
+                .addValue("lineId", fact.lineId())
+                .addValue("ruleVersionId", fact.ruleVersionId())
+                .addValue("topologyVersionId", fact.topologyVersionId())
+                .addValue("pointCatalogSnapshotId", fact.pointCatalogSnapshotId())
+                .addValue("signal", definition.signal())
+                .addValue("valueType", definition.valueType())
+                .addValue("metric", definition.metric())
+                .addValue("startOffsetSeconds", definition.startOffsetSeconds())
+                .addValue("endOffsetSeconds", definition.endOffsetSeconds())
+                .addValue("minimumSamples", definition.minimumSamples())
+                .addValue("maximumGapSeconds", definition.maximumGapSeconds())
+                .addValue("expectedUnit", definition.expectedUnit())
+                .addValue("requireCalibration", definition.requireCalibration())
+                .addValue("acceptedQualityCodes",
+                        writeJson(definition.acceptedQualityCodes()))
+                .addValue("windowDefinitionChecksum", definition.checksum())
+                .addValue("predictionTime", Timestamp.from(fact.predictionTime()))
+                .addValue("windowStart", Timestamp.from(fact.windowStart()))
+                .addValue("windowEnd", Timestamp.from(fact.windowEnd()))
+                .addValue("productId", fact.productId())
+                .addValue("deviceId", fact.deviceId())
+                .addValue("propertyId", fact.propertyId())
+                .addValue("bindingCalibrationVersion",
+                        fact.bindingCalibrationVersion())
+                .addValue("pointCatalogCalibrationVersion",
+                        fact.pointCatalogCalibrationVersion())
+                .addValue("pointCatalogDeviceState", fact.pointCatalogDeviceState())
+                .addValue("pointCatalogRegistered", fact.pointCatalogRegistered())
+                .addValue("pointCatalogPropertyPresent",
+                        fact.pointCatalogPropertyPresent())
+                .addValue("pointCatalogCalibrationStatus",
+                        fact.pointCatalogCalibrationStatus())
+                .addValue("sourcePointCount", fact.sourcePointCount())
+                .addValue("acceptedSampleCount", fact.acceptedSampleCount())
+                .addValue("rejectedQualityCount", fact.rejectedQualityCount())
+                .addValue("lateAvailabilityCount", fact.lateAvailabilityCount())
+                .addValue("unitMismatchCount", fact.unitMismatchCount())
+                .addValue("valueTypeMismatchCount", fact.valueTypeMismatchCount())
+                .addValue("calibrationMismatchCount", fact.calibrationMismatchCount())
+                .addValue("firstSampleTime", timestamp(fact.firstSampleTime()))
+                .addValue("lastSampleTime", timestamp(fact.lastSampleTime()))
+                .addValue("latestIngestTime", timestamp(fact.latestIngestTime()))
+                .addValue("maximumObservedGapSeconds",
+                        fact.maximumObservedGapSeconds())
+                .addValue("numericValue", fact.numericValue())
+                .addValue("sourceFingerprint", fact.sourceFingerprint())
+                .addValue("state", fact.state())
+                .addValue("blockerCodes", writeJson(fact.blockerCodes()))
+                .addValue("factChecksum", fact.factChecksum());
+    }
+
+    private Timestamp timestamp(Instant value) {
+        return value == null ? null : Timestamp.from(value);
+    }
+
     private MapSqlParameterSource selectionParameters(
             String tenantId,
             UUID datasetId,
@@ -737,6 +858,8 @@ public class DatasetPostgresRepository {
                         "manifestChecksum", build.manifestChecksum(),
                         "includedCount", build.includedCount(),
                         "excludedCount", build.excludedCount(),
+                        "processSignalWindowFactCount",
+                        build.processSignalWindowFacts().size(),
                         "materializationState", "NOT_STARTED"))));
     }
 
@@ -768,6 +891,17 @@ public class DatasetPostgresRepository {
             return objectMapper.readValue(value, new TypeReference<List<UUID>>() {});
         } catch (Exception exception) {
             throw new IllegalStateException("Could not read BPI dataset UUID list", exception);
+        }
+    }
+
+    private List<ProcessSignalWindowDefinition> readProcessSignalWindows(String value) {
+        if (value == null) return List.of();
+        try {
+            return objectMapper.readValue(
+                    value, new TypeReference<List<ProcessSignalWindowDefinition>>() {});
+        } catch (Exception exception) {
+            throw new IllegalStateException(
+                    "Could not read BPI process signal window definitions", exception);
         }
     }
 

@@ -52,6 +52,14 @@ class BpiDatasetManifestPostgresAcceptanceTest {
     private static final String SECRET = "bpi-test-secret-0123456789abcdef";
     private static final String PLANT_ID = "PLANT-01";
     private static final String LINE_ID = "LINE-S07-01";
+    private static final String PRODUCT_ID = "PRODUCT-DATASET";
+    private static final String FLOW_DEVICE_ID = "DEVICE-FLOW";
+    private static final String FLOW_PROPERTY_ID = "flow.instant";
+    private static final String FLOW_CALIBRATION_VERSION = "CAL-FLOW-1";
+    private static final String PUMP_DEVICE_ID = "DEVICE-PUMP";
+    private static final String PUMP_PROPERTY_ID = "pump.running";
+    private static final String FLOW_FEATURE_REF = "process.window.feed_flow.mean_60s";
+    private static final String PUMP_FEATURE_REF = "process.window.feed_pump.true_ratio_30s";
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
@@ -100,20 +108,49 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 INSERT INTO bpi.bpi_point_catalog_snapshots
                     (id, tenant_id, source, source_instance, source_revision, plant_id, line_id,
                      checksum, observed_at, point_count, source_claim_ready_point_count, imported_by)
-                VALUES (?, ?, 'JETLINKS', 'dataset-acceptance', 'revision-1', ?, ?, ?, ?, 1, 1, 'fixture')
+                VALUES (?, ?, 'JETLINKS', 'dataset-acceptance', 'revision-1', ?, ?, ?, ?, 2, 2, 'fixture')
                 """, pointSnapshotId, tenantId, PLANT_ID, LINE_ID, "a".repeat(64),
                 Timestamp.from(freezeAt.minus(9, ChronoUnit.DAYS)));
+        insertPointCatalogEntry(
+                FLOW_DEVICE_ID, FLOW_PROPERTY_ID, "t/h", "DOUBLE",
+                FLOW_CALIBRATION_VERSION, "VERIFIED");
+        insertPointCatalogEntry(
+                PUMP_DEVICE_ID, PUMP_PROPERTY_ID, "state", "BOOLEAN",
+                null, "MISSING");
+        insertApprovedFlowCalibration();
+        String topologyDefinition = objectMapper.writeValueAsString(Map.of(
+                "localityGroup", "LOCALITY-DATASET",
+                "nodes", List.of(
+                        Map.of("code", "FEED-METER", "type", "METER"),
+                        Map.of("code", "FEED-PUMP", "type", "PUMP")),
+                "edges", List.of(Map.of("from", "FEED-METER", "to", "FEED-PUMP")),
+                "bindings", List.of(
+                        Map.of(
+                                "signal", "feed.flow",
+                                "productId", PRODUCT_ID,
+                                "deviceId", FLOW_DEVICE_ID,
+                                "propertyId", FLOW_PROPERTY_ID,
+                                "expectedUnit", "t/h",
+                                "calibrationVersion", FLOW_CALIBRATION_VERSION),
+                        Map.of(
+                                "signal", "feed.pump",
+                                "productId", PRODUCT_ID,
+                                "deviceId", PUMP_DEVICE_ID,
+                                "propertyId", PUMP_PROPERTY_ID,
+                                "expectedUnit", "state",
+                                "calibrationVersion", "CAL-PUMP-NOT-REQUIRED")),
+                "requiredSignals", List.of("feed.flow", "feed.pump")));
         jdbc.update("""
                 INSERT INTO bpi.bpi_topology_versions
                     (id, tenant_id, topology_code, version, state, checksum, definition,
                      plant_id, line_id, revision, created_by, updated_by,
                      validation_status, validated_checksum, validated_by, validated_at,
-                     validated_point_catalog_snapshot_id, validated_point_catalog_checksum,
-                     published_by, published_at)
+                        validated_point_catalog_snapshot_id, validated_point_catalog_checksum,
+                        published_by, published_at)
                 VALUES (?, ?, 'TOPOLOGY-DATASET', '1.0.0', 'PUBLISHED', ?, CAST(? AS jsonb),
                         ?, ?, 2, 'fixture-author', 'fixture-author', 'PASSED', ?,
                         'fixture-reviewer', ?, ?, ?, 'fixture-reviewer', ?)
-                """, topologyId, tenantId, "b".repeat(64), "{\"nodes\":[],\"edges\":[]}",
+                """, topologyId, tenantId, "b".repeat(64), topologyDefinition,
                 PLANT_ID, LINE_ID, "b".repeat(64), Timestamp.from(freezeAt.minus(9, ChronoUnit.DAYS)),
                 pointSnapshotId, "a".repeat(64), Timestamp.from(freezeAt.minus(9, ChronoUnit.DAYS)));
         jdbc.update("""
@@ -165,16 +202,21 @@ class BpiDatasetManifestPostgresAcceptanceTest {
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_retention_archives WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_catalog_publications WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_materializations WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_process_signal_window_facts WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_snapshot_samples WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_snapshots WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_definitions WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_audit_events WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_api_idempotency WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_telemetry_points WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_telemetry_events WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_shadow_run_batch_reviews WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_shadow_runs WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_batch_instances WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_point_catalog_entries WHERE tenant_id = ?", tenantId);
+        cleanupJdbc.update("DELETE FROM bpi.bpi_point_calibrations WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id = ?", tenantId);
     }
 
@@ -190,8 +232,20 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 Map.entry("lineIds", List.of(LINE_ID)),
                 Map.entry("predictionTimePolicy", "AUTOMATIC_BATCH_START"),
                 Map.entry("featureCutoffPolicy", "AT_OR_BEFORE_PREDICTION_TIME"),
-                Map.entry("featureRefs", List.of("batch.order_id", "batch.material_code", "rule.version_id")),
-                Map.entry("labelRefs", List.of("review.manual_start_time", "review.reference_quantity")),
+                Map.entry("featureRefs", List.of(
+                        "batch.order_id",
+                        "batch.material_code",
+                        "batch.stage_code",
+                        "rule.version_id",
+                        "topology.version_id",
+                        "point_catalog.snapshot_id",
+                        FLOW_FEATURE_REF,
+                        PUMP_FEATURE_REF)),
+                Map.entry("processSignalWindows", processSignalWindows()),
+                Map.entry("labelRefs", List.of(
+                        "review.manual_start_time",
+                        "review.reference_quantity",
+                        "review.boundary_acceptance")),
                 Map.entry("maxLabelDelayHours", 24),
                 Map.entry("minimumConfidence", BigDecimal.ONE),
                 Map.entry("splitPolicy", "PRODUCTION_TIME"),
@@ -284,8 +338,11 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.manifest.phaseBoundary.mlflowRegistered").value(false))
                 .andExpect(jsonPath("$.data.manifest.phaseBoundary.modelTrained").value(false))
                 .andReturn();
-        String firstChecksum = response(readyResult).path("data").path("manifestChecksum").asText();
+        JsonNode firstSnapshot = response(readyResult).path("data");
+        String firstChecksum = firstSnapshot.path("manifestChecksum").asText();
         assertThat(firstChecksum).hasSize(64);
+        assertThat(firstSnapshot.path("manifest").path("definition")
+                .path("processSignalWindows").size()).isEqualTo(2);
 
         Map<String, Object> persisted = jdbc.queryForMap("""
                 SELECT count(*)::integer AS total,
@@ -317,6 +374,91 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                  WHERE tenant_id = ? AND snapshot_id = ?
                    AND jsonb_exists(exclusion_reasons, 'LABEL_DELAY_EXCEEDED')
                 """, Long.class, tenantId, firstSnapshotId)).isEqualTo(1L);
+        Map<String, Object> processFacts = jdbc.queryForMap("""
+                SELECT count(*)::integer AS total,
+                       count(*) FILTER (WHERE state = 'READY')::integer AS ready,
+                       count(*) FILTER (WHERE state = 'BLOCKED')::integer AS blocked,
+                       count(*) FILTER (
+                           WHERE state = 'BLOCKED'
+                             AND jsonb_exists(
+                                 blocker_codes, 'WINDOW_SAMPLE_COUNT_BELOW_MINIMUM')
+                             AND jsonb_exists(
+                                 blocker_codes, 'WINDOW_MAX_GAP_EXCEEDED')
+                             AND jsonb_exists(
+                                 blocker_codes, 'WINDOW_METRIC_UNAVAILABLE'))::integer
+                           AS blocked_for_missing_samples
+                  FROM bpi.bpi_dataset_process_signal_window_facts
+                 WHERE tenant_id = ? AND snapshot_id = ?
+                """, tenantId, firstSnapshotId);
+        assertThat(processFacts)
+                .containsEntry("total", 6)
+                .containsEntry("ready", 2)
+                .containsEntry("blocked", 4)
+                .containsEntry("blocked_for_missing_samples", 4);
+
+        Map<String, Object> flowFact = jdbc.queryForMap("""
+                SELECT source_point_count, accepted_sample_count, rejected_quality_count,
+                       late_availability_count, unit_mismatch_count,
+                       value_type_mismatch_count, calibration_mismatch_count,
+                       maximum_observed_gap_seconds, numeric_value,
+                       latest_ingest_time <= prediction_time AS cutoff_safe,
+                       length(source_fingerprint) AS fingerprint_length,
+                       length(fact_checksum) AS checksum_length
+                  FROM bpi.bpi_dataset_process_signal_window_facts
+                 WHERE tenant_id = ? AND snapshot_id = ?
+                   AND batch_no = 'DATASET-HIGH' AND feature_ref = ?
+                """, tenantId, firstSnapshotId, FLOW_FEATURE_REF);
+        assertThat(flowFact)
+                .containsEntry("source_point_count", 4)
+                .containsEntry("accepted_sample_count", 3)
+                .containsEntry("rejected_quality_count", 0)
+                .containsEntry("late_availability_count", 1)
+                .containsEntry("unit_mismatch_count", 0)
+                .containsEntry("value_type_mismatch_count", 0)
+                .containsEntry("calibration_mismatch_count", 0)
+                .containsEntry("cutoff_safe", true)
+                .containsEntry("fingerprint_length", 32)
+                .containsEntry("checksum_length", 64);
+        assertThat((BigDecimal) flowFact.get("numeric_value"))
+                .isEqualByComparingTo("20");
+        assertThat((BigDecimal) flowFact.get("maximum_observed_gap_seconds"))
+                .isEqualByComparingTo("30");
+
+        Map<String, Object> pumpFact = jdbc.queryForMap("""
+                SELECT source_point_count, accepted_sample_count,
+                       maximum_observed_gap_seconds, numeric_value
+                  FROM bpi.bpi_dataset_process_signal_window_facts
+                 WHERE tenant_id = ? AND snapshot_id = ?
+                   AND batch_no = 'DATASET-HIGH' AND feature_ref = ?
+                """, tenantId, firstSnapshotId, PUMP_FEATURE_REF);
+        assertThat(pumpFact)
+                .containsEntry("source_point_count", 2)
+                .containsEntry("accepted_sample_count", 2);
+        assertThat((BigDecimal) pumpFact.get("numeric_value"))
+                .isEqualByComparingTo("0.5");
+        assertThat((BigDecimal) pumpFact.get("maximum_observed_gap_seconds"))
+                .isEqualByComparingTo("30");
+
+        Map<String, Object> persistedFeatures = jdbc.queryForMap("""
+                SELECT (feature_payload ->> ?)::numeric AS flow_mean,
+                       (feature_payload ->> ?)::numeric AS pump_true_ratio,
+                       jsonb_array_length(
+                           source_payload -> 'processSignalWindows') AS evidence_count
+                  FROM bpi.bpi_dataset_snapshot_samples
+                 WHERE tenant_id = ? AND snapshot_id = ?
+                   AND batch_no = 'DATASET-HIGH' AND included
+                """, FLOW_FEATURE_REF, PUMP_FEATURE_REF, tenantId, firstSnapshotId);
+        assertThat((BigDecimal) persistedFeatures.get("flow_mean"))
+                .isEqualByComparingTo("20");
+        assertThat((BigDecimal) persistedFeatures.get("pump_true_ratio"))
+                .isEqualByComparingTo("0.5");
+        assertThat(persistedFeatures).containsEntry("evidence_count", 2);
+        List<String> firstFactChecksums = jdbc.queryForList("""
+                SELECT fact_checksum
+                  FROM bpi.bpi_dataset_process_signal_window_facts
+                 WHERE tenant_id = ? AND snapshot_id = ?
+                 ORDER BY review_id, feature_ref
+                """, String.class, tenantId, firstSnapshotId);
 
         MvcResult secondQueued = mockMvc.perform(post("/bpi/v1/datasets/{id}/snapshots", datasetId)
                         .header("Authorization", "Bearer " + engineerToken)
@@ -331,6 +473,21 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                  WHERE tenant_id = ? AND id = ?
                 """, String.class, tenantId, secondSnapshotId);
         assertThat(secondChecksum).isEqualTo(firstChecksum);
+        assertThat(jdbc.queryForList("""
+                SELECT fact_checksum
+                  FROM bpi.bpi_dataset_process_signal_window_facts
+                 WHERE tenant_id = ? AND snapshot_id = ?
+                 ORDER BY review_id, feature_ref
+                """, String.class, tenantId, secondSnapshotId))
+                .containsExactlyElementsOf(firstFactChecksums);
+        assertThatThrownBy(() -> jdbc.update("""
+                UPDATE bpi.bpi_dataset_process_signal_window_facts
+                   SET numeric_value = 999
+                 WHERE tenant_id = ? AND snapshot_id = ?
+                   AND batch_no = 'DATASET-HIGH' AND feature_ref = ?
+                """, tenantId, firstSnapshotId, FLOW_FEATURE_REF))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("immutable");
 
         long snapshotRevision = jdbc.queryForObject("""
                 SELECT revision FROM bpi.bpi_dataset_snapshots
@@ -1521,9 +1678,17 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.revision").value(1))
                 .andExpect(jsonPath("$.data.assessmentSequence").value(1))
                 .andExpect(jsonPath("$.data.policyVersion")
-                        .value("bpi-training-readiness/batch-start-boundary-v1"))
+                        .value("bpi-training-readiness/batch-start-boundary-v2"))
                 .andExpect(jsonPath("$.data.observedMetrics.includedSampleCount").value(1))
-                .andExpect(jsonPath("$.data.observedMetrics.signalWindowFeatureRefs").isEmpty())
+                .andExpect(jsonPath("$.data.observedMetrics.signalWindowFeatureRefs").isArray())
+                .andExpect(jsonPath("$.data.observedMetrics.processWindowExpectedFactCount")
+                        .value(2))
+                .andExpect(jsonPath("$.data.observedMetrics.processWindowReadyFactCount")
+                        .value(2))
+                .andExpect(jsonPath("$.data.observedMetrics.processWindowBlockedFactCount")
+                        .value(0))
+                .andExpect(jsonPath("$.data.observedMetrics.processWindowMissingFactCount")
+                        .value(0))
                 .andExpect(jsonPath("$.data.phaseBoundary.assessmentOnly").value(true))
                 .andExpect(jsonPath("$.data.phaseBoundary.trainingStarted").value(false))
                 .andExpect(jsonPath("$.data.phaseBoundary.modelCreated").value(false))
@@ -1533,11 +1698,19 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 .andReturn();
         JsonNode response = response(result).path("data");
         UUID assessmentId = UUID.fromString(response.path("id").asText());
+        JsonNode signalWindowFeatureRefs = response.path("observedMetrics")
+                .path("signalWindowFeatureRefs");
+        assertThat(signalWindowFeatureRefs.path(0).asText()).isEqualTo(FLOW_FEATURE_REF);
+        assertThat(signalWindowFeatureRefs.path(1).asText()).isEqualTo(PUMP_FEATURE_REF);
         assertThat(response.path("blockerCodes").toString())
-                .contains("PROCESS_SIGNAL_WINDOWS_MISSING")
-                .contains("BOUNDARY_REVIEW_LABEL_MISSING")
                 .contains("INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM")
                 .contains("START_REJECTED_LABEL_COUNT_BELOW_MINIMUM");
+        assertThat(response.path("blockerCodes").toString())
+                .doesNotContain(
+                        "PROCESS_SIGNAL_WINDOWS_MISSING",
+                        "PROCESS_SIGNAL_WINDOW_FACTS_INCOMPLETE",
+                        "REQUIRED_CONTEXT_FEATURES_MISSING",
+                        "BOUNDARY_REVIEW_LABEL_MISSING");
 
         mockMvc.perform(post(
                         "/bpi/v1/dataset-mlflow-registrations/{id}/training-readiness-assessments",
@@ -1583,7 +1756,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 .containsEntry("state", "BLOCKED")
                 .containsEntry("assessment_sequence", 1L)
                 .containsEntry("revision", 1L)
-                .containsEntry("gate_count", 19)
+                .containsEntry("gate_count", 20)
                 .containsEntry("training_started", "false")
                 .containsEntry("model_created", "false")
                 .containsEntry("model_registered", "false")
@@ -1751,6 +1924,140 @@ class BpiDatasetManifestPostgresAcceptanceTest {
         throw new AssertionError("External catalog publisher did not reach READY before timeout");
     }
 
+    private List<Map<String, Object>> processSignalWindows() {
+        return List.of(
+                Map.ofEntries(
+                        Map.entry("featureRef", FLOW_FEATURE_REF),
+                        Map.entry("signal", "feed.flow"),
+                        Map.entry("valueType", "NUMERIC"),
+                        Map.entry("metric", "MEAN"),
+                        Map.entry("startOffsetSeconds", -60),
+                        Map.entry("endOffsetSeconds", 0),
+                        Map.entry("minimumSamples", 3),
+                        Map.entry("maximumGapSeconds", 30),
+                        Map.entry("expectedUnit", "t/h"),
+                        Map.entry("requireCalibration", true),
+                        Map.entry("acceptedQualityCodes", List.of("GOOD"))),
+                Map.ofEntries(
+                        Map.entry("featureRef", PUMP_FEATURE_REF),
+                        Map.entry("signal", "feed.pump"),
+                        Map.entry("valueType", "BOOLEAN"),
+                        Map.entry("metric", "TRUE_RATIO"),
+                        Map.entry("startOffsetSeconds", -30),
+                        Map.entry("endOffsetSeconds", 0),
+                        Map.entry("minimumSamples", 2),
+                        Map.entry("maximumGapSeconds", 30),
+                        Map.entry("expectedUnit", "state"),
+                        Map.entry("requireCalibration", false),
+                        Map.entry("acceptedQualityCodes", List.of("GOOD"))));
+    }
+
+    private void insertPointCatalogEntry(
+            String deviceId,
+            String propertyId,
+            String unit,
+            String dataType,
+            String calibrationVersion,
+            String calibrationStatus) {
+        jdbc.update("""
+                INSERT INTO bpi.bpi_point_catalog_entries
+                    (id, tenant_id, snapshot_id, plant_id, line_id, locality_group,
+                     product_id, device_id, property_id, point_name, unit, data_type,
+                     device_state, registered, property_present, calibration_version,
+                     calibration_status, source_sequence_enabled)
+                VALUES (?, ?, ?, ?, ?, 'LOCALITY-DATASET', ?, ?, ?, ?, ?, ?,
+                        'ACTIVE', true, true, ?, ?, true)
+                """, UUID.randomUUID(), tenantId, pointSnapshotId, PLANT_ID, LINE_ID,
+                PRODUCT_ID, deviceId, propertyId, propertyId, unit, dataType,
+                calibrationVersion, calibrationStatus);
+    }
+
+    private void insertApprovedFlowCalibration() {
+        jdbc.update("""
+                INSERT INTO bpi.bpi_point_calibrations
+                    (id, tenant_id, plant_id, line_id, product_id, device_id, property_id,
+                     calibration_version, certificate_reference, certificate_checksum,
+                     valid_from, valid_until, state, revision, submitted_by, submitted_at,
+                     submit_reason, decided_by, decided_at, decision_reason)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                        ?, ?, 'APPROVED', 2, 'fixture-calibration-author', ?,
+                        'Dataset process-window acceptance calibration',
+                        'fixture-calibration-reviewer', ?, 'Independent review passed')
+                """, UUID.randomUUID(), tenantId, PLANT_ID, LINE_ID, PRODUCT_ID,
+                FLOW_DEVICE_ID, FLOW_PROPERTY_ID, FLOW_CALIBRATION_VERSION,
+                "urn:adp:calibration:" + FLOW_CALIBRATION_VERSION, "f".repeat(64),
+                Timestamp.from(freezeAt.minus(10, ChronoUnit.DAYS)),
+                Timestamp.from(freezeAt.plus(1, ChronoUnit.DAYS)),
+                Timestamp.from(freezeAt.minus(9, ChronoUnit.DAYS)),
+                Timestamp.from(freezeAt.minus(9, ChronoUnit.DAYS)));
+    }
+
+    private void insertHighBatchTelemetry(Instant predictionTime) {
+        insertTelemetryPoint(
+                FLOW_DEVICE_ID, FLOW_PROPERTY_ID, "DOUBLE", new BigDecimal("10"),
+                null, "t/h", FLOW_CALIBRATION_VERSION,
+                predictionTime.minusSeconds(60), predictionTime.minusSeconds(59), 1);
+        insertTelemetryPoint(
+                FLOW_DEVICE_ID, FLOW_PROPERTY_ID, "DOUBLE", new BigDecimal("20"),
+                null, "t/h", FLOW_CALIBRATION_VERSION,
+                predictionTime.minusSeconds(30), predictionTime.minusSeconds(29), 2);
+        insertTelemetryPoint(
+                FLOW_DEVICE_ID, FLOW_PROPERTY_ID, "DOUBLE", new BigDecimal("30"),
+                null, "t/h", FLOW_CALIBRATION_VERSION,
+                predictionTime, predictionTime, 3);
+        insertTelemetryPoint(
+                FLOW_DEVICE_ID, FLOW_PROPERTY_ID, "DOUBLE", new BigDecimal("999"),
+                null, "t/h", FLOW_CALIBRATION_VERSION,
+                predictionTime.minusSeconds(15), predictionTime.plusSeconds(5), 4);
+        insertTelemetryPoint(
+                FLOW_DEVICE_ID, FLOW_PROPERTY_ID, "DOUBLE", new BigDecimal("888"),
+                null, "t/h", FLOW_CALIBRATION_VERSION,
+                predictionTime.minusSeconds(10), freezeAt.plusSeconds(1), 5);
+        insertTelemetryPoint(
+                PUMP_DEVICE_ID, PUMP_PROPERTY_ID, "BOOLEAN", null,
+                true, "state", null,
+                predictionTime.minusSeconds(30), predictionTime.minusSeconds(29), 1);
+        insertTelemetryPoint(
+                PUMP_DEVICE_ID, PUMP_PROPERTY_ID, "BOOLEAN", null,
+                false, "state", null,
+                predictionTime, predictionTime, 2);
+    }
+
+    private void insertTelemetryPoint(
+            String deviceId,
+            String propertyId,
+            String valueType,
+            BigDecimal numericValue,
+            Boolean booleanValue,
+            String unit,
+            String calibrationVersion,
+            Instant sampleTime,
+            Instant ingestTime,
+            long sequence) {
+        UUID eventRowId = UUID.randomUUID();
+        String eventId = "DATASET-EVENT-" + UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO bpi.bpi_telemetry_events
+                    (id, tenant_id, plant_id, line_id, gateway_id, product_id, device_id,
+                     event_id, message_id, event_time, ingest_time, source_epoch, sequence,
+                     sequence_origin, sequence_disposition, payload_checksum, headers,
+                     point_count, accepted_point_count, rejected_point_count, status)
+                VALUES (?, ?, ?, ?, 'GATEWAY-DATASET', ?, ?, ?, ?, ?, ?, 1, ?,
+                        'DEVICE', 'ACCEPTED', ?, '{}'::jsonb, 1, 1, 0, 'ACCEPTED')
+                """, eventRowId, tenantId, PLANT_ID, LINE_ID, PRODUCT_ID, deviceId,
+                eventId, "MESSAGE-" + eventId, Timestamp.from(sampleTime),
+                Timestamp.from(ingestTime), sequence, "e".repeat(64));
+        jdbc.update("""
+                INSERT INTO bpi.bpi_telemetry_points
+                    (id, tenant_id, telemetry_event_id, event_id, property_id, value_type,
+                     numeric_value, string_value, boolean_value, unit, quality_code,
+                     sample_time, calibration_version)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, 'GOOD', ?, ?)
+                """, UUID.randomUUID(), tenantId, eventRowId, eventId, propertyId, valueType,
+                numericValue, booleanValue, unit, Timestamp.from(sampleTime),
+                calibrationVersion);
+    }
+
     private void insertReviewedBatch(
             String batchNo,
             Instant start,
@@ -1793,6 +2100,9 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 Timestamp.from(start.plusSeconds(startAccepted ? 0 : 61)), Timestamp.from(end),
                 startAccepted ? 0 : 61, startAccepted, endAccepted, deviation, quantityAccepted,
                 Timestamp.from(reviewedAt));
+        if ("DATASET-HIGH".equals(batchNo)) {
+            insertHighBatchTelemetry(start);
+        }
     }
 
     private void insertCrossPlantReviewedBatch() {

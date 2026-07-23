@@ -57,6 +57,8 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V29__bpi_dataset_object_lock_recovery_archive.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V30__bpi_dataset_mlflow_registration.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V31__bpi_dataset_training_readiness.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V32__bpi_dataset_process_signal_windows.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V33__bpi_function_execution_privilege_hardening.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -128,11 +130,13 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetService.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilder.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestProcessor.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/ProcessSignalWindowBuilder.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetTrainingReadinessBuilder.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetTrainingReadinessService.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataset/DatasetManifestDispatcher.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataset/DatasetManifestProperties.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetPostgresRepository.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ProcessSignalWindowPostgresRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DatasetTrainingReadinessPostgresRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetController.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DatasetTrainingReadinessCommand.java",
@@ -145,6 +149,7 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalPhase2IntegrationController.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfigurationTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilderTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/ProcessSignalWindowBuilderTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDatasetManifestPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/DatasetTrainingReadinessBuilderTest.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
@@ -213,10 +218,17 @@ REQUIRED_FILES = [
     "metadata/bpi-dataset-training-readiness-blocked-target.png",
     "metadata/bpi-dataset-training-readiness-blocked-mobile-target.png",
     "metadata/bpi-dataset-training-readiness-restart-target.png",
+    "docs/testing/bpi-dataset-process-signal-window-acceptance.md",
+    "docs/backend-table-audit/bpi-dataset-process-signal-window.md",
+    "metadata/bpi-dataset-process-signal-window-acceptance.json",
+    "metadata/bpi-integrated-upgrade-v33-target.json",
+    "metadata/bpi-dataset-process-signal-window-desktop-target.png",
+    "metadata/bpi-dataset-process-signal-window-mobile-target.png",
     "deploy/docker/scripts/adp-bpi-dataset-manifest-target-acceptance.js",
     "deploy/docker/scripts/adp-bpi-dataset-materialization-target-acceptance.js",
     "deploy/docker/scripts/adp-bpi-dataset-training-readiness-target-acceptance.js",
     "deploy/docker/scripts/bpi-dataset-manifest-target-fixture.sql",
+    "deploy/docker/scripts/bpi-dataset-process-window-target-fixture.sql",
     "deploy/docker/scripts/bpi-dataset-manifest-target-verification.sql",
     "deploy/docker/scripts/bpi-dataset-materialization-target-verification.sql",
     "deploy/docker/scripts/bpi-dataset-training-readiness-target-verification.sql",
@@ -553,10 +565,30 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V32__bpi_dataset_process_signal_windows.sql",
+        [
+            "process_signal_windows jsonb",
+            "bpi_dataset_process_signal_window_facts",
+            "reject_dataset_process_signal_window_mutation",
+            "bpi-training-readiness/batch-start-boundary-v2",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/resources/db/migration/V33__bpi_function_execution_privilege_hardening.sql",
+        [
+            "REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA bpi FROM PUBLIC",
+            "ALTER DEFAULT PRIVILEGES IN SCHEMA bpi",
+            "REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/DatasetManifestBuilder.java",
         [
-            "ALLOWED_FEATURE_REFS",
+            "ALLOWED_CONTEXT_FEATURE_REFS",
             "ALLOWED_LABEL_REFS",
+            "processSignalWindows and process.window.* featureRefs must match exactly.",
             "AT_OR_BEFORE_PREDICTION_TIME",
             "LABEL_DELAY_EXCEEDED",
             "CONFIDENCE_BELOW_THRESHOLD",
@@ -565,6 +597,48 @@ def main() -> int:
             'boundary.put("icebergReady", false)',
             'boundary.put("mlflowRegistered", false)',
             'boundary.put("modelTrained", false)',
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE
+        / "app/src/main/java/com/mapletct/ftmes/bpi/application/ProcessSignalWindowBuilder.java",
+        [
+            "WINDOW_BINDING_MISSING",
+            "WINDOW_POINT_NOT_READY",
+            "WINDOW_SAMPLE_COUNT_BELOW_MINIMUM",
+            "WINDOW_MAX_GAP_EXCEEDED",
+            "WINDOW_METRIC_UNAVAILABLE",
+            'case "MEAN"',
+            'case "TRUE_RATIO"',
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE
+        / (
+            "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/"
+            "ProcessSignalWindowPostgresRepository.java"
+        ),
+        [
+            "event.ingest_time <= :freezeAt",
+            "ingest_time <= prediction_time",
+            "available_at_prediction",
+            "sample_time <= prediction_time",
+            "maximum_observed_gap_seconds",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE
+        / (
+            "app/src/test/java/com/mapletct/ftmes/bpi/application/"
+            "ProcessSignalWindowBuilderTest.java"
+        ),
+        [
+            "buildsDeterministicReadyNumericWindow",
+            "failsClosedForCoverageUnitTypeAndCalibrationProblems",
+            "computesBooleanTrueRatioWithoutCalibrationRequirement",
         ],
         failures,
     )
@@ -2534,6 +2608,172 @@ def main() -> int:
                 or readiness_upgrade.get("database", {}).get("schemaDowngradeAllowed")
                     is not False):
             fail("BPI V31 controlled upgrade evidence is incomplete", failures)
+
+    process_window_acceptance = json.loads(
+        (
+            ROOT
+            / "metadata/bpi-dataset-process-signal-window-acceptance.json"
+        ).read_text(encoding="utf-8")
+    )
+    process_window_commit = "f7db2f98e82d481f6c53c5fa7539ac52c812e28f"
+    process_window_target = process_window_acceptance.get("target", {})
+    if (
+        process_window_acceptance.get("status")
+        != "PASS_TARGET_BROWSER_API_POSTGRES_PROCESS_WINDOWS_CLEANED_DEFAULT_OFF"
+        or process_window_acceptance.get("phase")
+        != "3C_C_PROCESS_SIGNAL_WINDOWS"
+        or process_window_acceptance.get("repoCommit") != process_window_commit
+        or process_window_acceptance.get("releaseCommit") != process_window_commit
+        or process_window_target.get("host") != "10.11.100.17"
+        or process_window_target.get("composeProject") != "adp-mes-newbase"
+        or process_window_target.get("database") != "PostgreSQL 15.18"
+        or process_window_target.get("databaseName") != "ft_mes_bpi"
+        or process_window_target.get("flywayVersion") != 33
+    ):
+        fail("BPI process-window target identity is incomplete", failures)
+
+    expected_process_window_summary = {
+        "testedFeatures": 12,
+        "pass": 12,
+        "fail": 0,
+        "blocked": 0,
+        "notApplicable": 0,
+        "browserRuns": 1,
+        "browserFailures": 0,
+        "postgresVerificationRuns": 1,
+        "postgresVerificationFailures": 0,
+        "unexpectedConsoleErrors": 0,
+        "pageErrors": 0,
+        "requestFailures": 0,
+        "horizontalOverflowFailures": 0,
+    }
+    if process_window_acceptance.get("summary") != expected_process_window_summary:
+        fail("BPI process-window acceptance summary is incomplete", failures)
+    process_window_items = process_window_acceptance.get("items", [])
+    if (
+        len(process_window_items) != 12
+        or sum(item.get("status") == "PASS" for item in process_window_items) != 12
+    ):
+        fail("BPI process-window item statuses are incomplete", failures)
+
+    process_window_deployment = process_window_acceptance.get("deployment", {})
+    if (
+        process_window_deployment.get("strategy") != "INTEGRATED_EXPAND_ONLY"
+        or process_window_deployment.get("databaseBefore") != 32
+        or process_window_deployment.get("databaseAfter") != 33
+        or process_window_deployment.get("upgradeStatus") != "PASS"
+        or process_window_deployment.get("upgradePhase") != "COMPLETE"
+        or process_window_deployment.get("activeServicesHealthy") != 3
+        or process_window_deployment.get("optionalServicesRunning") != 0
+        or process_window_deployment.get("webStatus") != 200
+    ):
+        fail("BPI process-window deployment evidence is incomplete", failures)
+
+    process_window_browser = process_window_acceptance.get("browser", {})
+    if (
+        process_window_browser.get("definitionStatus") != 200
+        or process_window_browser.get("snapshotStatus") != 202
+        or process_window_browser.get("snapshotState") != "MANIFEST_READY"
+        or process_window_browser.get("snapshotRevision") != 3
+        or process_window_browser.get("processWindowDefinitions") != 2
+        or process_window_browser.get("processWindowFacts") != 6
+        or process_window_browser.get("readyFacts") != 2
+        or process_window_browser.get("blockedFacts") != 4
+        or any(
+            process_window_browser.get(key)
+            for key in ("consoleErrors", "pageErrors", "requestFailures")
+        )
+        or process_window_browser.get("mobile", {}).get("viewport") != 390
+        or process_window_browser.get("mobile", {}).get("bodyWidth") != 390
+        or process_window_browser.get("mobile", {}).get("documentWidth") != 390
+    ):
+        fail("BPI process-window browser evidence is incomplete", failures)
+    for viewport_name in ("desktop", "mobile"):
+        screenshot = process_window_browser.get(viewport_name, {})
+        screenshot_path = ROOT / screenshot.get("screenshot", "")
+        if not screenshot_path.is_file():
+            fail(
+                f"BPI process-window {viewport_name} screenshot is missing",
+                failures,
+            )
+        elif hashlib.sha256(screenshot_path.read_bytes()).hexdigest() != screenshot.get(
+            "sha256"
+        ):
+            fail(
+                f"BPI process-window {viewport_name} screenshot hash does not match",
+                failures,
+            )
+
+    process_window_postgres = process_window_acceptance.get("postgres", {})
+    process_window_facts = process_window_postgres.get("processWindows", {})
+    process_window_flow = process_window_postgres.get("flow", {})
+    process_window_pump = process_window_postgres.get("pump", {})
+    if (
+        process_window_postgres.get("definitions") != 1
+        or process_window_postgres.get("snapshots") != 1
+        or process_window_postgres.get("samples", {}).get("total") != 3
+        or process_window_postgres.get("samples", {}).get("included") != 1
+        or process_window_postgres.get("samples", {}).get("excluded") != 2
+        or process_window_postgres.get("samples", {}).get("labelLeakageRows") != 0
+        or process_window_postgres.get("samples", {}).get("crossPlantRows") != 0
+        or process_window_facts.get("total") != 6
+        or process_window_facts.get("ready") != 2
+        or process_window_facts.get("blocked") != 4
+        or process_window_facts.get("cutoffSafe") != 6
+        or process_window_facts.get("checksumsValid") != 6
+        or process_window_flow.get("sourcePointCount") != 4
+        or process_window_flow.get("acceptedSampleCount") != 3
+        or process_window_flow.get("lateAvailabilityCount") != 1
+        or process_window_flow.get("numericValue") != 20
+        or process_window_pump.get("sourcePointCount") != 2
+        or process_window_pump.get("acceptedSampleCount") != 2
+        or process_window_pump.get("numericValue") != 0.5
+        or process_window_postgres.get("immutableUpdateRejected") is not True
+    ):
+        fail("BPI process-window PostgreSQL evidence is incomplete", failures)
+
+    process_window_cleanup = process_window_acceptance.get("cleanup", {})
+    if (
+        not process_window_cleanup
+        or any(value != 0 for value in process_window_cleanup.values())
+    ):
+        fail("BPI process-window cleanup evidence is incomplete", failures)
+    process_window_boundaries = process_window_acceptance.get("boundaries", {})
+    if (
+        not process_window_boundaries
+        or any(value is not False for value in process_window_boundaries.values())
+    ):
+        fail("BPI process-window acceptance overclaims a phase boundary", failures)
+
+    process_window_upgrade_path = ROOT / process_window_deployment.get(
+        "upgradeReport", ""
+    )
+    if not process_window_upgrade_path.is_file():
+        fail("BPI V33 controlled upgrade artifact is missing", failures)
+    else:
+        process_window_upgrade_bytes = process_window_upgrade_path.read_bytes()
+        if hashlib.sha256(process_window_upgrade_bytes).hexdigest() != (
+            process_window_deployment.get("upgradeReportSha256")
+        ):
+            fail("BPI V33 controlled upgrade artifact hash does not match", failures)
+        process_window_upgrade = json.loads(process_window_upgrade_bytes)
+        process_window_upgrade_database = process_window_upgrade.get("database", {})
+        if (
+            process_window_upgrade.get("status") != "PASS"
+            or process_window_upgrade.get("phase") != "COMPLETE"
+            or process_window_upgrade.get("strategy") != "INTEGRATED_EXPAND_ONLY"
+            or process_window_upgrade.get("releaseCommit") != process_window_commit
+            or process_window_upgrade_database.get("engine") != "PostgreSQL"
+            or process_window_upgrade_database.get("beforeFlywayVersion") != 32
+            or process_window_upgrade_database.get("afterFlywayVersion") != 33
+            or process_window_upgrade_database.get("expectedFlywayVersion") != 33
+            or process_window_upgrade_database.get("migrationMode")
+            != "APPLY_EXPANSION"
+            or process_window_upgrade_database.get("migrationApplied") is not True
+            or process_window_upgrade_database.get("schemaDowngradeAllowed")
+            is not False
+        ):
+            fail("BPI V33 controlled upgrade evidence is incomplete", failures)
 
     formal_reversal = json.loads(
         (ROOT / "metadata/bpi-formal-identity-wms-reversal-acceptance.json").read_text(

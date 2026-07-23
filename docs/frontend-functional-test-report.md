@@ -1017,6 +1017,26 @@ backend，结束后停止 MLflow/registrar、移除临时卷并恢复所有开�
 `metadata/bpi-dataset-training-readiness-restart-target.png`；完整报告：
 `docs/testing/bpi-dataset-training-readiness-acceptance.md`。
 
+### BPI V32/V33 工艺信号窗口（2026-07-23）
+
+本节使用唯一目标环境 `http://10.11.100.17:18080`、真实 ADP 登录和 exact revision
+`f7db2f98e82d481f6c53c5fa7539ac52c812e28f`。V32 增加工艺信号窗口定义与不可变事实，V33 撤销
+BPI schema 函数的默认 `PUBLIC EXECUTE`。第一次部署被最小权限门禁正确停止且未切换运行容器；
+补充 V33 后从 V32 expand-only 到 V33，并完成真实页面、API、PostgreSQL 和清理验收。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 窗口定义 | `/bpi/#/datasets` | 新建 definition，保留并提交流量 `MEAN/-60s..0s` 与泵状态 `TRUE_RATIO/-30s..0s` 两组受控窗口 | `POST /bpi-api/datasets` | HTTP 200；页面显示 2 个窗口定义；console/page/request error 均为 0 | `ACTIVE/r1`，定义 checksum 固化；审计与幂等 `COMPLETED/200` | `bpi_dataset_definitions`、`bpi_audit_events`、`bpi_api_idempotency` | PASS_TARGET | 仅为受控 fixture，不是现场测点配置 |
+| BPI 时间点窗口事实 | 同上 | 冻结 snapshot 并轮询至完成，展开样本和工艺信号窗口证据 | `POST /bpi-api/datasets/{id}/snapshots`；`GET /bpi-api/dataset-snapshots/{id}` | POST 202；最终 `MANIFEST_READY/r3`；页面显示 3 个样本、6 条事实、2 READY/4 BLOCKED | PostgreSQL 为 6 条不可变事实；流量均值 20、泵运行比例 0.5；迟到值 999 和冻结后值 888 未污染特征 | `bpi_dataset_snapshots`、`bpi_dataset_snapshot_samples`、`bpi_dataset_process_signal_window_facts`、telemetry/catalog/calibration 表 | PASS_TARGET_POINT_IN_TIME | 低置信度和标签延迟样本因没有测点形成 4 条 BLOCKED，属于预期失败关闭 |
+| BPI 响应式复验 | 同一详情，桌面 `1440x900` 与移动 `390x844` | 重新打开同一 snapshot 并核对窗口定义、事实和阶段边界 | definition/snapshot GET | 桌面和移动均显示 6 条事实；移动 viewport/body/document `390/390/390`，无横向溢出；浏览器错误为 0 | 只读返回同一 definition/snapshot checksum，没有新增业务行 | 只读 | PASS_TARGET_RESPONSIVE | 页面明确保持 `MANIFEST_ONLY/NOT_STARTED` |
+| BPI V33 权限门禁与退场 | 不适用 | 验证四个可选 worker 角色无函数执行权；定向删除 marker 并检查运行面 | PostgreSQL role verification；cleanup SQL；`GET /bpi/` | `/bpi/` 为 200，页面不再含 marker | Flyway 33；四角色权限校验 PASS；19 类投影为 0；主三服务 healthy，可选 sidecar 为 0 | `flyway_schema_history`、V26-V33 lineage/fixture 表 | PASS_TARGET_CLEANED_DEFAULT_OFF | 模型训练、注册、推断和激活未启动 |
+
+marker：`ADP_E2E_BPI_WINDOWS_20260723_1235_A1`。机器证据：
+`metadata/bpi-dataset-process-signal-window-acceptance.json`；截图：
+`metadata/bpi-dataset-process-signal-window-desktop-target.png`、
+`metadata/bpi-dataset-process-signal-window-mobile-target.png`；完整报告：
+`docs/testing/bpi-dataset-process-signal-window-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

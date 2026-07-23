@@ -1017,6 +1017,27 @@ V29 恢复包；PostgreSQL、Object Lock、最小权限、隔离恢复和清理�
 `docs/testing/bpi-dataset-training-readiness-acceptance.md`。本项证明评估机制真实可用；当前数据仍被 8 个
 门槛阻断，因此不关闭模型训练、注册、推断或生产激活。
 
+### BPI V32/V33 工艺信号窗口（目标页面/API/PostgreSQL）
+
+本节使用 marker `ADP_E2E_BPI_WINDOWS_20260723_1235_A1`。唯一目标栈运行 exact revision
+`f7db2f98e82d481f6c53c5fa7539ac52c812e28f`，PostgreSQL 15.18/Flyway V33。受控 fixture 提供
+拓扑绑定、点位目录、批准校准和 7 条遥测；真实 ADP 页面创建定义和快照，随后直接查库验证
+point-in-time、失败关闭、不可变和精确清理。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 创建两组受控窗口定义 | `/bpi/#/datasets` | `POST /bpi-api/datasets` | Java 8 adapter -> `DatasetController -> DatasetService -> DatasetPostgresRepository.insertDefinition` | `bpi_dataset_definitions`、`bpi_audit_events`、`bpi_api_idempotency` | `bpi-dataset-manifest-target-verification.sql`，要求 `processWindowCount=2`、checksum 有效、幂等完成 | HTTP 200；`ACTIVE/r1`；流量 MEAN 60 秒窗口和泵 TRUE_RATIO 30 秒窗口均固化；幂等 `COMPLETED/200` | PASS_TARGET |
+| 冻结 snapshot 并持久化窗口事实 | 同上 | `POST /bpi-api/datasets/{datasetId}/snapshots`；snapshot GET | `DatasetManifestProcessor -> ProcessSignalWindowPostgresRepository.findEvidence -> ProcessSignalWindowBuilder -> DatasetPostgresRepository.completeSnapshot` | `bpi_dataset_snapshots`、`bpi_dataset_snapshot_samples`、`bpi_dataset_process_signal_window_facts`、audit/idempotency | 同一 verification SQL，要求 snapshot `MANIFEST_READY/r3`、3 samples、6 facts、2 READY/4 BLOCKED | HTTP 202；3 个样本形成 6 条事实；checksum/fingerprint 6/6 有效；幂等 `COMPLETED/202` | PASS_TARGET |
+| 流量与泵状态 point-in-time 聚合 | snapshot 详情 | `GET /bpi-api/dataset-snapshots/{snapshotId}` | `ProcessSignalWindowPostgresRepository -> ProcessSignalWindowBuilder` | telemetry、topology binding、catalog、calibration、process-window facts | 查询 high-confidence review 的 source/accepted/late/gap/value 和 mismatch 计数 | 流量 `source=4/accepted=3/late=1/mean=20`，冻结后值 888 不进入 source；泵 `source=2/accepted=2/trueRatio=0.5`；单位/类型/校准 mismatch 均 0 | PASS_TARGET_POINT_IN_TIME |
+| 缺测失败关闭与不可变反证 | 同一详情；直接 SQL 负向验证 | snapshot GET；`UPDATE bpi_dataset_process_signal_window_facts` | `DatasetManifestBuilder` blocker；`trg_bpi_dataset_process_signal_window_immutable` | snapshot samples、process-window facts | 要求 4 BLOCKED 携带 sample-count/max-gap/metric-unavailable；尝试把 `numeric_value` 改为 999 | 4 条缺测事实明确 BLOCKED；UPDATE 返回 `BPI dataset process signal window facts are immutable`，旧事实不变 | PASS_TARGET_FAIL_CLOSED_IMMUTABLE |
+| V33 最小权限加固 | 不适用 | PostgreSQL role provision/grant/verify | `V33__bpi_function_execution_privilege_hardening.sql` | BPI schema 函数 ACL、默认权限 | 对 materializer/catalog publisher/retention archiver/MLflow registrar 检查函数 EXECUTE 均为 false | 首次 V32 部署在权限门禁处停止且未切换容器；新增 V33 后现有 V32 库与全新 V1-V33 库、四角色验证全部 PASS | PASS_SECURITY |
+| marker 与运行时退场 | 不适用 | `bpi-dataset-manifest-target-cleanup.sql`；Docker/HTTP readback | 受控定向 SQL 和正式 Compose runtime | V26-V33 lineage/fixture/audit/idempotency 表 | 要求 19 类 marker 投影均为 0，Flyway 33，主服务 healthy，可选 sidecar 0 | 定义、快照、样本、6 条事实、7 条遥测及依赖 fixture 全部清零；主三服务 healthy、`/bpi/` 200，训练/模型/推断/激活仍为 false | PASS_TARGET_CLEANED |
+
+机器证据：`metadata/bpi-dataset-process-signal-window-acceptance.json`；表级报告：
+`docs/backend-table-audit/bpi-dataset-process-signal-window.md`；完整页面、API、SQL、权限门禁和清理证据：
+`docs/testing/bpi-dataset-process-signal-window-acceptance.md`。本项只关闭受控过程窗口的实现与验收，不关闭
+物理 DEVICE/GATEWAY、正式校准、200 个复核批次、7 个生产日或模型训练资格。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

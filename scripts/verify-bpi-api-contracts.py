@@ -75,6 +75,56 @@ def main() -> int:
     if asyncapi.get("asyncapi") != "3.0.0":
         failures.append("asyncapi.json must use AsyncAPI 3.0.0")
 
+    schemas = openapi.get("components", {}).get("schemas", {})
+    required_dataset_schemas = {
+        "ProcessSignalWindowDefinitionCommand",
+        "ProcessSignalWindowDefinition",
+        "DatasetProcessSignalWindowEvidence",
+        "DatasetManifestDefinition",
+        "DatasetManifestSample",
+    }
+    missing_dataset_schemas = sorted(required_dataset_schemas - set(schemas))
+    if missing_dataset_schemas:
+        failures.append(
+            "process signal window schemas missing: " + ", ".join(missing_dataset_schemas)
+        )
+    dataset_command = schemas.get("DatasetDefinitionCreateCommand", {})
+    if (
+        dataset_command.get("properties", {})
+        .get("processSignalWindows", {})
+        .get("items", {})
+        .get("$ref")
+        != "#/components/schemas/ProcessSignalWindowDefinitionCommand"
+    ):
+        failures.append(
+            "DatasetDefinitionCreateCommand must expose typed processSignalWindows"
+        )
+    dataset_definition = schemas.get("DatasetDefinition", {})
+    if "processSignalWindows" not in dataset_definition.get("required", []):
+        failures.append("DatasetDefinition must return processSignalWindows")
+    manifest_samples = (
+        schemas.get("DatasetManifest", {})
+        .get("properties", {})
+        .get("samples", {})
+        .get("items", {})
+        .get("$ref")
+    )
+    if manifest_samples != "#/components/schemas/DatasetManifestSample":
+        failures.append("DatasetManifest samples must use the typed sample schema")
+    manifest_sample_required = set(schemas.get("DatasetManifestSample", {}).get("required", []))
+    if not {"featureCutoff", "featurePayload", "labelPayload", "sourcePayload"}.issubset(
+        manifest_sample_required
+    ):
+        failures.append("DatasetManifestSample must match the Java payload field names")
+    readiness_policy = (
+        schemas.get("DatasetTrainingReadinessAssessment", {})
+        .get("properties", {})
+        .get("policyVersion", {})
+        .get("enum")
+    )
+    if readiness_policy != ["bpi-training-readiness/batch-start-boundary-v2"]:
+        failures.append("training-readiness API policy must be the V2 process-fact gate")
+
     operations: dict[str, tuple[str, str, dict]] = {}
     for path, path_item in openapi.get("paths", {}).items():
         for method, operation in path_item.items():

@@ -21,11 +21,14 @@ const DATASET_RECOVERY_BUCKET = 'bpi-dataset-recovery';
 const DATASET_MLFLOW_REGISTRAR_VERSION = 'bpi-dataset-mlflow-registrar/0.1.0';
 const DATASET_MLFLOW_TRACKING_PROFILE = 'bpi-mlflow-dataset-v1';
 const DATASET_TRAINING_OBJECTIVE = 'BATCH_START_BOUNDARY_REVIEW_RISK';
-const DATASET_TRAINING_POLICY = 'bpi-training-readiness/batch-start-boundary-v1';
+const DATASET_TRAINING_POLICY = 'bpi-training-readiness/batch-start-boundary-v2';
 const DATASET_FEATURE_REFS = new Set([
   'batch.order_id', 'batch.material_code', 'batch.stage_code', 'batch.quantity_unit',
   'rule.version_id', 'topology.version_id', 'point_catalog.snapshot_id',
 ]);
+const DATASET_PROCESS_FEATURE_REF = /^process\.window\.[a-z0-9][a-z0-9._-]*$/;
+const DATASET_PROCESS_SIGNAL = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/;
+const DATASET_NUMERIC_WINDOW_METRICS = new Set(['MEAN', 'MIN', 'MAX', 'LAST', 'DELTA', 'SLOPE']);
 const DATASET_LABEL_REFS = new Set([
   'review.manual_start_time', 'review.manual_end_time', 'review.reference_quantity',
   'review.boundary_acceptance', 'review.quantity_acceptance',
@@ -667,20 +670,85 @@ function normalizeDatasetStrings(values) {
   return normalized;
 }
 
+function normalizeProcessSignalWindows(values) {
+  if (values === undefined || values === null) return [];
+  if (!Array.isArray(values) || values.length > 20) return null;
+  const normalized = values.map((value) => {
+    if (!value || typeof value !== 'object') return null;
+    const acceptedQualityCodes = normalizeDatasetStrings(value.acceptedQualityCodes);
+    const featureRef = String(value.featureRef || '').trim();
+    const signal = String(value.signal || '').trim();
+    const valueType = String(value.valueType || '').trim();
+    const metric = String(value.metric || '').trim();
+    const startOffsetSeconds = Number(value.startOffsetSeconds);
+    const endOffsetSeconds = Number(value.endOffsetSeconds);
+    const minimumSamples = Number(value.minimumSamples);
+    const maximumGapSeconds = Number(value.maximumGapSeconds);
+    const expectedUnit = String(value.expectedUnit || '').trim();
+    const validMetric = valueType === 'BOOLEAN'
+      ? metric === 'TRUE_RATIO'
+      : valueType === 'NUMERIC' && DATASET_NUMERIC_WINDOW_METRICS.has(metric);
+    if (!DATASET_PROCESS_FEATURE_REF.test(featureRef)
+        || !DATASET_PROCESS_SIGNAL.test(signal)
+        || !validMetric
+        || !Number.isInteger(startOffsetSeconds)
+        || startOffsetSeconds < -3600 || startOffsetSeconds > -1
+        || !Number.isInteger(endOffsetSeconds)
+        || endOffsetSeconds < -3599 || endOffsetSeconds > 0
+        || endOffsetSeconds <= startOffsetSeconds
+        || !Number.isInteger(minimumSamples)
+        || minimumSamples < 2 || minimumSamples > 900
+        || !Number.isInteger(maximumGapSeconds)
+        || maximumGapSeconds < 1 || maximumGapSeconds > 600
+        || !expectedUnit || expectedUnit.length > 32
+        || typeof value.requireCalibration !== 'boolean'
+        || !acceptedQualityCodes
+        || acceptedQualityCodes.length > 2
+        || acceptedQualityCodes.some((code) => !['GOOD', 'SUBSTITUTED'].includes(code))) {
+      return null;
+    }
+    const controlled = {
+      featureRef,
+      signal,
+      valueType,
+      metric,
+      startOffsetSeconds,
+      endOffsetSeconds,
+      minimumSamples,
+      maximumGapSeconds,
+      expectedUnit,
+      requireCalibration: value.requireCalibration,
+      acceptedQualityCodes,
+    };
+    return { ...controlled, checksum: sha256(controlled) };
+  });
+  if (normalized.some((value) => !value)) return null;
+  normalized.sort((left, right) => left.featureRef.localeCompare(right.featureRef));
+  if (new Set(normalized.map((value) => value.featureRef)).size !== normalized.length) return null;
+  return normalized;
+}
+
 function validateDatasetDefinition(body) {
   const lineIds = normalizeDatasetStrings(body.lineIds);
   const featureRefs = normalizeDatasetStrings(body.featureRefs);
   const labelRefs = normalizeDatasetStrings(body.labelRefs);
+  const processSignalWindows = normalizeProcessSignalWindows(body.processSignalWindows);
   const validCode = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(body.datasetCode || '');
   const validVersion = /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(body.version || '');
-  const validFeatures = featureRefs?.every((reference) => DATASET_FEATURE_REFS.has(reference));
+  const processFeatureRefs = processSignalWindows?.map((window) => window.featureRef) || [];
+  const selectedProcessFeatureRefs = featureRefs?.filter((reference) =>
+    reference.startsWith('process.window.')) || [];
+  const validFeatures = featureRefs?.every((reference) =>
+    DATASET_FEATURE_REFS.has(reference) || DATASET_PROCESS_FEATURE_REF.test(reference));
+  const processFeatureRefsMatch = processSignalWindows
+    && JSON.stringify(processFeatureRefs) === JSON.stringify(selectedProcessFeatureRefs);
   const validLabels = labelRefs?.every((reference) => DATASET_LABEL_REFS.has(reference));
   const validDelay = Number.isInteger(body.maxLabelDelayHours)
     && body.maxLabelDelayHours >= 1 && body.maxLabelDelayHours <= 2160;
   const confidence = Number(body.minimumConfidence);
   if (!validCode || !validVersion || !String(body.name || '').trim()
       || !String(body.plantId || '').trim() || !lineIds || !featureRefs || !labelRefs
-      || !validFeatures || !validLabels || !validDelay
+      || !processSignalWindows || !validFeatures || !processFeatureRefsMatch || !validLabels || !validDelay
       || !Number.isFinite(confidence) || confidence < 0 || confidence > 1
       || body.predictionTimePolicy !== DATASET_PREDICTION_TIME_POLICY
       || body.featureCutoffPolicy !== DATASET_FEATURE_CUTOFF_POLICY
@@ -688,7 +756,7 @@ function validateDatasetDefinition(body) {
       || !String(body.reason || '').trim()) {
     return null;
   }
-  return { lineIds, featureRefs, labelRefs, confidence };
+  return { lineIds, featureRefs, processSignalWindows, labelRefs, confidence };
 }
 
 function prepareDatasetManifestAcceptance(state) {
@@ -780,6 +848,96 @@ function selectedDatasetPayload(references, values) {
   return Object.fromEntries(references.map((reference) => [reference, values[reference]]));
 }
 
+function simulatedProcessSignalValue(definition, sampleIndex) {
+  if (definition.metric === 'TRUE_RATIO') return sampleIndex % 2 === 0 ? 1 : 0.5;
+  const base = 18.6 + sampleIndex * 0.4;
+  if (definition.metric === 'MIN') return Number((base - 0.8).toFixed(6));
+  if (definition.metric === 'MAX') return Number((base + 0.8).toFixed(6));
+  if (definition.metric === 'DELTA') return Number((0.8 + sampleIndex * 0.1).toFixed(6));
+  if (definition.metric === 'SLOPE') return Number((0.02 + sampleIndex * 0.001).toFixed(6));
+  return Number(base.toFixed(6));
+}
+
+function buildSimulatedProcessSignalWindowEvidence(state, definition, batch, sampleIndex) {
+  const predictionMillis = Date.parse(batch.startTime);
+  const binding = state.topology.definition.bindings.find((item) =>
+    item.signal === definition.signal);
+  const point = binding ? state.pointCatalog.points.find((item) =>
+    item.productId === binding.productId
+      && item.deviceId === binding.deviceId
+      && item.propertyId === binding.propertyId) : null;
+  const blockers = [];
+  if (!binding) blockers.push('WINDOW_BINDING_MISSING');
+  if (binding && binding.unit !== definition.expectedUnit) {
+    blockers.push('WINDOW_BINDING_UNIT_MISMATCH');
+  }
+  if (binding && !point) blockers.push('WINDOW_POINT_CATALOG_MISSING');
+  if (point && !point.ready) blockers.push('WINDOW_POINT_NOT_READY');
+  if (point && point.unit !== definition.expectedUnit) {
+    blockers.push('WINDOW_POINT_CATALOG_UNIT_MISMATCH');
+  }
+  if (definition.requireCalibration && binding && point
+      && (binding.calibrationVersion !== point.calibrationVersion
+        || point.calibrationStatus !== 'VERIFIED')) {
+    blockers.push('WINDOW_CALIBRATION_MISMATCH');
+  }
+  const stableBlockers = [...new Set(blockers)].sort();
+  const sampleIntervalSeconds = Math.min(15, definition.maximumGapSeconds);
+  const syntheticSourcePointCount = Math.max(
+    definition.minimumSamples,
+    Math.floor(
+      (definition.endOffsetSeconds - definition.startOffsetSeconds)
+      / sampleIntervalSeconds,
+    ) + 1,
+  );
+  const sourcePointCount = stableBlockers.length ? 0 : syntheticSourcePointCount;
+  const sourceFingerprint = sha256({
+    simulationOnly: true,
+    batchId: batch.id,
+    definitionChecksum: definition.checksum,
+    predictionTime: batch.startTime,
+    sourcePointCount,
+  });
+  const evidence = {
+    featureRef: definition.featureRef,
+    signal: definition.signal,
+    metric: definition.metric,
+    valueType: definition.valueType,
+    windowStart: new Date(
+      predictionMillis + definition.startOffsetSeconds * 1000,
+    ).toISOString(),
+    windowEnd: new Date(
+      predictionMillis + definition.endOffsetSeconds * 1000,
+    ).toISOString(),
+    predictionTime: batch.startTime,
+    physicalPoint: {
+      productId: binding?.productId || null,
+      deviceId: binding?.deviceId || null,
+      propertyId: binding?.propertyId || null,
+    },
+    expectedUnit: definition.expectedUnit,
+    minimumSamples: definition.minimumSamples,
+    maximumGapSeconds: definition.maximumGapSeconds,
+    sourcePointCount,
+    acceptedSampleCount: sourcePointCount,
+    rejectedQualityCount: 0,
+    lateAvailabilityCount: 0,
+    unitMismatchCount: stableBlockers.some((code) => code.includes('UNIT_MISMATCH')) ? 1 : 0,
+    valueTypeMismatchCount: 0,
+    calibrationMismatchCount: stableBlockers.includes('WINDOW_CALIBRATION_MISMATCH') ? 1 : 0,
+    maximumObservedGapSeconds: sourcePointCount ? sampleIntervalSeconds : null,
+    numericValue: stableBlockers.length
+      ? null : simulatedProcessSignalValue(definition, sampleIndex),
+    state: stableBlockers.length ? 'BLOCKED' : 'READY',
+    blockerCodes: stableBlockers,
+    sourceFingerprint,
+  };
+  return {
+    ...evidence,
+    factChecksum: sha256(evidence),
+  };
+}
+
 function buildDatasetSnapshot(state, snapshot) {
   const definition = state.datasetDefinitions.find((item) => item.id === snapshot.datasetId);
   if (!definition) return;
@@ -804,7 +962,7 @@ function buildDatasetSnapshot(state, snapshot) {
       || left.batch.id.localeCompare(right.batch.id)
       || left.review.id.localeCompare(right.review.id));
   const exclusionSummary = {};
-  const samples = rows.map(({ review, run, batch }) => {
+  const samples = rows.map(({ review, run, batch }, sampleIndex) => {
     const acceptedChecks = Number(review.startBoundaryAccepted)
       + Number(review.endBoundaryAccepted) + Number(review.quantityWithinTolerance);
     const confidence = Number((acceptedChecks / 3).toFixed(6));
@@ -825,6 +983,15 @@ function buildDatasetSnapshot(state, snapshot) {
       if (!review.endBoundaryAccepted) reasons.push('END_BOUNDARY_OUTSIDE_TOLERANCE');
       if (!review.quantityWithinTolerance) reasons.push('QUANTITY_OUTSIDE_TOLERANCE');
     }
+    const processSignalWindows = definition.processSignalWindows.map((window) =>
+      buildSimulatedProcessSignalWindowEvidence(state, window, batch, sampleIndex));
+    const blockedProcessSignalWindows = processSignalWindows
+      .filter((evidence) => evidence.state !== 'READY');
+    if (blockedProcessSignalWindows.length) {
+      reasons.push('PROCESS_SIGNAL_WINDOW_NOT_READY');
+      blockedProcessSignalWindows.forEach((evidence) =>
+        reasons.push(...evidence.blockerCodes));
+    }
     const stableReasons = [...new Set(reasons)].sort();
     stableReasons.forEach((reason) => { exclusionSummary[reason] = (exclusionSummary[reason] || 0) + 1; });
     const featureValues = {
@@ -836,6 +1003,9 @@ function buildDatasetSnapshot(state, snapshot) {
       'topology.version_id': run.topologyVersionId,
       'point_catalog.snapshot_id': run.pointCatalogSnapshotId,
     };
+    processSignalWindows.forEach((evidence) => {
+      featureValues[evidence.featureRef] = evidence.numericValue;
+    });
     const labelValues = {
       'review.manual_start_time': review.manualStartTime,
       'review.manual_end_time': review.manualEndTime,
@@ -857,13 +1027,13 @@ function buildDatasetSnapshot(state, snapshot) {
       included: stableReasons.length === 0,
       exclusionReasons: stableReasons,
       predictionTime: batch.startTime,
-      featureCutoffTime: batch.startTime,
+      featureCutoff: batch.startTime,
       labelAvailableAt: review.reviewedAt,
       confidence,
       splitKey: batch.startTime.slice(0, 7),
-      features: selectedDatasetPayload(definition.featureRefs, featureValues),
-      labels: selectedDatasetPayload(definition.labelRefs, labelValues),
-      source: {
+      featurePayload: selectedDatasetPayload(definition.featureRefs, featureValues),
+      labelPayload: selectedDatasetPayload(definition.labelRefs, labelValues),
+      sourcePayload: {
         reviewId: review.id,
         shadowRunId: run.id,
         batchId: batch.id,
@@ -874,6 +1044,7 @@ function buildDatasetSnapshot(state, snapshot) {
         startBoundaryAccepted: review.startBoundaryAccepted,
         endBoundaryAccepted: review.endBoundaryAccepted,
         quantityWithinTolerance: review.quantityWithinTolerance,
+        processSignalWindows,
       },
     };
   });
@@ -888,6 +1059,7 @@ function buildDatasetSnapshot(state, snapshot) {
       predictionTimePolicy: definition.predictionTimePolicy,
       featureCutoffPolicy: definition.featureCutoffPolicy,
       featureRefs: definition.featureRefs,
+      processSignalWindows: definition.processSignalWindows,
       labelRefs: definition.labelRefs,
       maxLabelDelayHours: definition.maxLabelDelayHours,
       minimumConfidence: definition.minimumConfidence,
@@ -1163,15 +1335,31 @@ function buildDatasetTrainingReadiness(state, registration, sequence, reason) {
   ];
   const missingContext = requiredContext.filter((item) => !featureRefs.includes(item));
   const signalFeatures = featureRefs.filter((item) => /^(signal\.|telemetry\.|process\.window\.|parameter\.window\.)/.test(item));
-  const accepted = included.filter((sample) => sample.labels?.['review.boundary_acceptance']?.start === true).length;
-  const rejected = included.filter((sample) => sample.labels?.['review.boundary_acceptance']?.start === false).length;
+  const accepted = included.filter((sample) =>
+    (sample.labelPayload || sample.labels)?.['review.boundary_acceptance']?.start === true).length;
+  const rejected = included.filter((sample) =>
+    (sample.labelPayload || sample.labels)?.['review.boundary_acceptance']?.start === false).length;
   const missingLabels = included.length - accepted - rejected;
   const distinctBatches = new Set(included.map((sample) => sample.batchId)).size;
   const productionDays = new Set(included.map((sample) => sample.predictionTime.slice(0, 10))).size;
   const splitGroups = new Set(included.map((sample) => sample.splitKey)).size;
   const leakageRows = included.filter((sample) =>
-    Date.parse(sample.featureCutoffTime) > Date.parse(sample.predictionTime)
+    Date.parse(sample.featureCutoff || sample.featureCutoffTime) > Date.parse(sample.predictionTime)
     || Date.parse(sample.labelAvailableAt) < Date.parse(sample.predictionTime)).length;
+  const expectedProcessSignalWindowFactCount =
+    included.length * (definition?.processSignalWindows?.length || 0);
+  const processSignalWindowFacts = included.flatMap((sample) => {
+    const facts = (sample.sourcePayload || sample.source)?.processSignalWindows;
+    return Array.isArray(facts) ? facts : [];
+  });
+  const readyProcessSignalWindowFactCount = processSignalWindowFacts
+    .filter((fact) => fact.state === 'READY').length;
+  const blockedProcessSignalWindowFactCount = processSignalWindowFacts
+    .filter((fact) => fact.state !== 'READY').length;
+  const missingProcessSignalWindowFactCount = Math.max(
+    0,
+    expectedProcessSignalWindowFactCount - processSignalWindowFacts.length,
+  );
   const excludedRatio = samples.length ? excluded.length / samples.length : 1;
   const inputVerified = registration.state === 'REGISTERED'
     && registration.registrationMetadata?.datasetInputVerified === true
@@ -1200,6 +1388,10 @@ function buildDatasetTrainingReadiness(state, registration, sequence, reason) {
     labelRefs: clone(labelRefs),
     missingContextFeatureRefs: missingContext,
     signalWindowFeatureRefs: signalFeatures,
+    processWindowExpectedFactCount: expectedProcessSignalWindowFactCount,
+    processWindowReadyFactCount: readyProcessSignalWindowFactCount,
+    processWindowBlockedFactCount: blockedProcessSignalWindowFactCount,
+    processWindowMissingFactCount: missingProcessSignalWindowFactCount,
     startAcceptedLabelCount: accepted,
     startRejectedLabelCount: rejected,
     startLabelMissingCount: missingLabels,
@@ -1241,6 +1433,20 @@ function buildDatasetTrainingReadiness(state, registration, sequence, reason) {
   gate('POINT_IN_TIME_LEAKAGE_DETECTED', 0, leakageRows, '特征截止和标签可用时间不能泄漏未来事实。', leakageRows === 0);
   gate('REQUIRED_CONTEXT_FEATURES_MISSING', [], missingContext, '缺少物料、工段或版本血缘上下文。', missingContext.length === 0);
   gate('PROCESS_SIGNAL_WINDOWS_MISSING', 2, signalFeatures.length, '至少需要两组边界前过程信号窗口，只有标识符不能训练工艺模型。', signalFeatures.length >= 2);
+  gate(
+    'PROCESS_SIGNAL_WINDOW_FACTS_INCOMPLETE',
+    expectedProcessSignalWindowFactCount,
+    {
+      ready: readyProcessSignalWindowFactCount,
+      blocked: blockedProcessSignalWindowFactCount,
+      missing: missingProcessSignalWindowFactCount,
+    },
+    '每个纳入样本的每组工艺窗口都必须形成 READY 的不可变事实。',
+    expectedProcessSignalWindowFactCount > 0
+      && readyProcessSignalWindowFactCount === expectedProcessSignalWindowFactCount
+      && blockedProcessSignalWindowFactCount === 0
+      && missingProcessSignalWindowFactCount === 0,
+  );
   gate('BOUNDARY_REVIEW_LABEL_MISSING', 'review.boundary_acceptance', labelRefs, '需要人工复核的起始边界标签。', labelRefs.includes('review.boundary_acceptance'));
   gate('INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM', 200, included.length, '纳入样本不足。', included.length >= 200);
   gate('DISTINCT_BATCH_COUNT_BELOW_MINIMUM', 200, distinctBatches, '独立批次数不足。', distinctBatches >= 200);
@@ -3287,6 +3493,7 @@ function createHandler(state) {
           predictionTimePolicy: body.predictionTimePolicy,
           featureCutoffPolicy: body.featureCutoffPolicy,
           featureRefs: validated.featureRefs,
+          processSignalWindows: validated.processSignalWindows,
           labelRefs: validated.labelRefs,
           maxLabelDelayHours: body.maxLabelDelayHours,
           minimumConfidence: validated.confidence,
