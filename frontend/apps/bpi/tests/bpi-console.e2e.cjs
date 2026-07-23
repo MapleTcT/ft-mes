@@ -189,7 +189,7 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   assert.match(await materializationPanel.locator('.dataset-artifact-uri').textContent(), /^s3:\/\/bpi-datasets\/datasets\/.*\.parquet\?versionId=.+$/);
   assert.match(await materializationPanel.locator('.dataset-artifact-sha').textContent(), /^[a-f0-9]{64}$/);
   assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
-    'MANIFEST_READY', 'READY', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED',
+    'MANIFEST_READY', 'READY', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED',
   ]);
 
   await page.getByRole('button', { name: '发布 Iceberg' }).click();
@@ -223,7 +223,7 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   assert.match(await catalogPanel.locator('.dataset-table-identifier').textContent(), /^ft_mes_bpi\.bpi_training\.tenant_[a-f0-9]{16}\.dataset_[a-f0-9]+$/);
   assert.match(await catalogPanel.locator('.dataset-semantic-sha').textContent(), /^[a-f0-9]{64}$/);
   assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
-    'MANIFEST_READY', 'READY', 'READY', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED',
+    'MANIFEST_READY', 'READY', 'READY', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED',
   ]);
 
   await page.getByRole('button', { name: '创建恢复包' }).click();
@@ -260,7 +260,7 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   assert.equal(await archivePanel.locator('.dataset-retention-semantic-sha').textContent(),
     await catalogPanel.locator('.dataset-semantic-sha').textContent());
   assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
-    'MANIFEST_READY', 'READY', 'READY', 'LOCKED', 'NOT_STARTED', 'NOT_STARTED',
+    'MANIFEST_READY', 'READY', 'READY', 'LOCKED', 'NOT_STARTED', 'NOT_STARTED', 'NOT_STARTED',
   ]);
 
   publicationResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-catalog-publications/${publicationId}`).then((item) => item.json());
@@ -315,7 +315,7 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   assert.match(await mlflowPanel.locator('.dataset-mlflow-experiment').textContent(), /^\d+$/);
   assert.match(await mlflowPanel.locator('.dataset-mlflow-run').textContent(), /^[a-f0-9]{32}$/);
   assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
-    'MANIFEST_READY', 'READY', 'READY', 'LOCKED', 'REGISTERED', 'NOT_STARTED',
+    'MANIFEST_READY', 'READY', 'READY', 'LOCKED', 'REGISTERED', 'NOT_STARTED', 'NOT_STARTED',
   ]);
 
   registrationResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-mlflow-registrations/${registrationId}`).then((item) => item.json());
@@ -331,6 +331,37 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   assert.equal(registrationResponse.data.registrationMetadata.modelRegistered, false);
   assert.equal(registrationResponse.data.registrationMetadata.onlineInferenceEnabled, false);
   assert.equal(registrationResponse.data.registrationMetadata.productionActivationAllowed, false);
+
+  let readinessResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-mlflow-registrations/${registrationId}/training-readiness-assessments`).then((item) => item.json());
+  assert.equal(readinessResponse.data, null);
+  await page.getByRole('button', { name: '评估训练资格' }).click();
+  await page.getByRole('heading', { name: '评估训练就绪' }).waitFor();
+  await page.getByText('只评估，不训练模型', { exact: true }).waitFor();
+  await page.locator('#dataset-training-readiness-reason').fill('浏览器核对样本、过程信号、标签、现场周期和质量门槛');
+  await page.locator('#dataset-training-readiness-submit').click();
+
+  const readinessPanel = page.locator('[data-training-readiness-state="BLOCKED"]');
+  await readinessPanel.waitFor();
+  await readinessPanel.getByText('PROCESS_SIGNAL_WINDOWS_MISSING', { exact: true }).waitFor();
+  await readinessPanel.getByText('START_REJECTED_LABEL_COUNT_BELOW_MINIMUM', { exact: true }).waitFor();
+  await readinessPanel.getByText('INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM', { exact: true }).waitFor();
+  await readinessPanel.getByText('training=false · registry=false · inference=false · activation=false', { exact: true }).waitFor();
+  assert.match(await readinessPanel.locator('.dataset-training-readiness-checksum').textContent(), /^[a-f0-9]{64}$/);
+  assert.deepEqual(await page.locator('.dataset-delivery-grid .status').allTextContents(), [
+    'MANIFEST_READY', 'READY', 'READY', 'LOCKED', 'REGISTERED', 'BLOCKED', 'NOT_STARTED',
+  ]);
+  readinessResponse = await fetch(`${simulatorUrl}/bpi/v1/dataset-mlflow-registrations/${registrationId}/training-readiness-assessments`).then((item) => item.json());
+  assert.equal(readinessResponse.data.state, 'BLOCKED');
+  assert.equal(readinessResponse.data.assessmentSequence, 1);
+  assert.equal(readinessResponse.data.gateResults.length, 19);
+  assert.equal(readinessResponse.data.observedMetrics.includedSampleCount, 1);
+  assert.equal(readinessResponse.data.observedMetrics.signalWindowFeatureRefs.length, 0);
+  assert.equal(readinessResponse.data.phaseBoundary.assessmentOnly, true);
+  assert.equal(readinessResponse.data.phaseBoundary.trainingStarted, false);
+  assert.equal(readinessResponse.data.phaseBoundary.modelCreated, false);
+  assert.equal(readinessResponse.data.phaseBoundary.modelRegistered, false);
+  assert.equal(readinessResponse.data.phaseBoundary.onlineInferenceEnabled, false);
+  assert.equal(readinessResponse.data.phaseBoundary.productionActivationAllowed, false);
 
   const definitions = await fetch(`${simulatorUrl}/bpi/v1/datasets?plantId=PLANT-01&limit=100`).then((item) => item.json());
   assert.equal(definitions.data.length, 1);
@@ -355,15 +386,19 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   await page.locator('[data-catalog-state="READY"]').waitFor();
   await page.locator('[data-retention-state="LOCKED"]').waitFor();
   await page.locator('[data-mlflow-state="REGISTERED"]').waitFor();
+  await page.locator('[data-training-readiness-state="BLOCKED"]').waitFor();
   assert.equal(await page.locator('.dataset-iceberg-snapshot').textContent(), '9223372036854775001',
     'page reload must rediscover the publication from the materialization');
   assert.match(await page.locator('.dataset-retention-manifest-sha').textContent(), /^[a-f0-9]{64}$/,
     'page reload must rediscover the immutable recovery package from the publication');
   assert.match(await page.locator('.dataset-mlflow-source').textContent(), /\?versionId=[a-f0-9-]{36}$/,
     'page reload must rediscover the exact MLflow Dataset Input registration');
+  assert.match(await page.locator('.dataset-training-readiness-checksum').textContent(), /^[a-f0-9]{64}$/,
+    'page reload must rediscover the latest immutable training-readiness assessment');
   await page.screenshot({ path: '/tmp/bpi-dataset-iceberg-desktop.png', fullPage: true });
   await page.screenshot({ path: '/tmp/bpi-dataset-object-lock-desktop.png', fullPage: true });
   await page.locator('.dataset-mlflow-panel').screenshot({ path: '/tmp/bpi-dataset-mlflow-desktop.png' });
+  await page.locator('.dataset-training-readiness-panel').screenshot({ path: '/tmp/bpi-dataset-training-readiness-desktop.png' });
   assert.deepEqual(errors, []);
   await desktop.close();
 
@@ -385,6 +420,7 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   await mobilePage.locator('[data-catalog-state="READY"]').waitFor();
   await mobilePage.locator('[data-retention-state="LOCKED"]').waitFor();
   await mobilePage.locator('[data-mlflow-state="REGISTERED"]').waitFor();
+  await mobilePage.locator('[data-training-readiness-state="BLOCKED"]').waitFor();
   assert.equal(await mobilePage.locator('.dataset-iceberg-snapshot').textContent(), '9223372036854775001');
   assert.match(await mobilePage.locator('.dataset-mlflow-source').textContent(), /\?versionId=[a-f0-9-]{36}$/);
   const drawerGeometry = await mobilePage.evaluate(() => ({ body: document.body.scrollWidth, viewport: window.innerWidth }));
@@ -392,6 +428,7 @@ test('data engineer delivers a version-locked MLflow Dataset Input with failed r
   await mobilePage.screenshot({ path: '/tmp/bpi-dataset-iceberg-mobile.png', fullPage: true });
   await mobilePage.screenshot({ path: '/tmp/bpi-dataset-object-lock-mobile.png', fullPage: true });
   await mobilePage.locator('.dataset-mlflow-panel').screenshot({ path: '/tmp/bpi-dataset-mlflow-mobile.png' });
+  await mobilePage.locator('.dataset-training-readiness-panel').screenshot({ path: '/tmp/bpi-dataset-training-readiness-mobile.png' });
   assert.deepEqual(mobileErrors, []);
   await mobile.close();
 });

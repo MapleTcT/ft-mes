@@ -20,6 +20,8 @@ const DATASET_RECOVERY_PROFILE = 'bpi-dataset-recovery-v1';
 const DATASET_RECOVERY_BUCKET = 'bpi-dataset-recovery';
 const DATASET_MLFLOW_REGISTRAR_VERSION = 'bpi-dataset-mlflow-registrar/0.1.0';
 const DATASET_MLFLOW_TRACKING_PROFILE = 'bpi-mlflow-dataset-v1';
+const DATASET_TRAINING_OBJECTIVE = 'BATCH_START_BOUNDARY_REVIEW_RISK';
+const DATASET_TRAINING_POLICY = 'bpi-training-readiness/batch-start-boundary-v1';
 const DATASET_FEATURE_REFS = new Set([
   'batch.order_id', 'batch.material_code', 'batch.stage_code', 'batch.quantity_unit',
   'rule.version_id', 'topology.version_id', 'point_catalog.snapshot_id',
@@ -769,6 +771,7 @@ function prepareDatasetManifestAcceptance(state) {
   state.pendingDatasetRetentionArchiveIds = new Set();
   state.datasetMlflowRegistrations = [];
   state.pendingDatasetMlflowRegistrationIds = new Set();
+  state.datasetTrainingReadinessAssessments = [];
   state.idempotency = new Map();
   return { runId, ruleVersionId: state.rule.id, preparedReviewCount: state.shadowRunReviews.length };
 }
@@ -1134,7 +1137,171 @@ function latestDatasetMlflowRegistration(state, archiveId) {
       && item.registrarVersion === DATASET_MLFLOW_REGISTRAR_VERSION
       && item.trackingProfile === DATASET_MLFLOW_TRACKING_PROFILE)
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt)
+    || right.id.localeCompare(left.id))[0] || null;
+}
+
+function latestDatasetTrainingReadiness(state, registrationId) {
+  return state.datasetTrainingReadinessAssessments
+    .filter((item) => item.mlflowRegistrationId === registrationId
+      && item.objectiveCode === DATASET_TRAINING_OBJECTIVE
+      && item.policyVersion === DATASET_TRAINING_POLICY)
+    .sort((left, right) => right.assessmentSequence - left.assessmentSequence
       || right.id.localeCompare(left.id))[0] || null;
+}
+
+function buildDatasetTrainingReadiness(state, registration, sequence, reason) {
+  const snapshot = state.datasetSnapshots.find((item) => item.id === registration.snapshotId);
+  const definition = state.datasetDefinitions.find((item) => item.id === registration.datasetId);
+  const samples = snapshot?.manifest?.samples || [];
+  const included = samples.filter((sample) => sample.included);
+  const excluded = samples.filter((sample) => !sample.included);
+  const featureRefs = definition?.featureRefs || [];
+  const labelRefs = definition?.labelRefs || [];
+  const requiredContext = [
+    'batch.material_code', 'batch.stage_code', 'rule.version_id',
+    'topology.version_id', 'point_catalog.snapshot_id',
+  ];
+  const missingContext = requiredContext.filter((item) => !featureRefs.includes(item));
+  const signalFeatures = featureRefs.filter((item) => /^(signal\.|telemetry\.|process\.window\.|parameter\.window\.)/.test(item));
+  const accepted = included.filter((sample) => sample.labels?.['review.boundary_acceptance']?.start === true).length;
+  const rejected = included.filter((sample) => sample.labels?.['review.boundary_acceptance']?.start === false).length;
+  const missingLabels = included.length - accepted - rejected;
+  const distinctBatches = new Set(included.map((sample) => sample.batchId)).size;
+  const productionDays = new Set(included.map((sample) => sample.predictionTime.slice(0, 10))).size;
+  const splitGroups = new Set(included.map((sample) => sample.splitKey)).size;
+  const leakageRows = included.filter((sample) =>
+    Date.parse(sample.featureCutoffTime) > Date.parse(sample.predictionTime)
+    || Date.parse(sample.labelAvailableAt) < Date.parse(sample.predictionTime)).length;
+  const excludedRatio = samples.length ? excluded.length / samples.length : 1;
+  const inputVerified = registration.state === 'REGISTERED'
+    && registration.registrationMetadata?.datasetInputVerified === true
+    && registration.registrationMetadata?.lineageVerified === true
+    && registration.registrationMetadata?.sourceFactsVerified === true;
+  const unresolvedCritical = state.dataQualityIncidents.filter((incident) =>
+    incident.severity === 'CRITICAL' && incident.state !== 'RESOLVED').length;
+  const observedMetrics = {
+    registrationState: registration.state,
+    registrationRevision: registration.revision,
+    datasetInputVerified: registration.registrationMetadata?.datasetInputVerified === true,
+    lineageVerified: registration.registrationMetadata?.lineageVerified === true,
+    sourceFactsVerified: registration.registrationMetadata?.sourceFactsVerified === true,
+    sourceRowCount: registration.sourceRowCount,
+    snapshotIncludedCount: snapshot?.includedCount || 0,
+    snapshotExcludedCount: snapshot?.excludedCount || 0,
+    persistedSampleCount: samples.length,
+    includedSampleCount: included.length,
+    excludedSampleCount: excluded.length,
+    excludedRatio,
+    distinctBatchCount: distinctBatches,
+    distinctProductionDayCount: productionDays,
+    productionSplitGroupCount: splitGroups,
+    leakageRowCount: leakageRows,
+    featureRefs: clone(featureRefs),
+    labelRefs: clone(labelRefs),
+    missingContextFeatureRefs: missingContext,
+    signalWindowFeatureRefs: signalFeatures,
+    startAcceptedLabelCount: accepted,
+    startRejectedLabelCount: rejected,
+    startLabelMissingCount: missingLabels,
+    distinctShadowRunCount: included.length ? 1 : 0,
+    approvedShadowRunCount: included.length ? 1 : 0,
+    shadowRunDurationGateFailureCount: 0,
+    maximumContinuousShadowRunDays: included.length ? 8 : 0,
+    pointCatalogSnapshotCount: included.length ? 1 : 0,
+    readyPointCatalogSnapshotCount: included.length ? 1 : 0,
+    unresolvedCriticalIncidentCount: unresolvedCritical,
+  };
+  const requiredThresholds = {
+    requiredRegistrationState: 'REGISTERED',
+    requiredDatasetInputEvidence: true,
+    requiredPredictionTimePolicy: DATASET_PREDICTION_TIME_POLICY,
+    requiredFeatureCutoffPolicy: DATASET_FEATURE_CUTOFF_POLICY,
+    requiredSplitPolicy: DATASET_SPLIT_POLICY,
+    requiredContextFeatureRefs: requiredContext,
+    requiredLabelRef: 'review.boundary_acceptance',
+    minimumSignalWindowFeatureRefs: 2,
+    minimumIncludedSamples: 200,
+    minimumDistinctBatches: 200,
+    minimumProductionDays: 7,
+    minimumProductionSplitGroups: 2,
+    maximumExcludedRatio: 0.2,
+    minimumStartAcceptedLabels: 100,
+    minimumStartRejectedLabels: 10,
+    minimumContinuousShadowRunDays: 7,
+    maximumLeakageRows: 0,
+    maximumUnresolvedCriticalIncidents: 0,
+  };
+  const gates = [];
+  const gate = (code, expected, observed, detail, passed) => gates.push({
+    code, expected, observed, detail, passed,
+  });
+  gate('MLFLOW_DATASET_INPUT_NOT_VERIFIED', true, inputVerified, 'MLflow 数据输入、血缘和来源事实必须全部复验。', inputVerified);
+  gate('DATASET_POLICY_MISMATCH', `${DATASET_PREDICTION_TIME_POLICY}|${DATASET_FEATURE_CUTOFF_POLICY}|${DATASET_SPLIT_POLICY}`, `${definition?.predictionTimePolicy}|${definition?.featureCutoffPolicy}|${definition?.splitPolicy}`, '数据集必须使用预测时点截止和生产时间切分。', definition?.predictionTimePolicy === DATASET_PREDICTION_TIME_POLICY && definition?.featureCutoffPolicy === DATASET_FEATURE_CUTOFF_POLICY && definition?.splitPolicy === DATASET_SPLIT_POLICY);
+  gate('SOURCE_ROW_RECONCILIATION_FAILED', included.length, registration.sourceRowCount, 'MLflow 来源行数必须等于清单纳入行数。', registration.sourceRowCount === included.length && snapshot?.includedCount === included.length && snapshot?.excludedCount === excluded.length);
+  gate('POINT_IN_TIME_LEAKAGE_DETECTED', 0, leakageRows, '特征截止和标签可用时间不能泄漏未来事实。', leakageRows === 0);
+  gate('REQUIRED_CONTEXT_FEATURES_MISSING', [], missingContext, '缺少物料、工段或版本血缘上下文。', missingContext.length === 0);
+  gate('PROCESS_SIGNAL_WINDOWS_MISSING', 2, signalFeatures.length, '至少需要两组边界前过程信号窗口，只有标识符不能训练工艺模型。', signalFeatures.length >= 2);
+  gate('BOUNDARY_REVIEW_LABEL_MISSING', 'review.boundary_acceptance', labelRefs, '需要人工复核的起始边界标签。', labelRefs.includes('review.boundary_acceptance'));
+  gate('INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM', 200, included.length, '纳入样本不足。', included.length >= 200);
+  gate('DISTINCT_BATCH_COUNT_BELOW_MINIMUM', 200, distinctBatches, '独立批次数不足。', distinctBatches >= 200);
+  gate('PRODUCTION_DAY_COVERAGE_BELOW_MINIMUM', 7, productionDays, '生产日期覆盖不足。', productionDays >= 7);
+  gate('PRODUCTION_SPLIT_GROUPS_BELOW_MINIMUM', 2, splitGroups, '至少需要两个生产时间切分组。', splitGroups >= 2);
+  gate('EXCLUDED_RATIO_ABOVE_MAXIMUM', 0.2, excludedRatio, '样本排除比例过高。', excludedRatio <= 0.2);
+  gate('START_ACCEPTED_LABEL_COUNT_BELOW_MINIMUM', 100, accepted, '起始边界接受标签不足。', accepted >= 100);
+  gate('START_REJECTED_LABEL_COUNT_BELOW_MINIMUM', 10, rejected, '起始边界拒绝标签不足。', rejected >= 10);
+  gate('START_LABEL_VALUES_MISSING', 0, missingLabels, '每个纳入样本都必须有起始边界复核标签。', missingLabels === 0);
+  gate('SHADOW_RUN_SOURCE_NOT_APPROVED', observedMetrics.distinctShadowRunCount, observedMetrics.approvedShadowRunCount, '所有来源必须是已批准影子运行。', observedMetrics.distinctShadowRunCount > 0 && observedMetrics.approvedShadowRunCount === observedMetrics.distinctShadowRunCount);
+  gate('SHADOW_RUN_DURATION_GATE_FAILED', 7, observedMetrics.maximumContinuousShadowRunDays, '影子运行必须满足 7-14 天现场窗口。', observedMetrics.maximumContinuousShadowRunDays >= 7);
+  gate('POINT_CATALOG_READINESS_UNPROVEN', observedMetrics.pointCatalogSnapshotCount, observedMetrics.readyPointCatalogSnapshotCount, '固定点位目录必须保留就绪证据。', observedMetrics.pointCatalogSnapshotCount > 0 && observedMetrics.readyPointCatalogSnapshotCount === observedMetrics.pointCatalogSnapshotCount);
+  gate('UNRESOLVED_CRITICAL_DATA_QUALITY', 0, unresolvedCritical, '来源窗口内不能存在未解决关键数据质量事件。', unresolvedCritical === 0);
+  const blockerCodes = gates.filter((item) => !item.passed).map((item) => item.code);
+  const phaseBoundary = {
+    assessmentOnly: true,
+    trainingStarted: false,
+    modelCreated: false,
+    modelRegistered: false,
+    onlineInferenceEnabled: false,
+    productionActivationAllowed: false,
+  };
+  const assessmentChecksum = sha256({
+    registrationId: registration.id,
+    snapshotId: registration.snapshotId,
+    sourceRegistrationRevision: registration.revision,
+    objectiveCode: DATASET_TRAINING_OBJECTIVE,
+    policyVersion: DATASET_TRAINING_POLICY,
+    requiredThresholds,
+    observedMetrics,
+    gateResults: gates,
+    phaseBoundary,
+  });
+  return {
+    id: stableUuid(`dataset-training-readiness:${registration.id}:${sequence}`),
+    mlflowRegistrationId: registration.id,
+    sourceSnapshotId: registration.snapshotId,
+    datasetId: registration.datasetId,
+    datasetCode: registration.datasetCode,
+    datasetVersion: registration.datasetVersion,
+    tenantId: registration.tenantId,
+    plantId: registration.plantId,
+    lineIds: clone(registration.lineIds),
+    objectiveCode: DATASET_TRAINING_OBJECTIVE,
+    policyVersion: DATASET_TRAINING_POLICY,
+    assessmentSequence: sequence,
+    state: blockerCodes.length ? 'BLOCKED' : 'ELIGIBLE',
+    revision: 1,
+    sourceRegistrationRevision: registration.revision,
+    manifestChecksum: registration.manifestChecksum,
+    datasetDigest: registration.datasetDigest,
+    requiredThresholds,
+    observedMetrics,
+    gateResults: gates,
+    blockerCodes,
+    phaseBoundary,
+    assessmentChecksum,
+    assessedBy: 'simulated.data.engineer',
+    assessmentReason: reason,
+    assessedAt: FIXED_TIME,
+  };
 }
 
 function completeDatasetMlflowRegistration(state, registration) {
@@ -3709,6 +3876,52 @@ function createHandler(state) {
         registration.failureDetail = null;
         state.pendingDatasetMlflowRegistrationIds.add(registration.id);
         return rememberAndSend(state, context, res, 202, envelope(operationId, registration), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-mlflow-registrations\/([^/]+)\/training-readiness-assessments$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getLatestDatasetTrainingReadinessAssessment';
+        const registration = state.datasetMlflowRegistrations.find((item) => item.id === ids[0]);
+        if (!registration) {
+          return send(res, 404, problem(404, 'Not Found', 'MLflow dataset registration not found.', operationId), operationId);
+        }
+        return send(res, 200, envelope(
+          operationId, latestDatasetTrainingReadiness(state, registration.id),
+        ), operationId);
+      }
+      if (req.method === 'POST' && ids) {
+        const operationId = 'assessDatasetTrainingReadiness';
+        const registration = state.datasetMlflowRegistrations.find((item) => item.id === ids[0]);
+        if (!registration) {
+          return send(res, 404, problem(404, 'Not Found', 'MLflow dataset registration not found.', operationId), operationId);
+        }
+        const context = commandContext(req, res, operationId, registration.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (body.objectiveCode !== DATASET_TRAINING_OBJECTIVE
+          || String(body.reason || '').trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'A supported objective and assessment reason are required.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (registration.state !== 'REGISTERED') {
+          const response = problem(409, 'Verified Dataset Input Required', 'Training readiness requires a REGISTERED MLflow Dataset Input.', operationId, registration.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const latest = latestDatasetTrainingReadiness(state, registration.id);
+        const assessment = buildDatasetTrainingReadiness(
+          state, registration, (latest?.assessmentSequence || 0) + 1,
+          String(body.reason).trim(),
+        );
+        state.datasetTrainingReadinessAssessments.push(assessment);
+        return rememberAndSend(state, context, res, 200, envelope(operationId, assessment), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/dataset-training-readiness-assessments\/([^/]+)$/);
+      if (req.method === 'GET' && ids) {
+        const operationId = 'getDatasetTrainingReadinessAssessment';
+        const assessment = state.datasetTrainingReadinessAssessments.find((item) => item.id === ids[0]);
+        if (!assessment) {
+          return send(res, 404, problem(404, 'Not Found', 'Dataset training readiness assessment not found.', operationId), operationId);
+        }
+        return send(res, 200, envelope(operationId, assessment), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/integrations/health') {
         return send(res, 200, envelope('getIntegrationHealth', state.integrations), 'getIntegrationHealth');

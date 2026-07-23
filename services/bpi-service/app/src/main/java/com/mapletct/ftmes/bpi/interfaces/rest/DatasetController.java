@@ -7,12 +7,14 @@ import com.mapletct.ftmes.bpi.application.DatasetMaterializationService;
 import com.mapletct.ftmes.bpi.application.DatasetMlflowRegistrationService;
 import com.mapletct.ftmes.bpi.application.DatasetRetentionArchiveService;
 import com.mapletct.ftmes.bpi.application.DatasetService;
+import com.mapletct.ftmes.bpi.application.DatasetTrainingReadinessService;
 import com.mapletct.ftmes.bpi.domain.DatasetCatalogPublicationView;
 import com.mapletct.ftmes.bpi.domain.DatasetDefinitionView;
 import com.mapletct.ftmes.bpi.domain.DatasetMaterializationView;
 import com.mapletct.ftmes.bpi.domain.DatasetMlflowRegistrationView;
 import com.mapletct.ftmes.bpi.domain.DatasetRetentionArchiveView;
 import com.mapletct.ftmes.bpi.domain.DatasetSnapshotView;
+import com.mapletct.ftmes.bpi.domain.DatasetTrainingReadinessView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +41,7 @@ public class DatasetController {
     private final DatasetCatalogPublicationService catalogPublicationService;
     private final DatasetRetentionArchiveService retentionArchiveService;
     private final DatasetMlflowRegistrationService mlflowRegistrationService;
+    private final DatasetTrainingReadinessService trainingReadinessService;
 
     public DatasetController(
             ActorContextFactory actorContextFactory,
@@ -46,13 +49,15 @@ public class DatasetController {
             DatasetMaterializationService materializationService,
             DatasetCatalogPublicationService catalogPublicationService,
             DatasetRetentionArchiveService retentionArchiveService,
-            DatasetMlflowRegistrationService mlflowRegistrationService) {
+            DatasetMlflowRegistrationService mlflowRegistrationService,
+            DatasetTrainingReadinessService trainingReadinessService) {
         this.actorContextFactory = actorContextFactory;
         this.service = service;
         this.materializationService = materializationService;
         this.catalogPublicationService = catalogPublicationService;
         this.retentionArchiveService = retentionArchiveService;
         this.mlflowRegistrationService = mlflowRegistrationService;
+        this.trainingReadinessService = trainingReadinessService;
     }
 
     @GetMapping("/bpi/v1/datasets")
@@ -276,6 +281,38 @@ public class DatasetController {
         return accepted(mlflowRegistrationService.retry(
                 actorContextFactory.from(jwt), registrationId, idempotencyKey,
                 ifMatch, command, traceId(request)), request);
+    }
+
+    @GetMapping("/bpi/v1/dataset-mlflow-registrations/{registrationId}/training-readiness-assessments")
+    public ApiResponse<DatasetTrainingReadinessView> getLatestTrainingReadinessAssessment(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID registrationId,
+            HttpServletRequest request) {
+        return ApiResponse.of(trainingReadinessService.getLatest(
+                actorContextFactory.from(jwt), registrationId), request);
+    }
+
+    @PostMapping("/bpi/v1/dataset-mlflow-registrations/{registrationId}/training-readiness-assessments")
+    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<DatasetTrainingReadinessView>> assessTrainingReadiness(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID registrationId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody DatasetTrainingReadinessCommand command,
+            HttpServletRequest request) {
+        return ok(trainingReadinessService.assess(
+                actorContextFactory.from(jwt), registrationId, idempotencyKey,
+                ifMatch, command, traceId(request)), request);
+    }
+
+    @GetMapping("/bpi/v1/dataset-training-readiness-assessments/{assessmentId}")
+    public ApiResponse<DatasetTrainingReadinessView> getTrainingReadinessAssessment(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID assessmentId,
+            HttpServletRequest request) {
+        return ApiResponse.of(trainingReadinessService.get(
+                actorContextFactory.from(jwt), assessmentId), request);
     }
 
     private <T> ResponseEntity<ApiResponse<T>> ok(

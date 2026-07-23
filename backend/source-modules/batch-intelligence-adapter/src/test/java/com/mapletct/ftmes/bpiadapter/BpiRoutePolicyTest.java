@@ -72,6 +72,9 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.POST, "/dataset-retention-archives/9c392d57-7502-4cd8-bc37-e72961bb08b4/mlflow-registrations"));
         assertTrue(policy.allows(HttpMethod.GET, "/dataset-mlflow-registrations/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertTrue(policy.allows(HttpMethod.POST, "/dataset-mlflow-registrations/9c392d57-7502-4cd8-bc37-e72961bb08b4/retry"));
+        assertTrue(policy.allows(HttpMethod.GET, "/dataset-mlflow-registrations/9c392d57-7502-4cd8-bc37-e72961bb08b4/training-readiness-assessments"));
+        assertTrue(policy.allows(HttpMethod.POST, "/dataset-mlflow-registrations/9c392d57-7502-4cd8-bc37-e72961bb08b4/training-readiness-assessments"));
+        assertTrue(policy.allows(HttpMethod.GET, "/dataset-training-readiness-assessments/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START/compare"));
@@ -118,6 +121,7 @@ public class BpiRoutePolicyTest {
         assertFalse(policy.allows(HttpMethod.GET, "/dataset-retention-archives/9c392d57-7502-4cd8-bc37-e72961bb08b4/mlflow-registrations/export"));
         assertFalse(policy.allows(HttpMethod.DELETE, "/dataset-mlflow-registrations/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertFalse(policy.allows(HttpMethod.POST, "/dataset-mlflow-registrations/9c392d57-7502-4cd8-bc37-e72961bb08b4/activate-model"));
+        assertFalse(policy.allows(HttpMethod.POST, "/dataset-training-readiness-assessments/9c392d57-7502-4cd8-bc37-e72961bb08b4/train"));
         assertFalse(policy.allows(HttpMethod.DELETE, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertFalse(policy.allows(HttpMethod.GET, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/release/export"));
         assertFalse(policy.allows(HttpMethod.GET, "/http://attacker.example"));

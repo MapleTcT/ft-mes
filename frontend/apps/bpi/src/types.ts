@@ -748,6 +748,7 @@ export type DatasetMaterializationDisplayState = 'NOT_STARTED' | DatasetMaterial
 export type DatasetCatalogPublicationState = 'QUEUED' | 'COMMITTING' | 'VERIFYING' | 'READY' | 'FAILED';
 export type DatasetRetentionArchiveState = 'QUEUED' | 'ARCHIVING' | 'VERIFYING' | 'LOCKED' | 'FAILED';
 export type DatasetMlflowRegistrationState = 'QUEUED' | 'REGISTERING' | 'REGISTERED' | 'FAILED';
+export type DatasetTrainingReadinessState = 'ELIGIBLE' | 'BLOCKED';
 
 export interface DatasetSnapshotSummary {
   id: string;
@@ -987,6 +988,50 @@ export interface DatasetMlflowRegistration {
   registrationMetadata?: Record<string, unknown> | null;
   failureCode?: string | null;
   failureDetail?: string | null;
+}
+
+export interface DatasetTrainingReadinessGate {
+  code: string;
+  passed: boolean;
+  expected: unknown;
+  observed: unknown;
+  detail: string;
+}
+
+export interface DatasetTrainingReadinessAssessment {
+  id: string;
+  mlflowRegistrationId: string;
+  sourceSnapshotId: string;
+  datasetId: string;
+  datasetCode: string;
+  datasetVersion: string;
+  tenantId: string;
+  plantId: string;
+  lineIds: string[];
+  objectiveCode: 'BATCH_START_BOUNDARY_REVIEW_RISK';
+  policyVersion: 'bpi-training-readiness/batch-start-boundary-v1';
+  assessmentSequence: number;
+  state: DatasetTrainingReadinessState;
+  revision: 1;
+  sourceRegistrationRevision: number;
+  manifestChecksum: string;
+  datasetDigest: string;
+  requiredThresholds: Record<string, unknown>;
+  observedMetrics: Record<string, unknown>;
+  gateResults: DatasetTrainingReadinessGate[];
+  blockerCodes: string[];
+  phaseBoundary: {
+    assessmentOnly: true;
+    trainingStarted: false;
+    modelCreated: false;
+    modelRegistered: false;
+    onlineInferenceEnabled: false;
+    productionActivationAllowed: false;
+  };
+  assessmentChecksum: string;
+  assessedBy: string;
+  assessmentReason: string;
+  assessedAt: string;
 }
 
 export interface DatasetManifestSample {

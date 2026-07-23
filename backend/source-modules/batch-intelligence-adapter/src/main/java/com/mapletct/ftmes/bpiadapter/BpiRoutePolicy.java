@@ -21,7 +21,9 @@ public class BpiRoutePolicy {
                     + "(?:/catalog-publications)?|"
                     + "dataset-catalog-publications/" + ID + "(?:/retention-archives)?|"
                     + "dataset-retention-archives/" + ID + "(?:/mlflow-registrations)?|"
-                    + "dataset-mlflow-registrations/" + ID + "|"
+                    + "dataset-mlflow-registrations/" + ID
+                    + "(?:/training-readiness-assessments)?|"
+                    + "dataset-training-readiness-assessments/" + ID + "|"
                     + "rules(?:/" + ID + "(?:/compare)?)?|rule-simulations/" + ID + ")$");
     private static final Pattern POST_ROUTE = Pattern.compile(
             "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume|force-close|wms/(?:reconcile|reversal))|"
@@ -34,7 +36,8 @@ public class BpiRoutePolicy {
                     + "dataset-materializations/" + ID + "/(?:retry|catalog-publications)|"
                     + "dataset-catalog-publications/" + ID + "/(?:retry|retention-archives)|"
                     + "dataset-retention-archives/" + ID + "/(?:retry|mlflow-registrations)|"
-                    + "dataset-mlflow-registrations/" + ID + "/retry|"
+                    + "dataset-mlflow-registrations/" + ID
+                    + "/(?:retry|training-readiness-assessments)|"
                     + "rules/" + ID + "/(?:simulate|submit-approval|reject-approval|publish|retire|publication/retry))$");
 
     public boolean allows(HttpMethod method, String path) {

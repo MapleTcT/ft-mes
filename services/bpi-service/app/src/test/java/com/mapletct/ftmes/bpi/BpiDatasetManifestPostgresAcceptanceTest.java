@@ -160,6 +160,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
     void cleanupMarker() {
         if (tenantId == null) return;
         if (Boolean.parseBoolean(env("BPI_TEST_KEEP_MARKER", "false"))) return;
+        cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_training_readiness_assessments WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_mlflow_registrations WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_retention_archives WHERE tenant_id = ?", tenantId);
         cleanupJdbc.update("DELETE FROM bpi.bpi_dataset_catalog_publications WHERE tenant_id = ?", tenantId);
@@ -1319,6 +1320,7 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                     """, tenantId, registrationId))
                     .isInstanceOf(DataAccessException.class)
                     .hasMessageContaining("REGISTERED");
+            proveTrainingReadinessLifecycle(registrationId);
             return;
         }
 
@@ -1461,6 +1463,159 @@ class BpiDatasetManifestPostgresAcceptanceTest {
                 """, tenantId, registrationId))
                 .isInstanceOf(DataAccessException.class)
                 .hasMessageContaining("REGISTERED");
+        proveTrainingReadinessLifecycle(registrationId);
+    }
+
+    private void proveTrainingReadinessLifecycle(UUID registrationId) throws Exception {
+        long registrationRevision = jdbc.queryForObject("""
+                SELECT revision
+                  FROM bpi.bpi_dataset_mlflow_registrations
+                 WHERE tenant_id = ? AND id = ? AND state = 'REGISTERED'
+                """, Long.class, tenantId, registrationId);
+        byte[] body = objectMapper.writeValueAsBytes(Map.of(
+                "objectiveCode", "BATCH_START_BOUNDARY_REVIEW_RISK",
+                "reason", "Assess the immutable dataset before any offline model training"));
+
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/training-readiness-assessments",
+                        registrationId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/training-readiness-assessments",
+                        registrationId)
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .header("Idempotency-Key", "readiness-viewer-denied-" + tenantId)
+                        .header("If-Match", registrationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/training-readiness-assessments",
+                        registrationId)
+                        .header("Authorization", "Bearer " + wrongScopeToken)
+                        .header("Idempotency-Key", "readiness-scope-denied-" + tenantId)
+                        .header("If-Match", registrationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/training-readiness-assessments",
+                        registrationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "readiness-stale-" + tenantId)
+                        .header("If-Match", registrationRevision - 1)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isConflict());
+
+        String key = "training-readiness-first-" + tenantId;
+        MvcResult result = mockMvc.perform(post(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/training-readiness-assessments",
+                        registrationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", key)
+                        .header("If-Match", registrationRevision)
+                        .header("X-Trace-Id", tenantId + "_TRAINING_READINESS")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("BLOCKED"))
+                .andExpect(jsonPath("$.data.revision").value(1))
+                .andExpect(jsonPath("$.data.assessmentSequence").value(1))
+                .andExpect(jsonPath("$.data.policyVersion")
+                        .value("bpi-training-readiness/batch-start-boundary-v1"))
+                .andExpect(jsonPath("$.data.observedMetrics.includedSampleCount").value(1))
+                .andExpect(jsonPath("$.data.observedMetrics.signalWindowFeatureRefs").isEmpty())
+                .andExpect(jsonPath("$.data.phaseBoundary.assessmentOnly").value(true))
+                .andExpect(jsonPath("$.data.phaseBoundary.trainingStarted").value(false))
+                .andExpect(jsonPath("$.data.phaseBoundary.modelCreated").value(false))
+                .andExpect(jsonPath("$.data.phaseBoundary.modelRegistered").value(false))
+                .andExpect(jsonPath("$.data.phaseBoundary.onlineInferenceEnabled").value(false))
+                .andExpect(jsonPath("$.data.phaseBoundary.productionActivationAllowed").value(false))
+                .andReturn();
+        JsonNode response = response(result).path("data");
+        UUID assessmentId = UUID.fromString(response.path("id").asText());
+        assertThat(response.path("blockerCodes").toString())
+                .contains("PROCESS_SIGNAL_WINDOWS_MISSING")
+                .contains("BOUNDARY_REVIEW_LABEL_MISSING")
+                .contains("INCLUDED_SAMPLE_COUNT_BELOW_MINIMUM")
+                .contains("START_REJECTED_LABEL_COUNT_BELOW_MINIMUM");
+
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/training-readiness-assessments",
+                        registrationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", key)
+                        .header("If-Match", registrationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.id").value(assessmentId.toString()));
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/training-readiness-assessments",
+                        registrationId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(assessmentId.toString()))
+                .andExpect(jsonPath("$.data.state").value("BLOCKED"));
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-training-readiness-assessments/{id}", assessmentId)
+                        .header("Authorization", "Bearer " + wrongScopeToken))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get(
+                        "/bpi/v1/dataset-training-readiness-assessments/{id}", assessmentId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.assessmentChecksum").isString());
+
+        Map<String, Object> persisted = jdbc.queryForMap("""
+                SELECT state, assessment_sequence, revision,
+                       jsonb_array_length(gate_results) AS gate_count,
+                       jsonb_array_length(blocker_codes) AS blocker_count,
+                       phase_boundary ->> 'trainingStarted' AS training_started,
+                       phase_boundary ->> 'modelCreated' AS model_created,
+                       phase_boundary ->> 'modelRegistered' AS model_registered,
+                       phase_boundary ->> 'onlineInferenceEnabled' AS inference_enabled,
+                       phase_boundary ->> 'productionActivationAllowed'
+                           AS production_activation_allowed
+                  FROM bpi.bpi_dataset_training_readiness_assessments
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, assessmentId);
+        assertThat(persisted)
+                .containsEntry("state", "BLOCKED")
+                .containsEntry("assessment_sequence", 1L)
+                .containsEntry("revision", 1L)
+                .containsEntry("gate_count", 19)
+                .containsEntry("training_started", "false")
+                .containsEntry("model_created", "false")
+                .containsEntry("model_registered", "false")
+                .containsEntry("inference_enabled", "false")
+                .containsEntry("production_activation_allowed", "false");
+        assertThat(((Number) persisted.get("blocker_count")).intValue()).isPositive();
+        assertThatThrownBy(() -> jdbc.update("""
+                UPDATE bpi.bpi_dataset_training_readiness_assessments
+                   SET assessment_reason = 'mutated'
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, assessmentId))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("immutable");
+
+        mockMvc.perform(post(
+                        "/bpi/v1/dataset-mlflow-registrations/{id}/training-readiness-assessments",
+                        registrationId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "training-readiness-second-" + tenantId)
+                        .header("If-Match", registrationRevision)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("BLOCKED"))
+                .andExpect(jsonPath("$.data.assessmentSequence").value(2))
+                .andExpect(jsonPath("$.data.assessmentChecksum")
+                        .value(response.path("assessmentChecksum").asText()));
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*)
+                  FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ?
+                   AND action = 'DATASET_TRAINING_READINESS_ASSESSED'
+                """, Long.class, tenantId)).isEqualTo(2L);
     }
 
     private Map<String, Object> awaitExternalMaterialization(UUID materializationId)

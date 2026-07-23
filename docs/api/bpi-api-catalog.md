@@ -118,6 +118,9 @@
 | 训练数据 | POST | `/bpi/v1/dataset-retention-archives/{archiveId}/mlflow-registrations` | `requestDatasetMlflowRegistration` | TARGET_ACCEPTED；仅 Object Lock、恢复重建和精确 source 事实均通过的 `LOCKED` 恢复包可排队；MLflow 停机时持久化失败且无外部 side effect，运行开关默认关闭 |
 | 训练数据 | GET | `/bpi/v1/dataset-mlflow-registrations/{registrationId}` | `getDatasetMlflowRegistration` | TARGET_ACCEPTED；目标已复验 `REGISTERED/r6`、精确 `s3://...?versionId=` source、experiment/run、Dataset Input 和不可变血缘，registrar 重启后不重复 run |
 | 训练数据 | POST | `/bpi/v1/dataset-mlflow-registrations/{registrationId}/retry` | `retryDatasetMlflowRegistration` | TARGET_ACCEPTED；真实页面只对 `FAILED` revision 重试同一任务；`REGISTERED` 只证明 Dataset Input，不代表训练、模型注册、推理或生产激活 |
+| 训练数据 | GET | `/bpi/v1/dataset-mlflow-registrations/{registrationId}/training-readiness-assessments` | `getLatestDatasetTrainingReadinessAssessment` | SERVICE_IMPLEMENTED；读取首个模型策略下最近一次不可变评估；未评估返回 `data=null`，不能从 Dataset Input 登记推导训练就绪 |
+| 训练数据 | POST | `/bpi/v1/dataset-mlflow-registrations/{registrationId}/training-readiness-assessments` | `assessDatasetTrainingReadiness` | SERVICE_IMPLEMENTED；仅 `REGISTERED` 输入可按 revision 幂等评估 19 个离线训练门槛；只新增评估事实，不创建 run/model、不启动训练或推理 |
+| 训练数据 | GET | `/bpi/v1/dataset-training-readiness-assessments/{assessmentId}` | `getDatasetTrainingReadinessAssessment` | SERVICE_IMPLEMENTED；按 tenant/plant/line scope 回读指定不可变评估、checksum、门槛证据和全 false 模型阶段边界 |
 | 集成运行 | GET | `/bpi/v1/integrations/health` | `getIntegrationHealth` | SIMULATED |
 | 集成运行 | POST | `/bpi/v1/integrations/{integrationId}/checks` | `runIntegrationCheck` | CONTRACT_ONLY |
 | 审计记录 | GET | `/bpi/v1/audit/events` | `listAuditEvents` | CONTRACT_ONLY |

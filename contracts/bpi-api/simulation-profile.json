@@ -73,6 +73,9 @@
     "requestDatasetMlflowRegistration",
     "getDatasetMlflowRegistration",
     "retryDatasetMlflowRegistration",
+    "getLatestDatasetTrainingReadinessAssessment",
+    "assessDatasetTrainingReadiness",
+    "getDatasetTrainingReadinessAssessment",
     "getIntegrationHealth"
   ]
 }

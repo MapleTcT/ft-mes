@@ -931,6 +931,40 @@
         }
       }
     },
+    "/bpi/v1/dataset-mlflow-registrations/{registrationId}/training-readiness-assessments": {
+      "get": {
+        "tags": ["Datasets"], "operationId": "getLatestDatasetTrainingReadinessAssessment", "summary": "查询当前策略下最近一次离线训练就绪评估",
+        "parameters": [{"$ref": "#/components/parameters/RegistrationId"}],
+        "responses": {
+          "200": {"description": "最近一次不可变评估；尚未评估时 data 为 null", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DatasetTrainingReadinessLookupResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      },
+      "post": {
+        "tags": ["Datasets"], "operationId": "assessDatasetTrainingReadiness", "summary": "对 REGISTERED Dataset Input 执行离线训练就绪评估",
+        "description": "同步读取不可变数据集、影子运行、点位目录和数据质量证据，只生成评估事实；不启动训练、不创建或注册模型、不启用推理，也不允许生产激活。",
+        "parameters": [{"$ref": "#/components/parameters/RegistrationId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DatasetTrainingReadinessCommand"}}}},
+        "responses": {
+          "200": {"description": "不可变离线训练就绪评估", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DatasetTrainingReadinessResponse"}}}},
+          "403": {"$ref": "#/components/responses/Forbidden"},
+          "404": {"$ref": "#/components/responses/NotFound"},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "422": {"$ref": "#/components/responses/Unprocessable"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/dataset-training-readiness-assessments/{assessmentId}": {
+      "get": {
+        "tags": ["Datasets"], "operationId": "getDatasetTrainingReadinessAssessment", "summary": "按 ID 查询不可变离线训练就绪评估",
+        "parameters": [{"$ref": "#/components/parameters/AssessmentId"}],
+        "responses": {
+          "200": {"description": "不可变离线训练就绪评估", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DatasetTrainingReadinessResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
     "/bpi/v1/integrations/health": {
       "get": {
         "tags": ["Integrations"], "operationId": "getIntegrationHealth", "summary": "查询依赖健康和业务影响",
@@ -985,6 +1019,7 @@
       "PublicationId": {"name": "publicationId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
       "ArchiveId": {"name": "archiveId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
       "RegistrationId": {"name": "registrationId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "AssessmentId": {"name": "assessmentId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
       "IntegrationId": {"name": "integrationId", "in": "path", "required": true, "schema": {"type": "string"}},
       "FlagKey": {"name": "flagKey", "in": "path", "required": true, "schema": {"type": "string", "enum": ["bpi.ui", "bpi.commands", "bpi.rule-management", "bpi.shadow-only", "bpi.auto-confirm", "bpi.wms-link"]}},
       "AuditId": {"name": "auditId", "in": "path", "required": true, "schema": {"type": "string"}},
@@ -1393,6 +1428,72 @@
       "DatasetMlflowRegistration": {"type": "object", "description": "不可变恢复包的 MLflow Dataset Input 登记。REGISTERED 只证明数据输入与血缘复验通过，不代表模型训练、模型注册、在线推理或生产激活。", "required": ["id", "retentionArchiveId", "catalogPublicationId", "materializationId", "snapshotId", "datasetId", "datasetCode", "datasetVersion", "tenantId", "plantId", "lineIds", "registrarVersion", "trackingProfile", "state", "revision", "manifestChecksum", "sourceContentSha256", "sourceObjectVersionId", "sourceByteSize", "sourceRowCount", "sourceSchema", "tableIdentifier", "icebergSnapshotId", "catalogSemanticChecksum", "archiveBucket", "sourceArchiveObjectKey", "sourceArchiveVersionId", "archiveManifestObjectKey", "archiveManifestVersionId", "archiveManifestSha256", "experimentName", "datasetName", "datasetDigest", "requestedBy", "requestReason", "createdAt", "attemptCount"], "properties": {"id": {"type": "string", "format": "uuid"}, "retentionArchiveId": {"type": "string", "format": "uuid"}, "catalogPublicationId": {"type": "string", "format": "uuid"}, "materializationId": {"type": "string", "format": "uuid"}, "snapshotId": {"type": "string", "format": "uuid"}, "datasetId": {"type": "string", "format": "uuid"}, "datasetCode": {"type": "string"}, "datasetVersion": {"type": "string"}, "tenantId": {"type": "string"}, "plantId": {"type": "string"}, "lineIds": {"type": "array", "items": {"type": "string"}}, "registrarVersion": {"type": "string"}, "trackingProfile": {"type": "string", "enum": ["bpi-mlflow-dataset-v1"]}, "state": {"type": "string", "enum": ["QUEUED", "REGISTERING", "REGISTERED", "FAILED"]}, "revision": {"type": "integer", "format": "int64", "minimum": 1}, "manifestChecksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "sourceContentSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "sourceObjectVersionId": {"type": "string"}, "sourceByteSize": {"type": "integer", "format": "int64", "minimum": 1}, "sourceRowCount": {"type": "integer", "format": "int64", "minimum": 1}, "sourceSchema": {"type": "object"}, "tableIdentifier": {"type": "string"}, "icebergSnapshotId": {"type": "string", "pattern": "^-?[0-9]+$"}, "catalogSemanticChecksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "archiveBucket": {"type": "string"}, "sourceArchiveObjectKey": {"type": "string"}, "sourceArchiveVersionId": {"type": "string"}, "archiveManifestObjectKey": {"type": "string"}, "archiveManifestVersionId": {"type": "string"}, "archiveManifestSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "experimentName": {"type": "string"}, "datasetName": {"type": "string"}, "datasetDigest": {"type": "string", "pattern": "^[a-f0-9]{16}$"}, "requestedBy": {"type": "string"}, "requestReason": {"type": "string"}, "createdAt": {"type": "string", "format": "date-time"}, "startedAt": {"type": ["string", "null"], "format": "date-time"}, "completedAt": {"type": ["string", "null"], "format": "date-time"}, "attemptCount": {"type": "integer", "minimum": 0}, "mlflowExperimentId": {"type": ["string", "null"]}, "mlflowRunId": {"type": ["string", "null"]}, "mlflowArtifactUri": {"type": ["string", "null"]}, "mlflowDatasetSource": {"type": ["string", "null"], "description": "REGISTERED 时为带 versionId 查询参数的精确 s3:// 恢复对象版本"}, "registrationMetadata": {"type": ["object", "null"], "description": "成功时必须证明 datasetInputVerified 和 lineageVerified 为 true，同时模型训练、注册、在线推理与生产激活边界均为 false"}, "failureCode": {"type": ["string", "null"]}, "failureDetail": {"type": ["string", "null"]}}},
       "DatasetMlflowRegistrationResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/DatasetMlflowRegistration"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "DatasetMlflowRegistrationLookupResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"anyOf": [{"$ref": "#/components/schemas/DatasetMlflowRegistration"}, {"type": "null"}]}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "DatasetTrainingReadinessCommand": {
+        "type": "object",
+        "required": ["objectiveCode", "reason"],
+        "properties": {
+          "objectiveCode": {"type": "string", "enum": ["BATCH_START_BOUNDARY_REVIEW_RISK"]},
+          "reason": {"type": "string", "minLength": 3, "maxLength": 500}
+        }
+      },
+      "DatasetTrainingReadinessGate": {
+        "type": "object",
+        "required": ["code", "passed", "expected", "observed", "detail"],
+        "properties": {
+          "code": {"type": "string"},
+          "passed": {"type": "boolean"},
+          "expected": {},
+          "observed": {},
+          "detail": {"type": "string"}
+        }
+      },
+      "DatasetTrainingReadinessPhaseBoundary": {
+        "type": "object",
+        "required": ["assessmentOnly", "trainingStarted", "modelCreated", "modelRegistered", "onlineInferenceEnabled", "productionActivationAllowed"],
+        "properties": {
+          "assessmentOnly": {"type": "boolean", "enum": [true]},
+          "trainingStarted": {"type": "boolean", "enum": [false]},
+          "modelCreated": {"type": "boolean", "enum": [false]},
+          "modelRegistered": {"type": "boolean", "enum": [false]},
+          "onlineInferenceEnabled": {"type": "boolean", "enum": [false]},
+          "productionActivationAllowed": {"type": "boolean", "enum": [false]}
+        }
+      },
+      "DatasetTrainingReadinessAssessment": {
+        "type": "object",
+        "description": "REGISTERED Dataset Input 的不可变、失败关闭训练资格评估。ELIGIBLE 只允许进入后续离线训练申请，不代表已经训练、注册、推理或生产激活。",
+        "required": ["id", "mlflowRegistrationId", "sourceSnapshotId", "datasetId", "datasetCode", "datasetVersion", "tenantId", "plantId", "lineIds", "objectiveCode", "policyVersion", "assessmentSequence", "state", "revision", "sourceRegistrationRevision", "manifestChecksum", "datasetDigest", "requiredThresholds", "observedMetrics", "gateResults", "blockerCodes", "phaseBoundary", "assessmentChecksum", "assessedBy", "assessmentReason", "assessedAt"],
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "mlflowRegistrationId": {"type": "string", "format": "uuid"},
+          "sourceSnapshotId": {"type": "string", "format": "uuid"},
+          "datasetId": {"type": "string", "format": "uuid"},
+          "datasetCode": {"type": "string"},
+          "datasetVersion": {"type": "string"},
+          "tenantId": {"type": "string"},
+          "plantId": {"type": "string"},
+          "lineIds": {"type": "array", "items": {"type": "string"}},
+          "objectiveCode": {"type": "string", "enum": ["BATCH_START_BOUNDARY_REVIEW_RISK"]},
+          "policyVersion": {"type": "string", "enum": ["bpi-training-readiness/batch-start-boundary-v1"]},
+          "assessmentSequence": {"type": "integer", "format": "int64", "minimum": 1},
+          "state": {"type": "string", "enum": ["ELIGIBLE", "BLOCKED"]},
+          "revision": {"type": "integer", "format": "int64", "enum": [1]},
+          "sourceRegistrationRevision": {"type": "integer", "format": "int64", "minimum": 1},
+          "manifestChecksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "datasetDigest": {"type": "string", "pattern": "^[a-f0-9]{16}$"},
+          "requiredThresholds": {"type": "object"},
+          "observedMetrics": {"type": "object"},
+          "gateResults": {"type": "array", "minItems": 1, "items": {"$ref": "#/components/schemas/DatasetTrainingReadinessGate"}},
+          "blockerCodes": {"type": "array", "items": {"type": "string"}},
+          "phaseBoundary": {"$ref": "#/components/schemas/DatasetTrainingReadinessPhaseBoundary"},
+          "assessmentChecksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "assessedBy": {"type": "string"},
+          "assessmentReason": {"type": "string"},
+          "assessedAt": {"type": "string", "format": "date-time"}
+        }
+      },
+      "DatasetTrainingReadinessResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/DatasetTrainingReadinessAssessment"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "DatasetTrainingReadinessLookupResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"anyOf": [{"$ref": "#/components/schemas/DatasetTrainingReadinessAssessment"}, {"type": "null"}]}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "DatasetManifestPhaseBoundary": {"type": "object", "required": ["deliveryState", "materializationState", "artifactUri", "icebergReady", "mlflowRegistered", "modelTrained"], "properties": {"deliveryState": {"type": "string", "enum": ["MANIFEST_ONLY"]}, "materializationState": {"type": "string", "enum": ["NOT_STARTED"]}, "artifactUri": {"type": "null"}, "icebergReady": {"type": "boolean", "enum": [false]}, "mlflowRegistered": {"type": "boolean", "enum": [false]}, "modelTrained": {"type": "boolean", "enum": [false]}}},
       "DatasetManifest": {"type": "object", "required": ["schemaVersion", "definition", "selection", "phaseBoundary", "counts", "samples"], "properties": {"schemaVersion": {"type": "string", "enum": ["bpi.dataset-manifest.v1"]}, "definition": {"type": "object"}, "selection": {"type": "object"}, "phaseBoundary": {"$ref": "#/components/schemas/DatasetManifestPhaseBoundary"}, "counts": {"type": "object"}, "samples": {"type": "array", "maxItems": 10000, "items": {"type": "object"}}}},
       "DatasetSnapshot": {"type": "object", "required": ["id", "datasetId", "datasetCode", "datasetVersion", "datasetName", "tenantId", "plantId", "snapshotVersion", "state", "revision", "freezeAt", "lineIds", "predictionTimePolicy", "ruleVersionIds", "excludeLowConfidence", "definitionChecksum", "materializationState", "requestedBy", "requestReason", "createdAt", "attemptCount"], "properties": {"id": {"type": "string", "format": "uuid"}, "datasetId": {"type": "string", "format": "uuid"}, "datasetCode": {"type": "string"}, "datasetVersion": {"type": "string"}, "datasetName": {"type": "string"}, "tenantId": {"type": "string"}, "plantId": {"type": "string"}, "snapshotVersion": {"type": "integer", "format": "int64"}, "state": {"type": "string", "enum": ["QUEUED", "BUILDING", "MANIFEST_READY", "FAILED"]}, "revision": {"type": "integer", "format": "int64"}, "freezeAt": {"type": "string", "format": "date-time"}, "lineIds": {"type": "array", "items": {"type": "string"}}, "predictionTimePolicy": {"type": "string", "enum": ["AUTOMATIC_BATCH_START"]}, "ruleVersionIds": {"type": "array", "items": {"type": "string", "format": "uuid"}}, "excludeLowConfidence": {"type": "boolean"}, "definitionChecksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "manifestSchemaVersion": {"type": ["string", "null"]}, "manifestChecksum": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}, "manifest": {"anyOf": [{"$ref": "#/components/schemas/DatasetManifest"}, {"type": "null"}]}, "includedCount": {"type": ["integer", "null"], "minimum": 0}, "excludedCount": {"type": ["integer", "null"], "minimum": 0}, "exclusionSummary": {"type": ["object", "null"], "additionalProperties": {"type": "integer", "minimum": 0}}, "materializationState": {"type": "string", "enum": ["NOT_STARTED", "QUEUED", "WRITING", "READY", "FAILED"]}, "artifactUri": {"type": ["string", "null"]}, "requestedBy": {"type": "string"}, "requestReason": {"type": "string"}, "createdAt": {"type": "string", "format": "date-time"}, "startedAt": {"type": ["string", "null"], "format": "date-time"}, "completedAt": {"type": ["string", "null"], "format": "date-time"}, "attemptCount": {"type": "integer", "minimum": 0}, "failureCode": {"type": ["string", "null"]}, "failureDetail": {"type": ["string", "null"]}, "latestMaterialization": {"anyOf": [{"$ref": "#/components/schemas/DatasetMaterialization"}, {"type": "null"}]}}},
