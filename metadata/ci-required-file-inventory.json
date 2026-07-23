@@ -5571,6 +5571,18 @@
     },
     {
       "ignored": false,
+      "path": "docs/plans/2026-07-23-bpi-phase3cd-field-data-coverage-design.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/plans/2026-07-23-bpi-phase3cd-field-data-coverage-implementation.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/postgres-migration-index.md",
       "state": "tracked",
       "tracked": true
@@ -9093,6 +9105,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ShadowRunSourceCoverage.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ShadowRunTrainingDataCoverage.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ShadowRunView.java",
       "state": "tracked",
       "tracked": true
@@ -11219,7 +11243,7 @@
       "tracked": 657
     },
     "docs": {
-      "tracked": 138
+      "tracked": 140
     },
     "frontend": {
       "tracked": 11
@@ -11237,7 +11261,7 @@
       "tracked": 57
     },
     "services": {
-      "tracked": 432
+      "tracked": 434
     },
     "simulation": {
       "tracked": 4
@@ -11249,8 +11273,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1865,
-    "tracked": 1865,
+    "totalFiles": 1869,
+    "tracked": 1869,
     "untracked": 0
   },
   "untrackedByDirectory": []
