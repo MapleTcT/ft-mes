@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-07-23T15:55:17Z",
+  "status": "PASS",
+  "marker": "ADP_E2E_BPI_PARQUET_V2_20260723_233000_A1",
+  "route": "http://10.11.100.17:18080/bpi/#/datasets",
+  "operation": {
+    "label": "发布 Iceberg",
+    "method": "POST",
+    "url": "/bpi-api/dataset-materializations/28b117f9-9976-4699-b9d1-7d7f8054ade3/catalog-publications",
+    "status": 202
+  },
+  "publication": {
+    "id": "2a9d7a45-f068-4f15-bd2e-33a2398eef2b",
+    "state": "READY",
+    "revision": 4,
+    "attemptCount": 1,
+    "icebergSnapshotId": "6747414530221740825",
+    "sourceRows": 1,
+    "verifiedRows": 1,
+    "catalogSnapshotVerified": true,
+    "mlflowRegistered": false,
+    "modelTrained": false
+  },
+  "desktop": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "delivery": [
+      "MANIFEST_READY",
+      "READY",
+      "READY",
+      "NOT_STARTED",
+      "NOT_STARTED",
+      "NOT_STARTED",
+      "NOT_STARTED"
+    ],
+    "screenshot": "metadata/bpi-dataset-parquet-v2-iceberg-ready-target.png"
+  },
+  "cleanupRequired": false
+}

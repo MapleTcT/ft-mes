@@ -1,0 +1,124 @@
+{
+  "generatedAt": "2026-07-23T15:55:17Z",
+  "repoCommit": "007616b290efa366f97e99cb27efb68c8186268c",
+  "target": "10.11.100.17",
+  "composeProject": "adp-mes-newbase",
+  "database": "PostgreSQL",
+  "flywayVersion": 35,
+  "status": "PASS_TARGET_BROWSER_API_POSTGRES_MINIO_ICEBERG_CLEANED",
+  "productionReady": false,
+  "marker": "ADP_E2E_BPI_PARQUET_V2_20260723_233000_A1",
+  "summary": {
+    "testedFeatures": 5,
+    "pass": 5,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0
+  },
+  "contracts": {
+    "artifactSchemaVersion": "bpi.dataset-parquet.v2",
+    "materializerVersion": "bpi-dataset-materializer/0.2.0",
+    "publisherVersion": "bpi-dataset-catalog-publisher/0.1.0"
+  },
+  "identities": {
+    "datasetId": "520419c7-b648-4109-9757-a4f295e0edde",
+    "snapshotId": "b199531e-451f-44c8-a55c-17848217dd4d",
+    "materializationId": "28b117f9-9976-4699-b9d1-7d7f8054ade3",
+    "publicationId": "2a9d7a45-f068-4f15-bd2e-33a2398eef2b",
+    "icebergSnapshotId": "6747414530221740825"
+  },
+  "artifacts": {
+    "parquet": {
+      "rowCount": 1,
+      "fieldCount": 27,
+      "byteSize": 12761,
+      "contentSha256": "2f9930cd46ca1942b93b87cef404757c888eefca308c20473ceef18644412f98",
+      "objectVersionId": "fbb8bfae-41fa-4d42-9629-b2d80da7b6e9"
+    },
+    "iceberg": {
+      "rowCount": 1,
+      "fieldCount": 33,
+      "snapshotId": "6747414530221740825",
+      "semanticChecksum": "a7e1ac899c21d9684d7a0b06625d6da1d140fb96167c155ac0c41208b901b810",
+      "catalogSnapshotVerified": true
+    },
+    "processWindowValues": {
+      "process.window.flow_instant.mean_60s": "20.000000",
+      "process.window.pump_running.true_ratio_30s": "0.500000"
+    }
+  },
+  "browser": {
+    "desktopConsoleErrors": 0,
+    "desktopPageErrors": 0,
+    "desktopRequestFailures": 0,
+    "mobileConsoleErrors": 0,
+    "mobilePageErrors": 0,
+    "mobileRequestFailures": 0,
+    "mobileHorizontalOverflow": false
+  },
+  "postgres": {
+    "snapshotState": "MANIFEST_READY",
+    "materializationState": "READY",
+    "publicationState": "READY",
+    "publicationAuditSequence": [
+      "DATASET_CATALOG_PUBLICATION_QUEUED",
+      "DATASET_CATALOG_PUBLICATION_COMMITTING",
+      "DATASET_CATALOG_PUBLICATION_VERIFYING",
+      "DATASET_CATALOG_PUBLICATION_READY"
+    ],
+    "publicationIdempotencyRows": 1,
+    "publicationIdempotencyStatus": 202
+  },
+  "cleanup": {
+    "catalogTableRemaining": 0,
+    "catalogNamespacesRemaining": 0,
+    "sourceObjectVersionsPurged": 1,
+    "sourceObjectVersionsRemaining": 0,
+    "warehouseObjectVersionsPurged": 6,
+    "warehouseObjectVersionsRemaining": 0,
+    "markerProjectionCounts": {
+      "definitions": 0,
+      "snapshots": 0,
+      "samples": 0,
+      "processWindowFacts": 0,
+      "materializations": 0,
+      "catalogPublications": 0,
+      "retentionArchives": 0,
+      "mlflowRegistrations": 0,
+      "trainingReadinessAssessments": 0,
+      "shadowRuns": 0,
+      "reviews": 0,
+      "batches": 0,
+      "telemetryPoints": 0,
+      "telemetryEvents": 0,
+      "rules": 0,
+      "topologies": 0,
+      "catalogs": 0,
+      "catalogEntries": 0,
+      "calibrations": 0,
+      "idempotency": 0
+    },
+    "optionalCatalogContainersRunning": 0,
+    "optionalFlagsEnabled": 0,
+    "bpiServiceHealth": "UP",
+    "frontendHttpStatus": 200
+  },
+  "evidence": [
+    "metadata/bpi-dataset-parquet-v2-browser-target.json",
+    "metadata/bpi-dataset-parquet-v2-object-target.json",
+    "metadata/bpi-dataset-parquet-v2-iceberg-browser-target.json",
+    "metadata/bpi-dataset-parquet-v2-iceberg-target.json",
+    "metadata/bpi-dataset-parquet-v2-manifest-target.png",
+    "metadata/bpi-dataset-parquet-v2-ready-target.png",
+    "metadata/bpi-dataset-parquet-v2-ready-mobile-target.png",
+    "metadata/bpi-dataset-parquet-v2-iceberg-ready-target.png"
+  ],
+  "remainingBlockers": [
+    "物理 DEVICE/GATEWAY 来源与断电重连证据未完成",
+    "正式计量校准未完成",
+    "至少 200 个真实复核批次和 7 个生产日未完成",
+    "至少 100 个 accepted START 和 10 个 rejected START 标签未完成",
+    "MLflow 生产 RBAC/SSO/TLS/HA 未完成",
+    "模型训练、注册、审批、推断和生产激活仍保持关闭"
+  ]
+}

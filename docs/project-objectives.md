@@ -498,6 +498,27 @@ IoT 周期恢复为 `10m/5m`。测试线已有 7 个历史未解决事件且无�
 多产线容量、7-14 天现场运行或训练资格；G-021 继续保持 `PARTIAL`。证据见
 [BPI 实时生产态势目标验收](testing/bpi-live-operations-evidence-acceptance.md)。
 
+2026-07-23 Phase 3C-G 关闭了 V32 工艺窗口事实无法进入训练制品的断点。源码
+`007616b290efa366f97e99cb27efb68c8186268c` 新增
+`bpi.dataset-parquet.v2 / bpi-dataset-materializer/0.2.0`，以
+`map<string, decimal128(24,6)>` 保存按原始 featureRef 排序的受治理过程窗口；历史 v1 对象和
+任务保持不变。marker `ADP_E2E_BPI_PARQUET_V2_20260723_233000_A1` 从真实
+`/bpi/#/datasets` 页面创建两个窗口、冻结 6 条事实并生成 1 row/27 fields 的 exact-version
+Parquet；独立校验得到 flow mean `20.000000` 和 pump true ratio `0.500000`。
+
+同一页面继续发布 Iceberg publication `2a9d7a45-f068-4f15-bd2e-33a2398eef2b`，PostgreSQL
+审计为 `QUEUED -> COMMITTING -> VERIFYING -> READY`，指定 snapshot
+`6747414530221740825` 的独立 PyIceberg scan 为 1 row/33 fields，两个窗口值、源 SHA/version 和
+semantic checksum 全部一致。桌面/移动浏览器错误为 0；取证后 Polaris table、两个专用 namespace、
+1 个 source exact version、6 个 warehouse exact versions 和 20 类 marker 投影均为 0，可选 catalog
+容器为 0，五个开关 false，核心三服务 healthy、页面 200。
+
+该纵切只证明过程窗口能被不可变交付到 Parquet/Iceberg，不证明数据具备训练资格。受控 fixture 不能
+替代物理 DEVICE/GATEWAY、正式校准、200 个真实复核批次、7 个生产日和正负 START 标签。
+G-021 继续为 `PARTIAL`，Phase 3D-A 的训练任务控制面必须对当前数据失败关闭，不能生成演示模型。
+机器证据为 `metadata/bpi-dataset-parquet-v2-acceptance.json`，完整报告为
+`docs/testing/bpi-dataset-parquet-v2-process-window-acceptance.md`。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -523,6 +544,7 @@ IoT 周期恢复为 `10m/5m`。测试线已有 7 个历史未解决事件且无�
 - [BPI 批次受控强制结束目标验收](testing/bpi-force-close-acceptance.md)
 - [BPI 正式身份双管理员强制结束验收](testing/bpi-formal-identity-force-close-acceptance.md)
 - [BPI 现场数据覆盖目标验收](testing/bpi-field-data-coverage-acceptance.md)
+- [BPI 工艺窗口 Parquet v2 与 Iceberg 验收](testing/bpi-dataset-parquet-v2-process-window-acceptance.md)
 - [BPI IoT 遥测落表目标验收](testing/bpi-iot-telemetry-landing-acceptance.md)
 - [BPI 实时生产态势目标验收](testing/bpi-live-operations-evidence-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
@@ -703,7 +725,8 @@ IoT 周期恢复为 `10m/5m`。测试线已有 7 个历史未解决事件且无�
 3. 保持已通过的单 broker 故障、service/adapter/Flink 双 savepoint 整栈回切、入口流量恢复、真实候选确认和 PostgreSQL 不变性为发布回归；生产切换前只需在生产等价维护窗口复跑并取得业务签字。
 4. 以已通过的 `MapleTcT/iot` 受控 MQTT 双会话链、V34 遥测窗口落表和 `mes-production-context-outbox` 为基线配置试点产线；当前产品、设备、`instantFlow` metadata、单位、受控 `source_epoch + sequence` 和 PostgreSQL 窗口隔离已进入自动链，下一步补真实校准并用物理 DEVICE/GATEWAY 重复同等验收。
 5. 受控 MQTT 与 WOM context 的同指令 START/END、以及 MQTT -> JetLinks -> Kafka -> BPI PostgreSQL -> 影子页面已通过；下一步用物理设备和正式校准替换受控来源，按同一生产指令重复 candidate/batch、自动 END、窗口落表和浏览器证据链，再连续运行 7-14 天影子批次。
-6. 达到现场边界人工认同率、累计量偏差和数据质量门槛后，才接入外部 QCS 主动事件及外部 ERP/WMS 写回、查单、拒绝、冲销和补偿。
+6. 固定 Phase 3C-G 的 Parquet v2/Iceberg exact-version 回归；Phase 3D-A 先实现训练任务控制面、幂等和失败关闭，对当前不足数据必须拒绝创建训练，不得绕过资格门槛。
+7. 达到现场边界人工认同率、累计量偏差和数据质量门槛后，才接入外部 QCS 主动事件及外部 ERP/WMS 写回、查单、拒绝、冲销和补偿。
 
 ### 主线 B：既有生产/质量核心链
 

@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-07-23T15:55:17Z",
+  "status": "PASS",
+  "marker": "ADP_E2E_BPI_PARQUET_V2_20260723_233000_A1",
+  "catalog": "ft_mes_bpi",
+  "tableIdentifier": "ft_mes_bpi.bpi_training.tenant_40510175845988f1.dataset_520419c7b64841099757a4f295e0edde",
+  "publicationId": "2a9d7a45-f068-4f15-bd2e-33a2398eef2b",
+  "materializationId": "28b117f9-9976-4699-b9d1-7d7f8054ade3",
+  "snapshotId": "6747414530221740825",
+  "metadataLocation": "s3://bpi-iceberg-warehouse/warehouse/bpi_training/tenant_40510175845988f1/dataset_520419c7b64841099757a4f295e0edde/metadata/00002-86ca5a45-202b-4c75-b170-cc9e0f24d93e.metadata.json",
+  "schemaId": 0,
+  "partitionSpecId": 1,
+  "rowCount": 1,
+  "fieldCount": 33,
+  "sourceContentSha256": "2f9930cd46ca1942b93b87cef404757c888eefca308c20473ceef18644412f98",
+  "sourceObjectVersionId": "fbb8bfae-41fa-4d42-9629-b2d80da7b6e9",
+  "semanticChecksum": "a7e1ac899c21d9684d7a0b06625d6da1d140fb96167c155ac0c41208b901b810",
+  "processWindowValues": {
+    "process.window.flow_instant.mean_60s": "20.000000",
+    "process.window.pump_running.true_ratio_30s": "0.500000"
+  },
+  "verification": {
+    "catalogSnapshotVerified": true,
+    "sourceVersionVerified": true,
+    "manifestChecksumVerified": true,
+    "exactSnapshotScan": true
+  },
+  "cleanupRequired": false
+}

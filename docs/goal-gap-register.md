@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-23T14:17:23+00:00` |
-| Repo Commit | `d6bfaa5a507f4f8bad5ade45baa744b19a583828` |
+| Generated At | `2026-07-23T16:03:55+00:00` |
+| Repo Commit | `007616b290efa366f97e99cb27efb68c8186268c` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -38,7 +38,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-018` | `PARTIAL` | 业务模块完整测试用例 | 生产矩阵 44 条已全部 PASS，模块 blocker/backlog 已清零，旧 public produceTaskCreated 已退役；现场 Batch/DCS 切换确认及业务负责人签字仍未完成。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 和独立不良数量闭环已闭合。 | 保持 material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑、独立不良数量闭环、旧 public endpoint 退役契约、PATROL 配置/执行/异常隐患、统计聚合和 Kafka 消费回归；接入有历史值的真实 TagManagement 测点并配置误差基准巡检项，复验中位数落库和误差图表；取得 SESGISConfig 后恢复 GIS 定位/轨迹，若要求整改、复查和销项则先取得真实 SESH；完成现场 Batch/DCS 切换确认，并补齐 before/after SQL 和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
-| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则、点位目录/校准治理、影子验收、运行回执、savepoint、数据质量、broker/组件回退、真实候选/批次负载下的 Service/Adapter/Flink 整体回切、同指令 START/END、正式 ADP 双会话强制结束四眼审批、真实目标 QCS 页面/事务 outbox/Kafka/BPI 首发与幂等重放、受控 QCS -> Kafka -> query-first material-wms -> durable receipt -> INBOUNDED/r4、同 event/同幂等键 WMS 原单核对与重新排队、目标内部 material-wms 停机/DLQ/恢复，以及 V25 正式身份申请/四眼审批/蓝红 Kafka/双 PostgreSQL/durable receipt/INBOUND_REVERSED/净库存归零/浏览器与清理整链均已通过。Phase 2 最终继续关闭；尚缺真实连续 7-14 天、物理设备来源和外部 ERP/WMS 实例的消费、查单、回执及协议补偿。 | 把 BPI_LIVE_20260720_123058、ADP_E2E_20260721021607_QCS_BPI、ADP_E2E_20260721053253_BPI_FORCE_CLOSE、ADP_BPI_FORMAL_IDENTITY_20260721134944、ADP_E2E_20260720_215500_BPI_WMS、ADP_E2E_20260721_015610_WMS_RECON、ADP_E2E_20260720193226_WMS_OUTAGE、ADP_BPI_INTEGRATED_ROLLBACK_20260721_2054、ADP_BPI_FORMAL_WMS_REVERSAL_20260721175536、ADP_BPI_FORMAL_WMS_REVERSAL_20260721190630、ADP_E2E_BPI_DATASET_TARGET_20260722_055000_A7C4、ADP_E2E_BPI_PARQUET_20260722_105844_A1 及对应迁移/部署/整链机器报告固定为发布回归基线；保持 Phase 2 关闭，先在选定产线用物理来源和正式校准连续运行 7-14 天，再接入真实外部 ERP/WMS 完成消费、查单、响应丢失、拒绝、冲销和补偿。 |
+| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | Phase 1/2 与 Phase 3A-3C-G 的受控软件链、真实页面、PostgreSQL、Parquet v2 和 Iceberg exact snapshot 均已闭合，但仍缺物理 DEVICE/GATEWAY 与断电重连、正式计量校准、多点/多产线容量、至少 200 个真实复核批次、7 个生产日、正负 START 标签、连续 7-14 天、外部 ERP/WMS、整站灾备及 MLflow 生产 RBAC/SSO/TLS/HA。当前数据不得进入训练或生产激活。 | 先实现 Phase 3D-A 训练任务控制面、幂等、审计和资格失败关闭：当前不足数据必须返回受阻且不创建训练、不写 MLflow 模型。把 Phase 3C-G marker 与 exact-version 报告固定为回归基线，同时在正式点位和批准校准下积累 200 个真实复核批次、7 个生产日、至少 100 accepted/10 rejected START，并完成物理来源、多产线容量和 7-14 天稳定性验收。 |
 
 ## Production Blockers
 

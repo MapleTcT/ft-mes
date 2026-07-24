@@ -71,3 +71,15 @@ v2 保留 v1 的固定列、顺序、标签和 point-in-time 元数据。工艺�
 v2 闭合后再实现 Phase 3D-A 离线训练任务控制面。当前目标数据仍为 `BLOCKED`，训练入口必须
 返回 422 且不创建任务、不写 MLflow。成功训练只允许使用通过当前 v2 资格策略的专用验收数据，
 并继续保持模型注册、在线推断和生产激活为 false。
+
+## 7. 验收状态
+
+2026-07-23 已在 `10.11.100.17 / adp-mes-newbase` 以 marker
+`ADP_E2E_BPI_PARQUET_V2_20260723_233000_A1` 完成真实页面、API、PostgreSQL、MinIO exact version
+和 Iceberg exact snapshot 验收。Parquet 为 1 row/27 fields，Iceberg 为 1 row/33 fields；两个
+过程窗口在两层均为 `20.000000 / 0.500000`。浏览器错误为 0，取证后表、namespace、7 个对象版本和
+20 类 marker 投影全部清零，可选开关恢复 false。
+
+状态为 `PASS_TARGET_BROWSER_API_POSTGRES_MINIO_ICEBERG_CLEANED`。详细证据见
+`docs/testing/bpi-dataset-parquet-v2-process-window-acceptance.md` 和
+`metadata/bpi-dataset-parquet-v2-acceptance.json`。该状态不改变训练资格和生产就绪结论。

@@ -4749,6 +4749,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/verify-bpi-dataset-parquet-v2-object.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/keycloak/production-migration/.env.example",
       "state": "tracked",
       "tracked": true
@@ -5643,6 +5649,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/plans/2026-07-23-bpi-phase3cg-process-window-parquet-v2-design.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/postgres-migration-index.md",
       "state": "tracked",
       "tracked": true
@@ -5650,6 +5662,12 @@
     {
       "ignored": false,
       "path": "docs/postgres-migration-watch-rationale.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/product/ft-mes-bpi-product-interaction-manual.md",
       "state": "tracked",
       "tracked": true
     },
@@ -5854,6 +5872,12 @@
     {
       "ignored": false,
       "path": "docs/testing/bpi-dataset-mlflow-registration-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/bpi-dataset-parquet-v2-process-window-acceptance.md",
       "state": "tracked",
       "tracked": true
     },
@@ -6454,6 +6478,60 @@
     {
       "ignored": false,
       "path": "metadata/bpi-dataset-mlflow-registration-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-parquet-v2-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-parquet-v2-browser-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-parquet-v2-iceberg-browser-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-parquet-v2-iceberg-ready-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-parquet-v2-iceberg-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-parquet-v2-manifest-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-parquet-v2-object-target.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-parquet-v2-ready-mobile-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-dataset-parquet-v2-ready-target.png",
       "state": "tracked",
       "tracked": true
     },
@@ -8032,6 +8110,12 @@
     {
       "ignored": false,
       "path": "scripts/verify-platform-validation-smoke.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "scripts/verify-product-interaction-manual.py",
       "state": "tracked",
       "tracked": true
     },
@@ -11486,16 +11570,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 663
+      "tracked": 664
     },
     "docs": {
-      "tracked": 147
+      "tracked": 150
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 259
+      "tracked": 268
     },
     "package.json": {
       "tracked": 1
@@ -11504,7 +11588,7 @@
       "tracked": 1
     },
     "scripts": {
-      "tracked": 57
+      "tracked": 58
     },
     "services": {
       "tracked": 451
@@ -11519,8 +11603,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1910,
-    "tracked": 1910,
+    "totalFiles": 1924,
+    "tracked": 1924,
     "untracked": 0
   },
   "untrackedByDirectory": []

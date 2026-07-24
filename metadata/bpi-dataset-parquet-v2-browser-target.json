@@ -1,0 +1,96 @@
+{
+  "generatedAt": "2026-07-23T15:39:39.802Z",
+  "status": "PASS",
+  "marker": "ADP_E2E_BPI_PARQUET_V2_20260723_233000_A1",
+  "route": "http://10.11.100.17:18080/bpi/#/datasets",
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "definition": {
+    "id": "520419c7-b648-4109-9757-a4f295e0edde",
+    "processWindowFeatureRefs": [
+      "process.window.flow_instant.mean_60s",
+      "process.window.pump_running.true_ratio_30s"
+    ]
+  },
+  "snapshot": {
+    "id": "b199531e-451f-44c8-a55c-17848217dd4d",
+    "state": "MANIFEST_READY",
+    "includedCount": 1,
+    "excludedCount": 2,
+    "processWindowFacts": {
+      "total": 6,
+      "ready": 2,
+      "blocked": 4,
+      "flowMean": "20.000000",
+      "pumpTrueRatio": "0.500000"
+    }
+  },
+  "materialization": {
+    "id": "28b117f9-9976-4699-b9d1-7d7f8054ade3",
+    "state": "READY",
+    "revision": 3,
+    "attemptCount": 1,
+    "artifactSchemaVersion": "bpi.dataset-parquet.v2",
+    "materializerVersion": "bpi-dataset-materializer/0.2.0",
+    "rowCount": 1,
+    "fieldCount": 27,
+    "byteSize": 12761,
+    "contentSha256": "2f9930cd46ca1942b93b87cef404757c888eefca308c20473ceef18644412f98",
+    "objectVersionId": "fbb8bfae-41fa-4d42-9629-b2d80da7b6e9"
+  },
+  "operations": [
+    {
+      "method": "POST",
+      "url": "/bpi-api/datasets",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "/bpi-api/datasets/520419c7-b648-4109-9757-a4f295e0edde/snapshots",
+      "status": 202
+    },
+    {
+      "method": "POST",
+      "url": "/bpi-api/dataset-snapshots/b199531e-451f-44c8-a55c-17848217dd4d/materializations",
+      "status": 202
+    }
+  ],
+  "desktop": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "delivery": [
+      "MANIFEST_READY",
+      "READY",
+      "NOT_STARTED",
+      "NOT_STARTED",
+      "NOT_STARTED",
+      "NOT_STARTED",
+      "NOT_STARTED"
+    ],
+    "screenshot": "metadata/bpi-dataset-parquet-v2-ready-target.png"
+  },
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "geometry": {
+      "viewport": 390,
+      "body": 390,
+      "document": 390
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "screenshot": "metadata/bpi-dataset-parquet-v2-ready-mobile-target.png"
+  },
+  "cleanupRequired": true
+}
