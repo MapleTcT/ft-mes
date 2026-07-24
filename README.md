@@ -6,6 +6,8 @@
 
 当前代码、本机目录、公司内网/Tailscale 入口、九个 BPI 页面、角色、交互、API、PostgreSQL 表和生产边界，
 统一见 [FT MES + BPI 当前项目地址与产品交互说明书](docs/product/ft-mes-bpi-product-interaction-manual.md)。
+本轮环境清理前的分支归并、迁移来源和保留目录见
+[2026-07-24 main 汇总基线](docs/main-consolidation-20260724.md)。
 
 ## 项目定位
 

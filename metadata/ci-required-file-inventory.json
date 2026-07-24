@@ -2133,6 +2133,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/patches/base-service-layout-json-postgres/.gitignore",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/patches/base-service-layout-json-postgres/src/com/supcon/orchid/ec/cache/BaseServiceCacheService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/patches/flow-postgres-datasource/src/com/supcon/supfusion/flow/engine/server/config/MultiSchemaProcessEngineInit.java",
       "state": "tracked",
       "tracked": true
@@ -3549,6 +3561,48 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/199-rm-line-formulas-table.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/200-hierarchicalmod-factory-line-ref-null-safe-condition.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/201-lims-quality-std-ref-runtime-view-link.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/202-lims-quality-std-ref-runtime-json.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/203-qcs-inspect-supervision-main-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/204-production-list-export-runtime-datagrid.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/205-production-export-propertycode-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4329,6 +4383,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/build-base-service-layout-json-postgres-patch.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/build-configuration-entity-model-compat-patch.sh",
       "state": "tracked",
       "tracked": true
@@ -4438,6 +4498,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/init-keycloak-realm.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/patch-base-service-layout-json-postgres.py",
       "state": "tracked",
       "tracked": true
     },
@@ -5536,6 +5602,12 @@
     {
       "ignored": false,
       "path": "docs/linux-migration-notes.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/main-consolidation-20260724.md",
       "state": "tracked",
       "tracked": true
     },
@@ -7342,6 +7414,12 @@
     {
       "ignored": false,
       "path": "metadata/keycloak-jwt-runtime-smoke.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/main-consolidation-20260724.json",
       "state": "tracked",
       "tracked": true
     },
@@ -11570,16 +11648,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 664
+      "tracked": 675
     },
     "docs": {
-      "tracked": 150
+      "tracked": 151
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 268
+      "tracked": 269
     },
     "package.json": {
       "tracked": 1
@@ -11603,8 +11681,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1924,
-    "tracked": 1924,
+    "totalFiles": 1937,
+    "tracked": 1937,
     "untracked": 0
   },
   "untrackedByDirectory": []

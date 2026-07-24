@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 198,
+  "migrationCount": 205,
   "firstNumber": 1,
-  "lastNumber": 198,
+  "lastNumber": 205,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -12,31 +12,31 @@
   "watchStatementCount": 78,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 10827,
-    "create-function": 93,
-    "create-index": 1005,
-    "create-table": 580,
-    "create-view": 142,
-    "insert": 11016,
-    "update": 11105
+    "alter-table": 10830,
+    "create-function": 101,
+    "create-index": 1011,
+    "create-table": 581,
+    "create-view": 143,
+    "insert": 11021,
+    "update": 11122
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 232,
-    "do-block": 395,
-    "if-exists": 124,
-    "if-not-exists": 13035,
-    "on-conflict": 10953,
-    "to-regclass": 219,
+    "create-or-replace": 241,
+    "do-block": 400,
+    "if-exists": 129,
+    "if-not-exists": 13048,
+    "on-conflict": 10956,
+    "to-regclass": 220,
     "where-not-exists": 45
   },
   "tagTotals": {
     "auth-rbac-org": 37,
-    "business": 37,
-    "compatibility": 77,
-    "configuration": 45,
-    "general": 35,
+    "business": 40,
+    "compatibility": 79,
+    "configuration": 48,
+    "general": 37,
     "notification": 9,
-    "platform": 55,
+    "platform": 58,
     "workflow": 21
   },
   "migrations": [
@@ -7499,6 +7499,243 @@
         "do-block": 0,
         "to-regclass": 0,
         "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/199-rm-line-formulas-table.sql",
+      "name": "199-rm-line-formulas-table.sql",
+      "number": 199,
+      "slug": "rm-line-formulas-table",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 160,
+      "sha256": "2986e9dc3689270384ccae65c2716dc2fb829b4b866df48ff26fcc6f01deb66a",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 4,
+        "alter-table": 2,
+        "insert": 1,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 7,
+        "on-conflict": 1,
+        "do-block": 3,
+        "to-regclass": 1,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/200-hierarchicalmod-factory-line-ref-null-safe-condition.sql",
+      "name": "200-hierarchicalmod-factory-line-ref-null-safe-condition.sql",
+      "number": 200,
+      "slug": "hierarchicalmod-factory-line-ref-null-safe-condition",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 159,
+      "sha256": "97ed6f5b217db09d91986b0a8341fec9cd4a1143b1fb4dcee24044bcc7183d7f",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/201-lims-quality-std-ref-runtime-view-link.sql",
+      "name": "201-lims-quality-std-ref-runtime-view-link.sql",
+      "number": 201,
+      "slug": "lims-quality-std-ref-runtime-view-link",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration",
+        "business"
+      ],
+      "lineCount": 27,
+      "sha256": "22682424bf591051520ead4dccae55b28e761e10c2cfc8e41b7da39e9fb417f7",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/202-lims-quality-std-ref-runtime-json.sql",
+      "name": "202-lims-quality-std-ref-runtime-json.sql",
+      "number": 202,
+      "slug": "lims-quality-std-ref-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 147,
+      "sha256": "33fb667a9f30de2bede1f121450dbd0a4762b3b7f42e85d9eb8827188b70b063",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 2,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/203-qcs-inspect-supervision-main-compat.sql",
+      "name": "203-qcs-inspect-supervision-main-compat.sql",
+      "number": 203,
+      "slug": "qcs-inspect-supervision-main-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 48,
+      "sha256": "465a134d3a420d962786f5cda6eba0c030995ccfe5bd5b350b374dabe0029d4f",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 6,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/204-production-list-export-runtime-datagrid.sql",
+      "name": "204-production-list-export-runtime-datagrid.sql",
+      "number": 204,
+      "slug": "production-list-export-runtime-datagrid",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 450,
+      "sha256": "f200257a475669ac1350290901ec46d927e7301ec858fb6f41ea0c02daf3f2c7",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 2,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/205-production-export-propertycode-compat.sql",
+      "name": "205-production-export-propertycode-compat.sql",
+      "number": 205,
+      "slug": "production-export-propertycode-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 551,
+      "sha256": "4901dc6e264fb255ed22ba217b636074559c381959997c2a35bae2a9142164b8",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 6,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 7
+      },
+      "idempotencySignals": {
+        "if-exists": 3,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 6,
         "where-not-exists": 0
       },
       "highRiskStatements": [],

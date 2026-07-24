@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`198`。
-- 编号范围：`001` 到 `198`。
+- 脚本数量：`205`。
+- 编号范围：`001` 到 `205`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -21,36 +21,36 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 37 |
-| business | 37 |
-| compatibility | 77 |
-| configuration | 45 |
-| general | 35 |
+| business | 40 |
+| compatibility | 79 |
+| configuration | 48 |
+| general | 37 |
 | notification | 9 |
-| platform | 55 |
+| platform | 58 |
 | workflow | 21 |
 
 ## 语句统计
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10827 |
-| create-function | 93 |
-| create-index | 1005 |
-| create-table | 580 |
-| create-view | 142 |
-| insert | 11016 |
-| update | 11105 |
+| alter-table | 10830 |
+| create-function | 101 |
+| create-index | 1011 |
+| create-table | 581 |
+| create-view | 143 |
+| insert | 11021 |
+| update | 11122 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 232 |
-| do-block | 395 |
-| if-exists | 124 |
-| if-not-exists | 13035 |
-| on-conflict | 10953 |
-| to-regclass | 219 |
+| create-or-replace | 241 |
+| do-block | 400 |
+| if-exists | 129 |
+| if-not-exists | 13048 |
+| on-conflict | 10956 |
+| to-regclass | 220 |
 | where-not-exists | 45 |
 
 ## 脚本清单
@@ -255,6 +255,13 @@
 | 196 | 196-qcs-manu-inspect-list-empty-column.sql | configuration, business | 114 | create-function:1, update:4 | 3 | watch:1 |
 | 197 | 197-configuration-app-owned-physical-schema-sync.sql | configuration | 4 | - | 2 | watch:2 |
 | 198 | 198-material-wms-completion-inbound-reversal.sql | general | 32 | create-index:1, alter-table:7 | 5 | - |
+| 199 | 199-rm-line-formulas-table.sql | general | 160 | create-table:1, create-index:4, alter-table:2, insert:1 | 12 | - |
+| 200 | 200-hierarchicalmod-factory-line-ref-null-safe-condition.sql | general | 159 | update:2 | 0 | - |
+| 201 | 201-lims-quality-std-ref-runtime-view-link.sql | platform, configuration, business | 27 | update:2 | 0 | - |
+| 202 | 202-lims-quality-std-ref-runtime-json.sql | platform, business | 147 | insert:2, update:2 | 3 | - |
+| 203 | 203-qcs-inspect-supervision-main-compat.sql | configuration, business, compatibility | 48 | create-view:1, create-index:2, alter-table:1, update:1 | 7 | - |
+| 204 | 204-production-list-export-runtime-datagrid.sql | platform | 450 | create-function:2, insert:2, update:3 | 4 | - |
+| 205 | 205-production-export-propertycode-compat.sql | configuration, compatibility | 551 | create-function:6, update:7 | 10 | - |
 
 ## 规则
 

@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2026-07-24T15:08:54+08:00",
+  "database": "PostgreSQL",
+  "baseMainCommit": "d1d33c563651daad9b89794db104015fecadcad1",
+  "consolidationBranch": "codex/main-consolidation-20260724",
+  "includedBranches": [
+    {
+      "name": "codex/factory-line-ref-postgres-compat",
+      "mode": "merge",
+      "status": "INCLUDED"
+    },
+    {
+      "name": "codex/quality-std-ref-layout-json-fix",
+      "mode": "merge",
+      "status": "INCLUDED"
+    },
+    {
+      "name": "codex/rbac-acceptance-ssh-retry",
+      "mode": "merge",
+      "status": "INCLUDED"
+    },
+    {
+      "name": "codex/wom-maketasklist-i18n-guards",
+      "mode": "ours",
+      "status": "SUPERSEDED_BY_MAIN"
+    }
+  ],
+  "migrations": [
+    "199-rm-line-formulas-table.sql",
+    "200-hierarchicalmod-factory-line-ref-null-safe-condition.sql",
+    "201-lims-quality-std-ref-runtime-view-link.sql",
+    "202-lims-quality-std-ref-runtime-json.sql",
+    "203-qcs-inspect-supervision-main-compat.sql",
+    "204-production-list-export-runtime-datagrid.sql",
+    "205-production-export-propertycode-compat.sql"
+  ],
+  "runtimeVerification": {
+    "target": "10.11.100.17",
+    "passes": 2,
+    "onErrorStop": true,
+    "status": "PASS",
+    "checks": {
+      "rmLineFormulaRows": 1,
+      "nullSafeFactoryReferenceConditions": 4,
+      "qualityStandardLayoutBytes": 2920,
+      "qcsSupervisionRows": 30,
+      "requiredExportFunctions": 3,
+      "targetExportDatagrids": 5
+    }
+  },
+  "cleanup": {
+    "canonicalSource": "GitHub main",
+    "preserveDirtyWorktree": "/Users/zhangchu/Documents/ADP/adp-source-repo",
+    "automaticCleanupPerformed": false
+  }
+}

@@ -1,28 +1,28 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-23T05:21:58+00:00",
-  "repoCommit": "65946084a9f7444217ae8945c4828219ff2267c3",
+  "generatedAt": "2026-07-24T07:12:14+00:00",
+  "repoCommit": "1fee983d2dc0d7045e732bdd9524d7a873243e0e",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 378,
-    "totalBytes": 55175689,
+    "totalFiles": 387,
+    "totalBytes": 55247595,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 198,
+      "postgres-init-sql": 205,
       "runtime-binary-patch": 7,
-      "runtime-patch-source": 22,
-      "runtime-script": 26,
+      "runtime-patch-source": 23,
+      "runtime-script": 27,
       "runtime-static-override": 79
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
       "nginx-runtime-config": 27463,
-      "postgres-init-sql": 54240935,
+      "postgres-init-sql": 54300347,
       "runtime-binary-patch": 29988,
-      "runtime-patch-source": 88039,
-      "runtime-script": 279499,
+      "runtime-patch-source": 95909,
+      "runtime-script": 284123,
       "runtime-static-override": 467412
     }
   },
@@ -1501,6 +1501,48 @@
       "sha256": "d2250c397acd24059ab687ca6dad42c6aae26e83789da9d61e30dc2bb2ddc2b4"
     },
     {
+      "path": "deploy/docker/postgres/init/199-rm-line-formulas-table.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 6312,
+      "sha256": "2986e9dc3689270384ccae65c2716dc2fb829b4b866df48ff26fcc6f01deb66a"
+    },
+    {
+      "path": "deploy/docker/postgres/init/200-hierarchicalmod-factory-line-ref-null-safe-condition.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 6951,
+      "sha256": "97ed6f5b217db09d91986b0a8341fec9cd4a1143b1fb4dcee24044bcc7183d7f"
+    },
+    {
+      "path": "deploy/docker/postgres/init/201-lims-quality-std-ref-runtime-view-link.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1328,
+      "sha256": "22682424bf591051520ead4dccae55b28e761e10c2cfc8e41b7da39e9fb417f7"
+    },
+    {
+      "path": "deploy/docker/postgres/init/202-lims-quality-std-ref-runtime-json.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 5135,
+      "sha256": "33fb667a9f30de2bede1f121450dbd0a4762b3b7f42e85d9eb8827188b70b063"
+    },
+    {
+      "path": "deploy/docker/postgres/init/203-qcs-inspect-supervision-main-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1530,
+      "sha256": "465a134d3a420d962786f5cda6eba0c030995ccfe5bd5b350b374dabe0029d4f"
+    },
+    {
+      "path": "deploy/docker/postgres/init/204-production-list-export-runtime-datagrid.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 18661,
+      "sha256": "f200257a475669ac1350290901ec46d927e7301ec858fb6f41ea0c02daf3f2c7"
+    },
+    {
+      "path": "deploy/docker/postgres/init/205-production-export-propertycode-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 19495,
+      "sha256": "4901dc6e264fb255ed22ba217b636074559c381959997c2a35bae2a9142164b8"
+    },
+    {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 2603,
@@ -1541,6 +1583,12 @@
       "category": "runtime-binary-patch",
       "sizeBytes": 2024,
       "sha256": "c4a831bc43a743743a5a4c104b3fb6a07f3e1161030bda37a79308b67c4009db"
+    },
+    {
+      "path": "deploy/docker/patches/base-service-layout-json-postgres/src/com/supcon/orchid/ec/cache/BaseServiceCacheService.java",
+      "category": "runtime-patch-source",
+      "sizeBytes": 7870,
+      "sha256": "6d88c1a440908791879d845ca3b29013d53c693daadbbf78d0f82f4ba1b262f9"
     },
     {
       "path": "deploy/docker/patches/flow-postgres-datasource/src/com/supcon/supfusion/flow/engine/server/config/MultiSchemaProcessEngineInit.java",
@@ -1691,6 +1739,12 @@
       "category": "runtime-script",
       "sizeBytes": 1373,
       "sha256": "ede31f8645df35b088434b188f8c19c8a851b0b0393ad5a810953102a2b0a586"
+    },
+    {
+      "path": "deploy/docker/scripts/patch-base-service-layout-json-postgres.py",
+      "category": "runtime-script",
+      "sizeBytes": 4624,
+      "sha256": "2c89d675d2ed39ffe7d30618369b3c10e323f90d2a64244c9868996fc04fca1a"
     },
     {
       "path": "deploy/docker/scripts/patch-basicmanagement-signature-mapper.py",
