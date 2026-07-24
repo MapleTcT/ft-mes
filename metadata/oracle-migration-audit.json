@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-24T07:12:36+00:00",
-  "repoCommit": "1fee983d2dc0d7045e732bdd9524d7a873243e0e",
-  "findingCount": 1630,
+  "generatedAt": "2026-07-24T07:22:44+00:00",
+  "repoCommit": "a35973198b102be60bb99ea202920ec41ce04e6e",
+  "findingCount": 1631,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
@@ -11,7 +11,7 @@
     "java-row-index-noise": 93,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
-    "postgres-compat-reference": 575,
+    "postgres-compat-reference": 576,
     "postgres-conversion-tooling": 48,
     "recovered-source-backlog": 253,
     "runtime-patch-backlog": 9,
@@ -21,7 +21,7 @@
     "decode-sql": 5,
     "from-dual": 140,
     "ojdbc": 15,
-    "oracle-keyword": 641,
+    "oracle-keyword": 642,
     "rownum": 694,
     "sysdate": 135
   },
@@ -8891,6 +8891,14 @@
       "category": "postgres-compat-reference",
       "note": "PostgreSQL compatibility SQL may mention Oracle as source context.",
       "excerpt": "-- report. The vendor initialization seeds wom_source on Oracle/MySQL/SQL"
+    },
+    {
+      "file": "deploy/docker/postgres/init/205-production-export-propertycode-compat.sql",
+      "line": 7,
+      "pattern": "oracle-keyword",
+      "category": "postgres-compat-reference",
+      "note": "PostgreSQL compatibility SQL may mention Oracle as source context.",
+      "excerpt": "-- properties lost associated_property_code during the Oracle -> PostgreSQL"
     },
     {
       "file": "deploy/docker/scripts/adp-nacos-config-drift-smoke.js",

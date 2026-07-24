@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-24T07:19:45+00:00",
-  "repoCommit": "32a37da8f53aced6b09af3093966a595350dd4c9",
+  "generatedAt": "2026-07-24T07:23:01+00:00",
+  "repoCommit": "a35973198b102be60bb99ea202920ec41ce04e6e",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -74,7 +74,7 @@
       "status": "PARTIAL",
       "scope": "默认运行、默认构建和默认 Docker 路径使用 PostgreSQL；Oracle 仅作为 legacy 对照。",
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1630, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 205. metadata/oracle-migration-audit.json currently has 1630 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1631, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 205. metadata/oracle-migration-audit.json currently has 1631 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
