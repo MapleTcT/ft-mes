@@ -1,6 +1,6 @@
 -- Null-safe runtime conditions for HierarchicalMod factory line references.
 --
--- SQL 175 restored the missing rm_line_formulas table used by formula-scoped
+-- SQL 199 restored the missing rm_line_formulas table used by formula-scoped
 -- WOM production-line references. A remaining legacy runtime condition still
 -- accessed customCondition.formulaId/customCondition.lineId without checking
 -- whether customCondition itself was present. Generic line-reference callers can
