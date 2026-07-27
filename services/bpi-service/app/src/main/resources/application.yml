@@ -175,7 +175,7 @@ bpi:
     max-payload-bytes: ${BPI_TELEMETRY_MAX_PAYLOAD_BYTES:524288}
     max-points-per-envelope: ${BPI_TELEMETRY_MAX_POINTS:500}
     max-future-skew: ${BPI_TELEMETRY_MAX_FUTURE_SKEW:2m}
-    accepted-units: ${BPI_TELEMETRY_ACCEPTED_UNITS:1,bool,%,t/h,kg/h,m3/h,m3/s,kg/s,degC,kPa,MPa,Be,Baume,Brix}
+    accepted-units: ${BPI_TELEMETRY_ACCEPTED_UNITS:1,bool,%,t/h,kg/h,m3,m3/h,m3/s,kg/s,degC,kPa,MPa,Be,Baume,Brix}
     accepted-qualities: GOOD,UNCERTAIN,BAD,STALE,SUBSTITUTED
   telemetry-kafka:
     enabled: ${BPI_TELEMETRY_KAFKA_ENABLED:false}

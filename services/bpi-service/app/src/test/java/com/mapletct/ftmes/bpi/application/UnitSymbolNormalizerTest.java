@@ -11,6 +11,7 @@ class UnitSymbolNormalizerTest {
     void acceptsAsciiAndJetLinksSuperscriptFlowUnitsAsEquivalent() {
         assertTrue(UnitSymbolNormalizer.equivalent("m3/h", "m\u00b3/h"));
         assertTrue(UnitSymbolNormalizer.equivalent(" m\u00b3 / h ", "m3/h"));
+        assertTrue(UnitSymbolNormalizer.equivalent("m3", "m\u00b3"));
     }
 
     @Test

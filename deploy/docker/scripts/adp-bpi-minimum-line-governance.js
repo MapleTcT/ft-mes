@@ -15,6 +15,7 @@ const reportPath = path.resolve(
 );
 const boundaryBaseTime = process.env.BPI_ACCEPTANCE_BOUNDARY_BASE_TIME || "";
 const timeoutMs = Number(process.env.BPI_ACCEPTANCE_TIMEOUT_MS || 180000);
+const recoveredPreviousFlags = previousFlagsFromEnvironment();
 
 if (!new Set(["setup", "cleanup"]).has(action)) {
   throw new Error("BPI_MINIMUM_LINE_ACTION must be setup or cleanup");
@@ -40,6 +41,34 @@ function required(key) {
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
+}
+
+function previousFlagsFromEnvironment() {
+  const raw = process.env.BPI_MINIMUM_LINE_PREVIOUS_FLAGS_JSON;
+  if (!raw?.trim()) return {};
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    throw new Error(`BPI_MINIMUM_LINE_PREVIOUS_FLAGS_JSON is invalid JSON: ${error.message}`);
+  }
+  assert(parsed && typeof parsed === "object" && !Array.isArray(parsed),
+    "BPI_MINIMUM_LINE_PREVIOUS_FLAGS_JSON must be an object");
+  for (const [key, value] of Object.entries(parsed)) {
+    assert(new Set(["bpi.rule-management", "bpi.commands"]).has(key),
+      `unsupported recovered feature flag: ${key}`);
+    assert(value && typeof value === "object" && !Array.isArray(value),
+      `recovered feature flag ${key} must be an object`);
+    for (const booleanField of ["overrideExists", "overrideActive"]) {
+      assert(typeof value[booleanField] === "boolean",
+        `recovered feature flag ${key}.${booleanField} must be boolean`);
+    }
+    assert(value.overrideEnabled === null || typeof value.overrideEnabled === "boolean",
+      `recovered feature flag ${key}.overrideEnabled must be boolean or null`);
+    assert(Number.isInteger(value.overrideRevision) && value.overrideRevision >= 0,
+      `recovered feature flag ${key}.overrideRevision must be a non-negative integer`);
+  }
+  return parsed;
 }
 
 function base64Url(value) {
@@ -169,6 +198,22 @@ async function currentCatalog(report, engineer, scenario) {
   return api(report, engineer, "GET", `/bpi/v1/point-catalog/current?${query}`);
 }
 
+async function listCalibrations(report, actorValue, scenario, propertyId) {
+  const query = new URLSearchParams({
+    plantId: scenario.scope.plantId,
+    lineId: scenario.scope.lineId,
+    productId: scenario.device.productId,
+    deviceId: scenario.device.deviceId,
+    propertyId,
+    limit: "100",
+  });
+  return api(report, actorValue, "GET", `/bpi/v1/point-calibrations?${query}`);
+}
+
+function writeReport(report) {
+  fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+}
+
 function selectedPoints(catalog, scenario) {
   return (catalog?.points || []).filter((point) =>
     point.productId === scenario.device.productId
@@ -180,6 +225,13 @@ async function setup() {
   const scenario = loadScenario();
   const engineer = actor(`${marker}_ENGINEER`, ["BPI_ENGINEER"], scenario);
   const admin = actor(`${marker}_ADMIN`, ["BPI_ADMIN"], scenario);
+  let previousRun = null;
+  if (fs.existsSync(reportPath)) {
+    const candidate = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+    if (candidate.marker === marker && candidate.action === "setup") {
+      previousRun = candidate;
+    }
+  }
   const report = {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
@@ -195,7 +247,14 @@ async function setup() {
     safety: scenario.safety,
     serviceBaseUrl,
     requests: [],
-    previousFlags: {},
+    previousFlags: {
+      ...recoveredPreviousFlags,
+      ...(previousRun?.previousFlags || {}),
+    },
+    previousFlagsSource: {
+      reportCheckpoint: Boolean(previousRun),
+      recoveredFromAudit: Object.keys(recoveredPreviousFlags),
+    },
     resources: {
       calibrations: [],
       topology: null,
@@ -208,22 +267,37 @@ async function setup() {
     for (const key of ["bpi.rule-management", "bpi.commands"]) {
       const flag = flags.find((item) => item.flagKey === key);
       assert(flag, `feature flag ${key} is missing`);
-      report.previousFlags[key] = {
-        overrideExists: flag.overrideExists,
-        overrideActive: flag.overrideActive,
-        overrideEnabled: flag.overrideEnabled,
-        overrideRevision: flag.overrideRevision,
-      };
-      await changeFlag(
-        report,
-        admin,
-        scenario,
-        key,
-        "SET",
-        true,
-        flag.overrideRevision,
-        "enable",
-      );
+      if (!report.previousFlags[key]) {
+        report.previousFlags[key] = {
+          overrideExists: flag.overrideExists,
+          overrideActive: flag.overrideActive,
+          overrideEnabled: flag.overrideEnabled,
+          overrideRevision: flag.overrideRevision,
+        };
+      }
+    }
+    writeReport(report);
+    for (const key of ["bpi.rule-management", "bpi.commands"]) {
+      const flag = flags.find((item) => item.flagKey === key);
+      if (flag.overrideActive && flag.overrideEnabled === true) {
+        report.requests.push({
+          actor: admin.subject,
+          method: "NOOP",
+          route: `/bpi/v1/feature-flags/${key}`,
+          status: "ALREADY_ENABLED",
+        });
+      } else {
+        await changeFlag(
+          report,
+          admin,
+          scenario,
+          key,
+          "SET",
+          true,
+          flag.overrideRevision,
+          "enable",
+        );
+      }
     }
 
     const catalogBefore = await waitFor("five source-sequence-qualified pilot points", async () => {
@@ -256,46 +330,65 @@ async function setup() {
     const validFrom = new Date(Date.now() - 86400000).toISOString();
     const validUntil = new Date(Date.now() + 30 * 86400000).toISOString();
     for (const signal of scenario.signals) {
-      const submitted = await api(report, engineer, "POST", "/bpi/v1/point-calibrations", {
-        key: `${marker}-cal-submit-${signal.targetPropertyId}`.slice(0, 128),
-        revision: 0,
-        trace: `cal-submit-${signal.targetPropertyId}`,
-        body: {
-          plantId: scenario.scope.plantId,
-          lineId: scenario.scope.lineId,
-          productId: scenario.device.productId,
-          deviceId: scenario.device.deviceId,
-          propertyId: signal.targetPropertyId,
-          calibrationVersion: signal.calibrationVersion,
-          certificateReference: `urn:adp:controlled-simulator:${marker}:${signal.targetPropertyId}`,
-          certificateChecksum: crypto.createHash("sha256")
-            .update(`${marker}:${signal.targetPropertyId}:controlled-simulator`)
-            .digest("hex"),
-          validFrom,
-          validUntil,
-          reason: `${marker} 受控模拟点确定性量程与类型校验`,
-        },
-      });
-      const approved = await api(
+      const certificateReference =
+        `urn:adp:controlled-simulator:${marker}:${signal.targetPropertyId}`;
+      const existing = await listCalibrations(
         report,
-        admin,
-        "POST",
-        `/bpi/v1/point-calibrations/${submitted.id}/approve`,
-        {
-          key: `${marker}-cal-approve-${signal.targetPropertyId}`.slice(0, 128),
-          revision: submitted.revision,
-          trace: `cal-approve-${signal.targetPropertyId}`,
-          body: {
-            reason: `${marker} 独立复核受控模拟器配置与校验和`,
-          },
-        },
+        engineer,
+        scenario,
+        signal.targetPropertyId,
       );
+      let submitted = existing.find((candidate) =>
+        candidate.calibrationVersion === signal.calibrationVersion
+        && candidate.certificateReference === certificateReference
+        && candidate.state !== "REVOKED");
+      const reused = Boolean(submitted);
+      if (!submitted) {
+        submitted = await api(report, engineer, "POST", "/bpi/v1/point-calibrations", {
+          key: `${marker}-cal-submit-${signal.targetPropertyId}`.slice(0, 128),
+          revision: 0,
+          trace: `cal-submit-${signal.targetPropertyId}`,
+          body: {
+            plantId: scenario.scope.plantId,
+            lineId: scenario.scope.lineId,
+            productId: scenario.device.productId,
+            deviceId: scenario.device.deviceId,
+            propertyId: signal.targetPropertyId,
+            calibrationVersion: signal.calibrationVersion,
+            certificateReference,
+            certificateChecksum: crypto.createHash("sha256")
+              .update(`${marker}:${signal.targetPropertyId}:controlled-simulator`)
+              .digest("hex"),
+            validFrom,
+            validUntil,
+            reason: `${marker} 受控模拟点确定性量程与类型校验`,
+          },
+        });
+      }
+      const approved = submitted.state === "APPROVED"
+        ? submitted
+        : await api(
+          report,
+          admin,
+          "POST",
+          `/bpi/v1/point-calibrations/${submitted.id}/approve`,
+          {
+            key: `${marker}-cal-approve-${signal.targetPropertyId}`.slice(0, 128),
+            revision: submitted.revision,
+            trace: `cal-approve-${signal.targetPropertyId}`,
+            body: {
+              reason: `${marker} 独立复核受控模拟器配置与校验和`,
+            },
+          },
+        );
       report.resources.calibrations.push({
         id: approved.id,
         propertyId: signal.targetPropertyId,
         state: approved.state,
         revision: approved.revision,
+        reused,
       });
+      writeReport(report);
     }
 
     const readyCatalog = await waitFor("five READY pilot points", async () => {
@@ -465,7 +558,7 @@ async function setup() {
 
     report.status = "PASS_MINIMUM_LINE_GOVERNANCE_READY";
     report.completedAt = new Date().toISOString();
-    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+    writeReport(report);
     process.stdout.write(`${JSON.stringify({
       status: report.status,
       reportPath,
@@ -476,7 +569,7 @@ async function setup() {
   } catch (error) {
     report.status = "FAIL";
     report.error = error.stack || error.message;
-    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+    writeReport(report);
     throw error;
   }
 }
@@ -518,19 +611,11 @@ async function cleanup() {
     }
 
     for (const resource of report.resources?.calibrations || []) {
-      const query = new URLSearchParams({
-        plantId: scenario.scope.plantId,
-        lineId: scenario.scope.lineId,
-        productId: scenario.device.productId,
-        deviceId: scenario.device.deviceId,
-        propertyId: resource.propertyId,
-        limit: "100",
-      });
-      const calibrations = await api(
+      const calibrations = await listCalibrations(
         report,
         admin,
-        "GET",
-        `/bpi/v1/point-calibrations?${query}`,
+        scenario,
+        resource.propertyId,
       );
       let calibration = calibrations.find((item) => item.id === resource.id);
       if (calibration?.state === "APPROVED") {
@@ -560,6 +645,24 @@ async function cleanup() {
       const previous = report.previousFlags?.[key];
       if (!current || !previous) continue;
       const restoreSet = previous.overrideExists && previous.overrideActive;
+      const alreadyRestored = restoreSet
+        ? current.overrideActive && current.overrideEnabled === previous.overrideEnabled
+        : !current.overrideActive;
+      if (alreadyRestored) {
+        report.requests.push({
+          actor: admin.subject,
+          method: "NOOP",
+          route: `/bpi/v1/feature-flags/${key}`,
+          status: "ALREADY_RESTORED",
+        });
+        report.cleanup.flags.push({
+          flagKey: key,
+          effectiveEnabled: current.effectiveEnabled,
+          overrideActive: current.overrideActive,
+          overrideRevision: current.overrideRevision,
+        });
+        continue;
+      }
       const restored = await changeFlag(
         report,
         admin,
@@ -581,12 +684,12 @@ async function cleanup() {
 
     report.cleanup.status = "PASS";
     report.cleanup.completedAt = new Date().toISOString();
-    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+    writeReport(report);
     process.stdout.write(`${JSON.stringify(report.cleanup, null, 2)}\n`);
   } catch (error) {
     report.cleanup.status = "FAIL";
     report.cleanup.error = error.stack || error.message;
-    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+    writeReport(report);
     throw error;
   }
 }
