@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-24T07:12:14+00:00",
-  "repoCommit": "1fee983d2dc0d7045e732bdd9524d7a873243e0e",
+  "generatedAt": "2026-07-27T10:49:55+00:00",
+  "repoCommit": "cd1b2827ac8ed2b2c5e825fc247d3fd2c71a3be9",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 387,
-    "totalBytes": 55247595,
+    "totalFiles": 389,
+    "totalBytes": 55266728,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 205,
+      "postgres-init-sql": 207,
       "runtime-binary-patch": 7,
       "runtime-patch-source": 23,
       "runtime-script": 27,
@@ -19,7 +19,7 @@
     "bytesByCategory": {
       "nacos-config-template": 42353,
       "nginx-runtime-config": 27463,
-      "postgres-init-sql": 54300347,
+      "postgres-init-sql": 54319480,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 95909,
       "runtime-script": 284123,
@@ -909,8 +909,8 @@
     {
       "path": "deploy/docker/postgres/init/100-wom-batch-active-runtime-buttons.sql",
       "category": "postgres-init-sql",
-      "sizeBytes": 10470,
-      "sha256": "235af019acc114ade19257e006c00cbef2cfb4dfa0c4cff99baff70a87760894"
+      "sizeBytes": 11320,
+      "sha256": "024fce46089e47941ab0097eafe09256cc89365b52d5b18087d22c68f07ca26f"
     },
     {
       "path": "deploy/docker/postgres/init/101-wom-output-finish-num-sync.sql",
@@ -1541,6 +1541,18 @@
       "category": "postgres-init-sql",
       "sizeBytes": 19495,
       "sha256": "4901dc6e264fb255ed22ba217b636074559c381959997c2a35bae2a9142164b8"
+    },
+    {
+      "path": "deploy/docker/postgres/init/206-wom-easy-task-activity-grid-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 10683,
+      "sha256": "938642e98e76a3f9d32bff7220e2199c1d262234f7f18a56931620ae6be85dee"
+    },
+    {
+      "path": "deploy/docker/postgres/init/207-wom-batch-active-response-envelope.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 7600,
+      "sha256": "6ed61455c10c459762cb9cbe08c98cf37a916499ec0fcb07fb2ac98dcff1c0de"
     },
     {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",

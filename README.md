@@ -9,6 +9,14 @@
 > `ACTIVE -> CLOSED_RAW` 影子批次。真实候选页面、API、PostgreSQL、Flink 36/36、治理恢复和
 > 零 QCS/WMS 写回均通过；来源仍为受控模拟器，因此总状态不升级为生产 READY。
 
+> **2026-07-27 MES 主流程进展：** marker `ADP_E2E_20260727_MES_FULL_CLOSED_10`
+> 已从空 marker、不续跑历史中间态，完成真实页面上的制造指令开始、工序开始、投料、产出报工、
+> 请检与合格报告、工序结束、制造指令完工、WMS 完工入库和批次追溯。PostgreSQL 终态为任务、
+> 1 个工序、2 个活动及其 2 条执行记录全部 finished，未完成 wait 为 0，投料明细/物料消耗
+> `1/1`、产出明细 2、QCS `1/1`、WMS `1/2/1`、追溯快照 3。所有浏览器网络、console、
+> page error 和可见 warning/error 均为 0，投料结束页显示绿色成功提示。现场 Batch/DCS、
+> 物理设备、正式迁移和业务签字仍未完成，因此整体状态仍为 `IN_PROGRESS_NOT_COMPLETE`。
+
 当前代码、本机目录、公司内网/Tailscale 入口、九个 BPI 页面、角色、交互、API、PostgreSQL 表和生产边界，
 统一见 [FT MES + BPI 当前项目地址与产品交互说明书](docs/product/ft-mes-bpi-product-interaction-manual.md)。
 本轮环境清理前的分支归并、迁移来源和保留目录见
@@ -30,7 +38,7 @@
 | 范围 | 状态 | 已有证据 | 继续完成的门槛 |
 |---|---|---|---|
 | 可持续开发仓库 | `READY` | 根父 POM、源码模块边界、CI、Compose、依赖/文件库存和 PostgreSQL-first 门禁 | 新模块持续补测试、迁移和库存 |
-| 既有 ADP/MES 平台 | `PARTIAL` | 登录、组织、权限、菜单及部分生产/质量功能有真实页面和 PostgreSQL marker 证据 | 生产矩阵仍有阻断项，业务链尚未全部闭合 |
+| 既有 ADP/MES 平台 | `PARTIAL` | 登录、组织、权限、菜单及生产/质量功能有真实页面和 PostgreSQL marker 证据；`...CLOSED_10` 已闭合制造到追溯主链并生成投料消耗台账 | 补现场 Batch/DCS、物理设备、连续运行、迁移演练和业务签字 |
 | WOM 可见新建指令单 | `PASS` | `wom-production-entry` 源码模块、列表入口、PostgreSQL 参照、迁移 189、marker `ADP_E2E_20260717101030_WOM_MANUAL_ENTRY` 的 9/9 浏览器/API/落库验收 | public `produceTaskCreated` 是否开放仍需产品范围决定；不影响受控可见入口 |
 | RM 批控配方 Web 编辑 | `PASS_WITH_EXTERNAL_DCS_BLOCKED` | `rm-formula-editor` 源码模块、迁移 190、可见 `Web编辑` 入口；marker `ADP_E2E_20260717120436_RM_WEB_FORMULA` 连续三轮完成桌面/移动页面、API、六表 PostgreSQL 回读、失败重试和清理 | 配置真实现场 Batch/DCS HTTPS 端点，加载生产主数据并完成投递确认与回滚签字 |
 | PATROL 共享巡检 | `TARGET_HIDDEN_DANGER_PASS_PARTIAL` | 455 个 Java 文件构建 PASS；目标 37 表、24 菜单、102 操作、2 工作流验收 PASS；EamMs JAR SHA `af01d6a7...97f753`；异常隐患 marker `ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER` 为 45/45 PASS，明细关联、幂等和 EAM 来源“巡检”复显均有证据 | 继续统计监控；完整隐患治理需真实 SESH；目标回滚需维护窗口确认 |
@@ -235,6 +243,17 @@ make ci
 
 JAVA_HOME=$(/usr/libexec/java_home -v 17) \
 make ci-java17
+```
+
+对当前测试环境重复执行会保留业务数据的 MES 完整主链验收时，必须显式确认并提供测试账号密码；脚本会先做 marker/ID 空间预检，默认不续跑历史中间态：
+
+```bash
+export ADP_PASSWORD='<test-account-password>'
+make acceptance-mes-full-production-flow \
+  MES_FULL_FLOW_CONFIRM=YES \
+  ADP_BASE_URL=http://10.11.100.17:18080 \
+  ADP_SSH_HOST=10.11.100.17 \
+  MES_FULL_FLOW_OUTPUT=/tmp/adp-mes-full-production-flow-acceptance.json
 ```
 
 本地验证真实 Flink checkpoint 与 Kafka 事务边界：

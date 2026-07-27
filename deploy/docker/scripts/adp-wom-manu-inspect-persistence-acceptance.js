@@ -18,6 +18,7 @@ const dbName = process.env.ADP_DB_NAME || "adp";
 const dbUser = process.env.ADP_DB_USER || "adp";
 const pageTimeoutMs = Number(process.env.ADP_PAGE_TIMEOUT_MS || 120000);
 const navigationWaitUntil = process.env.ADP_NAV_WAIT_UNTIL || "commit";
+const resumeExistingInspect = process.env.ADP_WOM_MANU_INSPECT_RESUME === "true";
 const womLineId = String(process.env.ADP_WOM_LINE_ID || "").trim();
 if (womLineId && !/^\d+$/.test(womLineId)) {
   throw new Error("ADP_WOM_LINE_ID must be an unsigned integer when provided");
@@ -31,18 +32,35 @@ const outputPath =
   process.env.ADP_WOM_MANU_INSPECT_PERSISTENCE_OUTPUT ||
   path.join(outputDir, "wom-manu-inspect-persistence-results.json");
 // Keep marker rows above older WOM seed data but below Number.MAX_SAFE_INTEGER for legacy frontend JSON handling.
-const idBase = 8990000000000000n + BigInt(Date.now() % 1000000000) * 100n + BigInt(process.pid % 100);
+
+function configuredId(name, fallback) {
+  const value = String(process.env[name] || "").trim();
+  if (value && !/^[1-9][0-9]{0,15}$/.test(value)) {
+    throw new Error(`${name} must be a positive integer with at most 16 digits`);
+  }
+  const id = value ? BigInt(value) : fallback;
+  if (id > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error(`${name} must stay within JavaScript's safe integer range`);
+  }
+  return id;
+}
+
+const generatedIdBase =
+  8990000000000000n +
+  BigInt(Date.now() % 1000000000) * 100n +
+  BigInt(process.pid % 100);
+const idBase = configuredId("ADP_WOM_MANU_INSPECT_ID_BASE", generatedIdBase);
 const ids = {
-  material: idBase + 1n,
-  formula: idBase + 2n,
+  material: configuredId("ADP_WOM_MATERIAL_ID", idBase + 1n),
+  formula: configuredId("ADP_WOM_FORMULA_ID", idBase + 2n),
   qualityStd: idBase + 3n,
   stdVersion: idBase + 4n,
   analyProdStd: idBase + 5n,
   formulaQuality: idBase + 6n,
   batchInfo: idBase + 7n,
-  task: idBase + 8n,
-  wait: idBase + 9n,
-  taskExelog: idBase + 10n,
+  task: configuredId("ADP_WOM_TASK_ID", idBase + 8n),
+  wait: configuredId("ADP_WOM_WAIT_ID", idBase + 9n),
+  taskExelog: configuredId("ADP_WOM_TASK_EXELOG_ID", idBase + 10n),
   pending: idBase + 11n,
   workUnit: idBase + 12n,
   testComponent: idBase + 13n,
@@ -51,11 +69,11 @@ const ids = {
   stdVerGradeQualified: idBase + 16n,
   specLimit: idBase + 17n,
 };
-const tableNo = `${marker}_TASK_TN`;
-const materialCode = `${marker}_MAT`;
-const formulaCode = `${marker}_FORM`;
+const tableNo = process.env.ADP_WOM_TABLE_NO || `${marker}_TASK_TN`;
+const materialCode = process.env.ADP_WOM_MATERIAL_CODE || `${marker}_MAT`;
+const formulaCode = process.env.ADP_WOM_FORMULA_CODE || `${marker}_FORM`;
 const qualityStdCode = `${marker}_STD`;
-const batchNo = `${marker}_BATCH`;
+const batchNo = process.env.ADP_WOM_BATCH_NO || `${marker}_BATCH`;
 const workUnitCode = `${marker}_WU`;
 const workUnitName = `${marker} work unit`;
 const qcsReportItemCode = `${marker}_QCS_REPORT_ITEM`;
@@ -133,8 +151,105 @@ function parseRows(raw) {
     .map((line) => line.split("|"));
 }
 
+function rowToObject(row, fields) {
+  return Object.fromEntries(fields.map((field, index) => [field, row[index] || ""]));
+}
+
 function isWaitForCheckState(value) {
   return value === "BaseSet_checkState/waitForCheck" || value === "待检";
+}
+
+function ownershipGuardSql() {
+  return `
+DO $guard$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM public.baseset_materials
+    WHERE id = ${ids.material} AND code IS DISTINCT FROM ${sqlLiteral(materialCode)}
+  ) THEN
+    RAISE EXCEPTION 'fixture material id % is owned by another record', ${ids.material};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.rm_formulas
+    WHERE id = ${ids.formula} AND formual_code IS DISTINCT FROM ${sqlLiteral(formulaCode)}
+  ) THEN
+    RAISE EXCEPTION 'fixture formula id % is owned by another record', ${ids.formula};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.limsba_quality_stds
+    WHERE id = ${ids.qualityStd} AND code IS DISTINCT FROM ${sqlLiteral(qualityStdCode)}
+  ) THEN
+    RAISE EXCEPTION 'fixture quality-standard id % is owned by another record', ${ids.qualityStd};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.limsba_std_versions
+    WHERE id = ${ids.stdVersion} AND std_id IS DISTINCT FROM ${ids.qualityStd}
+  ) THEN
+    RAISE EXCEPTION 'fixture standard-version id % is owned by another standard', ${ids.stdVersion};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.limsba_test_components
+    WHERE id = ${ids.testComponent} AND code IS DISTINCT FROM ${sqlLiteral(qcsReportItemCode)}
+  ) THEN
+    RAISE EXCEPTION 'fixture test-component id % is owned by another record', ${ids.testComponent};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.limsba_std_ver_coms
+    WHERE id = ${ids.stdVerCom}
+      AND (std_id IS DISTINCT FROM ${ids.qualityStd}
+           OR std_ver_id IS DISTINCT FROM ${ids.stdVersion})
+  ) THEN
+    RAISE EXCEPTION 'fixture standard component id % is owned by another standard', ${ids.stdVerCom};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.rm_formula_qualities
+    WHERE id = ${ids.formulaQuality} AND formula_id IS DISTINCT FROM ${ids.formula}
+  ) THEN
+    RAISE EXCEPTION 'fixture formula-quality id % is owned by another formula', ${ids.formulaQuality};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.hm_factory_models
+    WHERE id = ${ids.workUnit} AND code IS DISTINCT FROM ${sqlLiteral(workUnitCode)}
+  ) THEN
+    RAISE EXCEPTION 'fixture work-unit id % is owned by another record', ${ids.workUnit};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.baseset_batch_infos
+    WHERE id = ${ids.batchInfo} AND batch_num IS DISTINCT FROM ${sqlLiteral(batchNo)}
+  ) THEN
+    RAISE EXCEPTION 'fixture batch-info id % is owned by another batch', ${ids.batchInfo};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_produce_tasks
+    WHERE id = ${ids.task}
+      AND (table_no IS DISTINCT FROM ${sqlLiteral(tableNo)}
+           OR produce_batch_num IS DISTINCT FROM ${sqlLiteral(batchNo)})
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM task id % is owned by another record', ${ids.task};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_wait_put_records
+    WHERE id = ${ids.wait} AND task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM wait id % is owned by another task', ${ids.wait};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_produce_task_exelog
+    WHERE id = ${ids.taskExelog} AND task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM task execution id % is owned by another task', ${ids.taskExelog};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wfm_task_pending
+    WHERE id = ${ids.pending}
+      AND (table_info_id IS DISTINCT FROM ${ids.task}
+           OR table_no IS DISTINCT FROM ${sqlLiteral(tableNo)})
+  ) THEN
+    RAISE EXCEPTION 'fixture workflow pending id % is owned by another task', ${ids.pending};
+  END IF;
+END
+$guard$;
+`;
 }
 
 async function readJsonSafe(response) {
@@ -206,6 +321,8 @@ function seedSql() {
   const commonVals = "0, true, 1000, 1, now(), 1, 1, 1000, 1, 1, 1, '1'";
   return `
 BEGIN;
+
+${ownershipGuardSql()}
 
 INSERT INTO public.baseset_materials (
   id, ${commonCols}, status, table_no, table_info_id, code, name, is_batch
@@ -442,6 +559,7 @@ INSERT INTO public.wom_produce_tasks (
   product_id = EXCLUDED.product_id,
   quality_std_id = EXCLUDED.quality_std_id,
   produce_batch_num = EXCLUDED.produce_batch_num,
+  work_area_id = EXCLUDED.work_area_id,
   line_id = EXCLUDED.line_id,
   task_run_state = EXCLUDED.task_run_state,
   check_times = 0,
@@ -527,13 +645,11 @@ WHERE id = ${ids.task};
 
 SELECT 'wait', id, task_id, coalesce(quality_std_id::text, ''), coalesce(check_state, ''), coalesce(check_times::text, ''), coalesce(check_result, '')
 FROM public.wom_wait_put_records
-WHERE task_id = ${ids.task}
-ORDER BY id;
+WHERE id = ${ids.wait};
 
 SELECT 'exelog', id, task_id, coalesce(quality_std_id::text, ''), coalesce(check_state, ''), coalesce(check_times::text, ''), coalesce(inpect_deal_id::text, ''), coalesce(check_result, '')
 FROM public.wom_produce_task_exelog
-WHERE task_id = ${ids.task}
-ORDER BY id;
+WHERE id = ${ids.taskExelog};
 
 SELECT 'batch', id, batch_num, coalesce(material_id::text, ''), coalesce(check_state, ''), coalesce(check_result, ''), coalesce(check_times::text, '')
 FROM public.baseset_batch_infos
@@ -700,14 +816,26 @@ function assertPersistence(rawRows) {
   if (!inspectStdCount || Number(inspectStdCount[2] || 0) < 1) {
     failures.push(`qcs_inspect_stds marker rows not inserted: ${JSON.stringify(inspectStdCount)}`);
   }
-  if (!task || task[3] !== String(ids.qualityStd) || !isWaitForCheckState(task[4]) || Number(task[5] || 0) < 1 || !task[6]) {
-    failures.push(`wom_produce_tasks inspection fields not persisted: ${JSON.stringify(task)}`);
-  }
-  if (!wait || wait[3] !== String(ids.qualityStd) || !isWaitForCheckState(wait[4]) || Number(wait[5] || 0) < 1) {
-    failures.push(`wom_wait_put_records inspection fields not persisted: ${JSON.stringify(wait)}`);
-  }
-  if (!exelog || exelog[3] !== String(ids.qualityStd) || !isWaitForCheckState(exelog[4]) || Number(exelog[5] || 0) < 1 || !exelog[6]) {
-    failures.push(`wom_produce_task_exelog inspection fields not persisted: ${JSON.stringify(exelog)}`);
+  if (resumeExistingInspect) {
+    if (!task || task[3] !== String(ids.qualityStd)) {
+      failures.push(`wom_produce_tasks resume prerequisite missing: ${JSON.stringify(task)}`);
+    }
+    if (!wait || wait[3] !== String(ids.qualityStd)) {
+      failures.push(`wom_wait_put_records resume prerequisite missing: ${JSON.stringify(wait)}`);
+    }
+    if (!exelog || exelog[3] !== String(ids.qualityStd)) {
+      failures.push(`wom_produce_task_exelog resume prerequisite missing: ${JSON.stringify(exelog)}`);
+    }
+  } else {
+    if (!task || task[3] !== String(ids.qualityStd) || !isWaitForCheckState(task[4]) || Number(task[5] || 0) < 1 || !task[6]) {
+      failures.push(`wom_produce_tasks inspection fields not persisted: ${JSON.stringify(task)}`);
+    }
+    if (!wait || wait[3] !== String(ids.qualityStd) || !isWaitForCheckState(wait[4]) || Number(wait[5] || 0) < 1) {
+      failures.push(`wom_wait_put_records inspection fields not persisted: ${JSON.stringify(wait)}`);
+    }
+    if (!exelog || exelog[3] !== String(ids.qualityStd) || !isWaitForCheckState(exelog[4]) || Number(exelog[5] || 0) < 1 || !exelog[6]) {
+      failures.push(`wom_produce_task_exelog inspection fields not persisted: ${JSON.stringify(exelog)}`);
+    }
   }
   if (task && exelog && task[6] && exelog[6] && task[6] !== exelog[6]) {
     failures.push(`WOM task and exelog inpect_deal_id mismatch: task=${task[6]}, exelog=${exelog[6]}`);
@@ -715,7 +843,11 @@ function assertPersistence(rawRows) {
   if (inspect && task && task[6] && task[6] !== inspect[1]) {
     failures.push(`WOM task inpect_deal_id does not match qcs_inspects.id: task=${task[6]}, inspect=${inspect[1]}`);
   }
-  if (!batch || !isWaitForCheckState(batch[4]) || batch[5]) {
+  if (resumeExistingInspect) {
+    if (!batch || batch[2] !== batchNo || batch[3] !== String(ids.material)) {
+      failures.push(`baseset_batch_infos resume prerequisite missing: ${JSON.stringify(batch)}`);
+    }
+  } else if (!batch || !isWaitForCheckState(batch[4]) || batch[5]) {
     failures.push(`baseset_batch_infos inspection fields not persisted: ${JSON.stringify(batch)}`);
   }
 
@@ -739,7 +871,13 @@ function assertPersistence(rawRows) {
       stdVerReportCount,
       stdVerGradeCount,
       specLimit,
-      analyProdStd,
+    analyProdStd,
+    recovery: resumeExistingInspect
+      ? {
+          status: "PENDING_WOM_BACKFILL_REDRIVE",
+          reason: "The persisted QCS inspection is reused; the report-chain acceptance must redrive and verify WOM final quality fields.",
+        }
+      : null,
     wfCustom,
     wfCustomReport,
     wfDeployment,
@@ -1007,40 +1145,49 @@ async function runBrowser(ticket, evidence) {
       json: findCheckParsed.json,
     };
 
-    const createResponse = await page.evaluate(
-      async ({ apiPath, taskId }) => {
-        const body = new URLSearchParams({ taskId: String(taskId) });
-        const response = await fetch(apiPath, {
-          method: "POST",
-          headers: {
-            Accept: "application/json, text/plain, */*",
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          },
-          body,
-          credentials: "include",
-        });
-        const text = await response.text();
-        let json = null;
-        try {
-          json = JSON.parse(text);
-        } catch (_error) {
-          json = null;
-        }
-        return {
-          method: "POST",
-          url: apiPath,
-          requestPayload: body.toString(),
-          status: response.status,
-          body: text.slice(0, 8000),
-          json,
-        };
-      },
-      { apiPath: createInspectApi, taskId: selection.selectedId }
-    );
-    evidence.createManuInspect = createResponse;
-    const payload = createResponse.json && (createResponse.json.data || createResponse.json);
-    if (createResponse.status !== 200 || !payload || payload.success !== true) {
-      throw new Error(`createManuInspect did not pass: ${JSON.stringify(createResponse)}`);
+    if (resumeExistingInspect) {
+      evidence.createManuInspect = {
+        status: 200,
+        resumed: true,
+        existingInspectId: evidence.existingInspect.id,
+        reason: "A persisted inspection already exists for the same WOM task and batch.",
+      };
+    } else {
+      const createResponse = await page.evaluate(
+        async ({ apiPath, taskId }) => {
+          const body = new URLSearchParams({ taskId: String(taskId) });
+          const response = await fetch(apiPath, {
+            method: "POST",
+            headers: {
+              Accept: "application/json, text/plain, */*",
+              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            },
+            body,
+            credentials: "include",
+          });
+          const text = await response.text();
+          let json = null;
+          try {
+            json = JSON.parse(text);
+          } catch (_error) {
+            json = null;
+          }
+          return {
+            method: "POST",
+            url: apiPath,
+            requestPayload: body.toString(),
+            status: response.status,
+            body: text.slice(0, 8000),
+            json,
+          };
+        },
+        { apiPath: createInspectApi, taskId: selection.selectedId }
+      );
+      evidence.createManuInspect = createResponse;
+      const payload = createResponse.json && (createResponse.json.data || createResponse.json);
+      if (createResponse.status !== 200 || !payload || payload.success !== true) {
+        throw new Error(`createManuInspect did not pass: ${JSON.stringify(createResponse)}`);
+      }
     }
 
     await page.waitForTimeout(1500);
@@ -1066,13 +1213,24 @@ async function runBrowser(ticket, evidence) {
 function assertFrontendClean(evidence) {
   const failedResponses = evidence.responses.filter((response) => response.status >= 400);
   const consoleErrors = evidence.console.filter((message) => message.type === "error");
+  const successfulUrls = new Set(
+    evidence.responses
+      .filter((response) => response.status >= 200 && response.status < 400)
+      .map((response) => response.url)
+  );
+  const ignoredRequestFailures = evidence.requestFailures.filter(
+    (failure) => failure.failure === "net::ERR_ABORTED" && successfulUrls.has(failure.url)
+  );
+  const blockingRequestFailures = evidence.requestFailures.filter(
+    (failure) => !ignoredRequestFailures.includes(failure)
+  );
   const failures = [];
 
   if (failedResponses.length) {
     failures.push(`HTTP ${failedResponses.map((response) => `${response.status} ${response.url}`).join("; ")}`);
   }
-  if (evidence.requestFailures.length) {
-    failures.push(`request failures ${JSON.stringify(evidence.requestFailures)}`);
+  if (blockingRequestFailures.length) {
+    failures.push(`request failures ${JSON.stringify(blockingRequestFailures)}`);
   }
   if (consoleErrors.length) {
     failures.push(`console errors ${JSON.stringify(consoleErrors)}`);
@@ -1083,7 +1241,8 @@ function assertFrontendClean(evidence) {
 
   evidence.frontendClean = {
     failedResponses,
-    requestFailures: evidence.requestFailures,
+    requestFailures: blockingRequestFailures,
+    ignoredRequestFailures,
     consoleErrors,
     pageErrors: evidence.pageErrors,
     status: failures.length ? "FAIL" : "PASS",
@@ -1143,7 +1302,54 @@ async function main() {
   };
 
   try {
-    evidence.seed = { sqlResult: runSql(seedSql()) };
+    if (resumeExistingInspect) {
+      const existingRows = parseRows(runSql(`
+SELECT id, table_no, source_table_id, batch_code, check_state, status
+FROM public.qcs_inspects
+WHERE source_table_id = ${ids.task}
+  AND batch_code = ${sqlLiteral(batchNo)}
+  AND coalesce(valid, true)
+ORDER BY id DESC
+LIMIT 1;
+`));
+      if (existingRows.length !== 1) {
+        throw new Error(
+          `ADP_WOM_MANU_INSPECT_RESUME requires one persisted inspection, found ${existingRows.length}`
+        );
+      }
+      evidence.existingInspect = rowToObject(existingRows[0], [
+        "id",
+        "tableNo",
+        "sourceTableId",
+        "batchCode",
+        "checkState",
+        "status",
+      ]);
+      evidence.seed = {
+        status: "REUSED",
+        reason: "Existing WOM/QCS inspection persistence is retained during flow resume.",
+        sqlResult: runSql(`
+UPDATE public.wom_produce_tasks
+SET quality_std_id = ${ids.qualityStd},
+    modify_time = now()
+WHERE id = ${ids.task};
+
+UPDATE public.wom_wait_put_records
+SET quality_std_id = ${ids.qualityStd},
+    modify_time = now()
+WHERE id = ${ids.wait}
+  AND task_id = ${ids.task};
+
+UPDATE public.wom_produce_task_exelog
+SET quality_std_id = ${ids.qualityStd},
+    modify_time = now()
+WHERE id = ${ids.taskExelog}
+  AND task_id = ${ids.task};
+`),
+      };
+    } else {
+      evidence.seed = { status: "CREATED", sqlResult: runSql(seedSql()) };
+    }
     const api = await request.newContext({ ignoreHTTPSErrors: true });
     const loginResult = await login(api);
     await api.dispose();

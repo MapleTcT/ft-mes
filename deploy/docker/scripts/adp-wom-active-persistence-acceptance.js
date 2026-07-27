@@ -24,29 +24,51 @@ const outputDir =
 const outputPath =
   process.env.ADP_WOM_ACTIVE_PERSISTENCE_OUTPUT ||
   path.join(outputDir, "wom-active-persistence-results.json");
-const idBase = 8300000000000000n + BigInt(Date.now() % 900000000000) * 100n + BigInt(process.pid % 100);
+const reuseWorkOrderWait = process.env.ADP_WOM_REUSE_WORK_ORDER_WAIT === "true";
+
+function configuredId(name, fallback) {
+  const value = String(process.env[name] || "").trim();
+  if (value && !/^[1-9][0-9]{0,15}$/.test(value)) {
+    throw new Error(`${name} must be a positive integer with at most 16 digits`);
+  }
+  const id = value ? BigInt(value) : fallback;
+  if (id > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error(`${name} must stay within JavaScript's safe integer range`);
+  }
+  return id;
+}
+
+const generatedIdBase =
+  8300000000000000n +
+  BigInt(Date.now() % 900000000000) * 100n +
+  BigInt(process.pid % 100);
+const idBase = configuredId("ADP_WOM_ID_BASE", generatedIdBase);
 const ids = {
-  material: idBase + 1n,
-  formula: idBase + 2n,
-  task: idBase + 3n,
-  process: idBase + 4n,
-  active: idBase + 5n,
-  wait: idBase + 6n,
-  taskExelog: idBase + 7n,
-  processExelog: idBase + 8n,
-  procReport: idBase + 9n,
-  activeExelog: idBase + 10n,
-  outputDetail: idBase + 11n,
-  processWait: idBase + 12n,
-  workUnit: idBase + 13n,
-  workOrderWait: idBase + 14n,
-  putinDetailFallback: idBase + 15n,
-  proCheckDetail: idBase + 16n,
+  material: configuredId("ADP_WOM_MATERIAL_ID", idBase + 1n),
+  formula: configuredId("ADP_WOM_FORMULA_ID", idBase + 2n),
+  task: configuredId("ADP_WOM_TASK_ID", idBase + 3n),
+  process: configuredId("ADP_WOM_PROCESS_ID", idBase + 4n),
+  active: configuredId("ADP_WOM_ACTIVE_ID", idBase + 5n),
+  wait: configuredId("ADP_WOM_WAIT_ID", idBase + 6n),
+  taskExelog: configuredId("ADP_WOM_TASK_EXELOG_ID", idBase + 7n),
+  processExelog: configuredId("ADP_WOM_PROCESS_EXELOG_ID", idBase + 8n),
+  procReport: configuredId("ADP_WOM_PROC_REPORT_ID", idBase + 9n),
+  activeExelog: configuredId("ADP_WOM_ACTIVE_EXELOG_ID", idBase + 10n),
+  outputDetail: configuredId("ADP_WOM_OUTPUT_DETAIL_ID", idBase + 11n),
+  processWait: configuredId("ADP_WOM_PROCESS_WAIT_ID", idBase + 12n),
+  workUnit: configuredId("ADP_WOM_WORK_UNIT_ID", idBase + 13n),
+  workOrderWait: configuredId("ADP_WOM_WORK_ORDER_WAIT_ID", idBase + 14n),
+  putinDetailFallback: configuredId("ADP_WOM_PUTIN_DETAIL_ID", idBase + 15n),
+  proCheckDetail: configuredId("ADP_WOM_PRO_CHECK_DETAIL_ID", idBase + 16n),
 };
-const tableNo = `${marker}_TASK_TN`;
-const materialCode = `${marker}_MAT`;
-const formulaCode = `${marker}_FORM`;
-const batchNo = `${marker}_BATCH`;
+const tableNo = process.env.ADP_WOM_TABLE_NO || `${marker}_TASK_TN`;
+const materialCode = process.env.ADP_WOM_MATERIAL_CODE || `${marker}_MAT`;
+const formulaCode = process.env.ADP_WOM_FORMULA_CODE || `${marker}_FORM`;
+const batchNo = process.env.ADP_WOM_BATCH_NO || `${marker}_BATCH`;
+const womLineId = String(process.env.ADP_WOM_LINE_ID || "").trim();
+if (womLineId && !/^[1-9][0-9]{0,15}$/.test(womLineId)) {
+  throw new Error("ADP_WOM_LINE_ID must be a positive integer with at most 16 digits");
+}
 const workUnitCode = `${marker}_WU`;
 const workUnitName = `${marker} work unit`;
 const processName = `${marker} process`;
@@ -58,7 +80,9 @@ const easyReportAction = activeAction === "easy-end";
 const putinEndAction = activeAction === "putin-end";
 const checkEndAction = activeAction === "check-end";
 const processUnitAction = activeAction === "process-unit";
-const processAction = activeAction === "process-start" || activeAction === "process-end";
+const processStartAction = activeAction === "process-start";
+const processEndAction = activeAction === "process-end";
+const processAction = processStartAction || processEndAction;
 const processFlowAction = processAction || processUnitAction;
 const route = processUnitAction
   ? `/msService/WOM/produceTask/taskProcess/processUnitEdit?id=${ids.process}`
@@ -127,6 +151,100 @@ function parseRows(raw) {
     .split(/\r?\n/)
     .filter(Boolean)
     .map((line) => line.split("|"));
+}
+
+function ownershipGuardSql() {
+  return `
+DO $guard$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM public.baseset_materials
+    WHERE id = ${ids.material} AND code IS DISTINCT FROM ${sqlLiteral(materialCode)}
+  ) THEN
+    RAISE EXCEPTION 'fixture material id % is owned by another record', ${ids.material};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.rm_formulas
+    WHERE id = ${ids.formula} AND formual_code IS DISTINCT FROM ${sqlLiteral(formulaCode)}
+  ) THEN
+    RAISE EXCEPTION 'fixture formula id % is owned by another record', ${ids.formula};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.hm_factory_models
+    WHERE id = ${ids.workUnit} AND code IS DISTINCT FROM ${sqlLiteral(workUnitCode)}
+  ) THEN
+    RAISE EXCEPTION 'fixture work-unit id % is owned by another record', ${ids.workUnit};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_produce_tasks
+    WHERE id = ${ids.task}
+      AND (table_no IS DISTINCT FROM ${sqlLiteral(tableNo)}
+           OR produce_batch_num IS DISTINCT FROM ${sqlLiteral(batchNo)})
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM task id % is owned by another record', ${ids.task};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_task_processes
+    WHERE id = ${ids.process} AND task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM process id % is owned by another task', ${ids.process};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_task_actives
+    WHERE id = ${ids.active} AND task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM activity id % is owned by another task', ${ids.active};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_produce_task_exelog
+    WHERE id = ${ids.taskExelog} AND task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM task execution id % is owned by another task', ${ids.taskExelog};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_process_exelogs
+    WHERE id = ${ids.processExelog} AND task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM process execution id % is owned by another task', ${ids.processExelog};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_proc_reports
+    WHERE id = ${ids.procReport} AND task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM report id % is owned by another task', ${ids.procReport};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_acti_exelogs
+    WHERE id = ${ids.activeExelog} AND task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM activity execution id % is owned by another task', ${ids.activeExelog};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_wait_put_records
+    WHERE id IN (${ids.wait}, ${ids.processWait}, ${ids.workOrderWait})
+      AND task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'one or more fixture WOM wait ids are owned by another task';
+  END IF;
+  IF EXISTS (
+    SELECT 1
+    FROM public.wom_output_details d
+    LEFT JOIN public.wom_proc_reports r ON r.id = d.head_id
+    WHERE d.id = ${ids.outputDetail} AND r.task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture output detail id % is owned by another task', ${ids.outputDetail};
+  END IF;
+  IF EXISTS (
+    SELECT 1
+    FROM public.wom_putin_details d
+    LEFT JOIN public.wom_proc_reports r ON r.id = d.head_id
+    WHERE d.id = ${ids.putinDetailFallback} AND r.task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture put-in detail id % is owned by another task', ${ids.putinDetailFallback};
+  END IF;
+END
+$guard$;
+`;
 }
 
 async function readJsonSafe(response) {
@@ -212,7 +330,9 @@ function seedSql() {
   const commonCols =
     "version, valid, cid, create_staff_id, create_time, create_department_id, create_position_id, group_id, owner_staff_id, owner_department_id, owner_position_id, position_lay_rec";
   const commonVals = "0, true, 1000, 1, now(), 1, 1, 1000, 1, 1, 1, '1'";
-  const activeType = easyReportAction
+  const activeType = processStartAction
+    ? "RM_activeType/putin"
+    : easyReportAction
     ? "RM_activeType/output"
     : putinEndAction
       ? "RM_activeType/putin"
@@ -220,22 +340,36 @@ function seedSql() {
         ? "RM_activeType/check"
         : "RM_activeType/common";
   const activeProperty = easyReportAction ? "RM_RMproperty/02" : putinEndAction ? "RM_RMproperty/01" : null;
-  const initialProcessState = processFlowAction ? "WOM_runState/waitForRun" : "WOM_runState/runing";
-  const initialProcessStartTime = processFlowAction ? "NULL" : "now()";
+  const initialProcessState =
+    processStartAction || processUnitAction
+      ? "WOM_runState/waitForRun"
+      : "WOM_runState/runing";
+  const initialProcessStartTime =
+    processStartAction || processUnitAction ? "NULL" : "now()";
   const initialActiveState = easyReportAction
     ? "WOM_runState/runing"
     : checkEndAction
       ? "WOM_runState/runing"
-    : processFlowAction
+    : processStartAction
+      ? "WOM_runState/waitForRun"
+    : processEndAction || processUnitAction
       ? "WOM_runState/finished"
       : "WOM_runState/waitForRun";
-  const initialActiveFinished = processFlowAction ? "true" : "false";
+  const initialActiveFinished =
+    processEndAction || processUnitAction ? "true" : "false";
   const initialWaitState = easyReportAction || checkEndAction ? "WOM_runState/runing" : "WOM_runState/waitForRun";
   const actualStartTime = easyReportAction || checkEndAction ? "now() - interval '5 minutes'" : "NULL";
   const procReportId = easyReportAction || checkEndAction ? String(ids.procReport) : "NULL";
   const activeExelogId = easyReportAction || checkEndAction ? String(ids.activeExelog) : "NULL";
   return `
 BEGIN;
+
+${ownershipGuardSql()}
+
+${easyReportAction ? `
+DELETE FROM public.wom_mat_outpt_records
+WHERE out_mat_detail_id = ${ids.outputDetail};
+` : ""}
 
 INSERT INTO public.baseset_materials (
   id, ${commonCols}, code, name, table_no
@@ -269,18 +403,19 @@ INSERT INTO public.hm_factory_models (
 INSERT INTO public.wom_produce_tasks (
   id, ${commonCols}, status, table_no, table_info_id, batch_contral, finish_num,
   formula_id, plan_num, plan_start_time, plan_end_time, produce_batch_num,
-  product_id, task_run_state, task_type, need_pack, is_analy, is_abnormal,
+  product_id, line_id, task_run_state, task_type, need_pack, is_analy, is_abnormal,
   is_prepared, advance_charge, act_start_time, remark
 ) VALUES (
   ${ids.task}, ${commonVals}, 99, ${sqlLiteral(tableNo)}, ${ids.task}, false, 0,
   ${ids.formula}, 1, now() - interval '1 day', now() + interval '1 day', ${sqlLiteral(batchNo)},
-  ${ids.material}, 'WOM_runState/runing', 'WOM_taskType/manufacture', false, false, false,
+  ${ids.material}, ${womLineId || "NULL"}, 'WOM_runState/runing', 'WOM_taskType/manufacture', false, false, false,
   false, false, now(), NULL
 ) ON CONFLICT (id) DO UPDATE SET
   valid = true,
   status = 99,
   task_run_state = 'WOM_runState/runing',
   batch_contral = false,
+  line_id = coalesce(EXCLUDED.line_id, public.wom_produce_tasks.line_id),
   act_start_time = coalesce(public.wom_produce_tasks.act_start_time, now()),
   act_end_time = NULL;
 
@@ -298,19 +433,22 @@ INSERT INTO public.wom_task_processes (
   process_run_state = EXCLUDED.process_run_state,
   equipment_id = EXCLUDED.equipment_id,
   work_unit_working_type = EXCLUDED.work_unit_working_type,
-  act_start_time = EXCLUDED.act_start_time,
+  act_start_time = ${processEndAction
+    ? "coalesce(public.wom_task_processes.act_start_time, EXCLUDED.act_start_time)"
+    : "EXCLUDED.act_start_time"},
   act_end_time = NULL;
 
+${processEndAction ? "" : `
 INSERT INTO public.wom_task_actives (
   id, ${commonCols}, status, table_no, table_info_id, task_id, task_process_id,
   formula_id, formula_process_id, material_id, name, active_type, run_state,
   property, exec_sort, hidden_sort, main_active, is_more_other, is_finish, is_run,
-  is_agile, need_param_ana, material_batch_num, plan_quantity, standard_quantity, act_start_time, act_end_time, remark
+  is_agile, is_auto, need_param_ana, material_batch_num, plan_quantity, standard_quantity, act_start_time, act_end_time, remark
 ) VALUES (
   ${ids.active}, ${commonVals}, 99, ${sqlLiteral(`${marker}_ACTIVE_TN`)}, ${ids.active}, ${ids.task}, ${ids.process},
   ${ids.formula}, NULL, ${ids.material}, ${sqlLiteral(activeName)}, ${sqlLiteral(activeType)}, ${sqlLiteral(initialActiveState)},
   ${activeProperty ? sqlLiteral(activeProperty) : "NULL"}, '1', 1, true, false, ${initialActiveFinished}, ${easyReportAction ? "true" : "false"},
-  false, false, ${sqlLiteral(batchNo)}, 1, 1, ${actualStartTime}, NULL, NULL
+  false, false, false, ${sqlLiteral(batchNo)}, 1, 1, ${actualStartTime}, NULL, NULL
 ) ON CONFLICT (id) DO UPDATE SET
   valid = true,
   status = 99,
@@ -321,7 +459,9 @@ INSERT INTO public.wom_task_actives (
   act_start_time = ${easyReportAction ? actualStartTime : "NULL"},
   act_end_time = NULL,
   is_finish = EXCLUDED.is_finish,
-  is_run = EXCLUDED.is_run;
+  is_run = EXCLUDED.is_run,
+  is_auto = false;
+`}
 
 INSERT INTO public.wom_produce_task_exelog (
   id, ${commonCols}, status, table_no, table_info_id, task_id, task_run_state,
@@ -440,6 +580,7 @@ INSERT INTO public.wom_acti_exelogs (
   modify_time = now();
 ` : ""}
 
+${processStartAction || processEndAction ? "" : `
 INSERT INTO public.wom_wait_put_records (
   id, ${commonCols}, status, table_no, table_info_id, task_id, task_process_id,
   task_active_id, formula_id, material_id, product_id, produce_batch_num,
@@ -460,8 +601,9 @@ INSERT INTO public.wom_wait_put_records (
   actual_end_time = NULL,
   proc_report_id = EXCLUDED.proc_report_id,
   acti_exelog = EXCLUDED.acti_exelog;
+`}
 
-${processFlowAction ? `
+${processFlowAction && !reuseWorkOrderWait ? `
 INSERT INTO public.wom_wait_put_records (
   id, ${commonCols}, status, table_no, table_info_id, task_id, task_process_id,
   formula_id, material_id, product_id, produce_batch_num,
@@ -497,12 +639,12 @@ INSERT INTO public.wom_wait_put_records (
   ${sqlLiteral(processName)}, NULL, NULL, 'WOM_recordType/process', 'WOM_runState/waitForRun',
   'WOM_BatchSyncStatus/await', NULL, NULL, NULL, NULL, NULL
 ) ON CONFLICT (id) DO UPDATE SET
-  valid = true,
+  valid = true${processEndAction ? "" : `,
   exe_state = 'WOM_runState/waitForRun',
   actual_start_time = NULL,
   actual_end_time = NULL,
   proc_report_id = NULL,
-  acti_exelog = NULL;
+  acti_exelog = NULL`};
 ` : ""}
 
 COMMIT;
@@ -516,6 +658,8 @@ function putinDetailFallbackSql(procReportId) {
     "version, valid, cid, create_staff_id, create_time, create_department_id, create_position_id, group_id, owner_staff_id, owner_department_id, owner_position_id, position_lay_rec";
   const commonVals = "0, true, 1000, 1, now(), 1, 1, 1000, 1, 1, 1, '1'";
   return `
+BEGIN;
+${ownershipGuardSql()}
 INSERT INTO public.wom_putin_details (
   id, ${commonCols}, status, table_no, table_info_id, head_id,
   material_batch_num, material_id, putin_num, use_num, putin_time, putin_end_time,
@@ -536,6 +680,7 @@ INSERT INTO public.wom_putin_details (
   remain_operate = EXCLUDED.remain_operate,
   modify_time = now();
 SELECT 'putinDetailFallback', ${ids.putinDetailFallback}, ${procReportId};
+COMMIT;
 `;
 }
 
@@ -764,6 +909,12 @@ function assertProcessStartPersistence(rawRows) {
   const processWait = rows.find((row) => row[0] === "processWait");
   const workOrderWait = rows.find((row) => row[0] === "workOrderWait");
   const processExelog = rows.find((row) => row[0] === "processExelog");
+  const activeWait = rows.find(
+    (row) =>
+      row[0] === "wait" &&
+      row[4] === String(ids.active) &&
+      row[5] === "WOM_recordType/active"
+  );
   const failures = [];
 
   if (!task || task[3] !== "WOM_runState/runing" || !task[4]) {
@@ -784,10 +935,22 @@ function assertProcessStartPersistence(rawRows) {
   if (!processExelog || processExelog[4] !== "WOM_runState/runing" || !processExelog[5] || processExelog[7] !== "true") {
     failures.push(`wom_process_exelogs not inserted as expected: ${JSON.stringify(processExelog)}`);
   }
+  if (!activeWait || activeWait[6] !== "WOM_runState/waitForRun" || activeWait[11] !== "true") {
+    failures.push(`wom_wait_put_records active row not generated as expected: ${JSON.stringify(activeWait)}`);
+  }
   if (failures.length) {
     throw new Error(failures.join("; "));
   }
-  return { rows, task, process, processProcReport, processWait, workOrderWait, processExelog };
+  return {
+    rows,
+    task,
+    process,
+    processProcReport,
+    processWait,
+    workOrderWait,
+    processExelog,
+    activeWait,
+  };
 }
 
 function assertProcessEndPersistence(rawRows) {
@@ -893,13 +1056,13 @@ function assertEasyEndPersistence(rawRows) {
   if (!process || process[4] !== "WOM_runState/runing" || !process[5]) {
     failures.push(`wom_task_processes not kept running as expected: ${JSON.stringify(process)}`);
   }
-  if (!active || active[5] !== "WOM_runState/runing" || active[6] !== "true" || !active[7] || !active[8]) {
+  if (!active || active[5] !== "WOM_runState/finished" || active[6] !== "true" || !active[7] || !active[8]) {
     failures.push(`wom_task_actives did not finish easy report as expected: ${JSON.stringify(active)}`);
   }
   if (!procReport || procReport[5] !== "WOM_procReportType/taskActive" || procReport[6] !== "RM_exeSystem/mes" || procReport[7] !== "true" || procReport[8] !== "true") {
     failures.push(`wom_proc_reports not finished as expected: ${JSON.stringify(procReport)}`);
   }
-  if (!activeExelog || activeExelog[6] !== "WOM_runState/finished" || activeExelog[5] !== String(ids.procReport) || !activeExelog[7] || activeExelog[9] !== "true") {
+  if (!activeExelog || activeExelog[6] !== "WOM_runState/finished" || activeExelog[5] !== String(ids.procReport) || !activeExelog[7] || !activeExelog[8] || activeExelog[9] !== "true") {
     failures.push(`wom_acti_exelogs not finished as expected: ${JSON.stringify(activeExelog)}`);
   }
   if (!wait || wait[5] !== "WOM_recordType/active" || wait[6] !== "WOM_runState/finished" || !wait[7] || !wait[8] || wait[9] !== String(ids.procReport) || wait[10] !== String(ids.activeExelog) || wait[11] !== "true") {
@@ -940,7 +1103,6 @@ function assertPutinEndPersistence(rawRows) {
   const putinDetail = rows.find((row) => row[0] === "putinDetail");
   const matConsumRecordCount = rows.find((row) => row[0] === "matConsumRecordCount");
   const failures = [];
-  const issues = [];
 
   if (!task || task[3] !== "WOM_runState/runing" || !task[4]) {
     failures.push(`wom_produce_tasks not kept running as expected: ${JSON.stringify(task)}`);
@@ -954,8 +1116,15 @@ function assertPutinEndPersistence(rawRows) {
   if (!procReport || procReport[5] !== "WOM_procReportType/taskActive" || procReport[6] !== "RM_exeSystem/mes" || procReport[8] !== "true") {
     failures.push(`wom_proc_reports not retained as expected: ${JSON.stringify(procReport)}`);
   }
-  if (activeExelog) {
-    issues.push("RM_activeType/putin unexpectedly created wom_acti_exelogs; source code usually skips activity exelog creation for putin/output activity types.");
+  if (
+    !activeExelog ||
+    activeExelog[5] !== procReport[1] ||
+    activeExelog[6] !== "WOM_runState/finished" ||
+    !activeExelog[7] ||
+    !activeExelog[8] ||
+    activeExelog[9] !== "true"
+  ) {
+    failures.push(`wom_acti_exelogs was not materialized and finished for putin: ${JSON.stringify(activeExelog)}`);
   }
   if (!wait || wait[5] !== "WOM_recordType/active" || wait[6] !== "WOM_runState/finished" || !wait[7] || !wait[8] || !wait[9] || wait[11] !== "true") {
     failures.push(`wom_wait_put_records not finished as expected: ${JSON.stringify(wait)}`);
@@ -976,13 +1145,25 @@ function assertPutinEndPersistence(rawRows) {
   ) {
     failures.push(`wom_putin_details marker row not available as expected: ${JSON.stringify(putinDetail)}`);
   }
-  if (!matConsumRecordCount || Number(matConsumRecordCount[1] || 0) === 0) {
-    issues.push("wom_mat_consum_recods was not generated for putin-end; source endActive skips wom_acti_exelogs for RM_activeType/putin, so this remains a data-quality follow-up rather than a blocking persistence failure for wom_putin_details.");
+  if (!matConsumRecordCount || Number(matConsumRecordCount[1] || 0) < 1) {
+    failures.push(`wom_mat_consum_recods was not generated for putin-end: ${JSON.stringify(matConsumRecordCount)}`);
   }
   if (failures.length) {
     throw new Error(failures.join("; "));
   }
-  return { rows, task, process, active, procReport, activeExelog, wait, processExelog, putinDetail, matConsumRecordCount, issues };
+  return {
+    rows,
+    task,
+    process,
+    active,
+    procReport,
+    activeExelog,
+    wait,
+    processExelog,
+    putinDetail,
+    matConsumRecordCount,
+    issues: [],
+  };
 }
 
 async function getGridRows(page, gridCode) {
@@ -1166,7 +1347,50 @@ async function refreshEasyReportGridFromPage(page) {
   if (error) {
     throw new Error(`Easy report grid refresh response was not observed: ${error.message}`);
   }
-  return { status: response.status(), url: response.url() };
+  const payload = await response.json();
+  const rows =
+    payload &&
+    payload.data &&
+    Array.isArray(payload.data.result)
+      ? payload.data.result
+      : [];
+  const targetRows = rows.filter((row) => String(row.id) === String(ids.active));
+  if (targetRows.length !== 1) {
+    throw new Error(
+      `Easy report response did not contain exactly one target activity ${ids.active}: ` +
+        JSON.stringify({ responseRowCount: rows.length, targetRowCount: targetRows.length })
+    );
+  }
+  const loadResult = await page.evaluate(
+    ({ gridCode, responseRowCount, targetRows: selectedRows, targetId }) => {
+      const gridFactory = window.ReactAPI && window.ReactAPI.getComponentAPI("SupDataGrid");
+      const grid = gridFactory && typeof gridFactory.APIs === "function" && gridFactory.APIs(gridCode);
+      if (!grid || typeof grid.setDatagridData !== "function") {
+        return { ok: false, error: "easy report grid setDatagridData missing" };
+      }
+      grid.setDatagridData(selectedRows);
+      const loadedRows =
+        (typeof grid.getRows === "function" && grid.getRows()) ||
+        (typeof grid.getDatagridData === "function" && grid.getDatagridData()) ||
+        [];
+      return {
+        ok: loadedRows.length === 1 && String(loadedRows[0].id) === String(targetId),
+        responseRowCount,
+        loadedRowCount: loadedRows.length,
+        loadedIds: loadedRows.map((row) => String(row.id)),
+      };
+    },
+    {
+      gridCode: easyReportGridId,
+      responseRowCount: rows.length,
+      targetRows,
+      targetId: String(ids.active),
+    }
+  );
+  if (!loadResult.ok) {
+    throw new Error(`Easy report grid did not apply the real response rows: ${JSON.stringify(loadResult)}`);
+  }
+  return { status: response.status(), url: response.url(), ...loadResult };
 }
 
 async function submitProcessUnitFromPage(page) {
@@ -1390,6 +1614,35 @@ async function gotoRouteWhenReady(page, evidence) {
   return lastResponse;
 }
 
+async function waitForFormDataWhenReady(page, evidence, expectedId) {
+  const attempts = [];
+  let lastError = null;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      await page.waitForFunction(
+        (formId) => {
+          const data = window.ReactAPI && window.ReactAPI.getFormData && window.ReactAPI.getFormData();
+          return data && String(data.id) === String(formId);
+        },
+        String(expectedId),
+        { timeout: 30000 }
+      );
+      attempts.push({ attempt, loaded: true });
+      evidence.formLoad = { attempts };
+      return;
+    } catch (error) {
+      lastError = error;
+      attempts.push({ attempt, loaded: false, error: error.message });
+      if (attempt < 3) {
+        await page.waitForTimeout(5000);
+        await page.reload({ waitUntil: "domcontentloaded", timeout: 45000 });
+      }
+    }
+  }
+  evidence.formLoad = { attempts };
+  throw lastError;
+}
+
 async function runBrowser(ticket, evidence) {
   const browser = await chromium.launch({ headless });
   try {
@@ -1457,25 +1710,11 @@ async function runBrowser(ticket, evidence) {
 
     await gotoRouteWhenReady(page, evidence);
     await page.waitForLoadState("domcontentloaded");
-    if (processUnitAction) {
-      await page.waitForFunction(
-        (processId) => {
-          const data = window.ReactAPI && window.ReactAPI.getFormData && window.ReactAPI.getFormData();
-          return data && String(data.id) === String(processId);
-        },
-        String(ids.process),
-        { timeout: 60000 }
-      );
-    } else {
-      await page.waitForFunction(
-        (taskId) => {
-          const data = window.ReactAPI && window.ReactAPI.getFormData && window.ReactAPI.getFormData();
-          return data && String(data.id) === String(taskId);
-        },
-        String(ids.task),
-        { timeout: 60000 }
-      );
-    }
+    await waitForFormDataWhenReady(
+      page,
+      evidence,
+      processUnitAction ? ids.process : ids.task
+    );
     evidence.screenshots.before = path.join(outputDir, "wom-active-before.png");
     await page.screenshot({ path: evidence.screenshots.before, fullPage: true });
 
@@ -1526,37 +1765,33 @@ async function runBrowser(ticket, evidence) {
       evidence.processRowsBefore = await getGridRows(page, processGridId);
       evidence.processSelection = await selectGridRow(page, processGridId, String(ids.process), processName);
 
-      const processStartResponsePromise = waitForResponseSafe(
-        page,
-        (response) => response.url().includes(`/WOM/produceTask/taskProcess/start/${ids.process}`),
-        30000
-      );
-      const processStartInvocation = await invokeRuntimeButton(page, "startProcess");
-      evidence.processStartButtonInvocation = processStartInvocation;
-      if (!processStartInvocation.ok) {
-        const pendingStartResponse = await processStartResponsePromise;
-        if (pendingStartResponse.error) {
-          evidence.processStartWaitError = pendingStartResponse.error.message;
+      if (processStartAction) {
+        const processStartResponsePromise = waitForResponseSafe(
+          page,
+          (response) => response.url().includes(`/WOM/produceTask/taskProcess/start/${ids.process}`),
+          30000
+        );
+        const processStartInvocation = await invokeRuntimeButton(page, "startProcess");
+        evidence.processStartButtonInvocation = processStartInvocation;
+        if (!processStartInvocation.ok) {
+          const pendingStartResponse = await processStartResponsePromise;
+          if (pendingStartResponse.error) {
+            evidence.processStartWaitError = pendingStartResponse.error.message;
+          }
+          throw new Error(`startProcess runtime button invocation failed: ${JSON.stringify(processStartInvocation)}`);
         }
-        throw new Error(`startProcess runtime button invocation failed: ${JSON.stringify(processStartInvocation)}`);
-      }
 
-      const { response: processStartResponse, error: processStartResponseError } = await processStartResponsePromise;
-      if (processStartResponseError) {
-        evidence.processStartWaitError = processStartResponseError.message;
-        throw new Error(`startProcess response was not observed: ${processStartResponseError.message}`);
-      }
-      evidence.processStart = await parseResponse(processStartResponse);
-      const processStartPayload = evidence.processStart.json && (evidence.processStart.json.data || evidence.processStart.json);
-      if (evidence.processStart.status !== 200 || !processStartPayload || processStartPayload.dealSuccessFlag !== true) {
-        throw new Error(`startProcess did not pass: ${JSON.stringify(evidence.processStart)}`);
-      }
-
-      if (activeAction === "process-end") {
-        await page.waitForTimeout(1500);
-        evidence.processGridRefreshAfterStart = await refreshProcessGridFromPage(page);
-        evidence.processRowsAfterStart = await getGridRows(page, processGridId);
-        evidence.processSelectionAfterStart = await selectGridRow(page, processGridId, String(ids.process), processName);
+        const { response: processStartResponse, error: processStartResponseError } = await processStartResponsePromise;
+        if (processStartResponseError) {
+          evidence.processStartWaitError = processStartResponseError.message;
+          throw new Error(`startProcess response was not observed: ${processStartResponseError.message}`);
+        }
+        evidence.processStart = await parseResponse(processStartResponse);
+        const processStartPayload = evidence.processStart.json && (evidence.processStart.json.data || evidence.processStart.json);
+        if (evidence.processStart.status !== 200 || !processStartPayload || processStartPayload.dealSuccessFlag !== true) {
+          throw new Error(`startProcess did not pass: ${JSON.stringify(evidence.processStart)}`);
+        }
+      } else if (processEndAction) {
 
         const processEndResponsePromise = waitForResponseSafe(
           page,
@@ -1584,7 +1819,7 @@ async function runBrowser(ticket, evidence) {
         if (evidence.processEnd.status !== 200 || !processEndPayload || processEndPayload.dealSuccessFlag !== true) {
           throw new Error(`endProcess did not pass: ${JSON.stringify(evidence.processEnd)}`);
         }
-      } else if (activeAction !== "process-start") {
+      } else {
         throw new Error(`Unsupported process action ADP_WOM_ACTIVE_ACTION=${activeAction}`);
       }
     } else if (easyReportAction) {
@@ -1765,6 +2000,35 @@ async function runBrowser(ticket, evidence) {
 
     await page.waitForTimeout(1500);
     evidence.afterBody = (await page.locator("body").innerText()).slice(0, 5000);
+    evidence.visibleProblemNotices = await page
+      .locator(
+        [
+          ".ant-notification-notice-error",
+          ".ant-notification-notice-warning",
+          ".ant-message-error",
+          ".ant-message-warning",
+          "[role='alert'][class*='error']",
+          "[role='alert'][class*='warning']",
+        ].join(",")
+      )
+      .evaluateAll((nodes) =>
+        nodes
+          .filter((node) => {
+            const style = window.getComputedStyle(node);
+            const rect = node.getBoundingClientRect();
+            return (
+              style.display !== "none" &&
+              style.visibility !== "hidden" &&
+              Number(style.opacity || 1) > 0 &&
+              rect.width > 0 &&
+              rect.height > 0
+            );
+          })
+          .map((node) => ({
+            className: node.className,
+            text: (node.innerText || node.textContent || "").trim(),
+          }))
+      );
     evidence.screenshots.after = path.join(outputDir, "wom-active-after.png");
     await page.screenshot({ path: evidence.screenshots.after, fullPage: true });
     await context.close();
@@ -1790,12 +2054,16 @@ function assertFrontendClean(evidence) {
   if (evidence.pageErrors.length) {
     failures.push(`page errors ${JSON.stringify(evidence.pageErrors)}`);
   }
+  if (evidence.visibleProblemNotices && evidence.visibleProblemNotices.length) {
+    failures.push(`visible warning/error notices ${JSON.stringify(evidence.visibleProblemNotices)}`);
+  }
 
   evidence.frontendClean = {
     failedResponses,
     requestFailures: evidence.requestFailures,
     consoleErrors,
     pageErrors: evidence.pageErrors,
+    visibleProblemNotices: evidence.visibleProblemNotices || [],
     status: failures.length ? "FAIL" : "PASS",
   };
 
@@ -1825,6 +2093,7 @@ async function main() {
     console: [],
     pageErrors: [],
     requestFailures: [],
+    visibleProblemNotices: [],
     requests: [],
     responses: [],
     screenshots: {},

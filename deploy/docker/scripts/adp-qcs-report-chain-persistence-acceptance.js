@@ -17,8 +17,11 @@ const dbContainer = process.env.ADP_DB_CONTAINER || "adp-mes-newbase-postgres-1"
 const dbName = process.env.ADP_DB_NAME || "adp";
 const dbUser = process.env.ADP_DB_USER || "adp";
 const pageTimeoutMs = Number(process.env.ADP_PAGE_TIMEOUT_MS || 180000);
+const gridReadyTimeoutMs = Number(process.env.ADP_GRID_READY_TIMEOUT_MS || 30000);
 const navigationWaitUntil = process.env.ADP_NAV_WAIT_UNTIL || "commit";
 const mode = process.env.ADP_QCS_REPORT_CHAIN_MODE || "qualified";
+const keepFixture = process.env.ADP_QCS_KEEP_FIXTURE === "true";
+const redriveWomBackfill = process.env.ADP_QCS_REDRIVE_WOM_BACKFILL === "true";
 
 if (!["qualified", "unqualified"].includes(mode)) {
   throw new Error("ADP_QCS_REPORT_CHAIN_MODE must be qualified or unqualified");
@@ -40,6 +43,7 @@ const reportEditRoute = "/msService/QCS/inspectReport/inspectReport/manuInspRepo
 const reportViewRoute = "/msService/QCS/inspectReport/inspectReport/manuInspReportView";
 const inspectBulkSubmitApi = "/msService/QCS/inspect/inspect/bulkSubmit";
 const reportBatchDealApi = "/msService/QCS/inspectReport/inspectReport/batchDealReports";
+const womSyncInspectReportApi = "/msService/WOM/quality/quality/syncInspectReport";
 const expectedResult = mode === "unqualified" ? "不合格" : "合格";
 const expectedResultOption =
   mode === "unqualified"
@@ -250,6 +254,29 @@ WHERE qi.id = ${inspectId};
   return rowToObject(parseRows(raw)[0], fields);
 }
 
+function queryInspectSource(inspectId) {
+  const fields = ["id", "sourceId", "sourceTableId", "sourceType"];
+  const raw = runSql(`
+SELECT id, coalesce(source_id::text, ''), coalesce(source_table_id::text, ''),
+       coalesce(source_type, '')
+FROM public.qcs_inspects
+WHERE id = ${inspectId};
+`);
+  return rowToObject(parseRows(raw)[0], fields);
+}
+
+function queryWomTaskQuality(taskId) {
+  const normalizedTaskId = requiredId(taskId, "WOM task id");
+  const fields = ["id", "checkState", "checkResult", "checkResultId"];
+  const raw = runSql(`
+SELECT id, coalesce(check_state, ''), coalesce(check_result, ''),
+       coalesce(check_result_id::text, '')
+FROM public.wom_produce_tasks
+WHERE id = ${normalizedTaskId};
+`);
+  return rowToObject(parseRows(raw)[0], fields);
+}
+
 function queryReportState(inspectId, batchNo) {
   const fields = [
     "id",
@@ -336,9 +363,11 @@ SELECT 'task', id, coalesce(check_state, ''), coalesce(check_result, ''),
 FROM public.wom_produce_tasks
 WHERE id = ${taskId};
 
-SELECT 'wait', id, coalesce(check_state, ''), coalesce(check_result, '')
+SELECT 'wait', id, coalesce(record_type, ''), coalesce(check_state, ''), coalesce(check_result, '')
 FROM public.wom_wait_put_records
 WHERE task_id = ${taskId}
+  AND task_active_id IS NULL
+  AND record_type = 'WOM_recordType/workOrder'
 ORDER BY id;
 
 SELECT 'exelog', id, coalesce(check_state, ''), coalesce(check_result, ''),
@@ -389,6 +418,9 @@ function cleanupFixture(womEvidence, evidence) {
     const inspectId = requiredId(evidence.womManuInspect.inspectId, "inspectId");
     const taskId = requiredId(ids.task, "taskId");
     const batchNo = evidence.womManuInspect.batchNo;
+    const tableNo = womEvidence.tableNo;
+    const materialCode = womEvidence.materialCode;
+    const formulaCode = womEvidence.formulaCode;
     const entityRaw = runSql(`
 SELECT 'inspect', id, table_info_id
 FROM public.qcs_inspects
@@ -418,6 +450,46 @@ WHERE r.inspect_id = ${inspectId};
     );
     const cleanupSql = `
 BEGIN;
+
+DO $guard$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM public.qcs_inspects
+    WHERE id = ${inspectId}
+      AND source_table_id = ${taskId}
+      AND batch_code = ${sqlLiteral(batchNo)}
+  ) THEN
+    RAISE EXCEPTION 'QCS cleanup refused: inspection % is not owned by this fixture', ${inspectId};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.qcs_inspect_reports
+    WHERE inspect_id = ${inspectId}
+      AND coalesce(memo_field, '') NOT LIKE ${sqlLiteral(`${marker}%`)}
+  ) THEN
+    RAISE EXCEPTION 'QCS cleanup refused: a report is not marker-owned';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM public.wom_produce_tasks
+    WHERE id = ${taskId}
+      AND table_no = ${sqlLiteral(tableNo)}
+      AND produce_batch_num = ${sqlLiteral(batchNo)}
+  ) THEN
+    RAISE EXCEPTION 'QCS cleanup refused: WOM task % is not marker-owned', ${taskId};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.baseset_materials
+    WHERE id = ${fixtureIds.material} AND code IS DISTINCT FROM ${sqlLiteral(materialCode)}
+  ) THEN
+    RAISE EXCEPTION 'QCS cleanup refused: material id is not marker-owned';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.rm_formulas
+    WHERE id = ${fixtureIds.formula} AND formual_code IS DISTINCT FROM ${sqlLiteral(formulaCode)}
+  ) THEN
+    RAISE EXCEPTION 'QCS cleanup refused: formula id is not marker-owned';
+  END IF;
+END
+$guard$;
 
 DELETE FROM public.jbpm4_task
 WHERE execution_ IN (
@@ -568,6 +640,38 @@ async function postForm(page, apiPath, form) {
   );
 }
 
+async function postJson(page, apiPath, payload) {
+  return page.evaluate(
+    async ({ apiPath: pathValue, payloadValue }) => {
+      const response = await fetch(pathValue, {
+        method: "POST",
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=UTF-8",
+        },
+        body: JSON.stringify(payloadValue),
+        credentials: "include",
+      });
+      const text = await response.text();
+      let json = null;
+      try {
+        json = JSON.parse(text);
+      } catch (_error) {
+        json = null;
+      }
+      return {
+        method: "POST",
+        url: pathValue,
+        requestPayload: payloadValue,
+        status: response.status,
+        body: text.slice(0, 8000),
+        json,
+      };
+    },
+    { apiPath, payloadValue: payload }
+  );
+}
+
 async function safeScreenshot(page, evidence, pathValue) {
   try {
     await page.screenshot({ path: pathValue, fullPage: true, timeout: 15000 });
@@ -642,7 +746,22 @@ async function runBrowserWorkflow(ticket, womEvidence, evidence) {
       route: inspectListRoute,
       status: inspectNav && inspectNav.status(),
     };
-    await page.waitForTimeout(2500);
+    const inspectGridWaitStartedAt = Date.now();
+    let inspectGridWaitError = "";
+    try {
+      await page.waitForFunction(
+        () => document.body && document.body.innerText.includes("单据编号"),
+        null,
+        { polling: 250, timeout: gridReadyTimeoutMs }
+      );
+    } catch (error) {
+      inspectGridWaitError = error.message;
+    }
+    evidence.inspectListReadyWait = {
+      elapsedMs: Date.now() - inspectGridWaitStartedAt,
+      timeoutMs: gridReadyTimeoutMs,
+      error: inspectGridWaitError,
+    };
     evidence.inspectListDisplay = await page.evaluate(() => {
       const bodyText = document.body.innerText;
       return {
@@ -653,15 +772,20 @@ async function runBrowserWorkflow(ticket, womEvidence, evidence) {
         ),
       };
     });
+    evidence.screenshots.inspectList = path.join(outputDir, "qcs-inspect-list-before-submit.png");
+    await safeScreenshot(page, evidence, evidence.screenshots.inspectList);
     if (
       !evidence.inspectListDisplay.documentNumberVisible ||
       evidence.inspectListDisplay.rawTableNumberKeyVisible ||
       evidence.inspectListDisplay.rawEmptyCustomKeyVisible
     ) {
-      throw new Error(`QCS inspection list headers were not normalized: ${JSON.stringify(evidence.inspectListDisplay)}`);
+      throw new Error(
+        `QCS inspection list headers were not normalized: ${JSON.stringify({
+          ...evidence.inspectListDisplay,
+          readyWait: evidence.inspectListReadyWait,
+        })}`
+      );
     }
-    evidence.screenshots.inspectList = path.join(outputDir, "qcs-inspect-list-before-submit.png");
-    await safeScreenshot(page, evidence, evidence.screenshots.inspectList);
 
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       const inspectState = queryInspectState(inspectId);
@@ -767,6 +891,40 @@ async function runBrowserWorkflow(ticket, womEvidence, evidence) {
     }
 
     report = queryReportState(inspectId, batchNo);
+    if (redriveWomBackfill) {
+      const inspectSource = queryInspectSource(inspectId);
+      const womTaskBefore = queryWomTaskQuality(inspectSource && inspectSource.sourceId);
+      evidence.womBackfillRedrive = {
+        enabled: true,
+        inspectSource,
+        before: womTaskBefore,
+        skipped: isExpectedWomResult(womTaskBefore && womTaskBefore.checkResult),
+      };
+      if (!evidence.womBackfillRedrive.skipped) {
+        const response = await postJson(page, womSyncInspectReportApi, {
+          sourceId: inspectSource.sourceId,
+          sourceTableId: inspectSource.sourceTableId,
+          sourceType: inspectSource.sourceType,
+          inspectReportID: report.id,
+          reportResult: mode === "qualified",
+        });
+        evidence.womBackfillRedrive.response = response;
+        if (
+          response.status !== 200 ||
+          !response.json ||
+          Number(response.json.code) !== 200
+        ) {
+          throw new Error(`WOM inspection backfill redrive failed: ${JSON.stringify(response)}`);
+        }
+        await page.waitForTimeout(1500);
+        evidence.womBackfillRedrive.after = queryWomTaskQuality(inspectSource.sourceId);
+        if (!isExpectedWomResult(evidence.womBackfillRedrive.after && evidence.womBackfillRedrive.after.checkResult)) {
+          throw new Error(
+            `WOM inspection backfill redrive did not persist: ${JSON.stringify(evidence.womBackfillRedrive)}`
+          );
+        }
+      }
+    }
     const effectiveReportNav = await page.goto(
       `${reportEditRoute}?id=${encodeURIComponent(report.id)}&ADP_E2E=${encodeURIComponent(marker)}`,
       { waitUntil: navigationWaitUntil, timeout: pageTimeoutMs }
@@ -941,6 +1099,10 @@ function isExpectedWomResult(value) {
   return ["合格", "Qualified", "BaseSet_checkResult/qualified"].includes(normalized);
 }
 
+function isReportedWomState(value) {
+  return ["已检", "Checked", "BaseSet_checkState/haveChecked"].includes(String(value || ""));
+}
+
 function assertPersistence(evidence, womEvidence) {
   const inspectId = evidence.womManuInspect.inspectId;
   const batchNo = evidence.womManuInspect.batchNo;
@@ -971,13 +1133,26 @@ function assertPersistence(evidence, womEvidence) {
   if (!finalState.inspect || finalState.inspect[3] !== "QCS_checkState/reported") {
     failures.push(`qcs_inspects not reported: ${JSON.stringify(finalState.inspect)}`);
   }
-  if (!finalState.task || !isExpectedWomResult(finalState.task[3])) {
+  if (
+    !finalState.task ||
+    !isReportedWomState(finalState.task[2]) ||
+    !isExpectedWomResult(finalState.task[3])
+  ) {
     failures.push(`wom_produce_tasks check_result mismatch: ${JSON.stringify(finalState.task)}`);
   }
-  if (!finalState.wait || !isExpectedWomResult(finalState.wait[3])) {
+  if (
+    !finalState.wait ||
+    finalState.wait[2] !== "WOM_recordType/workOrder" ||
+    !isReportedWomState(finalState.wait[3]) ||
+    !isExpectedWomResult(finalState.wait[4])
+  ) {
     failures.push(`wom_wait_put_records check_result mismatch: ${JSON.stringify(finalState.wait)}`);
   }
-  if (!finalState.exelog || !isExpectedWomResult(finalState.exelog[3])) {
+  if (
+    !finalState.exelog ||
+    !isReportedWomState(finalState.exelog[2]) ||
+    !isExpectedWomResult(finalState.exelog[3])
+  ) {
     failures.push(`wom_produce_task_exelog check_result mismatch: ${JSON.stringify(finalState.exelog)}`);
   }
   if (!finalState.batch || finalState.batch[4] !== expectedBatchResult) {
@@ -1055,18 +1230,30 @@ async function main() {
         womEvidence = null;
       }
     }
-    if (womEvidence && evidence.womManuInspect && evidence.womManuInspect.inspectId) {
+    if (!keepFixture && womEvidence && evidence.womManuInspect && evidence.womManuInspect.inspectId) {
       cleanupFixture(womEvidence, evidence);
+    } else if (keepFixture) {
+      evidence.cleanup = {
+        status: "DEFERRED",
+        reason: "Shared MES flow fixture retained for downstream completion inbound and traceability acceptance.",
+      };
     }
     fs.writeFileSync(outputPath, JSON.stringify(evidence, null, 2));
     throw error;
   }
 
-  cleanupFixture(womEvidence, evidence);
-  if (evidence.cleanup.status !== "PASS") {
-    evidence.status = "FAIL";
-    evidence.error = `fixture cleanup failed: ${JSON.stringify(evidence.cleanup)}`;
-    process.exitCode = 1;
+  if (keepFixture) {
+    evidence.cleanup = {
+      status: "DEFERRED",
+      reason: "Shared MES flow fixture retained for downstream completion inbound and traceability acceptance.",
+    };
+  } else {
+    cleanupFixture(womEvidence, evidence);
+    if (evidence.cleanup.status !== "PASS") {
+      evidence.status = "FAIL";
+      evidence.error = `fixture cleanup failed: ${JSON.stringify(evidence.cleanup)}`;
+      process.exitCode = 1;
+    }
   }
 
   fs.writeFileSync(outputPath, JSON.stringify(evidence, null, 2));
