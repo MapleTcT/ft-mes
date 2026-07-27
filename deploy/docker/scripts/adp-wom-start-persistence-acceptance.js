@@ -19,6 +19,10 @@ const dbUser = process.env.ADP_DB_USER || "adp";
 const pageTimeoutMs = Number(process.env.ADP_PAGE_TIMEOUT_MS || 180000);
 const gridTimeoutMs = Number(process.env.ADP_GRID_TIMEOUT_MS || pageTimeoutMs);
 const keepFixtureForDownstreamSmoke = process.env.ADP_WOM_KEEP_FIXTURE === "true";
+const pauseAfterTransition = (process.env.ADP_WOM_PAUSE_AFTER_TRANSITION || "").trim();
+const pauseReadyFile = (process.env.ADP_WOM_PAUSE_READY_FILE || "").trim();
+const pauseResumeFile = (process.env.ADP_WOM_PAUSE_RESUME_FILE || "").trim();
+const pauseTimeoutMs = Number(process.env.ADP_WOM_PAUSE_TIMEOUT_MS || 900000);
 const womLineId = (process.env.ADP_WOM_LINE_ID || "").trim();
 if (womLineId) {
   if (!/^[1-9][0-9]{0,18}$/.test(womLineId) || BigInt(womLineId) > 9223372036854775807n) {
@@ -78,6 +82,17 @@ for (const transition of transitions) {
     throw new Error(`Unsupported ADP_WOM_TRANSITIONS item: ${transition}`);
   }
 }
+if (pauseAfterTransition) {
+  if (!transitions.includes(pauseAfterTransition)) {
+    throw new Error("ADP_WOM_PAUSE_AFTER_TRANSITION must be present in ADP_WOM_TRANSITIONS");
+  }
+  if (!path.isAbsolute(pauseReadyFile) || !path.isAbsolute(pauseResumeFile)) {
+    throw new Error("ADP_WOM_PAUSE_READY_FILE and ADP_WOM_PAUSE_RESUME_FILE must be absolute");
+  }
+  if (!Number.isInteger(pauseTimeoutMs) || pauseTimeoutMs < 1000) {
+    throw new Error("ADP_WOM_PAUSE_TIMEOUT_MS must be an integer of at least 1000");
+  }
+}
 const transitionName = transitions.join("-");
 const defaultMarkerSuffix = transitionName === "start" ? "WOMSTART" : `WOM${transitionName.replace(/[^a-z0-9]+/gi, "_").toUpperCase()}`;
 const marker = process.env.ADP_E2E_MARKER || `ADP_E2E_${nowToken}_${defaultMarkerSuffix}`;
@@ -124,6 +139,35 @@ const gridId = "WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg";
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
+}
+
+async function waitForExternalResume(transition, evidence) {
+  if (transition !== pauseAfterTransition) return;
+  if (fs.existsSync(pauseReadyFile) || fs.existsSync(pauseResumeFile)) {
+    throw new Error("WOM pause signal files must not exist before the transition");
+  }
+  fs.mkdirSync(path.dirname(pauseReadyFile), { recursive: true });
+  fs.mkdirSync(path.dirname(pauseResumeFile), { recursive: true });
+  fs.writeFileSync(pauseReadyFile, JSON.stringify({
+    marker,
+    transition,
+    tableNo,
+    taskId: ids.task.toString(),
+    readyAt: new Date().toISOString(),
+  }));
+  const startedAt = Date.now();
+  while (!fs.existsSync(pauseResumeFile)) {
+    if (Date.now() - startedAt >= pauseTimeoutMs) {
+      throw new Error(`WOM external pause timed out after ${pauseTimeoutMs} ms`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  evidence.externalPause = {
+    transition,
+    readyFile: pauseReadyFile,
+    resumeFile: pauseResumeFile,
+    durationMs: Date.now() - startedAt,
+  };
 }
 
 async function captureScreenshot(page, filePath, evidence, label) {
@@ -1074,6 +1118,7 @@ async function runBrowser(ticket, evidence) {
           expectedState: config.expectedState,
           persistence: assertTransitionPersistence(snapshotRaw, config),
         });
+        await waitForExternalResume(transition, evidence);
         continue;
       }
 
@@ -1086,13 +1131,14 @@ async function runBrowser(ticket, evidence) {
 	        });
 	        await page.waitForTimeout(1500);
 	        const snapshotRaw = runSql(verificationSql());
-	        evidence.persistenceByTransition.push({
-	          transition,
-	          expectedState: config.expectedState,
-	          persistence: assertAdvanceReleasePersistence(snapshotRaw),
-	        });
-	        continue;
-	      }
+        evidence.persistenceByTransition.push({
+          transition,
+          expectedState: config.expectedState,
+          persistence: assertAdvanceReleasePersistence(snapshotRaw),
+        });
+        await waitForExternalResume(transition, evidence);
+        continue;
+      }
 
 	      const updateResponsePromise = page.waitForResponse(
 	        (response) => {
@@ -1176,6 +1222,7 @@ async function runBrowser(ticket, evidence) {
 	        expectedState: config.expectedState,
 	        persistence: assertPersistence(snapshotRaw, config.expectedState),
 	      });
+	      await waitForExternalResume(transition, evidence);
 	    }
 
 	    evidence.updateTaskState = evidence.updateTaskStateByTransition[0] && evidence.updateTaskStateByTransition[0].response;

@@ -14,6 +14,22 @@ make bpi-api-contract-check
 make bpi-simulation-test
 ```
 
+The minimum transfer-cell pilot is defined once in
+`simulation/bpi/scenarios/minimum-transfer-cell-v1.json`. It contains the reviewed topology,
+five JetLinks point bindings, START/END rules, continuous sample phases and the expected boundary
+samples. The same file can generate the IoT pilot mapping:
+
+```bash
+node simulation/bpi/minimum-line-scenario.js validate \
+  simulation/bpi/scenarios/minimum-transfer-cell-v1.json
+node simulation/bpi/minimum-line-scenario.js mapping \
+  simulation/bpi/scenarios/minimum-transfer-cell-v1.json
+```
+
+The scenario always requires an active WOM production context and keeps WOM/QCS/WMS/PLC-DCS
+writeback disabled. Passing it proves only the controlled shadow-batch model; target acceptance
+still requires MQTT, JetLinks, Kafka/Flink, the BPI browser and PostgreSQL evidence.
+
 Run the service manually:
 
 ```bash

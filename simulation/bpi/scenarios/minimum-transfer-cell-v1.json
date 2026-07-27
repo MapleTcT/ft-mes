@@ -1,0 +1,370 @@
+{
+  "schemaVersion": 1,
+  "scenarioCode": "BPI-MINIMUM-TRANSFER-CELL-V1",
+  "title": "BPI 最小转运单元",
+  "safety": {
+    "shadowOnly": true,
+    "requiresActiveProductionContext": true,
+    "writeback": {
+      "wom": false,
+      "qcs": false,
+      "wms": false,
+      "plcDcs": false
+    }
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "localityGroup": "LOCALITY-S07-TRANSFER"
+  },
+  "device": {
+    "gatewayId": "bpi-pilot-mqtt-gateway-01",
+    "productId": "bpi-transfer-cell-product-01",
+    "deviceId": "bpi-transfer-cell-device-01",
+    "sequenceHeader": "sourceSequence",
+    "sourceEpochHeader": "sourceEpoch",
+    "sourceSequenceOrigin": "GATEWAY",
+    "requireSourceSequence": true
+  },
+  "signals": [
+    {
+      "sourcePropertyId": "instantFlow",
+      "targetPropertyId": "flow.instant",
+      "name": "瞬时流量",
+      "unit": "m3/h",
+      "dataType": "double",
+      "qualityHeader": "quality.instantFlow",
+      "defaultQuality": "GOOD",
+      "calibrationVersion": "SIM-CAL-TRANSFER-1",
+      "calibrationVerified": true
+    },
+    {
+      "sourcePropertyId": "totalizedFlow",
+      "targetPropertyId": "flow.totalizer",
+      "name": "累计流量",
+      "unit": "m3",
+      "dataType": "double",
+      "qualityHeader": "quality.totalizedFlow",
+      "defaultQuality": "GOOD",
+      "calibrationVersion": "SIM-CAL-TRANSFER-1",
+      "calibrationVerified": true
+    },
+    {
+      "sourcePropertyId": "pumpRunning",
+      "targetPropertyId": "pump.running",
+      "name": "送料泵运行",
+      "unit": "bool",
+      "dataType": "boolean",
+      "qualityHeader": "quality.pumpRunning",
+      "defaultQuality": "GOOD",
+      "calibrationVersion": "SIM-CAL-TRANSFER-1",
+      "calibrationVerified": true
+    },
+    {
+      "sourcePropertyId": "valvePathReady",
+      "targetPropertyId": "valve.path.ready",
+      "name": "阀门路径成立",
+      "unit": "bool",
+      "dataType": "boolean",
+      "qualityHeader": "quality.valvePathReady",
+      "defaultQuality": "GOOD",
+      "calibrationVersion": "SIM-CAL-TRANSFER-1",
+      "calibrationVerified": true
+    },
+    {
+      "sourcePropertyId": "targetTankLevel",
+      "targetPropertyId": "tank.level",
+      "name": "接收罐液位",
+      "unit": "%",
+      "dataType": "double",
+      "qualityHeader": "quality.targetTankLevel",
+      "defaultQuality": "GOOD",
+      "calibrationVersion": "SIM-CAL-TRANSFER-1",
+      "calibrationVerified": true
+    }
+  ],
+  "topology": {
+    "code": "TOPO-S07-TRANSFER-CELL",
+    "version": "1",
+    "definition": {
+      "localityGroup": "LOCALITY-S07-TRANSFER",
+      "stages": [
+        {
+          "code": "TRANSFER",
+          "name": "物料转运"
+        }
+      ],
+      "nodes": [
+        {
+          "code": "FEED-TANK",
+          "type": "TANK",
+          "name": "送料罐"
+        },
+        {
+          "code": "TRANSFER-PUMP",
+          "type": "PUMP",
+          "name": "送料泵"
+        },
+        {
+          "code": "FLOW-METER",
+          "type": "METER",
+          "name": "流量计"
+        },
+        {
+          "code": "TRANSFER-VALVE-PATH",
+          "type": "VALVE",
+          "name": "转运阀路"
+        },
+        {
+          "code": "RECEIVE-TANK",
+          "type": "TANK",
+          "name": "接收罐"
+        }
+      ],
+      "edges": [
+        {
+          "from": "FEED-TANK",
+          "to": "TRANSFER-PUMP"
+        },
+        {
+          "from": "TRANSFER-PUMP",
+          "to": "FLOW-METER"
+        },
+        {
+          "from": "FLOW-METER",
+          "to": "TRANSFER-VALVE-PATH"
+        },
+        {
+          "from": "TRANSFER-VALVE-PATH",
+          "to": "RECEIVE-TANK"
+        }
+      ],
+      "bindings": [
+        {
+          "signal": "flow.instant",
+          "productId": "bpi-transfer-cell-product-01",
+          "deviceId": "bpi-transfer-cell-device-01",
+          "propertyId": "flow.instant",
+          "expectedUnit": "m3/h",
+          "calibrationVersion": "SIM-CAL-TRANSFER-1"
+        },
+        {
+          "signal": "flow.totalizer",
+          "productId": "bpi-transfer-cell-product-01",
+          "deviceId": "bpi-transfer-cell-device-01",
+          "propertyId": "flow.totalizer",
+          "expectedUnit": "m3",
+          "calibrationVersion": "SIM-CAL-TRANSFER-1"
+        },
+        {
+          "signal": "pump.running",
+          "productId": "bpi-transfer-cell-product-01",
+          "deviceId": "bpi-transfer-cell-device-01",
+          "propertyId": "pump.running",
+          "expectedUnit": "bool",
+          "calibrationVersion": "SIM-CAL-TRANSFER-1"
+        },
+        {
+          "signal": "valve.path.ready",
+          "productId": "bpi-transfer-cell-product-01",
+          "deviceId": "bpi-transfer-cell-device-01",
+          "propertyId": "valve.path.ready",
+          "expectedUnit": "bool",
+          "calibrationVersion": "SIM-CAL-TRANSFER-1"
+        },
+        {
+          "signal": "tank.level",
+          "productId": "bpi-transfer-cell-product-01",
+          "deviceId": "bpi-transfer-cell-device-01",
+          "propertyId": "tank.level",
+          "expectedUnit": "%",
+          "calibrationVersion": "SIM-CAL-TRANSFER-1"
+        }
+      ],
+      "requiredSignals": [
+        "flow.instant",
+        "flow.totalizer",
+        "pump.running",
+        "valve.path.ready",
+        "tank.level"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "code": "RULE-S07-TRANSFER-START",
+      "version": "1.0.0",
+      "ast": {
+        "boundaryType": "START",
+        "quorumMinimum": 2,
+        "minimumConfidence": 0.8,
+        "maxCompositePenalty": 0.2,
+        "timing": {
+          "allowedLatenessSeconds": 5,
+          "watermarkDelaySeconds": 2,
+          "evaluationTimeoutSeconds": 120
+        },
+        "conditions": [
+          {
+            "signal": "pump.running",
+            "operator": "EQUALS_TRUE",
+            "holdSeconds": 4,
+            "maxSilenceSeconds": 5,
+            "classification": "REQUIRED",
+            "weight": 25
+          },
+          {
+            "signal": "valve.path.ready",
+            "operator": "EQUALS_TRUE",
+            "holdSeconds": 4,
+            "maxSilenceSeconds": 5,
+            "classification": "REQUIRED",
+            "weight": 25
+          },
+          {
+            "signal": "flow.instant",
+            "operator": "GREATER_THAN",
+            "threshold": 12,
+            "holdSeconds": 4,
+            "maxSilenceSeconds": 5,
+            "classification": "QUORUM",
+            "weight": 20
+          },
+          {
+            "signal": "flow.totalizer",
+            "operator": "RISING",
+            "threshold": 0.2,
+            "holdSeconds": 4,
+            "maxSilenceSeconds": 5,
+            "classification": "QUORUM",
+            "weight": 15
+          },
+          {
+            "signal": "tank.level",
+            "operator": "RISING",
+            "threshold": 0.05,
+            "holdSeconds": 4,
+            "maxSilenceSeconds": 5,
+            "classification": "QUORUM",
+            "weight": 15
+          }
+        ]
+      }
+    },
+    {
+      "code": "RULE-S07-TRANSFER-END",
+      "version": "1.0.0",
+      "ast": {
+        "boundaryType": "END",
+        "quorumMinimum": 1,
+        "minimumConfidence": 0.7,
+        "maxCompositePenalty": 0.2,
+        "timing": {
+          "allowedLatenessSeconds": 5,
+          "watermarkDelaySeconds": 2,
+          "evaluationTimeoutSeconds": 120
+        },
+        "conditions": [
+          {
+            "signal": "flow.instant",
+            "operator": "LESS_THAN",
+            "threshold": 0.5,
+            "holdSeconds": 4,
+            "maxSilenceSeconds": 5,
+            "classification": "REQUIRED",
+            "weight": 40
+          },
+          {
+            "signal": "pump.running",
+            "operator": "EQUALS_FALSE",
+            "holdSeconds": 4,
+            "maxSilenceSeconds": 5,
+            "classification": "QUORUM",
+            "weight": 30
+          },
+          {
+            "signal": "valve.path.ready",
+            "operator": "EQUALS_FALSE",
+            "holdSeconds": 4,
+            "maxSilenceSeconds": 5,
+            "classification": "QUORUM",
+            "weight": 30
+          }
+        ]
+      }
+    }
+  ],
+  "sampling": {
+    "intervalSeconds": 1,
+    "phases": [
+      {
+        "name": "IDLE",
+        "samples": 3,
+        "values": {
+          "flow.instant": 0,
+          "flow.totalizer": 100,
+          "pump.running": false,
+          "valve.path.ready": false,
+          "tank.level": 40
+        }
+      },
+      {
+        "name": "START_CONFIRM",
+        "samples": 7,
+        "values": {
+          "flow.instant": 13.5,
+          "flow.totalizer": 100,
+          "pump.running": true,
+          "valve.path.ready": true,
+          "tank.level": 40
+        },
+        "stepPerSample": {
+          "flow.totalizer": 0.3,
+          "tank.level": 0.08
+        }
+      },
+      {
+        "name": "RUNNING",
+        "samples": 8,
+        "values": {
+          "flow.instant": 18.2,
+          "flow.totalizer": 102.1,
+          "pump.running": true,
+          "valve.path.ready": true,
+          "tank.level": 40.56
+        },
+        "stepPerSample": {
+          "flow.totalizer": 0.5,
+          "tank.level": 0.12
+        }
+      },
+      {
+        "name": "STOP_CONFIRM",
+        "samples": 7,
+        "values": {
+          "flow.instant": 0.2,
+          "flow.totalizer": 105.6,
+          "pump.running": false,
+          "valve.path.ready": false,
+          "tank.level": 41.4
+        }
+      }
+    ]
+  },
+  "expectations": {
+    "start": {
+      "phase": "START_CONFIRM",
+      "phaseSample": 6
+    },
+    "end": {
+      "phase": "STOP_CONFIRM",
+      "phaseSample": 5
+    },
+    "batch": {
+      "isShadow": true,
+      "finalState": "CLOSED_RAW",
+      "candidateCount": 2
+    }
+  }
+}

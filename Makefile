@@ -777,7 +777,7 @@ bpi-api-contract-check:
 	$(PYTHON) scripts/verify-bpi-api-contracts.py
 
 bpi-simulation-test:
-	$(NODE) --test simulation/bpi/bpi-simulation.test.js
+	$(NODE) --test simulation/bpi/*.test.js
 
 bpi-service-static-check:
 	$(PYTHON) scripts/verify-bpi-service.py
