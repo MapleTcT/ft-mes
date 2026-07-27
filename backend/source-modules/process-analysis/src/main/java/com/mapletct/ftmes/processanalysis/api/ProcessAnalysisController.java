@@ -9,6 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,12 +47,27 @@ public class ProcessAnalysisController {
             .body(new ClassPathResource("static/process-batch-trace.html"));
     }
 
+    @GetMapping(value = "/processAnalysis/processExecution/detail", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<Resource> processExecutionDetailPage() {
+        return ResponseEntity.ok()
+            .contentType(new MediaType("text", "html", StandardCharsets.UTF_8))
+            .body(new ClassPathResource("static/process-execution-detail.html"));
+    }
+
     @GetMapping("/processAnalysis/api/trace")
     public LegacyResult<Map<String, Object>> trace(
             HttpServletRequest request,
             @RequestParam("batchNo") String batchNo,
             @RequestParam(value = "productNo", required = false, defaultValue = "") String productNo) {
         return LegacyResult.success(traceabilityService.trace(tenantResolver.resolve(request), batchNo, productNo));
+    }
+
+    @GetMapping("/processAnalysis/api/process-executions/{processExecutionId}")
+    public LegacyResult<Map<String, Object>> processExecutionDetail(
+            HttpServletRequest request,
+            @PathVariable("processExecutionId") long processExecutionId) {
+        return LegacyResult.success(traceabilityService.processExecutionDetail(
+            tenantResolver.resolve(request), processExecutionId));
     }
 
     @GetMapping("/paramDetail/paramDetail/analysisiTask")

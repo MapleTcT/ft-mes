@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`207`。
-- 编号范围：`001` 到 `207`。
+- 脚本数量：`210`。
+- 编号范围：`001` 到 `210`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`78`。
+- 需关注语句：`79`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -23,33 +23,33 @@
 | auth-rbac-org | 37 |
 | business | 40 |
 | compatibility | 79 |
-| configuration | 48 |
-| general | 38 |
+| configuration | 49 |
+| general | 39 |
 | notification | 9 |
-| platform | 59 |
+| platform | 61 |
 | workflow | 21 |
 
 ## 语句统计
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10830 |
-| create-function | 103 |
+| alter-table | 10831 |
+| create-function | 104 |
 | create-index | 1011 |
 | create-table | 581 |
 | create-view | 143 |
-| insert | 11023 |
-| update | 11128 |
+| insert | 11032 |
+| update | 11139 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 243 |
-| do-block | 400 |
-| if-exists | 129 |
-| if-not-exists | 13048 |
-| on-conflict | 10958 |
+| create-or-replace | 244 |
+| do-block | 403 |
+| if-exists | 130 |
+| if-not-exists | 13049 |
+| on-conflict | 10966 |
 | to-regclass | 220 |
 | where-not-exists | 45 |
 
@@ -264,6 +264,9 @@
 | 205 | 205-production-export-propertycode-compat.sql | configuration, compatibility | 551 | create-function:6, update:7 | 10 | - |
 | 206 | 206-wom-easy-task-activity-grid-runtime.sql | platform | 329 | create-function:1, insert:2, update:4 | 3 | - |
 | 207 | 207-wom-batch-active-response-envelope.sql | general | 208 | create-function:1, update:2 | 1 | - |
+| 208 | 208-wom-factory-line-reference-bootstrap.sql | general | 264 | create-function:1, alter-table:1, insert:3, update:5 | 6 | watch:1 |
+| 209 | 209-wom-process-execution-detail-runtime.sql | platform, configuration | 46 | insert:3, update:3 | 4 | - |
+| 210 | 210-wom-make-task-edit-full-runtime.sql | platform | 46 | insert:3, update:3 | 4 | - |
 
 ## 规则
 

@@ -10,7 +10,7 @@ public class BpiRoutePolicy {
 
     private static final String ID = "[A-Za-z0-9._:-]{1,128}";
     private static final Pattern GET_ROUTE = Pattern.compile(
-            "^/(?:overview|lines/" + ID + "/(?:current-state|live-evidence)|candidates(?:/" + ID + ")?|"
+            "^/(?:overview|process-evidence|lines/" + ID + "/(?:current-state|live-evidence)|candidates(?:/" + ID + ")?|"
                     + "batches(?:/" + ID + "(?:/(?:evidence|timeline|release|force-close|wms/reversal))?)?|"
                     + "shadow-runs(?:/" + ID + "(?:/batch-reviews)?)?|"
                     + "feature-flags|"

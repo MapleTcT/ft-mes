@@ -1191,6 +1191,24 @@ WOM 核心补丁会在投料明细保存成功后、结束活动时按明细补�
 `failedResponses/requestFailures/consoleErrors/pageErrors/visibleProblemNotices` 均为空。
 机器证据：`metadata/mes-full-production-flow-current.json`。
 
+### 果糖喷射到糖化工序边界落库（目标页面/API/PostgreSQL）
+
+本节使用 marker `BPI_MIN_20260727_110711`、任务 `9007190231280101` 和批次
+`BPI-LINES0701-20260727-E22B71C8`。MES 与 BPI 使用同一受信
+`1000/PLANT-01/LINE-S07-01` 生产上下文，但分别落在 PostgreSQL 数据库 `adp` 和
+`ft_mes_bpi`。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 生产线参照查询 | WOM 制造指令编辑页 | WOM 工厂模型参照查询 | 旧平台运行时 condition + HM/RM 查询 | `hm_factory_models`、`hm_fac_node_types`、`rm_line_formulas` | 按 `node_type.code=004` 统计有效节点 | 页面与数据库均为 15 条生产线；只读操作不新增业务行 | NOT_APPLICABLE |
+| 制造指令业务明细回显 | WOM 制造指令编辑页 | WOM 指令详情和子表查询 | 运行时视图 + WOM 查询服务 | WOM task/process/active/material/inspection 表 | 按任务 ID 查询工序、活动和明细 | 四个业务页签恢复，喷射和糖化可见；只读操作不新增业务行 | NOT_APPLICABLE |
+| 喷射与糖化执行夹具 | WOM 工序执行列表/详情 | WOM 列表；`GET /processAnalysis/api/process-executions/{id}` | ProcessAnalysis controller -> service -> PostgreSQL repository | `wom_task_processes`、`wom_proc_reports`、`wom_process_exelogs`、`wom_bpi_production_context_bindings` | 按 task/execution ID 查询工序顺序、状态、起止时间和上下文 | 两道工序均 finished；喷射 `16:00:20..16:00:44`，糖化 `16:00:56..16:01:32`，交接 12 秒 | PASS |
+| 12 点位连续信号 replay | BPI 受控模拟器 | 内部遥测接入链路；`GET /bpi/v1/process-evidence` | telemetry ingress -> PostgreSQL；ProcessEvidence repository | `bpi_telemetry_events`、`bpi_telemetry_points`、`bpi_telemetry_point_rejects`、`bpi_telemetry_quarantine` | 按 tenant/plant/line 和 `16:00:00..16:01:32+08` 统计事件、点、属性、reject/quarantine | 24 events、288 accepted/stored points、12 properties、0 rejects、0 quarantine | PASS |
+| 工序详情与批次追溯 | ProcessAnalysis 工序详情 | `GET /processAnalysis/api/process-executions/{id}`；`GET /processAnalysis/exelogSecond/processBatchViewOut` | ProcessAnalysis read model | WOM/QCS/物料事实表 | 按执行 ID 和批次查询时间轴、工序和事实链 | 详情显示 4 条信号序列；追溯显示 13 个事件和 2 道工序；均为只读 | NOT_APPLICABLE |
+
+关键 SQL、四条流量/波美值序列统计和浏览器结果见
+`docs/testing/fructose-process-boundary-acceptance.md`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

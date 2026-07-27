@@ -1,31 +1,31 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 207,
+  "migrationCount": 210,
   "firstNumber": 1,
-  "lastNumber": 207,
+  "lastNumber": 210,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 78,
+  "watchStatementCount": 79,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 10830,
-    "create-function": 103,
+    "alter-table": 10831,
+    "create-function": 104,
     "create-index": 1011,
     "create-table": 581,
     "create-view": 143,
-    "insert": 11023,
-    "update": 11128
+    "insert": 11032,
+    "update": 11139
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 243,
-    "do-block": 400,
-    "if-exists": 129,
-    "if-not-exists": 13048,
-    "on-conflict": 10958,
+    "create-or-replace": 244,
+    "do-block": 403,
+    "if-exists": 130,
+    "if-not-exists": 13049,
+    "on-conflict": 10966,
     "to-regclass": 220,
     "where-not-exists": 45
   },
@@ -33,10 +33,10 @@
     "auth-rbac-org": 37,
     "business": 40,
     "compatibility": 79,
-    "configuration": 48,
-    "general": 38,
+    "configuration": 49,
+    "general": 39,
     "notification": 9,
-    "platform": 59,
+    "platform": 61,
     "workflow": 21
   },
   "migrations": [
@@ -7802,6 +7802,117 @@
         "do-block": 0,
         "to-regclass": 0,
         "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/208-wom-factory-line-reference-bootstrap.sql",
+      "name": "208-wom-factory-line-reference-bootstrap.sql",
+      "number": 208,
+      "slug": "wom-factory-line-reference-bootstrap",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 264,
+      "sha256": "eabddf9c4e3a2bdd6fbf4fd5f8d764157b9585b0efa16e73f94a2f37b3f215ad",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 3,
+        "update": 5
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 1,
+        "on-conflict": 2,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 166,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS tr_adp_sync_wom_formula_line_mapping",
+          "statement": "DROP TRIGGER IF EXISTS tr_adp_sync_wom_formula_line_mapping ON public.wom_produce_tasks;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/209-wom-process-execution-detail-runtime.sql",
+      "name": "209-wom-process-execution-detail-runtime.sql",
+      "number": 209,
+      "slug": "wom-process-execution-detail-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration"
+      ],
+      "lineCount": 46,
+      "sha256": "ed5acbdb668e6c9d2e3d670c33a848ddc195738a45e094a46a4f07a3ea07275b",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 3,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 3,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/210-wom-make-task-edit-full-runtime.sql",
+      "name": "210-wom-make-task-edit-full-runtime.sql",
+      "number": 210,
+      "slug": "wom-make-task-edit-full-runtime",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 46,
+      "sha256": "75f2c734df63f1ae0661181310b1419979d6fa9af0cc886ff648f18fc4323cb5",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 3,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 3,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
         "where-not-exists": 0
       },
       "highRiskStatements": [],

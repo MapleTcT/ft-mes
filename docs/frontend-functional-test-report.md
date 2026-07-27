@@ -1142,6 +1142,23 @@ WMS 为 `1` 个单据、`2` 条事务、`1` 条批次库存；追溯快照为 `3
 `failedResponses/requestFailures/consoleErrors/pageErrors/visibleProblemNotices` 均为空。机器证据：
 `metadata/mes-full-production-flow-current.json`。
 
+### 果糖喷射到糖化工序边界与页面修复（2026-07-27）
+
+本节在唯一目标环境 `http://10.11.100.17:18080` 使用 marker
+`BPI_MIN_20260727_110711` 和批次 `BPI-LINES0701-20260727-E22B71C8`，复验用户指出的
+生产线参照空白、制造指令下方业务区空白、工序执行双击无详情，并增加喷射到糖化的连续信号场景。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WOM 生产线参照 | 制造指令编辑页、`factoryLineRef2` 弹窗 | 点击生产线名称参照并查询 | WOM 工厂模型参照查询 | 显示 15 条生产线，不再出现 SQLGrammarException；浏览器错误为 0 | `004/生产线` 节点类型和已有配方-产线映射可查询 | `hm_factory_models`、`hm_fac_node_types`、`rm_line_formulas` | PASS | 无 |
+| WOM 制造指令业务区 | 制造指令编辑页 | 打开 marker 指令并切换四个业务页签 | WOM 指令详情与子表查询 | `常规信息/工序活动/用料汇总/检验清单` 均显示；喷射和糖化可见；浏览器错误为 0 | 既有完成态数据按只读状态回显 | WOM task/process/active/material/inspection 表 | PASS | 完成态不允许手工新增子表，属业务约束 |
+| WOM 工序执行详情 | `/msService/WOM/produceTask/processExelog/processExeLogList` | 双击喷射执行记录 | WOM 列表；ProcessAnalysis 详情 API | 双击进入真实详情；显示喷射、糖化、12 秒交接和非空曲线；浏览器错误为 0 | 工序执行、报工头及 BPI 上下文关联完整 | `wom_process_exelogs`、`wom_proc_reports`、`wom_bpi_production_context_bindings` | PASS | 无 |
+| BPI 连续工艺信号 | 工序执行详情 | 查询喷射工序窗口内流量和波美值 | `GET /bpi-api/process-evidence` | 4 条关键序列均有曲线与统计值 | 24 个事件、288 个点、12 个属性；reject/quarantine 均 0 | `bpi_telemetry_events`、`bpi_telemetry_points` | PASS | 受控模拟信号，不替代物理现场 |
+| ProcessAnalysis 批次追溯 | 工序执行详情到生产过程追溯页 | 点击“查看批次追溯” | `GET /processAnalysis/exelogSecond/processBatchViewOut` | 当前页进入追溯，加载 13 个时间轴事件、2 道工序、物料谱系和质量闭环；浏览器错误为 0 | 追溯服务从 WOM/QCS/物料事实表读取同一批次 | WOM/QCS/物料事实表 | PASS | 无 |
+
+完整步骤、API 负测、SQL 和关键序列统计见
+`docs/testing/fructose-process-boundary-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

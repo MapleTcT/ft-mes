@@ -1,0 +1,165 @@
+{
+  "generatedAt": "2026-07-27T21:58:30+08:00",
+  "repoCommit": "4d41c2154e223c0aa629045cebea7ec4b0f924d4+working-tree-fructose-process-boundary",
+  "target": "http://10.11.100.17:18080",
+  "database": "PostgreSQL",
+  "marker": "BPI_MIN_20260727_110711",
+  "batchNo": "BPI-LINES0701-20260727-E22B71C8",
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "summary": {
+    "testedFeatures": 5,
+    "pass": 5,
+    "fail": 0,
+    "blocked": 0,
+    "browserConsoleErrors": 0,
+    "browserPageErrors": 0,
+    "browserRequestFailures": 0
+  },
+  "mes": {
+    "taskId": 9007190231280101,
+    "taskState": "WOM_runState/finished",
+    "productionLineCandidates": 15,
+    "processes": [
+      {
+        "executionId": 9007190231281109,
+        "name": "喷射",
+        "order": 1,
+        "state": "WOM_runState/finished",
+        "startedAt": "2026-07-27T16:00:20+08:00",
+        "endedAt": "2026-07-27T16:00:44+08:00"
+      },
+      {
+        "executionId": 9007190231282109,
+        "name": "糖化",
+        "order": 2,
+        "state": "WOM_runState/finished",
+        "startedAt": "2026-07-27T16:00:56+08:00",
+        "endedAt": "2026-07-27T16:01:32+08:00"
+      }
+    ],
+    "handoverSeconds": 12,
+    "traceTimelineEvents": 13
+  },
+  "bpi": {
+    "windowFrom": "2026-07-27T16:00:00+08:00",
+    "windowTo": "2026-07-27T16:01:32+08:00",
+    "events": 24,
+    "acceptedEvents": 24,
+    "acceptedPoints": 288,
+    "storedPoints": 288,
+    "properties": 12,
+    "pointRejects": 0,
+    "quarantine": 0,
+    "series": [
+      {
+        "propertyId": "jet.feed.baume",
+        "samples": 24,
+        "minimum": 19.8,
+        "average": 20.119,
+        "maximum": 20.25
+      },
+      {
+        "propertyId": "jet.flow.instant",
+        "samples": 24,
+        "minimum": 0,
+        "average": 6.263,
+        "maximum": 19
+      },
+      {
+        "propertyId": "saccharification.inlet.flow.instant",
+        "samples": 24,
+        "minimum": 0,
+        "average": 5.575,
+        "maximum": 16.8
+      },
+      {
+        "propertyId": "saccharification.liquor.baume",
+        "samples": 24,
+        "minimum": 20.2,
+        "average": 20.375,
+        "maximum": 20.7
+      }
+    ]
+  },
+  "items": [
+    {
+      "module": "WOM 制造指令",
+      "route": "制造指令编辑页",
+      "operation": "打开生产线参照并切换四个业务页签",
+      "api": "WOM production-line reference and task detail queries",
+      "method": "GET/POST",
+      "requiresPersistence": false,
+      "tables": [
+        "public.hm_factory_models",
+        "public.hm_fac_node_types",
+        "public.rm_line_formulas"
+      ],
+      "status": "PASS",
+      "evidence": "15 production-line candidates and all four business tabs rendered without browser errors."
+    },
+    {
+      "module": "WOM 工序执行",
+      "route": "/msService/WOM/produceTask/processExelog/processExeLogList",
+      "operation": "双击喷射记录进入详情",
+      "api": "GET /processAnalysis/api/process-executions/9007190231281109",
+      "method": "GET",
+      "requiresPersistence": false,
+      "tables": [
+        "public.wom_process_exelogs",
+        "public.wom_proc_reports"
+      ],
+      "status": "PASS",
+      "evidence": "The detail page showed jetting, saccharification and a 12-second contiguous handover."
+    },
+    {
+      "module": "BPI 工序历史证据",
+      "route": "工序执行详情",
+      "operation": "加载流量和波美值历史序列",
+      "api": "GET /bpi/v1/process-evidence",
+      "method": "GET",
+      "requiresPersistence": false,
+      "tables": [
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points"
+      ],
+      "status": "PASS",
+      "evidence": "Four key series rendered from PostgreSQL; unauthorized scope returned 403 and a window over 24 hours returned 422."
+    },
+    {
+      "module": "BPI 连续信号模拟",
+      "route": "simulation/bpi/fructose-line-scenario.js",
+      "operation": "以 4 秒间隔回放 24 帧、每帧 12 点",
+      "api": "Internal telemetry ingestion",
+      "method": "POST",
+      "requiresPersistence": true,
+      "tables": [
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_telemetry_point_rejects",
+        "bpi.bpi_telemetry_quarantine"
+      ],
+      "status": "PASS",
+      "evidence": "24 accepted events and 288 points persisted; rejects and quarantine were both zero."
+    },
+    {
+      "module": "ProcessAnalysis 批次追溯",
+      "route": "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut",
+      "operation": "从工序详情点击查看批次追溯",
+      "api": "GET /processAnalysis/exelogSecond/processBatchViewOut",
+      "method": "GET",
+      "requiresPersistence": false,
+      "tables": [
+        "public.wom_produce_tasks",
+        "public.wom_process_exelogs",
+        "public.qcs_inspects",
+        "public.qcs_inspect_reports"
+      ],
+      "status": "PASS",
+      "evidence": "The trace page loaded 13 timeline events, two processes, material genealogy and quality facts without browser errors."
+    }
+  ]
+}

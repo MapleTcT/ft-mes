@@ -66,6 +66,45 @@ public class ProcessAnalysisRepository {
         ));
     }
 
+    public Map<String, Object> findProcessExecutionDetail(long sourceId) {
+        return first(jdbc.queryForList(
+            "SELECT e.id, e.task_id, e.task_process_id, e.table_no, e.name, e.produce_batch_num, "
+                + "e.process_run_state, e.analysis_flag, e.act_start_time, e.act_end_time, e.long_time, "
+                + "e.create_time, e.modify_time, p.table_no AS planned_process_no, "
+                + "COALESCE(p.name, e.name) AS planned_process_name, "
+                + "COALESCE(p.exe_order, e.exe_order) AS process_order, "
+                + "t.table_no AS task_no, t.product_id, t.line_id AS wom_line_id, t.task_run_state, "
+                + "m.code AS product_code, m.name AS product_name, "
+                + "line.code AS wom_line_code, line.name AS wom_line_name, "
+                + "binding.tenant_id AS bpi_tenant_id, binding.plant_id AS bpi_plant_id, "
+                + "binding.line_id AS bpi_line_id "
+                + "FROM wom_process_exelogs e "
+                + "LEFT JOIN wom_task_processes p ON p.id = e.task_process_id "
+                + "LEFT JOIN wom_produce_tasks t ON t.id = e.task_id "
+                + "LEFT JOIN baseset_materials m ON m.id = t.product_id "
+                + "LEFT JOIN hm_factory_models line ON line.id = t.line_id "
+                + "LEFT JOIN wom_bpi_production_context_bindings binding "
+                + "ON binding.wom_cid = t.cid AND binding.wom_line_id = t.line_id "
+                + "AND binding.enabled IS DISTINCT FROM FALSE "
+                + "WHERE e.id = ? AND e.valid IS DISTINCT FROM FALSE",
+            sourceId
+        ));
+    }
+
+    public List<Map<String, Object>> findTaskProcessExecutions(long taskId) {
+        return jdbc.queryForList(
+            "SELECT e.id, e.task_id, e.task_process_id, e.table_no, e.name, e.produce_batch_num, "
+                + "e.process_run_state, e.act_start_time, e.act_end_time, e.long_time, "
+                + "COALESCE(p.name, e.name) AS planned_process_name, "
+                + "COALESCE(p.exe_order, e.exe_order) AS process_order "
+                + "FROM wom_process_exelogs e "
+                + "LEFT JOIN wom_task_processes p ON p.id = e.task_process_id "
+                + "WHERE e.task_id = ? AND e.valid IS DISTINCT FROM FALSE "
+                + "ORDER BY COALESCE(p.exe_order, e.exe_order), e.act_start_time, e.id",
+            taskId
+        );
+    }
+
     public Map<String, Object> findActivityExecution(long sourceId) {
         return first(jdbc.queryForList(
             "SELECT id, task_id, task_process_id, task_active_id, table_no, name, produce_batch_num, "
