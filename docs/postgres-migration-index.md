@@ -156,7 +156,7 @@
 | 097 | 097-jbpm-hasvars-boolean-compat.sql | compatibility | 47 | alter-table:2 | 1 | - |
 | 098 | 098-wom-active-execsort-convert-compat.sql | configuration, compatibility | 19 | create-function:1, alter-table:1 | 3 | - |
 | 099 | 099-wom-producetask-supervision-view-compat.sql | configuration, compatibility | 40 | create-view:1 | 4 | - |
-| 100 | 100-wom-batch-active-runtime-buttons.sql | platform | 267 | create-function:1, update:2 | 1 | - |
+| 100 | 100-wom-batch-active-runtime-buttons.sql | platform | 287 | create-function:1, update:2 | 1 | - |
 | 101 | 101-wom-output-finish-num-sync.sql | general | 76 | create-function:3, update:3 | 5 | watch:2 |
 | 102 | 102-wom-easy-active-runtime-report-button.sql | platform | 187 | create-function:1, update:2 | 1 | - |
 | 103 | 103-wom-batch-process-runtime-buttons.sql | platform | 318 | update:2 | 0 | - |
@@ -262,7 +262,7 @@
 | 203 | 203-qcs-inspect-supervision-main-compat.sql | configuration, business, compatibility | 48 | create-view:1, create-index:2, alter-table:1, update:1 | 7 | - |
 | 204 | 204-production-list-export-runtime-datagrid.sql | platform | 450 | create-function:2, insert:2, update:3 | 4 | - |
 | 205 | 205-production-export-propertycode-compat.sql | configuration, compatibility | 551 | create-function:6, update:7 | 10 | - |
-| 206 | 206-wom-easy-task-activity-grid-runtime.sql | platform | 324 | create-function:1, insert:2, update:4 | 3 | - |
+| 206 | 206-wom-easy-task-activity-grid-runtime.sql | platform | 329 | create-function:1, insert:2, update:4 | 3 | - |
 | 207 | 207-wom-batch-active-response-envelope.sql | general | 208 | create-function:1, update:2 | 1 | - |
 
 ## 规则

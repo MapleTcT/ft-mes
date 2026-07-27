@@ -733,102 +733,143 @@ async function refreshMarkerGrid(page) {
     gridId,
     { timeout: gridTimeoutMs }
   );
-  const responsePromise = waitForResponseSafe(
-    page,
-    (response) =>
-      /\/WOM\/produceTask\/produceTask\/makeTaskList-(pending|query)/.test(response.url()) &&
-      response.request().method() === "POST",
-    gridTimeoutMs
-  );
   const refreshResult = await page.evaluate(
-    ({ gridCode }) => {
-      const gridFactory = window.ReactAPI && window.ReactAPI.getComponentAPI("SupDataGrid");
-      const grid = gridFactory && typeof gridFactory.APIs === "function" && gridFactory.APIs(gridCode);
-      if (!grid || typeof grid.refreshDataByRequst !== "function") {
-        return { ok: false, error: "grid refreshDataByRequst missing" };
-      }
-      grid.refreshDataByRequst({
-        type: "POST",
-        url: "/msService/WOM/produceTask/produceTask/makeTaskList-pending",
-        param: {
-          classifyCodes: "",
-          customCondition: {},
-          permissionCode: "WOM_1.0.0_produceTask_makeTaskList",
-          pageNo: 1,
-          paging: true,
-          pageSize: 65535,
-          crossCompanyFlag: "true",
-        },
-      });
-      return { ok: true };
-    },
-    { gridCode: gridId }
-  );
-  if (!refreshResult.ok) {
-    throw new Error(`Failed to refresh WOM marker grid: ${JSON.stringify(refreshResult)}`);
-  }
-  const { response, error } = await responsePromise;
-  if (error) {
-    throw new Error(`WOM marker grid refresh response was not observed: ${error.message}`);
-  }
-  const payload = await response.json();
-  const rows =
-    payload &&
-    payload.data &&
-    Array.isArray(payload.data.result)
-      ? payload.data.result
-      : [];
-  const matchingRows = rows.filter((row) => String(row.id || "") === ids.task.toString());
-  const preferredRow =
-    matchingRows.find((row) =>
-      String((row.pending && row.pending.processId) || "").includes(`ADP_E2E_PROCESS_${marker}`)
-    ) ||
-    matchingRows[0] ||
-    null;
-  const targetRows = preferredRow ? [preferredRow] : [];
-  if (targetRows.length !== 1) {
-    throw new Error(
-      `WOM marker response did not contain exactly one target row: ${JSON.stringify({
-        responseRowCount: rows.length,
-        exactTaskRowCount: matchingRows.length,
-        targetRowCount: targetRows.length,
-        marker,
-        taskId: ids.task.toString(),
-      })}`
-    );
-  }
-  const loadResult = await page.evaluate(
-    ({ gridCode, selectedRows, expectedMarker }) => {
+    async ({ gridCode, expectedTaskId, expectedMarker }) => {
       const gridFactory = window.ReactAPI && window.ReactAPI.getComponentAPI("SupDataGrid");
       const grid = gridFactory && typeof gridFactory.APIs === "function" && gridFactory.APIs(gridCode);
       if (!grid || typeof grid.setDatagridData !== "function") {
         return { ok: false, error: "grid setDatagridData missing" };
       }
-      grid.setDatagridData(selectedRows);
-      const loadedRows =
-        (typeof grid.getRows === "function" && grid.getRows()) ||
-        (typeof grid.getDatagridData === "function" && grid.getDatagridData()) ||
-        [];
+      const endpoint = "/msService/WOM/produceTask/produceTask/makeTaskList-pending";
+      const pageSize = 20;
+      const maxPages = 500;
+      let pageNo = 1;
+      let scannedRows = 0;
+      let lastPage = null;
+      while (pageNo <= maxPages) {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json;charset=UTF-8",
+          },
+          body: JSON.stringify({
+            classifyCodes: "",
+            customCondition: {},
+            permissionCode: "WOM_1.0.0_produceTask_makeTaskList",
+            pageNo,
+            paging: true,
+            pageSize,
+            crossCompanyFlag: "true",
+          }),
+        });
+        const text = await response.text();
+        let payload = null;
+        try {
+          payload = JSON.parse(text);
+        } catch (_error) {
+          return {
+            ok: false,
+            error: "WOM marker page returned non-JSON",
+            status: response.status,
+            pageNo,
+            body: text.slice(0, 1000),
+          };
+        }
+        if (!response.ok || !payload || !payload.data) {
+          return {
+            ok: false,
+            error: "WOM marker page request failed",
+            status: response.status,
+            pageNo,
+            body: text.slice(0, 1000),
+          };
+        }
+        const rows = Array.isArray(payload.data.result) ? payload.data.result : [];
+        scannedRows += rows.length;
+        const matchingRows = rows.filter((row) => String(row.id || "") === expectedTaskId);
+        const preferredRow =
+          matchingRows.find((row) =>
+            String((row.pending && row.pending.processId) || "").includes(`ADP_E2E_PROCESS_${expectedMarker}`)
+          ) ||
+          matchingRows[0] ||
+          null;
+        if (preferredRow) {
+          grid.setDatagridData([preferredRow]);
+          const loadedRows =
+            (typeof grid.getRows === "function" && grid.getRows()) ||
+            (typeof grid.getDatagridData === "function" && grid.getDatagridData()) ||
+            [];
+          return {
+            ok:
+              loadedRows.length === 1 &&
+              String(loadedRows[0].tableNo || "").includes(expectedMarker),
+            status: response.status,
+            url: response.url,
+            pagesScanned: pageNo,
+            scannedRows,
+            responseRowCount: rows.length,
+            exactTaskRowCount: matchingRows.length,
+            targetRowCount: 1,
+            loadedRowCount: loadedRows.length,
+            loadedTableNos: loadedRows.map((row) => row.tableNo),
+          };
+        }
+        lastPage = {
+          pageNo,
+          rowCount: rows.length,
+          hasNext: payload.data.hasNext,
+          nextPage: payload.data.nextPage,
+        };
+        if (!payload.data.hasNext || rows.length === 0) {
+          break;
+        }
+        const nextPage = Number(payload.data.nextPage || pageNo + 1);
+        if (!Number.isFinite(nextPage) || nextPage <= pageNo) {
+          return {
+            ok: false,
+            error: "WOM marker pagination did not advance",
+            pageNo,
+            nextPage: payload.data.nextPage,
+            scannedRows,
+          };
+        }
+        pageNo = nextPage;
+      }
       return {
-        ok:
-          loadedRows.length === 1 &&
-          String(loadedRows[0].tableNo || "").includes(expectedMarker),
-        loadedRowCount: loadedRows.length,
-        loadedTableNos: loadedRows.map((row) => row.tableNo),
+        ok: false,
+        error: "WOM marker task was not found in paginated list response",
+        scannedRows,
+        pagesScanned: pageNo,
+        lastPage,
+        taskId: expectedTaskId,
+        marker: expectedMarker,
       };
     },
-    { gridCode: gridId, selectedRows: targetRows, expectedMarker: marker }
+    {
+      gridCode: gridId,
+      expectedTaskId: ids.task.toString(),
+      expectedMarker: marker,
+    }
   );
-  if (!loadResult.ok) {
-    throw new Error(`Failed to load WOM marker row into SupDataGrid: ${JSON.stringify(loadResult)}`);
+  if (!refreshResult.ok) {
+    throw new Error(
+      `Failed to load the WOM marker task from the paginated grid API: ${JSON.stringify(refreshResult)}`
+    );
   }
   return {
-    status: response.status(),
-    url: response.url(),
-    responseRowCount: rows.length,
-    exactTaskRowCount: matchingRows.length,
-    targetRowCount: targetRows.length,
-    loadResult,
+    status: refreshResult.status,
+    url: refreshResult.url,
+    pagesScanned: refreshResult.pagesScanned,
+    scannedRows: refreshResult.scannedRows,
+    responseRowCount: refreshResult.responseRowCount,
+    exactTaskRowCount: refreshResult.exactTaskRowCount,
+    targetRowCount: refreshResult.targetRowCount,
+    loadResult: {
+      loadedRowCount: refreshResult.loadedRowCount,
+      loadedTableNos: refreshResult.loadedTableNos,
+    },
   };
 }
 

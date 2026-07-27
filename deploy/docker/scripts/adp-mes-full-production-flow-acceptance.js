@@ -322,13 +322,11 @@ SELECT json_build_object(
          OR code IN (${sqlLiteral(`${marker}_LINE`)}, ${sqlLiteral(`${marker}_WU`)}))
   ),
   'qcsInspects', (SELECT count(*) FROM public.qcs_inspects WHERE batch_code=${sqlLiteral(batchNo)}),
-  'wmsDocuments', (
-    SELECT count(DISTINCT d.id)
-    FROM public.wms_stock_documents d
-    JOIN public.wms_stock_document_lines l ON l.document_id=d.id
-    WHERE l.production_batch_no=${sqlLiteral(batchNo)}
-  ),
-  'traceSnapshots', (SELECT count(*) FROM public.pa_trace_snapshots WHERE batch_no=${sqlLiteral(batchNo)})
+  'wmsDocuments', (SELECT count(*) FROM public.wms_stock_documents WHERE tenant_id=${sqlLiteral(tenantId)}),
+  'wmsTransactions', (SELECT count(*) FROM public.wms_inventory_transactions WHERE tenant_id=${sqlLiteral(tenantId)}),
+  'wmsStocks', (SELECT count(*) FROM public.wms_batch_stocks WHERE tenant_id=${sqlLiteral(tenantId)}),
+  'wmsQualityResults', (SELECT count(*) FROM public.wms_quality_results WHERE tenant_id=${sqlLiteral(tenantId)}),
+  'traceSnapshots', (SELECT count(*) FROM public.pa_trace_snapshots WHERE tenant_id=${sqlLiteral(tenantId)})
 );`;
 }
 
@@ -393,6 +391,7 @@ SELECT json_build_object(
     WHERE task_id=${taskId}
       AND coalesce(valid,true)
       AND is_finish=true
+      AND run_state='WOM_runState/finished'
       AND act_end_time IS NOT NULL
   ),
   'activityExecutionCount', (
@@ -434,6 +433,17 @@ SELECT json_build_object(
     FROM public.wom_output_details d
     JOIN public.wom_proc_reports r ON r.id=d.head_id
     WHERE r.task_id=${taskId} AND d.material_batch_num=${sqlLiteral(batchNo)} AND coalesce(d.valid,true)
+  ),
+  'materialOutputRecordCount', (
+    SELECT count(*)
+    FROM public.wom_mat_outpt_records o
+    JOIN public.wom_output_details d ON d.id=o.out_mat_detail_id
+    JOIN public.wom_proc_reports r ON r.id=d.head_id
+    WHERE r.task_id=${taskId}
+      AND d.material_batch_num=${sqlLiteral(batchNo)}
+      AND coalesce(o.valid,true)
+      AND coalesce(d.valid,true)
+      AND o.output_num IS NOT NULL
   ),
   'inspectionCount', (
     SELECT count(*) FROM public.qcs_inspects
@@ -498,6 +508,9 @@ function assertPreflight(preflight, bpiBefore) {
       "masterIdentityRows",
       "qcsInspects",
       "wmsDocuments",
+      "wmsTransactions",
+      "wmsStocks",
+      "wmsQualityResults",
       "traceSnapshots",
     ]
       .filter((key) => Number(preflight[key] || 0) !== 0);
@@ -536,7 +549,13 @@ function assertFinal(finalState, bpiBefore, bpiAfter) {
   if (!["合格", "Qualified", "BaseSet_checkResult/qualified"].includes(String(task.checkResult || ""))) {
     failures.push(`WOM task quality result is not qualified: ${JSON.stringify(task)}`);
   }
-  const minimums = {
+  if (!["已检", "Inspected", "WOM_checkState/inspected"].includes(String(task.checkState || ""))) {
+    failures.push(`WOM task check state is not inspected: ${JSON.stringify(task)}`);
+  }
+  if (Number(task.finishNum) !== 5) {
+    failures.push(`WOM task finish quantity expected 5, got ${task.finishNum}`);
+  }
+  const expectedCounts = {
     processCount: 1,
     finishedProcessCount: 1,
     processExecutionCount: 1,
@@ -548,6 +567,7 @@ function assertFinal(finalState, bpiBefore, bpiAfter) {
     inputDetailCount: 1,
     materialConsumptionCount: 1,
     outputDetailCount: 2,
+    materialOutputRecordCount: 2,
     inspectionCount: 1,
     effectiveQualifiedReportCount: 1,
     qualifiedBatchCount: 1,
@@ -557,9 +577,9 @@ function assertFinal(finalState, bpiBefore, bpiAfter) {
     traceSnapshotCount: 3,
     traceBatchSnapshotCount: 3,
   };
-  for (const [field, minimum] of Object.entries(minimums)) {
-    if (Number(finalState[field] || 0) < minimum) {
-      failures.push(`${field} expected >= ${minimum}, got ${finalState[field]}`);
+  for (const [field, expected] of Object.entries(expectedCounts)) {
+    if (Number(finalState[field] || 0) !== expected) {
+      failures.push(`${field} expected ${expected}, got ${finalState[field]}`);
     }
   }
   if (Number(finalState.activePendingCount || 0) !== 0) {

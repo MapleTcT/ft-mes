@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-27T10:56:29+00:00` |
-| Repo Commit | `cd1b2827ac8ed2b2c5e825fc247d3fd2c71a3be9` |
+| Generated At | `2026-07-27T11:46:34+00:00` |
+| Repo Commit | `ca2d0baf1c7d28b7a21ebd77397ed013aa063630` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -30,12 +30,12 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-002` | `PARTIAL` | 当前内容迁移 | 业务动作级源码、页面、表关系仍需继续排查，不能视为完整 MES 产品形态已迁移。 | 后续业务包进入时先跑 module-intake-check，再补 smoke 和落库验收。 |
 | `G-003` | `PARTIAL` | Oracle 替换为 PostgreSQL 默认路径 | Oracle backlog still contains tracked references and recovered modules with direct Oracle dependencies. | 逐模块把 Oracle SQL、ojdbc 和方言差异迁移到 PostgreSQL 或保留在显式 legacy 路径。 |
 | `G-012` | `PARTIAL` | 基础配置 | QCS reportShowIndexRange、RM.MQ brokerUrl、BaseSet.isEnable、customProperty 模型映射、实体/模型元数据 CRUD、PostgreSQL 基础物理模型表生命周期、字段约束生命周期、23 类标量类型矩阵、OBJECT 关联字段和显式受控删列均已完成 marker、回读、落库和回滚/清理；对应 QCS/RM/BaseSet 代表性业务回归已复跑 PASS。自动删列继续按设计禁用；身份、授权、密钥、密码类配置仍禁止通用 smoke 改值；其他 BaseSet/RM/QCS 配置项、Nacos/Keycloak 生产 export/diff、realm 迁移、secret 轮换和回退演练仍需继续验收。 | 继续把 QCS/RM/BaseSet 当前地址报告链路证据纳入后续生产或 rehearsal 业务 smoke 签字，但不要把测试环境证据直接冒充生产签字。 |
-| `G-013` | `PARTIAL` | 生产模块完整功能 | 生产测试矩阵、模块 blocker 和 active backlog 均已清零，制造到追溯八步主链及投料消耗台账已闭合；G-013 保持 PARTIAL，因为真实现场 Batch/DCS 投递确认、连续运行、回滚演练和生产业务签字仍是切换前置。 | 保持 ADP_E2E_20260727_MES_FULL_CLOSED_10、生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑、独立不良数量和旧 public endpoint 退役契约回归；把真实 Batch/DCS 投递确认、连续运行、回滚演练和签字作为生产切换前置单独验收。 |
+| `G-013` | `PARTIAL` | 生产模块完整功能 | 生产测试矩阵、模块 blocker 和 active backlog 均已清零，制造到追溯八步主链及投料消耗台账已闭合；G-013 保持 PARTIAL，因为真实现场 Batch/DCS 投递确认、连续运行、回滚演练和生产业务签字仍是切换前置。 | 保持 ADP_E2E_20260727_MES_FULL_CLOSED_10 干净基线与 ADP_E2E_20260727_MES_FULL_CLOSED_11 精确计数回归，并继续覆盖生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑、独立不良数量和旧 public endpoint 退役契约；把真实 Batch/DCS 投递确认、连续运行、回滚演练和签字作为生产切换前置单独验收。 |
 | `G-014` | `PARTIAL` | Nacos 配置链路 | 测试环境漂移 smoke 已完成，但生产 Nacos export/diff、漂移人工审阅、签名 patch 包和回退演练未完成。 | 导出生产 Nacos 配置，和 rendered 配置做差异账本。 |
 | `G-015` | `PARTIAL` | Keycloak/JWT 链路 | 测试环境 Keycloak/JWT runtime smoke 已完成，但生产 realm export/import、用户迁移、client secret 轮换、生产 JWT 同步后的登录 smoke 和数据库备份恢复演练未完成。 | 用 production-keycloak-source-export / production-keycloak-target-export 生成 source/target realm inventory。 |
 | `G-016` | `PARTIAL` | PostgreSQL 运行与迁移治理 | 生产数据迁移脚本、增量方案和 rehearsal 报告尚未完成。 | 用 deploy/database/production-migration 预检生产副本，补全量/增量迁移脚本。 |
 | `G-017` | `PARTIAL` | runtime patch | 测试环境 WOM 核心补丁回退和 material/WMS 部署回退手册已完成；生产签名 patch 包、生产 Nacos diff 和全栈生产回切演练仍未补。 | 用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。 |
-| `G-018` | `PARTIAL` | 业务模块完整测试用例 | 生产矩阵 44 条、制造到追溯八步主链和投料消耗台账已通过；现场 Batch/DCS 切换确认、连续运行及业务负责人签字仍未完成。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH。 | 保持 ADP_E2E_20260727_MES_FULL_CLOSED_10、生产列表导出、WOM 二维码、RM Web 配方、独立不良数量、PATROL 配置/执行/异常隐患、统计和 Kafka 回归；接入真实 TagManagement 历史和巡检依赖；完成现场 Batch/DCS 切换、连续运行、before/after SQL 和业务签字。 |
+| `G-018` | `PARTIAL` | 业务模块完整测试用例 | 生产矩阵 44 条、制造到追溯八步主链和投料消耗台账已通过；现场 Batch/DCS 切换确认、连续运行及业务负责人签字仍未完成。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH。 | 保持 ADP_E2E_20260727_MES_FULL_CLOSED_10 干净基线与 ADP_E2E_20260727_MES_FULL_CLOSED_11 精确计数回归，并覆盖生产列表导出、WOM 二维码、RM Web 配方、独立不良数量、PATROL 配置/执行/异常隐患、统计和 Kafka；接入真实 TagManagement 历史和巡检依赖；完成现场 Batch/DCS 切换、连续运行、before/after SQL 和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
 | `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | Phase 1/2 与 Phase 3A-3C-G 的受控软件链、真实页面、PostgreSQL、Parquet v2 和 Iceberg exact snapshot 均已闭合，但仍缺物理 DEVICE/GATEWAY 与断电重连、正式计量校准、多点/多产线容量、至少 200 个真实复核批次、7 个生产日、正负 START 标签、连续 7-14 天、外部 ERP/WMS、整站灾备及 MLflow 生产 RBAC/SSO/TLS/HA。当前数据不得进入训练或生产激活。 | 先实现 Phase 3D-A 训练任务控制面、幂等、审计和资格失败关闭：当前不足数据必须返回受阻且不创建训练、不写 MLflow 模型。把 Phase 3C-G marker 与 exact-version 报告固定为回归基线，同时在正式点位和批准校准下积累 200 个真实复核批次、7 个生产日、至少 100 accepted/10 rejected START，并完成物理来源、多产线容量和 7-14 天稳定性验收。 |

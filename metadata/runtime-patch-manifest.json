@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-27T10:49:55+00:00",
-  "repoCommit": "cd1b2827ac8ed2b2c5e825fc247d3fd2c71a3be9",
+  "generatedAt": "2026-07-27T11:46:34+00:00",
+  "repoCommit": "ca2d0baf1c7d28b7a21ebd77397ed013aa063630",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
     "totalFiles": 389,
-    "totalBytes": 55266728,
+    "totalBytes": 55267598,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
@@ -19,7 +19,7 @@
     "bytesByCategory": {
       "nacos-config-template": 42353,
       "nginx-runtime-config": 27463,
-      "postgres-init-sql": 54319480,
+      "postgres-init-sql": 54320350,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 95909,
       "runtime-script": 284123,
@@ -909,8 +909,8 @@
     {
       "path": "deploy/docker/postgres/init/100-wom-batch-active-runtime-buttons.sql",
       "category": "postgres-init-sql",
-      "sizeBytes": 11320,
-      "sha256": "024fce46089e47941ab0097eafe09256cc89365b52d5b18087d22c68f07ca26f"
+      "sizeBytes": 12011,
+      "sha256": "8b7acf5ba233111b6ae7fe79ba1db31655dc1fde388af86e07751b97f214d588"
     },
     {
       "path": "deploy/docker/postgres/init/101-wom-output-finish-num-sync.sql",
@@ -1545,8 +1545,8 @@
     {
       "path": "deploy/docker/postgres/init/206-wom-easy-task-activity-grid-runtime.sql",
       "category": "postgres-init-sql",
-      "sizeBytes": 10683,
-      "sha256": "938642e98e76a3f9d32bff7220e2199c1d262234f7f18a56931620ae6be85dee"
+      "sizeBytes": 10862,
+      "sha256": "5e4fb530a14df4cf69814894301ccecc7da0fe4d2ec350e9070a588349fab14f"
     },
     {
       "path": "deploy/docker/postgres/init/207-wom-batch-active-response-envelope.sql",

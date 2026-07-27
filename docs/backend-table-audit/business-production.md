@@ -12,7 +12,7 @@
 | WOM 制造任务开始/保持/重启落库 | `updateTaskState(start/hold/restart)` 真实前端触发，PostgreSQL 回查 `wom_produce_tasks`、`wom_wait_put_records`、`wom_proc_reports`、`wom_produce_task_exelog` | PASS |
 | WOM 制造任务结束最小路径落库 | `findProcReportIdByTaskId`、`outPutCommonTaskEdit`、`addOutputByOutPutDetails` 真实前端路径触发，PostgreSQL 回查任务/待办完成；`outputDetailCount=0` | PASS |
 | WOM 完工报工产出明细落库 | `outPutCommonTaskEdit` 真实前端弹窗提交产出明细，PostgreSQL 回查任务/待办/执行日志完成、`wom_output_details.output_num=5`，并生成 `wom_mat_outpt_records` | PASS |
-| WOM 投入明细报工落库 | `makeTaskBatchView` 真实前端上下文执行 `startActive -> remainMaterialView/save -> endActive`；当前 `...CLOSED_10` 由 PostgreSQL 确认 `wom_putin_details`、finished `wom_acti_exelogs`、`wom_mat_consum_recods` 为 `1/1/1`，页面显示绿色成功提示且无可见 warning/error；历史根因与修复见 [WOM 投入明细与消耗记录专项分析](wom-consumption-record-analysis.md) | PASS |
+| WOM 投入明细报工落库 | `makeTaskBatchView` 真实前端上下文执行 `startActive -> remainMaterialView/save -> endActive`；最新 `...CLOSED_11` 由 PostgreSQL 精确确认 `wom_putin_details`、finished `wom_acti_exelogs`、`wom_mat_consum_recods` 为 `1/1/1`，页面显示绿色成功提示且无可见 warning/error；`...CLOSED_10` 保留完全不续跑基线；历史根因与修复见 [WOM 投入明细与消耗记录专项分析](wom-consumption-record-analysis.md) | PASS |
 | WOM 提前放料确认落库 | `setAdvanceTrue` 真实前端触发，PostgreSQL 回查 `wom_produce_tasks.advance_charge=true`、`is_advanced=true`、`feed_condition` marker 保留 | PASS |
 | WOM 下推备料需求落库 | `generatePrepareNeed` 真实前端触发，PostgreSQL 回查任务备料状态、备料需求单、引用行和明细计数 | PASS |
 | WOM 工序开始/结束落库 | `startProcess/endProcess` 真实前端触发，PostgreSQL 回查 `wom_task_processes`、`wom_proc_reports`、`wom_process_exelogs`、`wom_wait_put_records` 状态变化；process wait 行 `actual_end_time` 已由 SQL 106 同步并复验 | PASS |
@@ -60,7 +60,7 @@
 - WOM 结束最小路径落库报告：`/tmp/adp-wom-stop-persistence-current.json`
 - WOM 完工报工产出明细落库报告：`/tmp/adp-wom-stop-output-persistence-current.json`
 - WOM 投入明细报工落库报告：`/tmp/adp-wom-putin-active-persistence-current.json`
-- WOM 投入明细与消耗记录专项分析：[`wom-consumption-record-analysis.md`](wom-consumption-record-analysis.md)；机器记录：`metadata/wom-consumption-record-analysis.json`；历史 `activeExelogCount=0/matConsumCount=0` 已定位为源码分支问题，当前服务层补建执行记录并由既有生成器形成消耗记录，`...CLOSED_10` 回读为 `1/1`。
+- WOM 投入明细与消耗记录专项分析：[`wom-consumption-record-analysis.md`](wom-consumption-record-analysis.md)；机器记录：`metadata/wom-consumption-record-analysis.json`；历史 `activeExelogCount=0/matConsumCount=0` 已定位为源码分支问题，当前服务层按明细补建缺失执行记录并由既有生成器形成消耗记录，`...CLOSED_11` 回读为 `1/1`，同时确认产出明细/产出台账 `2/2`。
 - WOM 提前放料确认落库报告：`/tmp/adp-wom-advance-release-persistence-current.json`
 - WOM 下推备料需求落库报告：`/tmp/adp-wom-prepare-need-persistence-current.json`
 - WOM 工序开始/结束落库报告：`/tmp/adp-wom-process-end-persistence-current.json`

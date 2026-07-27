@@ -13,11 +13,12 @@ Oracle 方言兼容问题，而是恢复源码中活动执行记录被跳过后�
 
 2026-07-27 已通过受控 WOM 核心源码补丁关闭该缺口：
 
-- `build-wom-core-production-boot-jar.sh` 在投料明细成功保存、活动结束时，仅当执行记录缺失才调用
-  既有 `procReportService.getExeLogs(...)` 补建 `WOMActiExelog`。
+- `build-wom-core-production-boot-jar.sh` 在投料明细成功保存、活动结束时，逐明细检查现有执行记录，
+  仅补建缺失的 `WOMActiExelog`，并覆盖同一未完成活动下的全部有效报工单。
 - 随后的原有 `generateInOutRecordByAvtiveRecord(...)` 负责生成物料消耗，不使用数据库触发器伪造业务事实。
-- marker `ADP_E2E_20260727_MES_FULL_CLOSED_10` 已证明 `wom_putin_details=1`、
-  `wom_acti_exelogs=1`、`wom_mat_consum_recods=1`，三者属于同一任务、工序、活动和批次。
+- `ADP_E2E_20260727_MES_FULL_CLOSED_10` 保留完全不续跑基线；最新 marker
+  `ADP_E2E_20260727_MES_FULL_CLOSED_11` 已精确证明 `wom_putin_details=1`、
+  投料 `wom_acti_exelogs=1`、`wom_mat_consum_recods=1`，并确认全链产出明细/产出台账 `2/2`。
 - 当前状态：`CLOSED_BY_SERVICE_PATCH_AND_REAL_ACCEPTANCE`。
 
 ## 源码证据
@@ -72,7 +73,7 @@ WHERE put_mat_detail_id = 755716019803392
 
 当前 marker：
 
-`ADP_E2E_20260727_MES_FULL_CLOSED_10`
+`ADP_E2E_20260727_MES_FULL_CLOSED_11`
 
 关键结果：
 
@@ -81,6 +82,8 @@ WHERE put_mat_detail_id = 755716019803392
 | `wom_putin_details` | 1 |
 | finished `wom_acti_exelogs` | 1 |
 | `wom_mat_consum_recods` | 1 |
+| 全链 `wom_output_details` | 2 |
+| 全链 `wom_mat_outpt_records` | 2 |
 | 页面可见 warning/error | 0 |
 
 完整 SQL、请求、响应和最终制造/QCS/WMS/追溯状态见
@@ -91,5 +94,6 @@ WHERE put_mat_detail_id = 755716019803392
 
 1. 保持服务层生成，不改成 PostgreSQL 触发器。
 2. 保持输入明细、活动执行和消耗记录的同批次/同活动联查。
-3. 每次升级 WOM 包时必须提供输入 JAR、两份源码的 SHA-256，并复跑完整 marker 流程。
+3. 每次生产部署 WOM 包时必须设置 `ADP_WOM_REQUIRE_CHECKSUMS=true`，提供输入 JAR、两份源码的
+   SHA-256，并复跑完整 marker 流程；本地准备允许无 checksum，但构建日志必须输出实际哈希。
 4. 现场 Batch/DCS 接入后，用真实仓库、货位、单位和库存接口再做同等验收。

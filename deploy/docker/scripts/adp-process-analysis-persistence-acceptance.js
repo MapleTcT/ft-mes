@@ -36,6 +36,11 @@ const browserTableNo = process.env.ADP_PROCESS_ANALYSIS_BROWSER_TABLE_NO || sour
 const browserBatchNo = process.env.ADP_PROCESS_ANALYSIS_BROWSER_BATCH_NO || sourceBatchNo;
 const keepFixture = process.env.ADP_PROCESS_ANALYSIS_KEEP_FIXTURE === "true";
 const tenantId = `${marker}_TENANT`;
+const wmsSourceDocumentId = `${marker}_WMS_IN`;
+const wmsSourceLineId = `${marker}_WMS_LINE`;
+const wmsWarehouseCode = `${marker}_WARE`;
+const wmsLocationCode = `${marker}_LOC`;
+const wmsMaterialCode = `${marker}_MAT`;
 const gridId = "WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg";
 
 function ensureDir(filePath) {
@@ -128,14 +133,23 @@ async function apiPost(api, ticket, route, payload) {
 
 function stateSql() {
   return `SELECT json_build_object(
-    'snapshotCount', (SELECT count(*) FROM pa_trace_snapshots WHERE tenant_id=${sqlLiteral(tenantId)}),
+    'snapshotCount', (SELECT count(*) FROM pa_trace_snapshots WHERE tenant_id=${sqlLiteral(tenantId)} AND batch_no=${sqlLiteral(sourceBatchNo)} AND task_id=${sourceTaskId}),
     'taskRevision', COALESCE((SELECT revision FROM pa_trace_snapshots WHERE tenant_id=${sqlLiteral(tenantId)} AND source_type='TASK' AND source_id=${sourceTaskExecutionId}), 0),
     'processRevision', COALESCE((SELECT revision FROM pa_trace_snapshots WHERE tenant_id=${sqlLiteral(tenantId)} AND source_type='PROCESS' AND source_id=${sourceProcessExecutionId}), 0),
     'activityRevision', COALESCE((SELECT revision FROM pa_trace_snapshots WHERE tenant_id=${sqlLiteral(tenantId)} AND source_type='ACTIVITY' AND source_id=${sourceActivityExecutionId}), 0),
-    'batchRows', (SELECT count(*) FROM pa_trace_snapshots WHERE tenant_id=${sqlLiteral(tenantId)} AND batch_no=${sqlLiteral(sourceBatchNo)}),
-    'wmsDocuments', (SELECT count(*) FROM wms_stock_documents WHERE tenant_id=${sqlLiteral(tenantId)}),
-    'wmsTransactions', (SELECT count(*) FROM wms_inventory_transactions WHERE tenant_id=${sqlLiteral(tenantId)}),
-    'wmsStockRows', (SELECT count(*) FROM wms_batch_stocks WHERE tenant_id=${sqlLiteral(tenantId)}),
+    'batchRows', (SELECT count(*) FROM pa_trace_snapshots WHERE tenant_id=${sqlLiteral(tenantId)} AND batch_no=${sqlLiteral(sourceBatchNo)} AND task_id=${sourceTaskId}),
+    'wmsDocuments', (SELECT count(*) FROM wms_stock_documents WHERE tenant_id=${sqlLiteral(tenantId)} AND source_document_id=${sqlLiteral(wmsSourceDocumentId)}),
+    'wmsTransactions', (SELECT count(*) FROM wms_inventory_transactions WHERE tenant_id=${sqlLiteral(tenantId)} AND source_line_id=${sqlLiteral(wmsSourceLineId)}),
+    'wmsQualityResults', (SELECT count(*) FROM wms_quality_results WHERE tenant_id=${sqlLiteral(tenantId)} AND source_line_id=${sqlLiteral(wmsSourceLineId)}),
+    'wmsStockRows', (
+      SELECT count(*) FROM wms_batch_stocks
+      WHERE tenant_id=${sqlLiteral(tenantId)}
+        AND warehouse_code=${sqlLiteral(wmsWarehouseCode)}
+        AND location_code=${sqlLiteral(wmsLocationCode)}
+        AND material_code=${sqlLiteral(wmsMaterialCode)}
+        AND batch_no=${sqlLiteral(sourceBatchNo)}
+        AND production_batch_no=${sqlLiteral(sourceBatchNo)}
+    ),
     'sourceRows', (
       SELECT count(*) FROM wom_produce_tasks t
       JOIN wom_produce_task_exelog te ON te.task_id=t.id
@@ -150,10 +164,19 @@ function queryState(label) {
 
 function cleanupSql() {
   return `BEGIN;
-DELETE FROM pa_trace_snapshots WHERE tenant_id=${sqlLiteral(tenantId)};
-DELETE FROM wms_stock_documents WHERE tenant_id=${sqlLiteral(tenantId)};
-DELETE FROM wms_quality_results WHERE tenant_id=${sqlLiteral(tenantId)};
-DELETE FROM wms_batch_stocks WHERE tenant_id=${sqlLiteral(tenantId)};
+DELETE FROM pa_trace_snapshots
+WHERE tenant_id=${sqlLiteral(tenantId)} AND batch_no=${sqlLiteral(sourceBatchNo)} AND task_id=${sourceTaskId};
+DELETE FROM wms_quality_results
+WHERE tenant_id=${sqlLiteral(tenantId)} AND source_line_id=${sqlLiteral(wmsSourceLineId)};
+DELETE FROM wms_stock_documents
+WHERE tenant_id=${sqlLiteral(tenantId)} AND source_document_id=${sqlLiteral(wmsSourceDocumentId)};
+DELETE FROM wms_batch_stocks
+WHERE tenant_id=${sqlLiteral(tenantId)}
+  AND warehouse_code=${sqlLiteral(wmsWarehouseCode)}
+  AND location_code=${sqlLiteral(wmsLocationCode)}
+  AND material_code=${sqlLiteral(wmsMaterialCode)}
+  AND batch_no=${sqlLiteral(sourceBatchNo)}
+  AND production_batch_no=${sqlLiteral(sourceBatchNo)};
 COMMIT;`;
 }
 
@@ -361,25 +384,24 @@ async function main() {
     assertCondition(precheck.status === 200 && precheck.body && precheck.body.code === 200, "追溯预检接口失败");
     assertCondition(precheck.body.data.dealRes === true, "追溯预检未识别真实 WOM 批次");
 
-    const inboundLineId = `${marker}_WMS_LINE`;
     const inboundPayload = {
-      srcID: `${marker}_WMS_IN`,
+      srcID: wmsSourceDocumentId,
       srcTableNo: `${marker}_WMS_IN_NO`,
       directiveNo: sourceTableNo,
       companyCode: tenantId,
       deptCode: "ADP_E2E",
       staffCode: "ADP_E2E",
       userName: username,
-      wareCode: `${marker}_WARE`,
+      wareCode: wmsWarehouseCode,
       storageDate: new Date().toISOString().slice(0, 10),
       comeType: "produceIn",
       redBlue: "blue",
       detailList: [{
-        srcPartId: inboundLineId,
-        goodCode: `${marker}_MAT`,
+        srcPartId: wmsSourceLineId,
+        goodCode: wmsMaterialCode,
         batchText: sourceBatchNo,
         produceBatchNum: sourceBatchNo,
-        placeSetCode: `${marker}_LOC`,
+        placeSetCode: wmsLocationCode,
         quantity: 1,
       }],
     };
@@ -388,7 +410,7 @@ async function main() {
     evidence.requests.push(inbound);
     assertCondition(inbound.status === 200 && inbound.body && inbound.body.code === 200, "追溯前置完工入库失败");
     const qualityRelease = await apiPost(api, ticket,
-      `/msService/material/foreign/foreign/checkProdResult?srcId=${encodeURIComponent(inboundLineId)}&checkResult=${encodeURIComponent("BaseSet_checkResult/qualified")}`,
+      `/msService/material/foreign/foreign/checkProdResult?srcId=${encodeURIComponent(wmsSourceLineId)}&checkResult=${encodeURIComponent("BaseSet_checkResult/qualified")}`,
       {});
     evidence.requests.push(qualityRelease);
     assertCondition(qualityRelease.status === 200 && qualityRelease.body && qualityRelease.body.code === 200, "追溯前置质量释放失败");
@@ -420,7 +442,13 @@ async function main() {
     assertCondition(Number(after.taskRevision) === 2, "任务统计幂等修订未递增");
     assertCondition(Number(after.processRevision) === 1 && Number(after.activityRevision) === 1, "工序/活动快照修订异常");
     assertCondition(Number(after.sourceRows) > 0, "追溯源 WOM 工单/执行记录不存在");
-    assertCondition(Number(after.wmsDocuments) === 1 && Number(after.wmsTransactions) === 2, "追溯 WMS marker 未真实落库");
+    assertCondition(
+      Number(after.wmsDocuments) === 1
+        && Number(after.wmsTransactions) === 2
+        && Number(after.wmsQualityResults) === 1
+        && Number(after.wmsStockRows) === 1,
+      "追溯 WMS marker 未完整落库"
+    );
 
     evidence.browser = await browserAcceptance(ticket);
     assertCondition(evidence.browser.navigationStatus === 200, "WOM 制造指令页面未返回 200");
@@ -444,7 +472,13 @@ async function main() {
         runSql(cleanupSql());
         evidence.states.push(queryState("afterCleanup"));
         const cleaned = evidence.states[evidence.states.length - 1];
-        if (Number(cleaned.snapshotCount) !== 0 || Number(cleaned.wmsDocuments) !== 0 || Number(cleaned.wmsStockRows) !== 0) {
+        if (
+          Number(cleaned.snapshotCount) !== 0
+          || Number(cleaned.wmsDocuments) !== 0
+          || Number(cleaned.wmsTransactions) !== 0
+          || Number(cleaned.wmsQualityResults) !== 0
+          || Number(cleaned.wmsStockRows) !== 0
+        ) {
           throw new Error("快照或 WMS marker 清理后仍有残留行");
         }
         evidence.cleanup = { status: "PASS" };
