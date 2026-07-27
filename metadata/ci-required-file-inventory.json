@@ -3615,6 +3615,24 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/208-wom-factory-line-reference-bootstrap.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/209-wom-process-execution-detail-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/210-wom-make-task-edit-full-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -6267,6 +6285,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/fructose-process-boundary-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/material-wms-completion-inbound-reversal-contract-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -7450,6 +7474,12 @@
     {
       "ignored": false,
       "path": "metadata/frontend-sourcemap-summary.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/fructose-process-boundary-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -8991,6 +9021,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/ProcessEvidenceService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/ProcessSignalWindowBuilder.java",
       "state": "tracked",
       "tracked": true
@@ -9376,6 +9412,24 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/PointCatalogView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ProcessEvidenceSample.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ProcessEvidenceSeries.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ProcessEvidenceView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -9945,6 +9999,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ProcessEvidencePostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ProcessSignalWindowPostgresRepository.java",
       "state": "tracked",
       "tracked": true
@@ -10210,6 +10270,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCatalogSnapshotCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ProcessEvidenceController.java",
       "state": "tracked",
       "tracked": true
     },
@@ -10707,6 +10773,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/ProcessEvidenceServiceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/ProcessSignalWindowBuilderTest.java",
       "state": "tracked",
       "tracked": true
@@ -11074,6 +11146,18 @@
     {
       "ignored": false,
       "path": "simulation/bpi/bpi-simulation.test.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "simulation/bpi/fructose-line-scenario.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "simulation/bpi/fructose-line-scenario.test.js",
       "state": "tracked",
       "tracked": true
     },
@@ -11720,16 +11804,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 679
+      "tracked": 682
     },
     "docs": {
-      "tracked": 152
+      "tracked": 153
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 273
+      "tracked": 274
     },
     "package.json": {
       "tracked": 1
@@ -11741,10 +11825,10 @@
       "tracked": 58
     },
     "services": {
-      "tracked": 452
+      "tracked": 459
     },
     "simulation": {
-      "tracked": 6
+      "tracked": 8
     },
     "streaming": {
       "tracked": 99
@@ -11753,8 +11837,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1949,
-    "tracked": 1949,
+    "totalFiles": 1963,
+    "tracked": 1963,
     "untracked": 0
   },
   "untrackedByDirectory": []

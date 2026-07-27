@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -123,6 +125,52 @@ public class TraceabilityService {
         return snapshot(tenantId, SnapshotType.PROCESS, sourceId, repository.findProcessExecution(sourceId));
     }
 
+    @Transactional(readOnly = true)
+    public Map<String, Object> processExecutionDetail(String tenantId, long sourceId) {
+        if (sourceId <= 0) {
+            throw new ProcessAnalysisBusinessException(400, "工序执行记录 ID 必须大于 0");
+        }
+        Map<String, Object> current = repository.findProcessExecutionDetail(sourceId);
+        if (current == null) {
+            throw new ProcessAnalysisBusinessException(404, "工序执行记录不存在");
+        }
+
+        List<Map<String, Object>> executions = repository.findTaskProcessExecutions(number(current.get("task_id")));
+        int currentIndex = -1;
+        for (int index = 0; index < executions.size(); index++) {
+            if (number(executions.get(index).get("id")) == sourceId) {
+                currentIndex = index;
+                break;
+            }
+        }
+        Map<String, Object> previous = currentIndex > 0 ? executions.get(currentIndex - 1) : null;
+        Map<String, Object> next = currentIndex >= 0 && currentIndex + 1 < executions.size()
+            ? executions.get(currentIndex + 1) : null;
+
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        result.put("processExecution", current);
+        result.put("previousProcess", previous);
+        result.put("nextProcess", next);
+
+        Map<String, Object> handover = new LinkedHashMap<String, Object>();
+        handover.put("previousToCurrent", boundary(previous, current));
+        handover.put("currentToNext", boundary(current, next));
+        result.put("handover", handover);
+
+        Map<String, Object> bpiContext = new LinkedHashMap<String, Object>();
+        bpiContext.put("tenantId", string(current.get("bpi_tenant_id")));
+        bpiContext.put("plantId", string(current.get("bpi_plant_id")));
+        bpiContext.put("lineId", string(current.get("bpi_line_id")));
+        bpiContext.put("orderId", string(current.get("task_no")));
+        bpiContext.put("available",
+            !string(current.get("bpi_tenant_id")).isEmpty()
+                && !string(current.get("bpi_plant_id")).isEmpty()
+                && !string(current.get("bpi_line_id")).isEmpty());
+        result.put("bpiContext", bpiContext);
+        result.put("tenantId", normalizeTenant(tenantId));
+        return result;
+    }
+
     @Transactional
     public Map<String, Object> analyzeActivity(String tenantId, long sourceId) {
         return snapshot(tenantId, SnapshotType.ACTIVITY, sourceId, repository.findActivityExecution(sourceId));
@@ -194,6 +242,47 @@ public class TraceabilityService {
         edge.put("materialId", materialId);
         edge.put("quantity", quantity);
         return edge;
+    }
+
+    private static Map<String, Object> boundary(Map<String, Object> from, Map<String, Object> to) {
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        result.put("fromProcessId", from == null ? null : from.get("id"));
+        result.put("fromProcessName", from == null ? "" : firstNonBlank(
+            from.get("planned_process_name"), from.get("name")));
+        result.put("toProcessId", to == null ? null : to.get("id"));
+        result.put("toProcessName", to == null ? "" : firstNonBlank(
+            to.get("planned_process_name"), to.get("name")));
+
+        Instant fromEnd = instant(from == null ? null : from.get("act_end_time"));
+        Instant toStart = instant(to == null ? null : to.get("act_start_time"));
+        if (from == null || to == null || fromEnd == null || toStart == null) {
+            result.put("state", "OPEN");
+            result.put("gapSeconds", null);
+            return result;
+        }
+        long gapSeconds = Duration.between(fromEnd, toStart).getSeconds();
+        result.put("gapSeconds", gapSeconds);
+        if (gapSeconds < 0) {
+            result.put("state", "OVERLAP");
+        } else if (gapSeconds <= 60) {
+            result.put("state", "CONTIGUOUS");
+        } else {
+            result.put("state", "GAP");
+        }
+        return result;
+    }
+
+    private static Instant instant(Object value) {
+        if (value instanceof Timestamp) {
+            return ((Timestamp) value).toInstant();
+        }
+        if (value instanceof Date) {
+            return ((Date) value).toInstant();
+        }
+        if (value instanceof LocalDateTime) {
+            return ((LocalDateTime) value).atZone(java.time.ZoneId.systemDefault()).toInstant();
+        }
+        return null;
     }
 
     private static List<Map<String, Object>> timeline(

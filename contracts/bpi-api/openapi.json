@@ -106,6 +106,27 @@
         }
       }
     },
+    "/bpi/v1/process-evidence": {
+      "get": {
+        "tags": ["Overview"],
+        "operationId": "getProcessEvidence",
+        "summary": "按 MES 工序时间窗查询产线历史采集证据",
+        "description": "orderId 仅作为 MES 上下文标签；采样点按租户、工厂、产线和时间窗匹配，不据此推断遥测数据天然归属于该指令。",
+        "parameters": [
+          {"$ref": "#/components/parameters/PlantId"},
+          {"$ref": "#/components/parameters/LineIdQuery"},
+          {"name": "orderId", "in": "query", "required": true, "schema": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$"}},
+          {"name": "from", "in": "query", "required": true, "schema": {"type": "string", "format": "date-time"}},
+          {"name": "to", "in": "query", "required": true, "schema": {"type": "string", "format": "date-time"}},
+          {"name": "property", "in": "query", "required": false, "schema": {"type": "array", "maxItems": 16, "items": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,128}$"}}, "style": "form", "explode": true}
+        ],
+        "responses": {
+          "200": {"description": "工序时间窗内的真实采样序列和统计值", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ProcessEvidenceResponse"}}}},
+          "403": {"$ref": "#/components/responses/Forbidden"},
+          "422": {"$ref": "#/components/responses/Unprocessable"}
+        }
+      }
+    },
     "/bpi/v1/candidates": {
       "get": {
         "tags": ["Candidates"],
@@ -1217,9 +1238,50 @@
           "incidents": {"type": "array", "items": {"$ref": "#/components/schemas/LineIncidentSnapshot"}}
         }
       },
+      "ProcessEvidenceSample": {
+        "type": "object",
+        "required": ["sampleTime", "numericValue", "stringValue", "booleanValue", "qualityCode"],
+        "properties": {
+          "sampleTime": {"type": "string", "format": "date-time"},
+          "numericValue": {"type": ["number", "null"]},
+          "stringValue": {"type": ["string", "null"]},
+          "booleanValue": {"type": ["boolean", "null"]},
+          "qualityCode": {"type": ["string", "null"]}
+        }
+      },
+      "ProcessEvidenceSeries": {
+        "type": "object",
+        "required": ["propertyId", "deviceId", "unit", "sourceCount", "truncated", "minimum", "maximum", "average", "samples"],
+        "properties": {
+          "propertyId": {"type": "string"},
+          "deviceId": {"type": ["string", "null"]},
+          "unit": {"type": ["string", "null"]},
+          "sourceCount": {"type": "integer", "minimum": 0},
+          "truncated": {"type": "boolean"},
+          "minimum": {"type": ["number", "null"]},
+          "maximum": {"type": ["number", "null"]},
+          "average": {"type": ["number", "null"]},
+          "samples": {"type": "array", "maxItems": 240, "items": {"$ref": "#/components/schemas/ProcessEvidenceSample"}}
+        }
+      },
+      "ProcessEvidence": {
+        "type": "object",
+        "required": ["tenantId", "plantId", "lineId", "orderId", "from", "to", "contextInferred", "series"],
+        "properties": {
+          "tenantId": {"type": "string"},
+          "plantId": {"type": "string"},
+          "lineId": {"type": "string"},
+          "orderId": {"type": "string"},
+          "from": {"type": "string", "format": "date-time"},
+          "to": {"type": "string", "format": "date-time"},
+          "contextInferred": {"type": "boolean", "const": true},
+          "series": {"type": "array", "items": {"$ref": "#/components/schemas/ProcessEvidenceSeries"}}
+        }
+      },
       "OverviewResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/LineState"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "LineStateResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/LineState"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "LineLiveEvidenceResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/LineLiveEvidence"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "ProcessEvidenceResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/ProcessEvidence"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "EvidenceItem": {
         "type": "object", "required": ["eventId", "signal", "classification", "satisfied", "quality", "eventTime"],
         "properties": {"eventId": {"type": "string"}, "signal": {"type": "string"}, "classification": {"type": "string", "enum": ["REQUIRED", "QUORUM", "OPTIONAL"]}, "satisfied": {"type": "boolean"}, "value": {}, "unit": {"type": ["string", "null"]}, "quality": {"type": "string"}, "eventTime": {"type": "string", "format": "date-time"}, "source": {"type": "string"}}

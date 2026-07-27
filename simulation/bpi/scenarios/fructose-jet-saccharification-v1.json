@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "scenarioCode": "BPI-FRUCTOSE-JET-SACCHARIFICATION-V1",
+  "title": "果糖产线喷射与糖化工序边界",
+  "safety": {
+    "shadowOnly": true,
+    "requiresActiveProductionContext": true,
+    "writeback": {
+      "wom": false,
+      "qcs": false,
+      "wms": false,
+      "plcDcs": false
+    }
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "device": {
+    "gatewayId": "fructose-line-simulator-01",
+    "productId": "fructose-process-product-01",
+    "deviceId": "fructose-line-device-01"
+  },
+  "sampling": {
+    "intervalSeconds": 4,
+    "baseTime": "2026-07-27T08:00:00.000Z"
+  },
+  "signals": [
+    {"propertyId": "jet.flow.instant", "name": "喷射进料瞬时流量", "unit": "m3/h", "dataType": "double", "calibrationVersion": "SIM-FRU-1"},
+    {"propertyId": "jet.feed.baume", "name": "喷射进料波美值", "unit": "Be", "dataType": "double", "calibrationVersion": "SIM-FRU-1"},
+    {"propertyId": "jet.pump.running", "name": "喷射进料泵运行", "unit": "bool", "dataType": "boolean", "calibrationVersion": "SIM-FRU-1"},
+    {"propertyId": "jet.valve.path.ready", "name": "喷射阀路成立", "unit": "bool", "dataType": "boolean", "calibrationVersion": "SIM-FRU-1"},
+    {"propertyId": "jet.temperature", "name": "喷射温度", "unit": "degC", "dataType": "double", "calibrationVersion": "SIM-FRU-1"},
+    {"propertyId": "jet.pressure", "name": "喷射压力", "unit": "MPa", "dataType": "double", "calibrationVersion": "SIM-FRU-1"},
+    {"propertyId": "saccharification.inlet.flow.instant", "name": "糖化进料瞬时流量", "unit": "m3/h", "dataType": "double", "calibrationVersion": "SIM-FRU-1"},
+    {"propertyId": "saccharification.liquor.baume", "name": "糖化液波美值", "unit": "Be", "dataType": "double", "calibrationVersion": "SIM-FRU-1"},
+    {"propertyId": "saccharification.pump.running", "name": "糖化进料泵运行", "unit": "bool", "dataType": "boolean", "calibrationVersion": "SIM-FRU-1"},
+    {"propertyId": "saccharification.valve.path.ready", "name": "糖化阀路成立", "unit": "bool", "dataType": "boolean", "calibrationVersion": "SIM-FRU-1"},
+    {"propertyId": "saccharification.temperature", "name": "糖化温度", "unit": "degC", "dataType": "double", "calibrationVersion": "SIM-FRU-1"},
+    {"propertyId": "saccharification.ph", "name": "糖化 pH", "unit": "1", "dataType": "double", "calibrationVersion": "SIM-FRU-1"}
+  ],
+  "baseValues": {
+    "jet.flow.instant": 0,
+    "jet.feed.baume": 19.8,
+    "jet.pump.running": false,
+    "jet.valve.path.ready": false,
+    "jet.temperature": 25,
+    "jet.pressure": 0,
+    "saccharification.inlet.flow.instant": 0,
+    "saccharification.liquor.baume": 20.2,
+    "saccharification.pump.running": false,
+    "saccharification.valve.path.ready": false,
+    "saccharification.temperature": 25,
+    "saccharification.ph": 5.8
+  },
+  "processes": [
+    {
+      "code": "JET",
+      "name": "喷射",
+      "routeCode": "JET",
+      "flowProperty": "jet.flow.instant",
+      "pumpProperty": "jet.pump.running",
+      "valveProperty": "jet.valve.path.ready",
+      "baumeProperty": "jet.feed.baume",
+      "baumeRange": {"minimum": 18.5, "maximum": 21.5},
+      "startFlowThreshold": 10,
+      "endFlowThreshold": 0.5,
+      "startHoldSeconds": 12,
+      "endHoldSeconds": 12
+    },
+    {
+      "code": "SACCHARIFICATION",
+      "name": "糖化",
+      "routeCode": "SACCHARIFICATION",
+      "flowProperty": "saccharification.inlet.flow.instant",
+      "pumpProperty": "saccharification.pump.running",
+      "valveProperty": "saccharification.valve.path.ready",
+      "baumeProperty": "saccharification.liquor.baume",
+      "baumeRange": {"minimum": 19, "maximum": 22},
+      "startFlowThreshold": 8,
+      "endFlowThreshold": 0.5,
+      "startHoldSeconds": 12,
+      "endHoldSeconds": 12
+    }
+  ],
+  "cases": [
+    {
+      "code": "NORMAL_HANDOVER",
+      "baseTime": "2026-07-27T08:00:00.000Z",
+      "phases": [
+        {"name": "IDLE", "samples": 2, "orderId": "MO-FRU-NORMAL-001", "routeCode": "IDLE"},
+        {
+          "name": "JET_START",
+          "samples": 4,
+          "orderId": "MO-FRU-NORMAL-001",
+          "routeCode": "JET",
+          "values": {
+            "jet.flow.instant": 14.2,
+            "jet.pump.running": true,
+            "jet.valve.path.ready": true,
+            "jet.temperature": 106,
+            "jet.pressure": 0.42
+          }
+        },
+        {
+          "name": "JET_RUNNING",
+          "samples": 5,
+          "orderId": "MO-FRU-NORMAL-001",
+          "routeCode": "JET",
+          "values": {"jet.flow.instant": 18.4, "jet.feed.baume": 20.1},
+          "stepPerSample": {"jet.flow.instant": 0.15, "jet.feed.baume": 0.03}
+        },
+        {
+          "name": "SACCHARIFICATION_START",
+          "samples": 4,
+          "orderId": "MO-FRU-NORMAL-001",
+          "routeCode": "SACCHARIFICATION",
+          "values": {
+            "jet.flow.instant": 0,
+            "jet.pump.running": false,
+            "jet.valve.path.ready": false,
+            "saccharification.inlet.flow.instant": 12.6,
+            "saccharification.pump.running": true,
+            "saccharification.valve.path.ready": true,
+            "saccharification.temperature": 61,
+            "saccharification.ph": 5.7
+          }
+        },
+        {
+          "name": "SACCHARIFICATION_RUNNING",
+          "samples": 5,
+          "orderId": "MO-FRU-NORMAL-001",
+          "routeCode": "SACCHARIFICATION",
+          "values": {
+            "saccharification.inlet.flow.instant": 16.8,
+            "saccharification.liquor.baume": 20.6
+          },
+          "stepPerSample": {
+            "saccharification.inlet.flow.instant": -0.1,
+            "saccharification.liquor.baume": 0.02
+          }
+        },
+        {
+          "name": "SACCHARIFICATION_STOP",
+          "samples": 4,
+          "orderId": "MO-FRU-NORMAL-001",
+          "routeCode": "SACCHARIFICATION",
+          "values": {
+            "saccharification.inlet.flow.instant": 0.1,
+            "saccharification.pump.running": false,
+            "saccharification.valve.path.ready": false
+          }
+        }
+      ],
+      "expectations": {
+        "boundaries": [
+          {"processCode": "JET", "type": "START", "reason": "SIGNAL_HOLD"},
+          {"processCode": "JET", "type": "END", "reason": "ROUTE_SWITCH"},
+          {"processCode": "SACCHARIFICATION", "type": "START", "reason": "SIGNAL_HOLD"},
+          {"processCode": "SACCHARIFICATION", "type": "END", "reason": "SIGNAL_HOLD"}
+        ],
+        "qualityExcursions": 0
+      }
+    },
+    {
+      "code": "BRIEF_FLOW_DROPOUT",
+      "baseTime": "2026-07-27T09:00:00.000Z",
+      "phases": [
+        {"name": "IDLE", "samples": 2, "orderId": "MO-FRU-DROPOUT-001", "routeCode": "IDLE"},
+        {"name": "JET_START", "samples": 4, "orderId": "MO-FRU-DROPOUT-001", "routeCode": "JET", "values": {"jet.flow.instant": 14, "jet.pump.running": true, "jet.valve.path.ready": true, "jet.temperature": 105, "jet.pressure": 0.4}},
+        {"name": "JET_RUNNING", "samples": 3, "orderId": "MO-FRU-DROPOUT-001", "routeCode": "JET", "values": {"jet.flow.instant": 18.2}},
+        {"name": "BRIEF_DROPOUT", "samples": 2, "orderId": "MO-FRU-DROPOUT-001", "routeCode": "JET", "values": {"jet.flow.instant": 0.1, "jet.pump.running": false, "jet.valve.path.ready": false}},
+        {"name": "JET_RECOVERY", "samples": 4, "orderId": "MO-FRU-DROPOUT-001", "routeCode": "JET", "values": {"jet.flow.instant": 17.9, "jet.pump.running": true, "jet.valve.path.ready": true}},
+        {"name": "JET_STOP", "samples": 4, "orderId": "MO-FRU-DROPOUT-001", "routeCode": "JET", "values": {"jet.flow.instant": 0.1, "jet.pump.running": false, "jet.valve.path.ready": false}}
+      ],
+      "expectations": {
+        "boundaries": [
+          {"processCode": "JET", "type": "START", "reason": "SIGNAL_HOLD"},
+          {"processCode": "JET", "type": "END", "reason": "SIGNAL_HOLD"}
+        ],
+        "qualityExcursions": 0
+      }
+    },
+    {
+      "code": "BAUME_EXCURSION",
+      "baseTime": "2026-07-27T10:00:00.000Z",
+      "phases": [
+        {"name": "IDLE", "samples": 2, "orderId": "MO-FRU-BAUME-001", "routeCode": "IDLE"},
+        {"name": "JET_START", "samples": 4, "orderId": "MO-FRU-BAUME-001", "routeCode": "JET", "values": {"jet.flow.instant": 14.5, "jet.pump.running": true, "jet.valve.path.ready": true, "jet.temperature": 106, "jet.pressure": 0.43}},
+        {"name": "JET_RUNNING", "samples": 3, "orderId": "MO-FRU-BAUME-001", "routeCode": "JET", "values": {"jet.flow.instant": 18.1, "jet.feed.baume": 20.2}},
+        {"name": "BAUME_HIGH", "samples": 3, "orderId": "MO-FRU-BAUME-001", "routeCode": "JET", "values": {"jet.feed.baume": 22.3}},
+        {"name": "BAUME_RECOVERED", "samples": 3, "orderId": "MO-FRU-BAUME-001", "routeCode": "JET", "values": {"jet.feed.baume": 20.4}},
+        {"name": "JET_STOP", "samples": 4, "orderId": "MO-FRU-BAUME-001", "routeCode": "JET", "values": {"jet.flow.instant": 0.1, "jet.pump.running": false, "jet.valve.path.ready": false}}
+      ],
+      "expectations": {
+        "boundaries": [
+          {"processCode": "JET", "type": "START", "reason": "SIGNAL_HOLD"},
+          {"processCode": "JET", "type": "END", "reason": "SIGNAL_HOLD"}
+        ],
+        "qualityExcursions": 1
+      }
+    },
+    {
+      "code": "ORDER_ROUTE_SWITCH",
+      "baseTime": "2026-07-27T11:00:00.000Z",
+      "phases": [
+        {"name": "IDLE", "samples": 2, "orderId": "MO-FRU-SWITCH-A", "routeCode": "IDLE"},
+        {"name": "JET_START", "samples": 4, "orderId": "MO-FRU-SWITCH-A", "routeCode": "JET", "values": {"jet.flow.instant": 14.3, "jet.pump.running": true, "jet.valve.path.ready": true, "jet.temperature": 105, "jet.pressure": 0.41}},
+        {"name": "JET_RUNNING", "samples": 3, "orderId": "MO-FRU-SWITCH-A", "routeCode": "JET", "values": {"jet.flow.instant": 18.3}},
+        {"name": "ORDER_AND_ROUTE_SWITCH", "samples": 4, "orderId": "MO-FRU-SWITCH-B", "routeCode": "SACCHARIFICATION", "values": {"jet.flow.instant": 0, "jet.pump.running": false, "jet.valve.path.ready": false, "saccharification.inlet.flow.instant": 12.4, "saccharification.pump.running": true, "saccharification.valve.path.ready": true, "saccharification.temperature": 60, "saccharification.ph": 5.6}},
+        {"name": "SACCHARIFICATION_RUNNING", "samples": 3, "orderId": "MO-FRU-SWITCH-B", "routeCode": "SACCHARIFICATION", "values": {"saccharification.inlet.flow.instant": 16.4, "saccharification.liquor.baume": 20.5}},
+        {"name": "SACCHARIFICATION_STOP", "samples": 4, "orderId": "MO-FRU-SWITCH-B", "routeCode": "SACCHARIFICATION", "values": {"saccharification.inlet.flow.instant": 0.1, "saccharification.pump.running": false, "saccharification.valve.path.ready": false}}
+      ],
+      "expectations": {
+        "boundaries": [
+          {"processCode": "JET", "type": "START", "reason": "SIGNAL_HOLD"},
+          {"processCode": "JET", "type": "END", "reason": "ORDER_SWITCH"},
+          {"processCode": "SACCHARIFICATION", "type": "START", "reason": "SIGNAL_HOLD"},
+          {"processCode": "SACCHARIFICATION", "type": "END", "reason": "SIGNAL_HOLD"}
+        ],
+        "qualityExcursions": 0
+      }
+    }
+  ]
+}

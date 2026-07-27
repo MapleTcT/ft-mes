@@ -312,6 +312,128 @@ class ProductRuntimeParityTest(unittest.TestCase):
         self.assertEqual(["name"], [field["key"] for field in payload["fields"]])
         self.assertNotIn("customSection", str(payload))
 
+    def test_data_grid_preserves_list_double_click_and_initialization_contract(self):
+        config = ET.fromstring(
+            "<config><layout><sections><list><list-item>"
+            "<regionType>LISTPT</regionType>"
+            "<listProperty>"
+            "<isdbcustom>true</isdbcustom>"
+            "<dbcustomtextarea>function openDetail(event,row){return row.id;}</dbcustomtextarea>"
+            "<dbcustomtextarea_es5>function openDetail(event,row){return row.id;}</dbcustomtextarea_es5>"
+            "<ptPageInit>function initGrid(){return true;}</ptPageInit>"
+            "<isFirstLoad>false</isFirstLoad>"
+            "<isCheckBox>true</isCheckBox>"
+            "</listProperty>"
+            "</list-item></list></sections></layout></config>"
+        )
+        view = view_variant(config_root=config)
+
+        payload = GENERATOR.data_grid_json(view)
+
+        self.assertIs(payload["isdbcustom"], True)
+        self.assertIs(payload["isFirstLoad"], False)
+        self.assertIs(payload["isCheckBox"], True)
+        self.assertIn("openDetail", payload["dbcustomtextarea"])
+        self.assertIn("initGrid", payload["ptPageInit"])
+
+    def test_process_execution_list_overrides_inert_vendor_double_click(self):
+        view = view_variant(
+            code="WOM_1.0.0_produceTask_processExeLogList",
+            url="/msService/WOM/produceTask/processExelog/processExeLogList",
+        )
+        packaged_payload = {
+            "pageType": "LIST",
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "DataGridCode": view.code,
+                    "isdbcustom": True,
+                    "dbcustomtextarea_es5": "function processExeLogListDB(event,row){}",
+                }
+            ],
+        }
+
+        payload = json.loads(
+            GENERATOR.view_json(view, {view.code: view}, {view.code: packaged_payload})
+        )
+        grid = payload["components"][0]
+
+        self.assertIs(grid["isdbcustom"], True)
+        self.assertIn("processExecutionId", grid["dbcustomtextarea_es5"])
+        self.assertIn("encodeURIComponent(row.id)", grid["dbcustomtextarea"])
+        self.assertNotIn("console.info", grid["dbcustomtextarea_es5"])
+
+    def test_make_task_runtime_migration_restores_business_tabs_and_grid_columns(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "210-wom-make-task-edit-full-runtime.sql"
+        ).read_text(encoding="utf-8")
+
+        for tab_name in ("工序活动", "用料汇总", "检验清单"):
+            self.assertIn(f'"name":"{tab_name}"', migration)
+        for model_code in (
+            "WOM_1.0.0_produceTask_TaskProcess",
+            "WOM_1.0.0_produceTask_TaskActive",
+            "WOM_1.0.0_produceTask_TaskMaterial",
+            "WOM_1.0.0_produceTask_TaskQuality",
+        ):
+            self.assertIn(f'"modelCode":"{model_code}"', migration)
+        for field_key in (
+            '"key":"taskProcessId.name"',
+            '"key":"materialId.code"',
+            '"key":"qualityStdId.name"',
+        ):
+            self.assertIn(field_key, migration)
+        self.assertIn("restoreMakeTaskBusinessTabs", migration)
+        self.assertIn(r'ReactAPI.Layout.showTab(\"tabs-3\")', migration)
+        self.assertNotIn("只显示常规信息页签", migration)
+
+    def test_make_task_edit_restores_business_tabs_after_form_data_is_ready(self):
+        view = view_variant(code="WOM_1.0.0_produceTask_makeTaskEdit")
+        packaged_payload = {
+            "pageType": "EDIT",
+            "events": [
+                {
+                    "name": "onload",
+                    "function": """let formData = ReactAPI.getFormData();
+if (!formData.id || !formData.formulaId || !formData.planNum) {
+    // 只显示常规信息页签
+    ReactAPI.Layout.hideTab('tabs-3');
+}
+// 如果配方已经同步过
+ReactAPI.Layout.hideTab('tabs-5');""",
+                },
+                {
+                    "name": "onload_es5",
+                    "function": """var formData = ReactAPI.getFormData();
+if (!formData.id || !formData.formulaId || !formData.planNum) {
+    // 只显示常规信息页签
+    ReactAPI.Layout.hideTab('tabs-3');
+}
+// 如果配方已经同步过
+ReactAPI.Layout.hideTab('tabs-5');""",
+                },
+            ],
+        }
+
+        payload = json.loads(
+            GENERATOR.view_json(view, {view.code: view}, {view.code: packaged_payload})
+        )
+
+        for event in payload["events"]:
+            self.assertIn("restoreMakeTaskBusinessTabs", event["function"])
+            self.assertIn('ReactAPI.Layout.showTab("tabs-3")', event["function"])
+            self.assertIn("formData.planNum != null", event["function"])
+            self.assertIn("if (attempt < 50)", event["function"])
+            self.assertNotIn("只显示常规信息页签", event["function"])
+            self.assertIn("// 如果配方已经同步过", event["function"])
+            self.assertLess(
+                event["function"].index("restoreMakeTaskBusinessTabs"),
+                event["function"].index("ReactAPI.Layout.hideTab"),
+            )
+
     def test_packaged_view_json_preserves_complex_layout_and_normalizes_runtime_values(self):
         operation_code = "workGroupList_add_add_PATROL_1.0.0_patrolRoute_workGroupList"
         packaged_payload = {

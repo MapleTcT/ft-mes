@@ -11,7 +11,7 @@
 
 ## 摘要
 
-- Watch 语句：`78`。
+- Watch 语句：`79`。
 - Watch 安全问题：`0`。
 
 ## 语句清单
@@ -96,3 +96,4 @@
 | 196-qcs-manu-inspect-list-empty-column.sql | 114 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_qcs_hide_empty_manu_inspect_column(jsonb); |
 | 197-configuration-app-owned-physical-schema-sync.sql | 3 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS tr_adp_ec_model_physical_table_sync ON public.ec_model; |
 | 197-configuration-app-owned-physical-schema-sync.sql | 4 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS tr_adp_ec_property_physical_column_sync ON public.ec_property; |
+| 208-wom-factory-line-reference-bootstrap.sql | 166 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS tr_adp_sync_wom_formula_line_mapping ON public.wom_produce_tasks; |

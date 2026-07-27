@@ -1,11 +1,19 @@
 CREATE TABLE wom_produce_tasks (
   id BIGINT PRIMARY KEY, table_no VARCHAR(128), produce_batch_num VARCHAR(128), product_id BIGINT,
+  cid BIGINT, line_id BIGINT,
   task_run_state VARCHAR(128), check_state VARCHAR(128), check_result VARCHAR(128),
   plan_num NUMERIC(20,6), finish_num NUMERIC(20,6), act_start_time TIMESTAMP, act_end_time TIMESTAMP,
   create_time TIMESTAMP, modify_time TIMESTAMP, valid BOOLEAN
 );
 CREATE TABLE baseset_materials (
   id BIGINT PRIMARY KEY, code VARCHAR(128), name VARCHAR(255), valid BOOLEAN
+);
+CREATE TABLE hm_factory_models (
+  id BIGINT PRIMARY KEY, code VARCHAR(128), name VARCHAR(255), valid BOOLEAN
+);
+CREATE TABLE wom_bpi_production_context_bindings (
+  id BIGINT PRIMARY KEY, wom_cid BIGINT, wom_line_id BIGINT, tenant_id VARCHAR(64),
+  plant_id VARCHAR(128), line_id VARCHAR(128), enabled BOOLEAN
 );
 CREATE TABLE wom_produce_task_exelog (
   id BIGINT PRIMARY KEY, task_id BIGINT, table_no VARCHAR(128), produce_batch_num VARCHAR(128),
@@ -20,6 +28,7 @@ CREATE TABLE wom_task_processes (
 );
 CREATE TABLE wom_process_exelogs (
   id BIGINT PRIMARY KEY, task_id BIGINT, task_process_id BIGINT, table_no VARCHAR(128), name VARCHAR(255),
+  exe_order INTEGER,
   produce_batch_num VARCHAR(128), process_run_state VARCHAR(128), analysis_flag BOOLEAN,
   act_start_time TIMESTAMP, act_end_time TIMESTAMP, long_time NUMERIC(20,6),
   create_time TIMESTAMP, modify_time TIMESTAMP, valid BOOLEAN

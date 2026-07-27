@@ -30,6 +30,19 @@ The scenario always requires an active WOM production context and keeps WOM/QCS/
 writeback disabled. Passing it proves only the controlled shadow-batch model; target acceptance
 still requires MQTT, JetLinks, Kafka/Flink, the BPI browser and PostgreSQL evidence.
 
+The fructose-line pilot is defined in
+`simulation/bpi/scenarios/fructose-jet-saccharification-v1.json`. It models the `喷射 -> 糖化`
+handover with twelve process signals sampled every four seconds (15 samples per minute). Its four
+cases cover a normal handover, an eight-second flow dropout, a Baumé excursion that must not split a
+process, and a production-order plus route switch that must close the old process immediately.
+
+```bash
+node simulation/bpi/fructose-line-scenario.js validate \
+  simulation/bpi/scenarios/fructose-jet-saccharification-v1.json
+node simulation/bpi/fructose-line-scenario.js envelopes \
+  simulation/bpi/scenarios/fructose-jet-saccharification-v1.json NORMAL_HANDOVER
+```
+
 Run the service manually:
 
 ```bash

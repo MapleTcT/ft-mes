@@ -13,6 +13,7 @@ public class BpiRoutePolicyTest {
     @Test
     public void allowsOnlyPhaseOneReadsLifecycleAndRuleManagementRoutes() {
         assertTrue(policy.allows(HttpMethod.GET, "/overview"));
+        assertTrue(policy.allows(HttpMethod.GET, "/process-evidence"));
         assertTrue(policy.allows(HttpMethod.GET, "/lines/LINE-S07-01/live-evidence"));
         assertTrue(policy.allows(HttpMethod.GET, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/timeline"));
         assertTrue(policy.allows(HttpMethod.GET, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/release"));
@@ -126,6 +127,7 @@ public class BpiRoutePolicyTest {
         assertFalse(policy.allows(HttpMethod.DELETE, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertFalse(policy.allows(HttpMethod.GET, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/release/export"));
         assertFalse(policy.allows(HttpMethod.GET, "/lines/LINE-S07-01/live-evidence/export"));
+        assertFalse(policy.allows(HttpMethod.GET, "/process-evidence/export"));
         assertFalse(policy.allows(HttpMethod.GET, "/http://attacker.example"));
         assertFalse(policy.allows(HttpMethod.GET, "/../actuator/env"));
     }

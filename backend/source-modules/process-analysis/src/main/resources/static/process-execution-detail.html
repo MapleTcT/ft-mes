@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>工序执行详情</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --blue: #176fd1;
+      --blue-soft: #eaf3ff;
+      --green: #1d8a55;
+      --amber: #a96800;
+      --red: #c83f49;
+      --ink: #202934;
+      --muted: #667383;
+      --line: #dce3ea;
+      --surface: #fff;
+      --surface-alt: #f6f8fa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--surface-alt);
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      letter-spacing: 0;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 64px;
+      padding: 0 28px;
+      color: #fff;
+      background: #226eaf;
+    }
+    h1 { margin: 0; font-size: 22px; font-weight: 650; }
+    h2 { margin: 0 0 14px; font-size: 17px; }
+    button, a.command {
+      min-height: 34px;
+      padding: 7px 14px;
+      border: 1px solid #bdd2e8;
+      border-radius: 4px;
+      color: #155da2;
+      background: #fff;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    button:hover, a.command:hover { border-color: var(--blue); }
+    .header-actions { display: flex; gap: 8px; }
+    main { max-width: 1440px; margin: 0 auto; padding: 20px 24px 36px; }
+    .notice {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border-left: 4px solid var(--red);
+      background: #fff1f2;
+      color: #8c2630;
+    }
+    section {
+      margin-bottom: 16px;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+    }
+    .fact {
+      min-height: 70px;
+      padding: 12px 14px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .fact span { display: block; margin-bottom: 5px; color: var(--muted); font-size: 12px; }
+    .fact strong { display: block; overflow-wrap: anywhere; font-size: 15px; font-weight: 600; }
+    .chain {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 160px minmax(0, 1fr) 160px minmax(0, 1fr);
+      align-items: stretch;
+      gap: 10px;
+    }
+    .process {
+      min-height: 104px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-top: 3px solid #8393a5;
+      background: var(--surface-alt);
+    }
+    .process.current { border-top-color: var(--blue); background: var(--blue-soft); }
+    .process .kind { color: var(--muted); font-size: 12px; }
+    .process .name { margin: 7px 0; font-size: 16px; font-weight: 650; }
+    .process .time { color: #4e5b69; font-size: 12px; }
+    .boundary {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 104px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .boundary::before {
+      width: 100%;
+      height: 2px;
+      margin-bottom: 8px;
+      background: #aab6c2;
+      content: "";
+    }
+    .boundary strong { color: var(--ink); font-size: 13px; }
+    .boundary[data-state="CONTIGUOUS"] strong { color: var(--green); }
+    .boundary[data-state="GAP"] strong { color: var(--amber); }
+    .boundary[data-state="OVERLAP"] strong { color: var(--red); }
+    .signal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .signal-head p { margin: 0; color: var(--muted); }
+    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .chart {
+      min-width: 0;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .chart h3 { margin: 0; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+    canvas { display: block; width: 100%; height: 230px; }
+    .empty { padding: 42px 18px; color: var(--muted); text-align: center; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 9px 10px; border: 1px solid var(--line); text-align: left; }
+    th { background: #eef2f6; font-weight: 600; }
+    .table-wrap { margin-top: 16px; overflow: auto; }
+    @media (max-width: 900px) {
+      header { padding: 12px 16px; align-items: flex-start; gap: 12px; }
+      main { padding: 14px 10px 24px; }
+      .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chain { grid-template-columns: 1fr; }
+      .boundary { min-height: 58px; }
+      .boundary::before { width: 2px; height: 28px; }
+      .charts { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>工序执行详情</h1>
+    <div class="header-actions">
+      <a id="traceLink" class="command" href="#" hidden>查看批次追溯</a>
+      <button id="refreshButton" type="button">刷新</button>
+    </div>
+  </header>
+  <main>
+    <div id="notice" class="notice" role="alert"></div>
+    <section aria-labelledby="summaryTitle">
+      <h2 id="summaryTitle">执行概况</h2>
+      <div id="facts" class="facts"></div>
+    </section>
+    <section aria-labelledby="boundaryTitle">
+      <h2 id="boundaryTitle">工序边界</h2>
+      <div class="chain">
+        <div id="previousProcess" class="process"></div>
+        <div id="previousBoundary" class="boundary"></div>
+        <div id="currentProcess" class="process current"></div>
+        <div id="nextBoundary" class="boundary"></div>
+        <div id="nextProcess" class="process"></div>
+      </div>
+    </section>
+    <section aria-labelledby="signalTitle">
+      <div class="signal-head">
+        <div>
+          <h2 id="signalTitle">流量与波美值证据</h2>
+          <p id="signalScope">正在读取产线采集数据</p>
+        </div>
+      </div>
+      <div id="signalEmpty" class="empty" hidden></div>
+      <div id="signalContent" hidden>
+        <div class="charts">
+          <div class="chart">
+            <h3>瞬时流量</h3>
+            <canvas id="flowChart" width="640" height="230"></canvas>
+          </div>
+          <div class="chart">
+            <h3>波美值</h3>
+            <canvas id="baumeChart" width="640" height="230"></canvas>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>测点</th><th>单位</th><th>样本数</th><th>最小值</th><th>平均值</th><th>最大值</th></tr></thead>
+            <tbody id="signalRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    (function () {
+      "use strict";
+      var query = new URLSearchParams(window.location.search);
+      var executionId = query.get("processExecutionId");
+      var detailPath = "/processAnalysis/processExecution/detail";
+      var serviceRoot = window.location.pathname.indexOf(detailPath) >= 0
+        ? window.location.pathname.slice(0, window.location.pathname.indexOf(detailPath))
+        : "/msService/ProcessAnalysis";
+      var detailApi = serviceRoot + "/processAnalysis/api/process-executions/";
+
+      function text(value) {
+        return value === null || value === undefined || value === "" ? "-" : String(value);
+      }
+
+      function html(value) {
+        return text(value).replace(/[&<>"']/g, function (character) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character];
+        });
+      }
+
+      function formatTime(value) {
+        if (!value) return "-";
+        var date = new Date(value);
+        return Number.isNaN(date.getTime()) ? text(value) : date.toLocaleString("zh-CN", { hour12: false });
+      }
+
+      function formatProcessState(value) {
+        var labels = {
+          "WOM_runState/waitForRun": "待执行",
+          "WOM_runState/runing": "执行中",
+          "WOM_runState/pausing": "暂停中",
+          "WOM_runState/paused": "已暂停",
+          "WOM_runState/resuming": "恢复中",
+          "WOM_runState/finished": "已完成"
+        };
+        return labels[value] || value || "-";
+      }
+
+      function showNotice(message) {
+        var notice = document.getElementById("notice");
+        notice.textContent = message;
+        notice.style.display = "block";
+      }
+
+      function fact(label, value) {
+        return '<div class="fact"><span>' + html(label) + "</span><strong>" + html(value) + "</strong></div>";
+      }
+
+      function renderProcess(targetId, label, process) {
+        var target = document.getElementById(targetId);
+        if (!process) {
+          target.innerHTML = '<div class="kind">' + html(label) + '</div><div class="empty">无相邻工序</div>';
+          return;
+        }
+        target.innerHTML =
+          '<div class="kind">' + html(label) + "</div>" +
+          '<div class="name">' + html(process.planned_process_name || process.name) + "</div>" +
+          '<div class="time">开始：' + html(formatTime(process.act_start_time)) + "</div>" +
+          '<div class="time">结束：' + html(formatTime(process.act_end_time)) + "</div>";
+      }
+
+      function renderBoundary(targetId, boundary) {
+        var target = document.getElementById(targetId);
+        var labels = { CONTIGUOUS: "连续交接", GAP: "存在间隔", OVERLAP: "时间重叠", OPEN: "边界未闭合" };
+        var state = boundary && boundary.state ? boundary.state : "OPEN";
+        var gap = boundary && boundary.gapSeconds !== null && boundary.gapSeconds !== undefined
+          ? boundary.gapSeconds + " 秒"
+          : "时间不足";
+        target.dataset.state = state;
+        target.innerHTML = "<strong>" + html(labels[state] || state) + "</strong><span>" + html(gap) + "</span>";
+      }
+
+      function drawSeries(canvasId, series, color) {
+        var canvas = document.getElementById(canvasId);
+        var context = canvas.getContext("2d");
+        var samples = series && series.samples ? series.samples.filter(function (item) {
+          return typeof item.numericValue === "number";
+        }) : [];
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        if (!samples.length) {
+          context.fillStyle = "#667383";
+          context.font = "14px sans-serif";
+          context.textAlign = "center";
+          context.fillText("该时间窗暂无有效数值", canvas.width / 2, canvas.height / 2);
+          return;
+        }
+        var values = samples.map(function (item) { return item.numericValue; });
+        var minimum = Math.min.apply(Math, values);
+        var maximum = Math.max.apply(Math, values);
+        if (minimum === maximum) { minimum -= 1; maximum += 1; }
+        var left = 50, right = 18, top = 18, bottom = 32;
+        context.strokeStyle = "#dce3ea";
+        context.lineWidth = 1;
+        for (var line = 0; line <= 4; line++) {
+          var y = top + (canvas.height - top - bottom) * line / 4;
+          context.beginPath();
+          context.moveTo(left, y);
+          context.lineTo(canvas.width - right, y);
+          context.stroke();
+        }
+        context.strokeStyle = color;
+        context.lineWidth = 2;
+        context.beginPath();
+        samples.forEach(function (item, index) {
+          var x = left + (canvas.width - left - right) * index / Math.max(samples.length - 1, 1);
+          var y = top + (maximum - item.numericValue) / (maximum - minimum) * (canvas.height - top - bottom);
+          if (index === 0) context.moveTo(x, y); else context.lineTo(x, y);
+        });
+        context.stroke();
+        context.fillStyle = "#667383";
+        context.font = "12px sans-serif";
+        context.textAlign = "right";
+        context.fillText(maximum.toFixed(2), left - 6, top + 4);
+        context.fillText(minimum.toFixed(2), left - 6, canvas.height - bottom + 4);
+      }
+
+      function signalKind(series) {
+        var key = ((series.propertyId || "") + " " + (series.unit || "")).toLowerCase();
+        if (key.indexOf("baume") >= 0 || key.indexOf("波美") >= 0 || key.indexOf("°bé") >= 0) return "baume";
+        if (key.indexOf("flow") >= 0 || key.indexOf("流量") >= 0 || key.indexOf("m3/h") >= 0) return "flow";
+        return "other";
+      }
+
+      async function loadSignals(detail) {
+        var context = detail.bpiContext || {};
+        var current = detail.processExecution || {};
+        var empty = document.getElementById("signalEmpty");
+        var content = document.getElementById("signalContent");
+        if (!context.available) {
+          empty.hidden = false;
+          empty.textContent = "当前 MES 生产线尚未绑定 BPI 采集上下文，工序详情可用，但没有自动采集证据。";
+          document.getElementById("signalScope").textContent = "MES 工序边界已显示，BPI 证据未配置";
+          return;
+        }
+        var from = current.act_start_time;
+        var to = current.act_end_time || new Date().toISOString();
+        if (!from) {
+          empty.hidden = false;
+          empty.textContent = "工序没有实际开始时间，无法确定采集数据时间窗。";
+          return;
+        }
+        var params = new URLSearchParams({
+          plantId: context.plantId,
+          lineId: context.lineId,
+          orderId: context.orderId,
+          from: new Date(from).toISOString(),
+          to: new Date(to).toISOString()
+        });
+        params.append("property", "jet.flow.instant");
+        params.append("property", "jet.feed.baume");
+        params.append("property", "saccharification.inlet.flow.instant");
+        params.append("property", "saccharification.liquor.baume");
+        try {
+          var response = await fetch("/bpi-api/process-evidence?" + params.toString(), { credentials: "same-origin" });
+          var payload = await response.json();
+          if (!response.ok || !payload || !payload.data) {
+            throw new Error((payload && (payload.message || payload.msg)) || "BPI 证据请求失败");
+          }
+          var series = payload.data.series || [];
+          if (!series.length) {
+            empty.hidden = false;
+            empty.textContent = "该工序时间窗内未找到流量或波美值样本。";
+            return;
+          }
+          var flow = series.find(function (item) { return signalKind(item) === "flow"; });
+          var baume = series.find(function (item) { return signalKind(item) === "baume"; });
+          drawSeries("flowChart", flow, "#176fd1");
+          drawSeries("baumeChart", baume, "#1d8a55");
+          document.getElementById("signalRows").innerHTML = series.map(function (item) {
+            return "<tr><td>" + html(item.propertyId) + "</td><td>" + html(item.unit) +
+              "</td><td>" + html(item.sourceCount) + "</td><td>" + html(item.minimum) +
+              "</td><td>" + html(item.average) + "</td><td>" + html(item.maximum) + "</td></tr>";
+          }).join("");
+          document.getElementById("signalScope").textContent =
+            context.plantId + " / " + context.lineId + "，" + formatTime(from) + " 至 " + formatTime(to);
+          content.hidden = false;
+        } catch (error) {
+          empty.hidden = false;
+          empty.textContent = "BPI 采集证据暂时不可用：" + error.message;
+        }
+      }
+
+      async function load() {
+        document.getElementById("notice").style.display = "none";
+        if (!executionId || !/^\d+$/.test(executionId)) {
+          showNotice("缺少有效的工序执行记录 ID。");
+          return;
+        }
+        try {
+          var response = await fetch(detailApi + encodeURIComponent(executionId), { credentials: "same-origin" });
+          var payload = await response.json();
+          if (!response.ok || !payload || payload.code !== 200 || !payload.data) {
+            throw new Error((payload && (payload.message || payload.msg)) || "工序执行详情加载失败");
+          }
+          var detail = payload.data;
+          var current = detail.processExecution || {};
+          document.getElementById("facts").innerHTML =
+            fact("制造指令", current.task_no) +
+            fact("生产批号", current.produce_batch_num) +
+            fact("产品", (current.product_code || "") + " " + (current.product_name || "")) +
+            fact("生产线", (current.wom_line_code || "") + " " + (current.wom_line_name || "")) +
+            fact("工序", current.planned_process_name || current.name) +
+            fact("执行状态", formatProcessState(current.process_run_state)) +
+            fact("实际开始", formatTime(current.act_start_time)) +
+            fact("实际结束", formatTime(current.act_end_time));
+          renderProcess("previousProcess", "上一工序", detail.previousProcess);
+          renderProcess("currentProcess", "当前工序", current);
+          renderProcess("nextProcess", "下一工序", detail.nextProcess);
+          renderBoundary("previousBoundary", detail.handover && detail.handover.previousToCurrent);
+          renderBoundary("nextBoundary", detail.handover && detail.handover.currentToNext);
+          if (current.produce_batch_num) {
+            var traceLink = document.getElementById("traceLink");
+            traceLink.href = serviceRoot + "/processAnalysis/exelogSecond/processBatchViewOut?batchNo=" +
+              encodeURIComponent(current.produce_batch_num);
+            traceLink.hidden = false;
+          }
+          await loadSignals(detail);
+        } catch (error) {
+          showNotice(error.message);
+        }
+      }
+
+      document.getElementById("refreshButton").addEventListener("click", load);
+      load();
+    }());
+  </script>
+</body>
+</html>

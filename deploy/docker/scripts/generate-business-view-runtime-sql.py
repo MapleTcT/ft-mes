@@ -60,6 +60,7 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "WOM_1.0.0_produceTask_makeTaskView",
     "WOM_1.0.0_produceTask_makeTaskBatchView",
     "WOM_1.0.0_produceTask_easyTaskOperateView",
+    "WOM_1.0.0_produceTask_processExeLogList",
     "WOM_1.0.0_procReport_outPutCommonTaskEdit",
     "WOM_1.0.0_batchMaterial_baRetireMentPDAList",
     "WOM_1.0.0_rejectMaterilal_batchRejectEdit",
@@ -76,6 +77,58 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "WTS_1.0.0_workPermit_workPermitList",
     "workAppointment_6.1.6.1_workPlan_workPlanList",
 )
+
+PROCESS_EXECUTION_DETAIL_DOUBLE_CLICK = """function processExeLogListDB(event, row) {
+    if (!row || !row.id) {
+        ReactAPI.showMessage("w", "请选择一条工序执行记录");
+        return false;
+    }
+    var target = "/msService/ProcessAnalysis/processAnalysis/processExecution/detail"
+        + "?processExecutionId=" + encodeURIComponent(row.id);
+    window.open(target, "_blank");
+    return true;
+}"""
+
+DATAGRID_RUNTIME_OVERRIDES: Dict[str, Dict[str, Any]] = {
+    "WOM_1.0.0_produceTask_processExeLogList": {
+        "isdbcustom": True,
+        "dbcustomtextarea": PROCESS_EXECUTION_DETAIL_DOUBLE_CLICK,
+        "dbcustomtextarea_es5": PROCESS_EXECUTION_DETAIL_DOUBLE_CLICK,
+    },
+}
+
+MAKE_TASK_BUSINESS_TAB_RESTORE = """
+(function restoreMakeTaskBusinessTabs(attempt) {
+    setTimeout(function () {
+        var formData = ReactAPI.getFormData();
+        if (formData && formData.id && formData.formulaId && formData.planNum != null) {
+            ReactAPI.Layout.showTab("tabs-3");
+            ReactAPI.Layout.showTab("tabs-4");
+            if (!formData.formulaId.setProcess
+                    || formData.formulaId.setProcess.id != "RM_formulaType/commonFormula") {
+                ReactAPI.Layout.showTab("tabs-5");
+            }
+            if (attempt < 50) {
+                restoreMakeTaskBusinessTabs(attempt + 1);
+            }
+            return;
+        }
+        if (attempt < 50) {
+            restoreMakeTaskBusinessTabs(attempt + 1);
+            return;
+        }
+        ReactAPI.Layout.hideTab("tabs-3");
+        ReactAPI.Layout.hideTab("tabs-4");
+        ReactAPI.Layout.hideTab("tabs-5");
+    }, attempt == 0 ? 0 : 100);
+})(0);
+""".strip()
+
+MAKE_TASK_VENDOR_ONLOAD_TAIL_MARKER = "// 如果配方已经同步过"
+
+VIEW_ONLOAD_APPENDS: Dict[str, str] = {
+    "WOM_1.0.0_produceTask_makeTaskEdit": MAKE_TASK_BUSINESS_TAB_RESTORE,
+}
 
 
 @dataclass(frozen=True)
@@ -1681,6 +1734,102 @@ def field_json(field: FieldDef) -> Dict[str, object]:
     return result
 
 
+def extract_list_runtime_properties(view: ViewDef) -> Dict[str, object]:
+    list_property: Optional[ET.Element] = None
+    for item in iter_region_items(view, "LISTPT"):
+        candidate = item.find("listProperty")
+        if candidate is not None:
+            list_property = candidate
+            break
+    if list_property is None:
+        return {}
+
+    result: Dict[str, object] = {}
+    for key in (
+        "isdbcustom",
+        "isFirstLoad",
+        "isCheckBox",
+        "selectFirstRow",
+        "isTreeView",
+        "treePaging",
+        "isExportExcel",
+    ):
+        value = direct_text(list_property, key)
+        if value:
+            result[key] = bool_text(value)
+    for key in (
+        "dbcustomtextarea",
+        "dbcustomtextarea_es5",
+        "ptPageInit",
+        "ptPageInit_es5",
+        "renderOver",
+        "renderOver_es5",
+    ):
+        value = direct_text(list_property, key)
+        if value:
+            result[key] = value
+    return result
+
+
+def apply_datagrid_runtime_overrides(view: ViewDef, payload: Any) -> None:
+    overrides = DATAGRID_RUNTIME_OVERRIDES.get(view.code)
+    if not overrides:
+        return
+    expected_grid_code = first_datagrid_code(view) or view.code
+    candidates: List[Dict[str, Any]] = []
+
+    def visit(node: Any) -> None:
+        if isinstance(node, list):
+            for child in node:
+                visit(child)
+            return
+        if not isinstance(node, dict):
+            return
+        if node.get("type") == "layoutDatagrid":
+            candidates.append(node)
+        for child in node.values():
+            visit(child)
+
+    visit(payload)
+    target = next(
+        (
+            candidate
+            for candidate in candidates
+            if candidate.get("DataGridCode") == expected_grid_code
+            or candidate.get("code") == expected_grid_code
+        ),
+        candidates[0] if candidates else None,
+    )
+    if target is not None:
+        target.update(copy.deepcopy(overrides))
+
+
+def apply_view_runtime_overrides(view: ViewDef, payload: Any) -> None:
+    onload_append = VIEW_ONLOAD_APPENDS.get(view.code)
+    if not onload_append or not isinstance(payload, dict):
+        return
+    for event in payload.get("events") or []:
+        if not isinstance(event, dict) or event.get("name") not in {"onload", "onload_es5"}:
+            continue
+        current = str(event.get("function") or "").rstrip()
+        if (
+            view.code == "WOM_1.0.0_produceTask_makeTaskEdit"
+            and current.lstrip().startswith(
+                (
+                    "var formData = ReactAPI.getFormData();",
+                    "let formData = ReactAPI.getFormData();",
+                )
+            )
+            and MAKE_TASK_VENDOR_ONLOAD_TAIL_MARKER in current
+        ):
+            # The recovered package hides all business tabs before asynchronous
+            # form data is available. Keep the remaining vendor initialization,
+            # while the guarded poll above owns tab visibility.
+            current = current[current.index(MAKE_TASK_VENDOR_ONLOAD_TAIL_MARKER) :]
+        if onload_append not in current:
+            event["function"] = f"{onload_append}\n{current}" if current else onload_append
+
+
 def data_grid_json(
     view: ViewDef, parent_code: Optional[str] = None, views: Optional[Dict[str, ViewDef]] = None
 ) -> Dict[str, object]:
@@ -1723,6 +1872,7 @@ def data_grid_json(
         "buttons": extract_buttons(view, views),
         "fields": [field_json(field) for field in fields],
     }
+    grid.update(extract_list_runtime_properties(view))
     if view.url:
         prefix = view.url.rsplit("/", 1)[0]
         grid["downloadXls"] = prefix + "/downloadXls"
@@ -2129,6 +2279,8 @@ def view_json(
         payload = action_view_json(view, views)
     else:
         payload = list_json(view, views=views)
+    apply_datagrid_runtime_overrides(view, payload)
+    apply_view_runtime_overrides(view, payload)
     sanitize_runtime_strings(payload)
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 

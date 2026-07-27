@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-27T19:39:02+08:00",
-  "repoCommit": "ca2d0baf+working-tree-20260727-mes-full-closed-11-hardened",
+  "generatedAt": "2026-07-27T21:58:30+08:00",
+  "repoCommit": "4d41c2154e223c0aa629045cebea7ec4b0f924d4+working-tree-fructose-process-boundary",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -252,11 +252,11 @@
     }
   },
   "summary": {
-    "testedFeatures": 283,
-    "pass": 280,
+    "testedFeatures": 288,
+    "pass": 282,
     "fail": 0,
     "blocked": 0,
-    "notApplicable": 3
+    "notApplicable": 6
   },
   "items": [
     {
@@ -6164,6 +6164,111 @@
       "verificationSql": "Count exact test tenant and batch rows; require WMS document/transactions/stock 1/2/1 and trace snapshots 3/3.",
       "status": "PASS",
       "evidence": "Completion inbound and the real ProcessAnalysis trace page passed; marker-scoped WMS document/transactions/stock are exactly 1/2/1, trace snapshots are exactly 3/3, 14 timeline events render, and browser error arrays were empty.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "fructose-process-boundary",
+      "module": "WOM 生产线参照",
+      "route": "制造指令编辑页 / factoryLineRef2",
+      "operation": "点击生产线名称参照并查询有效生产线",
+      "api": "WOM factory-model production-line reference query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "backendEntry": "runtime customer condition -> HM factory-model query",
+      "tables": [
+        "public.hm_factory_models",
+        "public.hm_fac_node_types",
+        "public.rm_line_formulas"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Count valid hm_factory_models joined to hm_fac_node_types where code='004'.",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The real reference dialog rendered 15 production lines without SQLGrammarException; this is a read-only lookup and intentionally creates no business row.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "fructose-process-boundary",
+      "module": "WOM 制造指令业务页签",
+      "route": "制造指令编辑页",
+      "operation": "打开 marker 指令并切换常规信息、工序活动、用料汇总和检验清单",
+      "api": "WOM manufacturing-order detail and child-grid queries",
+      "method": "GET/POST",
+      "requiresPersistence": false,
+      "backendEntry": "runtime edit view -> WOM task/process/active/material/inspection queries",
+      "tables": [
+        "public.wom_produce_tasks",
+        "public.wom_task_processes",
+        "public.wom_task_actives"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Read the dedicated task and its process/activity children; no write is expected for opening an existing completed order.",
+      "status": "NOT_APPLICABLE",
+      "evidence": "All four business tabs rendered and jetting/saccharification were visible; console, page and request failure arrays were empty.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "fructose-process-boundary",
+      "module": "WOM 喷射到糖化执行夹具",
+      "route": "/msService/WOM/produceTask/processExelog/processExeLogList",
+      "operation": "准备两道真实执行记录并从列表双击喷射进入详情",
+      "api": "GET /processAnalysis/api/process-executions/9007190231281109",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "ProcessAnalysisController -> TraceabilityService -> ProcessAnalysisRepository",
+      "tables": [
+        "public.wom_task_processes",
+        "public.wom_proc_reports",
+        "public.wom_process_exelogs",
+        "public.wom_bpi_production_context_bindings"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Query task 9007190231280101 and executions 9007190231281109/9007190231282109; calculate next start minus current end.",
+      "status": "PASS",
+      "evidence": "PostgreSQL contains finished jetting 16:00:20..16:00:44 and saccharification 16:00:56..16:01:32; the 12-second handover and BPI context were returned by the detail API.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "fructose-process-boundary",
+      "module": "BPI 果糖连续工艺信号",
+      "route": "simulation/bpi/fructose-line-scenario.js and process execution detail",
+      "operation": "以 4 秒间隔回放 24 帧、每帧 12 个流量/波美值/边界信号，并从详情读取历史证据",
+      "api": "POST internal telemetry ingress; GET /bpi/v1/process-evidence",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "telemetry ingestion -> bpi telemetry repositories; ProcessEvidenceController -> ProcessEvidencePostgresRepository",
+      "tables": [
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_telemetry_point_rejects",
+        "bpi.bpi_telemetry_quarantine"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Count events/points/distinct properties/rejects/quarantine for 1000/PLANT-01/LINE-S07-01 between 2026-07-27T16:00:00+08:00 and 16:01:32+08:00.",
+      "status": "PASS",
+      "evidence": "PostgreSQL contains 24 accepted events, 288 accepted/stored points and 12 properties with zero point rejects and zero quarantine; four key series each contain 24 samples.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "fructose-process-boundary",
+      "module": "ProcessAnalysis 工序详情与批次追溯",
+      "route": "/msService/ProcessAnalysis/processAnalysis/processExecution/detail and /processBatchViewOut",
+      "operation": "查看工序边界和曲线，再点击查看批次追溯",
+      "api": "GET /processAnalysis/api/process-executions/{id}; GET /bpi/v1/process-evidence; GET /processAnalysis/exelogSecond/processBatchViewOut",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "ProcessAnalysis read model and BPI historical evidence read model",
+      "tables": [
+        "public.wom_produce_tasks",
+        "public.wom_process_exelogs",
+        "public.qcs_inspects",
+        "public.qcs_inspect_reports",
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Read-only verification of the same process execution, batch timeline and telemetry window; no new business row is expected.",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The detail page showed two nonblank charts and the 12-second handover; the trace page loaded 13 timeline events, two processes, material genealogy and quality facts with zero browser errors.",
       "issues": []
     }
   ],

@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-27T11:46:34+00:00",
-  "repoCommit": "ca2d0baf1c7d28b7a21ebd77397ed013aa063630",
+  "generatedAt": "2026-07-27T14:21:22+00:00",
+  "repoCommit": "4d41c2154e223c0aa629045cebea7ec4b0f924d4",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 389,
-    "totalBytes": 55267598,
+    "totalFiles": 392,
+    "totalBytes": 55922955,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 207,
+      "postgres-init-sql": 210,
       "runtime-binary-patch": 7,
       "runtime-patch-source": 23,
       "runtime-script": 27,
@@ -19,7 +19,7 @@
     "bytesByCategory": {
       "nacos-config-template": 42353,
       "nginx-runtime-config": 27463,
-      "postgres-init-sql": 54320350,
+      "postgres-init-sql": 54975707,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 95909,
       "runtime-script": 284123,
@@ -1553,6 +1553,24 @@
       "category": "postgres-init-sql",
       "sizeBytes": 7600,
       "sha256": "6ed61455c10c459762cb9cbe08c98cf37a916499ec0fcb07fb2ac98dcff1c0de"
+    },
+    {
+      "path": "deploy/docker/postgres/init/208-wom-factory-line-reference-bootstrap.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 8820,
+      "sha256": "eabddf9c4e3a2bdd6fbf4fd5f8d764157b9585b0efa16e73f94a2f37b3f215ad"
+    },
+    {
+      "path": "deploy/docker/postgres/init/209-wom-process-execution-detail-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 61836,
+      "sha256": "ed5acbdb668e6c9d2e3d670c33a848ddc195738a45e094a46a4f07a3ea07275b"
+    },
+    {
+      "path": "deploy/docker/postgres/init/210-wom-make-task-edit-full-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 584701,
+      "sha256": "75f2c734df63f1ae0661181310b1419979d6fa9af0cc886ff648f18fc4323cb5"
     },
     {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
