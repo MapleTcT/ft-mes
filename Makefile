@@ -505,6 +505,7 @@ runtime-script-check:
 	sh -n deploy/docker/scripts/prepare-qcs-static-assets.sh
 	sh -n deploy/docker/scripts/patch-lims-qcs-inspect-report-service.sh
 	sh -n deploy/docker/scripts/build-rm-import-transaction-patch.sh
+	sh -n deploy/docker/scripts/build-wom-core-production-boot-jar.sh
 	sh -n deploy/docker/scripts/build-wom-public-produce-created-disabled-boot-jar.sh
 	sh -n deploy/database/production-migration/scripts/run-target-preflight.sh
 	sh -n deploy/database/production-migration/scripts/run-source-inventory.sh

@@ -198,12 +198,14 @@ BEGIN
         SELECT view_json, convert_from(lo_get(view_json), 'UTF8')
         INTO old_view_json_oid, current_payload
         FROM public.runtime_extra_view
-        WHERE code = 'WOM_1.0.0_produceTask_easyTaskOperateView';
+        WHERE code = 'WOM_1.0.0_produceTask_easyTaskOperateView'
+        FOR UPDATE;
     ELSE
         SELECT view_json::text
         INTO current_payload
         FROM public.runtime_extra_view
-        WHERE code = 'WOM_1.0.0_produceTask_easyTaskOperateView';
+        WHERE code = 'WOM_1.0.0_produceTask_easyTaskOperateView'
+        FOR UPDATE;
     END IF;
 
     IF current_payload IS NULL OR current_payload = '' THEN
@@ -234,6 +236,9 @@ BEGIN
         UPDATE public.runtime_extra_view
         SET view_json = patched_payload
         WHERE code = 'WOM_1.0.0_produceTask_easyTaskOperateView';
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'runtime_extra_view WOM easyTaskOperateView disappeared during patch';
+        END IF;
     END IF;
 END $do$;
 

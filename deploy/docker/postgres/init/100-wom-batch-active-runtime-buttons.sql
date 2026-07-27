@@ -2,6 +2,8 @@
 -- The recovered runtime_extra_view JSON in 076 has buttons: [] for this grid,
 -- while the source module.xml contains startActive/endActive button handlers.
 
+BEGIN;
+
 CREATE OR REPLACE FUNCTION public.adp_patch_datagrid_buttons(
     target jsonb,
     grid_code text,
@@ -46,6 +48,8 @@ DECLARE
     current_payload text;
     patched_payload text;
     active_buttons jsonb;
+    old_view_json_oid oid;
+    new_view_json_oid oid;
 BEGIN
     SELECT udt_name = 'oid' INTO view_json_is_oid
     FROM information_schema.columns
@@ -233,15 +237,17 @@ BEGIN
     );
 
     IF COALESCE(view_json_is_oid, false) THEN
-        SELECT convert_from(lo_get(view_json), 'UTF8')
-        INTO current_payload
+        SELECT view_json, convert_from(lo_get(view_json), 'UTF8')
+        INTO old_view_json_oid, current_payload
         FROM public.runtime_extra_view
-        WHERE code = 'WOM_1.0.0_produceTask_makeTaskBatchView';
+        WHERE code = 'WOM_1.0.0_produceTask_makeTaskBatchView'
+        FOR UPDATE;
     ELSE
         SELECT view_json::text
         INTO current_payload
         FROM public.runtime_extra_view
-        WHERE code = 'WOM_1.0.0_produceTask_makeTaskBatchView';
+        WHERE code = 'WOM_1.0.0_produceTask_makeTaskBatchView'
+        FOR UPDATE;
     END IF;
 
     IF current_payload IS NULL OR current_payload = '' THEN
@@ -256,12 +262,26 @@ BEGIN
     )::text;
 
     IF COALESCE(view_json_is_oid, false) THEN
+        new_view_json_oid := lo_from_bytea(0, convert_to(patched_payload, 'UTF8'));
         UPDATE public.runtime_extra_view
-        SET view_json = lo_from_bytea(0, convert_to(patched_payload, 'UTF8'))
+        SET view_json = new_view_json_oid
         WHERE code = 'WOM_1.0.0_produceTask_makeTaskBatchView';
+        IF FOUND THEN
+            IF old_view_json_oid IS NOT NULL AND old_view_json_oid <> new_view_json_oid THEN
+                PERFORM lo_unlink(old_view_json_oid);
+            END IF;
+        ELSE
+            PERFORM lo_unlink(new_view_json_oid);
+            RAISE EXCEPTION 'runtime_extra_view WOM makeTaskBatchView disappeared during patch';
+        END IF;
     ELSE
         UPDATE public.runtime_extra_view
         SET view_json = patched_payload
         WHERE code = 'WOM_1.0.0_produceTask_makeTaskBatchView';
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'runtime_extra_view WOM makeTaskBatchView disappeared during patch';
+        END IF;
     END IF;
 END $do$;
+
+COMMIT;

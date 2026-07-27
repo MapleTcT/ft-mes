@@ -13,12 +13,18 @@ Builds a patched WOMMs boot jar for the manufacturing-order core flow:
   - closes both the easy-report activity and its execution record consistently;
   - materializes missing put-in/output execution records before activity close.
 
-Required environment:
+Optional environment:
   ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_FILE=/path/to/WOMProduceTaskServiceImpl.java
   ADP_WOM_WAIT_PUT_SERVICE_SOURCE_FILE=/path/to/WOMWaitPutRecordServiceImpl.java
+
+The source paths default to the recovered WOM 6.1.3.4 source repository next
+to this repository. SHA-256 verification is optional for local/runtime
+preparation. If any checksum below is supplied, all three are required:
   ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_SHA256=<expected sha256>
   ADP_WOM_WAIT_PUT_SERVICE_SOURCE_SHA256=<expected sha256>
   ADP_WOM_INPUT_JAR_SHA256=<expected sha256>
+
+Set ADP_WOM_REQUIRE_CHECKSUMS=true to reject an unchecked production build.
 USAGE
 }
 
@@ -64,16 +70,18 @@ for command_name in javac jar unzip zip python3; do
   fi
 done
 
-produce_src="${ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_FILE:-}"
-wait_put_src="${ADP_WOM_WAIT_PUT_SERVICE_SOURCE_FILE:-}"
+script_dir="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+repo_root="$(CDPATH= cd -- "$script_dir/../../.." && pwd)"
+default_source_root="$(dirname "$repo_root")/mes-modules-source-repo/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/services/impl"
+produce_src="${ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_FILE:-$default_source_root/WOMProduceTaskServiceImpl.java}"
+wait_put_src="${ADP_WOM_WAIT_PUT_SERVICE_SOURCE_FILE:-$default_source_root/WOMWaitPutRecordServiceImpl.java}"
 produce_src_sha="${ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_SHA256:-}"
 wait_put_src_sha="${ADP_WOM_WAIT_PUT_SERVICE_SOURCE_SHA256:-}"
 input_wom_jar_sha="${ADP_WOM_INPUT_JAR_SHA256:-}"
+require_checksums="${ADP_WOM_REQUIRE_CHECKSUMS:-false}"
 
-if [ -z "$produce_src" ] || [ -z "$wait_put_src" ] ||
-   [ -z "$produce_src_sha" ] || [ -z "$wait_put_src_sha" ] ||
-   [ -z "$input_wom_jar_sha" ]; then
-  echo "source paths and expected SHA-256 values are required; see --help" >&2
+if [ "$require_checksums" != "true" ] && [ "$require_checksums" != "false" ]; then
+  echo "ADP_WOM_REQUIRE_CHECKSUMS must be true or false" >&2
   exit 2
 fi
 
@@ -104,17 +112,32 @@ wait_put_src="$(abs_path "$wait_put_src")"
 actual_input_wom_jar_sha="$(sha256_file "$input_wom_jar")"
 actual_produce_src_sha="$(sha256_file "$produce_src")"
 actual_wait_put_src_sha="$(sha256_file "$wait_put_src")"
-if [ "$actual_input_wom_jar_sha" != "$input_wom_jar_sha" ]; then
-  echo "input WOM jar checksum mismatch: expected $input_wom_jar_sha, got $actual_input_wom_jar_sha" >&2
-  exit 1
-fi
-if [ "$actual_produce_src_sha" != "$produce_src_sha" ]; then
-  echo "WOMProduceTaskServiceImpl source checksum mismatch: expected $produce_src_sha, got $actual_produce_src_sha" >&2
-  exit 1
-fi
-if [ "$actual_wait_put_src_sha" != "$wait_put_src_sha" ]; then
-  echo "WOMWaitPutRecordServiceImpl source checksum mismatch: expected $wait_put_src_sha, got $actual_wait_put_src_sha" >&2
-  exit 1
+checksum_values="${produce_src_sha}${wait_put_src_sha}${input_wom_jar_sha}"
+if [ -n "$checksum_values" ]; then
+  if [ -z "$produce_src_sha" ] || [ -z "$wait_put_src_sha" ] || [ -z "$input_wom_jar_sha" ]; then
+    echo "all three expected SHA-256 values are required when checksum verification is enabled" >&2
+    exit 2
+  fi
+  if [ "$actual_input_wom_jar_sha" != "$input_wom_jar_sha" ]; then
+    echo "input WOM jar checksum mismatch: expected $input_wom_jar_sha, got $actual_input_wom_jar_sha" >&2
+    exit 1
+  fi
+  if [ "$actual_produce_src_sha" != "$produce_src_sha" ]; then
+    echo "WOMProduceTaskServiceImpl source checksum mismatch: expected $produce_src_sha, got $actual_produce_src_sha" >&2
+    exit 1
+  fi
+  if [ "$actual_wait_put_src_sha" != "$wait_put_src_sha" ]; then
+    echo "WOMWaitPutRecordServiceImpl source checksum mismatch: expected $wait_put_src_sha, got $actual_wait_put_src_sha" >&2
+    exit 1
+  fi
+elif [ "$require_checksums" = "true" ]; then
+  echo "ADP_WOM_REQUIRE_CHECKSUMS=true requires all three expected SHA-256 values" >&2
+  exit 2
+else
+  echo "warning: building WOM patch without pinned checksums" >&2
+  echo "  input WOM jar: $actual_input_wom_jar_sha" >&2
+  echo "  WOMProduceTaskServiceImpl.java: $actual_produce_src_sha" >&2
+  echo "  WOMWaitPutRecordServiceImpl.java: $actual_wait_put_src_sha" >&2
 fi
 
 tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/adp-wom-core-production.XXXXXX")"
@@ -333,9 +356,13 @@ easy_execution_finish_block = '''\t\tfor(WOMActiExelog actiExelog : actiExelogs)
 \t\t\t// 活动执行状态(已完成)
 \t\t\tactiExelog.setRunState(new SystemCode("WOM_runState/finished"));'''
 easy_execution_finish_replacement = '''\t\tfor(WOMActiExelog actiExelog : actiExelogs){
-\t\t\tactiExelog.setActEndTime(now);
+\t\t\tDate executionEndTime = actiExelog.getActEndTime();
+\t\t\tif (executionEndTime == null) {
+\t\t\t\texecutionEndTime = now;
+\t\t\t\tactiExelog.setActEndTime(executionEndTime);
+\t\t\t}
 \t\t\tif (actiExelog.getActStartTime() != null) {
-\t\t\t\tlong takeMinutes = (now.getTime() - actiExelog.getActStartTime().getTime()) / (1000 * 60);
+\t\t\t\tlong takeMinutes = (executionEndTime.getTime() - actiExelog.getActStartTime().getTime()) / (1000 * 60);
 \t\t\t\tactiExelog.setActlongTime(BigDecimal.valueOf(takeMinutes));
 \t\t\t}
 \t\t\t// 活动执行状态(已完成)
@@ -354,33 +381,45 @@ end_active_feedback_replacement = '''\t\tif (!(Boolean) feedBackResult.get("succ
 \t\t\treturn resultMap;
 \t\t}
 \t\t// Detail-row saves can bypass the parent report callback in recovered views.
-\t\t// Rebuild the missing execution rows before close so the existing
-\t\t// generateInOutRecordByAvtiveRecord path persists material movements.
-\t\tif (actiExelogs.isEmpty()) {
-\t\t\tList<WOMProcReport> activeProcReports = procReportDao.findByCriteria(
-\t\t\t\t\tRestrictions.eq("taskActiveId", active),
-\t\t\t\t\tRestrictions.eq("valid", true));
-\t\t\tif (!activeProcReports.isEmpty()) {
-\t\t\t\tWOMProcReport activeProcReport = activeProcReports.get(0);
-\t\t\t\tif ("RM_activeType/putin".equals(activeType)
-\t\t\t\t\t\t|| "RM_activeType/batchPutin".equals(activeType)
-\t\t\t\t\t\t|| "RM_activeType/pipePutin".equals(activeType)
-\t\t\t\t\t\t|| "RM_activeType/pipeBatchPutin".equals(activeType)) {
-\t\t\t\t\tList<WOMPutinDetail> putinDetails = putinDetailDao.findByCriteria(
-\t\t\t\t\t\t\tRestrictions.eq("headId", activeProcReport),
-\t\t\t\t\t\t\tRestrictions.eq("valid", true));
-\t\t\t\t\tfor (WOMPutinDetail putinDetail : putinDetails) {
+\t\t// Rebuild every missing execution row for the current unfinished report;
+\t\t// existing rows are retained so a partial callback cannot create duplicates.
+\t\tSet<Long> existingPutinDetailIds = new HashSet<Long>();
+\t\tSet<Long> existingOutputDetailIds = new HashSet<Long>();
+\t\tfor (WOMActiExelog existingExelog : actiExelogs) {
+\t\t\tif (existingExelog.getPutinDetailId() != null) {
+\t\t\t\texistingPutinDetailIds.add(existingExelog.getPutinDetailId().getId());
+\t\t\t}
+\t\t\tif (existingExelog.getOutputDetailId() != null) {
+\t\t\t\texistingOutputDetailIds.add(existingExelog.getOutputDetailId().getId());
+\t\t\t}
+\t\t}
+\t\tList<WOMProcReport> activeProcReports = procReportDao.findByCriteria(
+\t\t\t\tRestrictions.eq("taskActiveId", active),
+\t\t\t\tRestrictions.eq("valid", true),
+\t\t\t\tRestrictions.eq("isFinish", false));
+\t\tfor (WOMProcReport activeProcReport : activeProcReports) {
+\t\t\tif ("RM_activeType/putin".equals(activeType)
+\t\t\t\t\t|| "RM_activeType/batchPutin".equals(activeType)
+\t\t\t\t\t|| "RM_activeType/pipePutin".equals(activeType)
+\t\t\t\t\t|| "RM_activeType/pipeBatchPutin".equals(activeType)) {
+\t\t\t\tList<WOMPutinDetail> putinDetails = putinDetailDao.findByCriteria(
+\t\t\t\t\t\tRestrictions.eq("headId", activeProcReport),
+\t\t\t\t\t\tRestrictions.eq("valid", true));
+\t\t\t\tfor (WOMPutinDetail putinDetail : putinDetails) {
+\t\t\t\t\tif (existingPutinDetailIds.add(putinDetail.getId())) {
 \t\t\t\t\t\tactiExelogs.add(procReportService.getExeLogs(
 \t\t\t\t\t\t\t\tputinDetail, null, activeProcReport.getOperateType(),
 \t\t\t\t\t\t\t\tactiveProcReport.getCheckActiveId()));
 \t\t\t\t\t}
 \t\t\t\t}
-\t\t\t\tif ("RM_activeType/output".equals(activeType)
-\t\t\t\t\t\t|| "RM_activeType/pipeOutput".equals(activeType)) {
-\t\t\t\t\tList<WOMOutputDetail> outputDetails = outputDetailDao.findByCriteria(
-\t\t\t\t\t\t\tRestrictions.eq("headId", activeProcReport),
-\t\t\t\t\t\t\tRestrictions.eq("valid", true));
-\t\t\t\t\tfor (WOMOutputDetail outputDetail : outputDetails) {
+\t\t\t}
+\t\t\tif ("RM_activeType/output".equals(activeType)
+\t\t\t\t\t|| "RM_activeType/pipeOutput".equals(activeType)) {
+\t\t\t\tList<WOMOutputDetail> outputDetails = outputDetailDao.findByCriteria(
+\t\t\t\t\t\tRestrictions.eq("headId", activeProcReport),
+\t\t\t\t\t\tRestrictions.eq("valid", true));
+\t\t\t\tfor (WOMOutputDetail outputDetail : outputDetails) {
+\t\t\t\t\tif (existingOutputDetailIds.add(outputDetail.getId())) {
 \t\t\t\t\t\tactiExelogs.add(procReportService.getExeLogs(
 \t\t\t\t\t\t\t\tnull, outputDetail, activeProcReport.getOperateType(),
 \t\t\t\t\t\t\t\tactiveProcReport.getCheckActiveId()));

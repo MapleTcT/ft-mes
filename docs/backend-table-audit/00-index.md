@@ -18,7 +18,7 @@
 | `platform-flow-todo.md` | 待开始 | 流程、待办、任务调度 |
 | `business-quality-lims-qcs.md` | 已开始 | LIMS、QCS、Qualify 质量域；QCS 请检/报告明细 PostgreSQL 缺表已用 `107-qcs-inspect-detail-tables.sql` 处理，业务写动作仍需 marker 验收 |
 | `business-production.md` | 核心主线已验收 | 制造、报工、请检、质量处置、完工入库和追溯已完成真实页面/API/PostgreSQL marker；其余产品范围与导出项独立跟踪 |
-| `wom-consumption-record-analysis.md` | 已完成专项解释 | 历史缺口已关闭：保留旧投料路径不生成 `wom_mat_consum_recods` 的证据；当前 WOM 服务补丁及 `_CLOSED_10` 真实页面/API/PostgreSQL 验收已确认投入明细、活动执行和消耗台账同步落库 |
+| `wom-consumption-record-analysis.md` | 已完成专项解释 | 历史缺口已关闭：保留旧投料路径不生成 `wom_mat_consum_recods` 的证据；当前 WOM 服务补丁及 `_CLOSED_11` 真实页面/API/PostgreSQL 精确验收已确认投入明细、活动执行和消耗台账同步落库，并确认产出明细/产出台账 `2/2` |
 | `wom-public-produce-task-created-analysis.md` | 已完成退役验收 | public `produceTaskCreated` 旧实现返回成功但不落库；当前已正式废弃并以 `HTTP 200/code=400/已废弃` 明确拒绝，PostgreSQL marker `0 -> 0`，`PROD-ACTION-007` 按 `NOT_APPLICABLE` 关闭；不是 PostgreSQL 兼容 SQL 缺口 |
 | `material-service-dependency-analysis.md` | 已完成专项解释 | WOM/QCS 完工入库、库存回写依赖缺失的 `material` 租户服务；`100.99.133.43` Nacos、网关、PostgreSQL 和包扫描均已复验 |
 | `processanalysis-dependency-analysis.md` | 已恢复并验收 | WOM 生产过程追溯由 `process-analysis` 源码模块恢复；`100.99.133.43` Nacos、网关、真实按钮和 PostgreSQL marker 均已复验 |

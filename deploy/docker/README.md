@@ -39,6 +39,13 @@ docker compose --env-file .env restart nginx
 docker compose --env-file .env ps
 ```
 
+`prepare-runtime-patches.sh` 会调用 WOM 核心补丁构建器。默认源码目录是当前仓库同级的
+`mes-modules-source-repo/modules/wom/WOM_6.1.3.4`；其他布局可通过
+`ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_FILE` 和 `ADP_WOM_WAIT_PUT_SERVICE_SOURCE_FILE`
+显式覆盖。本地准备允许未固定 checksum，但会在日志打印输入 JAR 和两份源码的实际 SHA-256。
+发布到共享或生产环境时必须设置 `ADP_WOM_REQUIRE_CHECKSUMS=true`，并同时提供三个
+`ADP_WOM_*_SHA256`，避免在未核对运行包/源码身份时生成补丁。
+
 从仓库根目录也可以使用统一入口：
 
 ```bash
