@@ -9,11 +9,16 @@ Usage:
 Builds a patched WOMMs boot jar for the manufacturing-order core flow:
   - keeps workflow end callbacks from clearing the active Hibernate session;
   - ignores soft-deleted tasks during production-batch uniqueness checks;
-  - reports missing product/unit master data as a business error instead of NPE.
+  - reports missing product/unit master data as a business error instead of NPE;
+  - closes both the easy-report activity and its execution record consistently;
+  - materializes missing put-in/output execution records before activity close.
 
-Optional:
+Required environment:
   ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_FILE=/path/to/WOMProduceTaskServiceImpl.java
   ADP_WOM_WAIT_PUT_SERVICE_SOURCE_FILE=/path/to/WOMWaitPutRecordServiceImpl.java
+  ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_SHA256=<expected sha256>
+  ADP_WOM_WAIT_PUT_SERVICE_SOURCE_SHA256=<expected sha256>
+  ADP_WOM_INPUT_JAR_SHA256=<expected sha256>
 USAGE
 }
 
@@ -59,12 +64,18 @@ for command_name in javac jar unzip zip python3; do
   fi
 done
 
-docker_dir="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
-repo_root="$(CDPATH= cd -- "$docker_dir/../.." && pwd)"
-source_root="$(CDPATH= cd -- "$repo_root/.." && pwd)/mes-modules-source-repo"
-default_service_root="$source_root/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/services/impl"
-produce_src="${ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_FILE:-$default_service_root/WOMProduceTaskServiceImpl.java}"
-wait_put_src="${ADP_WOM_WAIT_PUT_SERVICE_SOURCE_FILE:-$default_service_root/WOMWaitPutRecordServiceImpl.java}"
+produce_src="${ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_FILE:-}"
+wait_put_src="${ADP_WOM_WAIT_PUT_SERVICE_SOURCE_FILE:-}"
+produce_src_sha="${ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_SHA256:-}"
+wait_put_src_sha="${ADP_WOM_WAIT_PUT_SERVICE_SOURCE_SHA256:-}"
+input_wom_jar_sha="${ADP_WOM_INPUT_JAR_SHA256:-}"
+
+if [ -z "$produce_src" ] || [ -z "$wait_put_src" ] ||
+   [ -z "$produce_src_sha" ] || [ -z "$wait_put_src_sha" ] ||
+   [ -z "$input_wom_jar_sha" ]; then
+  echo "source paths and expected SHA-256 values are required; see --help" >&2
+  exit 2
+fi
 
 for src_file in "$produce_src" "$wait_put_src"; do
   if [ ! -f "$src_file" ]; then
@@ -77,8 +88,35 @@ abs_path() {
   python3 -c 'import os, sys; print(os.path.abspath(sys.argv[1]))' "$1"
 }
 
+sha256_file() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    shasum -a 256 "$1" | awk '{print $1}'
+  fi
+}
+
 input_wom_jar="$(abs_path "$input_wom_jar")"
 output_wom_jar="$(abs_path "$output_wom_jar")"
+produce_src="$(abs_path "$produce_src")"
+wait_put_src="$(abs_path "$wait_put_src")"
+
+actual_input_wom_jar_sha="$(sha256_file "$input_wom_jar")"
+actual_produce_src_sha="$(sha256_file "$produce_src")"
+actual_wait_put_src_sha="$(sha256_file "$wait_put_src")"
+if [ "$actual_input_wom_jar_sha" != "$input_wom_jar_sha" ]; then
+  echo "input WOM jar checksum mismatch: expected $input_wom_jar_sha, got $actual_input_wom_jar_sha" >&2
+  exit 1
+fi
+if [ "$actual_produce_src_sha" != "$produce_src_sha" ]; then
+  echo "WOMProduceTaskServiceImpl source checksum mismatch: expected $produce_src_sha, got $actual_produce_src_sha" >&2
+  exit 1
+fi
+if [ "$actual_wait_put_src_sha" != "$wait_put_src_sha" ]; then
+  echo "WOMWaitPutRecordServiceImpl source checksum mismatch: expected $wait_put_src_sha, got $actual_wait_put_src_sha" >&2
+  exit 1
+fi
+
 tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/adp-wom-core-production.XXXXXX")"
 trap 'rm -rf "$tmp_dir"' EXIT INT TERM
 
@@ -274,6 +312,86 @@ unit_replacement = unit_line.split('\n')[0] + '''
 if unit_line not in wait_put:
     raise SystemExit("failed to locate unit entity lookup in WOMWaitPutRecordServiceImpl")
 wait_put = wait_put.replace(unit_line, unit_replacement, 1)
+
+easy_active_finish_block = '''\t\tDate now = new Date();
+\t\t// 将活动修改为已完成
+\t\ttaskActive.setIsFinish(true);
+\t\t// 活动结束时间
+\t\ttaskActive.setActEndTime(now);
+\t\ttaskActiveDao.merge(taskActive);'''
+easy_active_finish_replacement = '''\t\tDate now = new Date();
+\t\t// Keep the activity row consistent with the finished state returned to the UI.
+\t\ttaskActive.setIsFinish(true);
+\t\ttaskActive.setRunState(new SystemCode("WOM_runState/finished"));
+\t\ttaskActive.setActEndTime(now);
+\t\ttaskActiveDao.merge(taskActive);'''
+if easy_active_finish_block not in produce:
+    raise SystemExit("failed to locate easy-report activity completion block")
+produce = produce.replace(easy_active_finish_block, easy_active_finish_replacement, 1)
+
+easy_execution_finish_block = '''\t\tfor(WOMActiExelog actiExelog : actiExelogs){
+\t\t\t// 活动执行状态(已完成)
+\t\t\tactiExelog.setRunState(new SystemCode("WOM_runState/finished"));'''
+easy_execution_finish_replacement = '''\t\tfor(WOMActiExelog actiExelog : actiExelogs){
+\t\t\tactiExelog.setActEndTime(now);
+\t\t\tif (actiExelog.getActStartTime() != null) {
+\t\t\t\tlong takeMinutes = (now.getTime() - actiExelog.getActStartTime().getTime()) / (1000 * 60);
+\t\t\t\tactiExelog.setActlongTime(BigDecimal.valueOf(takeMinutes));
+\t\t\t}
+\t\t\t// 活动执行状态(已完成)
+\t\t\tactiExelog.setRunState(new SystemCode("WOM_runState/finished"));'''
+if easy_execution_finish_block not in produce:
+    raise SystemExit("failed to locate easy-report execution completion block")
+produce = produce.replace(easy_execution_finish_block, easy_execution_finish_replacement, 1)
+
+end_active_feedback_block = '''\t\tif (!(Boolean) feedBackResult.get("success")) {
+\t\t\tresultMap.put("data", active.getRunState());
+\t\t\treturn resultMap;
+\t\t}
+\t\t//结束活动回填活动活动执行记录'''
+end_active_feedback_replacement = '''\t\tif (!(Boolean) feedBackResult.get("success")) {
+\t\t\tresultMap.put("data", active.getRunState());
+\t\t\treturn resultMap;
+\t\t}
+\t\t// Detail-row saves can bypass the parent report callback in recovered views.
+\t\t// Rebuild the missing execution rows before close so the existing
+\t\t// generateInOutRecordByAvtiveRecord path persists material movements.
+\t\tif (actiExelogs.isEmpty()) {
+\t\t\tList<WOMProcReport> activeProcReports = procReportDao.findByCriteria(
+\t\t\t\t\tRestrictions.eq("taskActiveId", active),
+\t\t\t\t\tRestrictions.eq("valid", true));
+\t\t\tif (!activeProcReports.isEmpty()) {
+\t\t\t\tWOMProcReport activeProcReport = activeProcReports.get(0);
+\t\t\t\tif ("RM_activeType/putin".equals(activeType)
+\t\t\t\t\t\t|| "RM_activeType/batchPutin".equals(activeType)
+\t\t\t\t\t\t|| "RM_activeType/pipePutin".equals(activeType)
+\t\t\t\t\t\t|| "RM_activeType/pipeBatchPutin".equals(activeType)) {
+\t\t\t\t\tList<WOMPutinDetail> putinDetails = putinDetailDao.findByCriteria(
+\t\t\t\t\t\t\tRestrictions.eq("headId", activeProcReport),
+\t\t\t\t\t\t\tRestrictions.eq("valid", true));
+\t\t\t\t\tfor (WOMPutinDetail putinDetail : putinDetails) {
+\t\t\t\t\t\tactiExelogs.add(procReportService.getExeLogs(
+\t\t\t\t\t\t\t\tputinDetail, null, activeProcReport.getOperateType(),
+\t\t\t\t\t\t\t\tactiveProcReport.getCheckActiveId()));
+\t\t\t\t\t}
+\t\t\t\t}
+\t\t\t\tif ("RM_activeType/output".equals(activeType)
+\t\t\t\t\t\t|| "RM_activeType/pipeOutput".equals(activeType)) {
+\t\t\t\t\tList<WOMOutputDetail> outputDetails = outputDetailDao.findByCriteria(
+\t\t\t\t\t\t\tRestrictions.eq("headId", activeProcReport),
+\t\t\t\t\t\t\tRestrictions.eq("valid", true));
+\t\t\t\t\tfor (WOMOutputDetail outputDetail : outputDetails) {
+\t\t\t\t\t\tactiExelogs.add(procReportService.getExeLogs(
+\t\t\t\t\t\t\t\tnull, outputDetail, activeProcReport.getOperateType(),
+\t\t\t\t\t\t\t\tactiveProcReport.getCheckActiveId()));
+\t\t\t\t\t}
+\t\t\t\t}
+\t\t\t}
+\t\t}
+\t\t//结束活动回填活动活动执行记录'''
+if end_active_feedback_block not in produce:
+    raise SystemExit("failed to locate endActive feedback completion block")
+produce = produce.replace(end_active_feedback_block, end_active_feedback_replacement, 1)
 
 produce_path.write_text(produce, encoding="utf-8")
 wait_put_path.write_text(wait_put, encoding="utf-8")

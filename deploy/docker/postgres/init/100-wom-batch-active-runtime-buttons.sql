@@ -94,29 +94,28 @@ BEGIN
         async: false,
         data: { activeId: activeId },
         success: function success(res) {
-            if (res.success) {
-                var data = res.data;
-                if (data.success) {
-                    ReactAPI.showMessage("s", "活动已开始！");
-                    activeDataGrid.refreshDataByRequst({
-                        type: "post",
-                        url: "/msService/WOM/produceTask/taskActive/queryByProcess?processId=" + processId + "&showBatch=false",
-                        param: {}
-                    });
-                    processDataGrid.refreshDataByRequst({
-                        type: "post",
-                        url: "/msService/WOM/produceTask/produceTask/data-dg1576028988483?datagridCode=WOM_1.0.0_produceTask_makeTaskBatchViewdg1586416569990&id=" + taskId,
-                        param: {}
-                    });
-                    if (opener) {
-                        opener.ReactAPI.getComponentAPI('ListView').SearchList.submitEditDialogCallback();
-                    }
-                } else {
-                    ReactAPI.showMessage("f", data.msg);
+            var data = res && res.data ? res.data : {};
+            if (res && (res.success === true || res.code === 200) && data.success === true) {
+                ReactAPI.showMessage("s", "活动已开始！");
+                activeDataGrid.refreshDataByRequst({
+                    type: "post",
+                    url: "/msService/WOM/produceTask/taskActive/queryByProcess?processId=" + processId + "&showBatch=false",
+                    param: {}
+                });
+                processDataGrid.refreshDataByRequst({
+                    type: "post",
+                    url: "/msService/WOM/produceTask/produceTask/data-dg1576028988483?datagridCode=WOM_1.0.0_produceTask_makeTaskBatchViewdg1586416569990&id=" + taskId,
+                    param: {}
+                });
+                if (opener) {
+                    opener.ReactAPI.getComponentAPI('ListView').SearchList.submitEditDialogCallback();
                 }
             } else {
-                ReactAPI.showMessage("f", res.msg);
+                ReactAPI.showMessage("f", data.msg || (res && (res.message || res.msg)) || "活动开始失败");
             }
+        },
+        error: function error(xhr) {
+            ReactAPI.showMessage("f", "活动开始请求失败（HTTP " + (xhr && xhr.status ? xhr.status : "未知") + "）");
         }
     });
 }$$,
@@ -135,29 +134,28 @@ BEGIN
         async: false,
         data: { activeId: activeId },
         success: function success(res) {
-            if (res.success) {
-                var data = res.data;
-                if (data.success) {
-                    ReactAPI.showMessage("s", "活动已开始！");
-                    activeDataGrid.refreshDataByRequst({
-                        type: "post",
-                        url: "/msService/WOM/produceTask/taskActive/queryByProcess?processId=" + processId + "&showBatch=false",
-                        param: {}
-                    });
-                    processDataGrid.refreshDataByRequst({
-                        type: "post",
-                        url: "/msService/WOM/produceTask/produceTask/data-dg1576028988483?datagridCode=WOM_1.0.0_produceTask_makeTaskBatchViewdg1586416569990&id=" + taskId,
-                        param: {}
-                    });
-                    if (opener) {
-                        opener.ReactAPI.getComponentAPI('ListView').SearchList.submitEditDialogCallback();
-                    }
-                } else {
-                    ReactAPI.showMessage("f", data.msg);
+            var data = res && res.data ? res.data : {};
+            if (res && (res.success === true || res.code === 200) && data.success === true) {
+                ReactAPI.showMessage("s", "活动已开始！");
+                activeDataGrid.refreshDataByRequst({
+                    type: "post",
+                    url: "/msService/WOM/produceTask/taskActive/queryByProcess?processId=" + processId + "&showBatch=false",
+                    param: {}
+                });
+                processDataGrid.refreshDataByRequst({
+                    type: "post",
+                    url: "/msService/WOM/produceTask/produceTask/data-dg1576028988483?datagridCode=WOM_1.0.0_produceTask_makeTaskBatchViewdg1586416569990&id=" + taskId,
+                    param: {}
+                });
+                if (opener) {
+                    opener.ReactAPI.getComponentAPI('ListView').SearchList.submitEditDialogCallback();
                 }
             } else {
-                ReactAPI.showMessage("f", res.msg);
+                ReactAPI.showMessage("f", data.msg || (res && (res.message || res.msg)) || "活动开始失败");
             }
+        },
+        error: function error(xhr) {
+            ReactAPI.showMessage("f", "活动开始请求失败（HTTP " + (xhr && xhr.status ? xhr.status : "未知") + "）");
         }
     });
 }$$
@@ -197,11 +195,15 @@ BEGIN
         async: false,
         data: { activeId: activeId },
         success: function success(res) {
-            if (res.success && res.data && res.data.success) {
+            var data = res && res.data ? res.data : {};
+            if (res && (res.success === true || res.code === 200) && data.success === true) {
                 ReactAPI.showMessage("s", "活动已结束！");
             } else {
-                ReactAPI.showMessage("f", (res.data && res.data.msg) || res.msg);
+                ReactAPI.showMessage("f", data.msg || (res && (res.message || res.msg)) || "活动结束失败");
             }
+        },
+        error: function error(xhr) {
+            ReactAPI.showMessage("f", "活动结束请求失败（HTTP " + (xhr && xhr.status ? xhr.status : "未知") + "）");
         }
     });
 }$$,
@@ -215,11 +217,15 @@ BEGIN
         async: false,
         data: { activeId: activeId },
         success: function success(res) {
-            if (res.success && res.data && res.data.success) {
+            var data = res && res.data ? res.data : {};
+            if (res && (res.success === true || res.code === 200) && data.success === true) {
                 ReactAPI.showMessage("s", "活动已结束！");
             } else {
-                ReactAPI.showMessage("f", (res.data && res.data.msg) || res.msg);
+                ReactAPI.showMessage("f", data.msg || (res && (res.message || res.msg)) || "活动结束失败");
             }
+        },
+        error: function error(xhr) {
+            ReactAPI.showMessage("f", "活动结束请求失败（HTTP " + (xhr && xhr.status ? xhr.status : "未知") + "）");
         }
     });
 }$$

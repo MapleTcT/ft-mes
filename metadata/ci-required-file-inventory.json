@@ -3603,6 +3603,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/206-wom-easy-task-activity-grid-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/207-wom-batch-active-response-envelope.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3862,6 +3874,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-menu-smoke.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-mes-full-production-flow-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -7474,6 +7492,12 @@
     {
       "ignored": false,
       "path": "metadata/material-wms-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/mes-full-production-flow-current.json",
       "state": "tracked",
       "tracked": true
     },
@@ -11696,7 +11720,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 676
+      "tracked": 679
     },
     "docs": {
       "tracked": 152
@@ -11705,7 +11729,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 272
+      "tracked": 273
     },
     "package.json": {
       "tracked": 1
@@ -11729,8 +11753,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1945,
-    "tracked": 1945,
+    "totalFiles": 1949,
+    "tracked": 1949,
     "untracked": 0
   },
   "untrackedByDirectory": []

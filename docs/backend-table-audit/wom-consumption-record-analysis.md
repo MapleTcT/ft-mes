@@ -2,17 +2,23 @@
 
 ## 结论
 
-`ADP_E2E_20260616021612_WOM_ACTIVE` 的真实前端验收已经证明投入明细会落到 `wom_putin_details`，但不会自动生成 `wom_mat_consum_recods`。这不是本轮发现的 PostgreSQL 缺表、缺列或 Oracle 方言兼容问题，而是当前 WOM 源码路径的业务设计结果：
+历史 marker `ADP_E2E_20260616021612_WOM_ACTIVE` 证明原始投料路径只写
+`wom_putin_details`，不会自动生成 `wom_mat_consum_recods`。这不是 PostgreSQL 缺表、缺列或
+Oracle 方言兼容问题，而是恢复源码中活动执行记录被跳过后，既有消耗生成器没有输入：
 
 1. `WOMProduceTaskServiceImpl.startActive` 对 `RM_activeType/putin` 设置 `noCreateActiExe=true`，人工投料活动开始时不生成 `WOMActiExelog`。
 2. `WOMProduceTaskServiceImpl.endActive` 只遍历已有 `WOMActiExelog` 调用 `actiExelogService.generateInOutRecordByAvtiveRecord(actiExelog)`。
 3. `WOMActiExelogServiceImpl.generateInOutRecordByAvtiveRecord` 才是自动生成 `WOMMatConsumRecod` 的入口，且需要 `WOMActiExelog` 上的 `actualNum/useNum/material/putinDetailId` 等字段。
 4. `WOMProduceTaskServiceImpl.toProcfeedback` 对人工投料只校验 `wom_putin_details` 并处理尾料，生成生产用料单的 `generatePutInMaterialBill(...)` 逻辑在当前源码中被注释为“不生成投料单/不生成生产用料单”。
 
-因此，当前验收状态应写为：
+2026-07-27 已通过受控 WOM 核心源码补丁关闭该缺口：
 
-- `wom_putin_details` 投入明细落库：`PASS`。
-- `wom_mat_consum_recods` 自动生成：`NOT_APPLICABLE_FOR_CURRENT_PUTIN_PATH`，除非产品确认人工投料活动结束也必须生成消耗记录。
+- `build-wom-core-production-boot-jar.sh` 在投料明细成功保存、活动结束时，仅当执行记录缺失才调用
+  既有 `procReportService.getExeLogs(...)` 补建 `WOMActiExelog`。
+- 随后的原有 `generateInOutRecordByAvtiveRecord(...)` 负责生成物料消耗，不使用数据库触发器伪造业务事实。
+- marker `ADP_E2E_20260727_MES_FULL_CLOSED_10` 已证明 `wom_putin_details=1`、
+  `wom_acti_exelogs=1`、`wom_mat_consum_recods=1`，三者属于同一任务、工序、活动和批次。
+- 当前状态：`CLOSED_BY_SERVICE_PATCH_AND_REAL_ACCEPTANCE`。
 
 ## 源码证据
 
@@ -32,7 +38,7 @@
 | `WOMActiExelogServiceImpl.java:6363-6425` | `generateInOutRecordByAvtiveRecord` 对投料/投配料活动生成 `WOMMatConsumRecod`，但输入是 `WOMActiExelog` |
 | `WOMPutinDetailServiceImpl.java:6001-6003` | 删除投入明细时关联删除 `WOMMatConsumRecod` 的代码也被注释，说明二者不是当前 save/endActive 路径的强制同步关系 |
 
-## 真实库验证
+## 历史真实库验证
 
 远端环境：`10.11.100.17`，PostgreSQL 容器：`adp-mes-newbase-postgres-1`。
 
@@ -60,15 +66,30 @@ WHERE put_mat_detail_id = 755716019803392
 | `activeExelogCount` | 0 |
 | `matConsumCount` | 0 |
 
-既然人工投料活动没有活动执行记录，`generateInOutRecordByAvtiveRecord` 没有可处理输入，因此本次不能把 `wom_mat_consum_recods=0` 写成 PostgreSQL 落库失败。
+该历史结果解释了修复前根因，不能再作为当前产品行为。
+
+## 当前真实库验证
+
+当前 marker：
+
+`ADP_E2E_20260727_MES_FULL_CLOSED_10`
+
+关键结果：
+
+| 项 | 结果 |
+| --- | ---: |
+| `wom_putin_details` | 1 |
+| finished `wom_acti_exelogs` | 1 |
+| `wom_mat_consum_recods` | 1 |
+| 页面可见 warning/error | 0 |
+
+完整 SQL、请求、响应和最终制造/QCS/WMS/追溯状态见
+`metadata/mes-full-production-flow-current.json`。验收脚本现在把活动执行记录或消耗记录缺失直接判为
+`FAIL`，不再降级成非阻断 issue。
 
 ## 后续处理规则
 
-如果业务确认“人工投料活动结束必须生成消耗记录”，不能只用 PostgreSQL 触发器硬补。推荐先补业务设计：
-
-1. 明确 `wom_mat_consum_recods` 应关联 `WOMActiExelog` 还是直接关联 `WOMPutinDetail`。
-2. 明确 `report_num`、`putin_num`、仓库、货位、人员、同步状态、库存接口调用的字段来源。
-3. 再决定是在 Java 服务层补活动执行记录/消耗记录生成，还是新增明确的 PostgreSQL 兼容补丁。
-4. 补充独立验收脚本，断言 `wom_putin_details` 和 `wom_mat_consum_recods` 两条链路同时成立。
-
-在业务确认前，生产模块剩余优先级应继续放在请检、质量判定、不良数、完工入库和库存链路的真实前端落库验收。
+1. 保持服务层生成，不改成 PostgreSQL 触发器。
+2. 保持输入明细、活动执行和消耗记录的同批次/同活动联查。
+3. 每次升级 WOM 包时必须提供输入 JAR、两份源码的 SHA-256，并复跑完整 marker 流程。
+4. 现场 Batch/DCS 接入后，用真实仓库、货位、单位和库存接口再做同等验收。

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 205,
+  "migrationCount": 207,
   "firstNumber": 1,
-  "lastNumber": 205,
+  "lastNumber": 207,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -13,19 +13,19 @@
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 10830,
-    "create-function": 101,
+    "create-function": 103,
     "create-index": 1011,
     "create-table": 581,
     "create-view": 143,
-    "insert": 11021,
-    "update": 11122
+    "insert": 11023,
+    "update": 11128
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 241,
+    "create-or-replace": 243,
     "do-block": 400,
     "if-exists": 129,
     "if-not-exists": 13048,
-    "on-conflict": 10956,
+    "on-conflict": 10958,
     "to-regclass": 220,
     "where-not-exists": 45
   },
@@ -34,9 +34,9 @@
     "business": 40,
     "compatibility": 79,
     "configuration": 48,
-    "general": 37,
+    "general": 38,
     "notification": 9,
-    "platform": 58,
+    "platform": 59,
     "workflow": 21
   },
   "migrations": [
@@ -3908,8 +3908,8 @@
       "tags": [
         "platform"
       ],
-      "lineCount": 261,
-      "sha256": "235af019acc114ade19257e006c00cbef2cfb4dfa0c4cff99baff70a87760894",
+      "lineCount": 267,
+      "sha256": "024fce46089e47941ab0097eafe09256cc89365b52d5b18087d22c68f07ca26f",
       "statementCounts": {
         "create-table": 0,
         "create-view": 0,
@@ -7736,6 +7736,72 @@
         "do-block": 1,
         "to-regclass": 0,
         "create-or-replace": 6,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/206-wom-easy-task-activity-grid-runtime.sql",
+      "name": "206-wom-easy-task-activity-grid-runtime.sql",
+      "number": 206,
+      "slug": "wom-easy-task-activity-grid-runtime",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 324,
+      "sha256": "938642e98e76a3f9d32bff7220e2199c1d262234f7f18a56931620ae6be85dee",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 2,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/207-wom-batch-active-response-envelope.sql",
+      "name": "207-wom-batch-active-response-envelope.sql",
+      "number": 207,
+      "slug": "wom-batch-active-response-envelope",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 208,
+      "sha256": "6ed61455c10c459762cb9cbe08c98cf37a916499ec0fcb07fb2ac98dcff1c0de",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
         "where-not-exists": 0
       },
       "highRiskStatements": [],

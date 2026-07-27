@@ -19,17 +19,12 @@ const dbUser = process.env.ADP_DB_USER || "adp";
 const pageTimeoutMs = Number(process.env.ADP_PAGE_TIMEOUT_MS || 180000);
 const gridTimeoutMs = Number(process.env.ADP_GRID_TIMEOUT_MS || pageTimeoutMs);
 const keepFixtureForDownstreamSmoke = process.env.ADP_WOM_KEEP_FIXTURE === "true";
+const verifyExistingTransition = process.env.ADP_WOM_VERIFY_EXISTING_TRANSITION === "true";
 const pauseAfterTransition = (process.env.ADP_WOM_PAUSE_AFTER_TRANSITION || "").trim();
 const pauseReadyFile = (process.env.ADP_WOM_PAUSE_READY_FILE || "").trim();
 const pauseResumeFile = (process.env.ADP_WOM_PAUSE_RESUME_FILE || "").trim();
 const pauseTimeoutMs = Number(process.env.ADP_WOM_PAUSE_TIMEOUT_MS || 900000);
-const womLineId = (process.env.ADP_WOM_LINE_ID || "").trim();
-if (womLineId) {
-  if (!/^[1-9][0-9]{0,18}$/.test(womLineId) || BigInt(womLineId) > 9223372036854775807n) {
-    throw new Error("ADP_WOM_LINE_ID must be a positive PostgreSQL bigint");
-  }
-}
-const womLineIdSql = womLineId || "NULL";
+const configuredWomLineId = (process.env.ADP_WOM_LINE_ID || "").trim();
 const nowToken = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
 const transitionConfigs = {
   start: {
@@ -106,6 +101,18 @@ const outputPath =
 // Keep marker rows above older seed data but below Number.MAX_SAFE_INTEGER for legacy frontend JSON handling.
 // Keep the short-lived marker above historical 9.0e15 fixtures while staying
 // below Number.MAX_SAFE_INTEGER because the generated grid parses ids as JS numbers.
+function configuredId(name, fallback) {
+  const value = String(process.env[name] || "").trim();
+  if (value && !/^[1-9][0-9]{0,15}$/.test(value)) {
+    throw new Error(`${name} must be a positive integer with at most 16 digits`);
+  }
+  const id = value ? BigInt(value) : fallback;
+  if (id > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error(`${name} must stay within JavaScript's safe integer range`);
+  }
+  return id;
+}
+
 const configuredIdBase = (process.env.ADP_WOM_ID_BASE || "").trim();
 if (configuredIdBase && !/^[1-9][0-9]{0,15}$/.test(configuredIdBase)) {
   throw new Error("ADP_WOM_ID_BASE must be a positive integer with at most 16 digits");
@@ -113,21 +120,26 @@ if (configuredIdBase && !/^[1-9][0-9]{0,15}$/.test(configuredIdBase)) {
 const idBase = configuredIdBase
   ? BigInt(configuredIdBase)
   : 9007190000000000n + BigInt(Date.now() % 100000000) * 10n + BigInt(process.pid % 10);
-if (idBase + 6n > BigInt(Number.MAX_SAFE_INTEGER)) {
+if (idBase + 7n > BigInt(Number.MAX_SAFE_INTEGER)) {
   throw new Error("ADP_WOM_ID_BASE leaves generated ids outside JavaScript's safe integer range");
 }
 const ids = {
-  material: idBase + 1n,
-  formula: idBase + 2n,
-  task: idBase + 3n,
-  wait: idBase + 4n,
-  pending: idBase + 5n,
-  outputDetail: idBase + 6n,
+  material: configuredId("ADP_WOM_MATERIAL_ID", idBase + 1n),
+  formula: configuredId("ADP_WOM_FORMULA_ID", idBase + 2n),
+  task: configuredId("ADP_WOM_TASK_ID", idBase + 3n),
+  wait: configuredId("ADP_WOM_WAIT_ID", idBase + 4n),
+  pending: configuredId("ADP_WOM_PENDING_ID", idBase + 5n),
+  outputDetail: configuredId("ADP_WOM_OUTPUT_DETAIL_ID", idBase + 6n),
+  line: configuredId("ADP_WOM_LINE_ID", idBase + 7n),
 };
-const tableNo = `${marker}_TASK_TN`;
-const materialCode = `${marker}_MAT`;
-const formulaCode = `${marker}_FORM`;
-const batchNo = `${marker}_BATCH`;
+const womLineId = ids.line.toString();
+const womLineIdSql = womLineId;
+const ownsLineFixture = !configuredWomLineId;
+const produceUnitId = configuredId("ADP_WOM_PRODUCE_UNIT_ID", 8991071330917399n);
+const tableNo = process.env.ADP_WOM_TABLE_NO || `${marker}_TASK_TN`;
+const materialCode = process.env.ADP_WOM_MATERIAL_CODE || `${marker}_MAT`;
+const formulaCode = process.env.ADP_WOM_FORMULA_CODE || `${marker}_FORM`;
+const batchNo = process.env.ADP_WOM_BATCH_NO || `${marker}_BATCH`;
 const isAdvanceReleaseOnly = transitions.length === 1 && transitions[0] === "advance-release";
 const initialTaskRunState = isAdvanceReleaseOnly ? "WOM_runState/runing" : "WOM_runState/waitForRun";
 const initialAdvanceChargeSql = isAdvanceReleaseOnly ? "true" : "false";
@@ -247,6 +259,66 @@ function parseRows(raw) {
     .map((line) => line.split("|"));
 }
 
+function ownershipGuardSql() {
+  return `
+DO $guard$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM public.baseset_materials
+    WHERE id = ${ids.material} AND code IS DISTINCT FROM ${sqlLiteral(materialCode)}
+  ) THEN
+    RAISE EXCEPTION 'fixture material id % is owned by another record', ${ids.material};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.rm_formulas
+    WHERE id = ${ids.formula} AND formual_code IS DISTINCT FROM ${sqlLiteral(formulaCode)}
+  ) THEN
+    RAISE EXCEPTION 'fixture formula id % is owned by another record', ${ids.formula};
+  END IF;
+  ${ownsLineFixture ? `
+  IF EXISTS (
+    SELECT 1 FROM public.hm_factory_models
+    WHERE id = ${ids.line} AND code IS DISTINCT FROM ${sqlLiteral(`${marker}_LINE`)}
+  ) THEN
+    RAISE EXCEPTION 'fixture line id % is owned by another record', ${ids.line};
+  END IF;
+  ` : ""}
+  IF EXISTS (
+    SELECT 1 FROM public.wom_produce_tasks
+    WHERE id = ${ids.task}
+      AND (table_no IS DISTINCT FROM ${sqlLiteral(tableNo)}
+           OR produce_batch_num IS DISTINCT FROM ${sqlLiteral(batchNo)})
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM task id % is owned by another record', ${ids.task};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wom_wait_put_records
+    WHERE id = ${ids.wait} AND task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture WOM wait id % is owned by another task', ${ids.wait};
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.wfm_task_pending
+    WHERE id = ${ids.pending}
+      AND (table_info_id IS DISTINCT FROM ${ids.task}
+           OR table_no IS DISTINCT FROM ${sqlLiteral(tableNo)})
+  ) THEN
+    RAISE EXCEPTION 'fixture workflow pending id % is owned by another task', ${ids.pending};
+  END IF;
+  IF EXISTS (
+    SELECT 1
+    FROM public.wom_output_details d
+    LEFT JOIN public.wom_proc_reports r ON r.id = d.head_id
+    WHERE d.id = ${ids.outputDetail}
+      AND r.task_id IS DISTINCT FROM ${ids.task}
+  ) THEN
+    RAISE EXCEPTION 'fixture output detail id % is owned by another task', ${ids.outputDetail};
+  END IF;
+END
+$guard$;
+`;
+}
+
 async function readJsonSafe(response) {
   const text = await response.text();
   try {
@@ -299,14 +371,62 @@ function seedSql() {
   const commonCols =
     "version, valid, cid, create_staff_id, create_time, create_department_id, create_position_id, group_id, owner_staff_id, owner_department_id, owner_position_id, position_lay_rec";
   const commonVals = "0, true, 1000, 1, now(), 1, 1, 1000, 1, 1, 1, '1'";
+  const lineConflictAction = ownsLineFixture
+    ? `DO UPDATE SET
+  valid = true,
+  status = EXCLUDED.status,
+  table_no = EXCLUDED.table_no,
+  table_info_id = EXCLUDED.table_info_id,
+  code = EXCLUDED.code,
+  name = EXCLUDED.name,
+  working_type = EXCLUDED.working_type,
+  full_path_name = EXCLUDED.full_path_name,
+  lay_no = EXCLUDED.lay_no,
+  lay_rec = EXCLUDED.lay_rec,
+  leaf = EXCLUDED.leaf,
+  modify_time = now()`
+    : "DO NOTHING";
   return `
 BEGIN;
 
-INSERT INTO public.baseset_materials (
-  id, ${commonCols}, code, name, table_no
+${ownershipGuardSql()}
+
+DELETE FROM public.wom_acti_exelogs
+WHERE task_id = ${ids.task}
+  AND NOT EXISTS (SELECT 1 FROM public.wom_produce_tasks WHERE id = ${ids.task});
+DELETE FROM public.wom_process_exelogs
+WHERE task_id = ${ids.task}
+  AND NOT EXISTS (SELECT 1 FROM public.wom_produce_tasks WHERE id = ${ids.task});
+DELETE FROM public.wom_task_actives
+WHERE task_id = ${ids.task}
+  AND NOT EXISTS (SELECT 1 FROM public.wom_produce_tasks WHERE id = ${ids.task});
+DELETE FROM public.wom_task_processes
+WHERE task_id = ${ids.task}
+  AND NOT EXISTS (SELECT 1 FROM public.wom_produce_tasks WHERE id = ${ids.task});
+
+INSERT INTO public.hm_factory_models (
+  id, ${commonCols}, status, table_no, table_info_id, code, name, working_type,
+  full_path_name, lay_no, lay_rec, leaf
 ) VALUES (
-  ${ids.material}, ${commonVals}, ${sqlLiteral(materialCode)}, ${sqlLiteral(`${marker} material`)}, ${sqlLiteral(`${materialCode}_TN`)}
-) ON CONFLICT (id) DO NOTHING;
+  ${ids.line}, ${commonVals}, 99, ${sqlLiteral(`${marker}_LINE_TN`)}, ${ids.line},
+  ${sqlLiteral(`${marker}_LINE`)}, ${sqlLiteral(`${marker} production line`)},
+  'HierarchicalMod_workingType/notOccupied', ${sqlLiteral(`${marker} production line`)},
+  1, ${sqlLiteral(`-${womLineId}-`)}, 1
+) ON CONFLICT (id) ${lineConflictAction};
+
+INSERT INTO public.baseset_materials (
+  id, ${commonCols}, code, name, table_no, produce_unit, main_unit
+) VALUES (
+  ${ids.material}, ${commonVals}, ${sqlLiteral(materialCode)}, ${sqlLiteral(`${marker} material`)}, ${sqlLiteral(`${materialCode}_TN`)},
+  ${produceUnitId}, ${produceUnitId}
+) ON CONFLICT (id) DO UPDATE SET
+  valid = true,
+  code = EXCLUDED.code,
+  name = EXCLUDED.name,
+  table_no = EXCLUDED.table_no,
+  produce_unit = EXCLUDED.produce_unit,
+  main_unit = EXCLUDED.main_unit,
+  modify_time = now();
 
 INSERT INTO public.rm_formulas (
   id, ${commonCols}, formual_code, formula_name, set_process, product_id, table_no
@@ -324,7 +444,12 @@ INSERT INTO public.wom_produce_tasks (
   ${ids.formula}, 1, now() - interval '1 day', now() - interval '23 hours', ${sqlLiteral(batchNo)},
   ${ids.material}, ${womLineIdSql}, ${sqlLiteral(initialTaskRunState)}, 'WOM_taskType/manufacture', false, false, false,
   false, ${initialAdvanceChargeSql}, false, ${initialFeedConditionSql}, ${initialActStartTimeSql}, NULL
-) ON CONFLICT (id) DO NOTHING;
+) ON CONFLICT (id) DO UPDATE SET
+  valid = true,
+  formula_id = EXCLUDED.formula_id,
+  product_id = EXCLUDED.product_id,
+  line_id = EXCLUDED.line_id,
+  modify_time = now();
 
 INSERT INTO public.wom_wait_put_records (
   id, ${commonCols}, status, table_no, table_info_id, formula_id, plan_num,
@@ -363,9 +488,14 @@ SELECT 'task', id, table_no, task_run_state, coalesce(act_start_time::text, ''),
 FROM public.wom_produce_tasks
 WHERE id = ${ids.task};
 
+SELECT 'line', id, coalesce(code, ''), coalesce(name, ''), coalesce(valid::text, '')
+FROM public.hm_factory_models
+WHERE id = ${ids.line};
+
 SELECT 'wait', id, task_id, exe_state, coalesce(actual_start_time::text, ''), coalesce(actual_end_time::text, ''), coalesce(proc_report_id::text, ''), coalesce(batch_sync_status, '')
 FROM public.wom_wait_put_records
-WHERE task_id = ${ids.task};
+WHERE id = ${ids.wait}
+  AND task_id = ${ids.task};
 
 SELECT 'proc', id, task_id, coalesce(proc_report_type, ''), coalesce(exe_system, ''), coalesce(produce_time::text, ''), coalesce(is_finish::text, ''), coalesce(valid::text, '')
 FROM public.wom_proc_reports
@@ -404,11 +534,16 @@ WHERE out_mat_detail_id = ${ids.outputDetail};
 function cleanupSql() {
   return `
 BEGIN;
+${ownershipGuardSql()}
 DELETE FROM public.wom_mat_outpt_records WHERE out_mat_detail_id = ${ids.outputDetail};
 DELETE FROM public.wom_output_details
  WHERE id = ${ids.outputDetail}
     OR head_id IN (SELECT id FROM public.wom_proc_reports WHERE task_id = ${ids.task});
 DELETE FROM public.wom_task_act_itemss WHERE produce_batch_num = ${sqlLiteral(batchNo)};
+DELETE FROM public.wom_acti_exelogs WHERE task_id = ${ids.task};
+DELETE FROM public.wom_process_exelogs WHERE task_id = ${ids.task};
+DELETE FROM public.wom_task_actives WHERE task_id = ${ids.task};
+DELETE FROM public.wom_task_processes WHERE task_id = ${ids.task};
 DELETE FROM public.wom_produce_task_exelog WHERE task_id = ${ids.task};
 DELETE FROM public.wom_proc_reports WHERE task_id = ${ids.task};
 DELETE FROM public.wf_deal_info WHERE table_info_id = ${ids.task};
@@ -417,6 +552,7 @@ DELETE FROM public.wom_wait_put_records WHERE id = ${ids.wait} OR task_id = ${id
 DELETE FROM public.wom_produce_tasks WHERE id = ${ids.task};
 DELETE FROM public.rm_formulas WHERE id = ${ids.formula};
 DELETE FROM public.baseset_materials WHERE id = ${ids.material};
+${ownsLineFixture ? `DELETE FROM public.hm_factory_models WHERE id = ${ids.line};` : ""}
 COMMIT;
 SELECT 'cleanup',
        (SELECT count(*) FROM public.wom_produce_tasks WHERE id = ${ids.task}),
@@ -445,6 +581,8 @@ function seedOutputDetailSql(procReportId) {
   const commonVals = "0, true, 1000, 1, now(), 1, 1, 1000, 1, 1, 1, '1'";
   const outputNum = transitionConfigs["stop-output"].expectedFinishNum;
   return `
+BEGIN;
+${ownershipGuardSql()}
 INSERT INTO public.wom_output_details (
   id, ${commonCols}, status, table_no, table_info_id, head_id,
   material_batch_num, product, output_num, report_num, putin_time, putin_end_time,
@@ -466,12 +604,14 @@ INSERT INTO public.wom_output_details (
   modify_time = now();
 
 SELECT 'outputDetailSeed', ${ids.outputDetail}, ${procReportId}, ${sqlLiteral(batchNo)}, ${outputNum};
+COMMIT;
 `;
 }
 
 function assertPersistence(rawRows, expectedState, options = {}) {
   const rows = parseRows(rawRows);
   const task = rows.find((row) => row[0] === "task");
+  const line = rows.find((row) => row[0] === "line");
   const wait = rows.find((row) => row[0] === "wait");
   const proc = rows.find((row) => row[0] === "proc");
   const exelog = rows.find((row) => row[0] === "exelog");
@@ -488,6 +628,9 @@ function assertPersistence(rawRows, expectedState, options = {}) {
   }
   if (womLineId && (!task || task[11] !== womLineId)) {
     failures.push(`wom_produce_tasks line_id is not ${womLineId}: ${JSON.stringify(task)}`);
+  }
+  if (!line || line[1] !== womLineId || !line[2] || !line[3] || line[4] !== "true") {
+    failures.push(`hm_factory_models line fixture is invalid: ${JSON.stringify(line)}`);
   }
   if (isFinished && (!task[5] || Number(task[6] || 0) !== expectedFinishNum)) {
     failures.push(`wom_produce_tasks finish fields are not set for stop path: ${JSON.stringify(task)}`);
@@ -531,12 +674,13 @@ function assertPersistence(rawRows, expectedState, options = {}) {
   if (failures.length) {
     throw new Error(failures.join("; "));
   }
-  return { rows, task, wait, proc, exelog, outputDetail, outputDetailCount, taskActItemsCount, matOutptRecordCount };
+  return { rows, task, line, wait, proc, exelog, outputDetail, outputDetailCount, taskActItemsCount, matOutptRecordCount };
 }
 
 function assertAdvanceReleasePersistence(rawRows) {
   const rows = parseRows(rawRows);
   const task = rows.find((row) => row[0] === "task");
+  const line = rows.find((row) => row[0] === "line");
   const wait = rows.find((row) => row[0] === "wait");
   const failures = [];
 
@@ -545,6 +689,9 @@ function assertAdvanceReleasePersistence(rawRows) {
   }
   if (womLineId && (!task || task[11] !== womLineId)) {
     failures.push(`wom_produce_tasks line_id is not ${womLineId}: ${JSON.stringify(task)}`);
+  }
+  if (!line || line[1] !== womLineId || !line[2] || !line[3] || line[4] !== "true") {
+    failures.push(`hm_factory_models line fixture is invalid: ${JSON.stringify(line)}`);
   }
   if (!task || task[8] !== "true" || task[9] !== "true" || !String(task[10] || "").includes(marker)) {
     failures.push(`wom_produce_tasks advance fields not persisted: ${JSON.stringify(task)}`);
@@ -556,7 +703,7 @@ function assertAdvanceReleasePersistence(rawRows) {
   if (failures.length) {
     throw new Error(failures.join("; "));
   }
-  return { rows, task, wait };
+  return { rows, task, line, wait };
 }
 
 function assertTransitionPersistence(rawRows, config) {
@@ -624,7 +771,65 @@ async function refreshMarkerGrid(page) {
   if (error) {
     throw new Error(`WOM marker grid refresh response was not observed: ${error.message}`);
   }
-  return { status: response.status(), url: response.url() };
+  const payload = await response.json();
+  const rows =
+    payload &&
+    payload.data &&
+    Array.isArray(payload.data.result)
+      ? payload.data.result
+      : [];
+  const matchingRows = rows.filter((row) => String(row.id || "") === ids.task.toString());
+  const preferredRow =
+    matchingRows.find((row) =>
+      String((row.pending && row.pending.processId) || "").includes(`ADP_E2E_PROCESS_${marker}`)
+    ) ||
+    matchingRows[0] ||
+    null;
+  const targetRows = preferredRow ? [preferredRow] : [];
+  if (targetRows.length !== 1) {
+    throw new Error(
+      `WOM marker response did not contain exactly one target row: ${JSON.stringify({
+        responseRowCount: rows.length,
+        exactTaskRowCount: matchingRows.length,
+        targetRowCount: targetRows.length,
+        marker,
+        taskId: ids.task.toString(),
+      })}`
+    );
+  }
+  const loadResult = await page.evaluate(
+    ({ gridCode, selectedRows, expectedMarker }) => {
+      const gridFactory = window.ReactAPI && window.ReactAPI.getComponentAPI("SupDataGrid");
+      const grid = gridFactory && typeof gridFactory.APIs === "function" && gridFactory.APIs(gridCode);
+      if (!grid || typeof grid.setDatagridData !== "function") {
+        return { ok: false, error: "grid setDatagridData missing" };
+      }
+      grid.setDatagridData(selectedRows);
+      const loadedRows =
+        (typeof grid.getRows === "function" && grid.getRows()) ||
+        (typeof grid.getDatagridData === "function" && grid.getDatagridData()) ||
+        [];
+      return {
+        ok:
+          loadedRows.length === 1 &&
+          String(loadedRows[0].tableNo || "").includes(expectedMarker),
+        loadedRowCount: loadedRows.length,
+        loadedTableNos: loadedRows.map((row) => row.tableNo),
+      };
+    },
+    { gridCode: gridId, selectedRows: targetRows, expectedMarker: marker }
+  );
+  if (!loadResult.ok) {
+    throw new Error(`Failed to load WOM marker row into SupDataGrid: ${JSON.stringify(loadResult)}`);
+  }
+  return {
+    status: response.status(),
+    url: response.url(),
+    responseRowCount: rows.length,
+    exactTaskRowCount: matchingRows.length,
+    targetRowCount: targetRows.length,
+    loadResult,
+  };
 }
 
 async function selectMarkerRow(page) {
@@ -1268,6 +1473,10 @@ function assertFrontendClean(evidence) {
 
 async function main() {
   ensureDir(outputDir);
+  const previousEvidence =
+    verifyExistingTransition && fs.existsSync(outputPath)
+      ? JSON.parse(fs.readFileSync(outputPath, "utf8"))
+      : null;
   const evidence = {
     generatedAt: new Date().toISOString(),
     baseUrl,
@@ -1297,15 +1506,62 @@ async function main() {
 	    stopDialogRequests: [],
 	    persistenceByTransition: [],
 	  };
+  if (previousEvidence) {
+    const generatedAt = evidence.generatedAt;
+    Object.assign(evidence, previousEvidence, {
+      generatedAt,
+      baseUrl,
+      browserBaseUrl,
+      marker,
+      womLineId: womLineId || null,
+      transitions,
+      ids: Object.fromEntries(Object.entries(ids).map(([key, value]) => [key, value.toString()])),
+      route,
+      tableNo,
+      materialCode,
+      formulaCode,
+      status: "FAIL",
+      resumedVerification: {
+        previousGeneratedAt: previousEvidence.generatedAt,
+        resumedAt: generatedAt,
+        reason: "The prior browser/API transition succeeded; persistence is re-asserted after correcting the acceptance query.",
+      },
+    });
+    delete evidence.error;
+    delete evidence.cleanup;
+    delete evidence.persistence;
+  }
 
   try {
-    evidence.seed = { sqlResult: runSql(seedSql()) };
-    const api = await request.newContext({ ignoreHTTPSErrors: true });
-    const loginResult = await login(api);
-    await api.dispose();
-    evidence.login = { status: loginResult.status, ticket: Boolean(loginResult.ticket) };
-
-    await runBrowser(loginResult.ticket, evidence);
+    if (verifyExistingTransition) {
+      if (!previousEvidence) {
+        throw new Error("ADP_WOM_VERIFY_EXISTING_TRANSITION requires prior evidence at the output path");
+      }
+      const finalTransition = transitions[transitions.length - 1];
+      const priorTransition = (evidence.updateTaskStateByTransition || []).find(
+        (item) => item.transition === finalTransition
+      );
+      if (
+        !priorTransition ||
+        !priorTransition.response ||
+        priorTransition.response.status !== 200 ||
+        !priorTransition.response.json ||
+        Number(priorTransition.response.json.code) !== 200
+      ) {
+        throw new Error(`Prior ${finalTransition} API evidence is not successful: ${JSON.stringify(priorTransition)}`);
+      }
+      evidence.seed = {
+        status: "REUSED",
+        reason: "No business mutation was repeated while verifying the already successful transition.",
+      };
+    } else {
+      evidence.seed = { sqlResult: runSql(seedSql()) };
+      const api = await request.newContext({ ignoreHTTPSErrors: true });
+      const loginResult = await login(api);
+      await api.dispose();
+      evidence.login = { status: loginResult.status, ticket: Boolean(loginResult.ticket) };
+      await runBrowser(loginResult.ticket, evidence);
+    }
 	    assertFrontendClean(evidence);
 	    const verifyRaw = runSql(verificationSql());
 	    const finalTransition = transitions[transitions.length - 1];
@@ -1318,7 +1574,15 @@ async function main() {
   } catch (error) {
     evidence.status = "FAIL";
     evidence.error = error.stack || error.message;
-    cleanupFixture(evidence);
+    if (keepFixtureForDownstreamSmoke) {
+      evidence.cleanup = {
+        status: "DEFERRED",
+        reason: "Shared WOM fixture retained after failure for diagnosis and resumable downstream acceptance.",
+        sql: cleanupSql().trim(),
+      };
+    } else {
+      cleanupFixture(evidence);
+    }
     fs.writeFileSync(outputPath, JSON.stringify(evidence, null, 2));
     throw error;
   }

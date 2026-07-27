@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`205`。
-- 编号范围：`001` 到 `205`。
+- 脚本数量：`207`。
+- 编号范围：`001` 到 `207`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -24,9 +24,9 @@
 | business | 40 |
 | compatibility | 79 |
 | configuration | 48 |
-| general | 37 |
+| general | 38 |
 | notification | 9 |
-| platform | 58 |
+| platform | 59 |
 | workflow | 21 |
 
 ## 语句统计
@@ -34,22 +34,22 @@
 | Statement | Count |
 | --- | --- |
 | alter-table | 10830 |
-| create-function | 101 |
+| create-function | 103 |
 | create-index | 1011 |
 | create-table | 581 |
 | create-view | 143 |
-| insert | 11021 |
-| update | 11122 |
+| insert | 11023 |
+| update | 11128 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 241 |
+| create-or-replace | 243 |
 | do-block | 400 |
 | if-exists | 129 |
 | if-not-exists | 13048 |
-| on-conflict | 10956 |
+| on-conflict | 10958 |
 | to-regclass | 220 |
 | where-not-exists | 45 |
 
@@ -156,7 +156,7 @@
 | 097 | 097-jbpm-hasvars-boolean-compat.sql | compatibility | 47 | alter-table:2 | 1 | - |
 | 098 | 098-wom-active-execsort-convert-compat.sql | configuration, compatibility | 19 | create-function:1, alter-table:1 | 3 | - |
 | 099 | 099-wom-producetask-supervision-view-compat.sql | configuration, compatibility | 40 | create-view:1 | 4 | - |
-| 100 | 100-wom-batch-active-runtime-buttons.sql | platform | 261 | create-function:1, update:2 | 1 | - |
+| 100 | 100-wom-batch-active-runtime-buttons.sql | platform | 267 | create-function:1, update:2 | 1 | - |
 | 101 | 101-wom-output-finish-num-sync.sql | general | 76 | create-function:3, update:3 | 5 | watch:2 |
 | 102 | 102-wom-easy-active-runtime-report-button.sql | platform | 187 | create-function:1, update:2 | 1 | - |
 | 103 | 103-wom-batch-process-runtime-buttons.sql | platform | 318 | update:2 | 0 | - |
@@ -262,6 +262,8 @@
 | 203 | 203-qcs-inspect-supervision-main-compat.sql | configuration, business, compatibility | 48 | create-view:1, create-index:2, alter-table:1, update:1 | 7 | - |
 | 204 | 204-production-list-export-runtime-datagrid.sql | platform | 450 | create-function:2, insert:2, update:3 | 4 | - |
 | 205 | 205-production-export-propertycode-compat.sql | configuration, compatibility | 551 | create-function:6, update:7 | 10 | - |
+| 206 | 206-wom-easy-task-activity-grid-runtime.sql | platform | 324 | create-function:1, insert:2, update:4 | 3 | - |
+| 207 | 207-wom-batch-active-response-envelope.sql | general | 208 | create-function:1, update:2 | 1 | - |
 
 ## 规则
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-27T14:37:24+08:00",
+  "generatedAt": "2026-07-27T18:40:31+08:00",
   "generatedFromCommit": "2a81b1b8078e+minimum-transfer-cell-live-acceptance",
   "overallStatus": "IN_PROGRESS_NOT_COMPLETE",
   "databaseDefault": "PostgreSQL",
@@ -36,7 +36,7 @@
         "make ci passed on 2026-06-15 after commit d13b817",
         "make sustainable-check now validates generated-artifact ignore rules and blocks tracked __pycache__, pyc, target, node_modules, dist, class and log artifacts except narrow runtime patch class allowlist with adjacent source.",
         "make ci now includes runtime-smoke-reports-check so committed runtime smoke reports are checked for schema, PASS status, current host, expected checks, and secret hygiene.",
-        "make ci includes ci-required-file-inventory-check and ci-required-file-strict-check; metadata/ci-required-file-inventory.json currently records 1945 CI/governance/runtime assets, all 1945 tracked, 0 untracked and 0 missing references. The inventory includes PostgreSQL migrations through BPI Flyway V35, the Phase 3C-B offline training-readiness, Phase 3C-C process-window, Phase 3C-D/E coverage/telemetry-landing, Phase 3C-F live operations evidence, Phase 3C-G Parquet v2/Iceberg exact-version evidence, the minimum transfer-cell live acceptance and the current implementation product interaction manual plus target MQTT/Kafka/PostgreSQL/page evidence, screenshots, cleanup and pre-mutation Chromium preflight. Continuous production enablement, physical process-window evidence and field-data volume, full-site disaster recovery, MLflow production governance and external ERP/WMS activation remain explicitly open.",
+        "make ci includes ci-required-file-inventory-check and ci-required-file-strict-check; metadata/ci-required-file-inventory.json currently records 1949 CI/governance/runtime assets, all 1949 tracked, 0 untracked and 0 missing references. The inventory includes PostgreSQL migrations through BPI Flyway V35, the Phase 3C-B offline training-readiness, Phase 3C-C process-window, Phase 3C-D/E coverage/telemetry-landing, Phase 3C-F live operations evidence, Phase 3C-G Parquet v2/Iceberg exact-version evidence, the minimum transfer-cell live acceptance, the MES full-production-flow script/migration/evidence and the current implementation product interaction manual plus target MQTT/Kafka/PostgreSQL/page evidence, screenshots, cleanup and pre-mutation Chromium preflight. Continuous production enablement, physical process-window evidence and field-data volume, full-site disaster recovery, MLflow production governance and external ERP/WMS activation remain explicitly open.",
         "make ci now includes goal-gap-register-check; metadata/goal-gap-register.json and docs/goal-gap-register.md are generated from the project goal ledger, production blockers, backlog, dependency readiness, export readiness and production migration ledgers so open gaps cannot be hidden by localized PASS evidence.",
         "make ci-required-file-strict-check now passes and scripts/verify-project-goal-acceptance.py rejects G-001 READY if the strict inventory is not clean or if the inventory generator/report artifacts are not tracked."
       ],
@@ -89,7 +89,7 @@
         "docs/module-intake-latest-basic-modules.md"
       ],
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1631, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 205. metadata/oracle-migration-audit.json currently has 1631 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1631, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 207. metadata/oracle-migration-audit.json currently has 1631 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
@@ -435,7 +435,12 @@
         "deploy/docker/postgres/init/191-wom-quality-quantity-reporting.sql",
         "deploy/docker/postgres/init/193-qcs-bpi-quality-gate-outbox.sql",
         "backend/source-modules/qcs-quality-gate-outbox/pom.xml",
-        "backend/source-modules/qcs-quality-gate-outbox/README.md"
+        "backend/source-modules/qcs-quality-gate-outbox/README.md",
+        "deploy/docker/scripts/build-wom-core-production-boot-jar.sh",
+        "deploy/docker/postgres/init/206-wom-easy-task-activity-grid-runtime.sql",
+        "deploy/docker/postgres/init/207-wom-batch-active-response-envelope.sql",
+        "deploy/docker/scripts/adp-mes-full-production-flow-acceptance.js",
+        "metadata/mes-full-production-flow-current.json"
       ],
       "currentEvidence": [
         "生产模块测试矩阵共 44 条，当前 44 PASS / 0 BLOCKED / 0 NOT_RUN，44 条 route smoke 全部 PASS。",
@@ -443,7 +448,8 @@
         "metadata/production-module-backlog.json is CLEAR with 0 unresolved items. Legacy public produceTaskCreated is formally retired as NOT_APPLICABLE; marker ADP_E2E_20260721104747_PUBLIC_PRODUCE_RETIRED proves HTTP 200/code=400/已废弃, PostgreSQL 0 -> 0 and a zero-error browser smoke of the supported manual replacement path.",
         "动作源码地图登记 15 个 source action，12 个已具备 marker 落库条件。",
         "WOM 状态流转、无明细 stop、产出/投入明细报工、提前放料、下推备料需求、工序开始结束、活动开始结束、简易活动报工、生产请检、备料退料，QCS 报告生成/编辑/结果保存/合格/不合格处置/降级放行/退回/检验放行，WTS 正常关闭/停工，WAPS 工作计划创建/调整/取消/审批，RM 导入/批量同步/删除，craftGraph 创建/更新/删除已形成真实前端/API 和 PostgreSQL 证据。",
-        "投入明细 wom_mat_consum_recods=0 已解释为当前人工投料源码路径行为。",
+        "投入明细 wom_putin_details 已真实落库；当前 WOM 核心补丁会为投料活动补建 wom_acti_exelogs 并复用既有逻辑生成 wom_mat_consum_recods，正式物料平衡所需的投料消耗台账缺口已关闭。",
+        "2026-07-27 marker ADP_E2E_20260727_MES_FULL_CLOSED_10 从空 marker、不续跑历史中间态，连续通过真实 WOM 制造指令开始、工序开始、投料、产出报工、QCS 请检与合格报告、工序结束、制造指令完工、WMS 完工入库和 ProcessAnalysis 追溯。PostgreSQL 证明任务、1 个工序、2 个活动及 2 条活动执行记录全部 finished，未完成 wait 为 0，投料明细/物料消耗 1/1、产出明细 2、QCS 1/1、WMS 1/2/1、追溯快照 3；所有浏览器错误和可见 warning/error 数组为空。",
         "ProcessAnalysis 追溯已由 backend/source-modules/process-analysis 恢复并通过 marker ADP_E2E_20260710084011_PROCESS_ANALYSIS 验收：真实 WOM 按钮打开追溯页、10 个时间轴事件可见、3 类 pa_trace_snapshots 落库且清理为 0。",
         "metadata/business-dependency-contracts.json records material-service and process-analysis as 2/2 READY with 8 required endpoint probes, 22 required acceptance stages, 2 startup compatibility evidence contracts and 8 startup smoke commands; make business-dependency-contract-check cross-checks the contracts against readiness smoke, package scan, production blocker ledger, production backlog and startup adaptation rules.",
         "metadata/production-export-readiness-smoke.json 于 2026-07-17T04:53:37.777Z 在当前测试环境完成真实浏览器点击、layoutJson、目标 sourceAudit 和工作簿响应复验：API base 和 browser base 均为 http://10.11.100.17:18080，pagePass=6、visibleExportActions=6、runtimeExportActions=6、nonEmptyDownloads=1、backendQueryExportWorkbooks=6、backendQueryExportErrors=0、verifiedDataExports=6、targetExportMatches=10、ready=6、blocked=0；WOM/RM/WTS/QCS 六个目标均 READY，RM PostgreSQL 有效 231 行与工作簿 232 行（含表头）一致。",
@@ -458,13 +464,13 @@
         "2026-07-17 独立不良数量已由 backend/source-modules/wom-quality-reporting 与 material-wms 协同实现并部署：marker ADP_E2E_20260717141017_WOM_BAD_QTY 通过 WOM/QCS 两个真实可见入口、API 幂等、QCS 质检关联、WMS 合格/冻结数量分配、PostgreSQL 事件账本、反向冲销和 marker 清理；metadata/wom-quality-quantity-persistence-acceptance.json 记录 44 条生产用例最终 44/44 PASS。"
       ],
       "blockingIssues": [
-        "生产测试矩阵、模块 blocker 和 active backlog 均已清零；G-013 保持 PARTIAL，因为真实现场 Batch/DCS 投递确认、回滚演练和生产业务签字仍是切换前置。"
+        "生产测试矩阵、模块 blocker 和 active backlog 均已清零，制造到追溯八步主链及投料消耗台账已闭合；G-013 保持 PARTIAL，因为真实现场 Batch/DCS 投递确认、连续运行、回滚演练和生产业务签字仍是切换前置。"
       ],
       "nextActions": [
-        "保持制造-质量-material/WMS-ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑、独立不良数量和旧 public endpoint 退役契约回归；把真实 Batch/DCS 投递确认、回滚演练和签字作为生产切换前置单独验收。"
+        "保持 ADP_E2E_20260727_MES_FULL_CLOSED_10、生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑、独立不良数量和旧 public endpoint 退役契约回归；把真实 Batch/DCS 投递确认、连续运行、回滚演练和签字作为生产切换前置单独验收。"
       ],
-      "evidence": "生产模块测试矩阵 44 条，当前 44 PASS / 0 BLOCKED / 0 NOT_RUN；WOM、QCS、WTS、WAPS、RM、craftGraph、material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑和独立不良数量闭环已覆盖真实前端/API/PostgreSQL 或文件响应证据。最新导出报告为 READY/6-of-6，不良数量 marker ADP_E2E_20260717141017_WOM_BAD_QTY 已完成分配、幂等、冲销和清理；工具栏 8 个动作当前全部 PASS。",
-      "gap": "仓库内生产功能与旧 public produceTaskCreated 产品边界已闭合；真实 Batch/DCS 投递确认、回滚演练和业务负责人签字仍是生产切换前置。独立不良数量、material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单和 RM Web 配方编辑已闭合。"
+      "evidence": "生产模块测试矩阵 44 条，当前 44 PASS / 0 BLOCKED / 0 NOT_RUN；WOM、QCS、WTS、WAPS、RM、craftGraph、material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑和独立不良数量均有真实前端/API/PostgreSQL 或文件响应证据。marker ADP_E2E_20260727_MES_FULL_CLOSED_10 又完成制造到追溯八步连续闭环，任务、工序、2 个活动及 2 条活动执行均 finished，投料消耗、QCS、WMS 和 trace 均有直接 PostgreSQL 证据，浏览器及可见 warning/error 为 0。",
+      "gap": "仓库内制造到追溯主链和投料消耗台账可连续运行；真实 Batch/DCS 投递确认、连续运行、回滚演练和业务负责人签字仍是生产切换前置。独立不良数量、material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单和 RM Web 配方编辑已闭合。"
     },
     {
       "id": "G-014",
@@ -727,14 +733,20 @@
         "docs/testing/bpi-minimum-transfer-cell-live-acceptance.md",
         "metadata/bpi-minimum-transfer-cell-live-acceptance.json",
         "metadata/bpi-minimum-transfer-cell-start-target.png",
-        "metadata/bpi-minimum-transfer-cell-end-target.png"
+        "metadata/bpi-minimum-transfer-cell-end-target.png",
+        "deploy/docker/scripts/build-wom-core-production-boot-jar.sh",
+        "deploy/docker/postgres/init/206-wom-easy-task-activity-grid-runtime.sql",
+        "deploy/docker/postgres/init/207-wom-batch-active-response-envelope.sql",
+        "deploy/docker/scripts/adp-mes-full-production-flow-acceptance.js",
+        "metadata/mes-full-production-flow-current.json"
       ],
       "currentEvidence": [
         "53 business pages have API/layout and browser smoke evidence",
         "production module test matrix has 44 cases: 44 PASS, 0 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks 0 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and is CLEAR with 0 active items; legacy public produceTaskCreated is retired as NOT_APPLICABLE with explicit rejection/no-persistence evidence.",
-        "persistence acceptance ledger has 275 tested features: 272 PASS, 0 FAIL, 0 BLOCKED, 3 NOT_APPLICABLE",
+        "persistence acceptance ledger has 283 tested features: 280 PASS, 0 FAIL, 0 BLOCKED, 3 NOT_APPLICABLE",
+        "2026-07-27 marker ADP_E2E_20260727_MES_FULL_CLOSED_10 passed a clean, non-resumed real WOM/QCS/WMS/ProcessAnalysis run with eight browser/API stages. Direct PostgreSQL verification closed task, process and two activity execution states, one putin detail, one material-consumption row, QCS qualification, WMS 1/2/1 and three trace snapshots; browser and visible warning/error evidence were empty.",
         "2026-07-27 minimum transfer-cell marker BPI_MIN_20260727_110711 passed the real WOM page, controlled MQTT multi-signal publisher, JetLinks, Kafka, Flink, BPI service, PostgreSQL and candidate pages. Five telemetry points drove one START and one END candidate into one CLOSED_RAW shadow batch; both browser confirmations, WOM context outbox revisions, six boundary evidence rows, state events, cleanup and default-off restoration passed without QCS/WMS writes.",
         "BPI V27 marker ADP_E2E_BPI_PARQUET_20260722_105844_A1 passed the real ADP page, controlled FAILED/r3 persistence, same-task retry to READY/r6, exact MinIO versionId/SHA/bytes/rows/schema verification, service restart readback, least-privilege deletion denial and zero-residue/default-off cleanup.",
         "BPI V28 markers ADP_E2E_BPI_ICEBERG_20260722_175829_A1, ADP_E2E_BPI_ICEBERG_RETRY_20260722_181106_A1 and ADP_E2E_BPI_ICEBERG_FENCE_20260722_181629_A1 passed the clean target ADP desktop/mobile page, exact MinIO source and Polaris/PyIceberg snapshot checks, controlled failure and same-task retry, real post-commit exit 86 and stale-claim reconcile to the same single snapshot, least privilege and zero-residue/default-off cleanup.",
@@ -774,10 +786,10 @@
         "2026-07-21 marker ADP_E2E_20260721021607_QCS_BPI closed the real WOM/QCS page -> QCS PostgreSQL transaction outbox -> Java 8 sidecar -> three-broker Kafka -> BPI PostgreSQL chain. First delivery moved the shadow batch to RELEASED/r3 with ACCEPTED gate; exact replay kept gate/link/inbox/state/audit/WMS-outbox counts at 1/1/1/2/2/0, DLQ and lag at zero. Browser errors and dual-database marker residue were zero, all six write switches were restored false, and the shadow batch correctly requested no WMS command. Evidence: metadata/qcs-bpi-quality-gate-target-acceptance.json."
       ],
       "blockingIssues": [
-        "生产矩阵 44 条已全部 PASS，模块 blocker/backlog 已清零，旧 public produceTaskCreated 已退役；现场 Batch/DCS 切换确认及业务负责人签字仍未完成。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 和独立不良数量闭环已闭合。"
+        "生产矩阵 44 条、制造到追溯八步主链和投料消耗台账已通过；现场 Batch/DCS 切换确认、连续运行及业务负责人签字仍未完成。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH。"
       ],
       "nextActions": [
-        "保持 material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑、独立不良数量闭环、旧 public endpoint 退役契约、PATROL 配置/执行/异常隐患、统计聚合和 Kafka 消费回归；接入有历史值的真实 TagManagement 测点并配置误差基准巡检项，复验中位数落库和误差图表；取得 SESGISConfig 后恢复 GIS 定位/轨迹，若要求整改、复查和销项则先取得真实 SESH；完成现场 Batch/DCS 切换确认，并补齐 before/after SQL 和业务签字。"
+        "保持 ADP_E2E_20260727_MES_FULL_CLOSED_10、生产列表导出、WOM 二维码、RM Web 配方、独立不良数量、PATROL 配置/执行/异常隐患、统计和 Kafka 回归；接入真实 TagManagement 历史和巡检依赖；完成现场 Batch/DCS 切换、连续运行、before/after SQL 和业务签字。"
       ]
     },
     {
@@ -814,13 +826,19 @@
         "deploy/docker/postgres/init/193-qcs-bpi-quality-gate-outbox.sql",
         "deploy/docker/postgres/init/194-qcs-inspect-report-view-runtime-json.sql",
         "deploy/docker/postgres/init/195-wom-source-compat.sql",
-        "deploy/docker/postgres/init/196-qcs-manu-inspect-list-empty-column.sql"
+        "deploy/docker/postgres/init/196-qcs-manu-inspect-list-empty-column.sql",
+        "deploy/docker/postgres/init/206-wom-easy-task-activity-grid-runtime.sql",
+        "deploy/docker/postgres/init/207-wom-batch-active-response-envelope.sql",
+        "deploy/docker/scripts/build-wom-core-production-boot-jar.sh",
+        "deploy/docker/scripts/adp-mes-full-production-flow-acceptance.js",
+        "metadata/mes-full-production-flow-current.json"
       ],
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 275 tested features: 272 PASS, 0 FAIL, 0 BLOCKED, 3 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED.",
+        "metadata/persistence-acceptance.json currently has 283 tested features: 280 PASS, 0 FAIL, 0 BLOCKED, 3 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED.",
+        "2026-07-27 marker ADP_E2E_20260727_MES_FULL_CLOSED_10 adds eight exact persistence rows for WOM start/process/putin/output/QCS/process-end/finish and WMS/trace. It reuses PostgreSQL tables, adds no Oracle runtime path, and proves the repaired putin path creates both activity execution and material-consumption facts.",
         "Target marker ADP_E2E_20260720193226_WMS_OUTAGE directly verified the BPI and material PostgreSQL tables across a real internal material-wms outage and recovery: no material row during the outage, one durable document/line/transaction/stock after recovery, and zero marker residue after cleanup.",
-        "metadata/postgres-migration-inventory.json currently has 205 scripts, highRiskStatementCount=0, watchStatementCount=78, watchSafetyIssueCount=0, with no missing, duplicate, invalid, or unguarded structural migration statements.",
+        "metadata/postgres-migration-inventory.json currently has 207 scripts, highRiskStatementCount=0, watchStatementCount=78, watchSafetyIssueCount=0; there are no missing, duplicate, invalid, or unguarded structural migration statements.",
         "PATROL migration 186 restores the hidden-danger/EAM risk projection and repairs supfusion_i18n_resource.modifier from the legacy varchar shape to the java.util.Date-compatible PostgreSQL timestamp shape; target migration, i18n restart, browser/API and PostgreSQL marker verification passed.",
         "metadata/persistence-acceptance.json currently has 0 FAIL and 0 BLOCKED rows",
         "metadata/production-module-backlog.json covers those unresolved persistence rows with 0 backlog items, 0 FAIL_BACKLOG and 0 BLOCKED",
@@ -841,8 +859,8 @@
         "2026-07-23 BPI Flyway V31 adds PostgreSQL-owned immutable offline training-readiness assessments, audit and idempotency facts. Target marker ADP_E2E_BPI_READINESS_20260723_091500_A1 persisted two BLOCKED assessments with 19 gates and eight blockers, rejected direct mutation, preserved zero model side effects and cleaned all marker rows without adding an Oracle runtime path.",
         "2026-07-23 BPI Flyway V32/V33 adds governed process-window definitions, immutable point-in-time window facts and function privilege hardening. Target marker ADP_E2E_BPI_WINDOWS_20260723_1235_A1 persisted six facts with exact late/freeze exclusion, explicit READY/BLOCKED status, immutable rejection, least-privilege verification and zero marker cleanup without adding an Oracle runtime path.",
         "2026-07-23 BPI Phase 3C-D reuses the V33 PostgreSQL model and adds no duplicate collection tables. Target marker ADP_E2E_BPI_FIELD_COVERAGE_20260723_1525_A3 persisted the shadow-run create/cancel lifecycle, two audits and two idempotency rows, computed six source and four training-volume counts directly from existing catalog/sequence/calibration/batch/review facts, and cleaned 12 marker categories to zero without adding an Oracle runtime path.",
-        "2026-07-23 BPI Phase 3C-E adds only V34 shadow-window indexes and a default-off scoped Kafka consumer over existing PostgreSQL telemetry tables. Target marker BPI_TLANDING_20260723_094606 persisted controlled MQTT sequences 1..5, excluded three preheat records, projected two in-window events/two points/zero rejects into the real page, cancelled the run and cleaned all marker rows without adding a duplicate lifecycle table or Oracle runtime path."
-        ,"2026-07-23 BPI Phase 3C-F adds V35 bpi_telemetry_point_latest as a rebuildable one-row-per-point projection while preserving events/points as history. Target marker ADP_E2E_20260723_BPI_LIVE_V35_07 persisted two events/two points/one latest/zero rejects, read the same fact through overview/live-evidence and the real page, then cleaned all marker rows without adding an Oracle runtime path."
+        "2026-07-23 BPI Phase 3C-E adds only V34 shadow-window indexes and a default-off scoped Kafka consumer over existing PostgreSQL telemetry tables. Target marker BPI_TLANDING_20260723_094606 persisted controlled MQTT sequences 1..5, excluded three preheat records, projected two in-window events/two points/zero rejects into the real page, cancelled the run and cleaned all marker rows without adding a duplicate lifecycle table or Oracle runtime path.",
+        "2026-07-23 BPI Phase 3C-F adds V35 bpi_telemetry_point_latest as a rebuildable one-row-per-point projection while preserving events/points as history. Target marker ADP_E2E_20260723_BPI_LIVE_V35_07 persisted two events/two points/one latest/zero rejects, read the same fact through overview/live-evidence and the real page, then cleaned all marker rows without adding an Oracle runtime path."
       ],
       "blockingIssues": [
         "只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。"
@@ -850,7 +868,7 @@
       "nextActions": [
         "每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。"
       ],
-      "evidence": "Oracle/PostgreSQL audit, init SQL, persistence acceptance, production backlog, and migration inventory are in CI; metadata/persistence-acceptance.json currently has 275 tested features: 272 PASS, 0 FAIL, 0 BLOCKED, 3 NOT_APPLICABLE, and metadata/production-module-backlog.json is CLEAR with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED. BPI Flyway V26 owns immutable dataset definitions, point-in-time snapshots and manifest samples; V27 adds independent Parquet materialization; V28 adds Iceberg/Polaris publication; V29 adds append-only retention archive and recovery facts; V30 adds MLflow Dataset Input registration facts; V31 adds immutable offline training-readiness assessments; V32 adds immutable point-in-time process-window facts; V33 hardens function execution privileges; V34 adds shadow-window lookup indexes; V35 adds a rebuildable latest telemetry projection while preserving original facts. Phase 3C-D projects pinned-source and training-volume coverage, Phase 3C-E persists exact-scope Kafka telemetry, and Phase 3C-F reads the same PostgreSQL facts through overview/live-evidence and the real page. The 2026-07-27 minimum transfer-cell acceptance adds a real WOM-context, five-signal MQTT/Flink START-to-END shadow-batch proof without adding tables or an Oracle runtime path. Target markers prove controlled failure/retry, exact object versions and checksums, post-commit fencing recovery, Object Lock retention, exact MLflow source/run/input, process-window late/freeze exclusion, source/training/telemetry coverage, restart idempotency, least privilege, blocked-readiness fail-closed behavior and zero cleanup without adding an Oracle runtime path. Existing entity-model, QCS/WOM, PATROL, material/WMS, ProcessAnalysis, QR, manual-entry and RM evidence remains in the detailed ledgers."
+      "evidence": "Oracle/PostgreSQL audit, init SQL, persistence acceptance, production backlog, and migration inventory are in CI; metadata/persistence-acceptance.json currently has 283 tested features: 280 PASS, 0 FAIL, 0 BLOCKED, 3 NOT_APPLICABLE. Marker ADP_E2E_20260727_MES_FULL_CLOSED_10 adds a clean non-resumed WOM/QCS/WMS/ProcessAnalysis eight-step PostgreSQL proof, including one material-consumption row and zero visible warning/error notices. BPI Flyway V26 owns immutable dataset definitions, point-in-time snapshots and manifest samples; V27 adds independent Parquet materialization; V28 adds Iceberg/Polaris publication; V29 adds append-only retention archive and recovery facts; V30 adds MLflow Dataset Input registration facts; V31 adds immutable offline training-readiness assessments; V32 adds immutable point-in-time process-window facts; V33 hardens function execution privileges; V34 adds shadow-window lookup indexes; V35 adds a rebuildable latest telemetry projection while preserving original facts. The 2026-07-27 minimum transfer-cell acceptance adds a real WOM-context, five-signal MQTT/Flink START-to-END shadow-batch proof without adding tables or an Oracle runtime path. Existing entity-model, QCS/WOM, PATROL, material/WMS, ProcessAnalysis, QR, manual-entry and RM evidence remains in the detailed ledgers."
     },
     {
       "id": "G-020",

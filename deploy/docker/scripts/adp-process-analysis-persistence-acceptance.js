@@ -34,6 +34,7 @@ const sourceProductNo = process.env.ADP_PROCESS_ANALYSIS_PRODUCT_NO || "ADP_E2E_
 const browserTaskId = process.env.ADP_PROCESS_ANALYSIS_BROWSER_TASK_ID || sourceTaskId;
 const browserTableNo = process.env.ADP_PROCESS_ANALYSIS_BROWSER_TABLE_NO || sourceTableNo;
 const browserBatchNo = process.env.ADP_PROCESS_ANALYSIS_BROWSER_BATCH_NO || sourceBatchNo;
+const keepFixture = process.env.ADP_PROCESS_ANALYSIS_KEEP_FIXTURE === "true";
 const tenantId = `${marker}_TENANT`;
 const gridId = "WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg";
 
@@ -433,17 +434,26 @@ async function main() {
   } catch (error) {
     evidence.issues.push(error.stack || error.message);
   } finally {
-    try {
-      runSql(cleanupSql());
-      evidence.states.push(queryState("afterCleanup"));
-      const cleaned = evidence.states[evidence.states.length - 1];
-      if (Number(cleaned.snapshotCount) !== 0 || Number(cleaned.wmsDocuments) !== 0 || Number(cleaned.wmsStockRows) !== 0) {
-        throw new Error("快照或 WMS marker 清理后仍有残留行");
+    if (keepFixture && evidence.status === "PASS") {
+      evidence.cleanup = {
+        status: "DEFERRED",
+        reason: "Shared MES flow snapshots and completion inbound rows retained for final cross-module verification.",
+      };
+    } else {
+      try {
+        runSql(cleanupSql());
+        evidence.states.push(queryState("afterCleanup"));
+        const cleaned = evidence.states[evidence.states.length - 1];
+        if (Number(cleaned.snapshotCount) !== 0 || Number(cleaned.wmsDocuments) !== 0 || Number(cleaned.wmsStockRows) !== 0) {
+          throw new Error("快照或 WMS marker 清理后仍有残留行");
+        }
+        evidence.cleanup = { status: "PASS" };
+      } catch (cleanupError) {
+        evidence.issues.push(`cleanup: ${cleanupError.stack || cleanupError.message}`);
+        evidence.cleanup = { status: "FAIL", error: cleanupError.stack || cleanupError.message };
+        evidence.status = "FAIL";
+        exitCode = 1;
       }
-    } catch (cleanupError) {
-      evidence.issues.push(`cleanup: ${cleanupError.stack || cleanupError.message}`);
-      evidence.status = "FAIL";
-      exitCode = 1;
     }
     fs.writeFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
     await api.dispose();
