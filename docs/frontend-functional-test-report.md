@@ -1093,6 +1093,27 @@ JetLinks/Kafka/BPI 链落库后，由 `/bpi/#/overview` 和点位事实抽屉直
 `metadata/bpi-live-operations-drawer-target.png`；完整报告：
 `docs/testing/bpi-live-operations-evidence-acceptance.md`。
 
+### BPI 最小转运单元多信号与真实 MES 批次（2026-07-27）
+
+本节在唯一目标环境 `http://10.11.100.17:18080` 使用 marker
+`BPI_MIN_20260727_110711`。受控 MQTT 同时发送瞬时流量、累计流量、泵、阀路和接收罐液位，
+真实 WOM 页面提供运行/结束生产上下文；真实 BPI 候选页确认 START/END 后，同一 PostgreSQL
+影子批次从 ACTIVE 进入 CLOSED_RAW。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WOM 生产上下文 | `/msService/WOM/produceTask/produceTask/makeTaskList` | 对 marker 任务执行开始，待 BPI START 确认后执行结束 | `POST .../updateTaskState`，`state=start/stop` | 两次动作均 200；最终页面显示 finished；console/page/request failure 均为 0 | 任务真实经历 runing/finished；waitforrun、runing、finished 三条 outbox 均 `SENT/1` | `wom_produce_tasks`、`wom_wait_put_records`、`wom_bpi_production_context_outbox` | PASS | fixture 已定向删除，outbox 审计保留 |
+| BPI START 候选 | `/bpi/#/candidates` | 打开 `0dfd...d565` 抽屉并确认 | `POST /bpi-api/candidates/0dfd8cb9-59fc-5486-8f4b-9d93abf7d565/confirm` | 登录 200、确认 200；candidate 从列表消失；console/page/request failure 均为 0 | candidate `CONFIRMED/r2`；批次 `0ed2...e77c` 为 `ACTIVE/r1/is_shadow=true` | `bpi_batch_candidates`、`bpi_batch_instances`、`bpi_batch_state_events`、`bpi_boundary_evidence` | PASS | START 按 required + 2/3 quorum 成立，累计量未进入本次候选证据 |
+| BPI END 候选 | `/bpi/#/candidates` | 发送停流样本推进事件时间，打开 `a838...e3c` 抽屉并确认 | `POST /bpi-api/candidates/a838687a-7895-52de-b821-23eaf3c95e3c/confirm` | 登录 200、确认 200；console/page/request failure 均为 0 | 同一批次进入 `CLOSED_RAW/r2`；START/END 时间分别为 `11:33:28.905/11:35:19.354` | 同上 | PASS | 第二组 STOP 样本推进 watermark，边界时间仍正确落在第一组满足点 |
+| 五信号遥测修复后复验 | MQTT，不对应用户页面 | sequence `36..42` 每条发送五个不同类型点位 | MQTT QoS1 -> JetLinks -> Kafka -> BPI consumer | 7/7 PUBACK；不适用页面交互 | 7 events 均 `ACCEPTED`，每条 5/5/0；35 points、0 rejects，double/boolean 单位均正确 | `bpi_telemetry_events`、`bpi_telemetry_points`、`bpi_telemetry_point_rejects` | PASS | 受控模拟器，不是物理现场 |
+| 治理恢复 | `/bpi/#/rules`、`/bpi/#/points` | 退役规则、撤销测试校准并恢复运行开关 | rule/calibration/feature APIs | 没有 pending candidate 或 active batch | 两条规则 `RETIRED/INACTIVE`；五条校准 `REVOKED`；`bpi.commands` 恢复 false | rule/calibration/feature/audit 表 | PASS | 版本化拓扑作为无活动规则的模型资产保留 |
+| 生产写回隔离 | BPI 批次只读事实 | 查 QCS/WMS 投影和 outbox | PostgreSQL direct verification | 页面显示 `qualityGate=NOT_APPLICABLE`、`wmsStatus=NOT_REQUESTED` | quality gate/link、WMS link/reversal/outbox 五项均为 0 | QCS/WMS 投影及 `bpi_outbox_events` | PASS | WOM/QCS/WMS/PLC/DCS 写回继续关闭 |
+
+机器证据：`metadata/bpi-minimum-transfer-cell-live-acceptance.json`；截图：
+`metadata/bpi-minimum-transfer-cell-start-target.png`、
+`metadata/bpi-minimum-transfer-cell-end-target.png`；完整报告：
+`docs/testing/bpi-minimum-transfer-cell-live-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

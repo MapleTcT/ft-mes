@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-23T21:20:53+08:00",
-  "repoCommit": "67b728dabedbf350499accabd85929952733086e+adapter-316e04d9+frontend-8622196d+iot-21618eae",
+  "generatedAt": "2026-07-27T12:01:48+08:00",
+  "repoCommit": "2a81b1b8+iot-3d6e1108+adapter-316e04d9+frontend-8622196d",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -236,11 +236,17 @@
       "marker": "ADP_E2E_20260723_BPI_LIVE_V35_07",
       "evidence": "metadata/bpi-live-operations-evidence-acceptance.json; docs/testing/bpi-live-operations-evidence-acceptance.md",
       "assertions": "V35 latest projection stored exactly one controlled latest row from 2 events/2 GOOD points/0 rejects; real overview displayed 12.5 m3/h and opened a five-sample point-evidence drawer; overview/live-evidence APIs were 200; 36 browser responses were all 2xx with zero console/page/request failures; seven marker categories cleaned to zero; 10m/5m IoT cadence restored; no model, inference, activation or external WMS side effect"
+    },
+    "bpiMinimumTransferCell": {
+      "status": "PASS_CONTROLLED_MULTI_SIGNAL_WOM_TO_SHADOW_BATCH",
+      "marker": "BPI_MIN_20260727_110711",
+      "evidence": "metadata/bpi-minimum-transfer-cell-live-acceptance.json; docs/testing/bpi-minimum-transfer-cell-live-acceptance.md",
+      "assertions": "Real WOM start/stop produced three SENT/1 context revisions; five simultaneous MQTT signals passed JetLinks/Kafka/Flink governance; real BPI browser confirmations persisted one ACTIVE then CLOSED_RAW shadow batch; post-fix telemetry was 7 events/35 accepted points/0 rejects; QCS/WMS side effects were zero; controlled rules, calibrations and flags were restored."
     }
   },
   "summary": {
-    "testedFeatures": 269,
-    "pass": 266,
+    "testedFeatures": 275,
+    "pass": 272,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -5862,9 +5868,140 @@
         "Seven pre-existing unresolved data-quality incidents correctly keep dataHealth BAD and line status BLOCKED.",
         "The controlled simulator and temporary calibration do not establish physical field qualification."
       ]
+    },
+    {
+      "module": "BPI 最小转运单元拓扑与规则治理",
+      "route": "/bpi/#/rules and /bpi/#/points",
+      "operation": "发布五节点拓扑，审批五个受控点位校准，模拟并发布 START/END 规则",
+      "api": "BPI topology, point calibration, rule simulation/publication and feature-flag APIs",
+      "method": "GET/POST",
+      "requiresPersistence": true,
+      "backendEntry": "TopologyController, PointCalibrationController, RuleController and PostgreSQL repositories",
+      "tables": [
+        "bpi.bpi_topology_versions",
+        "bpi.bpi_point_calibrations",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_rule_application_receipts",
+        "bpi.bpi_rule_runtime_readiness_receipts"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Require five READY points and two PUBLISHED/APPLIED/READY rules before execution; require RETIRED/INACTIVE and REVOKED after cleanup.",
+      "status": "PASS",
+      "evidence": "Five points were READY and both deterministic simulations matched one boundary with zero misses and false positives; cleanup retired both rules and revoked all controlled calibrations.",
+      "issues": []
+    },
+    {
+      "module": "BPI 最小转运单元真实 WOM 上下文",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operation": "从真实页面开始和结束一个 marker 制造任务",
+      "api": "POST /msService/WOM/produceTask/produceTask/updateTaskState",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "Legacy WOM task state service and PostgreSQL production-context outbox trigger/publisher",
+      "tables": [
+        "public.wom_produce_tasks",
+        "public.wom_wait_put_records",
+        "public.wom_bpi_production_context_outbox"
+      ],
+      "marker": "BPI_MIN_20260727_110711_TASK_TN",
+      "verificationSql": "Read task state during run and after stop; query three context revisions and require SENT/1; cleanup fixture rows to zero.",
+      "status": "PASS",
+      "evidence": "Page/API returned 200 for start and stop; PostgreSQL persisted running then finished and three wait/run/finish context revisions were SENT once.",
+      "issues": []
+    },
+    {
+      "module": "BPI 最小转运单元五信号 MQTT 落表",
+      "route": "MQTT /bpi-transfer-cell-product-01/bpi-transfer-cell-device-01/properties/report",
+      "operation": "持续发布 START/RUNNING/STOP 分阶段 envelope，每条同时携带五个工艺信号",
+      "api": "MQTT QoS1 -> JetLinks -> iot.telemetry.selected.v1",
+      "method": "MQTT",
+      "requiresPersistence": true,
+      "backendEntry": "JetLinks exporter -> Kafka -> TelemetryKafkaListener -> TelemetryIngestionService",
+      "tables": [
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_telemetry_point_rejects"
+      ],
+      "marker": "BPI_MIN_20260727_110711_ACCEPT5",
+      "verificationSql": "Require seven ACCEPTED events, 5/5 accepted points per event, 35 point rows and zero rejects.",
+      "status": "PASS",
+      "evidence": "Sequences 36..42 all received MQTT PUBACK and persisted as ACCEPTED 5/5/0 with canonical double and boolean units.",
+      "issues": []
+    },
+    {
+      "module": "BPI 最小转运单元 START 候选与影子批次",
+      "route": "/bpi/#/candidates",
+      "operation": "打开真实候选抽屉并确认 START 边界",
+      "api": "POST /bpi-api/candidates/0dfd8cb9-59fc-5486-8f4b-9d93abf7d565/confirm",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "CandidateController -> CandidateService -> candidate, batch, evidence and audit repositories",
+      "tables": [
+        "bpi.bpi_batch_candidates",
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_boundary_evidence"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Require candidate CONFIRMED/r2 and batch ACTIVE/r1, is_shadow=true, with the WOM order ID and four satisfied signal evidence rows.",
+      "status": "PASS",
+      "evidence": "Real page confirmation returned 200 with zero browser errors and created batch 0ed2b956-9e1b-53fb-805c-9ff5e1f5e77c as ACTIVE/r1.",
+      "issues": []
+    },
+    {
+      "module": "BPI 最小转运单元 END 候选与批次关闭",
+      "route": "/bpi/#/candidates",
+      "operation": "用 STOP 样本推进事件时间，打开真实候选抽屉并确认 END",
+      "api": "POST /bpi-api/candidates/a838687a-7895-52de-b821-23eaf3c95e3c/confirm",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "Flink boundary evaluator -> candidate Kafka ingress -> CandidateController and PostgreSQL repositories",
+      "tables": [
+        "bpi.bpi_batch_candidates",
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_boundary_evidence"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Require END candidate CONFIRMED/r2 and the same batch CLOSED_RAW/r2 with exact start/end times and two lifecycle events.",
+      "status": "PASS",
+      "evidence": "END confirmation returned 200; the same shadow batch closed at the first STOP hold boundary and retained the WOM order ID.",
+      "issues": [
+        "A second STOP_CONFIRM sample group was needed to advance the event-time watermark; the candidate boundary time correctly remained on the first group.",
+        "Persisted boundary evidence currently leaves unit blank although telemetry point rows retain authoritative units."
+      ]
+    },
+    {
+      "module": "BPI 最小转运单元写回隔离与治理恢复",
+      "route": "N/A",
+      "operation": "退役受控规则、撤销校准、恢复开关并验证没有 QCS/WMS 写回",
+      "api": "BPI governance cleanup APIs and direct PostgreSQL verification",
+      "method": "POST/SQL",
+      "requiresPersistence": true,
+      "backendEntry": "Governance script and BPI PostgreSQL repositories",
+      "tables": [
+        "bpi.bpi_feature_flags",
+        "bpi.bpi_point_calibrations",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_quality_gates",
+        "bpi.bpi_quality_links",
+        "bpi.bpi_wms_inbound_links",
+        "bpi.bpi_wms_inbound_reversal_tasks",
+        "bpi.bpi_outbox_events"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Require rules RETIRED/INACTIVE, calibrations REVOKED, bpi.commands restored false, zero pending candidates/active batches and zero QCS/WMS rows.",
+      "status": "PASS",
+      "evidence": "Cleanup was idempotent and restored pre-run flags; all five QCS/WMS side-effect counts were zero while the closed shadow batch remained immutable evidence.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "BPI_MIN_20260727_110711",
+      "artifact": "metadata/bpi-minimum-transfer-cell-live-acceptance.json",
+      "summary": "The target minimum transfer cell closed real WOM start/stop, three SENT context revisions, five simultaneous MQTT process signals, JetLinks/Kafka/Flink event-time evaluation, two real browser candidate confirmations and one ACTIVE-to-CLOSED_RAW PostgreSQL shadow batch. Post-fix telemetry persisted 7 accepted events and 35 accepted points with zero rejects; governance recovery was idempotent and QCS/WMS side effects were zero. Physical devices, formal calibration, boundary-evidence unit projection, multi-line capacity and continuous field operation remain open."
+    },
     {
       "marker": "ADP_E2E_20260723_BPI_LIVE_V35_07",
       "artifact": "metadata/bpi-live-operations-evidence-acceptance.json",

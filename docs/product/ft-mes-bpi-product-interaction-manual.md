@@ -278,6 +278,19 @@ BPI 当前实现九个稳定 hash 路由：
 
 ![START 候选审核](../../metadata/bpi-live-mqtt-wom-start-candidate.png)
 
+**最小转运单元当前验证：**
+
+- 模型路径：送料罐 -> 送料泵 -> 流量计 -> 转运阀路 -> 接收罐。
+- 同时输入：瞬时流量、累计流量、泵运行、阀路成立、接收罐液位。
+- START：泵和阀路必须成立，流量/累计量/液位至少满足两项。
+- END：低流量必须成立，泵停止/阀路断开至少满足一项。
+- marker `BPI_MIN_20260727_110711` 已由真实 WOM context 生成同一影子批次的 START/END；
+  当前只允许人工确认影子事实，不触发生产写回。
+- 页面操作和落库证据见
+  [最小转运单元联合验收](../testing/bpi-minimum-transfer-cell-live-acceptance.md)。
+
+![最小转运单元 START 候选](../../metadata/bpi-minimum-transfer-cell-start-target.png)
+
 ### 8.3 批次档案
 
 **目标：** 查询批次从边界事实到质量、库存和冲销的完整状态。
@@ -632,6 +645,7 @@ adapter 不可用时 Nginx 回退原 ADP 菜单；固定 `#/featureFlags` 深链
 sequenceDiagram
   participant D as 物理设备/受控模拟器
   participant I as JetLinks + MapleTcT/iot
+  participant M as MES/WOM
   participant K as Kafka
   participant F as Flink
   participant B as BPI Service
@@ -640,6 +654,8 @@ sequenceDiagram
 
   D->>I: MQTT QoS1 telemetry + epoch/sequence
   I->>K: 规范化遥测、目录、来源序列
+  M->>P: WOM start/stop 与同事务 context outbox
+  P->>K: mes.production.context.v1
   K->>F: telemetry + WOM context + rule lifecycle
   F->>K: START/END candidate
   K->>B: read_committed candidate

@@ -3687,6 +3687,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-minimum-line-governance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-mqtt-ingress-browser-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -6081,6 +6087,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-minimum-transfer-cell-live-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-mqtt-ingress-joint-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -6988,6 +7000,24 @@
     {
       "ignored": false,
       "path": "metadata/bpi-mes-production-context-runtime-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-minimum-transfer-cell-end-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-minimum-transfer-cell-live-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-minimum-transfer-cell-start-target.png",
       "state": "tracked",
       "tracked": true
     },
@@ -10827,6 +10857,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/MinimumTransferCellRuleTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/pom.xml",
       "state": "tracked",
       "tracked": true
@@ -11014,6 +11050,18 @@
     {
       "ignored": false,
       "path": "simulation/bpi/bpi-simulation.test.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "simulation/bpi/minimum-line-scenario.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "simulation/bpi/minimum-line-scenario.test.js",
       "state": "tracked",
       "tracked": true
     },
@@ -11648,16 +11696,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 675
+      "tracked": 676
     },
     "docs": {
-      "tracked": 151
+      "tracked": 152
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 269
+      "tracked": 272
     },
     "package.json": {
       "tracked": 1
@@ -11669,10 +11717,10 @@
       "tracked": 58
     },
     "services": {
-      "tracked": 451
+      "tracked": 452
     },
     "simulation": {
-      "tracked": 4
+      "tracked": 6
     },
     "streaming": {
       "tracked": 99
@@ -11681,8 +11729,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1937,
-    "tracked": 1937,
+    "totalFiles": 1945,
+    "tracked": 1945,
     "untracked": 0
   },
   "untrackedByDirectory": []

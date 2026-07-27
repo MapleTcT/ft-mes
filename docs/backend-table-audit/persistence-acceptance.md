@@ -1092,6 +1092,58 @@ JetLinks、六分区 Kafka 和精确 scope BPI consumer 事务落表，再由真
 精确恢复和边界见 `docs/testing/bpi-live-operations-evidence-acceptance.md`。本项关闭 Phase 3C-F
 受控实时事实投影，不关闭物理来源、正式校准、多产线容量、7-14 天现场运行或训练资格。
 
+### BPI 最小转运单元多信号与真实 MES 批次（目标页面/MQTT/Flink/PostgreSQL）
+
+本节使用 marker `BPI_MIN_20260727_110711`。真实 WOM 页面产生运行上下文，受控 MQTT 每个
+envelope 同时携带瞬时流量、累计流量、泵、阀路和罐液位五个信号。Flink 在事件时间上关联
+`mes.production.context.v1` 与 `iot.telemetry.selected.v1`，再按已发布 START/END 规则生成候选；
+真实 BPI 页面确认后直接查 PostgreSQL 验证同一影子批次。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 发布最小拓扑、五点目录与两条规则 | `/bpi/#/rules`、`/bpi/#/points` | topology/calibration/rule/feature APIs | BPI controllers/services/PostgreSQL repositories；rule outbox -> Kafka/Flink receipts | `bpi_topology_versions`、`bpi_point_calibrations`、`bpi_rule_versions`、application/readiness receipt、audit | 要求 5 READY、两规则 PUBLISHED/APPLIED/READY；模拟均 1/0/0/0 | 五点全部 READY；START/END 模拟均命中 1、漏检/误报 0；运行时 READY | PASS_TARGET |
+| WOM 页面开始并发布 active context | `/msService/WOM/produceTask/produceTask/makeTaskList` | `POST .../updateTaskState`，`state=start` | WOM task state service -> PostgreSQL trigger/outbox -> Java 8 Kafka publisher | `wom_produce_tasks`、`wom_wait_put_records`、`wom_bpi_production_context_outbox` | 按 task ID 查 runing，按 order ID 查 outbox | 页面/API 200；任务和 wait 为 runing；waitforrun inactive 与 runing active 均 SENT/1 | PASS_TARGET |
+| 五信号连续遥测入库 | MQTT topic | MQTT QoS1 -> JetLinks -> `iot.telemetry.selected.v1` | JetLinks exporter -> Kafka -> `TelemetryKafkaListener -> TelemetryIngestionService` | `bpi_telemetry_events`、`bpi_telemetry_points`、`bpi_telemetry_point_rejects` | marker `...ACCEPT5:%` 要求 7 ACCEPTED、每条 5/5/0、35 points、0 rejects | sequence 36..42 全部 PUBACK；五种 point/type/unit 各 7 条，reject=0 | PASS_TARGET |
+| 页面确认 START 并创建影子批次 | `/bpi/#/candidates` | `POST /bpi-api/candidates/0dfd8cb9-59fc-5486-8f4b-9d93abf7d565/confirm` | candidate Kafka ingress -> `CandidateController -> CandidateService -> PostgreSQL repositories` | `bpi_batch_candidates`、`bpi_batch_instances`、`bpi_batch_state_events`、`bpi_boundary_evidence`、audit/idempotency | 查 candidate、batch、timeline、evidence；要求 CONFIRMED/r2、ACTIVE/r1、shadow=true、WOM order ID | HTTP 200；candidate `CONFIRMED/r2/confidence=.85`；同事务创建 `ACTIVE/r1` 影子批次和 r1 状态事件 | PASS_TARGET |
+| 页面确认 END 并关闭同一批次 | `/bpi/#/candidates` | `POST /bpi-api/candidates/a838687a-7895-52de-b821-23eaf3c95e3c/confirm` | Flink event-time evaluator -> candidate Kafka ingress -> candidate/batch repositories | 同上 | 要求 END CONFIRMED/r2；同一 batch CLOSED_RAW/r2；精确 start/end；两条 timeline | HTTP 200；END confidence .70；批次 `ACTIVE -> CLOSED_RAW`，结束时间为第一组 STOP 条件满足时刻 | PASS_TARGET |
+| WOM 页面结束并发布 inactive context | WOM 制造指令页 | `POST .../updateTaskState`，`state=stop` | WOM task/report service -> outbox publisher | WOM task/wait/report/exelog/outbox | 查 finished 状态和第三条 context revision | 页面/API 200；task/wait/exelog 为 finished；finished inactive 为 SENT/1 | PASS_TARGET |
+| 写回隔离、治理恢复与 fixture 清理 | BPI 治理页/直接 SQL | rule retire、calibration revoke、feature restore、cleanup SQL | governance runner + BPI/WOM repositories | feature/rule/calibration；quality/WMS projection/outbox；WOM fixture | 要求 RETIRED/INACTIVE、REVOKED、开关恢复、pending/active=0、五项 QCS/WMS=0、WOM fixture=0 | 全部满足；保留 2 CONFIRMED candidate、1 CLOSED_RAW shadow batch 及不可变证据；没有生产写回 | PASS_TARGET_CLEANED |
+
+核心批次 SQL：
+
+```sql
+SELECT id, boundary_type, order_id, state, revision,
+       candidate_key, batch_id, boundary_time, confidence
+FROM bpi.bpi_batch_candidates
+WHERE id IN (
+  '0dfd8cb9-59fc-5486-8f4b-9d93abf7d565',
+  'a838687a-7895-52de-b821-23eaf3c95e3c'
+)
+ORDER BY boundary_time;
+
+SELECT id, batch_no, order_id, state, revision, is_shadow,
+       start_time, end_time, quality_gate, wms_status
+FROM bpi.bpi_batch_instances
+WHERE id = '0ed2b956-9e1b-53fb-805c-9ff5e1f5e77c';
+
+SELECT revision, action, from_state, to_state, event_time
+FROM bpi.bpi_batch_state_events
+WHERE batch_id = '0ed2b956-9e1b-53fb-805c-9ff5e1f5e77c'
+ORDER BY revision;
+```
+
+结果为两条 `CONFIRMED/r2` candidate；同一 batch
+`BPI-LINES0701-20260727-E22B71C8` 最终
+`CLOSED_RAW/r2/is_shadow=true`，保留 WOM order ID。状态事件恰好为
+`SHADOW_BATCH_CREATED` 和 `END_BOUNDARY_CONFIRMED`。
+
+当前 `bpi_boundary_evidence` 的 signal/value/quality/time 正确，但 unit 字段为空；权威单位仍保存在
+`bpi_telemetry_points`。该项标记为证据可解释性 backlog，正式生产前必须补投影、迁移和 replay 回归，
+不能因为状态机 PASS 就隐藏。
+
+机器证据：`metadata/bpi-minimum-transfer-cell-live-acceptance.json`；完整页面、MQTT、Flink、SQL、
+恢复和边界见 `docs/testing/bpi-minimum-transfer-cell-live-acceptance.md`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

@@ -1,0 +1,605 @@
+{
+  "generatedAt": "2026-07-27T12:01:48+08:00",
+  "repoBaseline": "2a81b1b8",
+  "iotBaseline": "3d6e1108",
+  "database": "PostgreSQL",
+  "status": "PASS_CONTROLLED_MULTI_SIGNAL_WOM_TO_SHADOW_BATCH",
+  "marker": "BPI_MIN_20260727_110711",
+  "summary": {
+    "testedFeatures": 8,
+    "pass": 8,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "realAdpBrowser": true,
+    "realWomContext": true,
+    "realMqttProtocol": true,
+    "realJetLinks": true,
+    "realKafkaFlink": true,
+    "realPostgresPersistence": true,
+    "multiSignalModel": true,
+    "controlledSourceSimulator": true,
+    "physicalDevice": false,
+    "shadowBatchOnly": true,
+    "productionWriteback": false,
+    "productionReady": false,
+    "goalStatus": "PARTIAL"
+  },
+  "target": {
+    "host": "v6-2288H-V6",
+    "address": "10.11.100.17",
+    "adpUrl": "http://10.11.100.17:18080",
+    "bpiUrl": "http://10.11.100.17:18080/bpi/",
+    "bpiServiceUrl": "http://10.11.100.17:19091",
+    "flinkUrl": "http://100.99.133.43:18081",
+    "adpDatabase": "adp",
+    "bpiDatabase": "ft_mes_bpi",
+    "jetLinksDatabase": "jetlinks",
+    "composeProject": "adp-mes-newbase"
+  },
+  "relationship": {
+    "productionContext": "WOM page -> wom_bpi_production_context_outbox -> mes.production.context.v1",
+    "telemetry": "controlled MQTT QoS1 -> JetLinks -> iot.telemetry.selected.v1",
+    "decision": "Flink event-time production-context join + published topology/rules -> bpi.batch.candidate.v1",
+    "persistence": "BPI candidate confirmation -> PostgreSQL shadow batch, boundary evidence, state events and audit",
+    "writebackBoundary": "No WOM, QCS, WMS, PLC or DCS production writeback is enabled by this acceptance."
+  },
+  "minimumCell": {
+    "scenarioCode": "BPI-MINIMUM-TRANSFER-CELL-V1",
+    "scenarioChecksum": "2b728461e969f08f53b746b599afde249f897dc409e2fa29cfe5c628c006be8c",
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "localityGroup": "LOCALITY-S07-TRANSFER",
+    "productId": "bpi-transfer-cell-product-01",
+    "deviceId": "bpi-transfer-cell-device-01",
+    "gatewayId": "bpi-pilot-mqtt-gateway-01",
+    "topologyPath": [
+      "FEED-TANK",
+      "TRANSFER-PUMP",
+      "FLOW-METER",
+      "TRANSFER-VALVE-PATH",
+      "RECEIVE-TANK"
+    ],
+    "signals": [
+      {
+        "sourcePropertyId": "instantFlow",
+        "propertyId": "flow.instant",
+        "dataType": "double",
+        "unit": "m3/h"
+      },
+      {
+        "sourcePropertyId": "totalizedFlow",
+        "propertyId": "flow.totalizer",
+        "dataType": "double",
+        "unit": "m3"
+      },
+      {
+        "sourcePropertyId": "pumpRunning",
+        "propertyId": "pump.running",
+        "dataType": "boolean",
+        "unit": "bool"
+      },
+      {
+        "sourcePropertyId": "valvePathReady",
+        "propertyId": "valve.path.ready",
+        "dataType": "boolean",
+        "unit": "bool"
+      },
+      {
+        "sourcePropertyId": "targetTankLevel",
+        "propertyId": "tank.level",
+        "dataType": "double",
+        "unit": "%"
+      }
+    ],
+    "startRule": {
+      "required": [
+        "pump.running == true for 4s",
+        "valve.path.ready == true for 4s"
+      ],
+      "quorumMinimum": 2,
+      "quorum": [
+        "flow.instant > 12 m3/h for 4s",
+        "flow.totalizer rising >= 0.2 m3 for 4s",
+        "tank.level rising >= 0.05% for 4s"
+      ],
+      "minimumConfidence": 0.8
+    },
+    "endRule": {
+      "required": [
+        "flow.instant < 0.5 m3/h for 4s"
+      ],
+      "quorumMinimum": 1,
+      "quorum": [
+        "pump.running == false for 4s",
+        "valve.path.ready == false for 4s"
+      ],
+      "minimumConfidence": 0.7
+    }
+  },
+  "governance": {
+    "status": "PASS_MINIMUM_LINE_GOVERNANCE_READY",
+    "topology": {
+      "id": "03a8bb02-12a1-4f03-a6de-58e4f3ff69ca",
+      "stateBeforeCleanup": "PUBLISHED",
+      "finalState": "PUBLISHED"
+    },
+    "rules": [
+      {
+        "id": "d8ba8e38-6bec-40ae-92b9-63bfc37df4be",
+        "boundaryType": "START",
+        "simulation": {
+          "matched": 1,
+          "missed": 0,
+          "falsePositive": 0,
+          "meanBoundaryErrorSeconds": 0
+        },
+        "runtimeBeforeCleanup": "APPLIED/READY",
+        "finalState": "RETIRED/INACTIVE"
+      },
+      {
+        "id": "89eecadc-2bc8-485d-994e-432ab7738672",
+        "boundaryType": "END",
+        "simulation": {
+          "matched": 1,
+          "missed": 0,
+          "falsePositive": 0,
+          "meanBoundaryErrorSeconds": 0
+        },
+        "runtimeBeforeCleanup": "APPLIED/READY",
+        "finalState": "RETIRED/INACTIVE"
+      }
+    ],
+    "catalog": {
+      "readyPointCountDuringRun": 5,
+      "requiredPointCount": 5,
+      "calibrationVersion": "SIM-CAL-TRANSFER-1",
+      "calibrationsApprovedDuringRun": 5,
+      "calibrationsFinalState": "REVOKED"
+    },
+    "featureFlagsAfterCleanup": {
+      "bpi.commands": {
+        "effectiveEnabled": false,
+        "overrideActive": false,
+        "revision": 8
+      },
+      "bpi.rule-management": {
+        "effectiveEnabled": true,
+        "overrideActive": true,
+        "revision": 6
+      }
+    }
+  },
+  "wom": {
+    "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+    "api": "POST /msService/WOM/produceTask/produceTask/updateTaskState",
+    "taskId": "9007190231280101",
+    "orderId": "BPI_MIN_20260727_110711_TASK_TN",
+    "externalBatch": "BPI_MIN_20260727_110711_BATCH",
+    "lineId": "8388157374858567",
+    "browserTransitions": [
+      {
+        "action": "start",
+        "status": 200,
+        "persistedState": "WOM_runState/runing"
+      },
+      {
+        "action": "stop",
+        "status": 200,
+        "persistedState": "WOM_runState/finished"
+      }
+    ],
+    "outbox": [
+      {
+        "contextRevision": 1785123132513,
+        "active": false,
+        "sourceState": "wom_runstate/waitforrun",
+        "publicationState": "SENT",
+        "attemptCount": 1
+      },
+      {
+        "contextRevision": 1785123152841,
+        "active": true,
+        "sourceState": "wom_runstate/runing",
+        "publicationState": "SENT",
+        "attemptCount": 1
+      },
+      {
+        "contextRevision": 1785123688204,
+        "active": false,
+        "sourceState": "wom_runstate/finished",
+        "publicationState": "SENT",
+        "attemptCount": 1
+      }
+    ],
+    "cleanup": {
+      "taskRows": 0,
+      "waitRows": 0,
+      "formulaRows": 0,
+      "materialRows": 0
+    }
+  },
+  "source": {
+    "kind": "CONTROLLED_MULTI_SIGNAL_MQTT",
+    "protocol": "MQTT 3.1.1",
+    "qos": 1,
+    "sourceEpoch": 20260727110711,
+    "sessions": [
+      {
+        "phases": [
+          "START_CONFIRM",
+          "RUNNING"
+        ],
+        "sequences": "7..21",
+        "messageCount": 15,
+        "pubAckCount": 15,
+        "result": "START_CANDIDATE"
+      },
+      {
+        "phases": [
+          "STOP_CONFIRM"
+        ],
+        "sequences": "22..28",
+        "messageCount": 7,
+        "pubAckCount": 7,
+        "result": "END_CONDITION_HELD"
+      },
+      {
+        "phases": [
+          "STOP_CONFIRM"
+        ],
+        "sequences": "29..35",
+        "messageCount": 7,
+        "pubAckCount": 7,
+        "result": "EVENT_TIME_WATERMARK_ADVANCED_END_CANDIDATE"
+      },
+      {
+        "phases": [
+          "STOP_CONFIRM"
+        ],
+        "sequences": "36..42",
+        "messageCount": 7,
+        "pubAckCount": 7,
+        "result": "FIVE_OF_FIVE_POINTS_ACCEPTED"
+      }
+    ],
+    "postFixPersistence": {
+      "events": 7,
+      "eventsAccepted": 7,
+      "pointsPerEvent": 5,
+      "acceptedPointsPerEvent": 5,
+      "rejectedPointsPerEvent": 0,
+      "totalPoints": 35,
+      "totalRejects": 0,
+      "units": {
+        "flow.instant": "m3/h",
+        "flow.totalizer": "m3",
+        "pump.running": "bool",
+        "valve.path.ready": "bool",
+        "tank.level": "%"
+      }
+    },
+    "jetLinksImage": "mapletct/jetlinks-bpi-pilot:20260727-minline-boolunit",
+    "applicationJarSha256": "5c4a223b16aa4c933cd5cf51bff40dae1c79cc8f8658e8ecf0285b52852bbd8e"
+  },
+  "batchAcceptance": {
+    "batchId": "0ed2b956-9e1b-53fb-805c-9ff5e1f5e77c",
+    "batchNo": "BPI-LINES0701-20260727-E22B71C8",
+    "orderId": "BPI_MIN_20260727_110711_TASK_TN",
+    "shadow": true,
+    "startCandidate": {
+      "id": "0dfd8cb9-59fc-5486-8f4b-9d93abf7d565",
+      "candidateKey": "e22b71c8-7455-5494-9a65-e368663a3ce6",
+      "boundaryTime": "2026-07-27T11:33:28.905+08:00",
+      "state": "CONFIRMED",
+      "revision": 2,
+      "confidence": 0.85,
+      "batchStateAfterConfirmation": "ACTIVE",
+      "satisfiedSignals": [
+        "valve.path.ready",
+        "flow.instant",
+        "pump.running",
+        "tank.level"
+      ],
+      "missingSignals": [
+        "flow.totalizer"
+      ]
+    },
+    "endCandidate": {
+      "id": "a838687a-7895-52de-b821-23eaf3c95e3c",
+      "candidateKey": "31d8560e-3eee-514d-9ce2-0cc6661d52e3",
+      "boundaryTime": "2026-07-27T11:35:19.354+08:00",
+      "state": "CONFIRMED",
+      "revision": 2,
+      "confidence": 0.7,
+      "batchStateAfterConfirmation": "CLOSED_RAW",
+      "satisfiedSignals": [
+        "flow.instant",
+        "pump.running"
+      ],
+      "missingSignals": [
+        "valve.path.ready"
+      ]
+    },
+    "finalBatch": {
+      "state": "CLOSED_RAW",
+      "revision": 2,
+      "startTime": "2026-07-27T11:33:28.905+08:00",
+      "endTime": "2026-07-27T11:35:19.354+08:00",
+      "qualityGate": "NOT_APPLICABLE",
+      "wmsStatus": "NOT_REQUESTED"
+    },
+    "stateEvents": [
+      {
+        "revision": 1,
+        "action": "SHADOW_BATCH_CREATED",
+        "fromState": null,
+        "toState": "ACTIVE"
+      },
+      {
+        "revision": 2,
+        "action": "END_BOUNDARY_CONFIRMED",
+        "fromState": "ACTIVE",
+        "toState": "CLOSED_RAW"
+      }
+    ],
+    "boundaryEvidenceRows": 6
+  },
+  "browserAcceptance": {
+    "route": "/bpi/#/candidates",
+    "loginStatus": 200,
+    "startConfirmStatus": 200,
+    "endConfirmStatus": 200,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "screenshots": [
+      "metadata/bpi-minimum-transfer-cell-start-target.png",
+      "metadata/bpi-minimum-transfer-cell-end-target.png"
+    ]
+  },
+  "streamRuntime": {
+    "jobId": "40f36698aeee4aaae17eac52608c7939",
+    "state": "RUNNING",
+    "runningTasks": 36,
+    "totalTasks": 36,
+    "latestCompletedCheckpoint": 25206,
+    "acknowledgedSubtasks": 36,
+    "completedCheckpoints": 16200,
+    "failedCheckpoints": 0
+  },
+  "safety": {
+    "qualityGateRows": 0,
+    "qualityLinkRows": 0,
+    "wmsInboundLinkRows": 0,
+    "wmsReversalRows": 0,
+    "wmsOutboxRows": 0,
+    "pendingCandidatesAfterCleanup": 0,
+    "activeBatchesAfterCleanup": 0,
+    "retainedConfirmedCandidates": 2,
+    "retainedClosedShadowBatches": 1
+  },
+  "persistence": {
+    "tables": [
+      "public.wom_bpi_production_context_outbox",
+      "bpi.bpi_telemetry_events",
+      "bpi.bpi_telemetry_points",
+      "bpi.bpi_telemetry_point_rejects",
+      "bpi.bpi_point_catalog_snapshots",
+      "bpi.bpi_point_catalog_entries",
+      "bpi.bpi_source_sequence_evidence_current",
+      "bpi.bpi_point_calibrations",
+      "bpi.bpi_topology_versions",
+      "bpi.bpi_rule_versions",
+      "bpi.bpi_rule_application_receipts",
+      "bpi.bpi_rule_runtime_readiness_receipts",
+      "bpi.bpi_batch_candidates",
+      "bpi.bpi_batch_instances",
+      "bpi.bpi_batch_state_events",
+      "bpi.bpi_boundary_evidence",
+      "bpi.bpi_audit_events"
+    ],
+    "verificationSql": {
+      "womOutbox": "SELECT context_revision,active,source_state,publication_state,attempt_count,sent_at FROM public.wom_bpi_production_context_outbox WHERE order_id='BPI_MIN_20260727_110711_TASK_TN' ORDER BY context_revision;",
+      "telemetry": "SELECT message_id,status,point_count,accepted_point_count,rejected_point_count,source_epoch,sequence FROM bpi.bpi_telemetry_events WHERE message_id LIKE 'BPI_MIN_20260727_110711_ACCEPT5:%' ORDER BY sequence;",
+      "telemetryPoints": "SELECT property_id,value_type,unit,quality_code,count(*) FROM bpi.bpi_telemetry_points p JOIN bpi.bpi_telemetry_events e ON e.id=p.telemetry_event_id AND e.tenant_id=p.tenant_id WHERE e.message_id LIKE 'BPI_MIN_20260727_110711_ACCEPT5:%' GROUP BY property_id,value_type,unit,quality_code ORDER BY property_id;",
+      "candidates": "SELECT id,boundary_type,order_id,state,revision,candidate_key,batch_id,boundary_time,confidence FROM bpi.bpi_batch_candidates WHERE id IN ('0dfd8cb9-59fc-5486-8f4b-9d93abf7d565','a838687a-7895-52de-b821-23eaf3c95e3c') ORDER BY boundary_time;",
+      "batch": "SELECT id,batch_no,order_id,state,revision,is_shadow,start_time,end_time,quality_gate,wms_status FROM bpi.bpi_batch_instances WHERE id='0ed2b956-9e1b-53fb-805c-9ff5e1f5e77c';",
+      "timeline": "SELECT revision,action,from_state,to_state,event_time FROM bpi.bpi_batch_state_events WHERE batch_id='0ed2b956-9e1b-53fb-805c-9ff5e1f5e77c' ORDER BY revision;",
+      "evidence": "SELECT boundary_type,signal,value_text,unit,quality,event_time FROM bpi.bpi_boundary_evidence WHERE batch_id='0ed2b956-9e1b-53fb-805c-9ff5e1f5e77c' ORDER BY boundary_type,event_time,signal;",
+      "writebackIsolation": "Query bpi_quality_gates, bpi_quality_links, bpi_wms_inbound_links, bpi_wms_inbound_reversal_tasks and WMS-topic bpi_outbox_events by batch_id; all counts must be zero."
+    }
+  },
+  "items": [
+    {
+      "module": "BPI minimum transfer cell governance",
+      "route": "/bpi/#/rules and /bpi/#/points",
+      "operation": "Publish one five-node topology, approve five controlled point calibrations, simulate and publish START/END rules",
+      "api": "BPI topology, point calibration, rule simulation/publication and feature-flag APIs",
+      "method": "GET/POST",
+      "requiresPersistence": true,
+      "backendEntry": "TopologyController, PointCalibrationController, RuleController and PostgreSQL repositories",
+      "tables": [
+        "bpi.bpi_topology_versions",
+        "bpi.bpi_point_calibrations",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_rule_application_receipts",
+        "bpi.bpi_rule_runtime_readiness_receipts"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Verify five READY points and two PUBLISHED/APPLIED/READY rules before execution; verify RETIRED/INACTIVE and REVOKED after cleanup.",
+      "status": "PASS",
+      "evidence": "Five points were READY and both simulations matched 1 with zero misses and false positives; cleanup retired both rules and revoked all controlled calibrations.",
+      "issues": []
+    },
+    {
+      "module": "WOM real production context",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operation": "Start and stop one marker production task from the real page",
+      "api": "POST /msService/WOM/produceTask/produceTask/updateTaskState",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "Legacy WOM task state service and PostgreSQL production-context outbox trigger/publisher",
+      "tables": [
+        "public.wom_produce_tasks",
+        "public.wom_wait_put_records",
+        "public.wom_bpi_production_context_outbox"
+      ],
+      "marker": "BPI_MIN_20260727_110711_TASK_TN",
+      "verificationSql": "Read task state during run and after stop; query three context revisions and require SENT/1; cleanup fixture rows to zero.",
+      "status": "PASS",
+      "evidence": "Page/API returned 200 for start and stop; PostgreSQL persisted running then finished and three wait/run/finish context revisions were SENT once.",
+      "issues": []
+    },
+    {
+      "module": "Controlled five-signal MQTT persistence",
+      "route": "MQTT /bpi-transfer-cell-product-01/bpi-transfer-cell-device-01/properties/report",
+      "operation": "Publish continuous START/RUNNING/STOP phase envelopes carrying five process signals",
+      "api": "MQTT QoS1 -> JetLinks -> iot.telemetry.selected.v1",
+      "method": "MQTT",
+      "requiresPersistence": true,
+      "backendEntry": "JetLinks exporter -> Kafka -> TelemetryKafkaListener -> TelemetryIngestionService",
+      "tables": [
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points",
+        "bpi.bpi_telemetry_point_rejects"
+      ],
+      "marker": "BPI_MIN_20260727_110711_ACCEPT5",
+      "verificationSql": "Require seven ACCEPTED events, 5/5 accepted points per event, 35 point rows and zero rejects.",
+      "status": "PASS",
+      "evidence": "Sequences 36..42 all received PUBACK and persisted as ACCEPTED 5/5/0 with canonical double and boolean units.",
+      "issues": []
+    },
+    {
+      "module": "BPI START candidate and shadow batch",
+      "route": "/bpi/#/candidates",
+      "operation": "Open the real candidate drawer and confirm the START boundary",
+      "api": "POST /bpi-api/candidates/0dfd8cb9-59fc-5486-8f4b-9d93abf7d565/confirm",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "CandidateController -> CandidateService -> candidate, batch, evidence and audit repositories",
+      "tables": [
+        "bpi.bpi_batch_candidates",
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_boundary_evidence"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Verify candidate CONFIRMED/r2 and batch ACTIVE/r1, is_shadow=true, with the WOM order ID and four satisfied signal evidence rows.",
+      "status": "PASS",
+      "evidence": "Real page confirmation returned 200 with zero browser errors and created batch 0ed2b956-9e1b-53fb-805c-9ff5e1f5e77c as ACTIVE/r1.",
+      "issues": []
+    },
+    {
+      "module": "BPI END candidate and shadow batch close",
+      "route": "/bpi/#/candidates",
+      "operation": "Advance event time with STOP samples, open the real candidate drawer and confirm END",
+      "api": "POST /bpi-api/candidates/a838687a-7895-52de-b821-23eaf3c95e3c/confirm",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "Flink boundary evaluator -> candidate Kafka ingress -> CandidateController and PostgreSQL repositories",
+      "tables": [
+        "bpi.bpi_batch_candidates",
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_boundary_evidence"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Verify END candidate CONFIRMED/r2 and the same batch CLOSED_RAW/r2 with exact start/end times and two lifecycle events.",
+      "status": "PASS",
+      "evidence": "END confirmation returned 200; the same shadow batch closed at the first STOP hold boundary and retained the WOM order ID.",
+      "issues": [
+        "A second STOP_CONFIRM sample group was needed to advance the event-time watermark; the candidate boundary time correctly remained on the first group.",
+        "Persisted boundary evidence currently leaves unit blank even though telemetry point rows retain units; this is a traceability backlog, not a boundary-state failure."
+      ]
+    },
+    {
+      "module": "BPI production writeback isolation and cleanup",
+      "route": "N/A",
+      "operation": "Retire controlled rules, revoke calibrations, restore flags and verify no QCS/WMS writeback",
+      "api": "BPI governance cleanup APIs and direct PostgreSQL verification",
+      "method": "POST/SQL",
+      "requiresPersistence": true,
+      "backendEntry": "Governance script and BPI PostgreSQL repositories",
+      "tables": [
+        "bpi.bpi_feature_flags",
+        "bpi.bpi_point_calibrations",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_quality_gates",
+        "bpi.bpi_quality_links",
+        "bpi.bpi_wms_inbound_links",
+        "bpi.bpi_wms_inbound_reversal_tasks",
+        "bpi.bpi_outbox_events"
+      ],
+      "marker": "BPI_MIN_20260727_110711",
+      "verificationSql": "Require both rules RETIRED/INACTIVE, five calibrations REVOKED, bpi.commands restored false, zero pending candidates/active batches and zero QCS/WMS rows.",
+      "status": "PASS",
+      "evidence": "Cleanup was idempotent and restored the pre-run flags; all five QCS/WMS side-effect counts were zero while the closed shadow batch remained as immutable evidence.",
+      "issues": []
+    }
+  ],
+  "evidence": {
+    "targetDirectory": "/home/v6/bpi-acceptance/BPI_MIN_20260727_110711",
+    "files": [
+      {
+        "name": "browser-start.json",
+        "sha256": "bfb3597076f953db539d55564a56f146b405279d277ea9732e591a3922bccf75"
+      },
+      {
+        "name": "browser-start.png",
+        "sha256": "fd674882dbda99662ce81581e9d36398b29e191c8ab249c14214953b2aa2fe00"
+      },
+      {
+        "name": "browser-end.json",
+        "sha256": "0625d5aa5fb4df02d68fa180eddaa6ac7ff3ea78bd340a65b1885807bcd4edcc"
+      },
+      {
+        "name": "browser-end.png",
+        "sha256": "bbfff4aaecaecb5507b29b81e5152ac6cd647d617da539958d64c3de87b3b027"
+      },
+      {
+        "name": "wom.json",
+        "sha256": "dec5dddecb87c35499e250d07b0ebf96b07b8d1c1f506cd0fe68ae7e5bdf75e2"
+      },
+      {
+        "name": "governance.json",
+        "sha256": "7d84866ddec6cc3add035af7a18762555f00168dce8b936806fc9d6425bad5ad"
+      },
+      {
+        "name": "accepted5-mqtt.json",
+        "sha256": "2513d831b99a7814a182450c9be91e232d45e946e36241514465d8bd8eeae511"
+      }
+    ]
+  },
+  "findings": [
+    {
+      "code": "FIXED_BOOLEAN_POINT_UNIT",
+      "status": "FIXED",
+      "detail": "JetLinks boolean metadata does not expose a numeric ValueUnit; the exporter now uses the reviewed binding unit only when the property exists."
+    },
+    {
+      "code": "FIXED_TOTALIZER_M3_ALLOWLIST",
+      "status": "FIXED",
+      "detail": "The BPI telemetry allowlist and unit normalizer now accept m3 and m³ for cumulative volume."
+    },
+    {
+      "code": "EVENT_TIME_WATERMARK_REQUIRES_FOLLOWUP_EVENTS",
+      "status": "EXPECTED_STREAMING_BEHAVIOR",
+      "detail": "The first STOP group satisfied hold semantics; a second group advanced the watermark and emitted the candidate with the original boundary time."
+    },
+    {
+      "code": "BOUNDARY_EVIDENCE_UNIT_NOT_PROJECTED",
+      "status": "OPEN_TRACEABILITY_BACKLOG",
+      "detail": "bpi_boundary_evidence unit is blank although bpi_telemetry_points retains the authoritative unit. Production readiness must not be claimed until evidence projection is completed and migrated."
+    }
+  ],
+  "remainingGates": [
+    "Repeat the exact five-signal scenario with a physical DEVICE/GATEWAY and reconnect/power-loss evidence.",
+    "Replace controlled calibration evidence with approved field certificates tied to exact catalog versions.",
+    "Run at least one selected production line continuously for 7-14 days and accumulate the required reviewed batches.",
+    "Project authoritative unit and calibration identity into immutable boundary evidence.",
+    "Keep WOM/QCS/WMS/PLC/DCS writeback disabled until shadow thresholds, rollback drills and business sign-off pass.",
+    "Complete multi-line capacity, backpressure, disaster recovery and external QCS/ERP-WMS acceptance."
+  ]
+}
