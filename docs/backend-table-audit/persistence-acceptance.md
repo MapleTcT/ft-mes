@@ -1232,6 +1232,27 @@ WOM 核心补丁会在投料明细保存成功后、结束活动时按明细补�
 `ERROR/WARN`。机器证据：
 `/tmp/adp-factory-line-persistence-ui-acceptance.json`。
 
+### 果糖喷射液化至糖化试运行线落库（目标 PostgreSQL）
+
+本节使用 marker `ADP_E2E_FRUCTOSE_LINE_01`。所有主数据和限值均含
+`TEST_ONLY_DRAFT` 归属，不构成正式生产标准。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 物料与吨单位建模 | WOM 制造指令详情 | 指令详情及物料关联查询 | 受控试运行 seed -> BaseSet PostgreSQL | `baseset_units`、`baseset_materials`、`baseset_batch_infos` | 按 marker 查询 1 个吨单位、3 个物料及其主/生产单位、3 个批次 | 淀粉浆、液化液、糖化液均为吨、批次管理、检验管理；3 个批次 qualified/available | PASS |
+| 喷射液化物料转换 | 工序详情和追溯页 | ProcessAnalysis process/trace API | ProcessAnalysis controller -> service -> repository | WOM process/active/input/output/record 表 | 按 task/process/activity 查询输入输出批次和数量 | 淀粉浆 34.4 t -> 液化液 34.8 t；工序 finished | PASS |
+| 糖化物料转换 | 工序详情和追溯页 | 同上 | 同上 | 同上 | 同上 | 液化液 34.8 t -> 糖化液 35.1 t；工序 finished | PASS |
+| 非物料设备活动 | WOM 工序活动 | WOM 详情及 ProcessAnalysis trace API | WOM activity persistence/read model | `wom_task_actives`、`wom_acti_exelogs` | 查询泵送、换热、闪蒸、保温的物料和批次字段 | 4 个活动均 finished，`material_id`/批次均为空 | PASS |
+| 工序交接检查 | WOM 检验清单 | WOM process report checks | WOM process-report persistence | `wom_check_details`、质量标准相关表 | 按两个工序报告统计 marker 检查项 | 淀粉浆 2 项、液化液 3 项，共 5 项合格 | PASS |
+| 糖化液 QCS 放行 | QCS 产品检验报告 | QCS inspect/report data API | QCS inspect/report services | `qcs_inspects`、`qcs_inspect_reports`、`qcs_report_coms` | 按 report id 查询 4 个 component 的值和结论 | 波美 20.6、pH 5.7、DE 96.4、干物 31.2，全部合格 | PASS |
+| WMS 完工入库与质量释放 | 批次追溯页 | completion inbound；material quality result | material WMS service -> repositories | `wms_stock_documents`、`wms_inventory_transactions`、`wms_batch_stocks` | 按 tenant `1000`、source document 和批次统计 | 1 单、2 流水；在库 35.1、可用 35.1、冻结 0 | PASS |
+| 按工序生成批次谱系 | 批次追溯页 | `GET /processAnalysis/api/trace` | ProcessAnalysis trace service -> PostgreSQL repository | WOM 事实表、`pa_trace_snapshots` | 断言恰好两条 `task_process_id` 配对谱系及 5 个 marker 快照 | raw -> liquefied、liquefied -> saccharified，数量和工序名称均正确 | PASS |
+| BPI 工艺信号回读 | 两张工序详情页 | `GET /bpi-api/process-evidence` | BPI process-evidence repository | `bpi_telemetry_events`、`bpi_telemetry_points`、reject/quarantine 表 | 按 `1000/PLANT-01/LINE-S07-01` 和时间窗统计 | 24 accepted events、288 points、12 properties、0 reject/quarantine | PASS |
+
+精确 PostgreSQL 查询、前端路由、试运行检验范围和复验命令见
+`docs/testing/fructose-line-pilot-acceptance.md`；机器证据见
+`metadata/fructose-line-pilot-acceptance.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

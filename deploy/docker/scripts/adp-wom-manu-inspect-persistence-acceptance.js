@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
 const { chromium, request } = require("playwright");
+const { parseQualityProfile, rangeDisplay } = require("./qcs-quality-profile");
 
 const baseUrl = (process.env.ADP_BASE_URL || "http://100.99.133.43:18080").replace(/\/+$/, "");
 const browserBaseUrl = (process.env.ADP_BROWSER_BASE_URL || baseUrl).replace(/\/+$/, "");
@@ -32,6 +33,21 @@ const outputPath =
   process.env.ADP_WOM_MANU_INSPECT_PERSISTENCE_OUTPUT ||
   path.join(outputDir, "wom-manu-inspect-persistence-results.json");
 // Keep marker rows above older WOM seed data but below Number.MAX_SAFE_INTEGER for legacy frontend JSON handling.
+const tableNo = process.env.ADP_WOM_TABLE_NO || `${marker}_TASK_TN`;
+const materialCode = process.env.ADP_WOM_MATERIAL_CODE || `${marker}_MAT`;
+const formulaCode = process.env.ADP_WOM_FORMULA_CODE || `${marker}_FORM`;
+const qualityStdCode = `${marker}_STD`;
+const batchNo = process.env.ADP_WOM_BATCH_NO || `${marker}_BATCH`;
+const workUnitCode = `${marker}_WU`;
+const workUnitName = `${marker} work unit`;
+const qcsReportItemCode = `${marker}_QCS_REPORT_ITEM`;
+const qcsReportItemName = `${marker} QCS report item`;
+const qualityProfile = parseQualityProfile(process.env.ADP_QCS_PROFILE_JSON || "", {
+  marker,
+  reportItemCode: qcsReportItemCode,
+  reportItemName: qcsReportItemName,
+});
+const materialName = process.env.ADP_WOM_MATERIAL_NAME || qualityProfile.materialName;
 
 function configuredId(name, fallback) {
   const value = String(process.env[name] || "").trim();
@@ -50,6 +66,21 @@ const generatedIdBase =
   BigInt(Date.now() % 1000000000) * 100n +
   BigInt(process.pid % 100);
 const idBase = configuredId("ADP_WOM_MANU_INSPECT_ID_BASE", generatedIdBase);
+const qualityItemIds = qualityProfile.items.map((_item, index) => {
+  if (index === 0) {
+    return {
+      testComponent: idBase + 13n,
+      stdVerCom: idBase + 14n,
+      specLimit: idBase + 17n,
+    };
+  }
+  const offset = 18n + BigInt(index - 1) * 3n;
+  return {
+    testComponent: idBase + offset,
+    stdVerCom: idBase + offset + 1n,
+    specLimit: idBase + offset + 2n,
+  };
+});
 const ids = {
   material: configuredId("ADP_WOM_MATERIAL_ID", idBase + 1n),
   formula: configuredId("ADP_WOM_FORMULA_ID", idBase + 2n),
@@ -63,26 +94,25 @@ const ids = {
   taskExelog: configuredId("ADP_WOM_TASK_EXELOG_ID", idBase + 10n),
   pending: idBase + 11n,
   workUnit: idBase + 12n,
-  testComponent: idBase + 13n,
-  stdVerCom: idBase + 14n,
+  testComponent: qualityItemIds[0].testComponent,
+  stdVerCom: qualityItemIds[0].stdVerCom,
   stdVerGradeUnqualified: idBase + 15n,
   stdVerGradeQualified: idBase + 16n,
-  specLimit: idBase + 17n,
+  specLimit: qualityItemIds[0].specLimit,
 };
-const tableNo = process.env.ADP_WOM_TABLE_NO || `${marker}_TASK_TN`;
-const materialCode = process.env.ADP_WOM_MATERIAL_CODE || `${marker}_MAT`;
-const formulaCode = process.env.ADP_WOM_FORMULA_CODE || `${marker}_FORM`;
-const qualityStdCode = `${marker}_STD`;
-const batchNo = process.env.ADP_WOM_BATCH_NO || `${marker}_BATCH`;
-const workUnitCode = `${marker}_WU`;
-const workUnitName = `${marker} work unit`;
-const qcsReportItemCode = `${marker}_QCS_REPORT_ITEM`;
-const qcsReportItemName = `${marker} QCS report item`;
 const route = "/msService/WOM/produceTask/produceTask/makeTaskList";
 const qcsRoute = "/msService/QCS/inspect/inspect/manuInspectList";
 const gridId = "WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg";
 const createInspectApi = "/msService/WOM/produceTask/produceTask/createManuInspect";
 const findCheckMsgApi = "/msService/WOM/produceTask/produceTask/findCheckMsgByBatch";
+
+function profileItemCode(item) {
+  return qualityProfile.testOnlyDraft ? `${marker}_${item.code}` : qcsReportItemCode;
+}
+
+function profileItemName(item) {
+  return qualityProfile.testOnlyDraft ? item.name : qcsReportItemName;
+}
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
@@ -187,20 +217,32 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'fixture standard-version id % is owned by another standard', ${ids.stdVersion};
   END IF;
-  IF EXISTS (
+${qualityProfile.items.map((item, index) => {
+  const itemIds = qualityItemIds[index];
+  return `  IF EXISTS (
     SELECT 1 FROM public.limsba_test_components
-    WHERE id = ${ids.testComponent} AND code IS DISTINCT FROM ${sqlLiteral(qcsReportItemCode)}
+    WHERE id = ${itemIds.testComponent}
+      AND code IS DISTINCT FROM ${sqlLiteral(profileItemCode(item))}
   ) THEN
-    RAISE EXCEPTION 'fixture test-component id % is owned by another record', ${ids.testComponent};
+    RAISE EXCEPTION 'fixture test-component id % is owned by another record', ${itemIds.testComponent};
   END IF;
   IF EXISTS (
     SELECT 1 FROM public.limsba_std_ver_coms
-    WHERE id = ${ids.stdVerCom}
+    WHERE id = ${itemIds.stdVerCom}
       AND (std_id IS DISTINCT FROM ${ids.qualityStd}
-           OR std_ver_id IS DISTINCT FROM ${ids.stdVersion})
+           OR std_ver_id IS DISTINCT FROM ${ids.stdVersion}
+           OR com_id IS DISTINCT FROM ${itemIds.testComponent})
   ) THEN
-    RAISE EXCEPTION 'fixture standard component id % is owned by another standard', ${ids.stdVerCom};
+    RAISE EXCEPTION 'fixture standard component id % is owned by another standard', ${itemIds.stdVerCom};
   END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.limsba_spec_limits
+    WHERE id = ${itemIds.specLimit}
+      AND std_ver_com_id IS DISTINCT FROM ${itemIds.stdVerCom}
+  ) THEN
+    RAISE EXCEPTION 'fixture specification id % is owned by another standard component', ${itemIds.specLimit};
+  END IF;`;
+}).join("\n")}
   IF EXISTS (
     SELECT 1 FROM public.rm_formula_qualities
     WHERE id = ${ids.formulaQuality} AND formula_id IS DISTINCT FROM ${ids.formula}
@@ -319,6 +361,113 @@ function seedSql() {
   const commonCols =
     "version, valid, cid, create_staff_id, create_time, create_department_id, create_position_id, group_id, owner_staff_id, owner_department_id, owner_position_id, position_lay_rec";
   const commonVals = "0, true, 1000, 1, now(), 1, 1, 1000, 1, 1, 1, '1'";
+  const componentSql = qualityProfile.items.map((item, index) => {
+    const itemIds = qualityItemIds[index];
+    const code = profileItemCode(item);
+    const name = profileItemName(item);
+    return `
+INSERT INTO public.limsba_test_components (
+  id, version, valid, cid, create_staff_id, create_time, sort, table_info_id,
+  code, name, report_name, unit_name, is_report, is_necessary, parallel_times,
+  value_kind, limit_type, min_value, max_value, default_value, disp_value,
+  digit_type, memo_field
+) VALUES (
+  ${itemIds.testComponent}, 0, true, 1000, 1, now(), ${index + 1}, ${itemIds.testComponent},
+  ${sqlLiteral(code)}, ${sqlLiteral(name)}, ${sqlLiteral(name)}, ${sqlLiteral(item.unit)}, true, ${item.required}, 1,
+  NULL, NULL,
+  ${item.minimum === null ? "NULL" : sqlLiteral(item.minimum)},
+  ${item.maximum === null ? "NULL" : sqlLiteral(item.maximum)},
+  ${sqlLiteral(item.result)}, ${sqlLiteral(item.result)}, NULL,
+  ${sqlLiteral(`${marker};source=${item.source};TEST_ONLY_DRAFT=${qualityProfile.testOnlyDraft}`)}
+) ON CONFLICT (id) DO UPDATE SET
+  valid = true,
+  sort = EXCLUDED.sort,
+  code = EXCLUDED.code,
+  name = EXCLUDED.name,
+  report_name = EXCLUDED.report_name,
+  unit_name = EXCLUDED.unit_name,
+  is_report = EXCLUDED.is_report,
+  is_necessary = EXCLUDED.is_necessary,
+  parallel_times = EXCLUDED.parallel_times,
+  value_kind = EXCLUDED.value_kind,
+  limit_type = EXCLUDED.limit_type,
+  min_value = EXCLUDED.min_value,
+  max_value = EXCLUDED.max_value,
+  default_value = EXCLUDED.default_value,
+  disp_value = EXCLUDED.disp_value,
+  digit_type = EXCLUDED.digit_type,
+  memo_field = EXCLUDED.memo_field,
+  modify_time = now();
+
+INSERT INTO public.limsba_std_ver_coms (
+  id, version, valid, cid, create_staff_id, create_time, sort, table_info_id,
+  std_id, std_ver_id, com_id, code, is_report, report_name, report_sort,
+  unit_name, parallel_times, valuen, sampling_plan, default_value, ref_value,
+  digit_type, memo_field
+) VALUES (
+  ${itemIds.stdVerCom}, 0, true, 1000, 1, now(), ${index + 1}, ${itemIds.stdVerCom},
+  ${ids.qualityStd}, ${ids.stdVersion}, ${itemIds.testComponent}, ${sqlLiteral(`${code}_STD_VER`)}, true, ${sqlLiteral(name)}, ${index + 1},
+  ${sqlLiteral(item.unit)}, 1, 1, 'LIMSBasic_samplingPlan/level3', ${sqlLiteral(item.result)},
+  ${sqlLiteral(rangeDisplay(item))}, NULL, ${sqlLiteral(marker)}
+) ON CONFLICT (id) DO UPDATE SET
+  valid = true,
+  sort = EXCLUDED.sort,
+  std_id = EXCLUDED.std_id,
+  std_ver_id = EXCLUDED.std_ver_id,
+  com_id = EXCLUDED.com_id,
+  code = EXCLUDED.code,
+  is_report = EXCLUDED.is_report,
+  report_name = EXCLUDED.report_name,
+  report_sort = EXCLUDED.report_sort,
+  unit_name = EXCLUDED.unit_name,
+  parallel_times = EXCLUDED.parallel_times,
+  valuen = EXCLUDED.valuen,
+  sampling_plan = EXCLUDED.sampling_plan,
+  default_value = EXCLUDED.default_value,
+  ref_value = EXCLUDED.ref_value,
+  digit_type = EXCLUDED.digit_type,
+  memo_field = EXCLUDED.memo_field,
+  modify_time = now();`;
+  }).join("\n");
+  const specLimitSql = qualityProfile.items.map((item, index) => {
+    const itemIds = qualityItemIds[index];
+    return `
+INSERT INTO public.limsba_spec_limits (
+  id, version, valid, cid, create_staff_id, create_time, sort, table_info_id,
+  code, disp_value, judge_cond, judge_option, judge_values,
+  min_val_include, min_value, max_val_include, max_value,
+  standard_grade, std_grade_name, std_id, std_ver_com_id,
+  sampling_plan, valuen, result_value
+) VALUES (
+  ${itemIds.specLimit}, 0, true, 1000, 1, now(), ${index + 1}, ${itemIds.specLimit},
+  ${sqlLiteral(`${marker}_${item.code}_SPEC_QUALIFIED`)}, ${sqlLiteral(rangeDisplay(item))},
+  ${sqlLiteral(item.minimum === null ? "TEXT" : "BETWEEN")}, ${sqlLiteral("AND")},
+  ${sqlLiteral(item.minimum === null ? item.result : `${item.minimum},${item.maximum}`)},
+  ${item.minimum === null ? "NULL" : "true"}, ${item.minimum === null ? "NULL" : sqlLiteral(item.minimum)},
+  ${item.maximum === null ? "NULL" : "true"}, ${item.maximum === null ? "NULL" : sqlLiteral(item.maximum)},
+  'LIMSBasic_standardGrade/Qualified', '合格', ${ids.qualityStd}, ${itemIds.stdVerCom},
+  'LIMSBasic_samplingPlan/level3', 1, ${sqlLiteral(item.result)}
+) ON CONFLICT (id) DO UPDATE SET
+  valid = true,
+  sort = EXCLUDED.sort,
+  code = EXCLUDED.code,
+  disp_value = EXCLUDED.disp_value,
+  judge_cond = EXCLUDED.judge_cond,
+  judge_option = EXCLUDED.judge_option,
+  judge_values = EXCLUDED.judge_values,
+  min_val_include = EXCLUDED.min_val_include,
+  min_value = EXCLUDED.min_value,
+  max_val_include = EXCLUDED.max_val_include,
+  max_value = EXCLUDED.max_value,
+  standard_grade = EXCLUDED.standard_grade,
+  std_grade_name = EXCLUDED.std_grade_name,
+  std_id = EXCLUDED.std_id,
+  std_ver_com_id = EXCLUDED.std_ver_com_id,
+  sampling_plan = EXCLUDED.sampling_plan,
+  valuen = EXCLUDED.valuen,
+  result_value = EXCLUDED.result_value,
+  modify_time = now();`;
+  }).join("\n");
   return `
 BEGIN;
 
@@ -327,7 +476,7 @@ ${ownershipGuardSql()}
 INSERT INTO public.baseset_materials (
   id, ${commonCols}, status, table_no, table_info_id, code, name, is_batch
 ) VALUES (
-  ${ids.material}, ${commonVals}, 99, ${sqlLiteral(`${materialCode}_TN`)}, ${ids.material}, ${sqlLiteral(materialCode)}, ${sqlLiteral(`${marker} material`)}, 'BaseSet_isBatch/batch'
+  ${ids.material}, ${commonVals}, 99, ${sqlLiteral(`${materialCode}_TN`)}, ${ids.material}, ${sqlLiteral(materialCode)}, ${sqlLiteral(materialName)}, 'BaseSet_isBatch/batch'
 ) ON CONFLICT (id) DO UPDATE SET
   valid = true,
   status = 99,
@@ -339,7 +488,7 @@ INSERT INTO public.baseset_materials (
 INSERT INTO public.limsba_quality_stds (
   id, ${commonCols}, status, table_no, table_info_id, code, name, standard, is_default, leaf
 ) VALUES (
-  ${ids.qualityStd}, ${commonVals}, 99, ${sqlLiteral(`${marker}_QUALITY_STD_TN`)}, ${ids.qualityStd}, ${sqlLiteral(qualityStdCode)}, ${sqlLiteral(`${marker} quality standard`)}, ${sqlLiteral(`${marker} standard`)}, true, true
+  ${ids.qualityStd}, ${commonVals}, 99, ${sqlLiteral(`${marker}_QUALITY_STD_TN`)}, ${ids.qualityStd}, ${sqlLiteral(qualityStdCode)}, ${sqlLiteral(qualityProfile.name)}, ${sqlLiteral(`${qualityProfile.profileCode};TEST_ONLY_DRAFT=${qualityProfile.testOnlyDraft}`)}, true, true
 ) ON CONFLICT (id) DO UPDATE SET
   valid = true,
   status = 99,
@@ -366,49 +515,7 @@ INSERT INTO public.limsba_std_versions (
   end_date = EXCLUDED.end_date,
   modify_time = now();
 
-INSERT INTO public.limsba_test_components (
-  id, version, valid, cid, create_staff_id, create_time, sort, table_info_id,
-  code, name, report_name, unit_name, is_report, is_necessary, parallel_times,
-  memo_field
-) VALUES (
-  ${ids.testComponent}, 0, true, 1000, 1, now(), 1, ${ids.testComponent},
-  ${sqlLiteral(qcsReportItemCode)}, ${sqlLiteral(qcsReportItemName)}, ${sqlLiteral(qcsReportItemName)}, 'EA', true, true, 1,
-  ${sqlLiteral(marker)}
-) ON CONFLICT (id) DO UPDATE SET
-  valid = true,
-  code = EXCLUDED.code,
-  name = EXCLUDED.name,
-  report_name = EXCLUDED.report_name,
-  unit_name = EXCLUDED.unit_name,
-  is_report = EXCLUDED.is_report,
-  is_necessary = EXCLUDED.is_necessary,
-  parallel_times = EXCLUDED.parallel_times,
-  memo_field = EXCLUDED.memo_field,
-  modify_time = now();
-
-INSERT INTO public.limsba_std_ver_coms (
-  id, version, valid, cid, create_staff_id, create_time, sort, table_info_id,
-  std_id, std_ver_id, com_id, code, is_report, report_name, report_sort,
-  unit_name, parallel_times, valuen, sampling_plan, memo_field
-) VALUES (
-  ${ids.stdVerCom}, 0, true, 1000, 1, now(), 1, ${ids.stdVerCom},
-  ${ids.qualityStd}, ${ids.stdVersion}, ${ids.testComponent}, ${sqlLiteral(`${qcsReportItemCode}_STD_VER`)}, true, ${sqlLiteral(qcsReportItemName)}, 1,
-  'EA', 1, 1, 'LIMSBasic_samplingPlan/level3', ${sqlLiteral(marker)}
-) ON CONFLICT (id) DO UPDATE SET
-  valid = true,
-  std_id = EXCLUDED.std_id,
-  std_ver_id = EXCLUDED.std_ver_id,
-  com_id = EXCLUDED.com_id,
-  code = EXCLUDED.code,
-  is_report = EXCLUDED.is_report,
-  report_name = EXCLUDED.report_name,
-  report_sort = EXCLUDED.report_sort,
-  unit_name = EXCLUDED.unit_name,
-  parallel_times = EXCLUDED.parallel_times,
-  valuen = EXCLUDED.valuen,
-  sampling_plan = EXCLUDED.sampling_plan,
-  memo_field = EXCLUDED.memo_field,
-  modify_time = now();
+${componentSql}
 
 INSERT INTO public.limsba_std_ver_grades (
   id, version, valid, cid, create_staff_id, create_time, sort, table_info_id,
@@ -433,27 +540,7 @@ ON CONFLICT (id) DO UPDATE SET
   memo_field = EXCLUDED.memo_field,
   modify_time = now();
 
-INSERT INTO public.limsba_spec_limits (
-  id, version, valid, cid, create_staff_id, create_time, sort, table_info_id,
-  code, disp_value, standard_grade, std_grade_name, std_id, std_ver_com_id,
-  sampling_plan, valuen, result_value
-) VALUES (
-  ${ids.specLimit}, 0, true, 1000, 1, now(), 10, ${ids.specLimit},
-  ${sqlLiteral(`${marker}_SPEC_LIMIT_QUALIFIED`)}, '合格', 'LIMSBasic_standardGrade/Qualified', '合格',
-  ${ids.qualityStd}, ${ids.stdVerCom}, 'LIMSBasic_samplingPlan/level3', 1, '合格'
-) ON CONFLICT (id) DO UPDATE SET
-  valid = true,
-  sort = EXCLUDED.sort,
-  code = EXCLUDED.code,
-  disp_value = EXCLUDED.disp_value,
-  standard_grade = EXCLUDED.standard_grade,
-  std_grade_name = EXCLUDED.std_grade_name,
-  std_id = EXCLUDED.std_id,
-  std_ver_com_id = EXCLUDED.std_ver_com_id,
-  sampling_plan = EXCLUDED.sampling_plan,
-  valuen = EXCLUDED.valuen,
-  result_value = EXCLUDED.result_value,
-  modify_time = now();
+${specLimitSql}
 
 INSERT INTO public.limsba_analy_prod_stds (
   id, version, valid, cid, create_staff_id, create_time, table_info_id,
@@ -578,8 +665,8 @@ INSERT INTO public.wom_wait_put_records (
 ) VALUES (
   ${ids.wait}, ${commonVals}, 99, ${sqlLiteral(`${marker}_WAIT_TN`)}, ${ids.wait}, ${ids.formula}, 1,
   now() - interval '1 day', now() + interval '1 day', ${sqlLiteral(batchNo)}, ${ids.material}, 'WOM_recordType/workOrder',
-  'WOM_runState/runing', 'WOM_BatchSyncStatus/done', ${ids.task}, ${ids.material}, ${sqlLiteral(materialCode)}, ${sqlLiteral(`${marker} material`)},
-  ${sqlLiteral(materialCode)}, ${sqlLiteral(`${marker} material`)}, ${sqlLiteral(formulaCode)}, ${ids.qualityStd}, 0,
+  'WOM_runState/runing', 'WOM_BatchSyncStatus/done', ${ids.task}, ${ids.material}, ${sqlLiteral(materialCode)}, ${sqlLiteral(materialName)},
+  ${sqlLiteral(materialCode)}, ${sqlLiteral(materialName)}, ${sqlLiteral(formulaCode)}, ${ids.qualityStd}, 0,
   NULL, NULL, ${sqlClobLiteral(marker)}
 ) ON CONFLICT (id) DO UPDATE SET
   valid = true,
@@ -716,6 +803,22 @@ SELECT 'specLimit', id, coalesce(std_ver_com_id::text, ''), coalesce(standard_gr
 FROM public.limsba_spec_limits
 WHERE id = ${ids.specLimit};
 
+SELECT 'profileItem', c.id, c.code, coalesce(c.name, ''), coalesce(c.report_name, ''),
+       coalesce(c.unit_name, ''), coalesce(c.default_value, ''), coalesce(c.min_value, ''),
+       coalesce(c.max_value, ''), vc.id, coalesce(vc.ref_value, ''),
+       sl.id, coalesce(sl.result_value, ''), coalesce(sl.valid::text, '')
+FROM public.limsba_test_components c
+JOIN public.limsba_std_ver_coms vc
+  ON vc.com_id = c.id
+ AND vc.std_ver_id = ${ids.stdVersion}
+ AND vc.valid = true
+JOIN public.limsba_spec_limits sl
+  ON sl.std_ver_com_id = vc.id
+ AND sl.valid = true
+WHERE c.id IN (${qualityItemIds.map((itemIds) => itemIds.testComponent).join(", ")})
+  AND c.valid = true
+ORDER BY c.sort, c.id;
+
 SELECT 'analyProdStd', id, coalesce(product_id::text, ''), coalesce(std_id::text, ''), coalesce(available_std::text, ''), coalesce(valid::text, '')
 FROM public.limsba_analy_prod_stds
 WHERE id = ${ids.analyProdStd};
@@ -756,6 +859,7 @@ function assertPersistence(rawRows) {
   const stdVerReportCount = rows.find((row) => row[0] === "stdVerReportCount");
   const stdVerGradeCount = rows.find((row) => row[0] === "stdVerGradeCount");
   const specLimit = rows.find((row) => row[0] === "specLimit");
+  const profileItems = rows.filter((row) => row[0] === "profileItem");
   const analyProdStd = rows.find((row) => row[0] === "analyProdStd");
   const wfCustom = rows.find((row) => row[0] === "wfCustom");
   const wfCustomReport = rows.find((row) => row[0] === "wfCustomReport");
@@ -781,14 +885,14 @@ function assertPersistence(rawRows) {
   if (!stdVersion || stdVersion[2] !== String(ids.qualityStd) || stdVersion[3] !== "true" || stdVersion[4] !== "true") {
     failures.push(`limsba_std_versions prerequisite missing/invalid: ${JSON.stringify(stdVersion)}`);
   }
-  if (!testComponent || testComponent[2] !== qcsReportItemCode || testComponent[4] !== qcsReportItemName || testComponent[5] !== "true" || testComponent[6] !== "true") {
+  if (!testComponent || testComponent[2] !== profileItemCode(qualityProfile.items[0]) || testComponent[4] !== profileItemName(qualityProfile.items[0]) || testComponent[5] !== "true" || testComponent[6] !== "true") {
     failures.push(`limsba_test_components report prerequisite missing/invalid: ${JSON.stringify(testComponent)}`);
   }
   if (!stdVerCom || stdVerCom[2] !== String(ids.qualityStd) || stdVerCom[3] !== String(ids.stdVersion) || stdVerCom[4] !== String(ids.testComponent) || stdVerCom[5] !== "true" || stdVerCom[7] !== "true") {
     failures.push(`limsba_std_ver_coms report prerequisite missing/invalid: ${JSON.stringify(stdVerCom)}`);
   }
-  if (!stdVerReportCount || Number(stdVerReportCount[2] || 0) < 1) {
-    failures.push(`limsba_std_ver_coms report item count is zero: ${JSON.stringify(stdVerReportCount)}`);
+  if (!stdVerReportCount || Number(stdVerReportCount[2] || 0) !== qualityProfile.items.length) {
+    failures.push(`limsba_std_ver_coms report item count mismatch: ${JSON.stringify(stdVerReportCount)}`);
   }
   if (!stdVerGradeCount || Number(stdVerGradeCount[2] || 0) < 2) {
     failures.push(`limsba_std_ver_grades report grade prerequisites missing: ${JSON.stringify(stdVerGradeCount)}`);
@@ -796,6 +900,27 @@ function assertPersistence(rawRows) {
   if (!specLimit || specLimit[2] !== String(ids.stdVerCom) || specLimit[3] !== "LIMSBasic_standardGrade/Qualified" || specLimit[5] !== "true") {
     failures.push(`limsba_spec_limits report prerequisite missing/invalid: ${JSON.stringify(specLimit)}`);
   }
+  if (profileItems.length !== qualityProfile.items.length) {
+    failures.push(`quality profile row count mismatch: ${profileItems.length}/${qualityProfile.items.length}`);
+  }
+  qualityProfile.items.forEach((item, index) => {
+    const row = profileItems[index];
+    const itemIds = qualityItemIds[index];
+    if (
+      !row
+      || row[1] !== String(itemIds.testComponent)
+      || row[2] !== profileItemCode(item)
+      || row[3] !== profileItemName(item)
+      || row[5] !== item.unit
+      || row[6] !== item.result
+      || row[9] !== String(itemIds.stdVerCom)
+      || row[11] !== String(itemIds.specLimit)
+      || row[12] !== item.result
+      || row[13] !== "true"
+    ) {
+      failures.push(`quality profile item ${item.code} missing/invalid: ${JSON.stringify(row)}`);
+    }
+  });
   if (!analyProdStd || analyProdStd[2] !== String(ids.material) || analyProdStd[3] !== String(ids.qualityStd) || analyProdStd[4] !== "true" || analyProdStd[5] !== "true") {
     failures.push(`limsba_analy_prod_stds prerequisite missing/invalid: ${JSON.stringify(analyProdStd)}`);
   }
@@ -869,8 +994,9 @@ function assertPersistence(rawRows) {
     testComponent,
       stdVerCom,
       stdVerReportCount,
-      stdVerGradeCount,
-      specLimit,
+    stdVerGradeCount,
+    specLimit,
+    profileItems,
     analyProdStd,
     recovery: resumeExistingInspect
       ? {
@@ -1262,11 +1388,21 @@ async function main() {
     navigationWaitUntil,
     marker,
     ids: Object.fromEntries(Object.entries(ids).map(([key, value]) => [key, value.toString()])),
+    qualityProfile: {
+      ...qualityProfile,
+      items: qualityProfile.items.map((item, index) => ({
+        ...item,
+        ids: Object.fromEntries(
+          Object.entries(qualityItemIds[index]).map(([key, value]) => [key, value.toString()])
+        ),
+      })),
+    },
     route,
     qcsRoute,
     tableNo,
     womLineId: womLineId || null,
     materialCode,
+    materialName,
     formulaCode,
     qualityStdCode,
     batchNo,

@@ -26,6 +26,105 @@
     "intervalSeconds": 4,
     "baseTime": "2026-07-27T08:00:00.000Z"
   },
+  "productionModel": {
+    "status": "TEST_ONLY_DRAFT",
+    "routeCode": "FRU-JET-SACCH-V1",
+    "routeName": "果糖喷射液化至糖化试运行路线",
+    "quantityUnit": "t",
+    "processes": [
+      {
+        "code": "JET",
+        "name": "喷射液化",
+        "order": 1,
+        "batchRequired": true,
+        "inventoryMaterialization": "MATERIAL_LOT",
+        "materializationReason": "进入液化液缓冲罐，按流量和波美值独立交接",
+        "inputMaterial": "STARCH_SLURRY",
+        "outputMaterial": "LIQUEFIED_SYRUP",
+        "inputQuantity": 34.4,
+        "outputQuantity": 34.8
+      },
+      {
+        "code": "SACCHARIFICATION",
+        "name": "糖化",
+        "order": 2,
+        "batchRequired": true,
+        "inventoryMaterialization": "MATERIAL_LOT",
+        "materializationReason": "形成独立糖化罐批并执行质量放行",
+        "inputMaterial": "LIQUEFIED_SYRUP",
+        "outputMaterial": "SACCHARIFIED_LIQUOR",
+        "inputQuantity": 34.8,
+        "outputQuantity": 35.1
+      }
+    ],
+    "materials": [
+      {
+        "code": "STARCH_SLURRY",
+        "name": "淀粉浆",
+        "type": "INTERMEDIATE",
+        "batchManaged": true,
+        "inventoryManaged": true,
+        "qualityStandard": "STARCH_SLURRY_HANDOVER_V1"
+      },
+      {
+        "code": "LIQUEFIED_SYRUP",
+        "name": "液化液",
+        "type": "INTERMEDIATE",
+        "batchManaged": true,
+        "inventoryManaged": true,
+        "qualityStandard": "LIQUEFIED_SYRUP_HANDOVER_V1"
+      },
+      {
+        "code": "SACCHARIFIED_LIQUOR",
+        "name": "糖化液",
+        "type": "INTERMEDIATE",
+        "batchManaged": true,
+        "inventoryManaged": true,
+        "qualityStandard": "SACCHARIFIED_LIQUOR_RELEASE_V1"
+      }
+    ],
+    "equipmentActivitiesWithoutMaterial": [
+      "泵送",
+      "换热",
+      "闪蒸",
+      "保温"
+    ],
+    "qualityStandards": [
+      {
+        "code": "STARCH_SLURRY_HANDOVER_V1",
+        "name": "淀粉浆交接试运行标准",
+        "materialCode": "STARCH_SLURRY",
+        "gate": "PROCESS_HANDOVER",
+        "items": [
+          {"code": "DRY_SOLIDS", "name": "干物含量", "unit": "%", "minimum": 24.0, "maximum": 26.0, "result": 25.0, "source": "LAB"},
+          {"code": "PH", "name": "pH", "unit": "1", "minimum": 5.5, "maximum": 6.5, "result": 5.9, "source": "LAB"}
+        ]
+      },
+      {
+        "code": "LIQUEFIED_SYRUP_HANDOVER_V1",
+        "name": "液化液交接试运行标准",
+        "materialCode": "LIQUEFIED_SYRUP",
+        "gate": "PROCESS_HANDOVER",
+        "items": [
+          {"code": "BAUME", "name": "液化液波美值", "unit": "Be", "minimum": 19.5, "maximum": 20.8, "result": 20.1, "source": "BPI+LAB"},
+          {"code": "PH", "name": "液化液 pH", "unit": "1", "minimum": 5.5, "maximum": 6.2, "result": 5.8, "source": "LAB"},
+          {"code": "DE", "name": "液化 DE 值", "unit": "%", "minimum": 12.0, "maximum": 20.0, "result": 15.2, "source": "LAB"}
+        ]
+      },
+      {
+        "code": "SACCHARIFIED_LIQUOR_RELEASE_V1",
+        "name": "糖化液放行试运行标准",
+        "materialCode": "SACCHARIFIED_LIQUOR",
+        "gate": "QCS_RELEASE",
+        "items": [
+          {"code": "BAUME", "name": "糖化液波美值", "unit": "Be", "minimum": 20.0, "maximum": 21.0, "result": 20.6, "source": "BPI+LAB"},
+          {"code": "PH", "name": "糖化液 pH", "unit": "1", "minimum": 5.4, "maximum": 6.2, "result": 5.7, "source": "BPI+LAB"},
+          {"code": "DE", "name": "糖化 DE 值", "unit": "%", "minimum": 95.0, "maximum": 98.0, "result": 96.4, "source": "LAB"},
+          {"code": "DRY_SOLIDS", "name": "糖化液干物含量", "unit": "%", "minimum": 28.0, "maximum": 35.0, "result": 31.2, "source": "LAB"}
+        ]
+      }
+    ]
+  },
   "signals": [
     {"propertyId": "jet.flow.instant", "name": "喷射进料瞬时流量", "unit": "m3/h", "dataType": "double", "calibrationVersion": "SIM-FRU-1"},
     {"propertyId": "jet.feed.baume", "name": "喷射进料波美值", "unit": "Be", "dataType": "double", "calibrationVersion": "SIM-FRU-1"},

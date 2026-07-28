@@ -212,6 +212,48 @@ public class TraceabilityService {
             List<Map<String, Object>> outputs,
             List<Map<String, Object>> outputRecords) {
         List<Map<String, Object>> edges = new ArrayList<Map<String, Object>>();
+        Map<String, List<Map<String, Object>>> inputsByProcess =
+            new LinkedHashMap<String, List<Map<String, Object>>>();
+        for (Map<String, Object> input : inputs) {
+            String processId = string(input.get("task_process_id"));
+            if (!processId.isEmpty()) {
+                if (!inputsByProcess.containsKey(processId)) {
+                    inputsByProcess.put(processId, new ArrayList<Map<String, Object>>());
+                }
+                inputsByProcess.get(processId).add(input);
+            }
+        }
+        Map<String, Boolean> seenProcessEdges = new LinkedHashMap<String, Boolean>();
+        for (Map<String, Object> output : outputs) {
+            String processId = string(output.get("task_process_id"));
+            String outputBatch = string(output.get("material_batch_num"));
+            List<Map<String, Object>> processInputs = inputsByProcess.get(processId);
+            if (processId.isEmpty() || outputBatch.isEmpty() || processInputs == null) {
+                continue;
+            }
+            for (Map<String, Object> input : processInputs) {
+                String inputBatch = string(input.get("material_batch_num"));
+                if (inputBatch.isEmpty()) {
+                    continue;
+                }
+                String signature = processId + "|" + inputBatch + "|" + outputBatch;
+                if (seenProcessEdges.put(signature, Boolean.TRUE) != null) {
+                    continue;
+                }
+                Map<String, Object> processEdge = edge(
+                    inputBatch, outputBatch, "PROCESS", output.get("product"), output.get("output_num"));
+                processEdge.put("processId", output.get("task_process_id"));
+                processEdge.put("processName", firstNonBlank(
+                    output.get("process_name"), input.get("process_name")));
+                processEdge.put("inputQuantity",
+                    input.get("use_num") == null ? input.get("putin_num") : input.get("use_num"));
+                processEdge.put("outputQuantity", output.get("output_num"));
+                edges.add(processEdge);
+            }
+        }
+        if (!edges.isEmpty()) {
+            return edges;
+        }
         for (Map<String, Object> input : inputs) {
             String inputBatch = string(input.get("material_batch_num"));
             if (!inputBatch.isEmpty()) {

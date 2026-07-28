@@ -1,0 +1,352 @@
+{
+  "generatedAt": "2026-07-28T07:46:19.908Z",
+  "repoCommit": "2400d76ed31fb3112008478ceb38f66e076edc56",
+  "evidenceCodeState": "worktree",
+  "database": "PostgreSQL",
+  "marker": "ADP_E2E_FRUCTOSE_LINE_01",
+  "status": "PASS",
+  "testOnlyDraft": true,
+  "scenario": {
+    "path": "simulation/bpi/scenarios/fructose-jet-saccharification-v1.json",
+    "code": "BPI-FRUCTOSE-JET-SACCHARIFICATION-V1",
+    "routeCode": "FRU-JET-SACCH-V1",
+    "routeName": "果糖喷射液化至糖化试运行路线",
+    "modelStatus": "TEST_ONLY_DRAFT"
+  },
+  "identity": {
+    "taskId": "9007185016254254",
+    "tableNo": "ADP_E2E_FRUCTOSE_LINE_01_TASK_TN",
+    "batchNo": "ADP_E2E_FRUCTOSE_LINE_01_BATCH",
+    "finalMaterialId": "9007185016254252",
+    "finalMaterialCode": "ADP_E2E_FRUCTOSE_LINE_01_SACCHARIFIED_LIQUOR",
+    "rawMaterialId": "9007185016264255",
+    "liquidMaterialId": "9007185016264256",
+    "rawBatchId": "9007185016264257",
+    "liquidBatchId": "9007185016264258",
+    "saccharificationProcessId": "9007185016264259",
+    "saccharificationExecutionId": "9007185016264260",
+    "tonneUnitId": "9007185016267254"
+  },
+  "summary": {
+    "processes": 2,
+    "materials": 3,
+    "batches": 3,
+    "lineageEdges": 2,
+    "equipmentActivitiesWithoutMaterial": 4,
+    "qualityStandards": 3,
+    "qualityItems": 9,
+    "handoverChecks": 5,
+    "finalQcsItems": 4,
+    "bpiEvents": 24,
+    "bpiPoints": 288,
+    "browserPages": 5,
+    "pass": 5,
+    "fail": 0,
+    "blocked": 0
+  },
+  "databaseState": {
+    "task": {
+      "id": 9007185016254254,
+      "tableNo": "ADP_E2E_FRUCTOSE_LINE_01_TASK_TN",
+      "batchNo": "ADP_E2E_FRUCTOSE_LINE_01_BATCH",
+      "lineId": 9007190231280105,
+      "productId": 9007185016254252,
+      "planNum": 35.1,
+      "finishNum": 35.1,
+      "state": "WOM_runState/finished",
+      "checkState": "已检",
+      "checkResult": "合格"
+    },
+    "unit": {
+      "id": 9007185016267254,
+      "code": "ADP_E2E_FRUCTOSE_LINE_01_TONNE",
+      "name": "吨",
+      "symbol": "t"
+    },
+    "processes": [
+      {
+        "id": 770643268805888,
+        "name": "喷射液化",
+        "order": 1,
+        "start": "2026-07-27T16:00:20",
+        "end": "2026-07-27T16:00:44",
+        "state": "WOM_runState/finished"
+      },
+      {
+        "id": 9007185016264260,
+        "name": "糖化",
+        "order": 2,
+        "start": "2026-07-27T16:00:56",
+        "end": "2026-07-27T16:01:32",
+        "state": "WOM_runState/finished"
+      }
+    ],
+    "handoverSeconds": 12,
+    "materials": [
+      {
+        "id": 9007185016264255,
+        "code": "ADP_E2E_FRUCTOSE_LINE_01_STARCH_SLURRY",
+        "name": "淀粉浆（试运行）",
+        "batchManaged": true,
+        "qualityManaged": true,
+        "mainUnit": "吨",
+        "produceUnit": "吨"
+      },
+      {
+        "id": 9007185016264256,
+        "code": "ADP_E2E_FRUCTOSE_LINE_01_LIQUEFIED_SYRUP",
+        "name": "液化液（试运行）",
+        "batchManaged": true,
+        "qualityManaged": true,
+        "mainUnit": "吨",
+        "produceUnit": "吨"
+      },
+      {
+        "id": 9007185016254252,
+        "code": "ADP_E2E_FRUCTOSE_LINE_01_SACCHARIFIED_LIQUOR",
+        "name": "糖化液（试运行）",
+        "batchManaged": true,
+        "qualityManaged": true,
+        "mainUnit": "吨",
+        "produceUnit": "吨"
+      }
+    ],
+    "batches": [
+      {
+        "batchNo": "ADP_E2E_FRUCTOSE_LINE_01_STARCH_SLURRY_BATCH",
+        "headBatchNo": null,
+        "materialId": 9007185016264255,
+        "checkResult": "BaseSet_checkResult/qualified",
+        "available": true
+      },
+      {
+        "batchNo": "ADP_E2E_FRUCTOSE_LINE_01_LIQUEFIED_SYRUP_BATCH",
+        "headBatchNo": "ADP_E2E_FRUCTOSE_LINE_01_STARCH_SLURRY_BATCH",
+        "materialId": 9007185016264256,
+        "checkResult": "BaseSet_checkResult/qualified",
+        "available": true
+      },
+      {
+        "batchNo": "ADP_E2E_FRUCTOSE_LINE_01_BATCH",
+        "headBatchNo": "ADP_E2E_FRUCTOSE_LINE_01_LIQUEFIED_SYRUP_BATCH",
+        "materialId": 9007185016254252,
+        "checkResult": "BaseSet_checkResult/qualified",
+        "available": true
+      }
+    ],
+    "lineage": [
+      {
+        "process": "喷射液化",
+        "inputBatch": "ADP_E2E_FRUCTOSE_LINE_01_STARCH_SLURRY_BATCH",
+        "outputBatch": "ADP_E2E_FRUCTOSE_LINE_01_LIQUEFIED_SYRUP_BATCH",
+        "inputQuantity": 34.4,
+        "outputQuantity": 34.8,
+        "unit": "t"
+      },
+      {
+        "process": "糖化",
+        "inputBatch": "ADP_E2E_FRUCTOSE_LINE_01_LIQUEFIED_SYRUP_BATCH",
+        "outputBatch": "ADP_E2E_FRUCTOSE_LINE_01_BATCH",
+        "inputQuantity": 34.8,
+        "outputQuantity": 35.1,
+        "unit": "t"
+      }
+    ],
+    "equipmentActivities": [
+      {
+        "name": "泵送",
+        "materialId": null,
+        "batchNo": null,
+        "state": "WOM_runState/finished"
+      },
+      {
+        "name": "换热",
+        "materialId": null,
+        "batchNo": null,
+        "state": "WOM_runState/finished"
+      },
+      {
+        "name": "闪蒸",
+        "materialId": null,
+        "batchNo": null,
+        "state": "WOM_runState/finished"
+      },
+      {
+        "name": "保温",
+        "materialId": null,
+        "batchNo": null,
+        "state": "WOM_runState/finished"
+      }
+    ],
+    "qualityStandards": [
+      {
+        "code": "ADP_E2E_FRUCTOSE_LINE_01_STARCH_SLURRY_HANDOVER_V1",
+        "name": "淀粉浆交接试运行标准",
+        "gate": "PROCESS_HANDOVER",
+        "itemCount": 2
+      },
+      {
+        "code": "ADP_E2E_FRUCTOSE_LINE_01_LIQUEFIED_SYRUP_HANDOVER_V1",
+        "name": "液化液交接试运行标准",
+        "gate": "PROCESS_HANDOVER",
+        "itemCount": 3
+      },
+      {
+        "code": "ADP_E2E_FRUCTOSE_LINE_01_SACCHARIFIED_LIQUOR_RELEASE_V1",
+        "name": "糖化液放行试运行标准",
+        "gate": "QCS_RELEASE",
+        "itemCount": 4
+      }
+    ],
+    "handoverCheckCount": 5,
+    "finalQcsItems": [
+      {
+        "name": "糖化液波美值",
+        "value": "20.6",
+        "result": "合格"
+      },
+      {
+        "name": "糖化液 pH",
+        "value": "5.7",
+        "result": "合格"
+      },
+      {
+        "name": "糖化 DE 值",
+        "value": "96.4",
+        "result": "合格"
+      },
+      {
+        "name": "糖化液干物含量",
+        "value": "31.2",
+        "result": "合格"
+      }
+    ],
+    "wms": {
+      "documentCount": 1,
+      "transactionCount": 2,
+      "stock": {
+        "onHand": 35.1,
+        "available": 35.1,
+        "hold": 0,
+        "unit": "t"
+      }
+    },
+    "traceSnapshotCount": 5
+  },
+  "trace": {
+    "processCount": 2,
+    "activityCount": 8,
+    "materialEventCount": 7,
+    "qualityEventCount": 6,
+    "inventoryEventCount": 2,
+    "timelineEventCount": 28,
+    "lineage": [
+      {
+        "fromBatch": "ADP_E2E_FRUCTOSE_LINE_01_STARCH_SLURRY_BATCH",
+        "toBatch": "ADP_E2E_FRUCTOSE_LINE_01_LIQUEFIED_SYRUP_BATCH",
+        "processName": "喷射液化",
+        "inputQuantity": 34.4,
+        "outputQuantity": 34.8
+      },
+      {
+        "fromBatch": "ADP_E2E_FRUCTOSE_LINE_01_LIQUEFIED_SYRUP_BATCH",
+        "toBatch": "ADP_E2E_FRUCTOSE_LINE_01_BATCH",
+        "processName": "糖化",
+        "inputQuantity": 34.8,
+        "outputQuantity": 35.1
+      }
+    ]
+  },
+  "bpi": {
+    "events": 24,
+    "acceptedEvents": 24,
+    "acceptedPoints": 288,
+    "storedPoints": 288,
+    "properties": 12,
+    "rejects": 0,
+    "quarantine": 0,
+    "series": [
+      {
+        "propertyId": "jet.feed.baume",
+        "samples": 24,
+        "minimum": 19.8,
+        "average": 20.119,
+        "maximum": 20.25
+      },
+      {
+        "propertyId": "jet.flow.instant",
+        "samples": 24,
+        "minimum": 0,
+        "average": 6.263,
+        "maximum": 19
+      },
+      {
+        "propertyId": "saccharification.inlet.flow.instant",
+        "samples": 24,
+        "minimum": 0,
+        "average": 5.575,
+        "maximum": 16.8
+      },
+      {
+        "propertyId": "saccharification.liquor.baume",
+        "samples": 24,
+        "minimum": 20.2,
+        "average": 20.375,
+        "maximum": 20.7
+      }
+    ]
+  },
+  "browser": {
+    "summary": {
+      "pageCount": 5,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "badResponses": 0,
+      "requestFailures": 0
+    },
+    "pages": [
+      {
+        "name": "wom-task",
+        "route": "/msService/WOM/produceTask/produceTask/makeTaskEdit?id=9007185016254254",
+        "navigationStatus": 200,
+        "requiredTextVisible": true
+      },
+      {
+        "name": "jet-process-detail",
+        "route": "/msService/ProcessAnalysis/processAnalysis/processExecution/detail?processExecutionId=770643268805888",
+        "navigationStatus": 200,
+        "requiredTextVisible": true
+      },
+      {
+        "name": "saccharification-process-detail",
+        "route": "/msService/ProcessAnalysis/processAnalysis/processExecution/detail?processExecutionId=9007185016264260",
+        "navigationStatus": 200,
+        "requiredTextVisible": true
+      },
+      {
+        "name": "qcs-report",
+        "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportView?id=770643536692480",
+        "navigationStatus": 200,
+        "requiredTextVisible": true
+      },
+      {
+        "name": "batch-trace",
+        "route": "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut",
+        "navigationStatus": 200,
+        "requiredTextVisible": true
+      }
+    ]
+  },
+  "evidence": {
+    "sourceReport": "/tmp/adp-fructose-line-pilot-acceptance.json",
+    "screenshots": "/tmp/adp-fructose-line-pilot-screenshots",
+    "documentation": "docs/testing/fructose-line-pilot-acceptance.md"
+  },
+  "issues": [],
+  "productionLimitations": [
+    "Controlled simulated telemetry is not physical PLC or DCS evidence",
+    "TEST_ONLY_DRAFT quality limits require QA and process approval",
+    "No certified metrology or continuous production evidence",
+    "No abnormal batch, rework, merge, split or rollback acceptance"
+  ]
+}

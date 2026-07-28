@@ -36,6 +36,30 @@ test('normal jet to saccharification route produces a closed two-process chain',
   assert.equal(result.qualityExcursions.length, 0);
 });
 
+test('production model materializes liquefied and saccharified intermediate lots', () => {
+  const model = scenario.productionModel;
+  assert.equal(model.status, 'TEST_ONLY_DRAFT');
+  assert.deepEqual(
+    model.processes.map((process) => [
+      process.code,
+      process.inventoryMaterialization,
+      process.outputMaterial,
+    ]),
+    [
+      ['JET', 'MATERIAL_LOT', 'LIQUEFIED_SYRUP'],
+      ['SACCHARIFICATION', 'MATERIAL_LOT', 'SACCHARIFIED_LIQUOR'],
+    ],
+  );
+  const release = model.qualityStandards.find(
+    (standard) => standard.code === 'SACCHARIFIED_LIQUOR_RELEASE_V1',
+  );
+  assert.ok(release);
+  assert.deepEqual(
+    release.items.map((item) => item.code),
+    ['BAUME', 'PH', 'DE', 'DRY_SOLIDS'],
+  );
+});
+
 test('eight-second flow dropout does not split the jet process', () => {
   const result = evaluateCase(scenario, 'BRIEF_FLOW_DROPOUT');
   assert.deepEqual(

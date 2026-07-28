@@ -5,6 +5,11 @@ const fs = require("fs");
 const path = require("path");
 const { execFileSync, spawnSync } = require("child_process");
 const { chromium, request } = require("playwright");
+const {
+  assertProfileMode,
+  findProfileItem,
+  parseQualityProfile,
+} = require("./qcs-quality-profile");
 
 const baseUrl = (process.env.ADP_BASE_URL || "http://100.99.133.43:18080").replace(/\/+$/, "");
 const browserBaseUrl = (process.env.ADP_BROWSER_BASE_URL || baseUrl).replace(/\/+$/, "");
@@ -31,6 +36,12 @@ const nowToken = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
 const marker =
   process.env.ADP_E2E_MARKER ||
   `ADP_E2E_${nowToken}_${mode === "unqualified" ? "QCS_UNQLF" : "QCS_QUAL"}`;
+const qualityProfile = parseQualityProfile(process.env.ADP_QCS_PROFILE_JSON || "", {
+  marker,
+  reportItemCode: `${marker}_QCS_REPORT_ITEM`,
+  reportItemName: `${marker} QCS report item`,
+});
+assertProfileMode(qualityProfile, mode);
 const outputDir =
   process.env.ADP_OUTPUT_DIR || path.join("/tmp", `adp-qcs-report-chain-${mode}-${nowToken}`);
 const outputPath =
@@ -448,6 +459,26 @@ WHERE r.inspect_id = ${inspectId};
     const fixtureIds = Object.fromEntries(
       Object.entries(ids).map(([key, value]) => [key, requiredId(value, `fixture ${key}`)])
     );
+    const profileFixtureIds = (
+      womEvidence.qualityProfile
+      && Array.isArray(womEvidence.qualityProfile.items)
+      && womEvidence.qualityProfile.items.length
+        ? womEvidence.qualityProfile.items
+        : [{
+            ids: {
+              testComponent: fixtureIds.testComponent,
+              stdVerCom: fixtureIds.stdVerCom,
+              specLimit: fixtureIds.specLimit,
+            },
+          }]
+    ).map((item, index) => ({
+      testComponent: requiredId(item.ids && item.ids.testComponent, `profile item ${index} testComponent`),
+      stdVerCom: requiredId(item.ids && item.ids.stdVerCom, `profile item ${index} stdVerCom`),
+      specLimit: requiredId(item.ids && item.ids.specLimit, `profile item ${index} specLimit`),
+    }));
+    const testComponentIds = profileFixtureIds.map((item) => item.testComponent).join(", ");
+    const stdVerComIds = profileFixtureIds.map((item) => item.stdVerCom).join(", ");
+    const specLimitIds = profileFixtureIds.map((item) => item.specLimit).join(", ");
     const cleanupSql = `
 BEGIN;
 
@@ -543,11 +574,11 @@ DELETE FROM public.wom_produce_tasks WHERE id = ${taskId};
 DELETE FROM public.rm_formula_qualities WHERE id = ${fixtureIds.formulaQuality};
 DELETE FROM public.hm_factory_models WHERE id = ${fixtureIds.workUnit};
 DELETE FROM public.rm_formulas WHERE id = ${fixtureIds.formula};
-DELETE FROM public.limsba_spec_limits WHERE id = ${fixtureIds.specLimit};
+DELETE FROM public.limsba_spec_limits WHERE id IN (${specLimitIds});
 DELETE FROM public.limsba_std_ver_grades
 WHERE id IN (${fixtureIds.stdVerGradeUnqualified}, ${fixtureIds.stdVerGradeQualified});
-DELETE FROM public.limsba_std_ver_coms WHERE id = ${fixtureIds.stdVerCom};
-DELETE FROM public.limsba_test_components WHERE id = ${fixtureIds.testComponent};
+DELETE FROM public.limsba_std_ver_coms WHERE id IN (${stdVerComIds});
+DELETE FROM public.limsba_test_components WHERE id IN (${testComponentIds});
 DELETE FROM public.limsba_analy_prod_stds WHERE id = ${fixtureIds.analyProdStd};
 DELETE FROM public.limsba_std_versions WHERE id = ${fixtureIds.stdVersion};
 DELETE FROM public.limsba_quality_stds WHERE id = ${fixtureIds.qualityStd};
@@ -593,12 +624,20 @@ function buildReportJson(report, reportComs) {
         }
       : null,
   };
-  const comPayload = reportComs.map((row) => ({
-    id: row.id,
-    version: Number(row.version),
-    checkResult: expectedResult,
-    dispValue: expectedResult,
-  }));
+  const comPayload = reportComs.map((row) => {
+    const profileItem = qualityProfile.testOnlyDraft
+      ? findProfileItem(qualityProfile, row.reportName)
+      : null;
+    if (qualityProfile.testOnlyDraft && !profileItem) {
+      throw new Error(`QCS report item is not defined by profile: ${row.reportName}`);
+    }
+    return {
+      id: row.id,
+      version: Number(row.version),
+      checkResult: expectedResult,
+      dispValue: profileItem ? profileItem.result : expectedResult,
+    };
+  });
   return JSON.stringify([
     {
       reportId: JSON.stringify(reportPayload),
@@ -1110,6 +1149,8 @@ function assertPersistence(evidence, womEvidence) {
   if (!report || !report.id) {
     throw new Error(`QCS report missing in final assertion for inspect ${inspectId}`);
   }
+  const reportComs = queryReportComs(report.id);
+  evidence.finalReportComs = reportComs;
   const finalState = queryFinalState(womEvidence, report.id, inspectId, batchNo);
   evidence.finalVerificationSql = finalState.raw;
   evidence.finalState = finalState;
@@ -1124,9 +1165,25 @@ function assertPersistence(evidence, womEvidence) {
   if (!valueIncludes(finalState.report, marker)) {
     failures.push(`qcs_inspect_reports memo marker missing: ${JSON.stringify(finalState.report)}`);
   }
-  if (!finalState.reportComCount || Number(finalState.reportComCount[1] || 0) < 1) {
+  if (!finalState.reportComCount || Number(finalState.reportComCount[1] || 0) !== qualityProfile.items.length) {
     failures.push(`qcs_report_coms were not persisted: ${JSON.stringify(finalState.reportComCount)}`);
   }
+  if (reportComs.length !== qualityProfile.items.length) {
+    failures.push(`qcs_report_coms profile count mismatch: ${reportComs.length}/${qualityProfile.items.length}`);
+  }
+  qualityProfile.items.forEach((item) => {
+    const row = qualityProfile.testOnlyDraft
+      ? reportComs.find((candidate) => candidate.reportName === item.name)
+      : reportComs[0];
+    if (
+      !row
+      || row.dispValue !== (qualityProfile.testOnlyDraft ? item.result : expectedResult)
+      || row.checkResult !== expectedResult
+      || row.valid !== "true"
+    ) {
+      failures.push(`qcs_report_coms item ${item.code} mismatch: ${JSON.stringify(row)}`);
+    }
+  });
   if (!finalState.reportPendingCount || finalState.reportPendingCount[1] !== "0") {
     failures.push(`report pending rows were not cleared: ${JSON.stringify(finalState.reportPendingCount)}`);
   }
@@ -1176,6 +1233,7 @@ async function main() {
     navigationWaitUntil,
     mode,
     marker,
+    qualityProfile,
     operation: `QCS manufacturing report save and ${mode} effective persistence`,
     api: `${inspectBulkSubmitApi}; ${reportBatchDealApi}`,
     backendEntry:

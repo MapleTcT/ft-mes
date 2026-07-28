@@ -36,6 +36,7 @@ function validateScenario(scenario) {
   if (!Array.isArray(scenario.signals) || scenario.signals.length !== 12) {
     throw new Error('fructose scenario must define exactly 12 telemetry signals');
   }
+  validateProductionModel(scenario.productionModel);
   const propertyIds = new Set();
   for (const [index, signal] of scenario.signals.entries()) {
     const propertyId = requireText(signal.propertyId, `signals[${index}].propertyId`);
@@ -93,6 +94,90 @@ function validateScenario(scenario) {
     }
   }
   return scenario;
+}
+
+function validateProductionModel(model) {
+  if (!model || model.status !== 'TEST_ONLY_DRAFT') {
+    throw new Error('productionModel.status must be TEST_ONLY_DRAFT');
+  }
+  requireText(model.routeCode, 'productionModel.routeCode');
+  requireText(model.routeName, 'productionModel.routeName');
+  requireText(model.quantityUnit, 'productionModel.quantityUnit');
+  if (!Array.isArray(model.processes) || model.processes.length !== 2) {
+    throw new Error('productionModel must define jet and saccharification');
+  }
+  if (!Array.isArray(model.materials) || model.materials.length < 3) {
+    throw new Error('productionModel must define at least three material states');
+  }
+  if (!Array.isArray(model.qualityStandards) || model.qualityStandards.length < 3) {
+    throw new Error('productionModel must define material quality standards');
+  }
+
+  const materials = new Map();
+  for (const [index, material] of model.materials.entries()) {
+    const code = requireText(material.code, `productionModel.materials[${index}].code`);
+    if (materials.has(code)) throw new Error(`duplicate material code ${code}`);
+    if (material.batchManaged !== true) {
+      throw new Error(`${code} must be batch managed`);
+    }
+    materials.set(code, material);
+  }
+
+  const processCodes = new Set();
+  for (const [index, process] of model.processes.entries()) {
+    const code = requireText(process.code, `productionModel.processes[${index}].code`);
+    if (processCodes.has(code)) throw new Error(`duplicate production process ${code}`);
+    processCodes.add(code);
+    if (process.batchRequired !== true) {
+      throw new Error(`${code} must create a process batch`);
+    }
+    if (!['NONE', 'VIRTUAL_LOT', 'MATERIAL_LOT'].includes(process.inventoryMaterialization)) {
+      throw new Error(`${code}.inventoryMaterialization is unsupported`);
+    }
+    if (!materials.has(process.inputMaterial) || !materials.has(process.outputMaterial)) {
+      throw new Error(`${code} references an unknown material`);
+    }
+    if (!(process.inputQuantity > 0) || !(process.outputQuantity > 0)) {
+      throw new Error(`${code} quantities must be positive`);
+    }
+  }
+
+  const standards = new Map();
+  for (const [index, standard] of model.qualityStandards.entries()) {
+    const code = requireText(
+      standard.code,
+      `productionModel.qualityStandards[${index}].code`,
+    );
+    if (standards.has(code)) throw new Error(`duplicate quality standard ${code}`);
+    if (!materials.has(standard.materialCode)) {
+      throw new Error(`${code} references an unknown material`);
+    }
+    if (!Array.isArray(standard.items) || standard.items.length < 1) {
+      throw new Error(`${code} must define inspection items`);
+    }
+    for (const [itemIndex, item] of standard.items.entries()) {
+      requireText(item.code, `${code}.items[${itemIndex}].code`);
+      requireText(item.name, `${code}.items[${itemIndex}].name`);
+      requireText(item.unit, `${code}.items[${itemIndex}].unit`);
+      requireText(item.source, `${code}.items[${itemIndex}].source`);
+      if (
+        !Number.isFinite(item.minimum)
+        || !Number.isFinite(item.maximum)
+        || !Number.isFinite(item.result)
+        || item.minimum > item.maximum
+        || item.result < item.minimum
+        || item.result > item.maximum
+      ) {
+        throw new Error(`${code}.items[${itemIndex}] has invalid test limits/result`);
+      }
+    }
+    standards.set(code, standard);
+  }
+  for (const material of materials.values()) {
+    if (!standards.has(material.qualityStandard)) {
+      throw new Error(`${material.code} references an unknown quality standard`);
+    }
+  }
 }
 
 function expandCaseFrames(scenario, caseCode) {
@@ -317,4 +402,5 @@ module.exports = {
   expandCaseFrames,
   loadScenario,
   validateScenario,
+  validateProductionModel,
 };

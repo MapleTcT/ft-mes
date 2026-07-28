@@ -190,7 +190,8 @@
         var lineage = materials.lineage || [];
         document.getElementById("lineage").innerHTML = lineage.length ? lineage.map(function (edge) {
           return '<div class="lineage"><strong>' + escapeHtml(edge.fromBatch) + '</strong><div class="arrow">' +
-            escapeHtml(edge.relation) + ' &gt;</div><strong>' + escapeHtml(edge.toBatch) + "</strong></div>";
+            escapeHtml(edge.processName || edge.relation) + ' &gt;</div><strong>' +
+            escapeHtml(edge.toBatch) + "</strong></div>";
         }).join("") : empty("当前批次暂无投入/产出谱系记录");
         document.getElementById("inputs").innerHTML = table(materials.inputs, [
           ["物料ID", "material_id"], ["物料批次", "material_batch_num"], ["投料量", "putin_num"], ["使用量", "use_num"], ["投料时间", "putin_time"]

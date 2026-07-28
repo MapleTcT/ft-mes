@@ -3915,6 +3915,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-fructose-line-pilot-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-home-todo-smoke.js",
       "state": "tracked",
       "tracked": true
@@ -4744,6 +4750,18 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/publish-nacos-configs.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/qcs-quality-profile.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/qcs-quality-profile.test.js",
       "state": "tracked",
       "tracked": true
     },
@@ -6327,6 +6345,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/fructose-line-pilot-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/fructose-process-boundary-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -7516,6 +7540,12 @@
     {
       "ignored": false,
       "path": "metadata/frontend-sourcemap-summary.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/fructose-line-pilot-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -11846,16 +11876,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 689
+      "tracked": 692
     },
     "docs": {
-      "tracked": 153
+      "tracked": 154
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 274
+      "tracked": 275
     },
     "package.json": {
       "tracked": 1
@@ -11879,8 +11909,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1970,
-    "tracked": 1970,
+    "totalFiles": 1975,
+    "tracked": 1975,
     "untracked": 0
   },
   "untrackedByDirectory": []

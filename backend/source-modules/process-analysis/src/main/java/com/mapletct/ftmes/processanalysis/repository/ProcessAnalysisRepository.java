@@ -152,15 +152,19 @@ public class ProcessAnalysisRepository {
                 + "WHERE task_id = ? AND valid IS DISTINCT FROM FALSE ORDER BY act_start_time NULLS LAST, id",
             taskId));
         facts.put("materialInputs", jdbc.queryForList(
-            "SELECT DISTINCT d.id, d.table_no, d.material_id, d.material_batch_num, d.putin_num, d.use_num, "
-                + "d.putin_time, d.putin_end_time, d.ware_id, d.store_id, d.is_finish, d.create_time "
+            "SELECT DISTINCT d.id, a.task_process_id, p.name AS process_name, d.table_no, d.material_id, "
+                + "d.material_batch_num, d.putin_num, d.use_num, d.putin_time, d.putin_end_time, "
+                + "d.ware_id, d.store_id, d.is_finish, d.create_time "
                 + "FROM wom_acti_exelogs a JOIN wom_putin_details d ON d.id = a.putin_detail_id "
+                + "LEFT JOIN wom_task_processes p ON p.id = a.task_process_id "
                 + "WHERE a.task_id = ? ORDER BY d.putin_time NULLS LAST, d.id",
             taskId));
         facts.put("materialOutputs", jdbc.queryForList(
-            "SELECT DISTINCT d.id, d.table_no, d.material_batch_num, d.product, d.output_num, d.report_num, "
-                + "d.putin_time, d.putin_end_time, d.ware_id, d.store_id, d.create_time "
+            "SELECT DISTINCT d.id, a.task_process_id, p.name AS process_name, d.table_no, "
+                + "d.material_batch_num, d.product, d.output_num, d.report_num, d.putin_time, "
+                + "d.putin_end_time, d.ware_id, d.store_id, d.create_time "
                 + "FROM wom_acti_exelogs a JOIN wom_output_details d ON d.id = a.output_detail_id "
+                + "LEFT JOIN wom_task_processes p ON p.id = a.task_process_id "
                 + "WHERE a.task_id = ? ORDER BY d.putin_time NULLS LAST, d.id",
             taskId));
         facts.put("materialOutputRecords", jdbc.queryForList(

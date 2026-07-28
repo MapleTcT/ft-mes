@@ -258,11 +258,11 @@
     }
   },
   "summary": {
-    "testedFeatures": 289,
-    "pass": 283,
+    "testedFeatures": 294,
+    "pass": 287,
     "fail": 0,
     "blocked": 0,
-    "notApplicable": 6
+    "notApplicable": 7
   },
   "items": [
     {
@@ -6296,6 +6296,112 @@
       "verificationSql": "select id,version,code,name,parent_id,node_type_id,department_id,lay_no,lay_rec,full_path_name,valid,leaf,cid from public.hm_factory_models where code='ADP_E2E_20260728042954_FACTORY_LINE'; verify runtime_customer_condition and ec_customer_condition by view_code='HierarchicalMod_1.0.0_factoryNodeType_nodeTypeRef';",
       "status": "PASS",
       "evidence": "Real shell navigation selected the PostgreSQL root, opened the add popup, visibly clicked 004/生产线 and the 选择 button, left the non-required department empty, and saved through the real form without component injection. HTTP 200 returned dealSuccessFlag=true and id=770612453238016; the PostgreSQL row has the same id and department_id null. WOM factoryLineRef2 listed the retained marker as 未占用, all 13 assertions passed, and console/page/request/HTTP error arrays were empty.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "fructose-line-pilot",
+      "module": "果糖试运行物料与计量单位",
+      "route": "/msService/WOM/makeTask/makeTask/makeTaskList",
+      "operation": "建立淀粉浆、液化液、糖化液及吨计量单位，并为三种物料生成可追溯批次",
+      "api": "WOM task and material read APIs used by the retained pilot fixture",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "Controlled PostgreSQL pilot fixture -> BaseSet material/unit/batch tables -> WOM task rendering",
+      "tables": [
+        "public.baseset_units",
+        "public.baseset_materials",
+        "public.baseset_batch_infos"
+      ],
+      "marker": "ADP_E2E_FRUCTOSE_LINE_01",
+      "verificationSql": "select code,name,symbol from public.baseset_units where code='ADP_E2E_FRUCTOSE_LINE_01_TONNE'; select code,name,main_unit_id,production_unit_id from public.baseset_materials where code like 'ADP_E2E_FRUCTOSE_LINE_01_%' order by code; select batch_no,material_id from public.baseset_batch_infos where batch_no like 'ADP_E2E_FRUCTOSE_LINE_01_%' order by batch_no;",
+      "status": "PASS",
+      "evidence": "PostgreSQL retained one controlled tonne unit and three TEST_ONLY_DRAFT materials/batches. The real WOM task page rendered the tonne unit and the retained batch names without browser errors.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "fructose-line-pilot",
+      "module": "果糖喷射液化与糖化物料转换",
+      "route": "/msService/ProcessAnalysis/processAnalysis/processExecution/detail and /processBatchViewOut",
+      "operation": "执行喷射液化和糖化，并按 task_process_id 形成淀粉浆到液化液、液化液到糖化液的两条工序谱系边",
+      "api": "GET /processAnalysis/api/process-executions/{id}; GET /processAnalysis/exelogSecond/processBatchViewOut",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "WOM process execution persistence -> ProcessAnalysisRepository -> TraceabilityService process-paired lineage projection",
+      "tables": [
+        "public.wom_produce_tasks",
+        "public.wom_task_processes",
+        "public.wom_process_exelogs",
+        "public.wom_input_materials",
+        "public.wom_output_materials",
+        "public.wom_process_records"
+      ],
+      "marker": "ADP_E2E_FRUCTOSE_LINE_01",
+      "verificationSql": "Select retained WOM task/process/execution/input/output rows by the marker and verify exactly two task_process_id pairs: 淀粉浆 34.4 t -> 液化液 34.8 t and 液化液 34.8 t -> 糖化液 35.1 t.",
+      "status": "PASS",
+      "evidence": "PostgreSQL and the real ProcessAnalysis trace page showed exactly two ordered process edges: 喷射液化 34.4 -> 34.8 and 糖化 34.8 -> 35.1. Four equipment activities remained non-materialized process records.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "fructose-line-pilot",
+      "module": "果糖工序交接与糖化液质量放行",
+      "route": "/msService/QCS/inspect/inspect/inspectList and WOM manufacturing inspection views",
+      "operation": "记录淀粉浆和液化液工序交接检查，并对糖化液执行独立请检、九项定义中的四项终检和合格放行",
+      "api": "WOM manufacturing inspection APIs; QCS inspect/report chain APIs",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "WOM handover inspection persistence and QCS inspect/report service chain",
+      "tables": [
+        "public.qcs_quality_standards",
+        "public.qcs_quality_standard_items",
+        "public.wom_check_details",
+        "public.qcs_inspects",
+        "public.qcs_inspect_reports",
+        "public.qcs_report_coms"
+      ],
+      "marker": "ADP_E2E_FRUCTOSE_LINE_01",
+      "verificationSql": "Select three TEST_ONLY_DRAFT quality standards and nine standard items by marker; verify five WOM handover checks and one qualified QCS report containing four final-product result rows.",
+      "status": "PASS",
+      "evidence": "PostgreSQL retained three draft standards and nine item definitions. Five raw/intermediate checks were linked to process handover; the final QCS report recorded 波美 20.6, pH 5.7, DE 96.4% and 干物 31.2%, all within the draft limits and qualified.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "fructose-line-pilot",
+      "module": "果糖完工入库、批次追溯与工艺信号",
+      "route": "/msService/MaterialWms/wms/batch and ProcessAnalysis trace/detail views",
+      "operation": "糖化液合格后完成入库和质量放行，回放流量、波美及边界信号，并复验统一批次时间线",
+      "api": "WMS batch/document read APIs; ProcessAnalysis trace APIs; BPI telemetry ingress/read APIs",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "QCS qualified report -> WMS completion inbound/quality release -> ProcessAnalysis trace projection; BPI telemetry ingestion -> PostgreSQL evidence",
+      "tables": [
+        "public.wms_documents",
+        "public.wms_document_lines",
+        "public.wms_inventory_transactions",
+        "public.wms_stock_balances",
+        "public.wms_batch_trace_snapshots",
+        "bpi.bpi_telemetry_events",
+        "bpi.bpi_telemetry_points"
+      ],
+      "marker": "ADP_E2E_FRUCTOSE_LINE_01",
+      "verificationSql": "Verify one marker-scoped WMS document, two transactions, final stock on_hand=available=35.1 and hold=0; verify five trace snapshots plus 24 accepted BPI events, 288 accepted points and 12 distinct properties.",
+      "status": "PASS",
+      "evidence": "The retained final batch contains COMPLETION_INBOUND and QUALITY_RELEASE inventory events, 35.1 t available stock, five trace snapshots, two process edges, 24 BPI events and 288 accepted points. The trace API returned 28 timeline events.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "fructose-line-pilot",
+      "module": "果糖试运行真实页面复验",
+      "route": "WOM task, WOM process detail, QCS inspect, WMS batch and ProcessAnalysis trace pages",
+      "operation": "通过真实浏览器打开五个业务页面并检查关键文本、接口响应和运行时错误",
+      "api": "Read APIs used by the five retained browser pages",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "Existing WOM/QCS/WMS/ProcessAnalysis/BPI read models",
+      "tables": [],
+      "marker": "ADP_E2E_FRUCTOSE_LINE_01",
+      "verificationSql": "Read-only verification; no new business row is expected from opening the five pages.",
+      "status": "NOT_APPLICABLE",
+      "evidence": "All five real pages rendered the retained marker, tonne unit, intermediate batches and WMS event labels. Console errors, page errors, bad responses and request failures were all zero.",
       "issues": []
     }
   ],

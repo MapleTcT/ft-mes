@@ -1183,6 +1183,23 @@ marker `ADP_E2E_20260728042954_FACTORY_LINE` 新增
 `/tmp/adp-factory-line-persistence-20260728042954/01-factory-line-before-save.png` 与
 `/tmp/adp-factory-line-persistence-20260728042954/02-wom-production-line-picker.png`。
 
+### 果糖喷射液化至糖化试运行线（2026-07-28）
+
+本节使用 marker `ADP_E2E_FRUCTOSE_LINE_01`，全部主数据和限值均为
+`TEST_ONLY_DRAFT`。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WOM 制造指令 | `/msService/WOM/produceTask/produceTask/makeTaskEdit?id=9007185016254254` | 打开保留的试运行指令，检查常规信息、工序活动、用料汇总和检验清单 | WOM 指令详情及子表查询 | 显示 35.1 吨、淀粉浆/液化液/糖化液投入产出，不再显示“件” | 任务 finished、已检/合格，3 个物料均绑定吨单位 | WOM task/process/active/material/check 表、`baseset_materials`、`baseset_units` | PASS | 正式主数据仍需审批 |
+| 喷射液化详情 | `/msService/ProcessAnalysis/processAnalysis/processExecution/detail?processExecutionId=770643268805888` | 查看当前/下一工序、交接间隔、流量和波美曲线 | `GET /processAnalysis/api/process-executions/{id}`；`GET /bpi-api/process-evidence` | 显示喷射液化、糖化、12 秒连续交接和非空曲线 | 工序 finished；BPI 受信上下文和窗口完整 | `wom_process_exelogs`、BPI telemetry 表 | PASS | 信号为受控模拟 |
+| 糖化详情 | `/msService/ProcessAnalysis/processAnalysis/processExecution/detail?processExecutionId=9007185016264260` | 查看上一工序和糖化窗口曲线 | 同上 | 显示上一工序喷射液化、当前糖化及流量/波美值 | 糖化工序 finished，时间窗 `16:00:56..16:01:32` | 同上 | PASS | 信号为受控模拟 |
+| QCS 糖化液报告 | `/msService/QCS/inspectReport/inspectReport/manuInspReportView?id=770643536692480` | 打开产品检验报告 | QCS report data API | 计量单位为吨；波美、pH、DE、干物 4 项均显示报告值与合格结论 | QCS inspect/report/component 共 1/1/4，全部合格 | `qcs_inspects`、`qcs_inspect_reports`、`qcs_report_coms` | PASS | 限值为试运行草案 |
+| 批次追溯 | `/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?...` | 查看工序、物料、质量和库存事实链 | `GET /processAnalysis/api/trace` | 显示“淀粉浆批次 -> 液化液批次 -> 糖化液批次”、`COMPLETION_INBOUND` 和 `QUALITY_RELEASE` | 2 条工序谱系、6 个质量事件、2 个库存事件、5 个追溯快照 | WOM/QCS/WMS 事实表、`pa_trace_snapshots` | PASS | 无 |
+
+5 个页面的 console error、page error、HTTP 4xx/5xx 和 request failure 均为 0。
+完整模型、检验项目、SQL 和重跑入口见
+`docs/testing/fructose-line-pilot-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

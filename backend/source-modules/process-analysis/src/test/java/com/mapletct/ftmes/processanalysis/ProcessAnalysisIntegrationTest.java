@@ -130,6 +130,9 @@ public class ProcessAnalysisIntegrationTest {
             .andExpect(jsonPath("$.data.summary.qualityEventCount").value(4))
             .andExpect(jsonPath("$.data.summary.inventoryEventCount").value(1))
             .andExpect(jsonPath("$.data.materials.lineage[0].fromBatch").value("RAW-BATCH-1"))
+            .andExpect(jsonPath("$.data.materials.lineage[0].toBatch").value("OUT-BATCH-1"))
+            .andExpect(jsonPath("$.data.materials.lineage[0].relation").value("PROCESS"))
+            .andExpect(jsonPath("$.data.materials.lineage[0].processName").value("喷射"))
             .andExpect(jsonPath("$.data.quality.reports[0].check_result").value("合格"))
             .andExpect(jsonPath("$.data.quality.reportItems[0].report_name").value("含量"));
 

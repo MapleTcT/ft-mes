@@ -129,6 +129,10 @@ MES_FULL_FLOW_OUTPUT ?= /tmp/adp-mes-full-production-flow-acceptance.json
 MES_FULL_FLOW_CONFIRM ?= NO
 MES_FULL_FLOW_BPI_BATCH_ID ?=
 MES_FULL_FLOW_TASK_ID ?=
+FRUCTOSE_PILOT_OUTPUT ?= /tmp/adp-fructose-line-pilot-acceptance.json
+FRUCTOSE_FULL_FLOW_OUTPUT ?= /tmp/adp-fructose-line-full-flow-01.json
+FRUCTOSE_PILOT_SCREENSHOT_DIR ?= /tmp/adp-fructose-line-pilot-screenshots
+FRUCTOSE_PILOT_CONFIRM ?= NO
 TEAMINFO_SCHEDULEPLAN_PERSISTENCE_OUTPUT ?= /tmp/adp-teaminfo-scheduleplan-persistence-acceptance.json
 CRAFTGRAPH_PERSISTENCE_OUTPUT ?= /tmp/adp-craftgraph-persistence-acceptance.json
 BUSINESS_PAGE_SMOKE_OUTPUT ?= /tmp/adp-business-page-smoke
@@ -173,6 +177,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: acceptance-entity-model-field-persistence acceptance-entity-model-field-type-matrix acceptance-entity-model-object-association acceptance-entity-model-field-delete-persistence
 .PHONY: acceptance-wom-public-produce-task-created-retirement
 .PHONY: acceptance-factory-line-persistence
+.PHONY: acceptance-fructose-line-pilot
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
@@ -298,6 +303,7 @@ help:
 	@printf '%s\n' '  make process-analysis-package Build the executable ProcessAnalysis JAR'
 	@printf '%s\n' '  make process-analysis-stage-runtime Copy the ProcessAnalysis JAR into the Docker runtime tree'
 	@printf '%s\n' '  make acceptance-process-analysis-persistence Run live trace/API/PostgreSQL marker acceptance'
+	@printf '%s\n' '  make acceptance-fructose-line-pilot Run retained fructose WOM/QCS/WMS/BPI/browser acceptance'
 	@printf '%s\n' '  make rm-formula-editor-test Run RM Web formula editor service tests'
 	@printf '%s\n' '  make rm-formula-editor-package Build the executable RM Web formula editor JAR'
 	@printf '%s\n' '  make rm-formula-editor-stage-runtime Copy the RM Web formula editor JAR into the Docker runtime tree'
@@ -592,6 +598,9 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-material-wms-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-process-analysis-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-mes-full-production-flow-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-fructose-line-pilot-acceptance.js
+	$(NODE) --check deploy/docker/scripts/qcs-quality-profile.js
+	$(NODE) --test deploy/docker/scripts/qcs-quality-profile.test.js
 	$(NODE) --check deploy/docker/scripts/adp-core-flow-runtime-rollback-rehearsal.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-toolbar-row-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-prepare-need-persistence-acceptance.js
@@ -1482,6 +1491,24 @@ acceptance-mes-full-production-flow:
 	ADP_MES_FULL_FLOW_BPI_BATCH_ID="$${ADP_MES_FULL_FLOW_BPI_BATCH_ID:-$(MES_FULL_FLOW_BPI_BATCH_ID)}" \
 	ADP_MES_FULL_FLOW_TASK_ID="$${ADP_MES_FULL_FLOW_TASK_ID:-$(MES_FULL_FLOW_TASK_ID)}" \
 	$(NODE) deploy/docker/scripts/adp-mes-full-production-flow-acceptance.js
+
+acceptance-fructose-line-pilot:
+	@set -eu; \
+	confirm="$${ADP_FRUCTOSE_PILOT_CONFIRM:-$(FRUCTOSE_PILOT_CONFIRM)}"; \
+	if [ "$$confirm" != "YES" ]; then \
+		echo "set FRUCTOSE_PILOT_CONFIRM=YES (or ADP_FRUCTOSE_PILOT_CONFIRM=YES) before running retained fructose acceptance" >&2; \
+		exit 2; \
+	fi; \
+	ADP_BASE_URL="$${ADP_BASE_URL:-$(ADP_BASE_URL)}" \
+	ADP_BROWSER_BASE_URL="$${ADP_BROWSER_BASE_URL:-$(ADP_BROWSER_BASE_URL)}" \
+	ADP_USERNAME="$${ADP_USERNAME:-$(ADP_USERNAME)}" \
+	ADP_PASSWORD="$${ADP_PASSWORD:-$(ADP_PASSWORD)}" \
+	ADP_DB_SSH_TARGET="$${ADP_DB_SSH_TARGET:-$(ADP_SSH_USER)@$(ADP_SSH_HOST)}" \
+	ADP_FRUCTOSE_PILOT_CONFIRM="YES" \
+	ADP_FRUCTOSE_FULL_FLOW_OUTPUT="$${ADP_FRUCTOSE_FULL_FLOW_OUTPUT:-$(FRUCTOSE_FULL_FLOW_OUTPUT)}" \
+	ADP_FRUCTOSE_PILOT_OUTPUT="$${ADP_FRUCTOSE_PILOT_OUTPUT:-$(FRUCTOSE_PILOT_OUTPUT)}" \
+	ADP_FRUCTOSE_PILOT_SCREENSHOT_DIR="$${ADP_FRUCTOSE_PILOT_SCREENSHOT_DIR:-$(FRUCTOSE_PILOT_SCREENSHOT_DIR)}" \
+	$(NODE) deploy/docker/scripts/adp-fructose-line-pilot-acceptance.js
 
 acceptance-teaminfo-scheduleplan-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_TEAMINFO_SCHEDULEPLAN_PERSISTENCE_OUTPUT=$(TEAMINFO_SCHEDULEPLAN_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-teaminfo-scheduleplan-persistence-acceptance.js
