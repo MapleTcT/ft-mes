@@ -1209,6 +1209,29 @@ WOM 核心补丁会在投料明细保存成功后、结束活动时按明细补�
 关键 SQL、四条流量/波美值序列统计和浏览器结果见
 `docs/testing/fructose-process-boundary-acceptance.md`。
 
+### 工厂架构新增生产线与 WOM 参照落库（目标页面/API/PostgreSQL）
+
+本节使用 marker `ADP_E2E_20260728042954_FACTORY_LINE`。真实工作台从
+`默认OEE工厂` 节点发起新增，保存响应中的业务 ID 为 `770612453238016`。后端源码链路为
+`HierarchicalModFactoryModelController.submit` ->
+`HierarchicalModFactoryModelServiceImpl.submit/saveFactoryModel` ->
+`HierarchicalModFactoryModelDaoImpl` / `TreeDaoImpl` / Hibernate。服务在保存主实体后同步关系网格、
+助记码及层级摘要；运行时默认数据库保持 PostgreSQL。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 新增生产线 | 工厂架构树选择 `默认OEE工厂` 后点击新增；从节点类型参照可见点选 `004/生产线` 并点击“选择”；部门留空 | `POST /msService/HierarchicalMod/factoryModel/factoryModel/factoryEdit/submit` | `HierarchicalModFactoryModelController.submit -> HierarchicalModFactoryModelServiceImpl.submit/saveFactoryModel -> HierarchicalModFactoryModelDaoImpl/TreeDaoImpl/Hibernate` | `hm_factory_models`、`hm_factory_models_mc` | `select id,version,code,name,parent_id,node_type_id,department_id,lay_no,lay_rec,full_path_name,valid,leaf,cid from public.hm_factory_models where code='ADP_E2E_20260728042954_FACTORY_LINE';` | HTTP 200、`dealSuccessFlag=true`；响应 ID 与主表 ID 均为 `770612453238016`；主表 `version 1 / parent 7000000000001000 / type 9100000000000000 / department NULL / layNo 2 / valid true / cid 1000`，助记码映射保存链无 SQLGrammarException | PASS |
+| 节点类型条件加载 | 新增页节点类型参照 | `POST .../factoryNodeType/facNodeType/nodeTypeRef-query` | Foundation EC customer-condition cache -> HierarchicalMod node-type query | `runtime_customer_condition`、`ec_customer_condition`、`hm_fac_node_types` | 按 `view_code='HierarchicalMod_1.0.0_factoryNodeType_nodeTypeRef'` 查询两张 condition 表，并按 `code='004'` 查询节点类型 | 两张 condition 表均有有效配置；参照返回唯一 `004/生产线`；该动作只读 | NOT_APPLICABLE |
+| WOM 新产线复显 | 制造指令生产线名称参照 `factoryLineRef2` | `POST .../factoryModel/factoryModel/factoryLineRef2-query` | 运行时列表条件 -> HierarchicalMod factory-model query | `hm_factory_models`、`hm_fac_node_types` | 按 marker 联查节点和 `004/生产线` 类型 | 新节点以“生产线 / 未占用”显示；只读复显未新增其他业务行 | NOT_APPLICABLE |
+
+写操作请求载荷包含唯一编码、名称、真实参照选择的节点类型、空部门对象和
+`parentId=7000000000001000`；最终
+`lay_rec=-7000000000001000--770612453238016`，
+`full_path_name=默认OEE工厂/果糖产线验收_20260728042954`。自动化断言 `13/13 PASS`，
+浏览器 console/page/request/HTTP 错误数组均为空；最终测试时间窗内 Foundation 无新增
+`ERROR/WARN`。机器证据：
+`/tmp/adp-factory-line-persistence-ui-acceptance.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

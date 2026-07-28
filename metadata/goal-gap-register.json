@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-27T14:29:16+00:00",
-  "repoCommit": "4d41c2154e223c0aa629045cebea7ec4b0f924d4",
+  "generatedAt": "2026-07-28T04:32:57+00:00",
+  "repoCommit": "66ff8a5c16aa50c88667597ec8c59fe49b474243",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -74,7 +74,7 @@
       "status": "PARTIAL",
       "scope": "默认运行、默认构建和默认 Docker 路径使用 PostgreSQL；Oracle 仅作为 legacy 对照。",
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1631, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 210. metadata/oracle-migration-audit.json currently has 1631 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1632, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 216. metadata/oracle-migration-audit.json currently has 1632 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
@@ -287,7 +287,14 @@
         "deploy/docker/postgres/init/206-wom-easy-task-activity-grid-runtime.sql",
         "deploy/docker/postgres/init/207-wom-batch-active-response-envelope.sql",
         "deploy/docker/scripts/adp-mes-full-production-flow-acceptance.js",
-        "metadata/mes-full-production-flow-current.json"
+        "metadata/mes-full-production-flow-current.json",
+        "deploy/docker/scripts/adp-factory-line-persistence-acceptance.js",
+        "deploy/docker/postgres/init/211-hierarchicalmod-factory-tree-bootstrap.sql",
+        "deploy/docker/postgres/init/212-hierarchicalmod-factory-edit-runtime.sql",
+        "deploy/docker/postgres/init/213-hierarchicalmod-factory-node-type-ref-runtime.sql",
+        "deploy/docker/postgres/init/214-hierarchicalmod-factory-model-mne-code-compat.sql",
+        "deploy/docker/postgres/init/215-hierarchicalmod-factory-tree-runtime.sql",
+        "deploy/docker/postgres/init/216-hierarchicalmod-factory-node-type-customer-condition.sql"
       ]
     },
     {
@@ -437,7 +444,8 @@
         "production module test matrix has 44 cases: 44 PASS, 0 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks 0 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and is CLEAR with 0 active items; legacy public produceTaskCreated is retired as NOT_APPLICABLE with explicit rejection/no-persistence evidence.",
-        "persistence acceptance ledger has 288 tested features: 282 PASS, 0 FAIL, 0 BLOCKED, 6 NOT_APPLICABLE",
+        "persistence acceptance ledger has 289 tested features: 283 PASS, 0 FAIL, 0 BLOCKED, 6 NOT_APPLICABLE",
+        "2026-07-28 marker ADP_E2E_20260728042954_FACTORY_LINE passed 13/13 through visible factory-architecture navigation and node-type selection, submit API, PostgreSQL hm_factory_models/hm_factory_models_mc readback and WOM factoryLineRef2 picker. Response id and PostgreSQL row id both equal 770612453238016; the optional department remained empty and persisted as null. The retained production-line fixture 果糖产线验收_20260728042954 is visible as 生产线/未占用, and browser console/page/request/bad-HTTP counts are all zero.",
         "2026-07-27 marker ADP_E2E_20260727_MES_FULL_CLOSED_10 remains the clean, non-resumed baseline. Latest marker ADP_E2E_20260727_MES_FULL_CLOSED_11 transparently records one pre-business pending-list pagination failure, then resumed the unchanged waitForRun fixture and ran all eight business stages once. Exact PostgreSQL verification closed task/process/two activities and executions, finishNum=5 and inspected/qualified, input/consumption 1/1, output/material-output 2/2, QCS 1/1, WMS 1/2/1 and trace 3/3; browser and visible warning/error evidence were empty.",
         "2026-07-27 minimum transfer-cell marker BPI_MIN_20260727_110711 passed the real WOM page, controlled MQTT multi-signal publisher, JetLinks, Kafka, Flink, BPI service, PostgreSQL and candidate pages. Five telemetry points drove one START and one END candidate into one CLOSED_RAW shadow batch; both browser confirmations, WOM context outbox revisions, six boundary evidence rows, state events, cleanup and default-off restoration passed without QCS/WMS writes.",
         "BPI V27 marker ADP_E2E_BPI_PARQUET_20260722_105844_A1 passed the real ADP page, controlled FAILED/r3 persistence, same-task retry to READY/r6, exact MinIO versionId/SHA/bytes/rows/schema verification, service restart readback, least-privilege deletion denial and zero-residue/default-off cleanup.",
@@ -614,14 +622,15 @@
       "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 288 tested features: 282 PASS, 0 FAIL, 0 BLOCKED, 6 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED.",
+        "metadata/persistence-acceptance.json currently has 289 tested features: 283 PASS, 0 FAIL, 0 BLOCKED, 6 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED.",
+        "2026-07-28 marker ADP_E2E_20260728042954_FACTORY_LINE proves visible factory-architecture interaction and node-type selection persisted one enabled production-line node whose response id matches its PostgreSQL id, with a null optional department plus synchronized mnemonic aliases; the same row was returned by the WOM factoryLineRef2 reference. Idempotent migrations 211-216 keep the runtime tree/edit/reference contracts on PostgreSQL without introducing an Oracle default path.",
         "2026-07-27 marker ADP_E2E_20260727_MES_FULL_CLOSED_11 refreshes the eight exact persistence rows for WOM start/process/putin/output/QCS/process-end/finish and WMS/trace. It reuses PostgreSQL tables, adds no Oracle runtime path, proves the repaired putin path creates activity execution and material-consumption facts, and proves output detail/material-output totals are exactly 2/2.",
         "Target marker ADP_E2E_20260720193226_WMS_OUTAGE directly verified the BPI and material PostgreSQL tables across a real internal material-wms outage and recovery: no material row during the outage, one durable document/line/transaction/stock after recovery, and zero marker residue after cleanup.",
-        "metadata/postgres-migration-inventory.json currently has 210 scripts, highRiskStatementCount=0, watchStatementCount=79, watchSafetyIssueCount=0; there are no missing, duplicate, invalid, or unguarded structural migration statements.",
+        "metadata/postgres-migration-inventory.json currently has 216 scripts, highRiskStatementCount=0, watchStatementCount=80, watchSafetyIssueCount=0; there are no missing, duplicate, invalid, or unguarded structural migration statements.",
         "PATROL migration 186 restores the hidden-danger/EAM risk projection and repairs supfusion_i18n_resource.modifier from the legacy varchar shape to the java.util.Date-compatible PostgreSQL timestamp shape; target migration, i18n restart, browser/API and PostgreSQL marker verification passed.",
         "metadata/persistence-acceptance.json currently has 0 FAIL and 0 BLOCKED rows",
         "metadata/production-module-backlog.json covers those unresolved persistence rows with 0 backlog items, 0 FAIL_BACKLOG and 0 BLOCKED",
-        "docs/postgres-migration-watch-rationale.md is generated from the PostgreSQL init inventory and records current watch statements; the current inventory has 78 watch statements and 0 watch safety issues.",
+        "docs/postgres-migration-watch-rationale.md is generated from the PostgreSQL init inventory and records current watch statements; the current inventory has 80 watch statements and 0 watch safety issues.",
         "RBAC role-user acceptance found HTTP 200 with rbac_roleuser.valid=false and closed it with idempotent PostgreSQL SQL 074-rbac-roleuser-valid-default.sql",
         "WOM production action tracing found missing WOM_WAIT_PUT_RECORDS and closed it with idempotent PostgreSQL SQL 079-wom-wait-put-records-table.sql plus remote schema readback; WOM process start/end later closed RM_PROCESS_ACTIVES, convert(proc_sort,int), and process wait actual_end_time compatibility through SQL 104/105/106.",
         "WOM outPutCommonTaskEdit layoutJson/cache blocker was closed with 084/085 and remote baseService cache restart before persistence acceptance",
@@ -681,7 +690,14 @@
         "deploy/docker/postgres/init/207-wom-batch-active-response-envelope.sql",
         "deploy/docker/scripts/build-wom-core-production-boot-jar.sh",
         "deploy/docker/scripts/adp-mes-full-production-flow-acceptance.js",
-        "metadata/mes-full-production-flow-current.json"
+        "metadata/mes-full-production-flow-current.json",
+        "deploy/docker/scripts/adp-factory-line-persistence-acceptance.js",
+        "deploy/docker/postgres/init/211-hierarchicalmod-factory-tree-bootstrap.sql",
+        "deploy/docker/postgres/init/212-hierarchicalmod-factory-edit-runtime.sql",
+        "deploy/docker/postgres/init/213-hierarchicalmod-factory-node-type-ref-runtime.sql",
+        "deploy/docker/postgres/init/214-hierarchicalmod-factory-model-mne-code-compat.sql",
+        "deploy/docker/postgres/init/215-hierarchicalmod-factory-tree-runtime.sql",
+        "deploy/docker/postgres/init/216-hierarchicalmod-factory-node-type-customer-condition.sql"
       ]
     },
     {

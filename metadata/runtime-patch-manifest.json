@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-27T14:21:22+00:00",
-  "repoCommit": "4d41c2154e223c0aa629045cebea7ec4b0f924d4",
+  "generatedAt": "2026-07-28T04:32:22+00:00",
+  "repoCommit": "66ff8a5c16aa50c88667597ec8c59fe49b474243",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 392,
-    "totalBytes": 55922955,
+    "totalFiles": 398,
+    "totalBytes": 56501116,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 210,
+      "postgres-init-sql": 216,
       "runtime-binary-patch": 7,
       "runtime-patch-source": 23,
       "runtime-script": 27,
@@ -19,7 +19,7 @@
     "bytesByCategory": {
       "nacos-config-template": 42353,
       "nginx-runtime-config": 27463,
-      "postgres-init-sql": 54975707,
+      "postgres-init-sql": 55553868,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 95909,
       "runtime-script": 284123,
@@ -1571,6 +1571,42 @@
       "category": "postgres-init-sql",
       "sizeBytes": 584701,
       "sha256": "75f2c734df63f1ae0661181310b1419979d6fa9af0cc886ff648f18fc4323cb5"
+    },
+    {
+      "path": "deploy/docker/postgres/init/211-hierarchicalmod-factory-tree-bootstrap.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 4439,
+      "sha256": "59588468bcc05de7ee0d61f566de5f096666ed2444ae692f3fdb5ff377182b13"
+    },
+    {
+      "path": "deploy/docker/postgres/init/212-hierarchicalmod-factory-edit-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 468692,
+      "sha256": "f56ca25677e778de2c316bfbaa2b08b4c18adfa0107b1d3624ba36533193946d"
+    },
+    {
+      "path": "deploy/docker/postgres/init/213-hierarchicalmod-factory-node-type-ref-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 19961,
+      "sha256": "2ce72c839dc6ad451a9a97560e8af1283a252dff4bd77e26a1bbe69da83ae2bd"
+    },
+    {
+      "path": "deploy/docker/postgres/init/214-hierarchicalmod-factory-model-mne-code-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 4123,
+      "sha256": "448214a001e373dccf8eb9d2d6cc347378bc884b2f5cb9aee8c96a6e0fd36755"
+    },
+    {
+      "path": "deploy/docker/postgres/init/215-hierarchicalmod-factory-tree-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 77468,
+      "sha256": "5fd56fd6eb2353db65eb7c8e411aaffbb04c6bb902b633209c0f132944f58776"
+    },
+    {
+      "path": "deploy/docker/postgres/init/216-hierarchicalmod-factory-node-type-customer-condition.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 3478,
+      "sha256": "a7849a9959f370c0d18f6a14393ffc8f3767f550956692b3f29ad1bf05b2ede1"
     },
     {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",

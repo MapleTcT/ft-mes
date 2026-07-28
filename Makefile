@@ -103,6 +103,7 @@ WOM_MANU_INSPECT_PERSISTENCE_OUTPUT ?= /tmp/adp-wom-manu-inspect-persistence-acc
 WOM_CHECKOUTBILL_PERSISTENCE_OUTPUT ?= /tmp/adp-wom-checkoutbill-persistence-acceptance.json
 WOM_MANUFACTURING_ORDER_PERSISTENCE_OUTPUT ?= /tmp/adp-wom-manufacturing-order-persistence-acceptance.json
 WOM_REJECT_MATERIAL_PERSISTENCE_OUTPUT ?= /tmp/adp-wom-reject-material-persistence-acceptance.json
+FACTORY_LINE_PERSISTENCE_OUTPUT ?= /tmp/adp-factory-line-persistence-acceptance.json
 CORE_FLOW_RUNTIME_ROLLBACK_OUTPUT ?= metadata/core-flow-runtime-rollback-rehearsal.json
 CORE_FLOW_REMOTE_ROOT ?= /home/v6/adp-mes-docker-newbase-20260611-181921
 CORE_FLOW_BACKUP_TAG ?= 20260710-coreflow
@@ -171,6 +172,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: rehearse-core-flow-runtime-rollback bpi-runtime-image-rollback-rehearsal bpi-integrated-rollback-rehearsal
 .PHONY: acceptance-entity-model-field-persistence acceptance-entity-model-field-type-matrix acceptance-entity-model-object-association acceptance-entity-model-field-delete-persistence
 .PHONY: acceptance-wom-public-produce-task-created-retirement
+.PHONY: acceptance-factory-line-persistence
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
@@ -410,6 +412,7 @@ help:
 	@printf '%s\n' '  make acceptance-wom-process-unit-persistence Run WOM processUnitEdit work-unit persistence acceptance'
 	@printf '%s\n' '  make acceptance-wom-manu-inspect-persistence Run WOM makeTaskList manufacturing inspection persistence acceptance'
 	@printf '%s\n' '  make acceptance-wom-checkoutbill-persistence Run WOM quality activity checkout-bill persistence acceptance'
+	@printf '%s\n' '  make acceptance-factory-line-persistence Run factory architecture production-line browser/PostgreSQL acceptance'
 	@printf '%s\n' '  make probe-wom-qrcode-route Run WOM QR code route/package probe against the test environment'
 	@printf '%s\n' '  make acceptance-qcs-report-chain-persistence QCS report save/effective WOM backfill acceptance'
 	@printf '%s\n' '  make acceptance-teaminfo-scheduleplan-persistence Run TeamInfo schedule-plan persistence acceptance'
@@ -595,6 +598,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-wom-active-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-manu-inspect-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-checkoutbill-persistence-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-factory-line-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-public-produce-task-created-noop-probe.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-qrcode-route-probe.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-qrcode-browser-acceptance.js
@@ -1384,6 +1388,9 @@ bpi-integrated-rollback-rehearsal:
 
 acceptance-wom-manufacturing-order-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_OUTPUT_PATH=$(WOM_MANUFACTURING_ORDER_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-wom-manufacturing-order-persistence-acceptance.js
+
+acceptance-factory-line-persistence:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_FACTORY_LINE_PERSISTENCE_OUTPUT=$(FACTORY_LINE_PERSISTENCE_OUTPUT) NODE_PATH="$(CURDIR)/node_modules" $(NODE) deploy/docker/scripts/adp-factory-line-persistence-acceptance.js
 
 acceptance-wom-start-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_WOM_KEEP_FIXTURE=$(ADP_WOM_KEEP_FIXTURE) ADP_WOM_START_PERSISTENCE_OUTPUT=$(WOM_START_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-wom-start-persistence-acceptance.js

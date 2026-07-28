@@ -3633,6 +3633,42 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/211-hierarchicalmod-factory-tree-bootstrap.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/212-hierarchicalmod-factory-edit-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/213-hierarchicalmod-factory-node-type-ref-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/214-hierarchicalmod-factory-model-mne-code-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/215-hierarchicalmod-factory-tree-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/216-hierarchicalmod-factory-node-type-customer-condition.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3868,6 +3904,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-entity-model-object-association-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-factory-line-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -11804,7 +11846,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 682
+      "tracked": 689
     },
     "docs": {
       "tracked": 153
@@ -11837,8 +11879,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1963,
-    "tracked": 1963,
+    "totalFiles": 1970,
+    "tracked": 1970,
     "untracked": 0
   },
   "untrackedByDirectory": []

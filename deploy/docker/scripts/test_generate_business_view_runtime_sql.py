@@ -212,6 +212,34 @@ class ProductRuntimeParityTest(unittest.TestCase):
         self.assertEqual(5, tree_sql.count("INSERT INTO public.action_view"))
         self.assertEqual(1, layout_sql.count("INSERT INTO public.action_view"))
 
+    def test_tree_runtime_preserves_title_field_and_root_configuration(self):
+        config_root = ET.fromstring(
+            "<config><layout>"
+            "<layoutCode>sample_tree_layout</layoutCode>"
+            "<pageConfig>"
+            "<rootName>sample.root</rootName>"
+            "<treeModelCode>name</treeModelCode>"
+            "<dragOpen>true</dragOpen>"
+            "<canMemory>true</canMemory>"
+            "<canDrag>false</canDrag>"
+            "</pageConfig>"
+            "</layout></config>"
+        )
+        tree = view_variant(
+            code="PATROL_1.0.0_sample_sampleTree",
+            view_type="TREE",
+            config_root=config_root,
+        )
+
+        payload = GENERATOR.tree_json(tree, views={tree.code: tree})
+
+        self.assertEqual("sample_tree_layout", payload["layoutCode"])
+        self.assertEqual("sample.root", payload["rootName"])
+        self.assertEqual("name", payload["treeModelCode"])
+        self.assertIs(payload["dragOpen"], True)
+        self.assertIs(payload["canMemory"], True)
+        self.assertIs(payload["canDrag"], False)
+
     def test_permission_button_includes_platform_power_code(self):
         operation_code = "inputStanList_add_add_PATROL_1.0.0_inputStandard_inputStanList"
         button = ET.fromstring(
@@ -256,6 +284,34 @@ class ProductRuntimeParityTest(unittest.TestCase):
 
         self.assertIsNotNone(payload)
         self.assertNotIn("pc", payload)
+
+    def test_nested_layout_button_uses_parent_view_permission_code(self):
+        operation_code = "sampleList_add_add_PATROL_1.0.0_sample_sampleList"
+        parent_code = "PATROL_1.0.0_sample_sampleLayout"
+        config_root = ET.fromstring(
+            "<config><layout><sections><list><list-item>"
+            "<regionType>BUTTON</regionType>"
+            "<id>add</id>"
+            "<showname>新增</showname>"
+            "<operatetype>ADD</operatetype>"
+            "<ispermission>true</ispermission>"
+            "<modelCode>PATROL_1.0.0_sample_Sample</modelCode>"
+            f"<buttonoperationcode>{operation_code}</buttonoperationcode>"
+            "</list-item></list></sections></layout></config>"
+        )
+        view = view_variant(config_root=config_root)
+
+        grid = GENERATOR.data_grid_json(view, parent_code, {view.code: view})
+        button = grid["buttons"][0]
+        expected_operation_code = f"{parent_code}_{operation_code}"
+
+        self.assertEqual(operation_code, button["buttonoperationcode"])
+        self.assertEqual(operation_code, button["CODE"])
+        self.assertEqual("PATROL_1.0.0_sample_Sample", button["modelCode"])
+        self.assertEqual(
+            GENERATOR.button_power_code(expected_operation_code),
+            button["pc"],
+        )
 
     def test_custom_property_placeholder_is_preserved_for_runtime_expansion(self):
         field = GENERATOR.FieldDef(
@@ -390,6 +446,129 @@ class ProductRuntimeParityTest(unittest.TestCase):
         self.assertIn(r'ReactAPI.Layout.showTab(\"tabs-3\")', migration)
         self.assertNotIn("只显示常规信息页签", migration)
 
+    def test_factory_edit_runtime_migration_restores_create_form(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "212-hierarchicalmod-factory-edit-runtime.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            "HierarchicalMod_1.0.0_factoryModel_factoryEdit",
+            GENERATOR.TARGET_VIEW_CODES,
+        )
+        self.assertEqual(migration.count('"pageType":"EDIT"'), 2)
+        for field_key in (
+            '"key":"factoryModel.code"',
+            '"key":"factoryModel.name"',
+            '"key":"factoryModel.nodeTypeId.name"',
+        ):
+            self.assertIn(field_key, migration)
+        self.assertIn("HierarchicalMod_1.0.0_factoryNodeType_nodeTypeRef", migration)
+        self.assertIn("getParamsInRequestUrl().parentId", migration)
+        self.assertIn('"namekey":"装置","name":"装置"', migration)
+        self.assertNotIn(
+            '"namekey":"HierarchicalMod.tabname.randon1618564480544.flag"',
+            migration,
+        )
+        self.assertIn("INSERT INTO public.runtime_extra_view", migration)
+        self.assertIn("INSERT INTO public.ec_extra_view", migration)
+
+    def test_factory_tree_runtime_migration_restores_node_title_mapping(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "215-hierarchicalmod-factory-tree-runtime.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            "HierarchicalMod_1.0.0_factoryModel_factoryTreeList",
+            GENERATOR.TARGET_VIEW_CODES,
+        )
+        self.assertIn(
+            "-- HierarchicalMod_1.0.0_factoryModel_factoryTree ",
+            migration,
+        )
+        self.assertIn(
+            "-- HierarchicalMod_1.0.0_factoryModel_factoryTreeList ",
+            migration,
+        )
+        self.assertGreaterEqual(migration.count('"treeModelCode":"name"'), 4)
+        self.assertGreaterEqual(
+            migration.count(
+                '"DataGridCode":"HierarchicalMod_1.0.0_factoryModel_factoryListPart"'
+            ),
+            2,
+        )
+        self.assertIn('"showname":"新增"', migration)
+        self.assertIn('"id":"addNode"', migration)
+        self.assertIn(
+            '"buttonoperationcode":"factoryListPart_addNode_add_'
+            'HierarchicalMod_1.0.0_factoryModel_factoryListPart"',
+            migration,
+        )
+        self.assertIn(
+            '"modelCode":"HierarchicalMod_1.0.0_factoryModel_FactoryModel"',
+            migration,
+        )
+        expected_permission_code = (
+            "HierarchicalMod_1.0.0_factoryModel_factoryTreeList_"
+            "factoryListPart_addNode_add_"
+            "HierarchicalMod_1.0.0_factoryModel_factoryListPart"
+        )
+        self.assertIn(
+            f'"pc":"{GENERATOR.button_power_code(expected_permission_code)}"',
+            migration,
+        )
+        self.assertNotIn(
+            f'"pc":"{GENERATOR.button_power_code("factoryListPart_addNode_add_HierarchicalMod_1.0.0_factoryModel_factoryListPart")}"',
+            migration,
+        )
+        self.assertIn(
+            '"rootName":"HierarchicalMod.HierarchicalMod_100_factoryModel_factoryTree.'
+            'randon1573030638717.flag"',
+            migration,
+        )
+
+    def test_factory_node_type_reference_runtime_migration_restores_picker(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "213-hierarchicalmod-factory-node-type-ref-runtime.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            "HierarchicalMod_1.0.0_factoryNodeType_nodeTypeRef",
+            GENERATOR.TARGET_VIEW_CODES,
+        )
+        self.assertEqual(migration.count('"pageType":"LIST"'), 2)
+        for field_key in (
+            '"key":"code"',
+            '"key":"name"',
+        ):
+            self.assertIn(field_key, migration)
+        self.assertIn("INSERT INTO public.runtime_extra_view", migration)
+        self.assertIn("INSERT INTO public.ec_extra_view", migration)
+
+    def test_factory_node_type_customer_condition_registration_is_idempotent(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "216-hierarchicalmod-factory-node-type-customer-condition.sql"
+        ).read_text(encoding="utf-8")
+
+        view_code = "HierarchicalMod_1.0.0_factoryNodeType_nodeTypeRef"
+        self.assertEqual(4, migration.count(view_code))
+        self.assertIn("INSERT INTO public.runtime_customer_condition", migration)
+        self.assertIn("INSERT INTO public.ec_customer_condition", migration)
+        self.assertEqual(2, migration.count("ON CONFLICT (code) DO UPDATE SET"))
+        self.assertNotIn("runtime_extra_view", migration)
+        self.assertNotIn("Oracle", migration)
+
     def test_make_task_edit_restores_business_tabs_after_form_data_is_ready(self):
         view = view_variant(code="WOM_1.0.0_produceTask_makeTaskEdit")
         packaged_payload = {
@@ -475,6 +654,41 @@ ReactAPI.Layout.hideTab('tabs-5');""",
         self.assertEqual(GENERATOR.button_power_code(operation_code), button["pc"])
         self.assertEqual("新增", button["NAME"])
         self.assertEqual("cui-btn-add", button["ICONCLS"])
+
+    def test_packaged_view_json_preserves_parent_qualified_button_permission(self):
+        operation_code = "factoryListPart_addNode_add_sample"
+        parent_operation_code = "sample_parent_" + operation_code
+        packaged_permission = GENERATOR.button_power_code(parent_operation_code)
+        packaged_payload = {
+            "pageType": "LIST",
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "buttons": [
+                        {
+                            "buttonoperationcode": operation_code,
+                            "showname": "新增",
+                            "ispermission": True,
+                            "modelCode": "sample_model",
+                            "pc": packaged_permission,
+                        }
+                    ],
+                }
+            ],
+        }
+
+        payload = json.loads(
+            GENERATOR.view_json(
+                sample_view(),
+                {sample_view().code: sample_view()},
+                {sample_view().code: packaged_payload},
+            )
+        )
+        button = payload["components"][0]["buttons"][0]
+
+        self.assertEqual(operation_code, button["CODE"])
+        self.assertEqual("sample_model", button["modelCode"])
+        self.assertEqual(packaged_permission, button["pc"])
         self.assertIs(button["USEINMORE"], False)
 
     def test_packaged_view_loader_prefers_highest_module_version(self):

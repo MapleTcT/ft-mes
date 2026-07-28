@@ -1159,6 +1159,30 @@ WMS 为 `1` 个单据、`2` 条事务、`1` 条批次库存；追溯快照为 `3
 完整步骤、API 负测、SQL 和关键序列统计见
 `docs/testing/fructose-process-boundary-acceptance.md`。
 
+### 工厂架构新增生产线与 WOM 参照（2026-07-28）
+
+本节在唯一目标环境 `http://10.11.100.17:18080` 通过真实工作台菜单进入工厂架构，使用
+marker `ADP_E2E_20260728042954_FACTORY_LINE` 新增
+`果糖产线验收_20260728042954`。验收不是直接调用保存接口：浏览器先选择 PostgreSQL 中的
+`默认OEE工厂` 根节点，点击“新增”，在新窗口填写节点编码和名称，从真实参照选择
+`004/生产线` 并点击可见的“选择”按钮完成回填；部门保持为空且非必填。随后点击“保存”，再打开 WOM 制造指令使用的
+`factoryLineRef2` 参照复验新产线。测试数据按验收要求保留。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| 工厂架构树与列表 | `/msService/HierarchicalMod/factoryModel/factoryModel/factoryTreeList` | 从真实工作台进入菜单，展开并选择 `默认OEE工厂` | `POST .../factoryTreeTreeDataCustom`；`POST .../factoryListPart-query` | 树节点显示真实名称，列表和“新增/修改/删除”工具栏可用 | 树和列表从 PostgreSQL 读取根节点及子节点 | `hm_factory_models`、`hm_fac_node_types` | PASS | 已修复恢复视图中树标题、DataGridCode 和父页面上下文不一致 |
+| 新增生产线 | 工厂架构列表 -> `factoryEdit` 新窗口 | 填写唯一编码/名称，从参照可见点选 `004/生产线` 并点击“选择”，部门留空后保存 | `POST /msService/HierarchicalMod/factoryModel/factoryModel/factoryEdit/submit` | 保存返回“操作成功”；console error、page error、request failure、HTTP 4xx/5xx 均为 0 | 返回 `id=770612453238016`，且与 PostgreSQL 行 ID 一致；节点落在所选根节点下，层级、全路径、公司和节点类型正确，`department_id IS NULL` | `hm_factory_models`、`hm_factory_models_mc` | PASS | 已补齐 PostgreSQL 兼容列、运行时编辑视图和参照条件 |
+| 节点类型参照 | `factoryEdit` -> `nodeTypeRef` | 打开节点类型参照并选择生产线 | `POST .../facNodeType/nodeTypeRef-query` | 显示且仅选择 `004/生产线`，回填编辑表单 | 运行时 customer-condition 缓存命中，查询无后端告警 | `runtime_customer_condition`、`ec_customer_condition`、`hm_fac_node_types` | PASS | 只读参照本身不新增业务行 |
+| WOM 生产线参照 | `/msService/HierarchicalMod/factoryModel/factoryModel/factoryLineRef2` | 从制造指令生产线名称参照查询新增 marker | `POST .../factoryLineRef2-query` | 新产线显示为“生产线 / 未占用”，无 SQLGrammarException；浏览器错误为 0 | 查询返回刚保存的同一节点，不需要复制或补种 WOM 数据 | `hm_factory_models`、`hm_fac_node_types` | PASS | 只读复显，不产生额外落库 |
+
+最终自动化为 `13/13 PASS`。保存请求为 HTTP 200，响应
+`code=200`、`dealSuccessFlag=true`、`operate=add`；PostgreSQL 直查得到
+`parent_id=7000000000001000`、`node_type_id=9100000000000000`、
+`department_id IS NULL`、`lay_no=2`、`valid=true`。机器证据位于
+`/tmp/adp-factory-line-persistence-ui-acceptance.json`，页面截图位于
+`/tmp/adp-factory-line-persistence-20260728042954/01-factory-line-before-save.png` 与
+`/tmp/adp-factory-line-persistence-20260728042954/02-wom-production-line-picker.png`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

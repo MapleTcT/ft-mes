@@ -29,6 +29,8 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "ChartReportMap_1.0.0_scatterChartSet_scatterChartList",
     "DataSet_1.0.0_categoryMgt_categoryList",
     "HierarchicalMod_1.0.0_factoryModel_factoryTreeList",
+    "HierarchicalMod_1.0.0_factoryModel_factoryEdit",
+    "HierarchicalMod_1.0.0_factoryNodeType_nodeTypeRef",
     "TagManagement_1.0.0_tagInfo_tagList",
     "TagManagement_1.0.0_dataConvert_dataConvertList",
     "TeamInfo_1.0.0_team_teamList",
@@ -90,6 +92,12 @@ PROCESS_EXECUTION_DETAIL_DOUBLE_CLICK = """function processExeLogListDB(event, r
 }"""
 
 DATAGRID_RUNTIME_OVERRIDES: Dict[str, Dict[str, Any]] = {
+    "HierarchicalMod_1.0.0_factoryModel_factoryListPart": {
+        "DataGridCode": "HierarchicalMod_1.0.0_factoryModel_factoryListPart",
+    },
+    "HierarchicalMod_1.0.0_factoryModel_factoryTreeList": {
+        "DataGridCode": "HierarchicalMod_1.0.0_factoryModel_factoryListPart",
+    },
     "WOM_1.0.0_produceTask_processExeLogList": {
         "isdbcustom": True,
         "dbcustomtextarea": PROCESS_EXECUTION_DETAIL_DOUBLE_CLICK,
@@ -130,6 +138,11 @@ VIEW_ONLOAD_APPENDS: Dict[str, str] = {
     "WOM_1.0.0_produceTask_makeTaskEdit": MAKE_TASK_BUSINESS_TAB_RESTORE,
 }
 
+VIEW_NAMEKEY_FALLBACKS: Dict[str, Dict[str, str]] = {
+    "HierarchicalMod_1.0.0_factoryModel_factoryEdit": {
+        "HierarchicalMod.tabname.randon1618564480544.flag": "装置",
+    },
+}
 
 @dataclass(frozen=True)
 class FieldDef:
@@ -529,6 +542,7 @@ BUTTON_COPY_KEYS: Sequence[str] = (
     "buttonAlign",
     "cellCode",
     "ecEnv",
+    "modelCode",
     "regionType",
 )
 
@@ -620,7 +634,11 @@ def normalize_packaged_runtime_payload(value: Any) -> Any:
         if operation_code:
             node["CODE"] = operation_code
             if bool_text(str(node.get("ispermission") or "false")):
-                node["pc"] = button_power_code(operation_code)
+                # Nested packaged views already carry the parent-qualified
+                # permission token expected by the static page's listButtons
+                # contract. Recomputing it from the child operation code keeps
+                # the button visible in some contexts but detaches its action.
+                node.setdefault("pc", button_power_code(operation_code))
             show_name = str(node.get("showname") or node.get("name") or "").strip()
             if show_name:
                 node["NAME"] = show_name
@@ -1805,6 +1823,23 @@ def apply_datagrid_runtime_overrides(view: ViewDef, payload: Any) -> None:
 
 
 def apply_view_runtime_overrides(view: ViewDef, payload: Any) -> None:
+    namekey_fallbacks = VIEW_NAMEKEY_FALLBACKS.get(view.code, {})
+    if namekey_fallbacks:
+        def replace_missing_namekey(node: Any) -> None:
+            if isinstance(node, list):
+                for child in node:
+                    replace_missing_namekey(child)
+                return
+            if not isinstance(node, dict):
+                return
+            namekey = node.get("namekey")
+            if namekey in namekey_fallbacks:
+                node["namekey"] = namekey_fallbacks[namekey]
+            for child in node.values():
+                replace_missing_namekey(child)
+
+        replace_missing_namekey(payload)
+
     onload_append = VIEW_ONLOAD_APPENDS.get(view.code)
     if not onload_append or not isinstance(payload, dict):
         return
@@ -1859,6 +1894,17 @@ def data_grid_json(
     if not any(field.key == "name" for field in visible_fields):
         main_display = visible_fields[0].key if visible_fields else fields[0].key
     datagrid_code = first_datagrid_code(view) or view.code
+    buttons = extract_buttons(view, views)
+    if parent_code:
+        operation_prefix = parent_code + "_"
+        for button in buttons:
+            operation_code = str(button.get("buttonoperationcode") or "").strip()
+            if not operation_code or not bool(button.get("ispermission")):
+                continue
+            permission_operation_code = operation_code
+            if not operation_code.startswith(operation_prefix):
+                permission_operation_code = operation_prefix + operation_code
+            button["pc"] = button_power_code(permission_operation_code)
     grid: Dict[str, object] = {
         "type": "layoutDatagrid",
         "layoutmethod": "container",
@@ -1869,7 +1915,7 @@ def data_grid_json(
         "mainDisplayName": main_display,
         "idPrefix": "compat_" + (parent_code or view.code),
         "listPT": False,
-        "buttons": extract_buttons(view, views),
+        "buttons": buttons,
         "fields": [field_json(field) for field in fields],
     }
     grid.update(extract_list_runtime_properties(view))
@@ -2208,6 +2254,7 @@ def tree_json(
 ) -> Dict[str, object]:
     layout = layout_element(view)
     layout_code = direct_text(layout, "layoutCode") or "compat_" + view.code
+    page_config = layout.find("pageConfig") if layout is not None else None
     result: Dict[str, object] = {
         "type": "layoutTree",
         "layoutmethod": "container",
@@ -2217,6 +2264,12 @@ def tree_json(
         "treeViewCode": view.code,
         "hasAttachment": view.has_attachment,
         "buttons": extract_buttons(view, views),
+        "rootName": direct_text(page_config, "rootName") or view.title,
+        "treeModelCode": direct_text(page_config, "treeModelCode") or "name",
+        "dragOpen": bool_text(direct_text(page_config, "dragOpen")),
+        "canMemory": bool_text(direct_text(page_config, "canMemory")),
+        "canDrag": bool_text(direct_text(page_config, "canDrag")),
+        "events": [],
     }
     if width:
         result["fix_w"] = width

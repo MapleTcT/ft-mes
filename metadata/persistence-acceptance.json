@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-27T21:58:30+08:00",
-  "repoCommit": "4d41c2154e223c0aa629045cebea7ec4b0f924d4+working-tree-fructose-process-boundary",
+  "generatedAt": "2026-07-28T12:29:54+08:00",
+  "repoCommit": "66ff8a5c16aa50c88667597ec8c59fe49b474243+working-tree-factory-line-runtime",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
-    "generatedAt": "2026-07-23T10:00:42.000Z",
+    "generatedAt": "2026-07-28T04:29:54.929Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -249,11 +249,17 @@
       "marker": "BPI_MIN_20260727_110711",
       "evidence": "metadata/bpi-minimum-transfer-cell-live-acceptance.json; docs/testing/bpi-minimum-transfer-cell-live-acceptance.md",
       "assertions": "Real WOM start/stop produced three SENT/1 context revisions; five simultaneous MQTT signals passed JetLinks/Kafka/Flink governance; real BPI browser confirmations persisted one ACTIVE then CLOSED_RAW shadow batch; post-fix telemetry was 7 events/35 accepted points/0 rejects; QCS/WMS side effects were zero; controlled rules, calibrations and flags were restored."
+    },
+    "factoryLinePersistence": {
+      "status": "PASS_TARGET_BROWSER_API_POSTGRES_WOM_REFERENCE_RETAINED",
+      "marker": "ADP_E2E_20260728042954_FACTORY_LINE",
+      "evidence": "/tmp/adp-factory-line-persistence-ui-acceptance.json",
+      "assertions": "13/13; real factory-architecture shell menu and PostgreSQL root; visible 004/生产线 row and 选择 button; empty non-required department; save HTTP 200/dealSuccessFlag true; response id and hm_factory_models id both 770612453238016 under root 7000000000001000 with department_id null; WOM factoryLineRef2 re-rendered the same line as 未占用; browser errors zero; final Foundation ERROR/WARN zero"
     }
   },
   "summary": {
-    "testedFeatures": 288,
-    "pass": 282,
+    "testedFeatures": 289,
+    "pass": 283,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 6
@@ -6270,9 +6276,35 @@
       "status": "NOT_APPLICABLE",
       "evidence": "The detail page showed two nonblank charts and the 12-second handover; the trace page loaded 13 timeline events, two processes, material genealogy and quality facts with zero browser errors.",
       "issues": []
+    },
+    {
+      "acceptanceSet": "factory-line-persistence",
+      "module": "工厂架构生产线",
+      "route": "真实工作台 -> 工厂架构 -> 工厂架构 -> factoryTreeList / factoryEdit",
+      "operation": "选择默认OEE工厂，新增生产线并保存，再从 WOM factoryLineRef2 复显",
+      "api": "POST /msService/HierarchicalMod/factoryModel/factoryModel/factoryEdit/submit",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "HierarchicalModFactoryModelController.submit -> HierarchicalModFactoryModelServiceImpl.submit/saveFactoryModel -> HierarchicalModFactoryModelDaoImpl/TreeDaoImpl/Hibernate",
+      "tables": [
+        "public.hm_factory_models",
+        "public.hm_factory_models_mc",
+        "public.runtime_customer_condition",
+        "public.ec_customer_condition"
+      ],
+      "marker": "ADP_E2E_20260728042954_FACTORY_LINE",
+      "verificationSql": "select id,version,code,name,parent_id,node_type_id,department_id,lay_no,lay_rec,full_path_name,valid,leaf,cid from public.hm_factory_models where code='ADP_E2E_20260728042954_FACTORY_LINE'; verify runtime_customer_condition and ec_customer_condition by view_code='HierarchicalMod_1.0.0_factoryNodeType_nodeTypeRef';",
+      "status": "PASS",
+      "evidence": "Real shell navigation selected the PostgreSQL root, opened the add popup, visibly clicked 004/生产线 and the 选择 button, left the non-required department empty, and saved through the real form without component injection. HTTP 200 returned dealSuccessFlag=true and id=770612453238016; the PostgreSQL row has the same id and department_id null. WOM factoryLineRef2 listed the retained marker as 未占用, all 13 assertions passed, and console/page/request/HTTP error arrays were empty.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260728042954_FACTORY_LINE",
+      "artifact": "/tmp/adp-factory-line-persistence-ui-acceptance.json",
+      "summary": "Real factory-architecture workbench navigation, visible production-line node-type selection, save API, PostgreSQL hierarchy persistence with a null optional department and WOM factoryLineRef2 re-render passed 13/13 on 10.11.100.17 with zero browser errors; the retained line is available as 未占用."
+    },
     {
       "marker": "ADP_E2E_20260727_MES_FULL_CLOSED_11",
       "artifact": "metadata/mes-full-production-flow-current.json",

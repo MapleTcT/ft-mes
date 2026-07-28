@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`210`。
-- 编号范围：`001` 到 `210`。
+- 脚本数量：`216`。
+- 编号范围：`001` 到 `216`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`79`。
+- 需关注语句：`80`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -22,34 +22,34 @@
 | --- | --- |
 | auth-rbac-org | 37 |
 | business | 40 |
-| compatibility | 79 |
-| configuration | 49 |
-| general | 39 |
+| compatibility | 80 |
+| configuration | 50 |
+| general | 41 |
 | notification | 9 |
-| platform | 61 |
+| platform | 64 |
 | workflow | 21 |
 
 ## 语句统计
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10831 |
-| create-function | 104 |
-| create-index | 1011 |
-| create-table | 581 |
+| alter-table | 10833 |
+| create-function | 105 |
+| create-index | 1016 |
+| create-table | 582 |
 | create-view | 143 |
-| insert | 11032 |
-| update | 11139 |
+| insert | 11050 |
+| update | 11161 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 244 |
-| do-block | 403 |
-| if-exists | 130 |
-| if-not-exists | 13049 |
-| on-conflict | 10966 |
+| create-or-replace | 245 |
+| do-block | 411 |
+| if-exists | 132 |
+| if-not-exists | 13057 |
+| on-conflict | 10983 |
 | to-regclass | 220 |
 | where-not-exists | 45 |
 
@@ -267,6 +267,12 @@
 | 208 | 208-wom-factory-line-reference-bootstrap.sql | general | 264 | create-function:1, alter-table:1, insert:3, update:5 | 6 | watch:1 |
 | 209 | 209-wom-process-execution-detail-runtime.sql | platform, configuration | 46 | insert:3, update:3 | 4 | - |
 | 210 | 210-wom-make-task-edit-full-runtime.sql | platform | 46 | insert:3, update:3 | 4 | - |
+| 211 | 211-hierarchicalmod-factory-tree-bootstrap.sql | general | 136 | create-index:1, insert:1, update:3 | 3 | - |
+| 212 | 212-hierarchicalmod-factory-edit-runtime.sql | platform | 46 | insert:3, update:3 | 4 | - |
+| 213 | 213-hierarchicalmod-factory-node-type-ref-runtime.sql | platform | 46 | insert:3, update:3 | 4 | - |
+| 214 | 214-hierarchicalmod-factory-model-mne-code-compat.sql | configuration, compatibility | 120 | create-table:1, create-function:1, create-index:4, alter-table:2, update:2 | 11 | watch:1 |
+| 215 | 215-hierarchicalmod-factory-tree-runtime.sql | platform | 124 | insert:9, update:9 | 12 | - |
+| 216 | 216-hierarchicalmod-factory-node-type-customer-condition.sql | general | 92 | insert:2, update:2 | 2 | - |
 
 ## 规则
 
