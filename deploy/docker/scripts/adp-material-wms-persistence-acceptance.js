@@ -16,8 +16,14 @@ const dbContainer = process.env.ADP_DB_CONTAINER || "adp-mes-newbase-postgres-1"
 const dbName = process.env.ADP_DB_NAME || "adp";
 const dbUser = process.env.ADP_DB_USER || "adp";
 const headless = process.env.ADP_HEADLESS !== "false";
+const qualityMode = process.env.ADP_WMS_QUALITY_MODE || "qualified";
+if (!["qualified", "unqualified"].includes(qualityMode)) {
+  throw new Error("ADP_WMS_QUALITY_MODE must be qualified or unqualified");
+}
+const unqualified = qualityMode === "unqualified";
 const nowToken = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
-const marker = process.env.ADP_E2E_MARKER || `ADP_E2E_${nowToken}_MATERIAL_WMS`;
+const marker = process.env.ADP_E2E_MARKER
+  || `ADP_E2E_${nowToken}_MATERIAL_WMS_${unqualified ? "UNQUAL" : "QUAL"}`;
 const outputDir = process.env.ADP_OUTPUT_DIR || path.join("/tmp", `adp-material-wms-${nowToken}`);
 const outputPath = process.env.ADP_MATERIAL_WMS_ACCEPTANCE_OUTPUT || path.join(outputDir, "acceptance.json");
 const screenshotPath = process.env.ADP_MATERIAL_WMS_SCREENSHOT || path.join(outputDir, "completion-inbound.png");
@@ -202,7 +208,7 @@ async function main() {
   const api = await request.newContext({ timeout: 30000 });
   const evidence = {
     generatedAt: new Date().toISOString(), repoCommit: gitCommit(), database: "PostgreSQL",
-    marker, tenantId, status: "FAIL", requests: [], states: [], browser: null,
+    marker, tenantId, qualityMode, status: "FAIL", requests: [], states: [], browser: null,
     verificationSql: stateSql(), cleanupSql: cleanupSql(), issues: [],
   };
   let exitCode = 1;
@@ -245,7 +251,9 @@ async function main() {
     evidence.states.push(queryState("afterInboundRetry"));
 
     const quality = await postJson(api, ticket,
-      `/msService/material/foreign/foreign/checkProdResult?srcId=${encodeURIComponent(inboundLine)}&checkResult=${encodeURIComponent("BaseSet_checkResult/qualified")}`,
+      `/msService/material/foreign/foreign/checkProdResult?srcId=${encodeURIComponent(inboundLine)}&checkResult=${encodeURIComponent(
+        unqualified ? "BaseSet_checkResult/unqualified" : "BaseSet_checkResult/qualified"
+      )}`,
       {});
     evidence.requests.push(quality);
     assertCondition(quality.body && quality.body.code === 200, "质检结果回写失败");
@@ -270,7 +278,14 @@ async function main() {
     const issue = await postJson(api, ticket,
       "/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing", issuePayload);
     evidence.requests.push(issue);
-    assertCondition(issue.body && issue.body.code === 200, "生产领料出库失败");
+    if (unqualified) {
+      assertCondition(
+        issue.status >= 400 || !issue.body || issue.body.code !== 200,
+        "不合格冻结库存仍然允许领料出库"
+      );
+    } else {
+      assertCondition(issue.body && issue.body.code === 200, "生产领料出库失败");
+    }
     evidence.states.push(queryState("afterIssue"));
 
     evidence.browser = await browserAcceptance(ticket);
@@ -281,8 +296,33 @@ async function main() {
     assertCondition(numeric(afterInbound.documents) === 1 && numeric(afterInbound.lines) === 1, "入库单或明细未落库");
     assertCondition(numeric(afterInbound.onHand) === 10 && numeric(afterInbound.hold) === 10, "待检入库库存不正确");
     assertCondition(JSON.stringify(afterInbound) === JSON.stringify({ ...afterRetry, label: "afterInbound" }), "幂等重试改变了数据库");
-    assertCondition(numeric(afterQuality.available) === 10 && numeric(afterQuality.hold) === 0, "合格回写未释放库存");
-    assertCondition(numeric(afterIssue.documents) === 2 && numeric(afterIssue.onHand) === 7 && numeric(afterIssue.available) === 7, "领料扣减不正确");
+    if (unqualified) {
+      assertCondition(
+        numeric(afterQuality.onHand) === 10
+          && numeric(afterQuality.available) === 0
+          && numeric(afterQuality.hold) === 10
+          && afterQuality.inboundQuality === "UNQUALIFIED",
+        "不合格回写未保持库存冻结"
+      );
+      assertCondition(
+        numeric(afterIssue.documents) === 1
+          && numeric(afterIssue.onHand) === 10
+          && numeric(afterIssue.available) === 0
+          && numeric(afterIssue.hold) === 10,
+        "不合格领料拦截后库存发生变化"
+      );
+    } else {
+      assertCondition(
+        numeric(afterQuality.available) === 10 && numeric(afterQuality.hold) === 0,
+        "合格回写未释放库存"
+      );
+      assertCondition(
+        numeric(afterIssue.documents) === 2
+          && numeric(afterIssue.onHand) === 7
+          && numeric(afterIssue.available) === 7,
+        "领料扣减不正确"
+      );
+    }
     assertCondition(evidence.browser.httpStatus === 200 && evidence.browser.markerVisible && evidence.browser.detailOpened, "运行视图验收失败");
     assertCondition(evidence.browser.consoleErrors.length === 0 && evidence.browser.requestFailures.length === 0 && evidence.browser.badResponses.length === 0, "运行视图存在 console/network 错误");
     evidence.status = "PASS";

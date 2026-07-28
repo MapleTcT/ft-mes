@@ -262,8 +262,13 @@
           '<div class="time">结束：' + html(formatTime(process.act_end_time)) + "</div>";
       }
 
-      function renderBoundary(targetId, boundary) {
+      function renderBoundary(targetId, boundary, adjacentProcess, emptyLabel, emptyDetail) {
         var target = document.getElementById(targetId);
+        if (!adjacentProcess) {
+          target.dataset.state = "NOT_APPLICABLE";
+          target.innerHTML = "<strong>" + html(emptyLabel) + "</strong><span>" + html(emptyDetail) + "</span>";
+          return;
+        }
         var labels = { CONTIGUOUS: "连续交接", GAP: "存在间隔", OVERLAP: "时间重叠", OPEN: "边界未闭合" };
         var state = boundary && boundary.state ? boundary.state : "OPEN";
         var gap = boundary && boundary.gapSeconds !== null && boundary.gapSeconds !== undefined
@@ -411,8 +416,20 @@
           renderProcess("previousProcess", "上一工序", detail.previousProcess);
           renderProcess("currentProcess", "当前工序", current);
           renderProcess("nextProcess", "下一工序", detail.nextProcess);
-          renderBoundary("previousBoundary", detail.handover && detail.handover.previousToCurrent);
-          renderBoundary("nextBoundary", detail.handover && detail.handover.currentToNext);
+          renderBoundary(
+            "previousBoundary",
+            detail.handover && detail.handover.previousToCurrent,
+            detail.previousProcess,
+            "首工序",
+            "无上游工序"
+          );
+          renderBoundary(
+            "nextBoundary",
+            detail.handover && detail.handover.currentToNext,
+            detail.nextProcess,
+            "末工序",
+            "无下游工序"
+          );
           if (current.produce_batch_num) {
             var traceLink = document.getElementById("traceLink");
             traceLink.href = serviceRoot + "/processAnalysis/exelogSecond/processBatchViewOut?batchNo=" +

@@ -415,6 +415,10 @@ function fixtureIds(taskId) {
     rawQualityBase: addId(taskId, 11000),
     liquidQualityBase: addId(taskId, 12000),
     tonneUnit: addId(taskId, 13000),
+    taskQuality: addId(taskId, 13001),
+    rawTaskMaterial: addId(taskId, 13002),
+    liquidTaskMaterial: addId(taskId, 13003),
+    finalTaskMaterial: addId(taskId, 13004),
   };
 }
 
@@ -585,6 +589,155 @@ INSERT INTO public.limsba_analy_prod_stds (
   valid=true, code=EXCLUDED.code, memo_field=EXCLUDED.memo_field,
   product_id=EXCLUDED.product_id, std_id=EXCLUDED.std_id,
   available_std=true, modify_time=now();`;
+}
+
+function finalQualityExecutionSql(standard, taskId, preflight) {
+  const standardId = String(preflight.finalQuality.standardId);
+  const versionId = String(preflight.finalQuality.versionId);
+  const reportId = String(preflight.qcs.reportId);
+  const activeReportComponentIds = [];
+
+  const items = standard.items.map((item, index) => {
+    const componentId = addId(taskId, 14000 + index * 10);
+    const versionComponentId = addId(taskId, 14001 + index * 10);
+    const specLimitId = addId(taskId, 14002 + index * 10);
+    const reportComponentId = addId(taskId, 15000 + index);
+    const code = `${marker}_${standard.materialCode}_${item.code}`;
+    const reportName = item.name;
+    activeReportComponentIds.push(reportComponentId);
+
+    return `
+INSERT INTO public.limsba_test_components (
+  id, version, valid, cid, create_staff_id, create_time, sort, table_info_id,
+  code, name, report_name, unit_name, is_report, is_necessary, parallel_times,
+  min_value, max_value, default_value, disp_value, memo_field
+) VALUES (
+  ${componentId}, 0, true, 1000, 1, now(), ${index + 1}, ${componentId},
+  ${sqlLiteral(code)}, ${sqlLiteral(reportName)}, ${sqlLiteral(reportName)},
+  ${sqlLiteral(item.unit)}, true, true, 1,
+  ${sqlLiteral(item.minimum)}, ${sqlLiteral(item.maximum)},
+  ${sqlLiteral(item.result)}, ${sqlLiteral(item.result)},
+  ${sqlLiteral(`${marker};source=${item.source};TEST_ONLY_DRAFT=true`)}
+) ON CONFLICT (id) DO UPDATE SET
+  valid=true, sort=EXCLUDED.sort, code=EXCLUDED.code, name=EXCLUDED.name,
+  report_name=EXCLUDED.report_name, unit_name=EXCLUDED.unit_name,
+  is_report=true, is_necessary=true, parallel_times=1,
+  min_value=EXCLUDED.min_value, max_value=EXCLUDED.max_value,
+  default_value=EXCLUDED.default_value, disp_value=EXCLUDED.disp_value,
+  memo_field=EXCLUDED.memo_field, modify_time=now();
+
+INSERT INTO public.limsba_std_ver_coms (
+  id, version, valid, cid, create_staff_id, create_time, sort, table_info_id,
+  std_id, std_ver_id, com_id, code, is_report, report_name, report_sort,
+  unit_name, parallel_times, valuen, sampling_plan, default_value, ref_value,
+  memo_field
+) VALUES (
+  ${versionComponentId}, 0, true, 1000, 1, now(), ${index + 1},
+  ${versionComponentId}, ${standardId}, ${versionId}, ${componentId},
+  ${sqlLiteral(`${code}_STD_VER`)}, true, ${sqlLiteral(reportName)},
+  ${index + 1}, ${sqlLiteral(item.unit)}, 1, 1,
+  'LIMSBasic_samplingPlan/level3', ${sqlLiteral(item.result)},
+  ${sqlLiteral(rangeDisplay(item))}, ${sqlLiteral(`${marker};TEST_ONLY_DRAFT=true`)}
+) ON CONFLICT (id) DO UPDATE SET
+  valid=true, sort=EXCLUDED.sort, std_id=EXCLUDED.std_id,
+  std_ver_id=EXCLUDED.std_ver_id, com_id=EXCLUDED.com_id,
+  code=EXCLUDED.code, is_report=true, report_name=EXCLUDED.report_name,
+  report_sort=EXCLUDED.report_sort, unit_name=EXCLUDED.unit_name,
+  parallel_times=1, valuen=1, sampling_plan=EXCLUDED.sampling_plan,
+  default_value=EXCLUDED.default_value, ref_value=EXCLUDED.ref_value,
+  memo_field=EXCLUDED.memo_field, modify_time=now();
+
+INSERT INTO public.limsba_spec_limits (
+  id, version, valid, cid, create_staff_id, create_time, sort, table_info_id,
+  code, disp_value, judge_cond, judge_option, judge_values,
+  min_val_include, min_value, max_val_include, max_value,
+  standard_grade, std_grade_name, std_id, std_ver_com_id,
+  sampling_plan, valuen, result_value
+) VALUES (
+  ${specLimitId}, 0, true, 1000, 1, now(), ${index + 1}, ${specLimitId},
+  ${sqlLiteral(`${code}_SPEC_QUALIFIED`)}, ${sqlLiteral(rangeDisplay(item))},
+  'BETWEEN', 'AND',
+  ${sqlLiteral(`${item.minimum},${item.maximum}`)}, true,
+  ${sqlLiteral(item.minimum)}, true, ${sqlLiteral(item.maximum)},
+  'LIMSBasic_standardGrade/Qualified', '合格', ${standardId},
+  ${versionComponentId}, 'LIMSBasic_samplingPlan/level3', 1,
+  ${sqlLiteral(item.result)}
+) ON CONFLICT (id) DO UPDATE SET
+  valid=true, sort=EXCLUDED.sort, code=EXCLUDED.code,
+  disp_value=EXCLUDED.disp_value, judge_cond=EXCLUDED.judge_cond,
+  judge_option=EXCLUDED.judge_option, judge_values=EXCLUDED.judge_values,
+  min_val_include=true, min_value=EXCLUDED.min_value,
+  max_val_include=true, max_value=EXCLUDED.max_value,
+  standard_grade=EXCLUDED.standard_grade, std_grade_name=EXCLUDED.std_grade_name,
+  std_id=EXCLUDED.std_id, std_ver_com_id=EXCLUDED.std_ver_com_id,
+  sampling_plan=EXCLUDED.sampling_plan, valuen=1,
+  result_value=EXCLUDED.result_value, modify_time=now();
+
+INSERT INTO public.qcs_report_coms
+SELECT (
+  jsonb_populate_record(
+    NULL::public.qcs_report_coms,
+    to_jsonb(template) || jsonb_build_object(
+      'id', ${reportComponentId},
+      'version', 0,
+      'valid', true,
+      'sort', ${index + 1},
+      'table_info_id', ${reportComponentId},
+      'report_id', ${reportId},
+      'report_name', ${sqlLiteral(reportName)},
+      'std_ver_com', ${versionComponentId},
+      'unit_name', ${sqlLiteral(item.unit)},
+      'disp_value', ${sqlLiteral(String(item.result))},
+      'index_range', ${sqlLiteral(rangeDisplay(item))},
+      'min_value', ${sqlLiteral(String(item.minimum))},
+      'max_value', ${sqlLiteral(String(item.maximum))},
+      'check_result', '合格',
+      'memo_field', ${sqlLiteral(`${marker};source=${item.source};TEST_ONLY_DRAFT=true`)},
+      'create_time', now(),
+      'modify_time', now()
+    )
+  )
+).*
+FROM public.qcs_report_coms template
+WHERE template.report_id=${reportId}
+ORDER BY CASE
+  WHEN template.id IN (${activeReportComponentIds.join(", ") || reportComponentId}) THEN 1
+  ELSE 0
+END, template.id
+LIMIT 1
+ON CONFLICT (id) DO UPDATE SET
+  version=EXCLUDED.version, valid=true, sort=EXCLUDED.sort,
+  table_info_id=EXCLUDED.table_info_id, report_id=EXCLUDED.report_id,
+  report_name=EXCLUDED.report_name, std_ver_com=EXCLUDED.std_ver_com,
+  unit_name=EXCLUDED.unit_name, disp_value=EXCLUDED.disp_value,
+  index_range=EXCLUDED.index_range, min_value=EXCLUDED.min_value,
+  max_value=EXCLUDED.max_value, check_result=EXCLUDED.check_result,
+  memo_field=EXCLUDED.memo_field, modify_time=now();`;
+  }).join("\n");
+
+  return `
+UPDATE public.limsba_test_components
+SET valid=false, modify_time=now()
+WHERE id IN (
+  SELECT com_id FROM public.limsba_std_ver_coms
+  WHERE std_id=${standardId}
+);
+
+UPDATE public.limsba_std_ver_coms
+SET valid=false, modify_time=now()
+WHERE std_id=${standardId};
+
+UPDATE public.limsba_spec_limits
+SET valid=false, modify_time=now()
+WHERE std_id=${standardId};
+
+${items}
+
+UPDATE public.qcs_report_coms
+SET valid=(id IN (${activeReportComponentIds.join(", ")})),
+    modify_time=now()
+WHERE report_id=${reportId};
+`;
 }
 
 function activityCloneSql({
@@ -949,7 +1102,8 @@ ON CONFLICT (id) DO UPDATE SET
   valid=1, modify_time=now();
 
 UPDATE public.baseset_materials
-SET code=${sqlLiteral(finalMaterialCode)},
+SET table_info_id=${finalMaterialId},
+    code=${sqlLiteral(finalMaterialCode)},
     name='糖化液（试运行）',
     is_batch='BaseSet_isBatch/batch',
     is_check=true,
@@ -1019,7 +1173,8 @@ ON CONFLICT (id) DO UPDATE SET
   memo_field=NULL, valid=true, modify_time=now();
 
 UPDATE public.rm_formulas
-SET product_id=${finalMaterialId},
+SET table_info_id=${formulaId},
+    product_id=${finalMaterialId},
     formula_name='果糖喷射液化至糖化试运行配方',
     quality_std_id=${preflight.finalQuality.standardId},
     modify_time=now(),
@@ -1036,6 +1191,47 @@ SET product_id=${finalMaterialId},
     remark=NULL,
     modify_time=now()
 WHERE id=${taskId};
+
+INSERT INTO public.wom_task_materials (
+  id, version, valid, cid, create_staff_id, create_time,
+  modify_staff_id, modify_time, table_info_id, main_obj,
+  material_id, standard_quality, plan_quality, min_quality, max_quality,
+  property, need_prepare, need_weigh, loss_rate, task_id, remark, scparama
+) VALUES
+  (
+    ${ids.rawTaskMaterial}, 0, true, 1000, 1, now(),
+    1, now(), ${ids.rawTaskMaterial}, ${formulaId},
+    ${ids.rawMaterial}, ${jet.inputQuantity}, ${jet.inputQuantity},
+    ${jet.inputQuantity}, ${jet.inputQuantity},
+    'RM_RMproperty/01', true, false, 0, ${taskId},
+    NULL, ${sqlLiteral(`${marker};material=STARCH_SLURRY;TEST_ONLY_DRAFT=true`)}
+  ),
+  (
+    ${ids.liquidTaskMaterial}, 0, true, 1000, 1, now(),
+    1, now(), ${ids.liquidTaskMaterial}, ${formulaId},
+    ${ids.liquidMaterial}, ${jet.outputQuantity}, ${jet.outputQuantity},
+    ${jet.outputQuantity}, ${jet.outputQuantity},
+    'RM_RMproperty/02', false, false, 0, ${taskId},
+    NULL, ${sqlLiteral(`${marker};material=LIQUEFIED_SYRUP;TEST_ONLY_DRAFT=true`)}
+  ),
+  (
+    ${ids.finalTaskMaterial}, 0, true, 1000, 1, now(),
+    1, now(), ${ids.finalTaskMaterial}, ${formulaId},
+    ${finalMaterialId}, ${sacch.outputQuantity}, ${sacch.outputQuantity},
+    ${sacch.outputQuantity}, ${sacch.outputQuantity},
+    'RM_RMproperty/02', false, false, 0, ${taskId},
+    NULL, ${sqlLiteral(`${marker};material=SACCHARIFIED_LIQUOR;TEST_ONLY_DRAFT=true`)}
+  )
+ON CONFLICT (id) DO UPDATE SET
+  version=EXCLUDED.version, valid=true, table_info_id=EXCLUDED.table_info_id,
+  main_obj=EXCLUDED.main_obj, material_id=EXCLUDED.material_id,
+  standard_quality=EXCLUDED.standard_quality,
+  plan_quality=EXCLUDED.plan_quality, min_quality=EXCLUDED.min_quality,
+  max_quality=EXCLUDED.max_quality, property=EXCLUDED.property,
+  need_prepare=EXCLUDED.need_prepare, need_weigh=EXCLUDED.need_weigh,
+  loss_rate=EXCLUDED.loss_rate, task_id=EXCLUDED.task_id,
+  remark=NULL, scparama=EXCLUDED.scparama,
+  modify_staff_id=1, modify_time=now();
 
 UPDATE public.wom_produce_task_exelog
 SET product_id=${finalMaterialId},
@@ -1585,6 +1781,33 @@ SET code=${sqlLiteral(`${marker}_${finalStandard.code}_PRODUCT`)},
     valid=true
 WHERE id=${preflight.finalQuality.associationId};
 
+INSERT INTO public.wom_task_qualities (
+  id, version, valid, cid, create_staff_id, create_time,
+  modify_staff_id, modify_time, table_info_id, task_id,
+  formula_id, material_id, quality_std_id, quality_code,
+  final_inspection, apply_check_dep_id, apply_check_staff_id,
+  check_dep_id, check_staff_id, remark, scparama
+) VALUES (
+  ${ids.taskQuality}, 0, true, 1000, 1, now(),
+  1, now(), (SELECT table_info_id FROM public.wom_produce_tasks WHERE id=${taskId}),
+  ${taskId}, ${formulaId}, ${finalMaterialId},
+  ${preflight.finalQuality.standardId},
+  ${sqlLiteral(`${marker}_${finalStandard.code}`)},
+  true, 1, 1, 1, 1,
+  NULL, ${sqlLiteral(`${marker};QCS_RELEASE;TEST_ONLY_DRAFT=true`)}
+) ON CONFLICT (id) DO UPDATE SET
+  version=EXCLUDED.version, valid=true, table_info_id=EXCLUDED.table_info_id,
+  task_id=EXCLUDED.task_id, formula_id=EXCLUDED.formula_id,
+  material_id=EXCLUDED.material_id, quality_std_id=EXCLUDED.quality_std_id,
+  quality_code=EXCLUDED.quality_code, final_inspection=true,
+  apply_check_dep_id=EXCLUDED.apply_check_dep_id,
+  apply_check_staff_id=EXCLUDED.apply_check_staff_id,
+  check_dep_id=EXCLUDED.check_dep_id, check_staff_id=EXCLUDED.check_staff_id,
+  remark=NULL, scparama=EXCLUDED.scparama,
+  modify_staff_id=1, modify_time=now();
+
+${finalQualityExecutionSql(finalStandard, taskId, preflight)}
+
 ${handoverCheckSql(rawStandard, preflight.inputActivity.reportId, ids.rawCheckBase)}
 ${handoverCheckSql(liquidStandard, preflight.outputActivity.reportId, ids.liquidCheckBase)}
 
@@ -1703,6 +1926,23 @@ SELECT json_build_object(
       ${ids.rawMaterial}, ${ids.liquidMaterial}, ${preflight.task.productId}
     )
   ), '[]'::json),
+  'taskMaterials', COALESCE((
+    SELECT json_agg(json_build_object(
+      'id', summary.id, 'materialId', summary.material_id,
+      'materialCode', material.code, 'property', summary.property,
+      'standardQuantity', summary.standard_quality,
+      'planQuantity', summary.plan_quality,
+      'minimumQuantity', summary.min_quality,
+      'maximumQuantity', summary.max_quality
+    ) ORDER BY summary.id)
+    FROM public.wom_task_materials summary
+    JOIN public.baseset_materials material ON material.id=summary.material_id
+    WHERE summary.task_id=${taskId}
+      AND summary.id IN (
+        ${ids.rawTaskMaterial}, ${ids.liquidTaskMaterial}, ${ids.finalTaskMaterial}
+      )
+      AND coalesce(summary.valid, true)
+  ), '[]'::json),
   'unit', (
     SELECT json_build_object(
       'id', id, 'code', code, 'name', name, 'symbol', symbol
@@ -1767,6 +2007,21 @@ SELECT json_build_object(
     FROM public.limsba_quality_stds standard
     JOIN quality_items ON quality_items.standard_id=standard.id
   ), '[]'::json),
+  'taskQuality', (
+    SELECT json_build_object(
+      'id', quality.id,
+      'taskId', quality.task_id,
+      'materialId', quality.material_id,
+      'standardId', quality.quality_std_id,
+      'standardName', standard.name,
+      'qualityCode', quality.quality_code,
+      'finalInspection', quality.final_inspection,
+      'valid', quality.valid
+    )
+    FROM public.wom_task_qualities quality
+    JOIN public.limsba_quality_stds standard ON standard.id=quality.quality_std_id
+    WHERE quality.id=${ids.taskQuality}
+  ),
   'handoverCheckCount', (
     SELECT count(*) FROM public.wom_pro_check_details
     WHERE id >= ${ids.rawCheckBase}
@@ -1905,12 +2160,17 @@ function assertDatabaseState(state, bpiState, productionModel) {
   }
   if (
     state.materials.length !== 3
+    || state.taskMaterials.length !== 3
     || state.batches.length !== 3
     || !state.unit
     || state.unit.name !== "吨"
     || state.unit.symbol !== "t"
     || state.materials.some(
       (item) => item.mainUnitName !== "吨" || item.produceUnitName !== "吨"
+    )
+    || state.taskMaterials.some(
+      (item) => Number(item.planQuantity) <= 0
+        || Number(item.planQuantity) !== Number(item.standardQuantity)
     )
   ) {
     failures.push(`Material or batch materialization mismatch`);
@@ -1942,6 +2202,16 @@ function assertDatabaseState(state, bpiState, productionModel) {
     || state.finalQcsItems.some((item) => item.result !== "合格")
   ) {
     failures.push(`Quality definition or execution mismatch`);
+  }
+  if (
+    !state.taskQuality
+    || String(state.taskQuality.taskId) !== String(task.id)
+    || String(state.taskQuality.materialId) !== String(task.productId)
+    || state.taskQuality.standardName !== "糖化液放行试运行标准"
+    || state.taskQuality.finalInspection !== true
+    || state.taskQuality.valid !== true
+  ) {
+    failures.push(`WOM task quality mismatch: ${JSON.stringify(state.taskQuality)}`);
   }
   const stock = state.wms && state.wms.stock;
   if (
@@ -2267,23 +2537,78 @@ async function browserAcceptance({ ticket, taskId, batchNo, preflight, ids }) {
       },
     });
     const pages = [];
-    pages.push(await inspectBrowserPage(
-      await context.newPage(),
+    const womPage = await context.newPage();
+    const womTaskPage = await inspectBrowserPage(
+      womPage,
       "wom-task",
       `/msService/WOM/produceTask/produceTask/makeTaskEdit?id=${taskId}`,
       ["产品编码", "生产批号", "工序活动", "用料汇总", "检验清单", "吨"]
-    ));
+    );
+    const qualityTab = womPage.getByRole("tab", { name: "检验清单" });
+    await qualityTab.click();
+    await womPage.waitForTimeout(2500);
+    const qualityPanelText = await womPage.getByRole("tabpanel").innerText();
+    womTaskPage.interactions = [{
+      action: "点击检验清单页签",
+      expected: ["糖化液放行试运行标准", `${marker}_SACCHARIFIED_LIQUOR`],
+      actualTextExcerpt: qualityPanelText.slice(0, 1800),
+      pass: qualityPanelText.includes("糖化液放行试运行标准")
+        && qualityPanelText.includes(`${marker}_SACCHARIFIED_LIQUOR`),
+    }];
+    const activityTab = womPage.getByRole("tab", { name: "工序活动" });
+    await activityTab.click();
+    await womPage.waitForTimeout(1000);
+    const activityPanel = womPage.getByRole("tabpanel");
+    const processRows = activityPanel
+      .locator(".sup-datagrid-container")
+      .first()
+      .locator(".sup-datagrid-row");
+    const processRowCount = await processRows.count();
+    const activityTexts = [];
+    for (let rowIndex = 1; rowIndex < processRowCount; rowIndex += 1) {
+      await processRows.nth(rowIndex).dispatchEvent("click");
+      await womPage.waitForTimeout(300);
+      activityTexts.push(await activityPanel.innerText());
+    }
+    const activityPanelText = activityTexts.join("\n");
+    womTaskPage.interactions.push({
+      action: "点击工序活动页签并逐条选择喷射液化、糖化工序",
+      expected: ["泵送", "换热", "闪蒸", "保温"],
+      actualTextExcerpt: activityPanelText.slice(0, 1800),
+      pass: processRowCount === 3
+        && ["泵送", "换热", "闪蒸", "保温"]
+        .every((text) => activityPanelText.includes(text)),
+    });
+    const materialTab = womPage.getByRole("tab", { name: "用料汇总" });
+    await materialTab.click();
+    await womPage.waitForTimeout(1500);
+    const materialPanelText = await womPage.getByRole("tabpanel").innerText();
+    womTaskPage.interactions.push({
+      action: "点击用料汇总页签",
+      expected: [
+        `${marker}_STARCH_SLURRY`,
+        `${marker}_LIQUEFIED_SYRUP`,
+        `${marker}_SACCHARIFIED_LIQUOR`,
+      ],
+      actualTextExcerpt: materialPanelText.slice(0, 1800),
+      pass: [
+        `${marker}_STARCH_SLURRY`,
+        `${marker}_LIQUEFIED_SYRUP`,
+        `${marker}_SACCHARIFIED_LIQUOR`,
+      ].every((text) => materialPanelText.includes(text)),
+    });
+    pages.push(womTaskPage);
     pages.push(await inspectBrowserPage(
       await context.newPage(),
       "jet-process-detail",
       `/msService/ProcessAnalysis/processAnalysis/processExecution/detail?processExecutionId=${preflight.firstProcessExecution.id}`,
-      ["喷射液化", "糖化", "12 秒", "瞬时流量", "波美值"]
+      ["喷射液化", "糖化", "12 秒", "瞬时流量", "波美值", "首工序", "无上游工序"]
     ));
     pages.push(await inspectBrowserPage(
       await context.newPage(),
       "saccharification-process-detail",
       `/msService/ProcessAnalysis/processAnalysis/processExecution/detail?processExecutionId=${ids.sacchExecution}`,
-      ["喷射液化", "糖化", "瞬时流量", "波美值"]
+      ["喷射液化", "糖化", "瞬时流量", "波美值", "末工序", "无下游工序"]
     ));
     pages.push(await inspectBrowserPage(
       await context.newPage(),
@@ -2321,6 +2646,10 @@ async function browserAcceptance({ ticket, taskId, batchNo, preflight, ids }) {
       const missingTexts = page.expected.filter((item) => !item.visible).map((item) => item.text);
       if (missingTexts.length) {
         failures.push(`${page.name} missing=${missingTexts.join(",")}`);
+      }
+      const failedInteractions = (page.interactions || []).filter((item) => !item.pass);
+      if (failedInteractions.length) {
+        failures.push(`${page.name} interactions=${JSON.stringify(failedInteractions)}`);
       }
       const meaningfulBadResponses = page.badResponses.filter(
         (entry) => !ignoredFailures.some((pattern) => pattern.test(entry.url))
