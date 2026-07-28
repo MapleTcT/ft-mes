@@ -1,0 +1,487 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-28T22:25:25+08:00",
+  "repoCommit": "dc56ed8f32bbae0cef472ce5ea7383a7f81c0e3c",
+  "database": "PostgreSQL",
+  "environment": {
+    "baseUrl": "http://10.11.100.17:18080",
+    "bpiUrl": "http://10.11.100.17:18080/bpi/",
+    "stack": "adp-mes-newbase"
+  },
+  "verdict": "CONDITIONAL_PASS",
+  "summary": {
+    "testedFeatures": 18,
+    "pass": 15,
+    "fail": 1,
+    "blocked": 1,
+    "notApplicable": 1
+  },
+  "retainedScenario": {
+    "marker": "STD_CORE_20260728_194300",
+    "taskId": "9007185760124474",
+    "tableNo": "STD_CORE_20260728_194300_TASK_TN",
+    "batchNo": "STD_CORE_20260728_194300_BATCH",
+    "processes": [
+      "喷射液化",
+      "糖化"
+    ],
+    "materials": [
+      {
+        "code": "STD_CORE_20260728_194300_STARCH_SLURRY",
+        "quantity": 34.4,
+        "unit": "t"
+      },
+      {
+        "code": "STD_CORE_20260728_194300_LIQUEFIED_SYRUP",
+        "quantity": 34.8,
+        "unit": "t"
+      },
+      {
+        "code": "STD_CORE_20260728_194300_SACCHARIFIED_LIQUOR",
+        "quantity": 35.1,
+        "unit": "t"
+      }
+    ],
+    "qcsReportId": "770733723563264",
+    "wms": {
+      "onHand": 35.1,
+      "available": 35.1,
+      "hold": 0
+    },
+    "bpiBatch": {
+      "id": "75a20cb3-a840-58b3-88dd-c7ce9b513786",
+      "batchNo": "BPI-LINES0701-20260728-24860E28",
+      "state": "CLOSED_RAW",
+      "revision": 2,
+      "stageCode": "UNASSIGNED",
+      "materialCode": null,
+      "quantity": 0,
+      "quantityUnit": "t",
+      "orderId": "STD_CORE_20260728_194300_BPI_WOM_TASK_TN",
+      "qualityGate": "NOT_APPLICABLE",
+      "wmsStatus": "NOT_REQUESTED"
+    }
+  },
+  "items": [
+    {
+      "module": "认证与导航",
+      "route": "/",
+      "operation": "登录并进入制造指令、QCS、WMS、追溯和 BPI 页面",
+      "api": "login; current-user menus",
+      "method": "POST; GET",
+      "requiresPersistence": false,
+      "backendEntry": "IAM/RBAC gateway session and menu resolution",
+      "tables": [],
+      "marker": "",
+      "verificationSql": "",
+      "status": "PASS",
+      "evidence": "All target pages returned HTTP 200; tested browser actions had zero unexpected console, page, failed-response, or request-failure entries.",
+      "issues": [
+        "This run did not expand to a full role-by-role permission matrix."
+      ]
+    },
+    {
+      "module": "WOM 制造指令",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /msService/WOM/produceTask/manual-entry/page",
+      "operation": "新建指令、幂等重放、重复批号拦截、生效和受控删除",
+      "api": "/msService/WOM/produceTask/manual-entry/create; /msService/WOM/produceTask/produceTask/makeTaskEdit/submit; /msService/WOM/produceTask/produceTask/delete",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "WomManualTaskController -> WomManualTaskService -> WOM workflow persistence",
+      "tables": [
+        "wom_manual_task_requests",
+        "wom_produce_tasks",
+        "wfm_task_pending",
+        "wf_deal_info"
+      ],
+      "marker": "STD_CORE_20260728_194300_MANUAL_CREATE",
+      "verificationSql": "SELECT id,status,table_no,produce_batch_num,product_id,formula_id,line_id,plan_num FROM public.wom_produce_tasks WHERE produce_batch_num='STD_CORE_20260728_194300_MANUAL_CREATE';",
+      "status": "PASS",
+      "evidence": "9/9 passed; create produced exactly one task, replay stayed at one, conflicting batch returned business 409, submit reached status 99, controlled delete set valid=false, and request marker cleanup returned zero.",
+      "issues": []
+    },
+    {
+      "module": "WOM 指令详情",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskEdit?id=9007185760124474",
+      "operation": "查看工序活动、用料汇总和检验清单主从交互",
+      "api": "produceTask data and detail datagrids",
+      "method": "GET; POST",
+      "requiresPersistence": false,
+      "backendEntry": "WOM produce-task read model and runtime datagrid views",
+      "tables": [
+        "wom_task_processes",
+        "wom_task_actives",
+        "wom_task_materials",
+        "wom_task_qualities"
+      ],
+      "marker": "STD_CORE_20260728_194300",
+      "verificationSql": "",
+      "status": "PASS",
+      "evidence": "Real page interactions selected both process rows and displayed pump, heat exchange, flash, hold, all three material codes, and the final saccharified-liquor quality standard; browser error arrays were empty.",
+      "issues": [
+        "The second process, three-material lineage, and draft quality definitions were created by a marker-scoped guarded SQL scenario fixture; this item proves runtime read interaction, not full master-data CRUD."
+      ]
+    },
+    {
+      "module": "WOM 任务开始",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operation": "选择制造指令并开始",
+      "api": "/msService/WOM/produceTask/produceTask/updateTaskState",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "WOMProduceTaskController.updateTaskState -> task execution service",
+      "tables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_proc_reports",
+        "wom_produce_task_exelog"
+      ],
+      "marker": "STD_CORE_20260728_194300",
+      "verificationSql": "SELECT table_no,task_run_state,act_start_time FROM public.wom_produce_tasks WHERE id=9007185760124474;",
+      "status": "PASS",
+      "evidence": "Real list action changed the task and waiting record to running and persisted the actual start time; frontendClean=PASS.",
+      "issues": []
+    },
+    {
+      "module": "WOM 工序开始",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskBatchView?id=9007185760124474",
+      "operation": "开始喷射液化工序",
+      "api": "/msService/WOM/produceTask/taskProcess/start/{processId}",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "TaskProcessController.start -> WOM process execution persistence",
+      "tables": [
+        "wom_task_processes",
+        "wom_process_exelogs",
+        "wom_proc_reports",
+        "wom_wait_put_records"
+      ],
+      "marker": "STD_CORE_20260728_194300",
+      "verificationSql": "SELECT id,process_run_state,act_start_time FROM public.wom_task_processes WHERE task_id=9007185760124474 ORDER BY exe_order;",
+      "status": "PASS",
+      "evidence": "The process, process report, execution log, and wait record entered running state from the real batch view with no browser errors.",
+      "issues": []
+    },
+    {
+      "module": "WOM 投料",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskBatchView?id=9007185760124474",
+      "operation": "启动投料活动并保存批次投料",
+      "api": "/msService/WOM/procReport/putinDetail/remainMaterialView/save",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PutinDetailController.save -> material-consumption persistence",
+      "tables": [
+        "wom_putin_details",
+        "wom_mat_consum_recods",
+        "wom_task_actives",
+        "wom_acti_exelogs"
+      ],
+      "marker": "STD_CORE_20260728_194300",
+      "verificationSql": "SELECT count(*) FROM public.wom_putin_details d JOIN public.wom_proc_reports r ON r.id=d.head_id WHERE r.task_id=9007185760124474 AND d.material_batch_num='STD_CORE_20260728_194300_BATCH';",
+      "status": "PASS",
+      "evidence": "One input detail and one material-consumption record persisted with quantity and batch identity; the page showed no visible problem notice.",
+      "issues": []
+    },
+    {
+      "module": "WOM 报工与产出",
+      "route": "/msService/WOM/produceTask/produceTask/easyTaskOperateView?id=9007185760124474",
+      "operation": "结束产出活动并登记产出",
+      "api": "/msService/WOM/produceTask/produceTask/endEasyActive/{activeId}; output-detail persistence",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "WOMProduceTaskController.endEasyActive -> output reporting services",
+      "tables": [
+        "wom_output_details",
+        "wom_mat_outpt_records",
+        "wom_task_actives",
+        "wom_acti_exelogs"
+      ],
+      "marker": "STD_CORE_20260728_194300",
+      "verificationSql": "SELECT count(*) FROM public.wom_output_details d JOIN public.wom_proc_reports r ON r.id=d.head_id WHERE r.task_id=9007185760124474; SELECT count(*) FROM public.wom_mat_outpt_records o JOIN public.wom_output_details d ON d.id=o.out_mat_detail_id JOIN public.wom_proc_reports r ON r.id=d.head_id WHERE r.task_id=9007185760124474;",
+      "status": "PASS",
+      "evidence": "Two output details and two material-output records persisted; activity and execution rows reached finished state and the real page remained clean.",
+      "issues": []
+    },
+    {
+      "module": "QCS 合格请检",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList; manuInspReportEdit; manuInspReportView",
+      "operation": "请检、生成报告、保存、生效并回写合格",
+      "api": "/msService/QCS/inspect/inspect/bulkSubmit; /msService/QCS/inspectReport/inspectReport/batchDealReports",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "QCSInspectController -> QCSInspectReportService -> WOMQCS backfill",
+      "tables": [
+        "qcs_inspects",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "wfm_task_pending",
+        "wom_produce_tasks",
+        "baseset_batch_infos"
+      ],
+      "marker": "STD_CORE_20260728_194300",
+      "verificationSql": "SELECT r.id,r.status,r.check_result FROM public.qcs_inspect_reports r JOIN public.qcs_inspects i ON i.id=r.inspect_id WHERE i.source_table_id=9007185760124474;",
+      "status": "PASS",
+      "evidence": "Effective report 770733723563264 and four final quality items displayed qualified; WOM task and retained batch were inspected, qualified, and available.",
+      "issues": []
+    },
+    {
+      "module": "QCS 不合格处置",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList; manuInspReportEdit; manuInspReportView",
+      "operation": "独立测试批请检、报告不合格生效并创建处置单",
+      "api": "/msService/QCS/inspect/inspect/bulkSubmit; /msService/QCS/inspectReport/inspectReport/batchDealReports",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "QCS report activation -> QCSUnQlfDeal listener -> WOM/batch backfill",
+      "tables": [
+        "qcs_inspects",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "qcs_un_qlf_deals",
+        "wom_produce_tasks",
+        "baseset_batch_infos"
+      ],
+      "marker": "STD_CORE_20260728_194300_QCS_UNQUAL",
+      "verificationSql": "SELECT r.status,r.check_result,r.un_qlf_deal_flag FROM public.qcs_inspect_reports r JOIN public.qcs_inspects i ON i.id=r.inspect_id WHERE i.batch_code='STD_CORE_20260728_194300_QCS_UNQUAL';",
+      "status": "PASS",
+      "evidence": "Real list/edit/view pages showed unqualified; report became effective, batch became unavailable, a status-88 unqualified-deal document was created, and marker-scoped cleanup passed.",
+      "issues": [
+        "The downstream manual final-close branch of the treatment document was outside this core-chain run."
+      ]
+    },
+    {
+      "module": "WOM 工序结束与完工",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskBatchView?id=9007185760124474; makeTaskList",
+      "operation": "结束工序并完成制造指令",
+      "api": "/msService/WOM/produceTask/taskProcess/end/{processId}; /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "TaskProcessController.end -> WOM completion report and task-state services",
+      "tables": [
+        "wom_produce_tasks",
+        "wom_task_processes",
+        "wom_process_exelogs",
+        "wom_task_actives",
+        "wom_acti_exelogs",
+        "wom_proc_reports"
+      ],
+      "marker": "STD_CORE_20260728_194300",
+      "verificationSql": "SELECT task_run_state,finish_num,act_start_time,act_end_time FROM public.wom_produce_tasks WHERE id=9007185760124474;",
+      "status": "PASS",
+      "evidence": "All task/process/activity execution rows reached finished, unfinished waits were zero, and the retained task showed finishNum=35.1, inspected, and qualified.",
+      "issues": []
+    },
+    {
+      "module": "WMS 合格完工入库",
+      "route": "/msService/material/wms",
+      "operation": "完工入库、幂等重放、合格放行和领料扣减",
+      "api": "/msService/public/material/produceInSingles/produceInSingl/generateProductInSingle; /msService/material/foreign/foreign/checkProdResult; /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "Material WMS controllers -> stock document, quality, inventory ledger, and batch-stock services",
+      "tables": [
+        "wms_stock_documents",
+        "wms_stock_document_lines",
+        "wms_inventory_transactions",
+        "wms_quality_results",
+        "wms_batch_stocks"
+      ],
+      "marker": "STD_CORE_20260728_194300_WMS_QUAL_REG",
+      "verificationSql": "SELECT on_hand_quantity,available_quantity,hold_quantity FROM public.wms_batch_stocks WHERE tenant_id='STD_CORE_20260728_194300_WMS_QUAL_REG_COMP';",
+      "status": "PASS",
+      "evidence": "Inbound 10 was held, replay was idempotent, qualification released all 10, issue 3 reduced on-hand and available to 7, browser detail opened cleanly, and cleanup returned zero.",
+      "issues": []
+    },
+    {
+      "module": "WMS 不合格库存门禁",
+      "route": "/msService/material/wms",
+      "operation": "完工入库后判不合格并尝试领料",
+      "api": "/msService/material/foreign/foreign/checkProdResult; /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "Material quality allocation -> stock hold and issue guard",
+      "tables": [
+        "wms_stock_documents",
+        "wms_stock_document_lines",
+        "wms_inventory_transactions",
+        "wms_quality_results",
+        "wms_batch_stocks"
+      ],
+      "marker": "STD_CORE_20260728_194300_WMS_UNQUAL",
+      "verificationSql": "SELECT on_hand_quantity,available_quantity,hold_quantity FROM public.wms_batch_stocks WHERE tenant_id='STD_CORE_20260728_194300_WMS_UNQUAL_COMP';",
+      "status": "PASS",
+      "evidence": "After unqualified result, onHand=10, available=0, hold=10; issue returned business code 409 and did not mutate stock; browser error arrays were empty and cleanup passed.",
+      "issues": []
+    },
+    {
+      "module": "ProcessAnalysis 批次追溯",
+      "route": "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?batchNo=STD_CORE_20260728_194300_BATCH",
+      "operation": "查看制造、质量、入库和两工序批次谱系",
+      "api": "/msService/ProcessAnalysis/processAnalysis/api/trace?batchNo=STD_CORE_20260728_194300_BATCH",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "ProcessAnalysis trace controller -> WOM/QCS/WMS projection -> trace snapshots",
+      "tables": [
+        "wom_produce_tasks",
+        "wom_process_exelogs",
+        "qcs_inspect_reports",
+        "wms_stock_documents",
+        "pa_trace_snapshots"
+      ],
+      "marker": "STD_CORE_20260728_194300",
+      "verificationSql": "SELECT count(*) FROM public.pa_trace_snapshots WHERE tenant_id='STD_CORE_20260728_194300_TENANT' AND batch_no='STD_CORE_20260728_194300_BATCH';",
+      "status": "PASS",
+      "evidence": "The retained scenario displayed starch slurry -> liquefied syrup -> saccharified liquor, two process executions, final QCS release, WMS stock, and correct first/last-process boundary labels with zero browser errors.",
+      "issues": [
+        "The extended two-process business model was seeded by a marker-scoped guarded SQL fixture after the real single-process lifecycle; the trace page and PostgreSQL relationships were then verified."
+      ]
+    },
+    {
+      "module": "BPI MQTT 真实协议链",
+      "route": "/bpi/#/candidates",
+      "operation": "通过真实 MQTT topic 发布五信号序列并经 JetLinks/Kafka/Flink 持久化",
+      "api": "MQTT /bpi-transfer-cell-product-01/bpi-transfer-cell-device-01/properties/report; BPI candidate queries",
+      "method": "MQTT PUBLISH; GET",
+      "requiresPersistence": true,
+      "backendEntry": "MQTT -> JetLinks -> Kafka -> Flink boundary evaluation -> BPI telemetry repository",
+      "tables": [
+        "bpi_telemetry_events",
+        "bpi_telemetry_points",
+        "bpi_telemetry_point_rejects",
+        "bpi_source_sequence_evidence_current"
+      ],
+      "marker": "STD_CORE_20260728_194300_BPI_LIVE",
+      "verificationSql": "Marker-scoped BPI telemetry verification recorded 57 accepted events, 285 accepted points, and zero rejects.",
+      "status": "PASS",
+      "evidence": "3 source-readiness events/15 points, 25 simulation events/125 points, and 29 live boundary events/145 points were published through the real protocol path; rule simulation matched=1, missed=0, falsePositive=0.",
+      "issues": [
+        "The publisher was a controlled simulator, not a physical PLC or field instrument."
+      ]
+    },
+    {
+      "module": "BPI 候选与影子批次",
+      "route": "/bpi/#/candidates; /bpi/#/batches",
+      "operation": "从真实页面确认 START 和 END 候选并关闭影子批次",
+      "api": "/bpi-api/candidates/{candidateId}/confirm",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "CandidateController.confirm -> CandidateService -> BpiPostgresRepository",
+      "tables": [
+        "bpi_batch_candidates",
+        "bpi_batch_instances",
+        "bpi_batch_state_events"
+      ],
+      "marker": "STD_CORE_20260728_194300_BPI_LIVE",
+      "verificationSql": "SELECT id,batch_no,state,stage_code,material_code,quantity,order_id,is_shadow,revision FROM bpi.bpi_batch_instances WHERE id='75a20cb3-a840-58b3-88dd-c7ce9b513786';",
+      "status": "PASS",
+      "evidence": "START candidate be1a6589-8545-53ac-a81f-2801c253e1c1 and END candidate 42f25b7d-4857-5930-90b3-f20dc1c76729 were confirmed from the real BPI page. Batch BPI-LINES0701-20260728-24860E28 persisted ACTIVE then CLOSED_RAW/r2 and linked the WOM table number.",
+      "issues": [
+        "The END candidate has no direct orderId, but closes the same batch through batchId."
+      ]
+    },
+    {
+      "module": "BPI 生产上下文",
+      "route": "/bpi/#/batches",
+      "operation": "检查自动批次的工序、物料、数量和单位",
+      "api": "GET /bpi-api/batches/{batchId}",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "MES production-context outbox -> BPI batch projection",
+      "tables": [
+        "bpi_batch_instances"
+      ],
+      "marker": "STD_CORE_20260728_194300_BPI_LIVE",
+      "verificationSql": "SELECT batch_no,state,stage_code,material_code,quantity,quantity_unit,order_id FROM bpi.bpi_batch_instances WHERE id='75a20cb3-a840-58b3-88dd-c7ce9b513786';",
+      "status": "FAIL",
+      "evidence": "The retained batch is CLOSED_RAW/r2 and linked to WOM order STD_CORE_20260728_194300_BPI_WOM_TASK_TN.",
+      "issues": [
+        "stage_code remains UNASSIGNED, material_code is null, and quantity is 0; this batch cannot yet drive settlement, inspection, inventory, or formal traceability."
+      ]
+    },
+    {
+      "module": "BPI 现场设备源",
+      "route": "Physical PLC/DCS/instrument source",
+      "operation": "校准后连续采集，并验证断网、漂移、乱序和重启",
+      "api": "Field MQTT/JetLinks",
+      "method": "MQTT PUBLISH",
+      "requiresPersistence": false,
+      "backendEntry": "Physical device -> JetLinks",
+      "tables": [],
+      "marker": "",
+      "verificationSql": "",
+      "status": "BLOCKED",
+      "evidence": "The software path was proven with a controlled real-protocol publisher only.",
+      "issues": [
+        "Blocked by field point list, device connectivity, metering calibration, clock validation, and a 24h/72h commissioning window."
+      ]
+    },
+    {
+      "module": "BPI 到 QCS/WMS 自动写回",
+      "route": "/bpi/#/batches",
+      "operation": "检查影子批次是否自动请检或自动入库",
+      "api": "QCS/WMS adapters",
+      "method": "NOT_APPLICABLE",
+      "requiresPersistence": false,
+      "backendEntry": "Shadow-mode side-effect isolation",
+      "tables": [],
+      "marker": "STD_CORE_20260728_194300_BPI_LIVE",
+      "verificationSql": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The retained shadow batch records quality_gate=NOT_APPLICABLE and wms_status=NOT_REQUESTED. No QCS/WMS side effect is expected until production context and field gates pass.",
+      "issues": []
+    }
+  ],
+  "standardProductScope": {
+    "keep": [
+      "IAM/RBAC and platform runtime dependencies",
+      "material, batch, unit, factory line, formula, and quality master data",
+      "WOM instruction, process execution, input, output, and completion",
+      "QCS inspection, report, qualified/unqualified result, and disposition entry",
+      "material WMS completion inbound, quality hold/release, and issue guard",
+      "ProcessAnalysis batch lineage and process detail",
+      "minimum BPI adapter/service, JetLinks, Kafka, Flink, and PostgreSQL shadow path"
+    ],
+    "defer": [
+      "equipment lifecycle",
+      "energy",
+      "EHS",
+      "patrol",
+      "OEE",
+      "work permits",
+      "advanced import/export",
+      "BPI dataset, training, and model-management workbenches",
+      "non-core external integrations"
+    ]
+  },
+  "releaseGates": [
+    {
+      "gate": "MES_CORE_HAPPY_PATH",
+      "status": "PASS"
+    },
+    {
+      "gate": "QUALITY_AND_STOCK_NEGATIVE_PATH",
+      "status": "PASS"
+    },
+    {
+      "gate": "BPI_PRODUCTION_CONTEXT",
+      "status": "FAIL"
+    },
+    {
+      "gate": "PHYSICAL_DEVICE_COMMISSIONING",
+      "status": "BLOCKED"
+    },
+    {
+      "gate": "FAILURE_RECOVERY_AND_OPERATIONS",
+      "status": "PARTIAL"
+    }
+  ],
+  "evidence": {
+    "fullFlow": "/tmp/std-core-20260728-194300/full-flow.json",
+    "manualInstruction": "/tmp/std-core-20260728-194300/manual-entry/wom-manual-entry-results.json",
+    "qcsUnqualified": "/tmp/std-core-20260728-194300/qcs-unqualified/qcs-report-chain.json",
+    "wmsQualified": "/tmp/std-core-20260728-194300/wms-qualified-regression/acceptance.json",
+    "wmsUnqualified": "/tmp/std-core-20260728-194300/wms-unqualified/acceptance.json",
+    "fructosePilot": "/tmp/std-core-20260728-194300/fructose-pilot.json",
+    "bpiLive": "/tmp/std-core-20260728-194300/bpi-live/",
+    "report": "docs/testing/standard-core-flow-acceptance-20260728.md"
+  }
+}

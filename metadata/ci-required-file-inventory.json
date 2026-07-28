@@ -6375,6 +6375,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/standard-core-flow-acceptance-20260728.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/wom-toolbar-action-coverage.md",
       "state": "tracked",
       "tracked": true
@@ -7942,6 +7948,12 @@
     {
       "ignored": false,
       "path": "metadata/runtime-patch-manifest.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/standard-core-flow-acceptance-20260728.json",
       "state": "tracked",
       "tracked": true
     },
@@ -11879,13 +11891,13 @@
       "tracked": 692
     },
     "docs": {
-      "tracked": 154
+      "tracked": 155
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 275
+      "tracked": 276
     },
     "package.json": {
       "tracked": 1
@@ -11909,8 +11921,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1975,
-    "tracked": 1975,
+    "totalFiles": 1977,
+    "tracked": 1977,
     "untracked": 0
   },
   "untrackedByDirectory": []

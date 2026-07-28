@@ -1,5 +1,25 @@
 # 后端落库验收报告
 
+## 2026-07-28 标准核心链路落库复验
+
+本轮以 marker `STD_CORE_20260728_194300` 从真实页面执行业务动作，并直接复读目标
+PostgreSQL。MES 主链和 BPI 技术影子链均有实际落库；BPI 生产上下文仍为明确失败项。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 制造指令新建与生效 | WOM 指令列表、人工新建页 | `manual-entry/create`、`makeTaskEdit/submit` | WOM manual task + workflow | `wom_manual_task_requests`、`wom_produce_tasks`、`wfm_task_pending`、`wf_deal_info` | 按唯一批号查任务、请求和待办 | 新建 1、幂等仍 1、重复批号 409、生效 status 99、受控删除后 valid=false | PASS |
+| 投料与产出报工 | WOM 批次执行、简易操作页 | 投料保存、活动结束和产出接口 | WOM process/activity/report services | `wom_putin_details`、`wom_mat_consum_recods`、`wom_output_details`、`wom_mat_outpt_records` | 按 taskId 联结报工头统计投料/消耗/产出 | 投料/消耗 1/1，产出明细/记录 2/2，活动和工序全部完成 | PASS |
+| 请检和质量处置 | QCS 列表、报告页 | `bulkSubmit`、`batchDealReports` | QCS report -> WOM backfill -> disposition listener | QCS 报告/明细、WOM、批次、`qcs_un_qlf_deals` | 按 source task 和 batchCode 查报告、批次和处理单 | 合格主批已检可用；独立不合格批不可用并创建 status 88 处理单 | PASS |
+| 完工入库和质量库存门禁 | Material WMS | 完工入库、质量回写、领料 | Material WMS inventory services | WMS 单据、明细、事务、质量和批次库存表 | 按 tenant/marker 汇总 onHand/available/hold | 合格 10/10/0 后领料余 7；不合格 10/0/10 且领料 409、不改库存 | PASS |
+| 两工序批次谱系 | ProcessAnalysis 追溯页 | trace GET | WOM/QCS/WMS projection -> snapshot | WOM/QCS/WMS、`pa_trace_snapshots` | 按最终批号查两条边和快照 | 淀粉浆 34.4 t -> 液化液 34.8 t -> 糖化液 35.1 t，质量与库存一致 | PASS |
+| MQTT 到影子批次 | BPI 候选和批次页 | MQTT、candidate confirm | JetLinks -> Kafka -> Flink -> BPI | telemetry、source sequence、candidate、batch、state event | 按 marker/orderId/batchId 查事件和批次 | 57 事件/285 点/0 reject；两候选确认；批次 ACTIVE -> CLOSED_RAW/r2 | PASS |
+| BPI 生产上下文 | BPI 批次详情 | batch GET | MES context projection | `bpi_batch_instances` | `SELECT stage_code,material_code,quantity,order_id ...` | `UNASSIGNED/null/0`，只有 WOM 单号关联 | FAIL |
+| 现场设备连续运行 | PLC/DCS/仪表 | 现场 MQTT | 物理设备 -> JetLinks | 不适用 | 未执行 | 受控模拟器不能替代点位校准和 24h/72h 现场影子运行 | BLOCKED |
+
+完整 SQL 摘要、终态和冻结建议见
+`docs/testing/standard-core-flow-acceptance-20260728.md`，机器记录见
+`metadata/standard-core-flow-acceptance-20260728.json`。
+
 ## 2026-07-21 QCS 合格/不合格双分支与显示契约
 
 本轮从 `10.11.100.17:18080` 的真实 WOM/QCS 页面执行业务动作，捕获业务请求后直接查询

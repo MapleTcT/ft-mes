@@ -1,5 +1,29 @@
 # 前端功能测试报告
 
+## 2026-07-28 标准核心链路复验
+
+本轮冻结外围模块，只验收
+制造指令 -> 投料/报工 -> 请检 -> 质量处置 -> 完工入库 -> 批次追溯 -> BPI 真实协议信号。
+真实页面、业务 API 和 PostgreSQL 共 18 项：15 PASS、1 FAIL、1 BLOCKED、1 NOT_APPLICABLE。
+MES 手工执行主链已闭合；BPI 影子批次已闭合，但
+`stage=UNASSIGNED/material=null/quantity=0`，现场 PLC 尚未联调，因此总体为
+`CONDITIONAL_PASS`。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| MES 核心制造 | WOM 指令列表、批次执行、报工页 | 指令新建、开始、投料、产出、结束、完工 | WOM manual-entry、task/process/activity/report APIs | 真实页面操作和详情页交互通过，错误数组为 0 | 任务、工序、活动、投料、产出和完工状态一致 | WOM 主表、执行表、投料/产出表 | PASS | 无 |
+| 质量双分支 | QCS 列表、报告编辑和只读页 | 合格放行；不合格回写和处置单 | QCS `bulkSubmit`、`batchDealReports` | 两种结论均正确复显，错误数组为 0 | 合格批可用；不合格批不可用且生成处置单 | QCS、WOM、批次、处置表 | PASS | 不合格处置单最终结案未纳入本轮 |
+| WMS 双分支 | `/msService/material/wms` | 待检入库、放行、冻结、领料门禁 | 完工入库、质量回写、领料接口 | 单据详情可打开，错误数组为 0 | 合格 10 -> 领料后 7；不合格 10 全冻结且领料 409 | WMS 单据、事务、质量、库存表 | PASS | 无 |
+| 批次追溯 | `processBatchViewOut`、工序执行详情 | 查看两工序和三物料谱系 | ProcessAnalysis trace API | 页面显示首/末工序、12 秒交接、质量和库存 | 淀粉浆 -> 液化液 -> 糖化液落库一致 | WOM、QCS、WMS、追溯快照 | PASS | 无 |
+| BPI 实时影子链 | `/bpi/#/candidates`、`/bpi/#/batches` | 五信号 MQTT、START/END 候选确认 | MQTT、BPI candidate confirm | 真实 BPI 页面完成两次确认 | 57 事件/285 点/0 reject；批次 CLOSED_RAW/r2 | BPI telemetry、候选、批次和状态事件 | PASS | 来源为受控模拟器 |
+| BPI 生产上下文 | BPI 批次详情 | 查看工序、物料和数量 | BPI batch GET | 页面可读 | 工序未分配、物料为空、数量为 0 | `bpi_batch_instances` | FAIL | 不能直接驱动请检、入库和结算 |
+| 现场设备 | PLC/DCS/仪表 | 24h/72h 影子运行 | 现场 MQTT/JetLinks | 未执行 | 未执行 | 不适用 | BLOCKED | 缺现场点位、校准和联调窗口 |
+
+完整报告：`docs/testing/standard-core-flow-acceptance-20260728.md`；机器记录：
+`metadata/standard-core-flow-acceptance-20260728.json`。制造动作通过真实页面/API 执行；
+双工序、三物料和四项试运行检验的扩展建模使用受控 SQL 场景夹具，页面验收结论是
+“运行态可读且关联正确”，不扩大为相关主数据 CRUD 页面全部通过。
+
 ## 2026-07-22 BPI Parquet 版本化物化（Phase 3B-A 目标整链）
 
 本轮在唯一测试环境 `http://10.11.100.17:18080` 使用真实 ADP 会话、Java 8 adapter、
