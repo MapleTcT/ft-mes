@@ -2,29 +2,39 @@
   top: 28px;
   left: 32px;
   z-index: 3;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 4px;
+  box-shadow: 0 6px 18px rgba(0, 38, 82, 0.18);
 }
 
 #logo img {
+  display: block;
   width: 190px;
   height: auto;
-  filter: brightness(0) invert(1);
-  opacity: 0.98;
+  filter: none;
+  opacity: 1;
 }
 
 #slogan {
   top: 50%;
   left: 50%;
   width: 58%;
-  max-width: 680px;
+  max-width: 520px;
   transform: translate(-50%, -50%);
 }
 
 #slogan img {
   width: 100%;
   height: auto;
+  box-sizing: border-box;
+  padding: 14px 22px;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 4px;
+  box-shadow: 0 10px 30px rgba(0, 35, 76, 0.22);
   transform: none;
-  filter: brightness(0) invert(1);
-  opacity: 0.98;
+  filter: none;
+  opacity: 1;
 }
 
 .feitian-login-accent {
@@ -143,7 +153,6 @@
 
   #logo img {
     width: 170px;
-    filter: none;
   }
 
   #login-form {

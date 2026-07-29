@@ -1,8 +1,10 @@
 #v3_logo {
+  background-color: #fff !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
   background-size: 156px auto !important;
-  filter: brightness(0) invert(1);
+  box-shadow: inset -1px 0 0 rgba(7, 77, 162, 0.16);
+  filter: none;
 }
 
 body.v3_menu_collapsed #v3_logo {
