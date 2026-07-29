@@ -285,6 +285,56 @@ class ProductRuntimeParityTest(unittest.TestCase):
         self.assertIsNotNone(payload)
         self.assertNotIn("pc", payload)
 
+    def test_truncated_button_function_name_is_repaired(self):
+        button = ET.fromstring(
+            "<list-item>"
+            "<id>bulkSubmit</id>"
+            "<showname>批量提交</showname>"
+            "<operatetype>CUSTOM</operatetype>"
+            "<funcname>onclick='nction bulkSubmitManu()'</funcname>"
+            "<buttonoperationcode>qcs_bulk_submit</buttonoperationcode>"
+            "</list-item>"
+        )
+
+        payload = GENERATOR.button_payload(button)
+
+        self.assertEqual("bulkSubmitManu()", payload["onclick"])
+        self.assertEqual("onclick='bulkSubmitManu()'", payload["funcname"])
+
+    def test_qcs_packaged_list_supplements_missing_source_button(self):
+        config_root = ET.fromstring(
+            "<config><layout><sections><list><list-item>"
+            "<regionType>BUTTON</regionType>"
+            "<id>delete</id>"
+            "<showname>删除</showname>"
+            "<operatetype>DELETE</operatetype>"
+            "<buttonoperationcode>qcs_delete</buttonoperationcode>"
+            "</list-item></list></sections></layout></config>"
+        )
+        view = view_variant(
+            code="QCS_5.0.0.0_inspect_manuInspectList",
+            config_root=config_root,
+        )
+        payload = {
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "buttons": [{"id": "open", "buttonoperationcode": "qcs_open"}],
+                }
+            ]
+        }
+
+        GENERATOR.supplement_packaged_datagrid_buttons(
+            view,
+            payload,
+            {view.code: view},
+        )
+
+        self.assertEqual(
+            ["open", "delete"],
+            [button["id"] for button in payload["components"][0]["buttons"]],
+        )
+
     def test_nested_layout_button_uses_parent_view_permission_code(self):
         operation_code = "sampleList_add_add_PATROL_1.0.0_sample_sampleList"
         parent_code = "PATROL_1.0.0_sample_sampleLayout"

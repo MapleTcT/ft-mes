@@ -1755,6 +1755,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/QCS/testPlan/inspectPlan/manuInspPlanList/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/QCS/testPlan/inspectPlan/manuInspPlanList/platform-common-zh_CN.properties",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/RM/formula/editor.html",
       "state": "tracked",
       "tracked": true
@@ -3670,6 +3682,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/postgres/init/217-feitian-login-branding.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/218-qcs-core-interaction-runtime.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -6381,6 +6399,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/qcs-interaction-round1-20260729.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/standard-core-flow-acceptance-20260728.md",
       "state": "tracked",
       "tracked": true
@@ -7870,6 +7894,24 @@
     {
       "ignored": false,
       "path": "metadata/qcs-inspect-list-display-current.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-interaction-round1-application-edit.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-interaction-round1-application-list.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-interaction-round1-inspection-plan.png",
       "state": "tracked",
       "tracked": true
     },
@@ -11894,16 +11936,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 693
+      "tracked": 696
     },
     "docs": {
-      "tracked": 155
+      "tracked": 156
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 276
+      "tracked": 279
     },
     "package.json": {
       "tracked": 1
@@ -11927,8 +11969,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1978,
-    "tracked": 1978,
+    "totalFiles": 1985,
+    "tracked": 1985,
     "untracked": 0
   },
   "untrackedByDirectory": []

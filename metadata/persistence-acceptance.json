@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-28T12:29:54+08:00",
-  "repoCommit": "66ff8a5c16aa50c88667597ec8c59fe49b474243+working-tree-factory-line-runtime",
+  "generatedAt": "2026-07-29T18:45:00+08:00",
+  "repoCommit": "094c50dbfb725802f11fe9342695e839f45b2ad7+working-tree-qcs-interaction-round1",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -27,6 +27,12 @@
       "marker": "ADP_E2E_20260721032600_QCS_UNQLF",
       "evidence": "metadata/qcs-report-chain-unqualified-current.json",
       "assertions": "list/edit/view rendered; report 99/不合格; WOM task/wait/exelog unqualified; batch unavailable; treatment document created; browser errors 0; cleanup 0/0/0/0/0/0/0"
+    },
+    "qcsInteractionRound1": {
+      "status": "PASS_READ_ONLY_AND_NO_SELECTION_GUARDS",
+      "marker": "",
+      "evidence": "docs/testing/qcs-interaction-round1-20260729.md",
+      "assertions": "Real QCS application list exposed open/close/bulk-submit/delete and 13 rows; application edit, report edit, unqualified treatment and emergency release rendered; inspection-plan empty state exposed the retained actions; no-selection feedback was translated; browser error arrays were zero; four runtime and product layout payloads were non-null; no business write request was issued."
     },
     "materialWms": {
       "status": "PASS",
@@ -258,11 +264,11 @@
     }
   },
   "summary": {
-    "testedFeatures": 294,
+    "testedFeatures": 295,
     "pass": 287,
     "fail": 0,
     "blocked": 0,
-    "notApplicable": 7
+    "notApplicable": 8
   },
   "items": [
     {
@@ -6403,9 +6409,35 @@
       "status": "NOT_APPLICABLE",
       "evidence": "All five real pages rendered the retained marker, tonne unit, intermediate batches and WMS event labels. Console errors, page errors, bad responses and request failures were all zero.",
       "issues": []
+    },
+    {
+      "acceptanceSet": "qcs-interaction-round1",
+      "module": "QCS 质检申请、报告、处置、放行与检验记录交互",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList; /msService/QCS/inspect/inspect/manuInspectEdit; /msService/QCS/inspectReport/inspectReport/manuInspReportEdit; /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealEdit; /msService/QCS/inspectRelease/inspectRelease/manuInspReleaseView; /msService/QCS/testPlan/inspectPlan/manuInspPlanList",
+      "operation": "真实浏览器读取既有单据，复验恢复的列表动作、申请编辑布局、空态检验记录和未选行防误操作中文提示",
+      "api": "GET /msService/baseService/view/layoutJson; QCS list/data read requests",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "baseService runtime view -> QCS inspect/report/treatment/release read services -> GreenDill renderer",
+      "tables": [
+        "public.runtime_extra_view",
+        "public.ec_extra_view"
+      ],
+      "marker": "",
+      "verificationSql": "Select the four QCS view codes from runtime_extra_view and ec_extra_view; require non-null view_json and non-zero payload size. No business-write request is expected from read-only or no-selection actions.",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Application list loaded 13 rows and four actions; application edit, report edit, unqualified treatment and emergency release rendered; inspection-plan list showed retained actions; both no-selection actions displayed translated feedback; console/page/request/HTTP error arrays were zero. Runtime payload sizes were 115879/45400/75315/45594 bytes and recent baseService logs contained no related NPE or SQL grammar error.",
+      "issues": [
+        "The inspection-plan list currently contains zero rows, so updatePlanLastTestDate, updatePlanCountNum and delete persistence require a separate controlled-data acceptance."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "",
+      "artifact": "docs/testing/qcs-interaction-round1-20260729.md",
+      "summary": "Real QCS pages on 10.11.100.17 restored application edit/list interactions and translated no-selection feedback with zero browser errors; four runtime/product view payloads were non-null, and no business write was attempted."
+    },
     {
       "marker": "ADP_E2E_20260728042954_FACTORY_LINE",
       "artifact": "/tmp/adp-factory-line-persistence-ui-acceptance.json",

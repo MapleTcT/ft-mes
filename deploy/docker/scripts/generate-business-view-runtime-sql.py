@@ -105,6 +105,10 @@ DATAGRID_RUNTIME_OVERRIDES: Dict[str, Dict[str, Any]] = {
     },
 }
 
+PACKAGED_BUTTON_SUPPLEMENT_VIEW_CODES = {
+    "QCS_5.0.0.0_inspect_manuInspectList",
+}
+
 MAKE_TASK_BUSINESS_TAB_RESTORE = """
 (function restoreMakeTaskBusinessTabs(attempt) {
     setTimeout(function () {
@@ -632,6 +636,12 @@ def normalize_packaged_runtime_payload(value: Any) -> Any:
 
         operation_code = str(node.get("buttonoperationcode") or "").strip()
         if operation_code:
+            raw_funcname = str(node.get("funcname") or "").strip()
+            onclick = canonical_button_onclick(raw_funcname)
+            if onclick and re.search(r"(?:^|['\"])nction\s+", raw_funcname):
+                node["funcname"] = f"onclick='{onclick}'"
+                node["onclick"] = onclick
+                node["ONCLICK"] = onclick
             node["CODE"] = operation_code
             if bool_text(str(node.get("ispermission") or "false")):
                 # Nested packaged views already carry the parent-qualified
@@ -699,9 +709,15 @@ def canonical_button_onclick(funcname: str) -> str:
         return ""
     match = re.search(r"onclick\s*=\s*['\"]([^'\"]+)['\"]", value)
     if match:
-        return match.group(1).strip()
-    if value.startswith("onclick="):
-        return value.split("=", 1)[-1].strip().strip("'\"")
+        value = match.group(1).strip()
+    elif value.startswith("onclick="):
+        value = value.split("=", 1)[-1].strip().strip("'\"")
+    truncated_function = re.fullmatch(
+        r"nction\s+([A-Za-z_$][A-Za-z0-9_$]*\s*\([^)]*\))\s*;?",
+        value,
+    )
+    if truncated_function:
+        return truncated_function.group(1).strip()
     return value
 
 
@@ -758,6 +774,11 @@ def button_payload(button_item: ET.Element, views: Optional[Dict[str, "ViewDef"]
     operation_code = str(result.get("buttonoperationcode") or result.get("id") or "").strip()
     onclick = canonical_button_onclick(str(result.get("funcname") or ""))
     if onclick:
+        if re.search(
+            r"(?:^|['\"])nction\s+",
+            str(result.get("funcname") or "").strip(),
+        ):
+            result["funcname"] = f"onclick='{onclick}'"
         result["onclick"] = onclick
         result["ONCLICK"] = onclick
     if operation_code:
@@ -1822,6 +1843,62 @@ def apply_datagrid_runtime_overrides(view: ViewDef, payload: Any) -> None:
         target.update(copy.deepcopy(overrides))
 
 
+def supplement_packaged_datagrid_buttons(
+    view: ViewDef,
+    payload: Any,
+    views: Optional[Dict[str, ViewDef]] = None,
+) -> None:
+    if view.code not in PACKAGED_BUTTON_SUPPLEMENT_VIEW_CODES:
+        return
+
+    source_buttons = extract_buttons(view, views)
+    if not source_buttons:
+        return
+
+    expected_grid_code = first_datagrid_code(view) or view.code
+    candidates: List[Dict[str, Any]] = []
+
+    def visit(node: Any) -> None:
+        if isinstance(node, list):
+            for child in node:
+                visit(child)
+            return
+        if not isinstance(node, dict):
+            return
+        if node.get("type") == "layoutDatagrid":
+            candidates.append(node)
+        for child in node.values():
+            visit(child)
+
+    visit(payload)
+    target = next(
+        (
+            candidate
+            for candidate in candidates
+            if candidate.get("DataGridCode") == expected_grid_code
+            or candidate.get("code") == expected_grid_code
+        ),
+        candidates[0] if candidates else None,
+    )
+    if target is None:
+        return
+
+    buttons = target.get("buttons")
+    if not isinstance(buttons, list):
+        buttons = []
+        target["buttons"] = buttons
+    existing_keys = {
+        str(button.get("buttonoperationcode") or button.get("id") or "").strip()
+        for button in buttons
+        if isinstance(button, dict)
+    }
+    for button in source_buttons:
+        key = str(button.get("buttonoperationcode") or button.get("id") or "").strip()
+        if key and key not in existing_keys:
+            buttons.append(copy.deepcopy(button))
+            existing_keys.add(key)
+
+
 def apply_view_runtime_overrides(view: ViewDef, payload: Any) -> None:
     namekey_fallbacks = VIEW_NAMEKEY_FALLBACKS.get(view.code, {})
     if namekey_fallbacks:
@@ -2332,6 +2409,7 @@ def view_json(
         payload = action_view_json(view, views)
     else:
         payload = list_json(view, views=views)
+    supplement_packaged_datagrid_buttons(view, payload, views)
     apply_datagrid_runtime_overrides(view, payload)
     apply_view_runtime_overrides(view, payload)
     sanitize_runtime_strings(payload)

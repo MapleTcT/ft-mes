@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-29T07:28:25+00:00",
-  "repoCommit": "bc2e275b71ca572dc536ddaefe40123a5b77acf7",
+  "generatedAt": "2026-07-29T11:20:44+00:00",
+  "repoCommit": "094c50dbfb725802f11fe9342695e839f45b2ad7",
   "findingCount": 1632,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
@@ -9286,7 +9286,7 @@
     },
     {
       "file": "deploy/docker/scripts/test_generate_business_view_runtime_sql.py",
-      "line": 570,
+      "line": 620,
       "pattern": "oracle-keyword",
       "category": "postgres-conversion-tooling",
       "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",
@@ -10146,7 +10146,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `294` 项，其中 `287 PASS / 0 FAIL / 0 BLOCKED / 7 NOT_APPLICABLE`。"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `295` 项，其中 `287 PASS / 0 FAIL / 0 BLOCKED / 8 NOT_APPLICABLE`。"
     },
     {
       "file": "docs/project-objectives.md",

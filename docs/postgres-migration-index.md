@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`217`。
-- 编号范围：`001` 到 `217`。
+- 脚本数量：`218`。
+- 编号范围：`001` 到 `218`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -21,12 +21,12 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 37 |
-| business | 40 |
+| business | 41 |
 | compatibility | 80 |
 | configuration | 50 |
 | general | 42 |
 | notification | 9 |
-| platform | 64 |
+| platform | 65 |
 | workflow | 21 |
 
 ## 语句统计
@@ -38,18 +38,18 @@
 | create-index | 1016 |
 | create-table | 582 |
 | create-view | 143 |
-| insert | 11050 |
-| update | 11162 |
+| insert | 11062 |
+| update | 11174 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 245 |
-| do-block | 412 |
+| do-block | 416 |
 | if-exists | 132 |
 | if-not-exists | 13057 |
-| on-conflict | 10983 |
+| on-conflict | 10995 |
 | to-regclass | 220 |
 | where-not-exists | 45 |
 
@@ -274,6 +274,7 @@
 | 215 | 215-hierarchicalmod-factory-tree-runtime.sql | platform | 124 | insert:9, update:9 | 12 | - |
 | 216 | 216-hierarchicalmod-factory-node-type-customer-condition.sql | general | 92 | insert:2, update:2 | 2 | - |
 | 217 | 217-feitian-login-branding.sql | general | 24 | update:1 | 1 | - |
+| 218 | 218-qcs-core-interaction-runtime.sql | platform, business | 163 | insert:12, update:12 | 16 | - |
 
 ## 规则
 

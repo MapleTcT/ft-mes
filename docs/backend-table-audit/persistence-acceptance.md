@@ -1273,6 +1273,20 @@ WOM 核心补丁会在投料明细保存成功后、结束活动时按明细补�
 `docs/testing/fructose-line-pilot-acceptance.md`；机器证据见
 `metadata/fructose-line-pilot-acceptance.json`。
 
+### QCS 质检交互首轮修复（只读与防误操作）
+
+本轮没有修改 QCS 业务单据。真实页面只读取既有申请、报告、处置和放行单，并在未选中
+记录时点击申请批量提交、检验记录设置日期，验证前端在发出写请求前拦截。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 恢复并读取产品检验申请布局 | 产品检验申请列表与编辑页 | `GET /msService/baseService/view/layoutJson`；`GET /msService/QCS/inspect/inspect/data/{id}` | baseService runtime view + QCS inspect read service | `runtime_extra_view`、`ec_extra_view` | 查询四个 QCS view code 的 `view_json` 非空及 payload 长度 | 四个布局全部非空；编辑页完整显示，浏览器错误为 0；没有业务写请求 | NOT_APPLICABLE |
+| 申请列表未选行批量提交 | 产品检验申请列表 | 无，前端保护在请求前返回 | GreenDill list action | 无 | 浏览器确认 network 中没有写请求 | 显示“请选择一条记录进行操作！”，没有 QCS 业务表变化 | NOT_APPLICABLE |
+| 检验记录未选行设置日期 | 产品检验记录列表 | 无，前端保护在请求前返回 | GreenDill list action | 无 | 浏览器确认 network 中没有写请求 | 显示中文防误操作提示，console/page/request/HTTP 错误为 0 | NOT_APPLICABLE |
+
+详细证据见 `docs/testing/qcs-interaction-round1-20260729.md`。产品检验记录当前为 0 条，
+因此 `updatePlanLastTestDate`、`updatePlanCountNum` 和删除的真实字段变化尚未在本轮执行。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

@@ -1224,12 +1224,27 @@ marker `ADP_E2E_20260728042954_FACTORY_LINE` 新增
 完整模型、检验项目、SQL 和重跑入口见
 `docs/testing/fructose-line-pilot-acceptance.md`。
 
+### QCS 质检交互首轮修复（2026-07-29）
+
+本轮在唯一测试环境 `http://10.11.100.17:18080` 通过真实工作台复验产品检验申请、
+报告、不合格处理、紧急放行和检验记录页面。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| 产品检验申请 | `/msService/QCS/inspect/inspect/manuInspectList` | 加载 13 条记录，检查工具栏并点击未选行“批量提交” | layoutJson；列表 pending/query | 打开、关闭、批量提交、删除恢复；任务描述和未选行提示均为中文；浏览器错误为 0 | 未选行被前端拦截，没有业务写请求 | `runtime_extra_view`、`ec_extra_view` | PASS | 只验收防误操作，不改变保留业务单据 |
+| 产品检验申请编辑 | `/msService/QCS/inspect/inspect/manuInspectEdit?...` | 双击既有待检单并重载 | inspect data；layoutJson | 表单、质量标准、检验项目和流程动作完整显示；浏览器错误为 0 | 四个运行时布局均恢复为非空 | `runtime_extra_view`、`ec_extra_view` | PASS | 只读打开，不落业务表 |
+| 报告/不合格/紧急放行 | 三个真实待办编辑或查看路由 | 双击既有单据并重载 | 各页面 data/layout 请求 | 三页均显示真实业务字段；console/page/request/HTTP 错误为 0 | 读取既有 QCS 数据，无写请求 | QCS 业务只读表 | PASS | 无 |
+| 产品检验记录 | `/msService/QCS/testPlan/inspectPlan/manuInspPlanList` | 打开空列表并点击未选行“设置检测日期” | layoutJson；列表 query | 设置检测日期、设置已跳批、删除可见；中文防误操作提示正常；浏览器错误为 0 | 未选行被拦截，无业务写请求 | `runtime_extra_view`、`ec_extra_view` | PASS | 当前 0 条；真实设置/删除落库待受控数据专项 |
+
+完整步骤、SQL、修复边界和截图见
+`docs/testing/qcs-interaction-round1-20260729.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。
 - 基础配置中的系统编码、普通 app 系统配置、customProperty 映射、实体/模型元数据 CRUD、PostgreSQL 基础物理模型表生命周期，以及 TEXT 字段新增、托管普通索引/唯一约束生命周期、外部唯一索引保护、nullable/NOT NULL 生命周期、安全扩容、幂等和危险变更事务回滚均已完成真实页面/API/落库验收；系统配置内置目录已有只读 smoke，QCS/RM/BaseSet 各有受控单项配置和代表性业务回归。其他业务运行配置、自动删列、更广字段类型矩阵和 Nacos/Keycloak 生产配置链路仍需专项验收。
 - 生产模块当前已有 API/layout 与页面可达性 smoke，WOM 动作页渲染、列表动作、制造指令、报工、独立不良数量、请检、二维码生成与打印状态回填、QCS 合格/不合格处理、完工入库、ProcessAnalysis 追溯和 6 个生产列表导出均已完成真实前端与 PostgreSQL/文件响应验收。现场 Batch/DCS 联调作为生产切换门禁单独管理。
-- 生产/QCS 页面仍存在 `ec.common.tableNo` 这类 i18n key 外露，以及生效报告只读页未回显“检验结论”的显示问题；本轮未把它们误记为落库失败，后续需要补 i18n/resource 与只读表单绑定专项修复和复验。
+- 本轮复验的 QCS 申请、报告、处置、放行和检验记录路径已不再外露 `SupDatagrid.button.error`、`ec.list.taskDescription` 等资源键；检验记录当前没有业务行，因此设置检测日期、设置已跳批和删除的真实写入仍需受控数据专项。其他生产/QCS 页面若出现新的资源键，继续按页面逐项补齐，不把显示缺陷误记为落库失败。
 
 ## 记录要求
 

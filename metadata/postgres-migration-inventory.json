@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 217,
+  "migrationCount": 218,
   "firstNumber": 1,
-  "lastNumber": 217,
+  "lastNumber": 218,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -17,26 +17,26 @@
     "create-index": 1016,
     "create-table": 582,
     "create-view": 143,
-    "insert": 11050,
-    "update": 11162
+    "insert": 11062,
+    "update": 11174
   },
   "idempotencySignalTotals": {
     "create-or-replace": 245,
-    "do-block": 412,
+    "do-block": 416,
     "if-exists": 132,
     "if-not-exists": 13057,
-    "on-conflict": 10983,
+    "on-conflict": 10995,
     "to-regclass": 220,
     "where-not-exists": 45
   },
   "tagTotals": {
     "auth-rbac-org": 37,
-    "business": 40,
+    "business": 41,
     "compatibility": 80,
     "configuration": 50,
     "general": 42,
     "notification": 9,
-    "platform": 64,
+    "platform": 65,
     "workflow": 21
   },
   "migrations": [
@@ -8154,6 +8154,40 @@
         "if-not-exists": 0,
         "on-conflict": 0,
         "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/218-qcs-core-interaction-runtime.sql",
+      "name": "218-qcs-core-interaction-runtime.sql",
+      "number": 218,
+      "slug": "qcs-core-interaction-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 163,
+      "sha256": "3245cf32b5fb9dcfb11e1d6ef33e91c1c4da52fec050f335f5a80df0511b411e",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 12,
+        "update": 12
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 12,
+        "do-block": 4,
         "to-regclass": 0,
         "create-or-replace": 0,
         "where-not-exists": 0

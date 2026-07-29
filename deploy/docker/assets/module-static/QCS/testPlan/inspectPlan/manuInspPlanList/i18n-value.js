@@ -1,30 +1,25 @@
 // Generated from platform-common-zh_CN.properties; do not edit by hand.
 window.InternationalResource = window.InternationalResource || {};
-window.InternationalResource["ec.common.tableNo"] = "单据编号";
-window.InternationalResource["ec.list.taskDescription"] = "任务描述";
 window.InternationalResource["SupDatagrid.button.error"] = "请选择一条记录进行操作！";
 window.InternationalResource["SupDatagrid.button.tit"] = "提示";
-window.InternationalResource["QCS.Inspect.operate.warn.inspectStatusHasBeenOpened"] = "第{0}行的单据已打开！";
-window.InternationalResource["QCS.Inspect.operate.warn.inspectStatusHasBeenClosed"] = "第{0}行的单据已关闭！";
-window.InternationalResource["QCS.Inspect.operate.warn.inspectStatusIneffective"] = "第{0}行的单据未生效！";
-window.InternationalResource["EditView.notice.operate.success"] = "处理成功！";
-window.InternationalResource["EditView.ButtonHead.modal.confirm"] = "确认";
-window.InternationalResource["QCS.inspect.operate.open"] = "确定打开吗？";
-window.InternationalResource["QCS.inspect.operate.close"] = "确定关闭吗？";
+window.InternationalResource["foundation.data.cross.company"] = "第{0}行数据为非本公司数据，无法操作！";
+window.InternationalResource["LIMSBasic.viewdisplayName.randon1614081910119"] = "检测频率参照";
+window.InternationalResource["Button.text.select"] = "选择";
+window.InternationalResource["Reference.confirm.tip.message"] = "请至少选中一行！";
 window.InternationalResource["Button.text.close"] = "关闭";
 window.InternationalResource["Button.text.cancel"] = "取消";
-window.InternationalResource["Button.text.ok"] = "确定";
-window.InternationalResource["foundation.data.cross.company"] = "第{0}行数据为非本公司数据，无法操作！";
-window.InternationalResource["QCS.custom.random1615272497454"] = "存在生效的单据，编号为{0}，不允许批量提交！";
-window.InternationalResource["QCS.custom.random1615272550801"] = "存在状态不一致的单据，不允许批量提交！";
-window.InternationalResource["QCS.custom.random1615281826558"] = "无待办的单据有：{0}";
-window.InternationalResource["foundation.common.dealandrefreshsuccessful"] = "处理成功！正在刷新...";
-window.InternationalResource["LIMSSample.sample.sampleCom.notAllowedToSubmit"] = "检测分项【{0}】多项结果未录入完成，不允许提交！";
-window.InternationalResource["QCS.custom.random1622532409498"] = "未选择检验项目，是否确认跳过本次检验？";
+window.InternationalResource["Button.text.save"] = "保存";
+window.InternationalResource["LIMSBasic.viewtitle.randon1614163932466"] = "设置检测日期";
+window.InternationalResource["EditView.notice.operate.success"] = "处理成功！";
+window.InternationalResource["Notification.message.title.info"] = "提示";
+window.InternationalResource["LIMSBasic.viewtitle.randon1615774477306"] = "设置已跳批";
+window.InternationalResource["LIMSBasic.custom.countNumberRangeError"] = "{0}值不正确，最小值为{1}";
+window.InternationalResource["LIMSBasic.selectedRowsAreNotBatch"] = "请选择频率为按批的记录进行操作！";
+window.InternationalResource["QCS.custom.random1624424081281"] = "请选择频率类型为按间隔且按批的记录进行操作！";
 
-(function installQCS_MANU_INSPECT_LISTI18nCompatibility(resources) {
-  var patchFlag = "__adpModuleI18nPatched_QCS_MANU_INSPECT_LIST";
-  var observerFlag = "__adpModuleI18nObserver_QCS_MANU_INSPECT_LIST";
+(function installQCS_MANU_INSP_PLAN_LISTI18nCompatibility(resources) {
+  var patchFlag = "__adpModuleI18nPatched_QCS_MANU_INSP_PLAN_LIST";
+  var observerFlag = "__adpModuleI18nObserver_QCS_MANU_INSP_PLAN_LIST";
   var attempts = 0;
 
   function accessibleWindows() {

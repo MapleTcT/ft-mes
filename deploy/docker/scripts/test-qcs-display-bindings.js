@@ -15,6 +15,9 @@ const nginx = read("deploy/docker/nginx/adp.conf");
 const listI18n = read(
   "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectList/i18n-value.js"
 );
+const planListI18n = read(
+  "deploy/docker/assets/module-static/QCS/testPlan/inspectPlan/manuInspPlanList/i18n-value.js"
+);
 const reportViewI18n = read(
   "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportView/i18n-value.js"
 );
@@ -52,8 +55,30 @@ assert(
   "QCS list i18n asset must translate the document-number header"
 );
 assert(
+  listI18n.includes(
+    'window.InternationalResource["SupDatagrid.button.error"] = "请选择一条记录进行操作！";'
+  ) &&
+    listI18n.includes(
+      'window.InternationalResource["ec.list.taskDescription"] = "任务描述";'
+    ),
+  "QCS list i18n asset must translate action feedback and workflow headers"
+);
+assert(
   listI18n.includes("installQCS_MANU_INSPECT_LISTI18nCompatibility"),
   "QCS list i18n asset must install the cross-frame compatibility fallback"
+);
+assert(
+  nginx.includes(
+    "location = /greenDill/static/QCS/testPlan/inspectPlan/manuInspPlanList/i18n-value.js"
+  ),
+  "QCS inspection-plan i18n asset must have an exact no-cache nginx route"
+);
+assert(
+  planListI18n.includes(
+    'window.InternationalResource["SupDatagrid.button.error"] = "请选择一条记录进行操作！";'
+  ) &&
+    planListI18n.includes("installQCS_MANU_INSP_PLAN_LISTI18nCompatibility"),
+  "QCS inspection-plan actions must install translated feedback resources"
 );
 assert(
   nginx.includes(
