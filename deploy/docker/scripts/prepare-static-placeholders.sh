@@ -3,28 +3,39 @@ set -eu
 
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/../../.." && pwd)
 STATIC_ROOT="${ADP_STATIC_ROOT:-$ROOT_DIR/runtime/bap-server/bap-workspace/bap-static}"
+BRANDING_ROOT="$ROOT_DIR/deploy/docker/assets/branding"
 
-write_placeholder() {
-  target="$1"
-  message="$2"
-  mkdir -p "$(dirname "$target")"
-  if [ ! -f "$target" ]; then
-    printf '%s\n' "$message" > "$target"
+install_branding_file() {
+  source_file="$1"
+  target_file="$2"
+  if [ ! -f "$source_file" ]; then
+    echo "Branding source not found: $source_file" >&2
+    exit 1
   fi
+  mkdir -p "$(dirname "$target_file")"
+  cp "$source_file" "$target_file"
 }
 
-write_placeholder \
-  "$STATIC_ROOT/bap/static/adp-custom/login/script/index.js" \
-  "// Docker test placeholder for optional login customization."
+install_branding_file \
+  "$BRANDING_ROOT/login.css" \
+  "$STATIC_ROOT/bap/static/adp-custom/login/style/index.css"
 
-write_placeholder \
-  "$STATIC_ROOT/bap/static/adp-custom/login/style/index.css" \
-  "/* Docker test placeholder for optional login styling. */"
+install_branding_file \
+  "$BRANDING_ROOT/login.js" \
+  "$STATIC_ROOT/bap/static/adp-custom/login/script/index.js"
 
-write_placeholder \
-  "$STATIC_ROOT/bap/static/adp-custom/homepage/script/index.js" \
-  "// Docker test placeholder for optional homepage customization."
+install_branding_file \
+  "$BRANDING_ROOT/homepage.css" \
+  "$STATIC_ROOT/bap/static/adp-custom/homepage/style/index.css"
 
-write_placeholder \
-  "$STATIC_ROOT/bap/static/adp-custom/homepage/style/index.css" \
-  "/* Docker test placeholder for optional homepage styling. */"
+install_branding_file \
+  "$BRANDING_ROOT/homepage.js" \
+  "$STATIC_ROOT/bap/static/adp-custom/homepage/script/index.js"
+
+install_branding_file \
+  "$BRANDING_ROOT/feitian-logo-login.png" \
+  "$STATIC_ROOT/bap/static/adp-custom/branding/feitian-logo-login.png"
+
+install_branding_file \
+  "$BRANDING_ROOT/feitian-logo-title.png" \
+  "$STATIC_ROOT/bap/static/adp-custom/branding/feitian-logo-title.png"

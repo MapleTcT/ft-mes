@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`216`。
-- 编号范围：`001` 到 `216`。
+- 脚本数量：`217`。
+- 编号范围：`001` 到 `217`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -24,7 +24,7 @@
 | business | 40 |
 | compatibility | 80 |
 | configuration | 50 |
-| general | 41 |
+| general | 42 |
 | notification | 9 |
 | platform | 64 |
 | workflow | 21 |
@@ -39,14 +39,14 @@
 | create-table | 582 |
 | create-view | 143 |
 | insert | 11050 |
-| update | 11161 |
+| update | 11162 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 245 |
-| do-block | 411 |
+| do-block | 412 |
 | if-exists | 132 |
 | if-not-exists | 13057 |
 | on-conflict | 10983 |
@@ -273,6 +273,7 @@
 | 214 | 214-hierarchicalmod-factory-model-mne-code-compat.sql | configuration, compatibility | 120 | create-table:1, create-function:1, create-index:4, alter-table:2, update:2 | 11 | watch:1 |
 | 215 | 215-hierarchicalmod-factory-tree-runtime.sql | platform | 124 | insert:9, update:9 | 12 | - |
 | 216 | 216-hierarchicalmod-factory-node-type-customer-condition.sql | general | 92 | insert:2, update:2 | 2 | - |
+| 217 | 217-feitian-login-branding.sql | general | 24 | update:1 | 1 | - |
 
 ## 规则
 

@@ -1,0 +1,11 @@
+#v3_logo {
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: 156px auto !important;
+  filter: brightness(0) invert(1);
+}
+
+body.v3_menu_collapsed #v3_logo {
+  background-position: left center !important;
+  background-size: 100px auto !important;
+}

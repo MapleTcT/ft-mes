@@ -39,6 +39,12 @@ docker compose --env-file .env restart nginx
 docker compose --env-file .env ps
 ```
 
+`prepare-static-placeholders.sh` also installs the repository-managed Feitian
+login and homepage branding from `deploy/docker/assets/branding`. Apply
+`postgres/init/217-feitian-login-branding.sql` when upgrading an existing
+PostgreSQL volume so the theme API returns the matching asset paths and product
+title.
+
 `prepare-runtime-patches.sh` 会调用 WOM 核心补丁构建器。默认源码目录是当前仓库同级的
 `mes-modules-source-repo/modules/wom/WOM_6.1.3.4`；其他布局可通过
 `ADP_WOM_PRODUCE_TASK_SERVICE_SOURCE_FILE` 和 `ADP_WOM_WAIT_PUT_SERVICE_SOURCE_FILE`

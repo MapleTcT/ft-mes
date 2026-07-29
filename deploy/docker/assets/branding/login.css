@@ -1,0 +1,158 @@
+#logo {
+  top: 28px;
+  left: 32px;
+  z-index: 3;
+}
+
+#logo img {
+  width: 190px;
+  height: auto;
+  filter: brightness(0) invert(1);
+  opacity: 0.98;
+}
+
+#slogan {
+  top: 50%;
+  left: 50%;
+  width: 58%;
+  max-width: 680px;
+  transform: translate(-50%, -50%);
+}
+
+#slogan img {
+  width: 100%;
+  height: auto;
+  transform: none;
+  filter: brightness(0) invert(1);
+  opacity: 0.98;
+}
+
+.feitian-login-accent {
+  display: flex;
+  width: 108px;
+  height: 4px;
+  margin-top: 28px;
+}
+
+.feitian-login-accent span {
+  flex: 1;
+}
+
+.feitian-login-accent span:nth-child(1) {
+  background: #f18800;
+}
+
+.feitian-login-accent span:nth-child(2) {
+  background: #009b4a;
+}
+
+.feitian-login-accent span:nth-child(3) {
+  background: #074da2;
+}
+
+.feitian-login-system-title {
+  margin-top: 22px;
+  color: #fff;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 46px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-shadow: 0 2px 12px rgba(0, 35, 76, 0.35);
+}
+
+.feitian-login-system-subtitle {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.88);
+  font-family: Arial, "Microsoft YaHei", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+#content {
+  background: rgba(238, 247, 253, 0.82);
+  border-left: 1px solid rgba(255, 255, 255, 0.42);
+}
+
+#login-form {
+  width: 64%;
+  min-width: 300px;
+  max-width: 360px;
+}
+
+.login-title {
+  color: #17344f;
+}
+
+.login-input:focus,
+.login-input:hover {
+  border-color: #0756a4;
+}
+
+.login-btn button {
+  background: #0756a4;
+}
+
+.login-btn button:hover {
+  background: #087d4c;
+}
+
+.login-btn button:active {
+  background: #064584;
+}
+
+#login-copyright {
+  display: block;
+  bottom: 22px;
+  color: #36516a;
+}
+
+@media (max-width: 1100px) {
+  #left-content {
+    right: 40%;
+  }
+
+  #content {
+    width: 40%;
+  }
+
+  #slogan {
+    width: 68%;
+  }
+
+  .feitian-login-system-title {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 720px) {
+  #left-content {
+    display: none;
+  }
+
+  #content {
+    width: 100%;
+    background: rgba(240, 248, 253, 0.9);
+  }
+
+  #logo {
+    top: 24px;
+    left: 24px;
+  }
+
+  #logo img {
+    width: 170px;
+    filter: none;
+  }
+
+  #login-form {
+    width: 78%;
+    min-width: 0;
+    max-width: 360px;
+  }
+
+  #login-copyright {
+    padding: 0 24px;
+  }
+}

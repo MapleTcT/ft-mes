@@ -3669,6 +3669,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/217-feitian-login-branding.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -11888,7 +11894,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 692
+      "tracked": 693
     },
     "docs": {
       "tracked": 155
@@ -11921,8 +11927,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1977,
-    "tracked": 1977,
+    "totalFiles": 1978,
+    "tracked": 1978,
     "untracked": 0
   },
   "untrackedByDirectory": []

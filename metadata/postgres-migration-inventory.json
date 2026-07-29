@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 216,
+  "migrationCount": 217,
   "firstNumber": 1,
-  "lastNumber": 216,
+  "lastNumber": 217,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -18,11 +18,11 @@
     "create-table": 582,
     "create-view": 143,
     "insert": 11050,
-    "update": 11161
+    "update": 11162
   },
   "idempotencySignalTotals": {
     "create-or-replace": 245,
-    "do-block": 411,
+    "do-block": 412,
     "if-exists": 132,
     "if-not-exists": 13057,
     "on-conflict": 10983,
@@ -34,7 +34,7 @@
     "business": 40,
     "compatibility": 80,
     "configuration": 50,
-    "general": 41,
+    "general": 42,
     "notification": 9,
     "platform": 64,
     "workflow": 21
@@ -8121,6 +8121,39 @@
         "if-not-exists": 0,
         "on-conflict": 2,
         "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/217-feitian-login-branding.sql",
+      "name": "217-feitian-login-branding.sql",
+      "number": 217,
+      "slug": "feitian-login-branding",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 24,
+      "sha256": "3ae103318d8f761e72b2de6451d1fa874052cd0b24a8aa64ae3b2bf0b90a8093",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
         "to-regclass": 0,
         "create-or-replace": 0,
         "where-not-exists": 0

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-28T14:37:24+00:00",
-  "repoCommit": "dc56ed8f32bbae0cef472ce5ea7383a7f81c0e3c",
+  "generatedAt": "2026-07-29T07:28:25+00:00",
+  "repoCommit": "bc2e275b71ca572dc536ddaefe40123a5b77acf7",
   "findingCount": 1632,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
@@ -4214,7 +4214,7 @@
     },
     {
       "file": "deploy/docker/README.md",
-      "line": 114,
+      "line": 120,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
