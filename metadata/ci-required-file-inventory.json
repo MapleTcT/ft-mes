@@ -7689,6 +7689,18 @@
     },
     {
       "ignored": false,
+      "path": "metadata/organization-person-add-entry-20260730.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/organization-person-add-entry-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/patrol-area-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -11963,7 +11975,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 280
+      "tracked": 282
     },
     "package.json": {
       "tracked": 1
@@ -11987,8 +11999,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1988,
-    "tracked": 1988,
+    "totalFiles": 1990,
+    "tracked": 1990,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -1246,6 +1246,23 @@ marker `ADP_E2E_20260728042954_FACTORY_LINE` 新增
 完整步骤、SQL、修复边界和截图见
 `docs/testing/qcs-interaction-round1-20260729.md`。
 
+### 企业组织架构新增入口复验（2026-07-30）
+
+本轮在唯一测试环境 `http://10.11.100.17:18080` 复现“人员管理没有新增按钮”。
+权限接口确认 `admin` 已同时拥有 `personmanage/addPerson`、
+`organizationmanage/addDepartment` 和 `organizationmanage/addPosition`。根因不是 RBAC：
+旧版产品将 `人员管理 -> 部门`定义为人员查看/筛选入口，只有选中有效岗位后才显示
+“新增人员”；复验前默认公司有 4 个部门但没有有效岗位。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| 人员管理-部门视图 | `/organization/#/personmanage` | 切换“部门”，选择“办公室” | `GET /inter-api/organization/v1/department/person`；`GET /inter-api/rbac/v1/userPermission/findUserOperate?menuInfoCode=personmanage` | 部门视图加载正常，只显示查看、导出等部门维度操作；浏览器四类错误为 0 | 权限返回包含 `addPerson`；该视图不执行新增写入 | 不适用 | NOT_APPLICABLE | 部门视图不是部门维护或人员新增入口 |
+| 组织管理-岗位新增 | `/organization/#/organizationmanage` | 切换“岗位”，从真实部门参照选择“数智部”，新增 `MES_ADMIN / MES系统管理员` | `POST /inter-api/organization/v1/position` | 新增表单、部门参照和保存均正常；返回“新增成功”；浏览器四类错误为 0 | HTTP 200，返回岗位 ID `6713707099111760`；PostgreSQL 直查为有效岗位并关联数智部 | `org_position`、`org_position_mnecode` | PASS | 该岗位作为测试环境基础主数据保留 |
+| 人员管理-新增人员入口 | `/organization/#/personmanage` | 默认“岗位”页选择 `MES系统管理员`，点击“新增” | 人员列表与系统编码只读接口 | 右侧显示“新增、岗位调入、导出”；新增人员表单正常打开，主岗回填为 `MES系统管理员`；浏览器四类错误为 0 | 本轮没有保存人员，不产生人员业务写入 | 不适用 | PASS | 人员必须先归属有效岗位 |
+
+机器记录：`metadata/organization-person-add-entry-20260730.json`；页面截图：
+`metadata/organization-person-add-entry-20260730.png`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

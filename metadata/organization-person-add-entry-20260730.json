@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2026-07-30T00:50:07Z",
+  "repoCommitBeforeEvidence": "438f2a8111bb68b6c8896a3cb7a0f6798cb5c159",
+  "environment": "http://10.11.100.17:18080",
+  "database": "PostgreSQL",
+  "rootCause": {
+    "permissionMissing": false,
+    "personManageDepartmentMode": "read-and-filter-only",
+    "activeDepartmentCountBefore": 4,
+    "activePositionCountBefore": 0,
+    "requiredRelationship": "A new person must be attached to an active position."
+  },
+  "permissions": {
+    "personmanage": [
+      "transferPosition",
+      "addPerson",
+      "querypersonManager",
+      "offPosition",
+      "deletePerson",
+      "importPerson",
+      "updatePerson"
+    ],
+    "organizationmanage": [
+      "deleteDep",
+      "addDepartment",
+      "deletePos",
+      "getDepTree",
+      "updatePos",
+      "importPos",
+      "addPosition",
+      "updateDepartment",
+      "importOrg"
+    ]
+  },
+  "retainedMasterData": {
+    "id": 6713707099111760,
+    "code": "MES_ADMIN",
+    "name": "MES系统管理员",
+    "description": "MES平台管理与基础配置岗位",
+    "companyId": 1000,
+    "departmentId": 6586437390746128,
+    "departmentCode": "0101",
+    "departmentName": "数智部",
+    "valid": true
+  },
+  "request": {
+    "method": "POST",
+    "endpoint": "/inter-api/organization/v1/position",
+    "status": 200
+  },
+  "verificationSql": "select p.id,p.code,p.name,p.company_id,p.dep_id,p.valid,p.full_path,d.code,d.name from public.org_position p left join public.org_department d on d.id=p.dep_id where p.code='MES_ADMIN' order by p.create_time desc nulls last limit 1;",
+  "verificationResult": "6713707099111760|MES_ADMIN|MES系统管理员|1000|6586437390746128|1|/默认公司/MES系统管理员|0101|数智部",
+  "browserAcceptance": {
+    "route": "/organization/#/personmanage",
+    "selectedPosition": "MES系统管理员",
+    "visibleActions": [
+      "新增",
+      "岗位调入",
+      "导出"
+    ],
+    "addPersonDialogOpened": true,
+    "mainPositionPrefilled": "MES系统管理员",
+    "personSaved": false,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "httpErrors": 0,
+    "requestFailures": 0
+  },
+  "status": "PASS"
+}

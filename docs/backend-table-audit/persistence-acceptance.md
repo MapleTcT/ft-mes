@@ -1287,6 +1287,15 @@ WOM 核心补丁会在投料明细保存成功后、结束活动时按明细补�
 详细证据见 `docs/testing/qcs-interaction-round1-20260729.md`。产品检验记录当前为 0 条，
 因此 `updatePlanLastTestDate`、`updatePlanCountNum` 和删除的真实字段变化尚未在本轮执行。
 
+### 企业组织架构岗位基础数据补齐（2026-07-30）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 新增 MES 系统管理岗位 | `/organization/#/organizationmanage` 岗位页选择默认公司后点击新增，并从部门参照选择数智部 | `POST /inter-api/organization/v1/position` | `PositionInterController.addPosition -> PositionServiceImpl -> MyBatis Plus` | `org_position`、`org_position_mnecode` | `select p.id,p.code,p.name,p.company_id,p.dep_id,p.valid,p.full_path,d.code,d.name from public.org_position p left join public.org_department d on d.id=p.dep_id where p.code='MES_ADMIN' order by p.create_time desc nulls last limit 1;` | 请求载荷为 `code=MES_ADMIN`、`name=MES系统管理员`、`companyId=1000`、`depId=6586437390746128`；HTTP 200，返回 ID `6713707099111760`；数据库结果为 `6713707099111760/MES_ADMIN/MES系统管理员/1000/6586437390746128/valid=1/默认公司/MES系统管理员/0101/数智部` | PASS |
+
+该岗位是测试环境为解除“零岗位导致人员新增入口不可达”而保留的基础主数据，不是临时
+E2E marker。人员新增表单只打开未保存，因此没有新增 `org_person` 记录。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。
