@@ -7,14 +7,14 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-30T05:36:36+00:00` |
-| Repo Commit | `7f620448deffadbd96dd7eb49238520f23a56ec0` |
+| Generated At | `2026-07-30T09:03:48+00:00` |
+| Repo Commit | `7dfd8d15cf78d37625b8b5fc572902b32bb7991b` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
 | Ready / Partial / Blocked Goals | `9 / 11 / 1` |
 | Production Blocked Cases | `0` |
-| Production Backlog Items | `0` |
+| Production Backlog Items | `1` |
 | Business Dependency Status | `READY` |
 | Production Export Status | `READY` |
 | Production Export Ready / Action Required / Blocked | `6 / 0 / 0` |
@@ -49,6 +49,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | ID | Status | Category | Disposition | PostgreSQL Gap | PASS Criteria |
 | --- | --- | --- | --- | --- | --- |
+| `NOTIFY-001` | `FAIL_BACKLOG` | `false-success-api` | `module-backlog` | `False` | admin 真实在线并建立 WebSocket 后，WTS 动火票全流程仍正常封票且业务 API 保持 HTTP 200。<br>PostgreSQL 直接查询证明站内信任务全部成功送达，不再出现 send_status=0 或 all fail。 (+2) |
 
 ## Business Dependency Readiness
 

@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`223`。
-- 编号范围：`001` 到 `223`。
+- 脚本数量：`227`。
+- 编号范围：`001` 到 `227`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -20,12 +20,12 @@
 
 | Tag | Count |
 | --- | --- |
-| auth-rbac-org | 37 |
+| auth-rbac-org | 38 |
 | business | 46 |
-| compatibility | 84 |
-| configuration | 54 |
-| general | 42 |
-| notification | 9 |
+| compatibility | 85 |
+| configuration | 55 |
+| general | 43 |
+| notification | 10 |
 | platform | 66 |
 | workflow | 21 |
 
@@ -34,24 +34,24 @@
 | Statement | Count |
 | --- | --- |
 | alter-table | 10833 |
-| create-function | 112 |
-| create-index | 1016 |
-| create-table | 583 |
+| create-function | 114 |
+| create-index | 1017 |
+| create-table | 584 |
 | create-view | 143 |
-| insert | 11069 |
-| update | 11187 |
+| insert | 11070 |
+| update | 11188 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 252 |
-| do-block | 418 |
+| create-or-replace | 254 |
+| do-block | 419 |
 | if-exists | 141 |
-| if-not-exists | 13059 |
+| if-not-exists | 13063 |
 | on-conflict | 11001 |
 | to-regclass | 221 |
-| where-not-exists | 46 |
+| where-not-exists | 47 |
 
 ## 脚本清单
 
@@ -280,6 +280,10 @@
 | 221 | 221-wts-module-config-lob-compat.sql | business, compatibility | 280 | create-function:2, update:1 | 5 | watch:2 |
 | 222 | 222-qcs-configuration-lob-compat.sql | configuration, business, compatibility | 93 | create-function:1, update:1 | 3 | watch:1 |
 | 223 | 223-qcs-inspect-report-config-lob-compat.sql | configuration, business, compatibility | 235 | create-function:2, update:1 | 5 | watch:2 |
+| 224 | 224-teaminfo-admin-directory-permissions.sql | auth-rbac-org, configuration | 77 | insert:1 | 1 | - |
+| 225 | 225-oee-factory-tree-level-compat.sql | compatibility | 11 | update:1 | 0 | - |
+| 226 | 226-postgres-legacy-oid-bigint-like-operator.sql | general | 65 | create-function:2 | 5 | - |
+| 227 | 227-notification-mobile-device-token.sql | notification | 25 | create-table:1, create-index:1 | 2 | - |
 
 ## 规则
 

@@ -27,6 +27,14 @@
 > 4 个不物化为物料的设备活动、3 套共 9 个检验项目、24 个遥测事件/288 点，以及
 > 5 个无浏览器错误的页面。所有限值均为 `TEST_ONLY_DRAFT`，不能作为正式质量标准。
 
+> **2026-07-30 admin 目录全量扫描：** 652 个参考节点中 admin 可见 533 个，
+> 533/533 权限接口和按钮权限缺口检查通过；398 个可导航页面逐页真实浏览器扫描后为
+> 185 PASS、42 WARN、171 FAIL。171 个失败中 169 个是设备、计量、工具等旧包的
+> HTTP 200 空白页，不能算作可用功能。核心 MES、组织、RBAC、PATROL 和 WTS 代表写链
+> 已再次用唯一 marker 和 PostgreSQL 验收；消息中心列表已恢复，但 WTS 实时站内信和
+> 移动通知在 admin 在线场景仍发送失败，未计为可用。完整结果见
+> [admin 权限目录全量功能扫描](docs/admin-permission-functional-scan-20260730.md)。
+
 当前代码、本机目录、公司内网/Tailscale 入口、九个 BPI 页面、角色、交互、API、PostgreSQL 表和生产边界，
 统一见 [FT MES + BPI 当前项目地址与产品交互说明书](docs/product/ft-mes-bpi-product-interaction-manual.md)。
 本轮环境清理前的分支归并、迁移来源和保留目录见
@@ -388,6 +396,7 @@ Java 服务和 Web 默认分别只监听 `127.0.0.1:19091`、`127.0.0.1:18090`�
 
 | 验收面 | 当前证据 | 结论边界 |
 |---|---|---|
+| admin 权限目录与页面 | [完整扫描报告](docs/admin-permission-functional-scan-20260730.md)、[398 页/533 权限机器记录](metadata/admin-permission-directory-scan-20260730.json) | 权限配置 533/533；页面 185 PASS、42 WARN、171 FAIL，169 个旧包空白页仍未恢复 |
 | 拓扑/规则产品化 | [本地产品化验收](metadata/bpi-topology-rule-productization-acceptance.json)、[目标环境产品化验收](metadata/bpi-target-topology-rule-acceptance.json) | Flyway V1-V9、本地 PostgreSQL/浏览器和目标环境真实 ADP 页面/API/PostgreSQL/重启读取均通过；真实点位和产品级回退仍未覆盖 |
 | 点位目录准入与拓扑门禁 | [目标环境验收](metadata/bpi-point-catalog-readiness-acceptance.json) | Flyway V10-V12、真实页面/API/PostgreSQL/幂等/重启读取通过；控制 PASS，但试点设备当前仍 BLOCKED |
 | 点位目录自动同步 | [Kafka 同步验收](metadata/bpi-point-catalog-kafka-sync-acceptance.json) | JetLinks 权威目录、Protobuf、Kafka、MES 消费、PostgreSQL、DLT、重启幂等和真实浏览器读取通过；数据源仍 BLOCKED |

@@ -575,16 +575,19 @@ INSERT INTO public.hm_factory_models (
   id, version, valid, cid, create_staff_id, create_time, create_department_id,
   create_position_id, group_id, owner_staff_id, owner_department_id,
   owner_position_id, position_lay_rec, code, name, table_no, table_info_id,
-  working_type
+  working_type, lay_no, lay_rec, leaf
 ) VALUES (
   ${ids.workUnit}, 0, true, 1000, 1, now(), 1,
   1, 1000, 1, 1,
   1, '1', ${sqlLiteral(workUnitCode)}, ${sqlLiteral(workUnitName)}, ${sqlLiteral(`${marker}_WU_TN`)}, ${ids.workUnit},
-  'HierarchicalMod_workingType/notOccupied'
+  'HierarchicalMod_workingType/notOccupied', 1, ${sqlLiteral(`-${ids.workUnit}-`)}, 1
 ) ON CONFLICT (id) DO UPDATE SET
   valid = true,
   code = EXCLUDED.code,
   name = EXCLUDED.name,
+  lay_no = EXCLUDED.lay_no,
+  lay_rec = EXCLUDED.lay_rec,
+  leaf = EXCLUDED.leaf,
   working_type = EXCLUDED.working_type,
   modify_time = now();
 

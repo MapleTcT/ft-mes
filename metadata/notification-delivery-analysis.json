@@ -1,0 +1,73 @@
+{
+  "generatedAt": "2026-07-30T08:08:00.000Z",
+  "database": "PostgreSQL",
+  "environment": {
+    "apiBaseUrl": "http://10.11.100.17:18080",
+    "browserBaseUrl": "http://39.164.227.152:18080",
+    "user": "admin"
+  },
+  "id": "NOTIFY-001",
+  "status": "FAIL_NOTIFICATION_DELIVERY",
+  "marker": "ADP_E2E_20260730080536_WTS_FIREWORK",
+  "messageCenter": {
+    "status": "PASS",
+    "page": "/notification/#/messageCenter",
+    "taskApiAttempts": 10,
+    "taskApiPass": 10,
+    "durationMsRange": [
+      38,
+      150
+    ]
+  },
+  "businessFlow": {
+    "status": "PASS",
+    "terminalStatus": 99,
+    "jobStatus": "WTS_jobStatus/normalClose",
+    "activePendingTasks": 0
+  },
+  "onlineSession": {
+    "adminWebsocketConnections": 1,
+    "websocketPath": "/inter-api/ws/v1/notice/notification"
+  },
+  "databaseEvidence": {
+    "windowStart": "2026-07-30 08:05:36",
+    "windowEnd": "2026-07-30 08:06:02",
+    "stationLetter": {
+      "table": "notice_msg_stationletter202607",
+      "attempted": 7,
+      "failed": 7,
+      "sendStatus": 0
+    },
+    "mobile": {
+      "table": "notice_msg_mobile202607",
+      "attempted": 7,
+      "failed": 7,
+      "sendStatus": 0
+    }
+  },
+  "runtimeEvidence": {
+    "service": "msgmanagement",
+    "websocketResponseCode": 100113000,
+    "websocketResponseMessage": "all fail",
+    "stationLetterError": "站内信发送失败",
+    "mobileError": "send mobile failed",
+    "mobileException": "NullPointerException"
+  },
+  "fixedBoundaries": [
+    "duplicate legacy notification service registration removed from the default profile",
+    "NoticeProtocolMapper exposed only under the PostgreSQL mapper path",
+    "mobile_device_token table added",
+    "message-center topic and task queries restored"
+  ],
+  "unresolvedBoundaries": [
+    "online admin websocket is not accepted by the notification delivery path",
+    "legacy mobile failure handling dereferences an incomplete websocket response",
+    "notificationEngine.zip startup warning remains unproven as a causal factor"
+  ],
+  "passCriteria": [
+    "station-letter rows use send_status=1 and the online browser receives every workflow notification",
+    "mobile delivery succeeds for a registered device or returns an explicit no-device state without an exception",
+    "msgmanagement logs contain no all fail, NullPointerException, or database-structure error",
+    "message center, WTS terminal state, and notification monthly tables agree for a new marker"
+  ]
+}

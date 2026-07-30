@@ -20,6 +20,7 @@ const scenario = process.env.ADP_WTS_FIREWORK_SCENARIO || "close";
 if (!["close", "stop"].includes(scenario)) {
   throw new Error(`Unsupported ADP_WTS_FIREWORK_SCENARIO=${scenario}; expected close or stop`);
 }
+const resume = process.env.ADP_WTS_FIREWORK_RESUME === "true";
 const markerSuffix = scenario === "stop" ? "WTS_FIREWORK_STOP" : "WTS_FIREWORK";
 const marker = process.env.ADP_E2E_MARKER || `ADP_E2E_${nowToken}_${markerSuffix}`;
 const outputDir =
@@ -192,11 +193,7 @@ function sqlLiteral(value) {
 }
 
 function runRemote(command, input) {
-  const args = [
-    "-o",
-    "PreferredAuthentications=password",
-    "-o",
-    "PubkeyAuthentication=no",
+  const commonArgs = [
     "-o",
     "KexAlgorithms=curve25519-sha256",
     "-o",
@@ -209,18 +206,22 @@ function runRemote(command, input) {
     "StrictHostKeyChecking=no",
     "-o",
     "UserKnownHostsFile=/dev/null",
-    dbSshTarget,
-    command,
   ];
   if (dbSshPassword) {
-    return execFileSync("sshpass", ["-e", "ssh", ...args], {
+    const passwordArgs = [
+      "-o",
+      "PreferredAuthentications=password",
+      "-o",
+      "PubkeyAuthentication=no",
+    ];
+    return execFileSync("sshpass", ["-e", "ssh", ...passwordArgs, ...commonArgs, dbSshTarget, command], {
       input,
       encoding: "utf8",
       env: { ...process.env, SSHPASS: dbSshPassword },
       stdio: ["pipe", "pipe", "pipe"],
     });
   }
-  return execFileSync("ssh", ["-o", "BatchMode=yes", ...args], {
+  return execFileSync("ssh", ["-o", "BatchMode=yes", ...commonArgs, dbSshTarget, command], {
     input,
     encoding: "utf8",
     stdio: ["pipe", "pipe", "pipe"],
@@ -389,7 +390,7 @@ SELECT permit.id,
        permit.valid,
        permit.ticket_no,
        permit.ticket_type,
-       coalesce(permit.payload, ''),
+       coalesce(convert_from(lo_get(permit.payload), 'UTF8'), ''),
        ticket.id,
        ticket.version,
        ticket.valid,
@@ -464,21 +465,6 @@ function parseCreatedTicket(raw) {
     processKey,
     processVersion,
   };
-}
-
-function repairPermitPayloadSql(permitId, ticketId, workType) {
-  const key = String(workType || "ticket").replace(/^.*\//, "") || "ticket";
-  return `
-UPDATE public.wts_work_permits
-   SET payload = json_build_object(
-       'workTickets',
-       json_build_object(${sqlLiteral(key)}, ${ticketId})
-   )::text
- WHERE id = ${permitId};
-SELECT id, ticket_no, payload
-FROM public.wts_work_permits
-WHERE id = ${permitId};
-`;
 }
 
 function activePendingSql(tableInfoId, activityName) {
@@ -940,13 +926,27 @@ async function runBrowser(ticket, evidence) {
       processVersion: deploymentRow[1],
     };
 
-    evidence.operations.create.payload = createPayload(evidence.workflowDeployment.deploymentId);
-    evidence.operations.create.response = await appFetch(context.request, "POST", permitSubmitApi, evidence.operations.create.payload);
-    if (evidence.operations.create.response.status !== 200 || !evidence.operations.create.response.json) {
-      throw new Error(`permitUltraSubmit failed: ${JSON.stringify(evidence.operations.create.response).slice(0, 1000)}`);
-    }
-    if (evidence.operations.create.response.json.code !== 200) {
-      throw new Error(`permitUltraSubmit returned code ${evidence.operations.create.response.json.code}: ${evidence.operations.create.response.body}`);
+    if (resume) {
+      evidence.operations.create.skipped = true;
+      evidence.operations.create.reason = "ADP_WTS_FIREWORK_RESUME=true; continuing the existing marker";
+    } else {
+      evidence.operations.create.payload = createPayload(evidence.workflowDeployment.deploymentId);
+      evidence.operations.create.response = await appFetch(
+        context.request,
+        "POST",
+        permitSubmitApi,
+        evidence.operations.create.payload
+      );
+      if (evidence.operations.create.response.status !== 200 || !evidence.operations.create.response.json) {
+        throw new Error(
+          `permitUltraSubmit failed: ${JSON.stringify(evidence.operations.create.response).slice(0, 1000)}`
+        );
+      }
+      if (evidence.operations.create.response.json.code !== 200) {
+        throw new Error(
+          `permitUltraSubmit returned code ${evidence.operations.create.response.json.code}: ${evidence.operations.create.response.body}`
+        );
+      }
     }
 
     const createdRaw = runSql(createdTicketSql());
@@ -959,22 +959,48 @@ async function runBrowser(ticket, evidence) {
     if (created.valid !== "t" || created.permitValid !== "t") {
       throw new Error(`Created WTS ticket/permit not valid=true: ${createdRaw}`);
     }
-    if (created.jobStatus !== "WTS_jobStatus/readyPerform") {
+    if (!resume && created.jobStatus !== "WTS_jobStatus/readyPerform") {
       throw new Error(`Created WTS ticket expected readyPerform, got ${created.jobStatus}`);
     }
-    const payloadRepairSql = repairPermitPayloadSql(created.permitId, created.id, created.workType);
-    const payloadRepairRaw = runSql(payloadRepairSql);
-    const repairedPayload = parseRows(payloadRepairRaw)[0] || [];
-    evidence.database.permitPayloadRepair = {
-      verificationSql: payloadRepairSql.trim(),
-      raw: payloadRepairRaw,
-      permitId: repairedPayload[0] || created.permitId,
-      ticketNo: repairedPayload[1] || created.permitTicketNo,
-      payload: repairedPayload[2] || "",
+    const payloadKey = String(created.workType || "ticket");
+    const legacyPayloadKey = payloadKey.replace(/^.*\//, "") || "ticket";
+    let permitPayload;
+    try {
+      permitPayload = JSON.parse(created.permitPayload);
+    } catch (error) {
+      throw new Error(`Created WTS permit payload is not valid JSON: ${created.permitPayload}`);
+    }
+    const payloadTicketId =
+      permitPayload &&
+      permitPayload.workTickets &&
+      (permitPayload.workTickets[payloadKey] ?? permitPayload.workTickets[legacyPayloadKey]);
+    if (String(payloadTicketId) !== String(created.id)) {
+      throw new Error(
+        `Created WTS permit payload does not reference ticket ${created.id}: ${created.permitPayload}`
+      );
+    }
+    evidence.database.permitPayload = {
+      verificationSql: "Read with created-ticket verification SQL; no direct database repair was performed.",
+      permitId: created.permitId,
+      ticketNo: created.permitTicketNo,
+      payload: permitPayload,
+      referencedTicketId: String(payloadTicketId),
     };
 
     evidence.scenario = scenario;
     for (const step of flowSteps) {
+      if (resume) {
+        const pendingRaw = runSql(activePendingSql(created.tableInfoId, step.activityName));
+        if (parseRows(pendingRaw).length === 0) {
+          evidence.steps.push({
+            name: step.name,
+            activityName: step.activityName,
+            status: "SKIPPED_COMPLETED",
+            reason: "No active pending task remains for this activity while resuming.",
+          });
+          continue;
+        }
+      }
       await runStep(page, context.request, created, step, evidence);
     }
 

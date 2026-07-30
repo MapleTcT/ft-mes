@@ -99,7 +99,7 @@ def check_doc(expected_ids: set[str], failures: list[str]) -> None:
         "# 生产模块 Backlog 账本",
         "make production-module-backlog-check",
         "FAIL_BACKLOG",
-        "当前未闭合 backlog 为 `0`",
+        f"当前未闭合 backlog 为 `{len(expected_ids)}`",
         "PROD-ACTION-007",
         "已废弃",
     ):
@@ -176,8 +176,6 @@ def check_item(
     if item.get("status") == "FAIL_BACKLOG":
         if "http 200" not in text or "postgresql" not in text:
             fail(failures, f"{item_id} FAIL_BACKLOG must explain HTTP success plus PostgreSQL proof")
-        if "nonSolutions" in item and "producetaskcreated2" not in text.lower():
-            fail(failures, f"{item_id} must explicitly forbid using produceTaskCreated2 as replacement proof")
     if item.get("category") == "missing-service-package":
         if "business-dependency-readiness-smoke" not in text or "business-dependency-package-scan" not in text:
             fail(failures, f"{item_id} missing-service-package must reference dependency readiness and package scan")

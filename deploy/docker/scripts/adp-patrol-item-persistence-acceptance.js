@@ -650,10 +650,18 @@ async function main() {
   page.on("pageerror", (error) => result.evidence.pageErrors.push(error.message.slice(0, 1000)));
   page.on("requestfailed", (requestItem) => {
     if (requestItem.url().includes("/PATROL/")) {
+      const failure = requestItem.failure() && requestItem.failure().errorText;
+      const isSupersededGridRequest =
+        requestItem.method() === "POST" &&
+        requestItem.url().includes("/data-dg") &&
+        failure === "net::ERR_ABORTED";
+      if (isSupersededGridRequest) {
+        return;
+      }
       result.evidence.requestFailures.push({
         method: requestItem.method(),
         url: requestItem.url(),
-        failure: requestItem.failure() && requestItem.failure().errorText,
+        failure,
       });
     }
   });

@@ -1,5 +1,26 @@
 # 前端功能测试报告
 
+## 2026-07-30 admin 权限目录全量扫描
+
+本轮从 admin 的真实权限目录出发，核对 652 个参考节点、533 个可见节点和 398 个可导航页面。
+权限接口 533/533 PASS，按钮权限缺口为 0；逐页浏览器验收最终为
+185 PASS、42 WARN、171 FAIL。171 个失败中 169 个是旧设备/计量/工具包的 HTTP 200 空白页，
+另外两个是 WTS 作业地图外部资源 503 和 PartiManage 浓度报表静态资源 404。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| admin 权限目录 | 398 个可导航入口 | 逐页打开、等待渲染、检查控件/空白/原始键/console/network | 当前用户菜单、参考菜单、角色权限、用户权限 | 185 PASS、42 WARN、171 FAIL | 533 个权限节点全部可查询，操作缺口 0 | 不适用 | FAIL | 169 个旧包空白页仍需补制品或隐藏菜单 |
+| 消息中心 | `/notification/#/messageCenter` | 打开列表并等待消息任务请求完成 | `GET /inter-api/notification-admin/v1/notice/task/tasks` | 页面 PASS，无 network/console/page error | 合并服务唯一注册；接口连续 10/10 返回 200，38-150 ms | 只读通知任务 | PASS | 已消除旧五服务与 msgmanagement 重复注册 |
+| WTS 通知分发 | admin 首页保持在线；WTS 动火票完整流程 | 在线 WebSocket 下生成 7 个流程待办并核对通知 | WTS submit APIs；`/inter-api/ws/v1/notice/notification` | admin 页面建立 1 个 WebSocket；业务页面无 console/page error | WTS 正常封票，但消息服务返回 `all fail`；移动通道触发旧代码空指针 | `notice_task_202607`、`notice_msg_stationletter202607`、`notice_msg_mobile202607` | FAIL | 站内信 7/7、移动通知 7/7 的 `send_status=0` |
+| MES 核心主链 | WOM/QCS/WMS/ProcessAnalysis 页面 | 开始、投料、产出、请检、质量、完工、入库、追溯 | WOM/QCS/material/ProcessAnalysis 业务接口 | 8 步页面/API 均通过 | 唯一 marker 全链状态一致 | WOM、QCS、WMS、追溯表 | PASS | 无 |
+| 组织与 RBAC | 组织管理、角色和权限页面 | 部门 CRUD；角色/用户/菜单/数据权限增删 | organization、auth、rbac APIs | 页面可打开，业务请求成功 | PostgreSQL 创建、更新、软删和关系变化一致 | `org_department`、`rbac_*`、`auth_user` | PASS | 无 |
+| 巡检与 WTS | PATROL 巡检项；WTS 动火票 | 巡检项 CRUD；动火票审批至正常封票 | PATROL、WTS/workflow APIs | PATROL 21/21；WTS 完整流程 PASS | marker 业务状态与待办终态一致 | PATROL、WTS、workflow 表 | PASS | 无 |
+
+详细分包统计、失败入口和逐页机器记录见
+[`admin 权限目录全量功能扫描`](admin-permission-functional-scan-20260730.md) 及
+`metadata/admin-permission-directory-scan-20260730.json`。
+消息列表可读、WTS 业务落库和实时通知送达是三个独立验收面；本轮只前两项通过。
+
 ## 2026-07-28 标准核心链路复验
 
 本轮冻结外围模块，只验收

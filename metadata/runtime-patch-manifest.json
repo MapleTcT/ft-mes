@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T05:28:58+00:00",
-  "repoCommit": "7f620448deffadbd96dd7eb49238520f23a56ec0",
+  "generatedAt": "2026-07-30T08:55:50+00:00",
+  "repoCommit": "7dfd8d15cf78d37625b8b5fc572902b32bb7991b",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 410,
-    "totalBytes": 57652287,
+    "totalFiles": 416,
+    "totalBytes": 57666974,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 223,
+      "postgres-init-sql": 227,
       "runtime-binary-patch": 8,
       "runtime-patch-source": 23,
-      "runtime-script": 27,
-      "runtime-static-override": 83
+      "runtime-script": 28,
+      "runtime-static-override": 84
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 31193,
-      "postgres-init-sql": 56532819,
+      "nginx-runtime-config": 31715,
+      "postgres-init-sql": 56538038,
       "runtime-binary-patch": 178941,
       "runtime-patch-source": 95909,
-      "runtime-script": 284354,
-      "runtime-static-override": 486718
+      "runtime-script": 289112,
+      "runtime-static-override": 490906
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 30973,
-      "sha256": "29745989f32bf486c2785e87d7d707cf716177cc4d41e4f7c098a8964528f6dd"
+      "sizeBytes": 31495,
+      "sha256": "0af98630ecdf875750d0b5efe627da4f2595f1992447347f66f0c210e1fe93f9"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1651,6 +1651,30 @@
       "sha256": "4525369fe8e2c2f9c7951ea0316be4e5332cb7025dfcb69733aa0bfb79f239b4"
     },
     {
+      "path": "deploy/docker/postgres/init/224-teaminfo-admin-directory-permissions.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1855,
+      "sha256": "947575bdbe0fde429aab9b1473e35525a1a199eba6bd5bfccb02045bfd01079b"
+    },
+    {
+      "path": "deploy/docker/postgres/init/225-oee-factory-tree-level-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 474,
+      "sha256": "42e3f7c22bad2bf44c98e29f1080958eedf4d8bcc4095de83ac840a8b004aa60"
+    },
+    {
+      "path": "deploy/docker/postgres/init/226-postgres-legacy-oid-bigint-like-operator.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 2005,
+      "sha256": "995b1e57e578b5f9fd4ebda3611b9460ee80209210061afbf02532f0bb265298"
+    },
+    {
+      "path": "deploy/docker/postgres/init/227-notification-mobile-device-token.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 885,
+      "sha256": "c6b3aeedcbc6afffc95344aef9f02df92953a0e97e314f10f834802fb27f423e"
+    },
+    {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 148953,
@@ -1901,6 +1925,12 @@
       "category": "runtime-script",
       "sizeBytes": 7589,
       "sha256": "72550345b0477e4d39d0450f29dcb922238c473a219942a724dda7f1dc514d5c"
+    },
+    {
+      "path": "deploy/docker/scripts/patch-msgmanagement-notice-protocol-mapper.py",
+      "category": "runtime-script",
+      "sizeBytes": 4758,
+      "sha256": "279f80a954831e0845acdfd41ca9eccc9482d7227e5aaac2e03141701483e978"
     },
     {
       "path": "deploy/docker/scripts/patch-notification-empty-time.py",
@@ -2207,6 +2237,12 @@
       "category": "runtime-static-override",
       "sizeBytes": 5179,
       "sha256": "eaf17eb0f63d21fb7fe50ce53756a970c63c78058f56ccee8602a7d1e8a5943b"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/compat/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 4188,
+      "sha256": "a6ac041b1d2a8371e35f409cc36e367634407e1faee2b81df02d050266ed885f"
     },
     {
       "path": "deploy/docker/assets/module-static/workAppointment/commonJs/WAPSCommon-es5.js",

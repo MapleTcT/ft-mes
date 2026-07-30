@@ -234,6 +234,18 @@
       "nextAction": "Run the plant Batch/DCS cutover rehearsal and attach signed acknowledgement, rollback and PostgreSQL evidence."
     },
     {
+      "id": "NOTIFY-001",
+      "severity": "BLOCKER",
+      "description": "Station-letter and mobile notification rows are persisted but remain undelivered in the online admin scenario.",
+      "source": "metadata/production-module-backlog.json",
+      "backlogItemIds": [
+        "NOTIFY-001"
+      ],
+      "owner": "platform-owner",
+      "riskAcceptance": "TBD",
+      "nextAction": "Repair the notification delivery providers, rerun online WebSocket and mobile delivery acceptance, and attach PostgreSQL send_status evidence."
+    },
+    {
       "id": "BUS-SIGNOFF-003",
       "severity": "BLOCKER",
       "description": "Basic configuration coverage remains partial and cannot be silently carried into production signoff.",

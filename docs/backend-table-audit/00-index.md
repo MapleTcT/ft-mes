@@ -23,6 +23,7 @@
 | `material-service-dependency-analysis.md` | 已完成专项解释 | WOM/QCS 完工入库、库存回写依赖缺失的 `material` 租户服务；`100.99.133.43` Nacos、网关、PostgreSQL 和包扫描均已复验 |
 | `processanalysis-dependency-analysis.md` | 已恢复并验收 | WOM 生产过程追溯由 `process-analysis` 源码模块恢复；`100.99.133.43` Nacos、网关、真实按钮和 PostgreSQL marker 均已复验 |
 | `business-equipment-energy-ehs.md` | 待开始 | 设备、能源、安环 |
+| `notification-delivery-analysis.md` | 已开始 | `NOTIFY-001` 状态为 FAIL：消息中心读取已恢复；在线 admin 场景的站内信 7/7、移动通知 7/7 仍发送失败 |
 | `bpi-phase1-persistence.md` | 已恢复并验收 | BPI 候选确认/拒绝、影子批次、证据、状态、幂等和审计 PostgreSQL 事务链 |
 | `bpi-telemetry-ingress.md` | 已恢复并验收 | 遥测 replay 幂等、序列状态、点级拒绝和隔离；HTTP 默认关闭 |
 | `bpi-candidate-protobuf-ingress.md` | 已恢复并验收 | Flink `BatchCandidateV1` 完整证据经 Protobuf bridge 入库，并已由目标环境 Kafka/浏览器联合 marker 复验 |
@@ -36,11 +37,13 @@
 | `bpi-live-telemetry-projection.md` | 已恢复并验收 | Flyway V35 latest 投影已完成受控 MQTT、Kafka、PostgreSQL、真实 `/bpi/#/overview` 和点位事实抽屉验收：2 events/2 GOOD points/1 latest/0 rejects，页面显示 `12.5 m3/h`，5 条样本、36 个全 2xx 响应、7 类零残留和 `10m/5m` 恢复；不声明物理现场资格 |
 | [`../testing/bpi-rule-retirement-acceptance.md`](../testing/bpi-rule-retirement-acceptance.md) | V15 受控影子验收 PASS | 规则退役、typed inactive、savepoint 有状态升级、回滚草稿、延迟候选落库和 11 类 marker 清理；不声明现场 READY 或生产写回 |
 | `bpi-iot-replay-runtime-acceptance.md` | 已恢复并验收 | IoT 信号经边界引擎、Protobuf、候选确认到 PostgreSQL 的跨模块闭环 |
-| `persistence-acceptance.md` | 持续更新 | 真实前端动作到 PostgreSQL 落库证明 |
+| `persistence-acceptance.md` | 持续更新 | 真实前端动作到 PostgreSQL 落库证明；admin 代表链已复验，WTS 实时通知分发仍为独立 FAIL |
 
 ## 验收规则
 
 - 功能验收入口：[功能验收与落库验收规则](../functional-persistence-acceptance.md)
 - 前端功能报告：[前端功能测试报告](../frontend-functional-test-report.md)
+- admin 全目录报告：[admin 权限目录全量功能扫描](../admin-permission-functional-scan-20260730.md)
+- admin 全目录机器记录：`metadata/admin-permission-directory-scan-20260730.json`
 - 机器可读记录：`metadata/persistence-acceptance.json`
 - 结构校验：`make persistence-acceptance-check`

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-30T05:25:07.000Z",
-  "repoCommit": "7f620448deffadbd96dd7eb49238520f23a56ec0+working-tree-wts-workflow-entry-fix",
+  "generatedAt": "2026-07-30T08:08:00.000Z",
+  "repoCommit": "7dfd8d15cf78d37625b8b5fc572902b32bb7991b+working-tree-admin-directory-scan-notification-retest",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -294,13 +294,147 @@
     }
   },
   "summary": {
-    "testedFeatures": 306,
-    "pass": 288,
-    "fail": 0,
+    "testedFeatures": 312,
+    "pass": 293,
+    "fail": 1,
     "blocked": 0,
     "notApplicable": 18
   },
   "items": [
+    {
+      "acceptanceSet": "admin-directory-representative-persistence-20260730",
+      "module": "MES/WOM/QCS/WMS/ProcessAnalysis",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; QCS report pages; /msService/material/wms; ProcessAnalysis trace page",
+      "operation": "制造任务开始、工序开始、投料、产出、质量判定、工序结束、完工、完工入库与追溯",
+      "api": "WOM start/process/putin/output/finish; QCS quality; material completion inbound; ProcessAnalysis trace APIs",
+      "method": "GET/POST",
+      "requiresPersistence": true,
+      "backendEntry": "WOM -> QCS -> material WMS -> ProcessAnalysis production chain",
+      "tables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_putin_details",
+        "wom_output_details",
+        "qcs_inspect_reports",
+        "wms_stock_documents",
+        "wms_inventory_transactions",
+        "pa_trace_snapshots"
+      ],
+      "marker": "MES_FULL_20260730064545076_a23187",
+      "verificationSql": "See the verificationSql collection in /tmp/adp-admin-mes-full-flow-20260730.json; queries are marker-scoped across WOM/QCS/WMS/ProcessAnalysis tables.",
+      "status": "PASS",
+      "evidence": "Eight steps passed: start, process-start, putin, output, quality, process-end, finish, completion-inbound-trace. Final states and PostgreSQL rows were consistent.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "admin-directory-representative-persistence-20260730",
+      "module": "组织机构",
+      "route": "/organization/#/organizationmanage",
+      "operation": "部门新增、修改、删除",
+      "api": "/inter-api/organization/v1/department",
+      "method": "POST/PUT/DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "organization department controller/service/repository",
+      "tables": [
+        "org_department",
+        "org_mnecode"
+      ],
+      "marker": "ADP_E2E_20260730064844_ORGDEP",
+      "verificationSql": "select id,code,name,dept_type,description,company_id,valid,full_path from public.org_department where code='ADP_E2E_20260730064844_ORGDEP_DEP';",
+      "status": "PASS",
+      "evidence": "Create and update returned HTTP 200 and PostgreSQL reflected the marker name/path. Delete returned HTTP 200 and changed valid from 1 to 0.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "admin-directory-representative-persistence-20260730",
+      "module": "RBAC",
+      "route": "/auth/#/role; /auth/#/permissionQuery",
+      "operation": "角色、用户、菜单权限和角色/用户数据资源权限生命周期",
+      "api": "/inter-api/rbac/v1/role; role/user permission and data-resource APIs; /inter-api/auth/v1/user",
+      "method": "GET/POST/PUT/DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "auth/rbac controllers and relation repositories",
+      "tables": [
+        "rbac_role",
+        "rbac_role_user",
+        "rbac_role_permission",
+        "rbac_user_permission",
+        "rbac_role_resource_auth",
+        "rbac_user_resource_auth",
+        "auth_user",
+        "org_person"
+      ],
+      "marker": "ADP_E2E_20260730064907_RBAC",
+      "verificationSql": "select id,code,name,valid from public.rbac_role where code='ADP_E2E_20260730064907_RBAC_ROLE';",
+      "status": "PASS",
+      "evidence": "Role create/update, prerequisite person/user, role-user relation, menu permission, role/user data-resource permission, delete and cleanup all matched PostgreSQL.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "admin-directory-representative-persistence-20260730",
+      "module": "PATROL",
+      "route": "/msService/PATROL/publicItem/publicItem/itemLayout",
+      "operation": "巡检项新增、查询、修改和删除",
+      "api": "PATROL public-item CRUD APIs",
+      "method": "GET/POST/PUT/DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "PATROL public item controller/service/mapper",
+      "tables": [
+      "mp_work_items",
+      "mp_work_areas",
+      "mp_work_groups"
+      ],
+      "marker": "ADP_E2E_20260730065159_PATROL_ITEM",
+      "verificationSql": "Marker-scoped PATROL item create/update/delete queries recorded in /tmp/adp-admin-patrol-item-retest-20260730.json.",
+      "status": "PASS",
+      "evidence": "21 of 21 API, browser and PostgreSQL assertions passed. The expected superseded datagrid request abort was excluded from unexpected failures.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "admin-directory-representative-persistence-20260730",
+      "module": "WTS",
+      "route": "/msService/WTS/workPermit/workPermit/workPermitList",
+      "operation": "动火票创建、审批、执行和正常封票",
+      "api": "WTS work-ticket submit/deal/workflow APIs",
+      "method": "GET/POST",
+      "requiresPersistence": true,
+      "backendEntry": "WTS work ticket service -> workflow/JBPM -> notification",
+      "tables": [
+        "wts_work_tickets",
+        "wfm_task_pending",
+        "wf_deal_info",
+        "jbpm4_hist_actinst"
+      ],
+      "marker": "ADP_E2E_20260730080536_WTS_FIREWORK",
+      "verificationSql": "select id,table_no,job_status,status,version,valid from public.wts_work_tickets where ticket_no = 'ADP_E2E_20260730080536_WTS_FIREWORK';",
+      "status": "PASS",
+      "evidence": "After notification service consolidation and mobile schema migration, the complete work permit flow reached normal close, terminal status 99, and zero pending tasks. Business persistence is independent from notification delivery.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "admin-directory-representative-persistence-20260730",
+      "module": "WTS notification delivery",
+      "route": "/notification/#/messageCenter; /msService/WTS/workPermit/workPermit/workPermitList",
+      "operation": "Keep admin portal websocket online while executing the complete firework workflow, then verify station-letter and mobile delivery rows",
+      "api": "WTS work-ticket submit APIs; /inter-api/ws/v1/notice/notification",
+      "method": "GET/POST/WebSocket",
+      "requiresPersistence": true,
+      "backendEntry": "WTS workflow event -> notification topic -> msgmanagement stationLetter/mobile providers",
+      "tables": [
+        "notice_task_202607",
+        "notice_msg_stationletter202607",
+        "notice_msg_mobile202607",
+        "mobile_device_token"
+      ],
+      "marker": "ADP_E2E_20260730080536_WTS_FIREWORK",
+      "verificationSql": "SELECT count(*), count(*) FILTER (WHERE send_status=0) FROM notice_msg_mobile202607 WHERE create_time BETWEEN timestamp '2026-07-30 08:05:36' AND timestamp '2026-07-30 08:06:02'; SELECT count(*), count(*) FILTER (WHERE send_status=0) FROM notice_msg_stationletter202607 WHERE create_time BETWEEN timestamp '2026-07-30 08:05:36' AND timestamp '2026-07-30 08:06:02';",
+      "status": "FAIL",
+      "evidence": "The admin portal established one real notification websocket and WTS reached normal close. PostgreSQL recorded mobile 7/7 failed and station-letter 7/7 failed with send_status=0. msgmanagement returned code 100113000 all fail; MobileServiceImpl also logged a NullPointerException after the incomplete websocket response. Dedicated evidence and closure criteria: docs/backend-table-audit/notification-delivery-analysis.md and metadata/notification-delivery-analysis.json.",
+      "issues": [
+        "Online admin websocket is not accepted by the notification delivery path.",
+        "Legacy mobile failure handling dereferences an incomplete websocket response."
+      ]
+    },
     {
       "module": "WTS 动火作业票",
       "route": "/msService/WTS/workTicket/workTicket/fireworkDeal?pendingId=6598888811741760",

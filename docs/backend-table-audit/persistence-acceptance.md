@@ -1,5 +1,24 @@
 # 后端落库验收报告
 
+## 2026-07-30 admin 代表业务落库与通知回归
+
+本轮先逐页扫描 admin 的 398 个可导航入口，再对会改变业务数据的代表动作使用唯一 marker
+执行业务请求并直接查询 PostgreSQL。全目录页面和通知分发仍有明确失败项，下表分别保留
+页面、业务落库和通知送达的真实结论。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| MES 完整生产质量链 | WOM 指令、执行、QCS、WMS、追溯页面 | WOM start/process/putin/output/finish；QCS quality；material inbound；ProcessAnalysis trace | WOM/QCS/material/ProcessAnalysis 正式服务 | WOM、QCS、WMS、追溯相关表 | marker `MES_FULL_20260730064545076_a23187`；开始、工序开始、投料、产出、质量、工序结束、完工、入库追溯 8/8 PASS | PASS |
+| 部门新增、修改和删除 | 组织管理/部门 | `POST/PUT/DELETE /inter-api/organization/v1/department` | organization controller/service/repository | `org_department`、`org_mnecode` | marker `ADP_E2E_20260730064844_ORGDEP`；创建 `valid=1`，更新名称/路径，删除后 `valid=0` | PASS |
+| RBAC 角色和权限关系 | 角色、用户和权限配置 | role/user/menu/data-resource APIs | auth/rbac services | `rbac_role`、角色用户/菜单/数据权限关系、`auth_user`、`org_person` | marker `ADP_E2E_20260730064907_RBAC`；角色/用户前置、菜单权限和角色/用户数据权限均完成增删并清理 | PASS |
+| 巡检项 CRUD | PATROL 公共巡检项 | PATROL public-item CRUD APIs | PATROL controller/service/mapper | PATROL 巡检项相关表 | marker `ADP_E2E_20260730065159_PATROL_ITEM`；21/21 断言通过 | PASS |
+| WTS 动火票正常封票 | WTS 动火作业票 | 创建、各审批节点、执行、`fireworkDeal/submit`、封票生效 | WTS workflow/JBPM | `wts_work_tickets`、`wfm_task_pending`、`wf_deal_info`、JBPM 历史表 | marker `ADP_E2E_20260730080536_WTS_FIREWORK`；最终 status 99、`normalClose`、待办 0 | PASS |
+| 消息任务列表回归 | 消息中心 | `GET /inter-api/notification-admin/v1/notice/task/tasks` | msgmanagement `NoticeTaskService` + `NoticeProtocolMapper` | 通知任务/协议月表，只读 | Nacos 仅 1 个 healthy `notification-admin` 实例；同一查询连续 10/10 返回 200、38-150 ms，页面复验 PASS | NOT_APPLICABLE |
+| WTS 待办实时通知分发 | admin 首页保持在线并建立 WebSocket；执行同一动火票全流程 | WTS submit APIs；`/inter-api/ws/v1/notice/notification` | WTS workflow -> notification topic -> msgmanagement mobile/stationLetter providers | `notice_task_202607`、`notice_msg_mobile202607`、`notice_msg_stationletter202607`、`mobile_device_token` | `SELECT count(*), count(*) FILTER (WHERE send_status=0) ... WHERE create_time BETWEEN '2026-07-30 08:05:36' AND '2026-07-30 08:06:02';`；移动 `7/7`、站内信 `7/7` 失败 | FAIL |
+
+完整页面结论见 `docs/admin-permission-functional-scan-20260730.md`。页面 FAIL 不会因上述代表动作
+落库 PASS 而自动关闭；169 个旧包空白页和实时通知分发失败仍是独立产品缺口。
+
 ## 2026-07-28 标准核心链路落库复验
 
 本轮以 marker `STD_CORE_20260728_194300` 从真实页面执行业务动作，并直接复读目标

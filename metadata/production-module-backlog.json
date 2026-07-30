@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T10:47:47.562Z",
-  "repoCommit": "6fac3120734ec14a343cae9ccf232e440c3b1dc8",
+  "generatedAt": "2026-07-30T08:38:55Z",
+  "repoCommit": "7dfd8d15cf78d37625b8b5fc572902b32bb7991b+working-tree-admin-directory-scan",
   "database": "PostgreSQL",
   "module": "production",
-  "overallStatus": "CLEAR",
+  "overallStatus": "OPEN",
   "sourceReports": [
     "metadata/persistence-acceptance.json",
     "metadata/production-module-test-cases.json",
@@ -19,7 +19,8 @@
     "metadata/wom-qrcode-browser-acceptance.json",
     "metadata/wom-manual-task-entry-acceptance.json",
     "metadata/rm-web-formula-editor-acceptance.json",
-    "metadata/wom-quality-quantity-persistence-acceptance.json"
+    "metadata/wom-quality-quantity-persistence-acceptance.json",
+    "metadata/notification-delivery-analysis.json"
   ],
   "latestCoreFlowEvidence": {
     "generatedAt": "2026-07-10T07:25:00Z",
@@ -101,18 +102,63 @@
     }
   ],
   "summary": {
-    "totalItems": 0,
-    "failBacklog": 0,
+    "totalItems": 1,
+    "failBacklog": 1,
     "blocked": 0,
     "postgresCompatibilityGap": 0,
-    "moduleBacklog": 0,
+    "moduleBacklog": 1,
     "missingServicePackage": 0,
     "externalClientRequired": 0,
     "missingExportImplementation": 0,
     "compositeServiceAndScope": 0,
     "productScopeConfirmation": 0,
-    "falseSuccessApi": 0,
+    "falseSuccessApi": 1,
     "missingRuntimeEndpoint": 0
   },
-  "items": []
+  "items": [
+    {
+      "id": "NOTIFY-001",
+      "title": "WTS 流程通知任务已落库但站内信和移动通知均未送达",
+      "status": "FAIL_BACKLOG",
+      "category": "false-success-api",
+      "disposition": "module-backlog",
+      "isPostgresCompatibilityGap": false,
+      "sourceStatus": "FAIL",
+      "productionCaseIds": [],
+      "persistenceCoverage": [
+        {
+          "status": "FAIL",
+          "module": "WTS notification delivery",
+          "operation": "Keep admin portal websocket online while executing the complete firework workflow, then verify station-letter and mobile delivery rows",
+          "api": "WTS work-ticket submit APIs; /inter-api/ws/v1/notice/notification"
+        }
+      ],
+      "evidenceRefs": [
+        "docs/backend-table-audit/notification-delivery-analysis.md",
+        "metadata/notification-delivery-analysis.json",
+        "metadata/persistence-acceptance.json",
+        "docs/admin-permission-functional-scan-20260730.md"
+      ],
+      "recheckCommands": [
+        "make persistence-acceptance-check",
+        "node deploy/docker/scripts/adp-wts-firework-persistence-acceptance.js"
+      ],
+      "passCriteria": [
+        "admin 真实在线并建立 WebSocket 后，WTS 动火票全流程仍正常封票且业务 API 保持 HTTP 200。",
+        "PostgreSQL 直接查询证明站内信任务全部成功送达，不再出现 send_status=0 或 all fail。",
+        "移动通知必须使用真实设备 token 全部送达；若标准产品明确关闭移动通道，则不得再生成失败的移动通知任务。",
+        "浏览器、消息服务日志和通知专项报告均无 NullPointerException、站内信发送失败或移动通知发送失败。"
+      ],
+      "nextActions": [
+        "修复 msgmanagement 站内信在线会话识别与 provider 返回值处理，保留真实 WebSocket 联合验收。",
+        "明确移动通知在标准产品中的启用策略；启用时补真实设备 token 链路，关闭时停止创建移动任务。",
+        "用新的唯一 marker 重跑 WTS 全流程，并以 PostgreSQL before/after SQL 更新通知专项与落库总账。"
+      ],
+      "nonSolutions": [
+        "不能把消息中心列表 HTTP 200 当作通知送达成功。",
+        "不能直接修改 PostgreSQL send_status 或删除失败任务来制造 PASS。",
+        "不能只重启服务、屏蔽异常或用 mock WebSocket/设备 token 替代真实在线 admin 验收。"
+      ]
+    }
+  ]
 }

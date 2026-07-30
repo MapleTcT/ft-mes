@@ -1839,6 +1839,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/compat/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/workAppointment/commonJs/WAPSCommon-es5.js",
       "state": "tracked",
       "tracked": true
@@ -3735,6 +3741,36 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/224-teaminfo-admin-directory-permissions.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/225-oee-factory-tree-level-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/226-postgres-legacy-oid-bigint-like-operator.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/227-notification-mobile-device-token.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4713,6 +4749,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/patch-msgmanagement-notice-protocol-mapper.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/patch-notification-empty-time.py",
       "state": "tracked",
       "tracked": true
@@ -5553,6 +5595,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/admin-permission-functional-scan-20260730.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/adp-system-design-logic.md",
       "state": "tracked",
       "tracked": true
@@ -5698,6 +5746,12 @@
     {
       "ignored": false,
       "path": "docs/backend-table-audit/material-service-dependency-analysis.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/backend-table-audit/notification-delivery-analysis.md",
       "state": "tracked",
       "tracked": true
     },
@@ -6550,6 +6604,12 @@
     {
       "ignored": false,
       "path": "frontend/apps/bpi/vite.config.ts",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/admin-permission-directory-scan-20260730.json",
       "state": "tracked",
       "tracked": true
     },
@@ -7738,6 +7798,12 @@
     {
       "ignored": false,
       "path": "metadata/nacos-config-drift-smoke.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/notification-delivery-analysis.json",
       "state": "tracked",
       "tracked": true
     },
@@ -12188,16 +12254,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 708
+      "tracked": 715
     },
     "docs": {
-      "tracked": 156
+      "tracked": 158
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 309
+      "tracked": 311
     },
     "package.json": {
       "tracked": 1
@@ -12221,8 +12287,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2027,
-    "tracked": 2027,
+    "totalFiles": 2038,
+    "tracked": 2038,
     "untracked": 0
   },
   "untrackedByDirectory": []

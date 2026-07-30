@@ -18,23 +18,23 @@ make business-module-intake-requirements-check
 make business-dependency-contract-check
 ```
 
-该门禁不负责把问题自动变成 `PASS`。它只保证每个未闭合项都有证据、复验入口、PASS 条件、下一步和非解法，避免后续开发把 HTTP 200、空下载、缺服务或外部客户端缺失误判为功能完成。当前未闭合 backlog 为 `0`，不代表生产迁移和现场签字已完成。
+该门禁不负责把问题自动变成 `PASS`。它只保证每个未闭合项都有证据、复验入口、PASS 条件、下一步和非解法，避免后续开发把 HTTP 200、空下载、缺服务或外部客户端缺失误判为功能完成。当前未闭合 backlog 为 `1`，且生产迁移和现场签字仍未完成。
 
 ## 当前总览
 
 | 指标 | 数量 |
 | --- | ---: |
-| Backlog 项 | 0 |
-| FAIL_BACKLOG | 0 |
+| Backlog 项 | 1 |
+| FAIL_BACKLOG | 1 |
 | BLOCKED | 0 |
 | PostgreSQL 兼容缺口 | 0 |
-| 模块 backlog | 0 |
+| 模块 backlog | 1 |
 
 ## 明细
 
 | ID | 状态 | 类型 | 关联用例/动作 | 证据 | 复验入口 | PASS 条件摘要 |
 | --- | --- | --- | --- | --- | --- | --- |
-| 无 | - | - | 当前生产模块未闭合 backlog 为 0 | `metadata/production-module-backlog.json` | `make production-module-backlog-check` | 后续出现 `FAIL/BLOCKED` 必须重新登记 |
+| NOTIFY-001 | FAIL_BACKLOG | false-success-api | WTS 在线流程通知分发 | `metadata/notification-delivery-analysis.json`；`docs/backend-table-audit/notification-delivery-analysis.md` | `make persistence-acceptance-check`；真实在线 admin + WTS 动火票全流程复验 | 站内信真实送达；移动通道真实送达或被明确关闭且不再生成失败任务；PostgreSQL 无 `send_status=0` |
 
 ## 本轮关闭
 

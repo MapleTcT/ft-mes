@@ -695,14 +695,17 @@ services:
 
   notification-admin:
     <<: *java-service
+    profiles: ["legacy-notification"]
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-admin/notification-admin.jar"]
 
   notification-apiserver:
     <<: *java-service
+    profiles: ["legacy-notification"]
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-apiserver/notification-apiserver.jar"]
 
   notification-engine:
     <<: *java-service
+    profiles: ["legacy-notification"]
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-engine/notification-engine.jar"]
 
   fileServer:
@@ -740,6 +743,7 @@ services:
 
   notification-app:
     <<: *java-service
+    profiles: ["legacy-notification"]
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-app/notification-app.jar"]
 
   notification-dingtalk:
@@ -748,6 +752,7 @@ services:
 
   notification-mobile:
     <<: *java-service
+    profiles: ["legacy-notification"]
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-mobile/notification-mobile.jar"]
 
   notification-sms-jincang:

@@ -15,6 +15,8 @@ BAD_QUANTITY_ANALYSIS_DOC = ROOT / "docs/backend-table-audit/wom-bad-quantity-an
 BAD_QUANTITY_ANALYSIS_JSON = ROOT / "metadata/wom-bad-quantity-analysis.json"
 MATERIAL_ANALYSIS_DOC = ROOT / "docs/backend-table-audit/material-service-dependency-analysis.md"
 MATERIAL_ANALYSIS_JSON = ROOT / "metadata/material-service-dependency-analysis.json"
+NOTIFICATION_ANALYSIS_DOC = ROOT / "docs/backend-table-audit/notification-delivery-analysis.md"
+NOTIFICATION_ANALYSIS_JSON = ROOT / "metadata/notification-delivery-analysis.json"
 
 REQUIRED_DOCS = [
     ROOT / "docs/functional-persistence-acceptance.md",
@@ -225,6 +227,34 @@ def check_visible_create_blocker(index: int, item: dict, failures: list[str]) ->
         fail(f"items[{index}] visible create blocker must require a product/UX decision", failures)
 
 
+def check_notification_delivery_blocker(index: int, item: dict, failures: list[str]) -> None:
+    text = item_text(item)
+    require_refs(index, text, [NOTIFICATION_ANALYSIS_DOC, NOTIFICATION_ANALYSIS_JSON], failures)
+    require_doc_phrases(
+        NOTIFICATION_ANALYSIS_DOC,
+        [
+            "NOTIFY-001",
+            "FAIL_NOTIFICATION_DELIVERY",
+            "不能把消息中心列表 PASS 当作通知送达 PASS",
+            "站内信 7/7 失败",
+            "移动通知 7/7 失败",
+        ],
+        failures,
+    )
+    data = read_json_path(NOTIFICATION_ANALYSIS_JSON, failures)
+    if not data:
+        return
+    if data.get("id") != "NOTIFY-001" or data.get("status") != "FAIL_NOTIFICATION_DELIVERY":
+        fail("notification delivery analysis must keep NOTIFY-001 as FAIL_NOTIFICATION_DELIVERY", failures)
+    if data.get("marker") != item.get("marker"):
+        fail("notification delivery item and analysis must use the same marker", failures)
+    database = data.get("databaseEvidence") if isinstance(data.get("databaseEvidence"), dict) else {}
+    for channel in ("stationLetter", "mobile"):
+        evidence = database.get(channel) if isinstance(database.get(channel), dict) else {}
+        if evidence.get("attempted") != 7 or evidence.get("failed") != 7 or evidence.get("sendStatus") != 0:
+            fail(f"notification delivery analysis must preserve 7/7 failed {channel} evidence", failures)
+
+
 def check_unresolved_item(index: int, item: dict, status: str, failures: list[str]) -> None:
     if status not in {"FAIL", "BLOCKED"}:
         return
@@ -239,6 +269,9 @@ def check_unresolved_item(index: int, item: dict, status: str, failures: list[st
         matched = True
     if status == "BLOCKED" and ("material-service" in text or "material 服务" in text or "servicename=material" in text):
         check_material_service_blocker(index, item, failures)
+        matched = True
+    if "notification delivery" in text or "通知分发" in text or "station-letter" in text:
+        check_notification_delivery_blocker(index, item, failures)
         matched = True
 
     if not matched:

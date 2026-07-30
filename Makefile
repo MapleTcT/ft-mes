@@ -624,6 +624,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-teaminfo-scheduleplan-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-craftgraph-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-rbac-authority-smoke.js
+	$(NODE) --check deploy/docker/scripts/adp-admin-permission-directory-scan.js
 	$(NODE) --check deploy/docker/scripts/adp-business-module-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-page-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-production-action-discovery.js
@@ -678,6 +679,7 @@ runtime-script-check:
 	$(PYTHON) -m py_compile deploy/docker/scripts/audit-postgres-mappings.py
 	$(PYTHON) -m unittest deploy/docker/scripts/test_audit_postgres_mappings.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-orgmanagement-rbac-permission-mapper.py
+	$(PYTHON) -m py_compile deploy/docker/scripts/patch-msgmanagement-notice-protocol-mapper.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-eam-reactapi-ready.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-wts-runtime-compat.py
 	$(PYTHON) -m py_compile scripts/generate-runtime-patch-manifest.py
