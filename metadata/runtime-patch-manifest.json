@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T04:00:30+00:00",
-  "repoCommit": "3de82ac789d028963a294bf4822cca3f7c22a618",
+  "generatedAt": "2026-07-30T04:41:19+00:00",
+  "repoCommit": "41edd4626e82df3dc1f4080ba827666106abd329",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 409,
-    "totalBytes": 57636149,
+    "totalFiles": 410,
+    "totalBytes": 57644974,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 222,
+      "postgres-init-sql": 223,
       "runtime-binary-patch": 8,
       "runtime-patch-source": 23,
       "runtime-script": 27,
@@ -18,8 +18,8 @@
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 30309,
-      "postgres-init-sql": 56524878,
+      "nginx-runtime-config": 31193,
+      "postgres-init-sql": 56532819,
       "runtime-binary-patch": 171663,
       "runtime-patch-source": 95909,
       "runtime-script": 284319,
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 30089,
-      "sha256": "b962da4daca4cbcbab28b42efd084a8dadb9623349eb8c580687dc1cae18751a"
+      "sizeBytes": 30973,
+      "sha256": "29745989f32bf486c2785e87d7d707cf716177cc4d41e4f7c098a8964528f6dd"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1643,6 +1643,12 @@
       "category": "postgres-init-sql",
       "sizeBytes": 2714,
       "sha256": "da24749c9d64364ccda7761ffec2440c94c996573ae2a5d5134fec63d5788e9c"
+    },
+    {
+      "path": "deploy/docker/postgres/init/223-qcs-inspect-report-config-lob-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 7941,
+      "sha256": "4525369fe8e2c2f9c7951ea0316be4e5332cb7025dfcb69733aa0bfb79f239b4"
     },
     {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",

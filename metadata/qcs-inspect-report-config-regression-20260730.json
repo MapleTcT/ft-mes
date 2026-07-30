@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-30T04:35:51.005Z",
+  "repoCommit": "41edd4626e82df3dc1f4080ba827666106abd329+working-tree-qcs-wom-regression-fix",
+  "database": "PostgreSQL",
+  "baseUrl": "http://10.11.100.17:18080",
+  "route": "/msService/ec/entity/config?entity.code=QCS_5.0.0.0_inspectReport",
+  "entityCode": "QCS_5.0.0.0_inspectReport",
+  "status": "PASS",
+  "summary": {
+    "testedFeatures": 8,
+    "pass": 8,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0
+  },
+  "frontend": {
+    "console": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "serverErrors": [],
+    "tabs": [
+      {
+        "label": "基本信息",
+        "expectedEndpoint": null,
+        "responseStatus": null,
+        "visibleError": null,
+        "status": "PASS"
+      },
+      {
+        "label": "数据模型",
+        "expectedEndpoint": null,
+        "responseStatus": null,
+        "visibleError": null,
+        "status": "PASS"
+      },
+      {
+        "label": "视图信息",
+        "expectedEndpoint": "/msService/ec/view/list",
+        "responseStatus": 200,
+        "visibleError": null,
+        "status": "PASS"
+      },
+      {
+        "label": "菜单信息",
+        "expectedEndpoint": "/msService/ec/entity/publishMenuFrame",
+        "responseStatus": 200,
+        "visibleError": null,
+        "status": "PASS"
+      },
+      {
+        "label": "工作流",
+        "expectedEndpoint": "/msService/ec/entity/wf",
+        "responseStatus": 200,
+        "visibleError": null,
+        "status": "PASS"
+      },
+      {
+        "label": "Excel导入模板",
+        "expectedEndpoint": null,
+        "responseStatus": null,
+        "visibleError": null,
+        "status": "PASS"
+      },
+      {
+        "label": "脚本信息",
+        "expectedEndpoint": null,
+        "responseStatus": null,
+        "visibleError": null,
+        "status": "PASS"
+      },
+      {
+        "label": "自定义代码",
+        "expectedEndpoint": null,
+        "responseStatus": null,
+        "visibleError": null,
+        "status": "PASS"
+      }
+    ],
+    "screenshots": {
+      "视图信息": "metadata/qcs-inspect-report-view-information-20260730.png",
+      "菜单信息": "metadata/qcs-inspect-report-menu-information-20260730.png",
+      "工作流": "metadata/qcs-inspect-report-workflow-20260730.png"
+    },
+    "navigation": {
+      "status": 200,
+      "title": "检验报告"
+    }
+  },
+  "persistence": {
+    "required": false,
+    "status": "NOT_APPLICABLE",
+    "reason": "Read-only low-code configuration-page regression; no business data is changed."
+  },
+  "issues": [],
+  "login": {
+    "status": 200,
+    "authenticated": true
+  },
+  "databaseMigration": {
+    "script": "deploy/docker/postgres/init/223-qcs-inspect-report-config-lob-compat.sql",
+    "scope": "QCS_5.0.0.0_inspectReport published ec_* and project-draft metadata only",
+    "beforeInvalidPerState": {
+      "fastQuery": 13,
+      "advancedQuery": 10,
+      "dataGridConfig": 22,
+      "fieldConfig": 835,
+      "buttonConfig": 33,
+      "eventFunction": 354,
+      "eventFunctionEs5": 354,
+      "customCode": 19
+    },
+    "afterInvalidTotal": 0,
+    "replayLargeObjectCount": {
+      "before": 200438,
+      "after": 200438,
+      "idempotent": true
+    },
+    "backup": "/home/v6/adp-mes-docker-newbase-20260611-181921/backups/qcs-wom-regression-20260730-123129"
+  }
+}

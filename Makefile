@@ -595,6 +595,8 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-patrol-area-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-patrol-item-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-start-persistence-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-wom-manual-task-entry-persistence-acceptance.js
+	$(NODE) --test deploy/docker/scripts/test-wom-manual-entry-auth-boundary.js
 	$(NODE) --check deploy/docker/scripts/adp-material-wms-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-process-analysis-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-mes-full-production-flow-acceptance.js
@@ -607,6 +609,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-wom-active-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-manu-inspect-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-checkoutbill-persistence-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-qcs-inspect-report-config-regression.js
 	$(NODE) --check deploy/docker/scripts/adp-factory-line-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-public-produce-task-created-noop-probe.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-qrcode-route-probe.js

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T04:08:34+00:00",
-  "repoCommit": "3de82ac789d028963a294bf4822cca3f7c22a618",
+  "generatedAt": "2026-07-30T04:54:29+00:00",
+  "repoCommit": "41edd4626e82df3dc1f4080ba827666106abd329",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -74,7 +74,7 @@
       "status": "PARTIAL",
       "scope": "默认运行、默认构建和默认 Docker 路径使用 PostgreSQL；Oracle 仅作为 legacy 对照。",
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1634, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 222. metadata/oracle-migration-audit.json currently has 1634 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. ADP migration 218 restores the original QCS runtime layouts; migrations 219-221 add incoming-inspection runtime, manual-create entries and complete WTS design/project metadata compatibility through PostgreSQL large objects; migration 222 converts QCS configuration extra-view payloads to valid PostgreSQL large-object references. None adds an Oracle runtime path. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1635, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 223. metadata/oracle-migration-audit.json currently has 1635 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. ADP migration 218 restores the original QCS runtime layouts; migrations 219-221 add incoming-inspection runtime, manual-create entries and complete WTS design/project metadata compatibility through PostgreSQL large objects; migration 222 converts QCS configuration extra-view payloads to valid PostgreSQL large-object references; migration 223 repairs the complete Hibernate @Lob-backed QCS inspect-report configuration metadata. None adds an Oracle runtime path. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
@@ -106,7 +106,8 @@
         "metadata/module-intake-latest-basic-modules.json",
         "docs/module-intake-latest-basic-modules.md",
         "deploy/docker/postgres/init/221-wts-module-config-lob-compat.sql",
-        "deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql"
+        "deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql",
+        "deploy/docker/postgres/init/223-qcs-inspect-report-config-lob-compat.sql"
       ]
     },
     {
@@ -448,7 +449,7 @@
         "production module test matrix has 44 cases: 44 PASS, 0 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks 0 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and is CLEAR with 0 active items; legacy public produceTaskCreated is retired as NOT_APPLICABLE with explicit rejection/no-persistence evidence.",
-        "persistence acceptance ledger has 303 tested features: 287 PASS, 0 FAIL, 0 BLOCKED, 16 NOT_APPLICABLE",
+        "persistence acceptance ledger has 305 tested features: 288 PASS, 0 FAIL, 0 BLOCKED, 17 NOT_APPLICABLE",
         "2026-07-30 public-browser regression restored organization department-add reachability, one manual-create action each for product and incoming QCS inspection, both complete create forms and the WTS work-permit menu-information configuration page. PostgreSQL verified four non-empty QCS layouts, unique manualAdd actions, scoped WTS LOB compatibility and 25/25 project metadata relations; QCS and organization forms were cancelled before business writes.",
         "2026-07-28 marker ADP_E2E_FRUCTOSE_LINE_01 passed the retained TEST_ONLY_DRAFT fructose pilot through five real WOM/QCS/WMS/ProcessAnalysis pages, PostgreSQL and BPI telemetry: one tonne unit, three materials and batches, two exact process-paired lineage edges, three quality standards with nine items, five handover checks, one four-item qualified QCS report, 35.1 t available WMS stock, five trace snapshots, 24 accepted events and 288 accepted points. Browser console/page/request/bad-response counts were all zero; formal process and QA/QC approval remains required before production use.",
         "2026-07-28 marker ADP_E2E_20260728042954_FACTORY_LINE passed 13/13 through visible factory-architecture navigation and node-type selection, submit API, PostgreSQL hm_factory_models/hm_factory_models_mc readback and WOM factoryLineRef2 picker. Response id and PostgreSQL row id both equal 770612453238016; the optional department remained empty and persisted as null. The retained production-line fixture 果糖产线验收_20260728042954 is visible as 生产线/未占用, and browser console/page/request/bad-HTTP counts are all zero.",
@@ -491,7 +492,9 @@
         "2026-07-20 BPI markers ADP_E2E_20260720_215500_BPI_WMS and ADP_E2E_UI_20260720_222600_BPI_WMS closed controlled QCS Protobuf -> BPI -> target Kafka -> query-first adapter -> material-wms document/line/inventory transaction/stock -> durable receipt -> INBOUNDED/r4. Identical QCS replay, forced Kafka command replay, five real browser APIs, empty-evidence layout, switch shutdown and exact cleanup passed; metadata/bpi-quality-release-wms-target-acceptance.json is the machine evidence.",
         "2026-07-21 marker ADP_E2E_20260721021607_QCS_BPI closed the real WOM/QCS page -> QCS PostgreSQL transaction outbox -> Java 8 sidecar -> three-broker Kafka -> BPI PostgreSQL chain. First delivery moved the shadow batch to RELEASED/r3 with ACCEPTED gate; exact replay kept gate/link/inbox/state/audit/WMS-outbox counts at 1/1/1/2/2/0, DLQ and lag at zero. Browser errors and dual-database marker residue were zero, all six write switches were restored false, and the shadow batch correctly requested no WMS command. Evidence: metadata/qcs-bpi-quality-gate-target-acceptance.json.",
         "2026-07-30 WTS module-level regression restored approval configuration and JSA menu reads, preserved the truthful empty JSA workflow page, passed the existing work-permit regression, and returned HTTP 200 for all 23 WTS menu-information endpoints sequentially. Invalid WTS ec/project extra-view full_config large-object references changed from 234/234 to 0/0; replay added zero large objects. These read-only checks add 3 NOT_APPLICABLE persistence rows and no workflow, menu or business write.",
-        "2026-07-30 QCS/WTS workflow-editor regression restored mixed-case locale resources on Linux and decoded PostgreSQL large-object workflow XML before parsing. The QCS manuInspectWorkFlow loaded 20 diagram elements and the WTS fireWorkWF loaded 88, both with HTTP 200 getFlow responses, no loading overlay and zero browser errors; source/design switching, zoom and reopen passed. Exact deployment/XML fingerprints were unchanged, so the read-only editor load adds one NOT_APPLICABLE persistence row."
+        "2026-07-30 QCS/WTS workflow-editor regression restored mixed-case locale resources on Linux and decoded PostgreSQL large-object workflow XML before parsing. The QCS manuInspectWorkFlow loaded 20 diagram elements and the WTS fireWorkWF loaded 88, both with HTTP 200 getFlow responses, no loading overlay and zero browser errors; source/design switching, zoom and reopen passed. Exact deployment/XML fingerprints were unchanged, so the read-only editor load adds one NOT_APPLICABLE persistence row.",
+        "2026-07-30 QCS inspect-report configuration regression converted only the Hibernate @Lob-backed published and draft metadata for QCS_5.0.0.0_inspectReport, reduced all audited invalid large-object references to zero, replayed without creating large objects and passed all 8 configuration tabs with zero browser errors; this read-only action is NOT_APPLICABLE for business persistence.",
+        "2026-07-30 WOM manual-entry authentication-boundary regression opened the real 新建指令单 page without a document-level Authorization header while preserving authentication on data APIs. Marker ADP_E2E_20260730_1235_WOM_MANUAL_AUTH passed 9/9 through browser create, PostgreSQL readback, pending submit and soft-delete rollback with zero browser errors."
       ],
       "blockingIssues": [
         "生产矩阵 44 条、制造到追溯八步主链和投料消耗台账已通过；现场 Batch/DCS 切换确认、连续运行及业务负责人签字仍未完成。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH。"
@@ -635,7 +638,12 @@
         "metadata/wts-approve-config-menu-after-fix-20260730.png",
         "metadata/wts-jsa-workflow-after-fix-20260730.png",
         "metadata/qcs-workflow-editor-regression-20260730.json",
-        "metadata/qcs-workflow-editor-after-fix-20260730.png"
+        "metadata/qcs-workflow-editor-after-fix-20260730.png",
+        "deploy/docker/postgres/init/223-qcs-inspect-report-config-lob-compat.sql",
+        "deploy/docker/scripts/adp-qcs-inspect-report-config-regression.js",
+        "metadata/qcs-inspect-report-config-regression-20260730.json",
+        "deploy/docker/scripts/adp-wom-manual-task-entry-persistence-acceptance.js",
+        "metadata/wom-manual-entry-auth-regression-20260730.json"
       ]
     },
     {
@@ -645,17 +653,17 @@
       "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 302 tested features: 287 PASS, 0 FAIL, 0 BLOCKED, 15 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED.",
-        "2026-07-30 migrations 219-222 restore the incoming-inspection list/edit runtime, add exactly one manual-create entry to product and incoming inspection lists, convert the complete WTS module design/project payloads to PostgreSQL large-object references, and convert QCS configuration extra-view payloads to valid PostgreSQL large-object references. Migration 221 passed a 23-entity sequential endpoint sweep; migration 222 passed QCS workflow configuration re-entry and idempotent replay. Transactional target apply, real browser/API checks and replay with unchanged large-object counts passed without adding an Oracle runtime path.",
+        "metadata/persistence-acceptance.json currently has 305 tested features: 288 PASS, 0 FAIL, 0 BLOCKED, 17 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED.",
+        "2026-07-30 migrations 219-223 restore the incoming-inspection list/edit runtime, add exactly one manual-create entry to product and incoming inspection lists, convert the complete WTS module design/project payloads to PostgreSQL large-object references, convert QCS configuration extra-view payloads to valid PostgreSQL large-object references, and repair the complete Hibernate @Lob-backed QCS inspect-report configuration metadata. Migration 221 passed a 23-entity sequential endpoint sweep; migration 222 passed QCS workflow configuration re-entry; migration 223 passed all 8 inspect-report configuration tabs and idempotent replay. Transactional target apply, real browser/API checks and replay with unchanged large-object counts passed without adding an Oracle runtime path.",
         "2026-07-28 marker ADP_E2E_FRUCTOSE_LINE_01 reuses the PostgreSQL WOM/QCS/WMS/ProcessAnalysis and BPI contracts to prove two process-paired material transformations, nine controlled draft quality-item definitions, final quality release and 35.1 t stock without adding an Oracle runtime path or a duplicate material ledger.",
         "2026-07-28 marker ADP_E2E_20260728042954_FACTORY_LINE proves visible factory-architecture interaction and node-type selection persisted one enabled production-line node whose response id matches its PostgreSQL id, with a null optional department plus synchronized mnemonic aliases; the same row was returned by the WOM factoryLineRef2 reference. Idempotent migrations 211-216 keep the runtime tree/edit/reference contracts on PostgreSQL without introducing an Oracle default path.",
         "2026-07-27 marker ADP_E2E_20260727_MES_FULL_CLOSED_11 refreshes the eight exact persistence rows for WOM start/process/putin/output/QCS/process-end/finish and WMS/trace. It reuses PostgreSQL tables, adds no Oracle runtime path, proves the repaired putin path creates activity execution and material-consumption facts, and proves output detail/material-output totals are exactly 2/2.",
         "Target marker ADP_E2E_20260720193226_WMS_OUTAGE directly verified the BPI and material PostgreSQL tables across a real internal material-wms outage and recovery: no material row during the outage, one durable document/line/transaction/stock after recovery, and zero marker residue after cleanup.",
-        "metadata/postgres-migration-inventory.json currently has 222 scripts, highRiskStatementCount=0, watchStatementCount=85, watchSafetyIssueCount=0; there are no missing, duplicate, invalid, or unguarded structural migration statements.",
+        "metadata/postgres-migration-inventory.json currently has 223 scripts, highRiskStatementCount=0, watchStatementCount=87, watchSafetyIssueCount=0; there are no missing, duplicate, invalid, or unguarded structural migration statements.",
         "PATROL migration 186 restores the hidden-danger/EAM risk projection and repairs supfusion_i18n_resource.modifier from the legacy varchar shape to the java.util.Date-compatible PostgreSQL timestamp shape; target migration, i18n restart, browser/API and PostgreSQL marker verification passed.",
         "metadata/persistence-acceptance.json currently has 0 FAIL and 0 BLOCKED rows",
         "metadata/production-module-backlog.json covers those unresolved persistence rows with 0 backlog items, 0 FAIL_BACKLOG and 0 BLOCKED",
-        "docs/postgres-migration-watch-rationale.md is generated from the PostgreSQL init inventory and records current watch statements; the current inventory has 85 watch statements and 0 watch safety issues.",
+        "docs/postgres-migration-watch-rationale.md is generated from the PostgreSQL init inventory and records current watch statements; the current inventory has 87 watch statements and 0 watch safety issues.",
         "RBAC role-user acceptance found HTTP 200 with rbac_roleuser.valid=false and closed it with idempotent PostgreSQL SQL 074-rbac-roleuser-valid-default.sql",
         "WOM production action tracing found missing WOM_WAIT_PUT_RECORDS and closed it with idempotent PostgreSQL SQL 079-wom-wait-put-records-table.sql plus remote schema readback; WOM process start/end later closed RM_PROCESS_ACTIVES, convert(proc_sort,int), and process wait actual_end_time compatibility through SQL 104/105/106.",
         "WOM outPutCommonTaskEdit layoutJson/cache blocker was closed with 084/085 and remote baseService cache restart before persistence acceptance",
@@ -726,8 +734,10 @@
         "deploy/docker/postgres/init/216-hierarchicalmod-factory-node-type-customer-condition.sql",
         "deploy/docker/postgres/init/221-wts-module-config-lob-compat.sql",
         "deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql",
+        "deploy/docker/postgres/init/223-qcs-inspect-report-config-lob-compat.sql",
         "metadata/wts-module-config-lob-regression-20260730.json",
-        "metadata/config-entry-regression-20260730.json"
+        "metadata/config-entry-regression-20260730.json",
+        "metadata/qcs-inspect-report-config-regression-20260730.json"
       ]
     },
     {

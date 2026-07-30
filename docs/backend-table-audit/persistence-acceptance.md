@@ -1350,6 +1350,22 @@ WTS 模块设计态和项目草稿态的遗留 CLOB 文本转换为 PostgreSQL l
 `backups/qcs-config-lob-20260730T1140/extra-view-before.sql`。机器证据：
 `metadata/config-entry-regression-20260730.json`。
 
+### QCS 检验报告配置与 WOM 新建指令鉴权回归（2026-07-30）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 读取检验报告实体完整配置 | 检验报告实体配置的 8 个标签 | `GET /msService/ec/view/list`；`GET /msService/ec/entity/publishMenuFrame`；`GET /msService/ec/entity/wf` | configuration view/menu/workflow controllers -> Hibernate metadata repositories | `ec_fast_query_json`、`ec_adv_query_json`、`ec_extra_view`、`ec_data_grid`、`ec_field`、`ec_button`、`ec_event` 及对应 `project_*`、`pg_largeobject` | 对 `QCS_5.0.0.0_inspectReport` 范围的 Hibernate `@Lob` 字段逐表统计非空但不能解析为 `pg_largeobject_metadata` OID 的数量 | 修复前快速查询 13/13、高级查询 10/10、表格 22/22、字段 835/835、事件 354/354 等均存在非法值；迁移后发布态和草稿态目标字段全部为 0；页面 8/8 通过。该动作只读，不产生业务写入 | NOT_APPLICABLE |
+| 新建、提交并回滚制造指令 | 制造指令单 -> 新建指令单 | `POST /msService/WOM/produceTask/manual-entry/create`；制造指令数据、提交和删除接口 | `WomProductionEntryController -> WomProductionEntryService -> WomProductionEntryRepository/WomUpstreamClient` | `wom_produce_tasks`、`wom_manual_task_requests`、`wfm_task_pending`、`wf_deal_info` | `SELECT ... FROM public.wom_produce_tasks WHERE produce_batch_num='ADP_E2E_20260730_1235_WOM_MANUAL_AUTH';` 并按 task id 查询待办、审批处理和删除后版本/有效标志 | 创建后任务 ID `771321194620160`、状态 88、数量 2.5、请求记录 SUCCESS；待办存在且页面显示 marker；提交后状态 99；删除回滚后版本 4、`valid=false`。业务接口始终要求授权 | PASS |
+
+QCS 兼容由
+`deploy/docker/postgres/init/223-qcs-inspect-report-config-lob-compat.sql`
+固化，事务内只转换检验报告实体的 Hibernate `@Lob` 元数据并逐表自检；迁移重放前后
+large-object 总数均为 `200438`。测试机回退备份：
+`/home/v6/adp-mes-docker-newbase-20260611-181921/backups/qcs-wom-regression-20260730-123129`。
+机器证据：
+`metadata/qcs-inspect-report-config-regression-20260730.json` 和
+`metadata/wom-manual-entry-auth-regression-20260730.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

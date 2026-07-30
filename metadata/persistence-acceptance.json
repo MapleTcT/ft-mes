@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-30T11:08:48+08:00",
-  "repoCommit": "30630c3785ba82d97ef25f6eb0b6f44f2172e147+working-tree-qcs-workflow-editor-fix",
+  "generatedAt": "2026-07-30T04:38:48.246Z",
+  "repoCommit": "41edd4626e82df3dc1f4080ba827666106abd329+working-tree-qcs-wom-regression-fix",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -294,11 +294,11 @@
     }
   },
   "summary": {
-    "testedFeatures": 303,
-    "pass": 287,
+    "testedFeatures": 305,
+    "pass": 288,
     "fail": 0,
     "blocked": 0,
-    "notApplicable": 16
+    "notApplicable": 17
   },
   "items": [
     {
@@ -6610,6 +6610,59 @@
       "verificationSql": "select id,process_key,process_version,version,modify_time,process_xml,temp_process_xml,md5(process_xml_text_backup),md5(temp_process_xml_text_backup),md5(convert_from(lo_get(process_xml),'UTF8')),md5(convert_from(lo_get(temp_process_xml),'UTF8')) from public.wf_deployment where id=6579656982888448;",
       "status": "NOT_APPLICABLE",
       "evidence": "The read-only getFlow call changed from HTTP 500 to 200 and rendered 20 QCS diagram elements with zero browser errors. The before/after workflow fingerprint was identical: version 1, unchanged modify_time, OIDs 201335/201336 and XML MD5 5882646ba2baaabe7eebb459c8310251.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "qcs-inspect-report-config-regression-20260730",
+      "module": "QCS 检验报告配置元数据",
+      "route": "/msService/ec/entity/config?entity.code=QCS_5.0.0.0_inspectReport",
+      "operation": "依次读取 8 个配置标签并验证视图、菜单和工作流",
+      "api": "GET /msService/ec/view/list; GET /msService/ec/entity/publishMenuFrame; GET /msService/ec/entity/wf",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "configuration view/menu/workflow controllers -> Hibernate metadata repositories",
+      "tables": [
+        "public.ec_fast_query_json",
+        "public.project_fast_query_json",
+        "public.ec_adv_query_json",
+        "public.project_adv_query_json",
+        "public.ec_extra_view",
+        "public.project_extra_view",
+        "public.ec_data_grid",
+        "public.project_data_grid",
+        "public.ec_field",
+        "public.project_field",
+        "public.ec_button",
+        "public.project_button",
+        "public.ec_event",
+        "public.project_event",
+        "pg_largeobject"
+      ],
+      "marker": "",
+      "verificationSql": "Count non-null Hibernate @Lob values scoped to QCS_5.0.0.0_inspectReport that are not numeric OIDs present in pg_largeobject_metadata, for every mapped ec_* and project_* table/column.",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Before migration, invalid published/draft metadata included fast query 13/13, advanced query 10/10, data grid 22/22, field 835/835 and event 354/354 rows. After migration all target invalid counts were 0. The real browser passed 8/8 tabs; the view, menu and workflow endpoints returned 200 with zero console, page, request or server errors. This is read-only configuration validation and does not write QCS business documents.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wom-manual-entry-auth-regression-20260730",
+      "module": "WOM 新建制造指令入口与真实落库",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList -> /msService/WOM/produceTask/manual-entry/page",
+      "operation": "点击新建指令单，创建、打开待办、提交并删除回滚 marker 指令",
+      "api": "GET /msService/WOM/produceTask/manual-entry/options; POST /msService/WOM/produceTask/manual-entry/create; WOM task data/submit/delete APIs",
+      "method": "GET/POST",
+      "requiresPersistence": true,
+      "backendEntry": "WomProductionEntryController -> WomProductionEntryService -> WomProductionEntryRepository/WomUpstreamClient",
+      "tables": [
+        "public.wom_produce_tasks",
+        "public.wom_manual_task_requests",
+        "public.wfm_task_pending",
+        "public.wf_deal_info"
+      ],
+      "marker": "ADP_E2E_20260730_1235_WOM_MANUAL_AUTH",
+      "verificationSql": "SELECT id,version,valid,status,table_info_id,table_no,deployment_id,process_key,produce_batch_num,product_id,formula_id,line_id,plan_num,plan_start_time,plan_end_time FROM public.wom_produce_tasks WHERE produce_batch_num='ADP_E2E_20260730_1235_WOM_MANUAL_AUTH';",
+      "status": "PASS",
+      "evidence": "The browser document navigation carried no Authorization header and still opened successfully; the page options request carried the localStorage login ticket and returned 200. Creation returned code 200 and persisted task 771321194620160 with status 88 and quantity 2.5, plus one active pending and one SUCCESS idempotency row. Submission changed status to 99. The normal delete rollback changed version to 4 and valid=false. Nine of nine acceptance checks passed with zero browser errors.",
       "issues": []
     }
   ],

@@ -1340,6 +1340,28 @@ QCS 迁移前 `ec_extra_view.full_config`、`project_extra_view.full_config` 各
 `metadata/wts-workpermit-property-list-20260730.png` 和
 `metadata/qcs-workflow-config-entry-20260730.png`。
 
+### QCS 检验报告配置与 WOM 新建指令鉴权回归（2026-07-30）
+
+本轮按用户截图从真实页面复现两个独立阻断：检验报告配置元数据仍以 Oracle CLOB 文本
+存储，导致 Hibernate 在 PostgreSQL 上按 large-object OID 读取时报错；“新建指令单”
+使用 `window.open` 打开新页，文档导航无法携带保存在 localStorage 的授权头，因而被
+Nginx 的接口鉴权规则提前拦截。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| QCS 检验报告配置 | `/msService/ec/entity/config?entity.code=QCS_5.0.0.0_inspectReport` | 依次点击基本信息、数据模型、视图信息、菜单信息、工作流、Excel 导入模板、脚本信息、自定义代码 | `GET /msService/ec/view/list`；`GET /msService/ec/entity/publishMenuFrame`；`GET /msService/ec/entity/wf` | 8/8 标签正常；视图清单、已发布菜单和当前工作流版本均显示；console、page error、request failure、HTTP 5xx 均为 0 | 三个关键接口由 500 恢复为 200；目标配置字段非法 LOB 引用全部降为 0 | `ec_*`、`project_*` 配置元数据；`pg_largeobject` | PASS | 只读配置回归，不写 QCS 业务单据 |
+| WOM 新建指令入口 | `/msService/WOM/produceTask/produceTask/makeTaskList` -> `/msService/WOM/produceTask/manual-entry/page` | 在制造指令列表点击“新建指令单” | 文档 `GET /manual-entry/page`；主数据 `GET /manual-entry/options` | 文档请求不带 Authorization 仍返回 200；页面从 localStorage 读取既有票据，主数据请求带 Authorization 并返回 20 个选项；移动端 390px 无横向溢出 | 无授权直接调用主数据接口仍返回 401，证明业务接口没有放开 | 不适用 | PASS | 修复前文档请求被 Nginx 返回 401 |
+| WOM 制造指令创建 | 新建制造指令页面 | 使用 marker `ADP_E2E_20260730_1235_WOM_MANUAL_AUTH` 创建、打开待办、提交并删除回滚 | `POST /manual-entry/create`；制造指令数据、提交和删除接口 | 创建结果、待办表单和 marker 均可见；9/9 验收项通过；浏览器错误四类均为 0 | 创建 HTTP 200/code 200；查库确认任务、待办和幂等记录；提交后状态 99；回滚后 `valid=false` | `wom_produce_tasks`、`wom_manual_task_requests`、`wfm_task_pending`、`wf_deal_info` | PASS | 测试记录已按正常删除动作回滚 |
+
+机器证据：
+`metadata/qcs-inspect-report-config-regression-20260730.json`、
+`metadata/wom-manual-entry-auth-regression-20260730.json`。关键截图：
+`metadata/qcs-inspect-report-view-information-20260730.png`、
+`metadata/qcs-inspect-report-menu-information-20260730.png`、
+`metadata/qcs-inspect-report-workflow-20260730.png`、
+`metadata/wom-manual-entry-auth-result-20260730.png` 和
+`metadata/wom-manual-entry-auth-pending-20260730.png`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

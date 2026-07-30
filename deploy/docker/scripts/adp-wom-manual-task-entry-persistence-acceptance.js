@@ -3,9 +3,10 @@
 
 const fs = require("fs");
 const path = require("path");
-const { execFileSync } = require("child_process");
+const { execFileSync, spawnSync } = require("child_process");
 const { chromium, request } = require("playwright");
 
+const repoRoot = path.resolve(__dirname, "../../..");
 const baseUrl = (process.env.ADP_BASE_URL || "http://10.11.100.17:18080").replace(/\/+$/, "");
 const username = process.env.ADP_USERNAME || "admin";
 const password = process.env.ADP_PASSWORD || "123456";
@@ -21,6 +22,14 @@ const outputPath = process.env.ADP_OUTPUT_PATH || path.join(outputDir, "wom-manu
 
 function ensureDir(directory) {
   fs.mkdirSync(directory, { recursive: true });
+}
+
+function repoCommit() {
+  const result = spawnSync("git", ["rev-parse", "HEAD"], {
+    cwd: repoRoot,
+    encoding: "utf8",
+  });
+  return result.status === 0 ? result.stdout.trim() : "UNKNOWN";
 }
 
 function shellQuote(value) {
@@ -106,6 +115,13 @@ async function browserFetch(page, method, apiPath, payload, formEncoded) {
   return page.evaluate(
     async ({ requestMethod, pathValue, bodyValue, useForm }) => {
       const headers = { Accept: "application/json, text/plain, */*" };
+      const ticket = localStorage.getItem("ticket")
+        || localStorage.getItem("suposTicket")
+        || localStorage.getItem("SUPOS_TICKET")
+        || localStorage.getItem("token");
+      if (ticket) {
+        headers.Authorization = ticket.startsWith("Bearer ") ? ticket : `Bearer ${ticket}`;
+      }
       let body;
       if (bodyValue !== undefined) {
         if (useForm) {
@@ -258,6 +274,7 @@ async function main() {
   const evidence = {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
+    repoCommit: repoCommit(),
     database: "PostgreSQL",
     baseUrl,
     dbSshTarget,
@@ -312,12 +329,13 @@ WHERE schemaname = 'public'
       baseURL: baseUrl,
       ignoreHTTPSErrors: true,
       viewport: { width: 1600, height: 1000 },
-      extraHTTPHeaders: { Authorization: `Bearer ${loginResult.ticket}` },
     });
-    await context.addCookies([
-      { name: "suposTicket", value: loginResult.ticket, url: baseUrl },
-      { name: "SUPOS_TICKET", value: loginResult.ticket, url: baseUrl },
-    ]);
+    await context.addInitScript((ticket) => {
+      localStorage.setItem("ticket", ticket);
+      localStorage.setItem("suposTicket", ticket);
+      localStorage.setItem("SUPOS_TICKET", ticket);
+      localStorage.setItem("token", ticket);
+    }, loginResult.ticket);
 
     listPage = await context.newPage();
     attachBrowserEvidence(listPage, evidence.frontend, "list");
@@ -332,18 +350,65 @@ WHERE schemaname = 'public'
     evidence.frontend.screenshots.list = path.join(outputDir, "01-manufacturing-instruction-list.png");
     await listPage.screenshot({ path: evidence.frontend.screenshots.list, fullPage: true });
 
+    let entryDocumentRequest = null;
+    let optionsRequest = null;
+    let resolveOptionsResponse;
+    const optionsResponsePromise = new Promise((resolve) => { resolveOptionsResponse = resolve; });
+    context.on("request", (item) => {
+      if (item.isNavigationRequest() && item.url().endsWith(evidence.entryRoute)) {
+        entryDocumentRequest = {
+          method: item.method(),
+          hasAuthorization: Boolean(item.headers().authorization),
+        };
+      }
+      if (item.url().includes("/manual-entry/options")) {
+        optionsRequest = {
+          method: item.method(),
+          hasAuthorization: Boolean(item.headers().authorization),
+        };
+      }
+    });
+    context.on("response", async (response) => {
+      if (response.url().includes("/manual-entry/options")) {
+        const parsed = await readJsonSafe(response);
+        resolveOptionsResponse({
+          status: response.status(),
+          body: parsed.text,
+          json: parsed.json,
+        });
+      }
+    });
+
     const popupPromise = listPage.waitForEvent("popup");
     await listPage.locator("#btn-manualCreateTask").click();
     entryPage = await popupPromise;
     attachBrowserEvidence(entryPage, evidence.frontend, "entry");
     await entryPage.waitForLoadState("domcontentloaded");
     await entryPage.locator("#production-option option").nth(1).waitFor({ state: "attached", timeout: 30000 });
+    const optionsResponse = await Promise.race([
+      optionsResponsePromise,
+      new Promise((_resolve, reject) => setTimeout(
+        () => reject(new Error("Options response capture timed out")),
+        5000
+      )),
+    ]);
     evidence.frontend.entry = {
       url: entryPage.url(),
       title: await entryPage.title(),
       optionCount: await entryPage.locator("#production-option option").count(),
       selectedOption: await entryPage.locator("#production-option").inputValue(),
+      documentRequest: entryDocumentRequest,
+      optionsRequest,
+      optionsResponseStatus: optionsResponse.status,
     };
+    if (
+      !entryDocumentRequest || entryDocumentRequest.hasAuthorization ||
+      !optionsRequest || !optionsRequest.hasAuthorization ||
+      optionsResponse.status !== 200 || !optionsResponse.json ||
+      Number(optionsResponse.json.code) !== 200
+    ) {
+      throw new Error(`Manual-entry auth boundary mismatch: ${JSON.stringify(evidence.frontend.entry)}`);
+    }
     await entryPage.setViewportSize({ width: 390, height: 844 });
     evidence.frontend.mobile = await entryPage.evaluate(() => ({
       viewportWidth: window.innerWidth,

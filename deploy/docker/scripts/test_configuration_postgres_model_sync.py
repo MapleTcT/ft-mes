@@ -52,6 +52,10 @@ MAKEFILE_PATH = ROOT / "Makefile"
 TRIGGER_RETIREMENT_PATH = ROOT / "deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql"
 TRIGGER_ROLLBACK_PATH = ROOT / "deploy/docker/postgres/rollback/197-configuration-app-owned-physical-schema-sync.sql"
 QCS_CONFIGURATION_LOB_PATH = ROOT / "deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql"
+QCS_INSPECT_REPORT_LOB_PATH = (
+    ROOT
+    / "deploy/docker/postgres/init/223-qcs-inspect-report-config-lob-compat.sql"
+)
 
 SPEC = importlib.util.spec_from_file_location("patch_configuration_entity_model_runtime", PATCHER_PATH)
 if SPEC is None or SPEC.loader is None:
@@ -249,6 +253,37 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertIn("lo_from_bytea(0, convert_to(item.payload, 'UTF8'))", migration)
         self.assertIn("QCS full_config LOB conversion incomplete", migration)
         self.assertNotIn("runtime_extra_view", migration)
+
+    def test_qcs_inspect_report_lob_migration_covers_hibernate_lob_metadata(self) -> None:
+        migration = QCS_INSPECT_REPORT_LOB_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("QCS_5.0.0.0_inspectReport", migration)
+        self.assertNotIn("QCS_5.0.0.0_'", migration)
+        self.assertIn("ARRAY['ec_', 'project_']", migration)
+        for table_name, column_name in (
+            ("fast_query_json", "query_config"),
+            ("adv_query_json", "query_config"),
+            ("extra_view", "full_config"),
+            ("data_grid", "config"),
+            ("data_grid", "full_config"),
+            ("data_grid", "data_grid_json"),
+            ("field", "config"),
+            ("button", "config"),
+            ("event", "event_function"),
+            ("event", "event_function_es5"),
+            ("backup_view", "field_config"),
+            ("backup_data_grid", "dg_field_config"),
+            ("import_template", "value"),
+            ("custom_code", "custom_code"),
+        ):
+            self.assertIn(f"'{table_name}'", migration)
+            self.assertIn(f"'{column_name}'", migration)
+
+        self.assertIn("adp_qcs_inspect_report_is_lob_ref(item.payload)", migration)
+        self.assertIn("lo_from_bytea(0, convert_to(item.payload, 'UTF8'))", migration)
+        self.assertIn("QCS inspection-report LOB conversion incomplete", migration)
+        self.assertIn("BEGIN;", migration)
+        self.assertIn("COMMIT;", migration)
 
     def test_runtime_patcher_replaces_both_sync_classes(self) -> None:
         target_classes = PATCHER.PATCH_TARGETS[PATCHER.SERVICE_JAR]

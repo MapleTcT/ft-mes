@@ -338,15 +338,41 @@
         elements.statusText.textContent = "";
       }
 
+      function loginTicket() {
+        return localStorage.getItem("ticket")
+          || localStorage.getItem("suposTicket")
+          || localStorage.getItem("SUPOS_TICKET")
+          || localStorage.getItem("token");
+      }
+
+      function requestHeaders(extraHeaders) {
+        var headers = Object.assign(
+          { "Accept": "application/json" },
+          extraHeaders || {}
+        );
+        var ticket = loginTicket();
+        if (ticket && !headers.Authorization) {
+          headers.Authorization = ticket.indexOf("Bearer ") === 0
+            ? ticket
+            : "Bearer " + ticket;
+        }
+        return headers;
+      }
+
       async function requestJson(url, options) {
-        var response = await fetch(url, Object.assign({
-          credentials: "same-origin",
-          headers: { "Accept": "application/json" }
-        }, options || {}));
+        var requestOptions = Object.assign(
+          { credentials: "same-origin" },
+          options || {}
+        );
+        requestOptions.headers = requestHeaders(options && options.headers);
+        var response = await fetch(url, requestOptions);
         var text = await response.text();
         var payload;
         try { payload = JSON.parse(text); } catch (_error) { payload = null; }
         if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            throw new Error("登录状态已失效，请返回系统重新登录");
+          }
           throw new Error("请求失败（HTTP " + response.status + "）");
         }
         if (!payload || Number(payload.code) !== 200) {

@@ -3729,6 +3729,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/223-qcs-inspect-report-config-lob-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4144,6 +4150,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-production-export-readiness-smoke.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-qcs-inspect-report-config-regression.js",
       "state": "tracked",
       "tracked": true
     },
@@ -4906,6 +4918,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/test-qcs-display-bindings.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test-wom-manual-entry-auth-boundary.js",
       "state": "tracked",
       "tracked": true
     },
@@ -7971,6 +7989,30 @@
     },
     {
       "ignored": false,
+      "path": "metadata/qcs-inspect-report-config-regression-20260730.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-inspect-report-menu-information-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-inspect-report-view-information-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-inspect-report-workflow-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/qcs-interaction-round1-application-edit.png",
       "state": "tracked",
       "tracked": true
@@ -8182,6 +8224,42 @@
     {
       "ignored": false,
       "path": "metadata/wom-consumption-record-analysis.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-manual-entry-auth-form-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-manual-entry-auth-list-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-manual-entry-auth-mobile-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-manual-entry-auth-pending-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-manual-entry-auth-regression-20260730.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-manual-entry-auth-result-20260730.png",
       "state": "tracked",
       "tracked": true
     },
@@ -12092,7 +12170,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 704
+      "tracked": 707
     },
     "docs": {
       "tracked": 156
@@ -12101,7 +12179,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 297
+      "tracked": 307
     },
     "package.json": {
       "tracked": 1
@@ -12125,8 +12203,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2011,
-    "tracked": 2011,
+    "totalFiles": 2024,
+    "tracked": 2024,
     "untracked": 0
   },
   "untrackedByDirectory": []
