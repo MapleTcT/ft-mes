@@ -157,7 +157,11 @@ public class PropertyController extends ConfigurationBaseController {
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/ec/property/list")
-	public Page<PropertyVO> list(@RequestParam("model.code") String modelCode, boolean showInherent, boolean showCustom,Integer pageNo, Integer pageSize) throws Exception {
+	public Page<PropertyVO> list(@RequestParam("model.code") String modelCode,
+			@RequestParam("showInherent") boolean showInherent,
+			@RequestParam("showCustom") boolean showCustom,
+			@RequestParam(value = "pageNo", required = false) Integer pageNo,
+			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Exception {
 		Model model = new Model();
 		model.setCode(modelCode);
 		Page<Property> properties=new Page<Property>(pageNo,pageSize);

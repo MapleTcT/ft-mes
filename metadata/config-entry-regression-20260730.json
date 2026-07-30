@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-07-30T11:47:14+08:00",
+  "repoCommit": "3de82ac789d028963a294bf4822cca3f7c22a618",
+  "database": "PostgreSQL",
+  "environment": {
+    "browserBaseUrl": "http://39.164.227.152:18080",
+    "testHost": "10.11.100.17",
+    "configurationContainer": "adp-mes-newbase-configuration-1"
+  },
+  "summary": {
+    "testedFeatures": 2,
+    "pass": 2,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 2
+  },
+  "items": [
+    {
+      "module": "WTS 作业许可配置",
+      "route": "/msService/ec/entity/config?entity.code=WTS_1.0.0_workPermit",
+      "operation": "点击数据模型，再点击作业许可模型",
+      "api": "/msService/ec/property/list",
+      "method": "POST",
+      "requiresPersistence": false,
+      "backendEntry": "PropertyController.list -> ModelService.findProperties",
+      "tables": [
+        "ec_model",
+        "ec_property"
+      ],
+      "status": "PASS",
+      "evidence": "修复后 HTTP 200，返回并渲染 18 个字段；加载遮罩不可见，无弹窗、4xx/5xx、console error 或 page error。截图 metadata/wts-workpermit-property-list-20260730.png。",
+      "issues": []
+    },
+    {
+      "module": "QCS 产品检验申请工作流配置",
+      "route": "/msService/ec/entity/config?entity.code=QCS_5.0.0.0_inspect",
+      "operation": "点击工作流，选择产品检验申请单工作流，再点击配置",
+      "api": "/msService/ec/entity/wf; /msService/ec/entity/wf-list; /msService/ec/workflow/flowEditH5; /msService/ec/workflow/getFlow",
+      "method": "GET/POST",
+      "requiresPersistence": false,
+      "backendEntry": "EntityController.wf/wfList -> WorkFlowController.getFlow -> ProcessServiceFlowImpl",
+      "tables": [
+        "ec_extra_view",
+        "project_extra_view",
+        "wf_deployment",
+        "pg_largeobject"
+      ],
+      "status": "PASS",
+      "evidence": "从实体配置完整点击路径连续打开 3 次，每次渲染 20 个流程图元，加载遮罩消失；无网络、console 或 page error。截图 metadata/qcs-workflow-config-entry-20260730.png。",
+      "issues": []
+    }
+  ],
+  "databaseCompatibility": {
+    "migration": "deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql",
+    "before": {
+      "ec_extra_viewInvalidFullConfig": 79,
+      "project_extra_viewInvalidFullConfig": 79
+    },
+    "after": {
+      "ec_extra_viewValidLargeObjectRefs": 79,
+      "project_extra_viewValidLargeObjectRefs": 79
+    },
+    "idempotency": {
+      "largeObjectCountBeforeReplay": 197084,
+      "largeObjectCountAfterReplay": 197084
+    },
+    "backup": "/home/v6/adp-mes-docker-newbase-20260611-181921/backups/qcs-config-lob-20260730T1140/extra-view-before.sql"
+  },
+  "serviceLogReview": {
+    "windowStart": "2026-07-30T11:45:34+08:00",
+    "propertyListCompleted": 1,
+    "entityWorkflowCompleted": 3,
+    "workflowListCompleted": 3,
+    "getFlowCompleted": 3,
+    "illegalArgumentException": 0,
+    "badValueForTypeLong": 0,
+    "error": 0
+  }
+}

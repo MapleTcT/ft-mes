@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`221`。
-- 编号范围：`001` 到 `221`。
+- 脚本数量：`222`。
+- 编号范围：`001` 到 `222`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`84`。
+- 需关注语句：`85`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -21,9 +21,9 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 37 |
-| business | 44 |
-| compatibility | 82 |
-| configuration | 52 |
+| business | 45 |
+| compatibility | 83 |
+| configuration | 53 |
 | general | 42 |
 | notification | 9 |
 | platform | 66 |
@@ -34,23 +34,23 @@
 | Statement | Count |
 | --- | --- |
 | alter-table | 10833 |
-| create-function | 109 |
+| create-function | 110 |
 | create-index | 1016 |
 | create-table | 583 |
 | create-view | 143 |
 | insert | 11069 |
-| update | 11185 |
+| update | 11186 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 249 |
+| create-or-replace | 250 |
 | do-block | 418 |
-| if-exists | 137 |
+| if-exists | 138 |
 | if-not-exists | 13059 |
 | on-conflict | 11001 |
-| to-regclass | 220 |
+| to-regclass | 221 |
 | where-not-exists | 46 |
 
 ## 脚本清单
@@ -278,6 +278,7 @@
 | 219 | 219-qcs-purch-inspect-runtime.sql | platform, configuration, business | 85 | insert:6, update:6 | 8 | - |
 | 220 | 220-qcs-manual-inspect-and-wts-config-compat.sql | configuration, business, compatibility | 472 | create-table:1, create-function:2, insert:1, update:4 | 7 | watch:2 |
 | 221 | 221-wts-module-config-lob-compat.sql | business, compatibility | 280 | create-function:2, update:1 | 5 | watch:2 |
+| 222 | 222-qcs-configuration-lob-compat.sql | configuration, business, compatibility | 93 | create-function:1, update:1 | 3 | watch:1 |
 
 ## 规则
 

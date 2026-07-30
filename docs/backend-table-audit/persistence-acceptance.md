@@ -1336,6 +1336,20 @@ WTS 模块设计态和项目草稿态的遗留 CLOB 文本转换为 PostgreSQL l
 `flowPublish`、临时保存或其他写接口。机器证据：
 `metadata/qcs-workflow-editor-regression-20260730.json`。
 
+### 配置入口 PostgreSQL 兼容复验（2026-07-30）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 读取 WTS 作业许可字段模型 | 作业许可实体配置“数据模型 -> 作业许可” | `POST /msService/ec/property/list` | `PropertyController.list -> ModelService.findProperties` | `ec_model`、`ec_property` | 比较接口总数与页面字段行数；检查修复后服务日志是否仍有参数绑定异常 | HTTP 200、接口和页面均为 18 条；无 `IllegalArgumentException`；该动作只读 | NOT_APPLICABLE |
+| 读取 QCS 工作流并打开设计器 | 产品检验申请实体配置“工作流 -> 配置” | `GET /msService/ec/entity/wf`；`POST /msService/ec/entity/wf-list`；`POST /msService/ec/workflow/getFlow` | `EntityController -> WorkFlowController -> ProcessServiceFlowImpl` | `ec_extra_view`、`project_extra_view`、`wf_deployment`、`pg_largeobject` | `select count(*) ... full_config ~ '^[0-9]+$' and exists (select 1 from pg_largeobject_metadata where oid=full_config::oid)`，分别检查 `ec_` 和 `project_` 表；迁移重放前后统计 `pg_largeobject_metadata` | 设计态和草稿态均 79/79 有效；完整入口连续 3 次渲染 20 个节点；大对象总数重放前后均为 197084；只读入口未调用保存/发布 | NOT_APPLICABLE |
+
+数据库兼容由
+`deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql` 固化，只转换
+`QCS_5.0.0.0_` 范围内 `ec_extra_view/project_extra_view.full_config`，不修改 QCS 业务单据。
+迁移前备份位于测试机
+`backups/qcs-config-lob-20260730T1140/extra-view-before.sql`。机器证据：
+`metadata/config-entry-regression-20260730.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

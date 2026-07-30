@@ -4,8 +4,8 @@
 
 ## 摘要
 
-- Generated At：`2026-07-30T03:23:12+00:00`。
-- Repo Commit：`30630c3785ba82d97ef25f6eb0b6f44f2172e147`。
+- Generated At：`2026-07-30T04:04:38+00:00`。
+- Repo Commit：`3de82ac789d028963a294bf4822cca3f7c22a618`。
 - CI 阻断问题：`0`。
 - 迁移缺口：`1`。
 - 关注项：`2`。
@@ -14,7 +14,7 @@
 - 源码模块 Oracle 禁入：`pass`。
 - Oracle backlog 引用：`1634`。
 - 直接 Oracle 依赖：`2`。
-- PostgreSQL migration 脚本：`221`。
+- PostgreSQL migration 脚本：`222`。
 - PostgreSQL mapper audit：`0` error / `0` warning。
 - 运行配置 active Oracle-like 默认行：`0`。
 - Oracle audit 未分类引用：`0`。
@@ -32,7 +32,7 @@
 | oracle-audit-current-and-classified | pass | no | generatedAt=2026-07-30T03:19:26+00:00, repoCommit=30630c3785ba82d97ef25f6eb0b6f44f2172e147, unclassified=0, findingCount=1634, categoryTotal=1634 | 先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。 |
 | backend-direct-oracle-deps | gap | no | 250 recovered modules, 2 direct Oracle dependencies, 4 JDBC dependencies. | 模块提升时优先处理直接 Oracle JDBC 依赖，默认路径只保留 PostgreSQL。 |
 | mapper-postgres-audit | pass | no | errors=0, warnings=0, findings=0 | 任何 error 级方言必须先迁移；warning 级 `to_char` 保留人工确认记录。 |
-| postgres-migration-governance | pass | no | 221 scripts, range=001-221, highRisk=0, watch=84 | 新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。 |
+| postgres-migration-governance | pass | no | 222 scripts, range=001-222, highRisk=0, watch=85 | 新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。 |
 | recovered-source-inventory | pass | no | 250 source jars, 991 frontend files, 80 compose services. | 新增包、服务或 source map 后运行 `make inventory`。 |
 | source-module-promotion | watch | no | `backend/source-modules` currently declares 10 buildable modules. | 按 auth/rbac/organization/configuration/workflow 顺序提升高频维护模块。 |
 | source-module-oracle-policy | pass | no | Source module verification passed. Modules: 10. | 修复 `backend/source-modules` 中的 Oracle JDBC、Oracle 默认配置、Oracle dialect 或 mapper/oracle 资源后重新运行 `make source-module-check`。 |

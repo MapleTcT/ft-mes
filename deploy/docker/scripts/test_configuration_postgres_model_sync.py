@@ -51,6 +51,7 @@ FIELD_DELETE_ACCEPTANCE_PATH = (
 MAKEFILE_PATH = ROOT / "Makefile"
 TRIGGER_RETIREMENT_PATH = ROOT / "deploy/docker/postgres/init/197-configuration-app-owned-physical-schema-sync.sql"
 TRIGGER_ROLLBACK_PATH = ROOT / "deploy/docker/postgres/rollback/197-configuration-app-owned-physical-schema-sync.sql"
+QCS_CONFIGURATION_LOB_PATH = ROOT / "deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql"
 
 SPEC = importlib.util.spec_from_file_location("patch_configuration_entity_model_runtime", PATCHER_PATH)
 if SPEC is None or SPEC.loader is None:
@@ -218,6 +219,36 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
             "com/supcon/supfusion/configuration/services/openapi/controller/PropertyController.class",
             PATCHER.PATCH_TARGETS[PATCHER.OPEN_API_JAR],
         )
+
+    def test_property_list_names_every_request_parameter_explicitly(self) -> None:
+        property_controller = PROPERTY_CONTROLLER_PATH.read_text(encoding="utf-8")
+        property_list = property_controller[
+            property_controller.index('@RequestMapping(value = "/ec/property/list")') :
+            property_controller.index('@RequestMapping(value = "/ec/property/list-select")')
+        ]
+
+        self.assertIn('@RequestParam("model.code") String modelCode', property_list)
+        self.assertIn('@RequestParam("showInherent") boolean showInherent', property_list)
+        self.assertIn('@RequestParam("showCustom") boolean showCustom', property_list)
+        self.assertIn(
+            '@RequestParam(value = "pageNo", required = false) Integer pageNo',
+            property_list,
+        )
+        self.assertIn(
+            '@RequestParam(value = "pageSize", required = false) Integer pageSize',
+            property_list,
+        )
+
+    def test_qcs_configuration_lob_migration_is_scoped_and_idempotent(self) -> None:
+        migration = QCS_CONFIGURATION_LOB_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("ARRAY['ec_extra_view', 'project_extra_view']", migration)
+        self.assertIn("QCS_5.0.0.0_", migration)
+        self.assertIn("full_config IS NOT NULL", migration)
+        self.assertIn("adp_qcs_is_large_object_ref(item.payload)", migration)
+        self.assertIn("lo_from_bytea(0, convert_to(item.payload, 'UTF8'))", migration)
+        self.assertIn("QCS full_config LOB conversion incomplete", migration)
+        self.assertNotIn("runtime_extra_view", migration)
 
     def test_runtime_patcher_replaces_both_sync_classes(self) -> None:
         target_classes = PATCHER.PATCH_TARGETS[PATCHER.SERVICE_JAR]

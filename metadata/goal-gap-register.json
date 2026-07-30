@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T03:16:19+00:00",
-  "repoCommit": "30630c3785ba82d97ef25f6eb0b6f44f2172e147",
+  "generatedAt": "2026-07-30T04:08:34+00:00",
+  "repoCommit": "3de82ac789d028963a294bf4822cca3f7c22a618",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -74,7 +74,7 @@
       "status": "PARTIAL",
       "scope": "默认运行、默认构建和默认 Docker 路径使用 PostgreSQL；Oracle 仅作为 legacy 对照。",
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1634, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 221. metadata/oracle-migration-audit.json currently has 1634 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. ADP migration 218 restores the original QCS runtime layouts; migrations 219-221 add incoming-inspection runtime, manual-create entries and complete WTS design/project metadata compatibility through PostgreSQL large objects without adding an Oracle runtime path. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1634, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 222. metadata/oracle-migration-audit.json currently has 1634 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. ADP migration 218 restores the original QCS runtime layouts; migrations 219-221 add incoming-inspection runtime, manual-create entries and complete WTS design/project metadata compatibility through PostgreSQL large objects; migration 222 converts QCS configuration extra-view payloads to valid PostgreSQL large-object references. None adds an Oracle runtime path. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
@@ -105,7 +105,8 @@
         "scripts/verify-module-intake-candidate-report.py",
         "metadata/module-intake-latest-basic-modules.json",
         "docs/module-intake-latest-basic-modules.md",
-        "deploy/docker/postgres/init/221-wts-module-config-lob-compat.sql"
+        "deploy/docker/postgres/init/221-wts-module-config-lob-compat.sql",
+        "deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql"
       ]
     },
     {
@@ -629,6 +630,7 @@
         "deploy/docker/postgres/init/220-qcs-manual-inspect-and-wts-config-compat.sql",
         "metadata/qcs-wts-organization-regression-20260730.json",
         "deploy/docker/postgres/init/221-wts-module-config-lob-compat.sql",
+        "deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql",
         "metadata/wts-module-config-lob-regression-20260730.json",
         "metadata/wts-approve-config-menu-after-fix-20260730.png",
         "metadata/wts-jsa-workflow-after-fix-20260730.png",
@@ -644,16 +646,16 @@
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
         "metadata/persistence-acceptance.json currently has 302 tested features: 287 PASS, 0 FAIL, 0 BLOCKED, 15 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED.",
-        "2026-07-30 migrations 219-221 restore the incoming-inspection list/edit runtime, add exactly one manual-create entry to product and incoming inspection lists, then convert the complete WTS module design/project payloads to PostgreSQL large-object references. Migration 221 passed a 23-entity sequential endpoint sweep and an idempotent replay with zero new large objects. Transactional target apply, real browser/API checks and idempotent replay with unchanged large-object count passed without adding an Oracle runtime path.",
+        "2026-07-30 migrations 219-222 restore the incoming-inspection list/edit runtime, add exactly one manual-create entry to product and incoming inspection lists, convert the complete WTS module design/project payloads to PostgreSQL large-object references, and convert QCS configuration extra-view payloads to valid PostgreSQL large-object references. Migration 221 passed a 23-entity sequential endpoint sweep; migration 222 passed QCS workflow configuration re-entry and idempotent replay. Transactional target apply, real browser/API checks and replay with unchanged large-object counts passed without adding an Oracle runtime path.",
         "2026-07-28 marker ADP_E2E_FRUCTOSE_LINE_01 reuses the PostgreSQL WOM/QCS/WMS/ProcessAnalysis and BPI contracts to prove two process-paired material transformations, nine controlled draft quality-item definitions, final quality release and 35.1 t stock without adding an Oracle runtime path or a duplicate material ledger.",
         "2026-07-28 marker ADP_E2E_20260728042954_FACTORY_LINE proves visible factory-architecture interaction and node-type selection persisted one enabled production-line node whose response id matches its PostgreSQL id, with a null optional department plus synchronized mnemonic aliases; the same row was returned by the WOM factoryLineRef2 reference. Idempotent migrations 211-216 keep the runtime tree/edit/reference contracts on PostgreSQL without introducing an Oracle default path.",
         "2026-07-27 marker ADP_E2E_20260727_MES_FULL_CLOSED_11 refreshes the eight exact persistence rows for WOM start/process/putin/output/QCS/process-end/finish and WMS/trace. It reuses PostgreSQL tables, adds no Oracle runtime path, proves the repaired putin path creates activity execution and material-consumption facts, and proves output detail/material-output totals are exactly 2/2.",
         "Target marker ADP_E2E_20260720193226_WMS_OUTAGE directly verified the BPI and material PostgreSQL tables across a real internal material-wms outage and recovery: no material row during the outage, one durable document/line/transaction/stock after recovery, and zero marker residue after cleanup.",
-        "metadata/postgres-migration-inventory.json currently has 221 scripts, highRiskStatementCount=0, watchStatementCount=84, watchSafetyIssueCount=0; there are no missing, duplicate, invalid, or unguarded structural migration statements.",
+        "metadata/postgres-migration-inventory.json currently has 222 scripts, highRiskStatementCount=0, watchStatementCount=85, watchSafetyIssueCount=0; there are no missing, duplicate, invalid, or unguarded structural migration statements.",
         "PATROL migration 186 restores the hidden-danger/EAM risk projection and repairs supfusion_i18n_resource.modifier from the legacy varchar shape to the java.util.Date-compatible PostgreSQL timestamp shape; target migration, i18n restart, browser/API and PostgreSQL marker verification passed.",
         "metadata/persistence-acceptance.json currently has 0 FAIL and 0 BLOCKED rows",
         "metadata/production-module-backlog.json covers those unresolved persistence rows with 0 backlog items, 0 FAIL_BACKLOG and 0 BLOCKED",
-        "docs/postgres-migration-watch-rationale.md is generated from the PostgreSQL init inventory and records current watch statements; the current inventory has 82 watch statements and 0 watch safety issues.",
+        "docs/postgres-migration-watch-rationale.md is generated from the PostgreSQL init inventory and records current watch statements; the current inventory has 85 watch statements and 0 watch safety issues.",
         "RBAC role-user acceptance found HTTP 200 with rbac_roleuser.valid=false and closed it with idempotent PostgreSQL SQL 074-rbac-roleuser-valid-default.sql",
         "WOM production action tracing found missing WOM_WAIT_PUT_RECORDS and closed it with idempotent PostgreSQL SQL 079-wom-wait-put-records-table.sql plus remote schema readback; WOM process start/end later closed RM_PROCESS_ACTIVES, convert(proc_sort,int), and process wait actual_end_time compatibility through SQL 104/105/106.",
         "WOM outPutCommonTaskEdit layoutJson/cache blocker was closed with 084/085 and remote baseService cache restart before persistence acceptance",
@@ -723,7 +725,9 @@
         "deploy/docker/postgres/init/215-hierarchicalmod-factory-tree-runtime.sql",
         "deploy/docker/postgres/init/216-hierarchicalmod-factory-node-type-customer-condition.sql",
         "deploy/docker/postgres/init/221-wts-module-config-lob-compat.sql",
-        "metadata/wts-module-config-lob-regression-20260730.json"
+        "deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql",
+        "metadata/wts-module-config-lob-regression-20260730.json",
+        "metadata/config-entry-regression-20260730.json"
       ]
     },
     {

@@ -1321,6 +1321,25 @@ QCS 流程记录在交互前后的版本、修改时间、OID 与四组 XML MD5 
 `metadata/qcs-workflow-editor-regression-20260730.json`；修复后截图：
 `metadata/qcs-workflow-editor-after-fix-20260730.png`。
 
+### 配置入口参数与 QCS 工作流稳定性回归（2026-07-30）
+
+本轮继续从用户截图中的完整入口复验，不直接打开最终编辑器地址。WTS 字段列表失败根因是
+旧控制器依赖编译产物中的 Java 参数名，而恢复运行包没有保留参数名；QCS 间歇性卡加载则由
+设计态和项目草稿态 `ExtraView.fullConfig` 的 79/79 条空文本与 Hibernate `@Lob` 映射不兼容
+触发。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WTS 作业许可数据模型 | `/msService/ec/entity/config?entity.code=WTS_1.0.0_workPermit` | 点击“数据模型”，再点击模型树“作业许可” | `POST /msService/ec/property/list?...showInherent=false&showCustom=false&pageSize=20` | 字段表渲染 18 条；加载遮罩消失；无弹窗、4xx/5xx、console 或 page error | `PropertyController.list` 显式绑定请求参数；接口由 500 恢复为 200 | `ec_model`、`ec_property`（只读） | PASS | `pageNo` 是旧前端可选参数，兼容缺省请求 |
+| QCS 产品检验申请工作流配置 | `/msService/ec/entity/config?entity.code=QCS_5.0.0.0_inspect` | 点击“工作流”，选中“产品检验申请单工作流”，点击“配置”；完整路径连续执行 3 次 | `GET /msService/ec/entity/wf`；`POST /msService/ec/entity/wf-list`；`GET /msService/ec/workflow/flowEditH5`；`POST /msService/ec/workflow/getFlow` | 3/3 次均渲染 20 个流程图元，加载遮罩消失；浏览器四类错误均为 0 | 四个入口均完成；修复后日志无 `Bad value for type long` 或其他异常 | `ec_extra_view`、`project_extra_view`、`wf_deployment`、`pg_largeobject` | PASS | 本项读取配置，不保存或发布流程 |
+
+QCS 迁移前 `ec_extra_view.full_config`、`project_extra_view.full_config` 各有 79 条非法空文本，
+迁移后 79/79 均为有效 PostgreSQL large-object 引用。迁移重复执行前后大对象总数均为
+`197084`，证明幂等。机器证据：
+`metadata/config-entry-regression-20260730.json`；页面截图：
+`metadata/wts-workpermit-property-list-20260730.png` 和
+`metadata/qcs-workflow-config-entry-20260730.png`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

@@ -3723,6 +3723,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -7545,6 +7551,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/config-entry-regression-20260730.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/core-flow-acceptance-20260710.json",
       "state": "tracked",
       "tracked": true
@@ -8055,6 +8067,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/qcs-workflow-config-entry-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/qcs-workflow-editor-after-fix-20260730.png",
       "state": "tracked",
       "tracked": true
@@ -8284,6 +8302,12 @@
     {
       "ignored": false,
       "path": "metadata/wts-module-config-lob-regression-20260730.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wts-workpermit-property-list-20260730.png",
       "state": "tracked",
       "tracked": true
     },
@@ -12068,7 +12092,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 703
+      "tracked": 704
     },
     "docs": {
       "tracked": 156
@@ -12077,7 +12101,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 294
+      "tracked": 297
     },
     "package.json": {
       "tracked": 1
@@ -12101,8 +12125,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2007,
-    "tracked": 2007,
+    "totalFiles": 2011,
+    "tracked": 2011,
     "untracked": 0
   },
   "untrackedByDirectory": []

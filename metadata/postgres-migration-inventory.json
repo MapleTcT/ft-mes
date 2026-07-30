@@ -1,39 +1,39 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 221,
+  "migrationCount": 222,
   "firstNumber": 1,
-  "lastNumber": 221,
+  "lastNumber": 222,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 84,
+  "watchStatementCount": 85,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 10833,
-    "create-function": 109,
+    "create-function": 110,
     "create-index": 1016,
     "create-table": 583,
     "create-view": 143,
     "insert": 11069,
-    "update": 11185
+    "update": 11186
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 249,
+    "create-or-replace": 250,
     "do-block": 418,
-    "if-exists": 137,
+    "if-exists": 138,
     "if-not-exists": 13059,
     "on-conflict": 11001,
-    "to-regclass": 220,
+    "to-regclass": 221,
     "where-not-exists": 46
   },
   "tagTotals": {
     "auth-rbac-org": 37,
-    "business": 44,
-    "compatibility": 82,
-    "configuration": 52,
+    "business": 45,
+    "compatibility": 83,
+    "configuration": 53,
     "general": 42,
     "notification": 9,
     "platform": 66,
@@ -8334,6 +8334,52 @@
           "pattern": "drop-function",
           "excerpt": "DROP FUNCTION IF EXISTS public.adp_is_large_object_ref(text);",
           "statement": "DROP FUNCTION IF EXISTS public.adp_is_large_object_ref(text);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql",
+      "name": "222-qcs-configuration-lob-compat.sql",
+      "number": 222,
+      "slug": "qcs-configuration-lob-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 93,
+      "sha256": "da24749c9d64364ccda7761ffec2440c94c996573ae2a5d5134fec63d5788e9c",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 1,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 91,
+          "pattern": "drop-function",
+          "excerpt": "DROP FUNCTION IF EXISTS public.adp_qcs_is_large_object_ref(text);",
+          "statement": "DROP FUNCTION IF EXISTS public.adp_qcs_is_large_object_ref(text);",
           "safe": true,
           "safety": "guarded-if-exists",
           "issue": "",

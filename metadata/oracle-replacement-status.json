@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T03:23:12+00:00",
-  "repoCommit": "30630c3785ba82d97ef25f6eb0b6f44f2172e147",
+  "generatedAt": "2026-07-30T04:04:38+00:00",
+  "repoCommit": "3de82ac789d028963a294bf4822cca3f7c22a618",
   "generatedFrom": [
     "metadata/current-content-inventory.json",
     "metadata/backend-module-dependency-inventory.json",
@@ -24,7 +24,7 @@
     "sourceModuleOraclePolicyPass": true,
     "oracleBacklogReferenceCount": 1634,
     "directOracleDependencyCount": 2,
-    "postgresMigrationCount": 221,
+    "postgresMigrationCount": 222,
     "postgresMigrationHighRiskCount": 0,
     "postgresMapperAuditErrorCount": 0,
     "postgresMapperAuditWarningCount": 0,
@@ -140,7 +140,7 @@
       "verification": "提升模块后运行 `make source-module-check`、`make source-module-test`，并用登录/currentuser 或升级任务 dry-run 验证。"
     }
   ],
-  "postgresMigrationWatchCount": 84,
+  "postgresMigrationWatchCount": 85,
   "checks": [
     {
       "id": "runtime-default-postgresql",
@@ -202,7 +202,7 @@
       "id": "postgres-migration-governance",
       "title": "PostgreSQL 初始化脚本可审计",
       "status": "pass",
-      "evidence": "221 scripts, range=001-221, highRisk=0, watch=84",
+      "evidence": "222 scripts, range=001-222, highRisk=0, watch=85",
       "nextAction": "新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。",
       "blocking": false
     },
