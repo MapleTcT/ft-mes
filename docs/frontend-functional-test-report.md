@@ -1263,6 +1263,26 @@ marker `ADP_E2E_20260728042954_FACTORY_LINE` 新增
 机器记录：`metadata/organization-person-add-entry-20260730.json`；页面截图：
 `metadata/organization-person-add-entry-20260730.png`。
 
+### 组织、QCS 新增入口与 WTS 配置回归（2026-07-30）
+
+本轮通过公网测试入口 `http://39.164.227.152:18080` 执行真实浏览器回归，并通过
+`10.11.100.17` 上的 PostgreSQL 复核运行时和设计态元数据。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| 企业组织架构 | `/organization/#/organizationmanage` | 选择默认公司，点击部门树“+”，检查后取消 | 部门树与操作权限只读接口 | 打开“新增部门”表单，部门名称、编码、类型、负责人、确定/取消完整；浏览器四类错误为 0 | 未保存，不发出部门写请求 | 不适用 | PASS | 本项只验新增入口；既有部门 CRUD 落库验收继续有效 |
+| QCS 产品检验申请 | `/msService/QCS/inspect/inspect/manuInspectList` | 点击“新增申请” | `layoutJson`；`manuInspectEdit` 布局 | 新增按钮可见，点击后进入“产品检验申请”，质量标准和检验项目区域完整；浏览器四类错误为 0 | 产品列表运行时布局中 `manualAdd` 恰好 1 个 | `runtime_extra_view`、`ec_extra_view` | PASS | 未填写和保存业务单据 |
+| QCS 来料检验申请 | `/msService/QCS/inspect/inspect/purchInspectList` | 加载恢复的列表并点击“新增申请” | `layoutJson`；`purchInspectEdit` 布局 | 查询、列表、新增入口完整；表单显示供应商、质量标准和检验项目；浏览器四类错误为 0 | 来料列表/编辑布局恢复为 50374/134287 bytes，`manualAdd` 恰好 1 个 | `runtime_extra_view`、`ec_extra_view` | PASS | 未填写和保存业务单据 |
+| WTS 作业许可配置 | `/msService/ec/entity/config?entity.code=WTS_1.0.0_workPermit` | 点击“菜单信息” | `GET /msService/ec/entity/publishMenuFrame?...` | 显示“已发布菜单”和作业许可的查询、新增、作业管理、查看/修改；无数据库异常、弹窗或浏览器错误 | 接口 200；WTS 设计态 LOB 引用有效，25 个 `project_*` 关系齐备 | `ec_*`、`project_*` | PASS | 只恢复配置设计页，不改变已发布业务单据 |
+
+机器证据：`metadata/qcs-wts-organization-regression-20260730.json`。截图：
+`metadata/organization-department-add-entry-20260730.png`、
+`metadata/qcs-manu-manual-add-20260730.png`、
+`metadata/qcs-manu-create-form-20260730.png`、
+`metadata/qcs-purch-manual-add-20260730.png`、
+`metadata/qcs-purch-create-form-20260730.png` 和
+`metadata/wts-menu-config-20260730.png`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

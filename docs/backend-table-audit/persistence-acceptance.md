@@ -1296,6 +1296,22 @@ WOM 核心补丁会在投料明细保存成功后、结束活动时按明细补�
 该岗位是测试环境为解除“零岗位导致人员新增入口不可达”而保留的基础主数据，不是临时
 E2E marker。人员新增表单只打开未保存，因此没有新增 `org_person` 记录。
 
+### 组织、QCS 新增入口与 WTS 配置兼容（2026-07-30）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 打开新增部门表单 | `/organization/#/organizationmanage` | 组织树和权限只读接口 | organization 前端 -> organization/rbac 只读服务 | 无 | 不适用；取消表单前确认没有部门写请求 | 新增部门表单完整打开，随后取消；不应也没有新增业务行 | NOT_APPLICABLE |
+| 打开产品检验申请新增表单 | `/msService/QCS/inspect/inspect/manuInspectList` | `layoutJson`；`manuInspectEdit` 布局 | baseService runtime view -> GreenDill renderer | `runtime_extra_view`、`ec_extra_view` | `select code, regexp_count(convert_from(lo_get(view_json),'UTF8'), '"id": "manualAdd"') ...;` | 产品列表 `manualAdd=1`，点击进入完整产品检验申请表单；本轮未保存单据 | NOT_APPLICABLE |
+| 恢复并打开来料检验申请新增表单 | `/msService/QCS/inspect/inspect/purchInspectList` | `layoutJson`；`purchInspectEdit` 布局 | baseService runtime view -> GreenDill renderer | `runtime_extra_view`、`ec_extra_view` | 查询四个 QCS 列表/编辑布局 payload 长度并统计 `manualAdd` | 来料列表/编辑布局为 50374/134287 bytes，`manualAdd=1`；本轮未保存单据 | NOT_APPLICABLE |
+| 恢复 WTS 菜单配置设计页 | `/msService/ec/entity/config?entity.code=WTS_1.0.0_workPermit` | `GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_workPermit&__res_html=true` | configuration controller -> project/ec metadata repositories | WTS 范围 `ec_*` LOB 字段；`project_*` 设计草稿表 | 核验 WTS `ec_extra_view.view_json`、`ec_fast_query_json.query_config` 的 OID/large-object 对应关系；统计 25 个项目关系和 WTS project view/grid/button 行 | 菜单读取本身不写业务表，记为不适用；安装迁移另行核验 LOB 2/2、2/2 有效，项目关系 25/25，WTS project view/extra-view/grid/button 为 4/4/1/5；接口 200，页面无数据库异常 | NOT_APPLICABLE |
+
+本节的数据库修复由
+`deploy/docker/postgres/init/219-qcs-purch-inspect-runtime.sql` 和
+`deploy/docker/postgres/init/220-qcs-manual-inspect-and-wts-config-compat.sql`
+固化。QCS 和组织项目仅打开新增表单，没有用空白表单制造业务数据；其真实业务写入仍以
+既有 QCS 全流程和组织 CRUD 落库验收为准。机器记录：
+`metadata/qcs-wts-organization-regression-20260730.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

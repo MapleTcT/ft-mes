@@ -1,0 +1,101 @@
+{
+  "generatedAt": "2026-07-30T09:34:16+08:00",
+  "repoCommit": "cdb2f1ee9a8d8c7ad8aa325de6abf0aa3e02e67c+working-tree-qcs-wts-organization-regression",
+  "environment": {
+    "application": "http://39.164.227.152:18080",
+    "database": "PostgreSQL",
+    "databaseHost": "10.11.100.17"
+  },
+  "summary": {
+    "testedFeatures": 4,
+    "pass": 4,
+    "fail": 0,
+    "blocked": 0,
+    "businessWrites": 0
+  },
+  "items": [
+    {
+      "module": "企业组织架构",
+      "route": "/organization/#/organizationmanage",
+      "operation": "选择默认公司并点击部门树新增按钮",
+      "expected": "打开新增部门表单",
+      "actual": "显示新增部门、部门名称、编码、类型、负责人、确定和取消",
+      "api": "organization department tree and permission read APIs",
+      "requiresPersistence": false,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS",
+      "evidence": "metadata/organization-department-add-entry-20260730.png"
+    },
+    {
+      "module": "QCS 产品检验申请",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList",
+      "operation": "点击新增申请",
+      "expected": "进入产品检验申请新增表单",
+      "actual": "列表显示新增申请，点击后打开产品检验申请表单并显示质量标准和检验项目区域",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspect_manuInspectList and manuInspectEdit",
+      "requiresPersistence": false,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS",
+      "evidence": "metadata/qcs-manu-manual-add-20260730.png; metadata/qcs-manu-create-form-20260730.png"
+    },
+    {
+      "module": "QCS 来料检验申请",
+      "route": "/msService/QCS/inspect/inspect/purchInspectList",
+      "operation": "加载恢复的列表并点击新增申请",
+      "expected": "进入来料检验申请新增表单",
+      "actual": "列表、查询条件和新增申请完整显示，点击后打开包含供应商、质量标准和检验项目的来料检验申请表单",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspect_purchInspectList and purchInspectEdit",
+      "requiresPersistence": false,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS",
+      "evidence": "metadata/qcs-purch-manual-add-20260730.png; metadata/qcs-purch-create-form-20260730.png"
+    },
+    {
+      "module": "WTS 作业许可配置",
+      "route": "/msService/ec/entity/config?entity.code=WTS_1.0.0_workPermit",
+      "operation": "点击菜单信息",
+      "expected": "读取设计态配置并显示已发布菜单",
+      "actual": "显示作业许可菜单及查询、新增、作业管理、查看/修改操作，无数据库操作异常",
+      "api": "GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_workPermit&__res_html=true",
+      "requiresPersistence": false,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS",
+      "evidence": "metadata/wts-menu-config-20260730.png"
+    }
+  ],
+  "databaseVerification": [
+    {
+      "check": "QCS manual-create button uniqueness",
+      "sql": "select code, regexp_count(convert_from(lo_get(view_json),'UTF8'), '\"id\": \"manualAdd\"') from runtime_extra_view where code in ('QCS_5.0.0.0_inspect_manuInspectList','QCS_5.0.0.0_inspect_purchInspectList') order by code;",
+      "result": "manuInspectList=1; purchInspectList=1",
+      "status": "PASS"
+    },
+    {
+      "check": "QCS runtime payload availability",
+      "sql": "select code, octet_length(convert_from(lo_get(view_json),'UTF8')) from runtime_extra_view where code in ('QCS_5.0.0.0_inspect_manuInspectList','QCS_5.0.0.0_inspect_manuInspectEdit','QCS_5.0.0.0_inspect_purchInspectList','QCS_5.0.0.0_inspect_purchInspectEdit') order by code;",
+      "result": "manu edit/list=115879/49146 bytes; purch edit/list=134287/50374 bytes",
+      "status": "PASS"
+    },
+    {
+      "check": "WTS design CLOB compatibility",
+      "sql": "Verify WTS ec_extra_view.view_json and ec_fast_query_json.query_config values resolve to PostgreSQL large objects.",
+      "result": "ec_extra_view.view_json=2/2 valid; ec_fast_query_json.query_config=2/2 valid",
+      "status": "PASS"
+    },
+    {
+      "check": "WTS project draft metadata",
+      "sql": "Count required project_* relations and WTS project_view/project_extra_view/project_data_grid/project_button rows.",
+      "result": "25/25 relations; WTS rows=4/4/1/5",
+      "status": "PASS"
+    }
+  ],
+  "scope": "All four browser operations are read-only or stop before save/submit, so they prove current interaction reachability but do not create business documents. The WTS database checks verify install-time metadata compatibility separately; existing QCS, organization and WTS persistence acceptance remains authoritative for business writes."
+}

@@ -1,42 +1,42 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 218,
+  "migrationCount": 220,
   "firstNumber": 1,
-  "lastNumber": 218,
+  "lastNumber": 220,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 80,
+  "watchStatementCount": 82,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 10833,
-    "create-function": 105,
+    "create-function": 107,
     "create-index": 1016,
-    "create-table": 582,
+    "create-table": 583,
     "create-view": 143,
-    "insert": 11062,
-    "update": 11174
+    "insert": 11069,
+    "update": 11184
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 245,
-    "do-block": 416,
-    "if-exists": 132,
-    "if-not-exists": 13057,
-    "on-conflict": 10995,
+    "create-or-replace": 247,
+    "do-block": 418,
+    "if-exists": 134,
+    "if-not-exists": 13059,
+    "on-conflict": 11001,
     "to-regclass": 220,
-    "where-not-exists": 45
+    "where-not-exists": 46
   },
   "tagTotals": {
     "auth-rbac-org": 37,
-    "business": 41,
-    "compatibility": 80,
-    "configuration": 50,
+    "business": 43,
+    "compatibility": 81,
+    "configuration": 52,
     "general": 42,
     "notification": 9,
-    "platform": 65,
+    "platform": 66,
     "workflow": 21
   },
   "migrations": [
@@ -8194,6 +8194,97 @@
       },
       "highRiskStatements": [],
       "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/219-qcs-purch-inspect-runtime.sql",
+      "name": "219-qcs-purch-inspect-runtime.sql",
+      "number": 219,
+      "slug": "qcs-purch-inspect-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration",
+        "business"
+      ],
+      "lineCount": 85,
+      "sha256": "3b6adcaf062ede18bd24a590676b394ca6251d99bc3e4473397f6561a98432c6",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 6,
+        "update": 6
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 6,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/220-qcs-manual-inspect-and-wts-config-compat.sql",
+      "name": "220-qcs-manual-inspect-and-wts-config-compat.sql",
+      "number": 220,
+      "slug": "qcs-manual-inspect-and-wts-config-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 472,
+      "sha256": "02d09aff7264bd078686a2c912e61bb606d6c5aea8055c15f6be5c2d1df2e245",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 2,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 2,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 2,
+        "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 470,
+          "pattern": "drop-function",
+          "excerpt": "DROP FUNCTION IF EXISTS public.adp_convert_scoped_text_lob_to_oid_ref(text, text, text);",
+          "statement": "DROP FUNCTION IF EXISTS public.adp_convert_scoped_text_lob_to_oid_ref(text, text, text);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
+        },
+        {
+          "line": 472,
+          "pattern": "drop-function",
+          "excerpt": "DROP FUNCTION IF EXISTS public.adp_prepend_datagrid_button(jsonb, text, jsonb);",
+          "statement": "DROP FUNCTION IF EXISTS public.adp_prepend_datagrid_button(jsonb, text, jsonb);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
+        }
+      ],
       "unguardedStructuralStatements": []
     }
   ]

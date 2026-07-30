@@ -3705,6 +3705,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/219-qcs-purch-inspect-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/220-qcs-manual-inspect-and-wts-config-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -7689,6 +7701,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/organization-department-add-entry-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/organization-person-add-entry-20260730.json",
       "state": "tracked",
       "tracked": true
@@ -7941,7 +7959,31 @@
     },
     {
       "ignored": false,
+      "path": "metadata/qcs-manu-create-form-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/qcs-manu-inspect-reference-dialog-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-manu-manual-add-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-purch-create-form-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-purch-manual-add-20260730.png",
       "state": "tracked",
       "tracked": true
     },
@@ -7990,6 +8032,12 @@
     {
       "ignored": false,
       "path": "metadata/qcs-runtime-config-wom-manu-inspect-regression.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-wts-organization-regression-20260730.json",
       "state": "tracked",
       "tracked": true
     },
@@ -8182,6 +8230,12 @@
     {
       "ignored": false,
       "path": "metadata/wom-toolbar-row-smoke.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wts-menu-config-20260730.png",
       "state": "tracked",
       "tracked": true
     },
@@ -11966,7 +12020,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 698
+      "tracked": 700
     },
     "docs": {
       "tracked": 156
@@ -11975,7 +12029,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 282
+      "tracked": 289
     },
     "package.json": {
       "tracked": 1
@@ -11999,8 +12053,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1990,
-    "tracked": 1990,
+    "totalFiles": 1999,
+    "tracked": 1999,
     "untracked": 0
   },
   "untrackedByDirectory": []

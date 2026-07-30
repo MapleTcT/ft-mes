@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`218`。
-- 编号范围：`001` 到 `218`。
+- 脚本数量：`220`。
+- 编号范围：`001` 到 `220`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`80`。
+- 需关注语句：`82`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -21,12 +21,12 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 37 |
-| business | 41 |
-| compatibility | 80 |
-| configuration | 50 |
+| business | 43 |
+| compatibility | 81 |
+| configuration | 52 |
 | general | 42 |
 | notification | 9 |
-| platform | 65 |
+| platform | 66 |
 | workflow | 21 |
 
 ## 语句统计
@@ -34,24 +34,24 @@
 | Statement | Count |
 | --- | --- |
 | alter-table | 10833 |
-| create-function | 105 |
+| create-function | 107 |
 | create-index | 1016 |
-| create-table | 582 |
+| create-table | 583 |
 | create-view | 143 |
-| insert | 11062 |
-| update | 11174 |
+| insert | 11069 |
+| update | 11184 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 245 |
-| do-block | 416 |
-| if-exists | 132 |
-| if-not-exists | 13057 |
-| on-conflict | 10995 |
+| create-or-replace | 247 |
+| do-block | 418 |
+| if-exists | 134 |
+| if-not-exists | 13059 |
+| on-conflict | 11001 |
 | to-regclass | 220 |
-| where-not-exists | 45 |
+| where-not-exists | 46 |
 
 ## 脚本清单
 
@@ -275,6 +275,8 @@
 | 216 | 216-hierarchicalmod-factory-node-type-customer-condition.sql | general | 92 | insert:2, update:2 | 2 | - |
 | 217 | 217-feitian-login-branding.sql | general | 24 | update:1 | 1 | - |
 | 218 | 218-qcs-core-interaction-runtime.sql | platform, business | 163 | insert:12, update:12 | 16 | - |
+| 219 | 219-qcs-purch-inspect-runtime.sql | platform, configuration, business | 85 | insert:6, update:6 | 8 | - |
+| 220 | 220-qcs-manual-inspect-and-wts-config-compat.sql | configuration, business, compatibility | 472 | create-table:1, create-function:2, insert:1, update:4 | 7 | watch:2 |
 
 ## 规则
 

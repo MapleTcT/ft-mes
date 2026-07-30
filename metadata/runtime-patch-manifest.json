@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T00:30:41+00:00",
-  "repoCommit": "cab4f042243ee88c15aece237d5c003f99962292",
+  "generatedAt": "2026-07-30T01:51:44+00:00",
+  "repoCommit": "cdb2f1ee9a8d8c7ad8aa325de6abf0aa3e02e67c",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 404,
-    "totalBytes": 57096930,
+    "totalFiles": 406,
+    "totalBytes": 57480277,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 218,
+      "postgres-init-sql": 220,
       "runtime-binary-patch": 7,
       "runtime-patch-source": 23,
       "runtime-script": 27,
@@ -19,7 +19,7 @@
     "bytesByCategory": {
       "nacos-config-template": 42353,
       "nginx-runtime-config": 28153,
-      "postgres-init-sql": 56129686,
+      "postgres-init-sql": 56513033,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 95909,
       "runtime-script": 284123,
@@ -1619,6 +1619,18 @@
       "category": "postgres-init-sql",
       "sizeBytes": 574864,
       "sha256": "3245cf32b5fb9dcfb11e1d6ef33e91c1c4da52fec050f335f5a80df0511b411e"
+    },
+    {
+      "path": "deploy/docker/postgres/init/219-qcs-purch-inspect-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 367234,
+      "sha256": "3b6adcaf062ede18bd24a590676b394ca6251d99bc3e4473397f6561a98432c6"
+    },
+    {
+      "path": "deploy/docker/postgres/init/220-qcs-manual-inspect-and-wts-config-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 16113,
+      "sha256": "02d09aff7264bd078686a2c912e61bb606d6c5aea8055c15f6be5c2d1df2e245"
     },
     {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",

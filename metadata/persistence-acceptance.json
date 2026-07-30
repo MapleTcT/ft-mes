@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-29T18:45:00+08:00",
-  "repoCommit": "094c50dbfb725802f11fe9342695e839f45b2ad7+working-tree-qcs-interaction-round1",
+  "generatedAt": "2026-07-30T09:34:16+08:00",
+  "repoCommit": "cdb2f1ee9a8d8c7ad8aa325de6abf0aa3e02e67c+working-tree-qcs-wts-organization-regression",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -261,14 +261,32 @@
       "marker": "ADP_E2E_20260728042954_FACTORY_LINE",
       "evidence": "/tmp/adp-factory-line-persistence-ui-acceptance.json",
       "assertions": "13/13; real factory-architecture shell menu and PostgreSQL root; visible 004/生产线 row and 选择 button; empty non-required department; save HTTP 200/dealSuccessFlag true; response id and hm_factory_models id both 770612453238016 under root 7000000000001000 with department_id null; WOM factoryLineRef2 re-rendered the same line as 未占用; browser errors zero; final Foundation ERROR/WARN zero"
+    },
+    "qcsManualInspectionEntries": {
+      "status": "PASS_BROWSER_ENTRY_WITHOUT_BUSINESS_WRITE",
+      "marker": "",
+      "evidence": "metadata/qcs-wts-organization-regression-20260730.json",
+      "assertions": "Product and incoming inspection lists each expose exactly one 新增申请 action; both create forms render their core fields, quality-standard and inspection-item regions; browser error arrays are zero; no business save or submit was issued."
+    },
+    "organizationDepartmentAddEntry": {
+      "status": "PASS_BROWSER_ENTRY_WITHOUT_BUSINESS_WRITE",
+      "marker": "",
+      "evidence": "metadata/qcs-wts-organization-regression-20260730.json",
+      "assertions": "Selecting the default company and clicking the department add control opens the complete 新增部门 form with zero browser errors; the form was cancelled without a write."
+    },
+    "wtsMenuConfiguration": {
+      "status": "PASS_BROWSER_API_POSTGRES_METADATA",
+      "marker": "",
+      "evidence": "metadata/qcs-wts-organization-regression-20260730.json",
+      "assertions": "The real menu-information page returns the published 作业许可 menu without database errors; scoped WTS design LOB references, all 25 project metadata relations and WTS project snapshots were verified in PostgreSQL."
     }
   },
   "summary": {
-    "testedFeatures": 295,
+    "testedFeatures": 299,
     "pass": 287,
     "fail": 0,
     "blocked": 0,
-    "notApplicable": 8
+    "notApplicable": 12
   },
   "items": [
     {
@@ -6430,9 +6448,91 @@
       "issues": [
         "The inspection-plan list currently contains zero rows, so updatePlanLastTestDate, updatePlanCountNum and delete persistence require a separate controlled-data acceptance."
       ]
+    },
+    {
+      "acceptanceSet": "qcs-wts-organization-regression-20260730",
+      "module": "企业组织架构新增部门入口",
+      "route": "/organization/#/organizationmanage",
+      "operation": "选择默认公司并打开新增部门表单后取消",
+      "api": "Organization department tree and RBAC permission read APIs",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "organization/rbac read services -> organization management frontend",
+      "tables": [],
+      "marker": "",
+      "verificationSql": "No persistence query is required because the form was cancelled before save; browser network inspection confirmed no department write request.",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The add control opened a complete 新增部门 form with department name, code, type, owner, confirm and cancel controls. Console, page, network and HTTP error arrays were zero.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "qcs-wts-organization-regression-20260730",
+      "module": "QCS 产品检验申请手工新增入口",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList",
+      "operation": "点击新增申请并打开产品检验申请表单",
+      "api": "GET /msService/baseService/view/layoutJson for manuInspectList and manuInspectEdit",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "baseService runtime view -> GreenDill renderer",
+      "tables": [
+        "public.runtime_extra_view",
+        "public.ec_extra_view"
+      ],
+      "marker": "",
+      "verificationSql": "select code, regexp_count(convert_from(lo_get(view_json),'UTF8'), '\"id\": \"manualAdd\"') from public.runtime_extra_view where code='QCS_5.0.0.0_inspect_manuInspectList';",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The product list contained exactly one manualAdd action and opened a complete 产品检验申请 form. Browser error arrays were zero; no save or submit was issued.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "qcs-wts-organization-regression-20260730",
+      "module": "QCS 来料检验申请运行时恢复与手工新增入口",
+      "route": "/msService/QCS/inspect/inspect/purchInspectList",
+      "operation": "加载来料检验列表并点击新增申请打开表单",
+      "api": "GET /msService/baseService/view/layoutJson for purchInspectList and purchInspectEdit",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "baseService runtime view -> GreenDill renderer",
+      "tables": [
+        "public.runtime_extra_view",
+        "public.ec_extra_view"
+      ],
+      "marker": "",
+      "verificationSql": "select code, octet_length(convert_from(lo_get(view_json),'UTF8')) from public.runtime_extra_view where code in ('QCS_5.0.0.0_inspect_purchInspectList','QCS_5.0.0.0_inspect_purchInspectEdit');",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The restored incoming list/edit payloads were 50374/134287 bytes, the list contained exactly one manualAdd action, and the complete 来料检验申请 form rendered with zero browser errors. No save or submit was issued.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "qcs-wts-organization-regression-20260730",
+      "module": "WTS 作业许可菜单配置元数据",
+      "route": "/msService/ec/entity/config?entity.code=WTS_1.0.0_workPermit",
+      "operation": "点击菜单信息并读取已发布菜单",
+      "api": "GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_workPermit&__res_html=true",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "configuration controller -> project/ec metadata repositories",
+      "tables": [
+        "public.ec_extra_view",
+        "public.ec_fast_query_json",
+        "public.project_view",
+        "public.project_extra_view",
+        "public.project_data_grid",
+        "public.project_button"
+      ],
+      "marker": "",
+      "verificationSql": "Verify WTS ec_extra_view.view_json and ec_fast_query_json.query_config values resolve to PostgreSQL large objects; count 25 required project_* relations and WTS project view/extra-view/grid/button rows.",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The menu-information click is read-only and creates no business row. Separately, install-time WTS LOB checks were 2/2 and 2/2 valid; all 25 project relations existed; WTS project rows were 4/4/1/5. The real page displayed 已发布菜单 and 作业许可 operations with HTTP 200 and zero fresh browser errors or dialogs.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "",
+      "artifact": "metadata/qcs-wts-organization-regression-20260730.json",
+      "summary": "Real public-browser regression restored organization department add reachability, product and incoming QCS manual-create entry points and the WTS menu-information configuration page. PostgreSQL verified unique QCS actions, four non-empty layouts, scoped WTS LOB compatibility and the complete project draft metadata layer; no QCS or organization business write was attempted."
+    },
     {
       "marker": "",
       "artifact": "docs/testing/qcs-interaction-round1-20260729.md",

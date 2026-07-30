@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-29T11:20:44+00:00",
-  "repoCommit": "094c50dbfb725802f11fe9342695e839f45b2ad7",
+  "generatedAt": "2026-07-30T01:58:16+00:00",
+  "repoCommit": "cdb2f1ee9a8d8c7ad8aa325de6abf0aa3e02e67c",
   "findingCount": 1632,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
@@ -10146,7 +10146,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `295` 项，其中 `287 PASS / 0 FAIL / 0 BLOCKED / 8 NOT_APPLICABLE`。"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `299` 项，其中 `287 PASS / 0 FAIL / 0 BLOCKED / 12 NOT_APPLICABLE`"
     },
     {
       "file": "docs/project-objectives.md",
