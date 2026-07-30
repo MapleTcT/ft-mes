@@ -1283,6 +1283,27 @@ marker `ADP_E2E_20260728042954_FACTORY_LINE` 新增
 `metadata/qcs-purch-create-form-20260730.png` 和
 `metadata/wts-menu-config-20260730.png`。
 
+### WTS 审批与作业配置模块级回归（2026-07-30）
+
+本轮从“运维管理 -> 微服务模块配置 -> 作业管理”复现审批配置的数据库异常。失败请求为
+`GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_approveConfig`，
+修复前返回 HTTP 500；后端日志显示 Hibernate `@Lob` 按 PostgreSQL 大对象读取恢复的
+Oracle CLOB 文本时触发 `Bad value for type long`。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WTS 审批配置 | `/msService/ec/entity/config?entity.code=WTS_1.0.0_approveConfig` | 点击“菜单信息” | `GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_approveConfig&__res_html=true` | 显示已发布菜单“审批流程”及删除、修改、查询、新增操作；console、HTTP 和弹窗错误均为 0 | 接口由 500 恢复为 200 | WTS 范围 `ec_*`、`project_*` 配置元数据 | PASS | 无 |
+| WTS JSA 工作流 | `/msService/ec/entity/config?entity.code=WTS_1.0.0_jobSafetyAnalysis` | 点击“工作流” | `GET /msService/ec/entity/wf?entityCode=WTS_1.0.0_jobSafetyAnalysis` | 新建、修改、配置、删除、设为当前版本和历史版本入口完整；浏览器错误为 0 | 接口 200；当前流程版本为 0 条，属于真实空态 | 流程配置只读表 | PASS | 尚未建立 JSA 正式流程版本 |
+| WTS JSA 菜单配置 | 同上 | 点击“菜单信息” | `GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_jobSafetyAnalysis&__res_html=true` | 菜单配置正常加载；浏览器错误为 0 | 接口 200 | WTS 范围 `ec_*`、`project_*` 配置元数据 | PASS | 无 |
+| WTS 全模块配置 | 23 个 WTS 实体配置页 | 按真实用户点击节奏顺序读取全部菜单配置 | `GET /msService/ec/entity/publishMenuFrame?entityCode={WTS_ENTITY_CODE}&__res_html=true` | 23/23 页面响应没有数据库异常 | 23/23 HTTP 200 | WTS 范围 `ec_*`、`project_*` 配置元数据 | PASS | 旧配置服务不适合 23 请求并发探测，验收采用顺序请求 |
+| WTS 作业许可回归 | `/msService/ec/entity/config?entity.code=WTS_1.0.0_workPermit` | 重新点击“菜单信息” | `GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_workPermit&__res_html=true` | 已发布菜单继续正常显示；浏览器错误为 0 | 接口 200 | 同上 | PASS | 无 |
+
+修复前 `ec_extra_view.full_config` 和 `project_extra_view.full_config` 各有 234 个非法
+WTS CLOB 值，修复后均为 0；迁移重复执行没有新增 PostgreSQL 大对象。机器证据：
+`metadata/wts-module-config-lob-regression-20260730.json`。页面截图：
+`metadata/wts-approve-config-menu-after-fix-20260730.png` 和
+`metadata/wts-jsa-workflow-after-fix-20260730.png`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

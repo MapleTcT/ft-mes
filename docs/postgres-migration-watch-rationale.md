@@ -11,7 +11,7 @@
 
 ## 摘要
 
-- Watch 语句：`82`。
+- Watch 语句：`84`。
 - Watch 安全问题：`0`。
 
 ## 语句清单
@@ -100,3 +100,5 @@
 | 214-hierarchicalmod-factory-model-mne-code-compat.sql | 101 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS trg_sync_hm_factory_models_mc_aliases ON public.hm_factory_models_mc; |
 | 220-qcs-manual-inspect-and-wts-config-compat.sql | 470 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_convert_scoped_text_lob_to_oid_ref(text, text, text); |
 | 220-qcs-manual-inspect-and-wts-config-compat.sql | 472 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_prepend_datagrid_button(jsonb, text, jsonb); |
+| 221-wts-module-config-lob-compat.sql | 273 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_convert_module_text_lob_to_oid_ref( text, text, text ); |
+| 221-wts-module-config-lob-compat.sql | 278 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_is_large_object_ref(text); |

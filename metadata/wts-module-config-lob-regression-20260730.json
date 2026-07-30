@@ -1,0 +1,98 @@
+{
+  "generatedAt": "2026-07-30T10:23:58+08:00",
+  "repoCommit": "0e58fd073705e06f16226cef2e3103ea3df11069+working-tree-wts-module-config-lob-fix",
+  "environment": {
+    "browserBaseUrl": "http://39.164.227.152:18080",
+    "databaseHost": "10.11.100.17",
+    "database": "PostgreSQL",
+    "moduleCode": "WTS_1.0.0"
+  },
+  "rootCause": {
+    "failingRoute": "/msService/ec/entity/config?entity.code=WTS_1.0.0_approveConfig",
+    "failingApi": "GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_approveConfig&__res_html=true",
+    "beforeStatus": 500,
+    "visibleError": "数据库操作异常",
+    "backendException": "org.hibernate.exception.DataException: could not load ExtraView; org.postgresql.util.PSQLException: Bad value for type long",
+    "explanation": "The recovered ec_* and project_* design tables retained Oracle CLOB text, while the legacy Hibernate @Lob mapping expects PostgreSQL large-object OID references."
+  },
+  "databaseVerification": {
+    "before": {
+      "largeObjectCount": 141044,
+      "ecExtraViewInvalidFullConfig": 234,
+      "projectExtraViewInvalidFullConfig": 234
+    },
+    "after": {
+      "largeObjectCount": 196926,
+      "ecExtraViewInvalidFullConfig": 0,
+      "projectExtraViewInvalidFullConfig": 0,
+      "databaseSize": "858 MB",
+      "largeObjectStorage": "285 MB"
+    },
+    "idempotence": {
+      "migrationReplay": "PASS",
+      "largeObjectCountAfterReplay": 196926,
+      "newLargeObjectsOnReplay": 0
+    },
+    "migration": "deploy/docker/postgres/init/221-wts-module-config-lob-compat.sql"
+  },
+  "summary": {
+    "testedFeatures": 5,
+    "pass": 5,
+    "fail": 0,
+    "blocked": 0,
+    "businessWrites": 0
+  },
+  "items": [
+    {
+      "module": "WTS 审批配置",
+      "route": "/msService/ec/entity/config?entity.code=WTS_1.0.0_approveConfig",
+      "operation": "点击菜单信息并读取已发布菜单",
+      "api": "GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_approveConfig&__res_html=true",
+      "requiresPersistence": false,
+      "status": "PASS",
+      "actual": "页面显示审批流程及删除、修改、查询、新增操作；HTTP、console 和弹窗错误均为 0。",
+      "evidence": "metadata/wts-approve-config-menu-after-fix-20260730.png"
+    },
+    {
+      "module": "WTS JSA 分析工作流",
+      "route": "/msService/ec/entity/config?entity.code=WTS_1.0.0_jobSafetyAnalysis",
+      "operation": "点击工作流",
+      "api": "GET /msService/ec/entity/wf?entityCode=WTS_1.0.0_jobSafetyAnalysis",
+      "requiresPersistence": false,
+      "status": "PASS",
+      "actual": "工作流页显示新建、修改、配置、删除、设为当前版本和历史版本入口；当前无流程版本数据，不属于加载错误。",
+      "evidence": "metadata/wts-jsa-workflow-after-fix-20260730.png"
+    },
+    {
+      "module": "WTS JSA 分析菜单配置",
+      "route": "/msService/ec/entity/config?entity.code=WTS_1.0.0_jobSafetyAnalysis",
+      "operation": "点击菜单信息",
+      "api": "GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_jobSafetyAnalysis&__res_html=true",
+      "requiresPersistence": false,
+      "status": "PASS",
+      "actual": "菜单配置正常加载；HTTP、console 和弹窗错误均为 0。"
+    },
+    {
+      "module": "WTS 全模块菜单配置",
+      "route": "/msService/ec/entity/publishMenuFrame",
+      "operation": "按真实用户节奏顺序读取 23 个 WTS 实体的菜单配置",
+      "api": "GET /msService/ec/entity/publishMenuFrame?entityCode={WTS_ENTITY_CODE}&__res_html=true",
+      "requiresPersistence": false,
+      "status": "PASS",
+      "actual": "23/23 返回 HTTP 200，0 个数据库异常响应。"
+    },
+    {
+      "module": "WTS 作业许可回归",
+      "route": "/msService/ec/entity/config?entity.code=WTS_1.0.0_workPermit",
+      "operation": "重新点击菜单信息",
+      "api": "GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_workPermit&__res_html=true",
+      "requiresPersistence": false,
+      "status": "PASS",
+      "actual": "作业许可菜单配置继续正常加载；HTTP、console 和弹窗错误均为 0。"
+    }
+  ],
+  "notes": [
+    "The first 23-request concurrent probe exceeded the legacy configuration service's 30-second request timeout. The acceptance sweep was rerun sequentially and passed 23/23.",
+    "No workflow version, menu, entity, or business document was created, modified, published, or deleted during this regression."
+  ]
+}

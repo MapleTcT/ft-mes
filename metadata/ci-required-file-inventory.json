@@ -3717,6 +3717,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/221-wts-module-config-lob-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -8235,7 +8241,25 @@
     },
     {
       "ignored": false,
+      "path": "metadata/wts-approve-config-menu-after-fix-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wts-jsa-workflow-after-fix-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/wts-menu-config-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wts-module-config-lob-regression-20260730.json",
       "state": "tracked",
       "tracked": true
     },
@@ -12020,7 +12044,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 700
+      "tracked": 701
     },
     "docs": {
       "tracked": 156
@@ -12029,7 +12053,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 289
+      "tracked": 292
     },
     "package.json": {
       "tracked": 1
@@ -12053,8 +12077,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1999,
-    "tracked": 1999,
+    "totalFiles": 2003,
+    "tracked": 2003,
     "untracked": 0
   },
   "untrackedByDirectory": []

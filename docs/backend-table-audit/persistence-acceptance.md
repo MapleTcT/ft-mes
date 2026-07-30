@@ -1312,6 +1312,20 @@ E2E marker。人员新增表单只打开未保存，因此没有新增 `org_pers
 既有 QCS 全流程和组织 CRUD 落库验收为准。机器记录：
 `metadata/qcs-wts-organization-regression-20260730.json`。
 
+### WTS 审批与作业配置模块级兼容（2026-07-30）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 读取审批配置已发布菜单 | `/msService/ec/entity/config?entity.code=WTS_1.0.0_approveConfig` 的“菜单信息” | `GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_approveConfig&__res_html=true` | `EntityController.publishMenuFrame -> ViewService -> project/ec metadata repositories` | WTS 范围 `ec_*`、`project_*` 配置元数据 | 统计 `ec_extra_view`、`project_extra_view` 中 WTS `full_config` 非空但无法解析为有效 PostgreSQL large-object OID 的数量 | 修复前各 234 个非法值，修复后各 0；接口由 HTTP 500 恢复为 200，并显示已发布“审批流程”；读取动作不写业务表 | NOT_APPLICABLE |
+| 读取 JSA 工作流和菜单配置 | `/msService/ec/entity/config?entity.code=WTS_1.0.0_jobSafetyAnalysis` 的“工作流”和“菜单信息” | `GET /msService/ec/entity/wf?...`；`GET /msService/ec/entity/publishMenuFrame?...` | configuration workflow/menu controllers -> metadata repositories | 流程配置只读表；WTS `ec_*`、`project_*` 配置元数据 | 浏览器捕获 HTTP、console、弹窗错误；核验工具栏和空态列表 | 工作流工具栏完整，当前真实流程版本为 0 条；菜单配置正常加载；两个入口均无浏览器错误，本轮不创建流程 | NOT_APPLICABLE |
+| 顺序读取 WTS 全模块菜单配置 | 23 个 WTS 实体配置页 | `GET /msService/ec/entity/publishMenuFrame?entityCode={WTS_ENTITY_CODE}&__res_html=true` | `EntityController.publishMenuFrame -> configuration repositories` | WTS 范围 `ec_*`、`project_*` 配置元数据 | 对 `project_entity.module_code='WTS_1.0.0'` 的 23 个实体逐一请求；重复执行迁移前后统计 `pg_largeobject_metadata` | 23/23 HTTP 200、0 个数据库异常；迁移重放前后 large-object 数量均为 196926，证明幂等；所有动作只读 | NOT_APPLICABLE |
+
+本节数据库兼容由
+`deploy/docker/postgres/init/221-wts-module-config-lob-compat.sql` 固化。迁移在一个事务内将
+WTS 模块设计态和项目草稿态的遗留 CLOB 文本转换为 PostgreSQL large-object OID，并在
+提交前逐表自检。机器证据：
+`metadata/wts-module-config-lob-regression-20260730.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

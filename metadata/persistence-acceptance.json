@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-30T09:34:16+08:00",
-  "repoCommit": "cdb2f1ee9a8d8c7ad8aa325de6abf0aa3e02e67c+working-tree-qcs-wts-organization-regression",
+  "generatedAt": "2026-07-30T10:23:58+08:00",
+  "repoCommit": "0e58fd073705e06f16226cef2e3103ea3df11069+working-tree-wts-module-config-lob-fix",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -279,14 +279,20 @@
       "marker": "",
       "evidence": "metadata/qcs-wts-organization-regression-20260730.json",
       "assertions": "The real menu-information page returns the published 作业许可 menu without database errors; scoped WTS design LOB references, all 25 project metadata relations and WTS project snapshots were verified in PostgreSQL."
+    },
+    "wtsModuleConfiguration": {
+      "status": "PASS_BROWSER_API_POSTGRES_METADATA",
+      "marker": "",
+      "evidence": "metadata/wts-module-config-lob-regression-20260730.json",
+      "assertions": "Approval configuration, JSA workflow/menu configuration and the existing work-permit page rendered without browser errors; all 23 WTS menu-information endpoints returned HTTP 200 sequentially; invalid WTS extra-view full_config LOB values fell from 234/234 to 0/0 and migration replay created zero new large objects."
     }
   },
   "summary": {
-    "testedFeatures": 299,
+    "testedFeatures": 302,
     "pass": 287,
     "fail": 0,
     "blocked": 0,
-    "notApplicable": 12
+    "notApplicable": 15
   },
   "items": [
     {
@@ -6525,9 +6531,69 @@
       "status": "NOT_APPLICABLE",
       "evidence": "The menu-information click is read-only and creates no business row. Separately, install-time WTS LOB checks were 2/2 and 2/2 valid; all 25 project relations existed; WTS project rows were 4/4/1/5. The real page displayed 已发布菜单 and 作业许可 operations with HTTP 200 and zero fresh browser errors or dialogs.",
       "issues": []
+    },
+    {
+      "acceptanceSet": "wts-module-config-lob-regression-20260730",
+      "module": "WTS 审批配置菜单元数据",
+      "route": "/msService/ec/entity/config?entity.code=WTS_1.0.0_approveConfig",
+      "operation": "点击菜单信息并读取已发布审批流程",
+      "api": "GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_approveConfig&__res_html=true",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "EntityController.publishMenuFrame -> ViewService -> project/ec metadata repositories",
+      "tables": [
+        "public.ec_extra_view",
+        "public.project_extra_view"
+      ],
+      "marker": "",
+      "verificationSql": "Count WTS ec_extra_view/project_extra_view full_config values that are non-null but do not resolve to pg_largeobject_metadata.",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The read-only page changed from HTTP 500 and 数据库操作异常 to HTTP 200, displaying the published 审批流程 menu and operations. Invalid full_config values changed from 234/234 to 0/0; browser error arrays were zero.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wts-module-config-lob-regression-20260730",
+      "module": "WTS JSA 工作流与菜单配置",
+      "route": "/msService/ec/entity/config?entity.code=WTS_1.0.0_jobSafetyAnalysis",
+      "operation": "读取工作流工具栏和菜单配置",
+      "api": "GET /msService/ec/entity/wf?entityCode=WTS_1.0.0_jobSafetyAnalysis; GET /msService/ec/entity/publishMenuFrame?entityCode=WTS_1.0.0_jobSafetyAnalysis&__res_html=true",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "configuration workflow/menu controllers -> metadata repositories",
+      "tables": [],
+      "marker": "",
+      "verificationSql": "No business persistence SQL is required; browser/network evidence proves both endpoints are read-only and returned 200.",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The workflow page rendered new/edit/config/delete/current-version/history controls and a truthful zero-row state; menu information also loaded. Browser error arrays were zero and no workflow version was created.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wts-module-config-lob-regression-20260730",
+      "module": "WTS 全模块菜单配置读取",
+      "route": "/msService/ec/entity/publishMenuFrame",
+      "operation": "顺序读取 project_entity 中 WTS_1.0.0 的 23 个实体菜单配置",
+      "api": "GET /msService/ec/entity/publishMenuFrame?entityCode={WTS_ENTITY_CODE}&__res_html=true",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "EntityController.publishMenuFrame -> configuration repositories",
+      "tables": [
+        "public.project_entity",
+        "public.ec_extra_view",
+        "public.project_extra_view"
+      ],
+      "marker": "",
+      "verificationSql": "select code from public.project_entity where module_code='WTS_1.0.0' order by code; replay migration and compare pg_largeobject_metadata counts.",
+      "status": "NOT_APPLICABLE",
+      "evidence": "All 23 sequential requests returned HTTP 200 with zero database-error responses. Migration replay left pg_largeobject_metadata unchanged at 196926, proving idempotence. No menu or entity was written.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "",
+      "artifact": "metadata/wts-module-config-lob-regression-20260730.json",
+      "summary": "Real browser and PostgreSQL regression identified legacy Oracle CLOB text behind the WTS configuration error, converted complete WTS ec/project design metadata transactionally, reduced invalid extra-view full_config references from 234/234 to 0/0, passed approval/JSA/work-permit UI checks and returned HTTP 200 for all 23 WTS menu-information endpoints. No workflow, menu or business document was written."
+    },
     {
       "marker": "",
       "artifact": "metadata/qcs-wts-organization-regression-20260730.json",
