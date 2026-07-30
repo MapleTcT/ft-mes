@@ -849,6 +849,143 @@ ReactAPI.Layout.hideTab('tabs-5');""",
         self.assertIn("lines.append(action_view_sql(view))", source)
         self.assertIn("lines.append(ec_extra_view_sql(view, views, packaged_view_json))", source)
 
+    def test_wts_basic_settings_runtime_migration_covers_all_action_views(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "230-wts-basic-settings-action-runtime-json.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("-- target_view_count: 46", migration)
+        self.assertIn("-- emitted_view_count: 46", migration)
+        self.assertEqual(
+            92,
+            migration.count("INSERT INTO public.runtime_extra_view"),
+        )
+        self.assertEqual(
+            46,
+            migration.count("INSERT INTO public.ec_extra_view"),
+        )
+        for view_code in (
+            "WTS_1.0.0_workRegion_workRegionList",
+            "WTS_1.0.0_qualifiSet_qualifyList",
+            "WTS_1.0.0_hazidLib_hazidLibList",
+            "WTS_1.0.0_riskSafeMeasures_riskSafeyLisit",
+            "WTS_1.0.0_gasAnalysis_gasAnalysisList",
+            "WTS_1.0.0_checkCriteriaLib_checkCriteriaList",
+            "WTS_1.0.0_hourLimit_hourLimitList",
+            "WTS_1.0.0_wfGasAnalysis_wfGasAnalysisList",
+            "WTS_1.0.0_approveConfig_approveConfigList",
+            "WTS_1.0.0_wfPathFunction_wfPathFuncList",
+            "WTS_1.0.0_customizedConfig_listFilterList",
+        ):
+            self.assertIn(view_code, migration)
+        for edit_view_code in (
+            "WTS_1.0.0_workRegion_workRegionEdit",
+            "WTS_1.0.0_hourLimit_hourLimitEdit",
+            "WTS_1.0.0_hazidLib_hazidLibEdit",
+        ):
+            self.assertIn(edit_view_code, migration)
+        self.assertIn('"showname":"新增"', migration)
+        self.assertIn(
+            "hazidLibList_add_add_WTS_1.0.0_hazidLib_hazidLibList",
+            migration,
+        )
+        self.assertIn(
+            "hazidLibList_modify_modify_WTS_1.0.0_hazidLib_hazidLibList",
+            migration,
+        )
+
+    def test_wts_basic_settings_lob_migration_covers_all_entities(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "231-wts-basic-settings-action-lob-compat.sql"
+        ).read_text(encoding="utf-8")
+
+        for entity_name in (
+            "approveConfig",
+            "checkCriteriaLib",
+            "customizedConfig",
+            "gasAnalysis",
+            "hazidLib",
+            "hourLimit",
+            "qualifiSet",
+            "riskSafeMeasures",
+            "wfGasAnalysis",
+            "wfPathFunction",
+            "workRegion",
+        ):
+            self.assertIn(f"'WTS_1.0.0_{entity_name}_%'", migration)
+        self.assertIn("lo_from_bytea(0, convert_to(item.view_json, 'UTF8'))", migration)
+        self.assertIn("invalid_count", migration)
+
+    def test_wts_hazard_permission_migration_splits_add_and_modify(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "232-wts-hazid-action-permissions.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            "hazidLibList_add_modify_WTS_1.0.0_hazidLib_hazidLibList",
+            migration,
+        )
+        self.assertIn(
+            "hazidLibList_add_add_WTS_1.0.0_hazidLib_hazidLibList",
+            migration,
+        )
+        self.assertIn(
+            "hazidLibList_modify_modify_WTS_1.0.0_hazidLib_hazidLibList",
+            migration,
+        )
+        self.assertIn("role_id = 1", migration)
+        self.assertIn("RAISE EXCEPTION", migration)
+
+    def test_wts_hazard_i18n_migration_repairs_runtime_labels(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "233-wts-hazid-i18n-labels.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("ec.property.dafult", migration)
+        self.assertIn("'默认'", migration)
+        self.assertIn('"namekey":"新增"', migration)
+        self.assertIn('"displayName":"默认"', migration)
+        self.assertIn("UPDATE public.runtime_extra_view", migration)
+        self.assertIn("UPDATE public.ec_extra_view", migration)
+
+    def test_wts_risk_safe_measures_migration_repairs_script_entrypoints(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "234-wts-risk-safe-measures-script-entrypoints.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            "WTS_1.0.0_riskSafeMeasures_riskSafeyEdit",
+            migration,
+        )
+        self.assertIn(
+            "WTS_1.0.0_riskSafeMeasures_riskSafeyView",
+            migration,
+        )
+        self.assertIn(r'typeof onLoad === \"function\"', migration)
+        self.assertIn("pageOnsave()", migration)
+        self.assertIn(r'typeof onLoad_InitParam === \"function\"', migration)
+        self.assertIn(r'typeof onSave === \"function\"', migration)
+        self.assertIn("UPDATE public.runtime_extra_view", migration)
+        self.assertIn("UPDATE public.ec_extra_view", migration)
+        self.assertIn("decoded.payload::jsonb", migration)
+        self.assertIn("runtime_valid_count <> 2", migration)
+        self.assertIn("product_valid_count <> 2", migration)
+
     def test_cli_output_strips_trailing_whitespace_from_embedded_source(self):
         output = GENERATOR.strip_generated_line_trailing_whitespace(
             "SELECT 'function run() {   \n\treturn true;\t\n \treturn false;\n}';   \n\n"

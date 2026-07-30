@@ -19,6 +19,27 @@
 完整页面结论见 `docs/admin-permission-functional-scan-20260730.md`。页面 FAIL 不会因上述代表动作
 落库 PASS 而自动关闭；169 个旧包空白页和实时通知分发失败仍是独立产品缺口。
 
+## 2026-07-30 WTS 基础设置代表落库验收
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| 作业时间约束新增、修改和删除 | 作业管理 -> 基础设置 -> 作业时间约束 | `POST /msService/WTS/hourLimit/hourLimit/hourLimitEdit/submit`；`POST /msService/WTS/hourLimit/hourLimit/delete` | `WTSHourLimitController.submit -> WTSHourLimitServiceImpl.submit/saveHourLimit -> WTSHourLimitDaoImpl/ExtendedGenericDaoImpl` | `wts_hour_limits` | marker `ADP_E2E_20260730_WTS_BASIC_1785414128217`；修改后 id `6715071776309408`、类型 `soilWork`、间隔 `3`、`valid=true/version=1`；产品删除后同一行 `valid=false` 且有效列表为 0 | PASS |
+
+修改后复读：
+
+```sql
+select id, work_type, limit_hour, is_on, remark, valid, version,
+       to_char(modify_time, 'YYYY-MM-DD HH24:MI:SS')
+from public.wts_hour_limits
+where id = 6715071776309408;
+```
+
+删除走旧服务的 HQL 软删除路径：
+`update WTSHourLimit set valid=false where id in(:ids)`。本项证明代表 CRUD 的真实落库；
+其余 10 个基础设置入口只完成新增表单渲染，不计为业务落库通过。完整证据见
+`docs/wts-basic-settings-functional-acceptance-20260730.md` 和
+`metadata/wts-basic-settings-runtime-acceptance-20260730.json`。
+
 ## 2026-07-28 标准核心链路落库复验
 
 本轮以 marker `STD_CORE_20260728_194300` 从真实页面执行业务动作，并直接复读目标

@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`229`。
-- 编号范围：`001` 到 `229`。
+- 脚本数量：`234`。
+- 编号范围：`001` 到 `234`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -20,13 +20,13 @@
 
 | Tag | Count |
 | --- | --- |
-| auth-rbac-org | 38 |
-| business | 47 |
-| compatibility | 86 |
+| auth-rbac-org | 39 |
+| business | 52 |
+| compatibility | 87 |
 | configuration | 57 |
 | general | 43 |
 | notification | 10 |
-| platform | 67 |
+| platform | 69 |
 | workflow | 21 |
 
 ## 语句统计
@@ -38,20 +38,20 @@
 | create-index | 1017 |
 | create-table | 584 |
 | create-view | 143 |
-| insert | 11074 |
-| update | 11195 |
+| insert | 11216 |
+| update | 11339 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 256 |
-| do-block | 421 |
+| do-block | 467 |
 | if-exists | 144 |
 | if-not-exists | 13063 |
-| on-conflict | 11004 |
+| on-conflict | 11142 |
 | to-regclass | 221 |
-| where-not-exists | 48 |
+| where-not-exists | 53 |
 
 ## 脚本清单
 
@@ -286,6 +286,11 @@
 | 227 | 227-notification-mobile-device-token.sql | notification | 25 | create-table:1, create-index:1 | 2 | - |
 | 228 | 228-wom-process-consumption-view-runtime.sql | platform, configuration | 144 | insert:4, update:6 | 6 | - |
 | 229 | 229-qcs-inspect-config-lob-compat.sql | configuration, business, compatibility | 288 | create-function:2, update:1 | 5 | watch:2 |
+| 230 | 230-wts-basic-settings-action-runtime-json.sql | platform, business | 1801 | insert:138, update:138 | 184 | - |
+| 231 | 231-wts-basic-settings-action-lob-compat.sql | business, compatibility | 86 | update:1 | 0 | - |
+| 232 | 232-wts-hazid-action-permissions.sql | auth-rbac-org, business | 408 | insert:3 | 3 | - |
+| 233 | 233-wts-hazid-i18n-labels.sql | platform, business | 257 | insert:1, update:3 | 2 | - |
+| 234 | 234-wts-risk-safe-measures-script-entrypoints.sql | business | 209 | update:2 | 0 | - |
 
 ## 规则
 

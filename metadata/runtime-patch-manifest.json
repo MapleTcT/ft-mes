@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T11:14:53+00:00",
-  "repoCommit": "5c5da24cba229c32ad56f086780869a844d4d0d1",
+  "generatedAt": "2026-07-30T12:52:10+00:00",
+  "repoCommit": "3ad9b065a4d273b500c08749f6af38192de90364",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 418,
-    "totalBytes": 57828603,
+    "totalFiles": 423,
+    "totalBytes": 59490678,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 229,
+      "postgres-init-sql": 234,
       "runtime-binary-patch": 8,
       "runtime-patch-source": 23,
       "runtime-script": 28,
@@ -19,7 +19,7 @@
     "bytesByCategory": {
       "nacos-config-template": 42353,
       "nginx-runtime-config": 31715,
-      "postgres-init-sql": 56699667,
+      "postgres-init-sql": 58361742,
       "runtime-binary-patch": 178941,
       "runtime-patch-source": 95909,
       "runtime-script": 289112,
@@ -1685,6 +1685,36 @@
       "category": "postgres-init-sql",
       "sizeBytes": 9518,
       "sha256": "cb0d7c0fcb817403ec54ab5db0d5ae4cfdb005e8c541f01c6597a72f0d116f38"
+    },
+    {
+      "path": "deploy/docker/postgres/init/230-wts-basic-settings-action-runtime-json.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1634439,
+      "sha256": "c92b0665b607bcf9c4c74f4d7e96058469f26ee25f551bff1ffc68a15ef7ef04"
+    },
+    {
+      "path": "deploy/docker/postgres/init/231-wts-basic-settings-action-lob-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 2633,
+      "sha256": "0ec022d4f67c51b2691207db9554d732bc2efb1fe0dd2d28aa2dce52b99bb880"
+    },
+    {
+      "path": "deploy/docker/postgres/init/232-wts-hazid-action-permissions.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 10739,
+      "sha256": "21879679b14853b550a478e36afbbd36cb0ed302ea89bb3f70831dbab0d63cf8"
+    },
+    {
+      "path": "deploy/docker/postgres/init/233-wts-hazid-i18n-labels.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 7393,
+      "sha256": "557fd1df7d76acab9d04205d5da1695ab2086272aa5d4ccee029fe15ddbc21f0"
+    },
+    {
+      "path": "deploy/docker/postgres/init/234-wts-risk-safe-measures-script-entrypoints.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 6871,
+      "sha256": "29fd625f62388ea9b3e93c5342e9a2730f8d73e09f64de8b704739c0bc8e2747"
     },
     {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",

@@ -3777,6 +3777,36 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/230-wts-basic-settings-action-runtime-json.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/231-wts-basic-settings-action-lob-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/232-wts-hazid-action-permissions.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/233-wts-hazid-i18n-labels.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/234-wts-risk-safe-measures-script-entrypoints.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -6555,6 +6585,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/wts-basic-settings-functional-acceptance-20260730.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "frontend/apps/bpi/README.md",
       "state": "tracked",
       "tracked": true
@@ -8458,6 +8494,12 @@
     {
       "ignored": false,
       "path": "metadata/wts-approve-config-menu-after-fix-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wts-basic-settings-runtime-acceptance-20260730.json",
       "state": "tracked",
       "tracked": true
     },
@@ -12278,16 +12320,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 717
+      "tracked": 722
     },
     "docs": {
-      "tracked": 158
+      "tracked": 159
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 313
+      "tracked": 314
     },
     "package.json": {
       "tracked": 1
@@ -12311,8 +12353,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2042,
-    "tracked": 2042,
+    "totalFiles": 2049,
+    "tracked": 2049,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T11:25:01+00:00",
-  "repoCommit": "5c5da24cba229c32ad56f086780869a844d4d0d1",
-  "findingCount": 1636,
+  "generatedAt": "2026-07-30T12:49:21+00:00",
+  "repoCommit": "3ad9b065a4d273b500c08749f6af38192de90364",
+  "findingCount": 1639,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 194,
+    "documentation-or-workflow": 195,
     "frontend-row-index-noise": 4,
     "java-row-index-noise": 93,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
-    "postgres-compat-reference": 577,
+    "postgres-compat-reference": 579,
     "postgres-conversion-tooling": 49,
     "recovered-source-backlog": 253,
     "runtime-patch-backlog": 9,
@@ -21,8 +21,8 @@
     "decode-sql": 5,
     "from-dual": 140,
     "ojdbc": 15,
-    "oracle-keyword": 647,
-    "rownum": 694,
+    "oracle-keyword": 648,
+    "rownum": 696,
     "sysdate": 135
   },
   "topFiles": [
@@ -8909,6 +8909,22 @@
       "excerpt": "-- ec_* and project_* tables still contain the original Oracle CLOB text. The"
     },
     {
+      "file": "deploy/docker/postgres/init/230-wts-basic-settings-action-runtime-json.sql",
+      "line": 987,
+      "pattern": "rownum",
+      "category": "postgres-compat-reference",
+      "note": "PostgreSQL compatibility SQL may mention Oracle as source context.",
+      "excerpt": "DECLARE runtime_extra_view_payload text := '{\"dealInfoShow\":false,\"hasAttachment\":false,\"components\":[{\"components\":[{\"components\":[{\"components\":[{\"isborder\":0,\"components\":[{\"isborder\":0,\"cells\":[{\"colspan\":1,\"firstTd\""
+    },
+    {
+      "file": "deploy/docker/postgres/init/230-wts-basic-settings-action-runtime-json.sql",
+      "line": 1015,
+      "pattern": "rownum",
+      "category": "postgres-compat-reference",
+      "note": "PostgreSQL compatibility SQL may mention Oracle as source context.",
+      "excerpt": "VALUES ('WTS_1.0.0_qualifiSet_qualifyEdit', 'product', 0, 'WTS_1.0.0_qualifiSet_qualifyEdit', '{\"dealInfoShow\":false,\"hasAttachment\":false,\"components\":[{\"components\":[{\"components\":[{\"components\":[{\"isborder\":0,\"compone"
+    },
+    {
       "file": "deploy/docker/scripts/adp-nacos-config-drift-smoke.js",
       "line": 56,
       "pattern": "oracle-keyword",
@@ -9686,7 +9702,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 362,
+      "line": 378,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -9694,7 +9710,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 1312,
+      "line": 1328,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -9702,7 +9718,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 1366,
+      "line": 1382,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10178,7 +10194,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `313` 项，其中 `293 PASS / 1 FAIL / 0 BLOCKED / 19 NOT_APPLICABLE`"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `314` 项，其中 `294 PASS / 1 FAIL / 0 BLOCKED / 19 NOT_APPLICABLE`"
     },
     {
       "file": "docs/project-objectives.md",
@@ -10539,6 +10555,14 @@
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
       "excerpt": "- PostgreSQL 是唯一默认数据库；Oracle 未进入本次运行链。"
+    },
+    {
+      "file": "docs/wts-basic-settings-functional-acceptance-20260730.md",
+      "line": 17,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "2. `ec_extra_view.view_json` 中仍有 Oracle CLOB 文本，而旧 Hibernate PostgreSQL 映射"
     },
     {
       "file": "frontend/apps/print/src/routes/reporter/ReporterDesigner/FillData.js",

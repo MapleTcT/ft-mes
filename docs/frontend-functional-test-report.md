@@ -21,6 +21,22 @@
 `metadata/admin-permission-directory-scan-20260730.json`。
 消息列表可读、WTS 业务落库和实时通知送达是三个独立验收面；本轮只前两项通过。
 
+## 2026-07-30 WTS 基础设置新增表单回归
+
+针对“作业管理 -> 基础设置”下新增弹窗只有标题和按钮、主体为空的问题，恢复了 11 个
+菜单依赖的 46 份 list/edit/view/reference 运行时布局，并补齐 PostgreSQL large-object、
+危害库操作权限/国际化和风险措施脚本入口兼容。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WTS 基础设置 | 作业位置、人员资质、危害、风险措施、气体分析、验收标准、时间约束、气体流程、审批、路径脚本、定制化共 11 个入口 | 逐项点击新增并检查字段、按钮、弹窗/新页、console 和 network | 11 个 list 路由及对应 `layoutJson` | 11/11 表单非空；console、page error、4xx/5xx、request failed 均为 0 | 运行时布局和权限读取正常 | `runtime_extra_view`、`ec_extra_view`、RBAC/I18N 元数据 | PASS | 无 |
+| WTS 作业时间约束 | `/msService/WTS/hourLimit/hourLimit/hourLimitList` | 新增、修改、删除 marker 记录 | `hourLimitEdit/submit`、`hourLimit/delete` | 页面创建、回显、修改和删除提示均正常 | 新增/修改真实写入，删除后 `valid=false` | `wts_hour_limits` | PASS | 删除审计人/时间字段未回填，属旧服务现有行为 |
+
+详细字段清单、请求载荷、SQL 和边界见
+`docs/wts-basic-settings-functional-acceptance-20260730.md`；机器记录：
+`metadata/wts-basic-settings-runtime-acceptance-20260730.json`。其余 10 个入口本轮只验收
+新增表单渲染，没有提交业务记录。
+
 ## 2026-07-28 标准核心链路复验
 
 本轮冻结外围模块，只验收

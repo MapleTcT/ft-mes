@@ -1,0 +1,238 @@
+{
+  "generatedAt": "2026-07-30T20:28:28+08:00",
+  "repoCommit": "3ad9b065a4d273b500c08749f6af38192de90364+working-tree-wts-basic-settings",
+  "database": "PostgreSQL",
+  "environment": {
+    "browserBaseUrl": "http://10.11.100.17:18080",
+    "databaseHost": "10.11.100.17",
+    "username": "admin",
+    "roleCode": "systemRole"
+  },
+  "summary": {
+    "testedFeatures": 11,
+    "pass": 11,
+    "fail": 0,
+    "blocked": 0,
+    "formsRendered": 11,
+    "persistenceChainsTested": 1,
+    "persistenceOperations": 3
+  },
+  "rootCauses": [
+    "The 46 list/edit/view/reference runtime action layouts required by the eleven WTS basic-setting menus were missing or incomplete.",
+    "Recovered ec_extra_view.view_json values retained Oracle CLOB text while the PostgreSQL Hibernate mapping requires large-object OID references.",
+    "The hazard library add and modify actions shared a stale permission operation and had missing add/default labels.",
+    "The risk and safety measures layouts called legacy script entrypoints that were absent in the deployed static body script."
+  ],
+  "items": [
+    {
+      "module": "WTS 基础设置",
+      "name": "作业位置设置",
+      "route": "/msService/WTS/workRegion/region/workRegionList",
+      "operation": "点击新增",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workRegion_workRegionEdit",
+      "interaction": "dialog",
+      "visibleControls": 4,
+      "detectedFields": 10,
+      "consoleErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS"
+    },
+    {
+      "module": "WTS 基础设置",
+      "name": "作业人资质设置",
+      "route": "/msService/WTS/qualifiSet/qualifiSet/qualifyList",
+      "operation": "点击新增",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_qualifiSet_qualifyEdit",
+      "interaction": "dialog",
+      "visibleControls": 5,
+      "detectedFields": 13,
+      "consoleErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS"
+    },
+    {
+      "module": "WTS 基础设置",
+      "name": "危害识别库",
+      "route": "/msService/WTS/hazidLib/hazid/hazidLibList",
+      "operation": "点击新增",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_hazidLib_hazidLibEdit",
+      "interaction": "dialog",
+      "visibleControls": 1,
+      "detectedFields": 9,
+      "consoleErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS"
+    },
+    {
+      "module": "WTS 基础设置",
+      "name": "风险与安全措施库",
+      "route": "/msService/WTS/riskSafeMeasures/riskSafey/riskSafeyLisit",
+      "operation": "点击新增",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_riskSafeMeasures_riskSafeyEdit",
+      "interaction": "new-page",
+      "visibleControls": 7,
+      "detectedFields": 26,
+      "consoleErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS"
+    },
+    {
+      "module": "WTS 基础设置",
+      "name": "气体分析库",
+      "route": "/msService/WTS/gasAnalysis/gasAnalysis/gasAnalysisList",
+      "operation": "点击新增",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_gasAnalysis_gasAnalysisEdit",
+      "interaction": "dialog",
+      "visibleControls": 4,
+      "detectedFields": 14,
+      "consoleErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS"
+    },
+    {
+      "module": "WTS 基础设置",
+      "name": "验收标准库",
+      "route": "/msService/WTS/checkCriteriaLib/checkCriteria/checkCriteriaList",
+      "operation": "点击新增",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_checkCriteriaLib_checkCriteriaEdit",
+      "interaction": "dialog",
+      "visibleControls": 3,
+      "detectedFields": 7,
+      "consoleErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS"
+    },
+    {
+      "module": "WTS 基础设置",
+      "name": "作业时间约束",
+      "route": "/msService/WTS/hourLimit/hourLimit/hourLimitList",
+      "operation": "点击新增并完成代表 CRUD",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_hourLimit_hourLimitEdit; POST /msService/WTS/hourLimit/hourLimit/hourLimitEdit/submit; POST /msService/WTS/hourLimit/hourLimit/delete",
+      "interaction": "dialog",
+      "visibleControls": 4,
+      "detectedFields": 8,
+      "consoleErrors": 0,
+      "networkErrors": 0,
+      "requiresPersistence": true,
+      "status": "PASS"
+    },
+    {
+      "module": "WTS 基础设置",
+      "name": "气体分析流程设置",
+      "route": "/msService/WTS/wfGasAnalysis/wfGasAnalysis/wfGasAnalysisList",
+      "operation": "点击新增",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_wfGasAnalysis_wfGasAnalysisEdit",
+      "interaction": "dialog",
+      "visibleControls": 6,
+      "detectedFields": 9,
+      "consoleErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS"
+    },
+    {
+      "module": "WTS 基础设置",
+      "name": "审批配置",
+      "route": "/msService/WTS/approveConfig/approveConfig/approveConfigList",
+      "operation": "点击新增",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_approveConfig_approveConfigEdit",
+      "interaction": "new-page",
+      "visibleControls": 4,
+      "detectedFields": 11,
+      "consoleErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS"
+    },
+    {
+      "module": "WTS 基础设置",
+      "name": "路径脚本",
+      "route": "/msService/WTS/wfPathFunction/wfPathFunction/wfPathFuncList",
+      "operation": "点击新增",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_wfPathFunction_wfPathFuncEdit",
+      "interaction": "dialog",
+      "visibleControls": 3,
+      "detectedFields": 12,
+      "consoleErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS"
+    },
+    {
+      "module": "WTS 基础设置",
+      "name": "定制化配置",
+      "route": "/msService/WTS/customizedConfig/ccListFilter/listFilterList",
+      "operation": "点击新增",
+      "api": "GET /msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_customizedConfig_listFilterEdit",
+      "interaction": "dialog",
+      "visibleControls": 5,
+      "detectedFields": 9,
+      "consoleErrors": 0,
+      "networkErrors": 0,
+      "status": "PASS"
+    }
+  ],
+  "persistenceAcceptance": {
+    "module": "WTS 作业时间约束",
+    "marker": "ADP_E2E_20260730_WTS_BASIC_1785414128217",
+    "updatedMarker": "ADP_E2E_20260730_WTS_BASIC_1785414128217_UPDATED",
+    "id": 6715071776309408,
+    "operations": [
+      {
+        "operation": "create",
+        "method": "POST",
+        "url": "/msService/WTS/hourLimit/hourLimit/hourLimitEdit/submit",
+        "payload": {
+          "workType": "WTS_workType/soilWork",
+          "limitHour": 2.5,
+          "isOn": true,
+          "remark": "ADP_E2E_20260730_WTS_BASIC_1785414128217"
+        },
+        "responseStatus": 200,
+        "status": "PASS"
+      },
+      {
+        "operation": "update",
+        "method": "POST",
+        "url": "/msService/WTS/hourLimit/hourLimit/hourLimitEdit/submit?id=6715071776309408",
+        "payload": {
+          "workType": "WTS_workType/soilWork",
+          "limitHour": 3,
+          "isOn": true,
+          "remark": "ADP_E2E_20260730_WTS_BASIC_1785414128217_UPDATED",
+          "version": 0
+        },
+        "responseStatus": 200,
+        "response": "operate=edit; dealSuccessFlag=true; id=6715071776309408",
+        "status": "PASS"
+      },
+      {
+        "operation": "delete",
+        "method": "POST",
+        "url": "/msService/WTS/hourLimit/hourLimit/delete?ids=6715071776309408@1",
+        "responseStatus": 200,
+        "response": "operate=delete; dealSuccessFlag=true",
+        "status": "PASS"
+      }
+    ],
+    "backendEntry": "WTSHourLimitController.submit -> WTSHourLimitServiceImpl.submit/saveHourLimit -> WTSHourLimitDaoImpl/ExtendedGenericDaoImpl",
+    "tables": [
+      "wts_hour_limits"
+    ],
+    "verificationSql": "select id,work_type,limit_hour,is_on,remark,valid,version,to_char(modify_time,'YYYY-MM-DD HH24:MI:SS') from public.wts_hour_limits where id=6715071776309408;",
+    "resultAfterUpdate": "6715071776309408|WTS_workType/soilWork|3.000000|true|ADP_E2E_20260730_WTS_BASIC_1785414128217_UPDATED|true|1|2026-07-30 20:22:35",
+    "resultAfterDelete": "6715071776309408|false|ADP_E2E_20260730_WTS_BASIC_1785414128217_UPDATED",
+    "cleanup": "The product delete action completed a soft delete. The row remains for audit with valid=false and is absent from the effective list.",
+    "status": "PASS"
+  },
+  "migrations": [
+    "deploy/docker/postgres/init/230-wts-basic-settings-action-runtime-json.sql",
+    "deploy/docker/postgres/init/231-wts-basic-settings-action-lob-compat.sql",
+    "deploy/docker/postgres/init/232-wts-hazid-action-permissions.sql",
+    "deploy/docker/postgres/init/233-wts-hazid-i18n-labels.sql",
+    "deploy/docker/postgres/init/234-wts-risk-safe-measures-script-entrypoints.sql"
+  ],
+  "verification": {
+    "targetedUnitTests": "34/34 PASS",
+    "browserScan": "11/11 PASS",
+    "browserErrors": 0
+  },
+  "scope": "All eleven add forms were rendered and interacted with in the real browser. Only hour-limit was persisted through create, update and soft-delete in this round; the other ten forms were not submitted."
+}

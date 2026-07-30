@@ -1,10 +1,16 @@
 {
-  "generatedAt": "2026-07-30T10:00:57.000Z",
-  "repoCommit": "03e3e53c1d6fba1eab1b478c845d3e994ca7dc9e+working-tree",
+  "generatedAt": "2026-07-30T20:28:28+08:00",
+  "repoCommit": "3ad9b065a4d273b500c08749f6af38192de90364+working-tree-wts-basic-settings",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
-    "generatedAt": "2026-07-28T04:29:54.929Z",
+    "generatedAt": "2026-07-30T20:28:28+08:00",
+    "wtsBasicSettings": {
+      "status": "PASS_RENDER_11_OF_11_AND_REPRESENTATIVE_CRUD",
+      "marker": "ADP_E2E_20260730_WTS_BASIC_1785414128217",
+      "evidence": "metadata/wts-basic-settings-runtime-acceptance-20260730.json",
+      "assertions": "11/11 add forms rendered without browser errors; hour-limit create/update/soft-delete persisted to PostgreSQL; effective marker rows after cleanup=0"
+    },
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -294,13 +300,31 @@
     }
   },
   "summary": {
-    "testedFeatures": 313,
-    "pass": 293,
+    "testedFeatures": 314,
+    "pass": 294,
     "fail": 1,
     "blocked": 0,
     "notApplicable": 19
   },
   "items": [
+    {
+      "acceptanceSet": "wts-basic-settings-runtime-20260730",
+      "module": "WTS 基础设置",
+      "route": "/msService/WTS/hourLimit/hourLimit/hourLimitList",
+      "operation": "作业时间约束新增、修改和软删除",
+      "api": "/msService/WTS/hourLimit/hourLimit/hourLimitEdit/submit; /msService/WTS/hourLimit/hourLimit/delete",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "WTSHourLimitController.submit -> WTSHourLimitServiceImpl.submit/saveHourLimit/deleteHourLimit -> WTSHourLimitDaoImpl/ExtendedGenericDaoImpl",
+      "tables": [
+        "wts_hour_limits"
+      ],
+      "marker": "ADP_E2E_20260730_WTS_BASIC_1785414128217",
+      "verificationSql": "select id,work_type,limit_hour,is_on,remark,valid,version,to_char(modify_time,'YYYY-MM-DD HH24:MI:SS') from public.wts_hour_limits where id=6715071776309408;",
+      "status": "PASS",
+      "evidence": "Create and update returned HTTP 200 with dealSuccessFlag=true; PostgreSQL showed interval 3, updated marker, valid=true/version=1; product delete returned HTTP 200 and changed valid=false. Full record: metadata/wts-basic-settings-runtime-acceptance-20260730.json.",
+      "issues": []
+    },
     {
       "acceptanceSet": "admin-directory-representative-persistence-20260730",
       "module": "MES/WOM/QCS/WMS/ProcessAnalysis",

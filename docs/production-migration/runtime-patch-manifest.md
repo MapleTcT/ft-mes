@@ -7,11 +7,11 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-30T11:14:53+00:00` |
-| Repo Commit | `5c5da24cba229c32ad56f086780869a844d4d0d1` |
+| Generated At | `2026-07-30T12:52:10+00:00` |
+| Repo Commit | `3ad9b065a4d273b500c08749f6af38192de90364` |
 | Database Target | `PostgreSQL` |
-| Total Files | `418` |
-| Total Bytes | `57828603` |
+| Total Files | `423` |
+| Total Bytes | `59490678` |
 
 ## Categories
 
@@ -19,7 +19,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | --- | ---: | ---: | --- |
 | `nacos-config-template` | 44 | 42353 | Sanitized Nacos configuration templates used by render-nacos-configs.py. |
 | `nginx-runtime-config` | 2 | 31715 | Nginx runtime configuration used by the Docker frontend gateway. |
-| `postgres-init-sql` | 229 | 56699667 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
+| `postgres-init-sql` | 234 | 58361742 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
 | `runtime-binary-patch` | 8 | 178941 | Compiled runtime patch payloads copied into the recovered Windows package at deploy time. |
 | `runtime-patch-source` | 23 | 95909 | Source or template files used to rebuild runtime patch payloads. |
 | `runtime-script` | 28 | 289112 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
@@ -304,6 +304,11 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `postgres-init-sql` | `deploy/docker/postgres/init/227-notification-mobile-device-token.sql` | 885 | `c6b3aeedcbc6afffc95344aef9f02df92953a0e97e314f10f834802fb27f423e` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/228-wom-process-consumption-view-runtime.sql` | 152111 | `46dace1085608fbb51d91619564feb66a9322c9a53522f2d7eb57944291a381a` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/229-qcs-inspect-config-lob-compat.sql` | 9518 | `cb0d7c0fcb817403ec54ab5db0d5ae4cfdb005e8c541f01c6597a72f0d116f38` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/230-wts-basic-settings-action-runtime-json.sql` | 1634439 | `c92b0665b607bcf9c4c74f4d7e96058469f26ee25f551bff1ffc68a15ef7ef04` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/231-wts-basic-settings-action-lob-compat.sql` | 2633 | `0ec022d4f67c51b2691207db9554d732bc2efb1fe0dd2d28aa2dce52b99bb880` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/232-wts-hazid-action-permissions.sql` | 10739 | `21879679b14853b550a478e36afbbd36cb0ed302ea89bb3f70831dbab0d63cf8` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/233-wts-hazid-i18n-labels.sql` | 7393 | `557fd1df7d76acab9d04205d5da1695ab2086272aa5d4ccee029fe15ddbc21f0` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/234-wts-risk-safe-measures-script-entrypoints.sql` | 6871 | `29fd625f62388ea9b3e93c5342e9a2730f8d73e09f64de8b704739c0bc8e2747` |
 | `runtime-binary-patch` | `deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar` | 148953 | `5b274bf1f2bcefbc9d7a31fc06e4599dd1a1be7f727e009a18cb4fb3636a7c40` |
 | `runtime-binary-patch` | `deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar` | 2603 | `4af609b0f58221eb3b9794437cecc5cd9ca6ee159d90a90739bfab01a9675eca` |
 | `runtime-binary-patch` | `deploy/docker/patches/notification-dynamic-templates/notification-dynamic-templates.jar` | 2056 | `929fad64e9dc57463ab4ba54d1274c8a7ee49d5f1af2a0b44a5734b2611bf058` |

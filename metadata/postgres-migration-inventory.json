@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 229,
+  "migrationCount": 234,
   "firstNumber": 1,
-  "lastNumber": 229,
+  "lastNumber": 234,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -17,26 +17,26 @@
     "create-index": 1017,
     "create-table": 584,
     "create-view": 143,
-    "insert": 11074,
-    "update": 11195
+    "insert": 11216,
+    "update": 11339
   },
   "idempotencySignalTotals": {
     "create-or-replace": 256,
-    "do-block": 421,
+    "do-block": 467,
     "if-exists": 144,
     "if-not-exists": 13063,
-    "on-conflict": 11004,
+    "on-conflict": 11142,
     "to-regclass": 221,
-    "where-not-exists": 48
+    "where-not-exists": 53
   },
   "tagTotals": {
-    "auth-rbac-org": 38,
-    "business": 47,
-    "compatibility": 86,
+    "auth-rbac-org": 39,
+    "business": 52,
+    "compatibility": 87,
     "configuration": 57,
     "general": 43,
     "notification": 10,
-    "platform": 67,
+    "platform": 69,
     "workflow": 21
   },
   "migrations": [
@@ -8665,6 +8665,175 @@
           "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
         }
       ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/230-wts-basic-settings-action-runtime-json.sql",
+      "name": "230-wts-basic-settings-action-runtime-json.sql",
+      "number": 230,
+      "slug": "wts-basic-settings-action-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 1801,
+      "sha256": "c92b0665b607bcf9c4c74f4d7e96058469f26ee25f551bff1ffc68a15ef7ef04",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 138,
+        "update": 138
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 138,
+        "do-block": 46,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/231-wts-basic-settings-action-lob-compat.sql",
+      "name": "231-wts-basic-settings-action-lob-compat.sql",
+      "number": 231,
+      "slug": "wts-basic-settings-action-lob-compat",
+      "validName": true,
+      "tags": [
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 86,
+      "sha256": "0ec022d4f67c51b2691207db9554d732bc2efb1fe0dd2d28aa2dce52b99bb880",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/232-wts-hazid-action-permissions.sql",
+      "name": "232-wts-hazid-action-permissions.sql",
+      "number": 232,
+      "slug": "wts-hazid-action-permissions",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "business"
+      ],
+      "lineCount": 408,
+      "sha256": "21879679b14853b550a478e36afbbd36cb0ed302ea89bb3f70831dbab0d63cf8",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 3,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 3
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/233-wts-hazid-i18n-labels.sql",
+      "name": "233-wts-hazid-i18n-labels.sql",
+      "number": 233,
+      "slug": "wts-hazid-i18n-labels",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 257,
+      "sha256": "557fd1df7d76acab9d04205d5da1695ab2086272aa5d4ccee029fe15ddbc21f0",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/234-wts-risk-safe-measures-script-entrypoints.sql",
+      "name": "234-wts-risk-safe-measures-script-entrypoints.sql",
+      "number": 234,
+      "slug": "wts-risk-safe-measures-script-entrypoints",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 209,
+      "sha256": "29fd625f62388ea9b3e93c5342e9a2730f8d73e09f64de8b704739c0bc8e2747",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
       "unguardedStructuralStatements": []
     }
   ]
