@@ -444,7 +444,18 @@ WHERE schemaname = 'public'
     evidence.frontend.screenshots.form = path.join(outputDir, "02-manual-entry-form.png");
     await entryPage.screenshot({ path: evidence.frontend.screenshots.form, fullPage: true });
     await entryPage.locator("#submit-create").click();
-    await entryPage.locator("#result-section:not(.hidden)").waitFor({ timeout: 60000 });
+    const submissionOutcome = await Promise.race([
+      entryPage.locator("#result-section:not(.hidden)").waitFor({ timeout: 60000 })
+        .then(() => ({ status: "success" })),
+      entryPage.locator("#status.status.visible.error").waitFor({ timeout: 60000 })
+        .then(async () => ({
+          status: "error",
+          message: (await entryPage.locator("#status-text").innerText()).trim(),
+        })),
+    ]);
+    if (submissionOutcome.status === "error") {
+      throw new Error(`Manual-entry create failed in page: ${submissionOutcome.message}`);
+    }
     capturedCreateResponse = await Promise.race([
       createResponsePromise,
       new Promise((_resolve, reject) => setTimeout(() => reject(new Error("Create response capture timed out")), 5000)),
