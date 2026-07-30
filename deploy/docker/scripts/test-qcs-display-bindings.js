@@ -15,6 +15,9 @@ const nginx = read("deploy/docker/nginx/adp.conf");
 const listI18n = read(
   "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectList/i18n-value.js"
 );
+const editI18n = read(
+  "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectEdit/i18n-value.js"
+);
 const planListI18n = read(
   "deploy/docker/assets/module-static/QCS/testPlan/inspectPlan/manuInspPlanList/i18n-value.js"
 );
@@ -66,6 +69,31 @@ assert(
 assert(
   listI18n.includes("installQCS_MANU_INSPECT_LISTI18nCompatibility"),
   "QCS list i18n asset must install the cross-frame compatibility fallback"
+);
+assert(
+  nginx.includes(
+    "location = /greenDill/static/QCS/inspect/inspect/manuInspectEdit/i18n-value.js"
+  ),
+  "QCS edit i18n asset must have an exact no-cache nginx route"
+);
+assert(
+  editI18n.includes(
+    'window.InternationalResource["LIMSBasic.viewtitle.randon1584520303249"] = "质量标准参照";'
+  ) &&
+    editI18n.includes(
+      'window.InternationalResource["Button.text.select"] = "选择";'
+    ) &&
+    editI18n.includes(
+      'window.InternationalResource["Button.text.close"] = "关闭";'
+    ) &&
+    editI18n.includes(
+      'window.InternationalResource["Reference.confirm.tip.message"] = "请至少选中一行！";'
+    ),
+  "QCS edit quality-standard reference must translate its title, actions, and empty-selection feedback"
+);
+assert(
+  editI18n.includes("installQCS_MANU_INSPECT_EDITI18nCompatibility"),
+  "QCS edit i18n asset must install the cross-frame compatibility fallback"
 );
 assert(
   nginx.includes(

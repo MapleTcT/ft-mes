@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-29T11:16:25+00:00",
-  "repoCommit": "094c50dbfb725802f11fe9342695e839f45b2ad7",
+  "generatedAt": "2026-07-30T00:30:41+00:00",
+  "repoCommit": "cab4f042243ee88c15aece237d5c003f99962292",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 402,
-    "totalBytes": 57088295,
+    "totalFiles": 404,
+    "totalBytes": 57096930,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
@@ -14,16 +14,16 @@
       "runtime-binary-patch": 7,
       "runtime-patch-source": 23,
       "runtime-script": 27,
-      "runtime-static-override": 81
+      "runtime-static-override": 83
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 27814,
+      "nginx-runtime-config": 28153,
       "postgres-init-sql": 56129686,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 95909,
       "runtime-script": 284123,
-      "runtime-static-override": 478422
+      "runtime-static-override": 486718
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 27594,
-      "sha256": "e5f8a0c84be728e2a1544f0a6dd63cde94ca11393228e023322f9ef65fe41b3a"
+      "sizeBytes": 27933,
+      "sha256": "bfe5a0a50f63120de5fd7a9bf8f53042e61bf862188e20d30df9d9635478afaf"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -2051,6 +2051,18 @@
       "category": "runtime-static-override",
       "sizeBytes": 1253,
       "sha256": "979853ad29cd2c294e85673b6767204a26f423b769e4dea8fa9b206f21a74d3f"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectEdit/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 6446,
+      "sha256": "2b0c2e072695c5bca9938e73a4693d7c82c81982e402e83a1f3e6228f13b4ba1"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectEdit/platform-common-zh_CN.properties",
+      "category": "runtime-static-override",
+      "sizeBytes": 1850,
+      "sha256": "afdf6455c3bea0dd207314c69e7d003db09dbaee104e61fe365b51f05e473b10"
     },
     {
       "path": "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectList/i18n-value.js",

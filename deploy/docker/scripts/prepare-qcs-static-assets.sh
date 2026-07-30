@@ -13,6 +13,9 @@ QCS_STATIC_DEST="$STATIC_ROOT/greenDill/static/QCS/static"
 QCS_LIST_I18N_DIR="$ROOT_DIR/deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectList"
 QCS_LIST_I18N_PROPERTIES="$QCS_LIST_I18N_DIR/platform-common-zh_CN.properties"
 QCS_LIST_I18N_OUTPUT="$QCS_LIST_I18N_DIR/i18n-value.js"
+QCS_EDIT_I18N_DIR="$ROOT_DIR/deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectEdit"
+QCS_EDIT_I18N_PROPERTIES="$QCS_EDIT_I18N_DIR/platform-common-zh_CN.properties"
+QCS_EDIT_I18N_OUTPUT="$QCS_EDIT_I18N_DIR/i18n-value.js"
 QCS_PLAN_LIST_I18N_DIR="$ROOT_DIR/deploy/docker/assets/module-static/QCS/testPlan/inspectPlan/manuInspPlanList"
 QCS_PLAN_LIST_I18N_PROPERTIES="$QCS_PLAN_LIST_I18N_DIR/platform-common-zh_CN.properties"
 QCS_PLAN_LIST_I18N_OUTPUT="$QCS_PLAN_LIST_I18N_DIR/i18n-value.js"
@@ -34,6 +37,11 @@ python3 "$SCRIPT_DIR/generate-module-i18n-js.py" \
   --module-code QCS_MANU_INSPECT_LIST
 
 python3 "$SCRIPT_DIR/generate-module-i18n-js.py" \
+  --properties "$QCS_EDIT_I18N_PROPERTIES" \
+  --output "$QCS_EDIT_I18N_OUTPUT" \
+  --module-code QCS_MANU_INSPECT_EDIT
+
+python3 "$SCRIPT_DIR/generate-module-i18n-js.py" \
   --properties "$QCS_PLAN_LIST_I18N_PROPERTIES" \
   --output "$QCS_PLAN_LIST_I18N_OUTPUT" \
   --module-code QCS_MANU_INSP_PLAN_LIST
@@ -45,5 +53,6 @@ python3 "$SCRIPT_DIR/generate-module-i18n-js.py" \
 
 echo "QCS static assets prepared: $QCS_STATIC_DEST"
 echo "QCS list i18n compatibility prepared: $QCS_LIST_I18N_OUTPUT"
+echo "QCS edit i18n compatibility prepared: $QCS_EDIT_I18N_OUTPUT"
 echo "QCS inspection-plan i18n compatibility prepared: $QCS_PLAN_LIST_I18N_OUTPUT"
 echo "QCS report view i18n compatibility prepared: $QCS_REPORT_VIEW_I18N_OUTPUT"

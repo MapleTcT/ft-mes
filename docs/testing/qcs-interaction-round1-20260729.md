@@ -69,3 +69,29 @@ ORDER BY code;
   - `node deploy/docker/scripts/test-qcs-display-bindings.js`
 - 产品检验记录当前为 0 条。设置检测日期、设置已跳批和删除的真实写入仍需先建立一条受控检验计划，再做 marker、API 和 PostgreSQL 字段变化验收。
 - 申请打开/关闭/批量提交及报告合格/不合格的真实业务落库已有历史专项证据；本轮没有重复改变保留中的真实业务单据。
+
+## 2026-07-30 质量标准参照补充复验
+
+用户在产品检验申请编辑页打开“质量标准参照”后，弹窗曾直接显示
+`LIMSBasic.viewtitle.randon1584520303249`、`Button.text.select` 和
+`Button.text.close`。现场确认该页面请求的
+`/greenDill/static/QCS/inspect/inspect/manuInspectEdit/i18n-value.js`
+只有空资源对象。
+
+本轮为 `manuInspectEdit` 补齐页面有效使用的 20 个平台、QCS、LIMSBasic 和
+LIMSSample 中文资源，并增加精确、禁缓存的 Nginx 路由。恢复包
+`i18n-key.txt` 中另有 `LIMSMaterial.custom.randon1597803645551`，但原始
+模块除清单声明外没有翻译值或调用，当前数据库和运行源码也无定义或引用，
+本轮没有猜测其业务含义。
+
+| 页面/路由 | 操作 | 预期结果 | 实际结果 | API/资源 | 落库 | 状态 |
+|---|---|---|---|---|---|---|
+| `/msService/QCS/inspect/inspect/manuInspectEdit?...` | 打开质量标准“参照” | 标题和底部动作显示中文 | 显示“质量标准参照 / 选择 / 关闭”，弹窗内 1 条标准完整显示，无原始资源键 | `GET .../manuInspectEdit/i18n-value.js`；质量标准参照 layout/query | 不落库 | PASS |
+| 同上 | 不选记录点击“选择” | 阻止关闭并给出中文提示 | 捕获到参照页 `showMessage("w", "请至少选中一行！")`，弹窗保持打开 | 前端防误操作，无业务写请求 | 不落库 | PASS |
+| 同上 | 勾选标准后点击“选择” | 回填标准并关闭弹窗 | 弹窗关闭；主表仍为 1 条目标质量标准，重复数据被过滤；无网络或页面错误 | 参照选择回调 | 仅修改未保存页面状态 | PASS |
+| 同上 | 重新打开后点击“关闭” | 关闭弹窗且不改变单据 | 弹窗关闭；质量标准行数从 1 保持为 1 | 无业务写请求 | 不落库 | PASS |
+| 同上 | 选中质量标准后点击“按计划选择” | 加载对应检验项目 | 加载 `ADP_E2E_20260710023850_WOM_CHECKOUTBILL QCS report item`，无原始资源键 | 检验项目计划查询 | 仅修改未保存页面状态 | PASS |
+
+浏览器验证期间 `HTTP >= 400`、request failure、console error 和 page error
+均为 0。证据截图：
+`metadata/qcs-manu-inspect-reference-dialog-20260730.png`。

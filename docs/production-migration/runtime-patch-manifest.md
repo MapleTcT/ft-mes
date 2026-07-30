@@ -7,23 +7,23 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-29T11:16:25+00:00` |
-| Repo Commit | `094c50dbfb725802f11fe9342695e839f45b2ad7` |
+| Generated At | `2026-07-30T00:30:41+00:00` |
+| Repo Commit | `cab4f042243ee88c15aece237d5c003f99962292` |
 | Database Target | `PostgreSQL` |
-| Total Files | `402` |
-| Total Bytes | `57088295` |
+| Total Files | `404` |
+| Total Bytes | `57096930` |
 
 ## Categories
 
 | Category | Files | Bytes | Description |
 | --- | ---: | ---: | --- |
 | `nacos-config-template` | 44 | 42353 | Sanitized Nacos configuration templates used by render-nacos-configs.py. |
-| `nginx-runtime-config` | 2 | 27814 | Nginx runtime configuration used by the Docker frontend gateway. |
+| `nginx-runtime-config` | 2 | 28153 | Nginx runtime configuration used by the Docker frontend gateway. |
 | `postgres-init-sql` | 218 | 56129686 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
 | `runtime-binary-patch` | 7 | 29988 | Compiled runtime patch payloads copied into the recovered Windows package at deploy time. |
 | `runtime-patch-source` | 23 | 95909 | Source or template files used to rebuild runtime patch payloads. |
 | `runtime-script` | 27 | 284123 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
-| `runtime-static-override` | 81 | 478422 | Static frontend runtime overrides mounted into the Docker frontend gateway. |
+| `runtime-static-override` | 83 | 486718 | Static frontend runtime overrides mounted into the Docker frontend gateway. |
 
 ## Manifest Entries
 
@@ -73,7 +73,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `nacos-config-template` | `deploy/nacos-config/supfusion-systemConfig.properties` | 807 | `557f134990f19b26597602b918aa3ce1f611d20ddcb4dfd828dd7c1f4e4805ea` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-task-scheduler.properties` | 1680 | `578b65e2754b9053209fb17cac4d8f027e3a1279a6fdd35f75c8b8435579f4ad` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-theme.properties` | 630 | `f62add6300bbb4758d3fba662cc7646530e9ecfbfe7da64452dbec2b30213c17` |
-| `nginx-runtime-config` | `deploy/docker/nginx/adp.conf` | 27594 | `e5f8a0c84be728e2a1544f0a6dd63cde94ca11393228e023322f9ef65fe41b3a` |
+| `nginx-runtime-config` | `deploy/docker/nginx/adp.conf` | 27933 | `bfe5a0a50f63120de5fd7a9bf8f53042e61bf862188e20d30df9d9635478afaf` |
 | `nginx-runtime-config` | `deploy/docker/nginx/gzip.conf` | 220 | `605130384f1677fdd26d0ea7514d87b8ad2619c794548a3a1cf200a3aa0d0a64` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/001-adp-postgres-compat.sql` | 4430 | `cea2ef60626794cdd7b2149a221072807385f3c5a587c8bb641a9f08eaa24f96` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/002-sms-jincang.sql` | 612 | `43007e1051a191caa4b6eb1238520600530c2605258ce166d0b00cdd0a32e598` |
@@ -365,6 +365,8 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `runtime-static-override` | `deploy/docker/assets/module-static/PATROL/patrolTask/taskDetail/abnormalSummary/body-es5.js` | 303 | `4004ee453b44ed880f925380fa70bf881c9c1925fe7a6e929b4c13d19cd5e934` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/PATROL/patrolTask/taskDetail/abnormalSummary/body.js` | 4419 | `131442c052ba7c5844c29ff533b56268bcb8a8eba770efe009caf2d14fc7bc92` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/PATROL/platform-common-zh_CN.properties` | 1253 | `979853ad29cd2c294e85673b6767204a26f423b769e4dea8fa9b206f21a74d3f` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectEdit/i18n-value.js` | 6446 | `2b0c2e072695c5bca9938e73a4693d7c82c81982e402e83a1f3e6228f13b4ba1` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectEdit/platform-common-zh_CN.properties` | 1850 | `afdf6455c3bea0dd207314c69e7d003db09dbaee104e61fe365b51f05e473b10` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectList/i18n-value.js` | 6528 | `ca40b4b0c52c41b1dd9827fb9205ea2493fca85dd7382d16c387f59523befae5` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectList/platform-common-zh_CN.properties` | 1903 | `a93bca04c36fa3cf7f01dc8e6e48b1bc836a401999c3358b749453162594bb87` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportEdit/body-es5.js` | 5794 | `f1457d6802550427a5ceae6c2660420d02bad9f00ea63a30e3a198eb925908c8` |

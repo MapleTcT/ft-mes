@@ -1719,6 +1719,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectEdit/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectEdit/platform-common-zh_CN.properties",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/QCS/inspect/inspect/manuInspectList/i18n-value.js",
       "state": "tracked",
       "tracked": true
@@ -7917,6 +7929,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/qcs-manu-inspect-reference-dialog-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/qcs-report-chain-qualified-current.json",
       "state": "tracked",
       "tracked": true
@@ -11936,7 +11954,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 696
+      "tracked": 698
     },
     "docs": {
       "tracked": 156
@@ -11945,7 +11963,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 279
+      "tracked": 280
     },
     "package.json": {
       "tracked": 1
@@ -11969,8 +11987,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1985,
-    "tracked": 1985,
+    "totalFiles": 1988,
+    "tracked": 1988,
     "untracked": 0
   },
   "untrackedByDirectory": []

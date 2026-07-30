@@ -1236,6 +1236,13 @@ marker `ADP_E2E_20260728042954_FACTORY_LINE` 新增
 | 报告/不合格/紧急放行 | 三个真实待办编辑或查看路由 | 双击既有单据并重载 | 各页面 data/layout 请求 | 三页均显示真实业务字段；console/page/request/HTTP 错误为 0 | 读取既有 QCS 数据，无写请求 | QCS 业务只读表 | PASS | 无 |
 | 产品检验记录 | `/msService/QCS/testPlan/inspectPlan/manuInspPlanList` | 打开空列表并点击未选行“设置检测日期” | layoutJson；列表 query | 设置检测日期、设置已跳批、删除可见；中文防误操作提示正常；浏览器错误为 0 | 未选行被拦截，无业务写请求 | `runtime_extra_view`、`ec_extra_view` | PASS | 当前 0 条；真实设置/删除落库待受控数据专项 |
 
+### QCS 产品检验申请参照按钮补充复验（2026-07-30）
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| 产品检验申请 | `/msService/QCS/inspect/inspect/manuInspectEdit?...` | 打开质量标准参照、不选记录点击选择、勾选后选择、重新打开后关闭 | `GET /greenDill/static/QCS/inspect/inspect/manuInspectEdit/i18n-value.js`；`GET /msService/baseService/view/layoutJson?viewCode=LIMSBasic_1.0.0_qualityStd_qualityStdVerRef...` | 标题及按钮显示“质量标准参照 / 选择 / 关闭”；未选提示为“请至少选中一行！”；选择回填、关闭不改值均正常；无原始资源键，浏览器四类错误均为 0 | 参照查询和前端回调正常，没有保存或提交请求 | 不适用 | PASS | 原空 i18n 资源和缓存路由已修复 |
+| 产品检验申请 | 同上 | 选中质量标准后点击“按计划选择” | 检验计划/项目查询 | 加载 1 条目标检验项目；无原始资源键或浏览器错误 | 查询正常，没有保存或提交请求 | 不适用 | PASS | 无 |
+
 完整步骤、SQL、修复边界和截图见
 `docs/testing/qcs-interaction-round1-20260729.md`。
 
