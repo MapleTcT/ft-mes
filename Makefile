@@ -619,6 +619,8 @@ runtime-script-check:
 	$(NODE) deploy/docker/scripts/test-qcs-display-bindings.js
 	$(NODE) --check deploy/docker/scripts/test-workflow-editor-locale-compat.js
 	$(NODE) deploy/docker/scripts/test-workflow-editor-locale-compat.js
+	$(NODE) --check deploy/docker/scripts/test-workflow-config-entry-popup-fallback.js
+	$(NODE) deploy/docker/scripts/test-workflow-config-entry-popup-fallback.js
 	$(NODE) --check deploy/docker/scripts/adp-teaminfo-scheduleplan-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-craftgraph-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-rbac-authority-smoke.js

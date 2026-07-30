@@ -1366,6 +1366,15 @@ large-object 总数均为 `200438`。测试机回退备份：
 `metadata/qcs-inspect-report-config-regression-20260730.json` 和
 `metadata/wom-manual-entry-auth-regression-20260730.json`。
 
+### WTS 作业票工作流配置入口只读验收（2026-07-30）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 选择动火安全作业流程并打开设计器 | 作业票实体配置“工作流 -> 选中 `fireWorkWF` -> 配置” | `POST /msService/ec/entity/wf-list`；`GET /msService/ec/workflow/flowEditH5`；`POST /msService/ec/workflow/getFlow` | `EntityController.wfList -> WorkFlowController.flowEditH5/getFlow -> ProcessServiceFlowImpl` | `wf_deployment`、`pg_largeobject`（只读） | `select id,process_key,process_version,version,to_char(modify_time,'YYYY-MM-DD HH24:MI:SS.US'),process_xml,temp_process_xml,md5(convert_from(lo_get(process_xml),'UTF8')),md5(convert_from(lo_get(temp_process_xml),'UTF8')) from public.wf_deployment where id=6579649724219392;` | 正常弹窗和强制拦截弹窗两条路径均打开完整流程图；复验前后指纹均为 `6579649724219392|fireWorkWF|1|1|2026-06-19 21:25:00.282317|202020|202021|ea3efa18931d7549d7629dad924ef65c|ea3efa18931d7549d7629dad924ef65c`，没有调用保存或发布接口 | NOT_APPLICABLE |
+
+本项修复的是页面导航容错，不改变流程定义和业务数据。机器证据：
+`metadata/wts-workticket-workflow-config-regression-20260730.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

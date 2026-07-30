@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T04:54:29+00:00",
-  "repoCommit": "41edd4626e82df3dc1f4080ba827666106abd329",
+  "generatedAt": "2026-07-30T05:36:36+00:00",
+  "repoCommit": "7f620448deffadbd96dd7eb49238520f23a56ec0",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -449,7 +449,8 @@
         "production module test matrix has 44 cases: 44 PASS, 0 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks 0 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and is CLEAR with 0 active items; legacy public produceTaskCreated is retired as NOT_APPLICABLE with explicit rejection/no-persistence evidence.",
-        "persistence acceptance ledger has 305 tested features: 288 PASS, 0 FAIL, 0 BLOCKED, 17 NOT_APPLICABLE",
+        "persistence acceptance ledger has 306 tested features: 288 PASS, 0 FAIL, 0 BLOCKED, 18 NOT_APPLICABLE",
+        "WTS work-ticket fireWorkWF configuration opens the fire-work workflow in both the normal new-tab path and the popup-blocked same-tab fallback; no-selection guard remains visible, all read APIs return HTTP 200 and the PostgreSQL workflow fingerprint is unchanged",
         "2026-07-30 public-browser regression restored organization department-add reachability, one manual-create action each for product and incoming QCS inspection, both complete create forms and the WTS work-permit menu-information configuration page. PostgreSQL verified four non-empty QCS layouts, unique manualAdd actions, scoped WTS LOB compatibility and 25/25 project metadata relations; QCS and organization forms were cancelled before business writes.",
         "2026-07-28 marker ADP_E2E_FRUCTOSE_LINE_01 passed the retained TEST_ONLY_DRAFT fructose pilot through five real WOM/QCS/WMS/ProcessAnalysis pages, PostgreSQL and BPI telemetry: one tonne unit, three materials and batches, two exact process-paired lineage edges, three quality standards with nine items, five handover checks, one four-item qualified QCS report, 35.1 t available WMS stock, five trace snapshots, 24 accepted events and 288 accepted points. Browser console/page/request/bad-response counts were all zero; formal process and QA/QC approval remains required before production use.",
         "2026-07-28 marker ADP_E2E_20260728042954_FACTORY_LINE passed 13/13 through visible factory-architecture navigation and node-type selection, submit API, PostgreSQL hm_factory_models/hm_factory_models_mc readback and WOM factoryLineRef2 picker. Response id and PostgreSQL row id both equal 770612453238016; the optional department remained empty and persisted as null. The retained production-line fixture 果糖产线验收_20260728042954 is visible as 生产线/未占用, and browser console/page/request/bad-HTTP counts are all zero.",
@@ -653,7 +654,7 @@
       "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 305 tested features: 288 PASS, 0 FAIL, 0 BLOCKED, 17 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED.",
+        "metadata/persistence-acceptance.json currently has 306 tested features: 288 PASS, 0 FAIL, 0 BLOCKED, 18 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 0 active backlog items, 0 FAIL_BACKLOG and 0 BLOCKED.",
         "2026-07-30 migrations 219-223 restore the incoming-inspection list/edit runtime, add exactly one manual-create entry to product and incoming inspection lists, convert the complete WTS module design/project payloads to PostgreSQL large-object references, convert QCS configuration extra-view payloads to valid PostgreSQL large-object references, and repair the complete Hibernate @Lob-backed QCS inspect-report configuration metadata. Migration 221 passed a 23-entity sequential endpoint sweep; migration 222 passed QCS workflow configuration re-entry; migration 223 passed all 8 inspect-report configuration tabs and idempotent replay. Transactional target apply, real browser/API checks and replay with unchanged large-object counts passed without adding an Oracle runtime path.",
         "2026-07-28 marker ADP_E2E_FRUCTOSE_LINE_01 reuses the PostgreSQL WOM/QCS/WMS/ProcessAnalysis and BPI contracts to prove two process-paired material transformations, nine controlled draft quality-item definitions, final quality release and 35.1 t stock without adding an Oracle runtime path or a duplicate material ledger.",
         "2026-07-28 marker ADP_E2E_20260728042954_FACTORY_LINE proves visible factory-architecture interaction and node-type selection persisted one enabled production-line node whose response id matches its PostgreSQL id, with a null optional department plus synchronized mnemonic aliases; the same row was returned by the WOM factoryLineRef2 reference. Idempotent migrations 211-216 keep the runtime tree/edit/reference contracts on PostgreSQL without introducing an Oracle default path.",

@@ -4929,6 +4929,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/test-workflow-config-entry-popup-fallback.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/test-workflow-editor-locale-compat.js",
       "state": "tracked",
       "tracked": true
@@ -8386,6 +8392,18 @@
     {
       "ignored": false,
       "path": "metadata/wts-workpermit-property-list-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wts-workticket-workflow-config-after-fix-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wts-workticket-workflow-config-regression-20260730.json",
       "state": "tracked",
       "tracked": true
     },
@@ -12170,7 +12188,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 707
+      "tracked": 708
     },
     "docs": {
       "tracked": 156
@@ -12179,7 +12197,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 307
+      "tracked": 309
     },
     "package.json": {
       "tracked": 1
@@ -12203,8 +12221,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2024,
-    "tracked": 2024,
+    "totalFiles": 2027,
+    "tracked": 2027,
     "untracked": 0
   },
   "untrackedByDirectory": []

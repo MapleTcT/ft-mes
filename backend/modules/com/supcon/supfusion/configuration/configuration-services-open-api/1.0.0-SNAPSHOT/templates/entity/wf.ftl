@@ -559,7 +559,10 @@
 			url+="&signature="+param.signature;
 			url+="&mainViewViewCode="+param.mainViewViewCode;
 			url +="&env=ec";
-			window.open(url);			
+			var flowConfigWindow=window.open(url,"_blank");
+			if(!flowConfigWindow){
+				window.location.assign(url);
+			}
 		}
 		//保存流程配置信息
 		ec.wf.saveFlow=function(callback){

@@ -7,11 +7,11 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-30T04:41:19+00:00` |
-| Repo Commit | `41edd4626e82df3dc1f4080ba827666106abd329` |
+| Generated At | `2026-07-30T05:28:58+00:00` |
+| Repo Commit | `7f620448deffadbd96dd7eb49238520f23a56ec0` |
 | Database Target | `PostgreSQL` |
 | Total Files | `410` |
-| Total Bytes | `57644974` |
+| Total Bytes | `57652287` |
 
 ## Categories
 
@@ -20,9 +20,9 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `nacos-config-template` | 44 | 42353 | Sanitized Nacos configuration templates used by render-nacos-configs.py. |
 | `nginx-runtime-config` | 2 | 31193 | Nginx runtime configuration used by the Docker frontend gateway. |
 | `postgres-init-sql` | 223 | 56532819 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
-| `runtime-binary-patch` | 8 | 171663 | Compiled runtime patch payloads copied into the recovered Windows package at deploy time. |
+| `runtime-binary-patch` | 8 | 178941 | Compiled runtime patch payloads copied into the recovered Windows package at deploy time. |
 | `runtime-patch-source` | 23 | 95909 | Source or template files used to rebuild runtime patch payloads. |
-| `runtime-script` | 27 | 284319 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
+| `runtime-script` | 27 | 284354 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
 | `runtime-static-override` | 83 | 486718 | Static frontend runtime overrides mounted into the Docker frontend gateway. |
 
 ## Manifest Entries
@@ -298,7 +298,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `postgres-init-sql` | `deploy/docker/postgres/init/221-wts-module-config-lob-compat.sql` | 9131 | `2a11844eff594a16ad5594411d11d5d9270e4cc17c7441c2c4472f71cf894b8b` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/222-qcs-configuration-lob-compat.sql` | 2714 | `da24749c9d64364ccda7761ffec2440c94c996573ae2a5d5134fec63d5788e9c` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/223-qcs-inspect-report-config-lob-compat.sql` | 7941 | `4525369fe8e2c2f9c7951ea0316be4e5332cb7025dfcb69733aa0bfb79f239b4` |
-| `runtime-binary-patch` | `deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar` | 141675 | `68f2d21d57a91c33cb4c39c6cb81f80d0ebd67e41485295034fab1913abe7785` |
+| `runtime-binary-patch` | `deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar` | 148953 | `5b274bf1f2bcefbc9d7a31fc06e4599dd1a1be7f727e009a18cb4fb3636a7c40` |
 | `runtime-binary-patch` | `deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar` | 2603 | `4af609b0f58221eb3b9794437cecc5cd9ca6ee159d90a90739bfab01a9675eca` |
 | `runtime-binary-patch` | `deploy/docker/patches/notification-dynamic-templates/notification-dynamic-templates.jar` | 2056 | `929fad64e9dc57463ab4ba54d1274c8a7ee49d5f1af2a0b44a5734b2611bf058` |
 | `runtime-binary-patch` | `deploy/docker/patches/rm-config-defaults/rm-config-defaults.jar` | 2042 | `4c8179d3cbabd71f14fb7ff073997b4b32648924601c6cf9f1be8a71e9504a3a` |
@@ -334,7 +334,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `runtime-script` | `deploy/docker/scripts/build-wom-config-default-patch.sh` | 1373 | `ede31f8645df35b088434b188f8c19c8a851b0b0393ad5a810953102a2b0a586` |
 | `runtime-script` | `deploy/docker/scripts/patch-base-service-layout-json-postgres.py` | 4624 | `2c89d675d2ed39ffe7d30618369b3c10e323f90d2a64244c9868996fc04fca1a` |
 | `runtime-script` | `deploy/docker/scripts/patch-basicmanagement-signature-mapper.py` | 4607 | `c7fa52fba780faad6752700adf63356952f16850807f6c4c1b432794ba45c1a0` |
-| `runtime-script` | `deploy/docker/scripts/patch-configuration-entity-model-runtime.py` | 6378 | `f6987d6dd3f24060313b544b89e396f7db47fcd1515d4d706adf03f907231171` |
+| `runtime-script` | `deploy/docker/scripts/patch-configuration-entity-model-runtime.py` | 6413 | `72f092576634c125dca148956b8cb177c55686d45b01ad5da89f7b85384ca029` |
 | `runtime-script` | `deploy/docker/scripts/patch-eam-patrol-runtime.py` | 12011 | `dfd9102b251d716ee8149b1388417c1a9e081d3154d9dabbad009ab2b23b204b` |
 | `runtime-script` | `deploy/docker/scripts/patch-eam-reactapi-ready.py` | 5534 | `55d71252622f6c4ac3fc0e8750464d53d01680491abac5cced2d298ae8d7b75b` |
 | `runtime-script` | `deploy/docker/scripts/patch-flow-postgres-datasource.py` | 6353 | `6981f42b705228e394d6846df9fa2aac83f93e5bc3daac9c9d6a9e425858eb76` |

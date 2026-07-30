@@ -37,10 +37,13 @@ javac -encoding UTF-8 -source 8 -target 8 \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.java" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-workflow/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/workflow/service/impl/ProcessServiceFlowImpl.java"
 
-mkdir -p "$classes_dir/templates/model"
+mkdir -p "$classes_dir/templates/model" "$classes_dir/templates/entity"
 cp \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/model/manage.ftl" \
   "$classes_dir/templates/model/manage.ftl"
+cp \
+  "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/entity/wf.ftl" \
+  "$classes_dir/templates/entity/wf.ftl"
 
 jar cf "$patch_root/configuration-entity-model-compat.jar" -C "$classes_dir" .
 echo "built $patch_root/configuration-entity-model-compat.jar"

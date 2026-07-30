@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-30T04:38:48.246Z",
-  "repoCommit": "41edd4626e82df3dc1f4080ba827666106abd329+working-tree-qcs-wom-regression-fix",
+  "generatedAt": "2026-07-30T05:25:07.000Z",
+  "repoCommit": "7f620448deffadbd96dd7eb49238520f23a56ec0+working-tree-wts-workflow-entry-fix",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -294,11 +294,11 @@
     }
   },
   "summary": {
-    "testedFeatures": 305,
+    "testedFeatures": 306,
     "pass": 288,
     "fail": 0,
     "blocked": 0,
-    "notApplicable": 17
+    "notApplicable": 18
   },
   "items": [
     {
@@ -6664,9 +6664,33 @@
       "status": "PASS",
       "evidence": "The browser document navigation carried no Authorization header and still opened successfully; the page options request carried the localStorage login ticket and returned 200. Creation returned code 200 and persisted task 771321194620160 with status 88 and quantity 2.5, plus one active pending and one SUCCESS idempotency row. Submission changed status to 99. The normal delete rollback changed version to 4 and valid=false. Nine of nine acceptance checks passed with zero browser errors.",
       "issues": []
+    },
+    {
+      "acceptanceSet": "wts-workticket-workflow-config-regression-20260730",
+      "module": "WTS 作业票工作流配置入口",
+      "route": "/msService/ec/entity/config?entity.code=WTS_1.0.0_workTicket",
+      "operation": "选中 fireWorkWF 点击配置，并模拟浏览器拦截弹窗后重复打开",
+      "api": "POST /msService/ec/entity/wf-list; GET /msService/ec/workflow/flowEditH5; POST /msService/ec/workflow/getFlow",
+      "method": "GET/POST",
+      "requiresPersistence": false,
+      "backendEntry": "EntityController.wfList -> WorkFlowController.flowEditH5/getFlow -> ProcessServiceFlowImpl",
+      "tables": [
+        "public.wf_deployment",
+        "pg_largeobject"
+      ],
+      "marker": "",
+      "verificationSql": "select id,process_key,process_version,version,to_char(modify_time,'YYYY-MM-DD HH24:MI:SS.US'),process_xml,temp_process_xml,md5(convert_from(lo_get(process_xml),'UTF8')),md5(convert_from(lo_get(temp_process_xml),'UTF8')) from public.wf_deployment where id=6579649724219392;",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Normal popup and forced popup-blocked paths both opened the complete fireWorkWF editor with zero browser errors and HTTP 200 workflow requests. The blocked path reused the current tab. Before and after fingerprints were identical: 6579649724219392|fireWorkWF|1|1|2026-06-19 21:25:00.282317|202020|202021|ea3efa18931d7549d7629dad924ef65c|ea3efa18931d7549d7629dad924ef65c.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "",
+      "artifact": "metadata/wts-workticket-workflow-config-regression-20260730.json",
+      "summary": "The real WTS work-ticket configuration entry retained normal new-tab behavior and added a same-tab fallback for blocked popups. Both paths rendered fireWorkWF without loading or browser errors; the no-selection guard remained intact and the workflow database fingerprint was unchanged."
+    },
     {
       "marker": "",
       "artifact": "metadata/qcs-workflow-editor-regression-20260730.json",

@@ -1362,6 +1362,23 @@ Nginx 的接口鉴权规则提前拦截。
 `metadata/wom-manual-entry-auth-result-20260730.png` 和
 `metadata/wom-manual-entry-auth-pending-20260730.png`。
 
+### WTS 作业票工作流配置入口回归（2026-07-30）
+
+本轮从用户截图中的完整入口复现“工作流 -> 配置”看似无响应。流程编辑器和
+`getFlow` 本身可用，阻断发生在入口仅调用 `window.open(url)`：旧页面在同步读取流程
+属性后才打开新窗口，公网访问较慢或浏览器拦截弹窗时返回 `null`，原实现既不提示也不
+跳转。修复保留正常的新标签页行为，并在弹窗被拦截时回退到当前标签页。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WTS 作业票工作流配置 | `/msService/ec/entity/config?entity.code=WTS_1.0.0_workTicket` | 进入“工作流”，选中 `fireWorkWF`，点击“配置”；再强制模拟 `window.open` 被拦截并重复操作 | `POST /msService/ec/entity/wf-list`；`GET /msService/ec/workflow/flowEditH5`；`POST /msService/ec/workflow/getFlow` | 正常模式打开新标签页；弹窗受阻模式在当前页进入编辑器；两种模式均显示“动火安全作业”流程、加载遮罩消失，console、page、HTTP 和 request failure 错误均为 0 | 三个接口均为 HTTP 200，`getFlow` 返回并渲染 `fireWorkWF` | `wf_deployment`、PostgreSQL large object（只读） | PASS | 无 |
+| WTS 工作流未选择校验 | 同上 | 不选中流程直接点击“配置” | 无流程编辑器请求 | 保持在配置页，不创建新页面，显示“请选中一行！” | 未调用 `flowEditH5/getFlow` | 不适用 | PASS | 无 |
+
+复验前后 `wf_deployment.id=6579649724219392` 的版本、修改时间、两个 OID 和两个 XML
+MD5 指纹完全一致，打开设计器没有保存或发布流程。机器证据：
+`metadata/wts-workticket-workflow-config-regression-20260730.json`；修复后截图：
+`metadata/wts-workticket-workflow-config-after-fix-20260730.png`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

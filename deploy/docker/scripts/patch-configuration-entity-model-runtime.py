@@ -20,6 +20,7 @@ PATCH_TARGETS = {
         "com/supcon/supfusion/configuration/services/openapi/utils/DtoUtils.class",
         "com/supcon/supfusion/configuration/services/openapi/controller/PropertyController.class",
         "templates/model/manage.ftl",
+        "templates/entity/wf.ftl",
     ],
     BASE_JAR: [
         "com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.class",

@@ -1,0 +1,116 @@
+{
+  "generatedAt": "2026-07-30T13:25:07+08:00",
+  "repoCommit": "7f620448deffadbd96dd7eb49238520f23a56ec0+working-tree-wts-workflow-entry-fix",
+  "database": "PostgreSQL",
+  "environment": {
+    "browserBaseUrl": "http://39.164.227.152:18080",
+    "testHost": "10.11.100.17",
+    "configurationContainer": "adp-mes-newbase-configuration-1"
+  },
+  "rootCause": {
+    "entry": "/msService/ec/entity/config?entity.code=WTS_1.0.0_workTicket",
+    "before": "ec.wf.openFlowConfig called window.open(url) after synchronously binding workflow metadata. When the browser blocked the delayed popup, window.open returned null and the page gave no feedback or navigation.",
+    "after": "The existing new-tab behavior is retained. If window.open returns null, window.location.assign opens the same workflow editor in the current tab."
+  },
+  "staticVerification": {
+    "status": "PASS",
+    "checks": [
+      "deploy/docker/scripts/test-workflow-config-entry-popup-fallback.js",
+      "deploy/docker/scripts/test_configuration_postgres_model_sync.py",
+      "temporary runtime nested-jar replacement"
+    ],
+    "runtimeTemplate": "BOOT-INF/lib/configuration-services-open-api-1.0.0-SNAPSHOT.jar!/templates/entity/wf.ftl"
+  },
+  "browserAcceptance": {
+    "route": "/msService/ec/entity/config?entity.code=WTS_1.0.0_workTicket",
+    "workflow": {
+      "processKey": "fireWorkWF",
+      "name": "动火安全作业",
+      "deploymentId": "6579649724219392",
+      "version": 1
+    },
+    "normalPopup": {
+      "status": "PASS",
+      "newPageOpened": true,
+      "editorTitle": "动火安全作业",
+      "loadingOverlayPresent": false,
+      "visibleNodes": [
+        "开始活动",
+        "开票申请",
+        "气体分析",
+        "风险与安全措施确认",
+        "作业执行",
+        "作业封票",
+        "结束活动"
+      ],
+      "browserErrors": {
+        "console": [],
+        "page": [],
+        "http4xx5xx": [],
+        "requestFailures": []
+      }
+    },
+    "blockedPopup": {
+      "status": "PASS",
+      "windowOpenResult": null,
+      "pageCountBefore": 6,
+      "pageCountAfter": 6,
+      "sameTabFallback": true,
+      "editorTitle": "动火安全作业",
+      "loadingOverlayPresent": false,
+      "browserErrors": {
+        "console": [],
+        "page": [],
+        "http4xx5xx": [],
+        "requestFailures": []
+      }
+    },
+    "noSelection": {
+      "status": "PASS",
+      "newPageOpened": false,
+      "prompt": "请选中一行！",
+      "flowEditorRequested": false
+    },
+    "screenshot": "metadata/wts-workticket-workflow-config-after-fix-20260730.png"
+  },
+  "apiAcceptance": {
+    "status": "PASS",
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/msService/ec/entity/wf-list",
+        "responseStatus": 200
+      },
+      {
+        "method": "GET",
+        "url": "/msService/ec/workflow/flowEditH5",
+        "responseStatus": 200
+      },
+      {
+        "method": "POST",
+        "url": "/msService/ec/workflow/getFlow",
+        "responseStatus": 200,
+        "responseKey": "fireWorkWF"
+      }
+    ]
+  },
+  "persistenceAcceptance": {
+    "requiresPersistence": false,
+    "status": "NOT_APPLICABLE",
+    "table": "public.wf_deployment",
+    "verificationSql": "select id,process_key,process_version,version,to_char(modify_time,'YYYY-MM-DD HH24:MI:SS.US'),process_xml,temp_process_xml,md5(convert_from(lo_get(process_xml),'UTF8')),md5(convert_from(lo_get(temp_process_xml),'UTF8')) from public.wf_deployment where id=6579649724219392;",
+    "beforeFingerprint": "6579649724219392|fireWorkWF|1|1|2026-06-19 21:25:00.282317|202020|202021|ea3efa18931d7549d7629dad924ef65c|ea3efa18931d7549d7629dad924ef65c",
+    "afterFingerprint": "6579649724219392|fireWorkWF|1|1|2026-06-19 21:25:00.282317|202020|202021|ea3efa18931d7549d7629dad924ef65c|ea3efa18931d7549d7629dad924ef65c",
+    "result": "Opening the workflow editor did not call save or publish endpoints and did not alter the persisted workflow definition."
+  },
+  "deployment": {
+    "runtimeJarBeforeSha256": "6635a64e720d62384ba509183aa6ad8bc68a199c691da53f308bd2abe48abde0",
+    "runtimeJarAfterSha256": "6ce7f69ffc3660d356db3d9f7f4cb824402dab2ab8cf641c0c3a5c6eb592f59c",
+    "patchJarSha256": "5b274bf1f2bcefbc9d7a31fc06e4599dd1a1be7f727e009a18cb4fb3636a7c40",
+    "rollbackBackup": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/base-Server/configuration/supfusion-configuration.jar.bak-entity-model-compat-20260730132909",
+    "configurationServiceStarted": true
+  },
+  "knownUnrelatedRuntimeWarnings": [
+    "The configuration container still logs an existing non-blocking Nacos DefaultHttpClientFactory startup thread warning. All workflow entry, editor, and getFlow requests completed successfully."
+  ]
+}
