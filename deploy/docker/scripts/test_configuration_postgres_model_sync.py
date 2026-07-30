@@ -56,6 +56,10 @@ QCS_INSPECT_REPORT_LOB_PATH = (
     ROOT
     / "deploy/docker/postgres/init/223-qcs-inspect-report-config-lob-compat.sql"
 )
+QCS_INSPECT_LOB_PATH = (
+    ROOT
+    / "deploy/docker/postgres/init/229-qcs-inspect-config-lob-compat.sql"
+)
 
 SPEC = importlib.util.spec_from_file_location("patch_configuration_entity_model_runtime", PATCHER_PATH)
 if SPEC is None or SPEC.loader is None:
@@ -282,6 +286,21 @@ class ConfigurationPostgresModelSyncTest(unittest.TestCase):
         self.assertIn("adp_qcs_inspect_report_is_lob_ref(item.payload)", migration)
         self.assertIn("lo_from_bytea(0, convert_to(item.payload, 'UTF8'))", migration)
         self.assertIn("QCS inspection-report LOB conversion incomplete", migration)
+        self.assertIn("BEGIN;", migration)
+        self.assertIn("COMMIT;", migration)
+
+    def test_qcs_inspect_lob_migration_is_exactly_scoped_and_idempotent(self) -> None:
+        migration = QCS_INSPECT_LOB_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("position('QCS_5.0.0.0_inspect_' in view_code) = 1", migration)
+        self.assertNotIn("position('QCS_5.0.0.0_inspectReport' in view_code)", migration)
+        self.assertNotIn("position('QCS_5.0.0.0_inspectRelease' in view_code)", migration)
+        self.assertIn("ARRAY['ec_', 'project_']", migration)
+        self.assertIn("adp_qcs_inspect_is_lob_ref(item.payload)", migration)
+        self.assertIn("lo_from_bytea(0, convert_to(item.payload, 'UTF8'))", migration)
+        self.assertIn("QCS inspection-request LOB conversion incomplete", migration)
+        self.assertIn("current_udt NOT IN ('text', 'varchar')", migration)
+        self.assertNotIn("runtime_", migration)
         self.assertIn("BEGIN;", migration)
         self.assertIn("COMMIT;", migration)
 

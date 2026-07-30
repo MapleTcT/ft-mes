@@ -1416,6 +1416,25 @@ MD5 指纹完全一致，打开设计器没有保存或发布流程。机器证�
 WOM 业务记录。机器证据：
 `metadata/wom-process-consumption-view-regression-20260730.json`。
 
+### admin 权限目录全量页面与配置深度回归（2026-07-30）
+
+本轮以测试环境 `admin/systemRole` 的真实目录为边界，逐一打开全部可导航入口，并读取
+每个目录节点的角色授权和用户直授操作。全量结果为 652 个参考节点、533 个 admin
+可见节点、398 个可导航页面；权限接口 533/533 PASS，角色授权去重后 1,193 个操作、
+629 个动作地址，可导航页面有效动作缺口为 0。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| admin 权限目录 | 398 个 admin 可导航入口 | 逐页导航，检查空白、可见错误、console、XHR/fetch 和控件 | 当前菜单、角色权限、用户权限及各页面只读请求 | 185 PASS、42 WARN、171 FAIL；FAIL 中 169 个为旧包空白页 | 权限接口 533/533 PASS；无有效动作缺口 | 权限数据只读 | PARTIAL | 旧 EAM、maintenance、SpareManage 等包仍缺运行前端 |
+| QCS 检验申请配置 | `/msService/ec/entity/config?entity.code=QCS_5.0.0.0_inspect` | 依次点击数据模型、视图信息、菜单信息和工作流 | `publishMenuFrame`、视图和工作流接口 | 4/4 页签正常；无弹窗、console 或失败请求 | `publishMenuFrame` 由 500 恢复为 200；精确范围 10/10 LOB 引用有效 | `ec_fast_query_json` 等配置元数据、`pg_largeobject` | PASS | 旧 CLOB 文本与 PostgreSQL OID 映射不兼容，已修复 |
+| QCS 新增入口 | 产品/来料检验申请列表 | 分别点击“新增申请” | 两个列表和两个编辑页请求 | 两个按钮均可见，两个完整编辑表单均打开；无可见错误 | 本项未保存单据，不产生业务写入 | 不适用 | PASS | 无 |
+| 审批流设计器 | 产品检验申请、检验报告、WTS 动火作业 | 选中流程并点击“配置” | `flowEditH5`、`getFlow` | 3/3 流程画布渲染，加载结束；无浏览器错误 | 三条流程均只读加载成功 | 工作流配置只读 | PASS | 无 |
+
+完整目录、失败分类和边界见
+`docs/admin-permission-functional-scan-20260730.md`；机器记录见
+`metadata/admin-permission-directory-scan-20260730.json` 和
+`metadata/admin-config-deep-scan-20260730.json`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

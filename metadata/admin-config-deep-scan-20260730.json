@@ -1,0 +1,157 @@
+{
+  "generatedAt": "2026-07-30T11:08:36Z",
+  "sourceBaseCommit": "5c5da24cba229c32ad56f086780869a844d4d0d1",
+  "database": "PostgreSQL",
+  "environment": {
+    "apiBaseUrl": "http://10.11.100.17:18080",
+    "browserBaseUrl": "http://10.11.100.17:18080",
+    "username": "admin",
+    "roleCode": "systemRole"
+  },
+  "permissionAudit": {
+    "referenceNodes": 652,
+    "adminVisibleNodes": 533,
+    "navigableRoutes": 398,
+    "permissionEndpointsPass": 533,
+    "permissionEndpointsFail": 0,
+    "roleAssignedRecords": 3454,
+    "roleAssignedUniqueActions": 1193,
+    "roleAssignedUniqueActionUrls": 629,
+    "userDirectAssignedActions": 0,
+    "navigableWithActionGap": 0
+  },
+  "qcsInspectConfigFix": {
+    "migration": "deploy/docker/postgres/init/229-qcs-inspect-config-lob-compat.sql",
+    "failedEndpoint": "GET /msService/ec/entity/publishMenuFrame?entityCode=QCS_5.0.0.0_inspect&__res_html=true",
+    "before": {
+      "httpStatus": 500,
+      "message": "数据库操作异常",
+      "cause": "Legacy Hibernate @Lob mapping tried to read recovered PostgreSQL text as a large-object OID"
+    },
+    "after": {
+      "httpStatus": 200,
+      "exactScopedFastQueryRows": 10,
+      "validLargeObjectReferences": 10,
+      "invalidLargeObjectReferences": 0,
+      "largeObjectsBeforeReapply": 203364,
+      "largeObjectsAfterReapply": 203364,
+      "idempotentReapply": true,
+      "inspectReportChanged": false,
+      "inspectReleaseChanged": false
+    }
+  },
+  "entityConfigSections": [
+    {
+      "entityCode": "QCS_5.0.0.0_inspect",
+      "title": "检验申请",
+      "sections": {
+        "数据模型": "PASS",
+        "视图信息": "PASS",
+        "菜单信息": "PASS",
+        "工作流": "PASS"
+      },
+      "dialogs": 0,
+      "consoleErrors": 0,
+      "failedResponses": 0
+    },
+    {
+      "entityCode": "QCS_5.0.0.0_inspectReport",
+      "title": "检验报告",
+      "sections": {
+        "数据模型": "PASS",
+        "视图信息": "PASS",
+        "菜单信息": "PASS",
+        "工作流": "PASS"
+      },
+      "dialogs": 0,
+      "consoleErrors": 0,
+      "failedResponses": 0
+    },
+    {
+      "entityCode": "WTS_1.0.0_workPermit",
+      "title": "作业许可",
+      "sections": {
+        "数据模型": "PASS",
+        "视图信息": "PASS",
+        "菜单信息": "PASS"
+      },
+      "dialogs": 0,
+      "consoleErrors": 0,
+      "failedResponses": 0
+    },
+    {
+      "entityCode": "WTS_1.0.0_workTicket",
+      "title": "作业票",
+      "sections": {
+        "数据模型": "PASS",
+        "视图信息": "PASS",
+        "菜单信息": "PASS",
+        "工作流": "PASS"
+      },
+      "dialogs": 0,
+      "consoleErrors": 0,
+      "failedResponses": 0
+    }
+  ],
+  "manualCreateEntries": [
+    {
+      "module": "QCS",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList",
+      "operation": "点击新增申请",
+      "buttonVisible": true,
+      "openedRoute": "/msService/QCS/inspect/inspect/manuInspectEdit",
+      "formRendered": true,
+      "status": "PASS"
+    },
+    {
+      "module": "QCS",
+      "route": "/msService/QCS/inspect/inspect/purchInspectList",
+      "operation": "点击新增申请",
+      "buttonVisible": true,
+      "openedRoute": "/msService/QCS/inspect/inspect/purchInspectEdit",
+      "formRendered": true,
+      "status": "PASS"
+    }
+  ],
+  "workflowDesigners": [
+    {
+      "entityCode": "QCS_5.0.0.0_inspect",
+      "workflow": "产品检验申请单工作流",
+      "designer": "flowEditH5",
+      "canvasCount": 2,
+      "loading": false,
+      "status": "PASS"
+    },
+    {
+      "entityCode": "QCS_5.0.0.0_inspectReport",
+      "workflow": "按检验申请",
+      "designer": "flowEditH5",
+      "canvasCount": 2,
+      "loading": false,
+      "status": "PASS"
+    },
+    {
+      "entityCode": "WTS_1.0.0_workTicket",
+      "workflow": "动火安全作业",
+      "designer": "flowEditH5",
+      "canvasCount": 2,
+      "loading": false,
+      "status": "PASS"
+    }
+  ],
+  "pageScan": {
+    "tested": 398,
+    "pass": 185,
+    "warn": 42,
+    "fail": 171,
+    "blankFail": 169,
+    "nonBlankFail": 2
+  },
+  "remainingIssues": [
+    "169 个旧包入口为 HTTP 200 空白页，主要集中在 EAM、maintenance、SpareManage、EQPTOperation、outagManage、Measure、PartiManage、Special、OverEquipEffect、TOOL 和 OverhaulTicket",
+    "WTS 作业地图依赖资源返回 503",
+    "PartiManage 浓度数据报表有一个静态资源 404",
+    "24 个页面仍有未翻译键，18 个页面仍有旧参数告警"
+  ],
+  "acceptanceBoundary": "This scan proves admin menu visibility, effective action assignment, page/read health and selected deep interactions. Destructive CRUD and approval actions use the separate marker-based persistence acceptance records."
+}

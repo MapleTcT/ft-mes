@@ -338,6 +338,7 @@ async function scanPermissionNode(api, ticket, roleId, menu, index, total) {
       status: roleResult.status,
       ok: roleResult.ok,
       counts: roleResult.json ? permissionCounts(roleResult.json) : null,
+      assigned: roleResult.json ? permissionDetails(roleResult.json, "assign") : [],
       unassigned: roleResult.json ? permissionDetails(roleResult.json, "unassign") : [],
       error: roleResult.ok ? null : roleResult.bodySnippet,
     },
@@ -345,6 +346,7 @@ async function scanPermissionNode(api, ticket, roleId, menu, index, total) {
       status: userResult.status,
       ok: userResult.ok,
       counts: userResult.json ? permissionCounts(userResult.json) : null,
+      assigned: userResult.json ? permissionDetails(userResult.json, "assign") : [],
       unassigned: userResult.json ? permissionDetails(userResult.json, "unassign") : [],
       error: userResult.ok ? null : userResult.bodySnippet,
     },
@@ -670,6 +672,18 @@ async function main() {
       warn: pageResults.filter((item) => item.status === "WARN").length,
       fail: pageResults.filter((item) => item.status === "FAIL").length,
     };
+    const roleAssignedDetails = permissionResults.flatMap(
+      (item) => (item.role && item.role.assigned) || []
+    );
+    const userAssignedDetails = permissionResults.flatMap(
+      (item) => (item.user && item.user.assigned) || []
+    );
+    const uniqueActionCount = (items) => new Set(
+      items.map((item) => String(item.id || item.code || `${item.name || ""}|${item.url || ""}`))
+    ).size;
+    const uniqueActionUrlCount = (items) => new Set(
+      items.map((item) => item.url).filter(Boolean)
+    ).size;
     const permissionSummary = {
       total: permissionResults.length,
       pass: permissionResults.filter((item) => item.ok).length,
@@ -677,6 +691,12 @@ async function main() {
       navigableWithActionGap: permissionResults.filter(
         (item) => item.navigable && item.effectiveActionGap > 0
       ).length,
+      roleAssignedActions: roleAssignedDetails.length,
+      roleAssignedUniqueActions: uniqueActionCount(roleAssignedDetails),
+      roleAssignedUniqueActionUrls: uniqueActionUrlCount(roleAssignedDetails),
+      userAssignedActions: userAssignedDetails.length,
+      userAssignedUniqueActions: uniqueActionCount(userAssignedDetails),
+      userAssignedUniqueActionUrls: uniqueActionUrlCount(userAssignedDetails),
     };
     const report = {
       generatedAt: new Date().toISOString(),

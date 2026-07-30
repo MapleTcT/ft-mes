@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`228`。
-- 编号范围：`001` 到 `228`。
+- 脚本数量：`229`。
+- 编号范围：`001` 到 `229`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`87`。
+- 需关注语句：`89`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -21,9 +21,9 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 38 |
-| business | 46 |
-| compatibility | 85 |
-| configuration | 56 |
+| business | 47 |
+| compatibility | 86 |
+| configuration | 57 |
 | general | 43 |
 | notification | 10 |
 | platform | 67 |
@@ -34,20 +34,20 @@
 | Statement | Count |
 | --- | --- |
 | alter-table | 10833 |
-| create-function | 114 |
+| create-function | 116 |
 | create-index | 1017 |
 | create-table | 584 |
 | create-view | 143 |
 | insert | 11074 |
-| update | 11194 |
+| update | 11195 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 254 |
+| create-or-replace | 256 |
 | do-block | 421 |
-| if-exists | 141 |
+| if-exists | 144 |
 | if-not-exists | 13063 |
 | on-conflict | 11004 |
 | to-regclass | 221 |
@@ -285,6 +285,7 @@
 | 226 | 226-postgres-legacy-oid-bigint-like-operator.sql | general | 65 | create-function:2 | 5 | - |
 | 227 | 227-notification-mobile-device-token.sql | notification | 25 | create-table:1, create-index:1 | 2 | - |
 | 228 | 228-wom-process-consumption-view-runtime.sql | platform, configuration | 144 | insert:4, update:6 | 6 | - |
+| 229 | 229-qcs-inspect-config-lob-compat.sql | configuration, business, compatibility | 288 | create-function:2, update:1 | 5 | watch:2 |
 
 ## 规则
 

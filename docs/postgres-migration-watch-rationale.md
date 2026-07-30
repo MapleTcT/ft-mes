@@ -11,7 +11,7 @@
 
 ## 摘要
 
-- Watch 语句：`87`。
+- Watch 语句：`89`。
 - Watch 安全问题：`0`。
 
 ## 语句清单
@@ -105,3 +105,5 @@
 | 222-qcs-configuration-lob-compat.sql | 91 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_qcs_is_large_object_ref(text); |
 | 223-qcs-inspect-report-config-lob-compat.sql | 228 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_qcs_inspect_report_convert_lob( text, text, text ); |
 | 223-qcs-inspect-report-config-lob-compat.sql | 233 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_qcs_inspect_report_is_lob_ref(text); |
+| 229-qcs-inspect-config-lob-compat.sql | 281 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_qcs_inspect_convert_lob( text, text, text ); |
+| 229-qcs-inspect-config-lob-compat.sql | 286 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_qcs_inspect_is_lob_ref(text); |

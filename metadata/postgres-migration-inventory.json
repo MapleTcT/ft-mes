@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 228,
+  "migrationCount": 229,
   "firstNumber": 1,
-  "lastNumber": 228,
+  "lastNumber": 229,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 87,
+  "watchStatementCount": 89,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 10833,
-    "create-function": 114,
+    "create-function": 116,
     "create-index": 1017,
     "create-table": 584,
     "create-view": 143,
     "insert": 11074,
-    "update": 11194
+    "update": 11195
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 254,
+    "create-or-replace": 256,
     "do-block": 421,
-    "if-exists": 141,
+    "if-exists": 144,
     "if-not-exists": 13063,
     "on-conflict": 11004,
     "to-regclass": 221,
@@ -31,9 +31,9 @@
   },
   "tagTotals": {
     "auth-rbac-org": 38,
-    "business": 46,
-    "compatibility": 85,
-    "configuration": 56,
+    "business": 47,
+    "compatibility": 86,
+    "configuration": 57,
     "general": 43,
     "notification": 10,
     "platform": 67,
@@ -8609,6 +8609,62 @@
       },
       "highRiskStatements": [],
       "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/229-qcs-inspect-config-lob-compat.sql",
+      "name": "229-qcs-inspect-config-lob-compat.sql",
+      "number": 229,
+      "slug": "qcs-inspect-config-lob-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 288,
+      "sha256": "cb0d7c0fcb817403ec54ab5db0d5ae4cfdb005e8c541f01c6597a72f0d116f38",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 2,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 3,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 281,
+          "pattern": "drop-function",
+          "excerpt": "DROP FUNCTION IF EXISTS public.adp_qcs_inspect_convert_lob(",
+          "statement": "DROP FUNCTION IF EXISTS public.adp_qcs_inspect_convert_lob( text, text, text );",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
+        },
+        {
+          "line": 286,
+          "pattern": "drop-function",
+          "excerpt": "DROP FUNCTION IF EXISTS public.adp_qcs_inspect_is_lob_ref(text);",
+          "statement": "DROP FUNCTION IF EXISTS public.adp_qcs_inspect_is_lob_ref(text);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
+        }
+      ],
       "unguardedStructuralStatements": []
     }
   ]

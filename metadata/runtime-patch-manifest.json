@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T10:05:05+00:00",
-  "repoCommit": "03e3e53c1d6fba1eab1b478c845d3e994ca7dc9e",
+  "generatedAt": "2026-07-30T11:14:53+00:00",
+  "repoCommit": "5c5da24cba229c32ad56f086780869a844d4d0d1",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 417,
-    "totalBytes": 57819085,
+    "totalFiles": 418,
+    "totalBytes": 57828603,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 228,
+      "postgres-init-sql": 229,
       "runtime-binary-patch": 8,
       "runtime-patch-source": 23,
       "runtime-script": 28,
@@ -19,7 +19,7 @@
     "bytesByCategory": {
       "nacos-config-template": 42353,
       "nginx-runtime-config": 31715,
-      "postgres-init-sql": 56690149,
+      "postgres-init-sql": 56699667,
       "runtime-binary-patch": 178941,
       "runtime-patch-source": 95909,
       "runtime-script": 289112,
@@ -1679,6 +1679,12 @@
       "category": "postgres-init-sql",
       "sizeBytes": 152111,
       "sha256": "46dace1085608fbb51d91619564feb66a9322c9a53522f2d7eb57944291a381a"
+    },
+    {
+      "path": "deploy/docker/postgres/init/229-qcs-inspect-config-lob-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 9518,
+      "sha256": "cb0d7c0fcb817403ec54ab5db0d5ae4cfdb005e8c541f01c6597a72f0d116f38"
     },
     {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",

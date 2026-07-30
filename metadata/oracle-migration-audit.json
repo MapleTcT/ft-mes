@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T10:19:32+00:00",
-  "repoCommit": "03e3e53c1d6fba1eab1b478c845d3e994ca7dc9e",
-  "findingCount": 1635,
+  "generatedAt": "2026-07-30T11:25:01+00:00",
+  "repoCommit": "5c5da24cba229c32ad56f086780869a844d4d0d1",
+  "findingCount": 1636,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 193,
+    "documentation-or-workflow": 194,
     "frontend-row-index-noise": 4,
     "java-row-index-noise": 93,
     "legacy-ojdbc-dependency": 6,
@@ -21,7 +21,7 @@
     "decode-sql": 5,
     "from-dual": 140,
     "ojdbc": 15,
-    "oracle-keyword": 646,
+    "oracle-keyword": 647,
     "rownum": 694,
     "sysdate": 135
   },
@@ -9307,6 +9307,14 @@
       "category": "documentation-or-workflow",
       "note": "Nacos/runtime patch evidence may require Oracle-default drift checks while keeping PostgreSQL as the runtime target.",
       "excerpt": "\"Review rendered-vs-target drift, confirm no Oracle defaults or secret leakage, and attach owner approval.\""
+    },
+    {
+      "file": "docs/admin-permission-functional-scan-20260730.md",
+      "line": 114,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "`QCS_5.0.0.0_inspect_*` 查询配置仍保存为 Oracle CLOB 文本，而旧 Hibernate"
     },
     {
       "file": "docs/backend-module-dependency-inventory.md",

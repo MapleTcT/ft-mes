@@ -3771,6 +3771,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/229-qcs-inspect-config-lob-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -6610,6 +6616,12 @@
     {
       "ignored": false,
       "path": "frontend/apps/bpi/vite.config.ts",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/admin-config-deep-scan-20260730.json",
       "state": "tracked",
       "tracked": true
     },
@@ -12266,7 +12278,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 716
+      "tracked": 717
     },
     "docs": {
       "tracked": 158
@@ -12275,7 +12287,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 312
+      "tracked": 313
     },
     "package.json": {
       "tracked": 1
@@ -12299,8 +12311,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2040,
-    "tracked": 2040,
+    "totalFiles": 2042,
+    "tracked": 2042,
     "untracked": 0
   },
   "untrackedByDirectory": []
