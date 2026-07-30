@@ -1394,6 +1394,17 @@ large-object 总数均为 `200438`。测试机回退备份：
 本项修复的是页面导航容错，不改变流程定义和业务数据。机器证据：
 `metadata/wts-workticket-workflow-config-regression-20260730.json`。
 
+### WOM 工序产耗查看只读验收（2026-07-30）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 查看工序投入与产出记录 | 工序执行记录选择糖化记录后点击“产耗查看”，切换投入/产出页签 | `GET /baseService/view/layoutJson`；`GET /WOM/produceTask/processExelog/data/{id}`；`POST /custom-data-dg1615273225070`；`GET /data-dg1616479577890` | baseService runtime view -> WOM processExelog read APIs | `runtime_extra_view`、`ec_extra_view`；WOM 产耗业务表只读 | `WITH payloads AS (...) SELECT code,octet_length(payload),position(raw_call IN payload),position('请选择一条工序执行记录' IN payload) ...;` | 未选行提示可读；选中记录后详情及两个数据页签渲染，关键请求全部 HTTP 200，产出物料 `BPI_MIN_20260727_110711_MAT`、批次 `BPI-LINES0701-20260727-E22B71C8`、数量 `3.00` 可见；运行时 payload 为 72678/29895 bytes，旧原始调用位置为 0；本轮未调用写接口 | NOT_APPLICABLE |
+
+运行时配置由
+`deploy/docker/postgres/init/228-wom-process-consumption-view-runtime.sql`
+幂等恢复。机器证据：
+`metadata/wom-process-consumption-view-regression-20260730.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

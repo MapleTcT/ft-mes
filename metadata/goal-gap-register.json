@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T09:03:48+00:00",
-  "repoCommit": "7dfd8d15cf78d37625b8b5fc572902b32bb7991b",
+  "generatedAt": "2026-07-30T10:15:23+00:00",
+  "repoCommit": "03e3e53c1d6fba1eab1b478c845d3e994ca7dc9e",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -74,7 +74,7 @@
       "status": "PARTIAL",
       "scope": "默认运行、默认构建和默认 Docker 路径使用 PostgreSQL；Oracle 仅作为 legacy 对照。",
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1635, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 227. metadata/oracle-migration-audit.json currently has 1635 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. ADP migration 218 restores the original QCS runtime layouts; migrations 219-221 add incoming-inspection runtime, manual-create entries and complete WTS design/project metadata compatibility through PostgreSQL large objects; migration 222 converts QCS configuration extra-view payloads to valid PostgreSQL large-object references; migration 223 repairs the complete Hibernate @Lob-backed QCS inspect-report configuration metadata; migrations 224-227 close admin directory permissions, OEE factory-tree level compatibility, legacy OID/bigint comparison compatibility and notification mobile-device-token schema gaps. None adds an Oracle runtime path. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1635, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. PostgreSQL migration count is 228. metadata/oracle-migration-audit.json currently has 1635 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. ADP migration 218 restores the original QCS runtime layouts; migrations 219-221 add incoming-inspection runtime, manual-create entries and complete WTS design/project metadata compatibility through PostgreSQL large objects; migration 222 converts QCS configuration extra-view payloads to valid PostgreSQL large-object references; migration 223 repairs the complete Hibernate @Lob-backed QCS inspect-report configuration metadata; migrations 224-228 close admin directory permissions, OEE factory-tree level compatibility, legacy OID/bigint comparison compatibility, notification mobile-device-token schema gaps and the WOM process-consumption detail view. None adds an Oracle runtime path. New V34 policy references are classified as documentation-or-workflow and the PostgreSQL decode(..., 'hex') acceptance fixture is postgres-conversion-tooling. Existing Spring JDBC rowNum callbacks remain classified as java-row-index-noise, not Oracle runtime defaults. PATROL generated runtime-metadata references are classified as postgres-compat-reference; JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
@@ -111,7 +111,8 @@
         "deploy/docker/postgres/init/224-teaminfo-admin-directory-permissions.sql",
         "deploy/docker/postgres/init/225-oee-factory-tree-level-compat.sql",
         "deploy/docker/postgres/init/226-postgres-legacy-oid-bigint-like-operator.sql",
-        "deploy/docker/postgres/init/227-notification-mobile-device-token.sql"
+        "deploy/docker/postgres/init/227-notification-mobile-device-token.sql",
+        "deploy/docker/postgres/init/228-wom-process-consumption-view-runtime.sql"
       ]
     },
     {
@@ -453,7 +454,7 @@
         "production module test matrix has 44 cases: 44 PASS, 0 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks 0 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and is OPEN with 1 active FAIL_BACKLOG item; legacy public produceTaskCreated remains retired as NOT_APPLICABLE, while NOTIFY-001 tracks the independently reproduced notification-delivery failure.",
-        "persistence acceptance ledger has 312 tested features: 293 PASS, 1 FAIL, 0 BLOCKED, 18 NOT_APPLICABLE",
+        "persistence acceptance ledger has 313 tested features: 293 PASS, 1 FAIL, 0 BLOCKED, 19 NOT_APPLICABLE",
         "2026-07-30 admin directory acceptance verified 533/533 permission nodes with zero action gaps and scanned 398 navigable routes in a real browser: 185 PASS, 42 WARN and 171 FAIL. Representative MES, organization, RBAC, PATROL and WTS persistence passed, but online WTS notification delivery remains NOTIFY-001 because PostgreSQL recorded station-letter 7/7 and mobile 7/7 with send_status=0.",
         "WTS work-ticket fireWorkWF configuration opens the fire-work workflow in both the normal new-tab path and the popup-blocked same-tab fallback; no-selection guard remains visible, all read APIs return HTTP 200 and the PostgreSQL workflow fingerprint is unchanged",
         "2026-07-30 public-browser regression restored organization department-add reachability, one manual-create action each for product and incoming QCS inspection, both complete create forms and the WTS work-permit menu-information configuration page. PostgreSQL verified four non-empty QCS layouts, unique manualAdd actions, scoped WTS LOB compatibility and 25/25 project metadata relations; QCS and organization forms were cancelled before business writes.",
@@ -663,13 +664,13 @@
       "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 312 tested features: 293 PASS, 1 FAIL, 0 BLOCKED, 18 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 1 active backlog item, 1 FAIL_BACKLOG and 0 BLOCKED.",
-        "2026-07-30 migrations 219-227 restore the incoming-inspection list/edit runtime, product/incoming manual-create entries, WTS/QCS large-object metadata, TeamInfo admin permissions, OEE factory-tree levels, the narrow WTS oid/bigint LIKE compatibility operator and the recovered mobile-device-token table. Migrations 224-227 were applied and replayed idempotently on PostgreSQL; no Oracle default path was added. The table fix removes only one schema blocker: NOTIFY-001 remains open because real station-letter and mobile delivery rows still failed.",
+        "metadata/persistence-acceptance.json currently has 313 tested features: 293 PASS, 1 FAIL, 0 BLOCKED, 19 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 1 active backlog item, 1 FAIL_BACKLOG and 0 BLOCKED.",
+        "2026-07-30 migrations 219-228 restore the incoming-inspection list/edit runtime, product/incoming manual-create entries, WTS/QCS large-object metadata, TeamInfo admin permissions, OEE factory-tree levels, the narrow WTS oid/bigint LIKE compatibility operator, the recovered mobile-device-token table and the WOM process-consumption detail view. Migrations 224-228 were applied and replayed idempotently on PostgreSQL; no Oracle default path was added. The notification table fix removes only one schema blocker: NOTIFY-001 remains open because real station-letter and mobile delivery rows still failed.",
         "2026-07-28 marker ADP_E2E_FRUCTOSE_LINE_01 reuses the PostgreSQL WOM/QCS/WMS/ProcessAnalysis and BPI contracts to prove two process-paired material transformations, nine controlled draft quality-item definitions, final quality release and 35.1 t stock without adding an Oracle runtime path or a duplicate material ledger.",
         "2026-07-28 marker ADP_E2E_20260728042954_FACTORY_LINE proves visible factory-architecture interaction and node-type selection persisted one enabled production-line node whose response id matches its PostgreSQL id, with a null optional department plus synchronized mnemonic aliases; the same row was returned by the WOM factoryLineRef2 reference. Idempotent migrations 211-216 keep the runtime tree/edit/reference contracts on PostgreSQL without introducing an Oracle default path.",
         "2026-07-27 marker ADP_E2E_20260727_MES_FULL_CLOSED_11 refreshes the eight exact persistence rows for WOM start/process/putin/output/QCS/process-end/finish and WMS/trace. It reuses PostgreSQL tables, adds no Oracle runtime path, proves the repaired putin path creates activity execution and material-consumption facts, and proves output detail/material-output totals are exactly 2/2.",
         "Target marker ADP_E2E_20260720193226_WMS_OUTAGE directly verified the BPI and material PostgreSQL tables across a real internal material-wms outage and recovery: no material row during the outage, one durable document/line/transaction/stock after recovery, and zero marker residue after cleanup.",
-        "metadata/postgres-migration-inventory.json currently has 227 scripts, highRiskStatementCount=0, watchStatementCount=87, watchSafetyIssueCount=0; there are no missing, duplicate, invalid, or unguarded structural migration statements.",
+        "metadata/postgres-migration-inventory.json currently has 228 scripts, highRiskStatementCount=0, watchStatementCount=87, watchSafetyIssueCount=0; there are no missing, duplicate, invalid, or unguarded structural migration statements.",
         "PATROL migration 186 restores the hidden-danger/EAM risk projection and repairs supfusion_i18n_resource.modifier from the legacy varchar shape to the java.util.Date-compatible PostgreSQL timestamp shape; target migration, i18n restart, browser/API and PostgreSQL marker verification passed.",
         "metadata/persistence-acceptance.json currently has 1 FAIL and 0 BLOCKED rows",
         "metadata/production-module-backlog.json covers those unresolved persistence rows with 1 backlog items, 1 FAIL_BACKLOG and 0 BLOCKED",
@@ -752,6 +753,7 @@
         "deploy/docker/postgres/init/225-oee-factory-tree-level-compat.sql",
         "deploy/docker/postgres/init/226-postgres-legacy-oid-bigint-like-operator.sql",
         "deploy/docker/postgres/init/227-notification-mobile-device-token.sql",
+        "deploy/docker/postgres/init/228-wom-process-consumption-view-runtime.sql",
         "docs/backend-table-audit/notification-delivery-analysis.md",
         "metadata/notification-delivery-analysis.json"
       ]

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 227,
+  "migrationCount": 228,
   "firstNumber": 1,
-  "lastNumber": 227,
+  "lastNumber": 228,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -17,26 +17,26 @@
     "create-index": 1017,
     "create-table": 584,
     "create-view": 143,
-    "insert": 11070,
-    "update": 11188
+    "insert": 11074,
+    "update": 11194
   },
   "idempotencySignalTotals": {
     "create-or-replace": 254,
-    "do-block": 419,
+    "do-block": 421,
     "if-exists": 141,
     "if-not-exists": 13063,
-    "on-conflict": 11001,
+    "on-conflict": 11004,
     "to-regclass": 221,
-    "where-not-exists": 47
+    "where-not-exists": 48
   },
   "tagTotals": {
     "auth-rbac-org": 38,
     "business": 46,
     "compatibility": 85,
-    "configuration": 55,
+    "configuration": 56,
     "general": 43,
     "notification": 10,
-    "platform": 66,
+    "platform": 67,
     "workflow": 21
   },
   "migrations": [
@@ -8572,6 +8572,40 @@
         "to-regclass": 0,
         "create-or-replace": 0,
         "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/228-wom-process-consumption-view-runtime.sql",
+      "name": "228-wom-process-consumption-view-runtime.sql",
+      "number": 228,
+      "slug": "wom-process-consumption-view-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration"
+      ],
+      "lineCount": 144,
+      "sha256": "46dace1085608fbb51d91619564feb66a9322c9a53522f2d7eb57944291a381a",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 4,
+        "update": 6
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 3,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 1
       },
       "highRiskStatements": [],
       "watchStatements": [],

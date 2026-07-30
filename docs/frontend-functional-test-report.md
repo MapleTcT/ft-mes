@@ -1400,6 +1400,22 @@ MD5 指纹完全一致，打开设计器没有保存或发布流程。机器证�
 `metadata/wts-workticket-workflow-config-regression-20260730.json`；修复后截图：
 `metadata/wts-workticket-workflow-config-after-fix-20260730.png`。
 
+### WOM 工序产耗查看回归（2026-07-30）
+
+本轮从“生产管理 -> 工序执行记录”真实点击“产耗查看”。修复前，未选行时外露
+`WOM.custom.randon1585636817654`，选中记录后详情页为空；后端
+`layoutJson` 因 `runtime_extra_view.view_json` 为空返回 HTTP 500。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WOM 工序执行记录 | `/msService/WOM/produceTask/processExelog/processExeLogList` | 不选择记录点击“产耗查看” | 无业务查询 | 显示“请选择一条工序执行记录”，不再外露资源键；没有打开空页面 | 未发起详情查询 | `runtime_extra_view`、`ec_extra_view`（运行时配置） | PASS | 无 |
+| WOM 工序产耗详情 | 同上，选择糖化记录 `9007190231282109` 后点击“产耗查看” | 打开详情并切换“投入记录/产出记录” | `layoutJson`；`editStates`；`data/9007190231282109`；投入和产出数据接口 | 页面显示批次 `BPI-LINES0701-20260727-E22B71C8`、糖化工序、工作单元和起止时间；产出页显示物料 `BPI_MIN_20260727_110711_MAT`、批次及数量 `3.00`；console、page error、request failure 均为 0 | 文档及 9 个页面/数据请求全部 HTTP 200 | `runtime_extra_view`、`ec_extra_view`；WOM 产耗业务表只读 | PASS | 无 |
+
+详情视图恢复后 `runtime_extra_view` payload 为 72678 bytes；列表视图 payload 为
+29895 bytes，原始 i18n 调用位置为 0，中文兜底存在。该功能只读，本轮没有保存或修改
+WOM 业务记录。机器证据：
+`metadata/wom-process-consumption-view-regression-20260730.json`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

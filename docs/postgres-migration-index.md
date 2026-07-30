@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`227`。
-- 编号范围：`001` 到 `227`。
+- 脚本数量：`228`。
+- 编号范围：`001` 到 `228`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -23,10 +23,10 @@
 | auth-rbac-org | 38 |
 | business | 46 |
 | compatibility | 85 |
-| configuration | 55 |
+| configuration | 56 |
 | general | 43 |
 | notification | 10 |
-| platform | 66 |
+| platform | 67 |
 | workflow | 21 |
 
 ## 语句统计
@@ -38,20 +38,20 @@
 | create-index | 1017 |
 | create-table | 584 |
 | create-view | 143 |
-| insert | 11070 |
-| update | 11188 |
+| insert | 11074 |
+| update | 11194 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 254 |
-| do-block | 419 |
+| do-block | 421 |
 | if-exists | 141 |
 | if-not-exists | 13063 |
-| on-conflict | 11001 |
+| on-conflict | 11004 |
 | to-regclass | 221 |
-| where-not-exists | 47 |
+| where-not-exists | 48 |
 
 ## 脚本清单
 
@@ -284,6 +284,7 @@
 | 225 | 225-oee-factory-tree-level-compat.sql | compatibility | 11 | update:1 | 0 | - |
 | 226 | 226-postgres-legacy-oid-bigint-like-operator.sql | general | 65 | create-function:2 | 5 | - |
 | 227 | 227-notification-mobile-device-token.sql | notification | 25 | create-table:1, create-index:1 | 2 | - |
+| 228 | 228-wom-process-consumption-view-runtime.sql | platform, configuration | 144 | insert:4, update:6 | 6 | - |
 
 ## 规则
 

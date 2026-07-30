@@ -3765,6 +3765,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/228-wom-process-consumption-view-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -8373,6 +8379,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/wom-process-consumption-view-regression-20260730.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/wom-public-produce-task-created-analysis.json",
       "state": "tracked",
       "tracked": true
@@ -12254,7 +12266,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 715
+      "tracked": 716
     },
     "docs": {
       "tracked": 158
@@ -12263,7 +12275,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 311
+      "tracked": 312
     },
     "package.json": {
       "tracked": 1
@@ -12287,8 +12299,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2038,
-    "tracked": 2038,
+    "totalFiles": 2040,
+    "tracked": 2040,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -1,0 +1,80 @@
+{
+  "generatedAt": "2026-07-30T10:00:57Z",
+  "repoCommit": "03e3e53c1d6fba1eab1b478c845d3e994ca7dc9e+working-tree",
+  "database": "PostgreSQL",
+  "environment": "http://10.11.100.17:18080",
+  "status": "PASS",
+  "module": "WOM 工序执行记录",
+  "route": "/msService/WOM/produceTask/processExelog/processExeLogList",
+  "operation": "产耗查看",
+  "processExecutionId": "9007190231282109",
+  "processBatch": "BPI-LINES0701-20260727-E22B71C8",
+  "checks": {
+    "noSelectionWarningReadable": true,
+    "noSelectionRawI18nKeyVisible": false,
+    "detailPageRendered": true,
+    "inputTabRendered": true,
+    "outputTabRendered": true,
+    "outputBusinessRowRendered": true,
+    "browserErrorCount": 0,
+    "failedRequestCount": 0
+  },
+  "httpEvidence": [
+    {
+      "method": "GET",
+      "endpoint": "/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsuEntryProView&isEs5=true",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "endpoint": "/msService/WOM/produceTask/processExelog/editStates?viewCode=WOM_1.0.0_produceTask_matConsuEntryProView&id=9007190231282109",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "endpoint": "/msService/WOM/produceTask/processExelog/data/9007190231282109",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "endpoint": "/msService/WOM/produceTask/processExelog/custom-data-dg1615273225070?dataGridCode=WOM_1.0.0_produceTask_matConsuEntryProViewdg1615273225070&procExelogId=9007190231282109",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "endpoint": "/msService/WOM/produceTask/processExelog/data-dg1616479577890?datagridCode=WOM_1.0.0_produceTask_matConsuEntryProViewdg1616479577890&id=9007190231282109",
+      "status": 200
+    }
+  ],
+  "visibleEvidence": {
+    "warning": "请选择一条工序执行记录",
+    "processName": "糖化",
+    "workUnit": "BPI_MIN_20260727_110711 work unit",
+    "outputMaterialCode": "BPI_MIN_20260727_110711_MAT",
+    "outputMaterialName": "BPI_MIN_20260727_110711 material",
+    "outputQuantity": "3.00"
+  },
+  "databaseEvidence": {
+    "verificationSql": "WITH payloads AS (SELECT code, convert_from(lo_get(view_json), 'UTF8') AS payload FROM runtime_extra_view WHERE code IN ('WOM_1.0.0_produceTask_processExeLogList','WOM_1.0.0_produceTask_matConsuEntryProView')) SELECT code,octet_length(payload),position($needle$ReactAPI.international.getText('WOM.custom.randon1585636817654')$needle$ IN payload),position('请选择一条工序执行记录' IN payload) FROM payloads ORDER BY code;",
+    "results": [
+      {
+        "code": "WOM_1.0.0_produceTask_matConsuEntryProView",
+        "payloadBytes": 72678,
+        "rawCallPosition": 0,
+        "fallbackPosition": 0
+      },
+      {
+        "code": "WOM_1.0.0_produceTask_processExeLogList",
+        "payloadBytes": 29895,
+        "rawCallPosition": 0,
+        "fallbackPosition": 11143
+      }
+    ]
+  },
+  "persistenceAcceptance": {
+    "requiresPersistence": false,
+    "status": "NOT_APPLICABLE",
+    "reason": "产耗查看及页签切换均为只读查询；本轮未调用保存接口，也未修改 WOM 业务记录。"
+  },
+  "issues": []
+}

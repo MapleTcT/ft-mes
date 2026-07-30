@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-30T08:08:00.000Z",
-  "repoCommit": "7dfd8d15cf78d37625b8b5fc572902b32bb7991b+working-tree-admin-directory-scan-notification-retest",
+  "generatedAt": "2026-07-30T10:00:57.000Z",
+  "repoCommit": "03e3e53c1d6fba1eab1b478c845d3e994ca7dc9e+working-tree",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -294,11 +294,11 @@
     }
   },
   "summary": {
-    "testedFeatures": 312,
+    "testedFeatures": 313,
     "pass": 293,
     "fail": 1,
     "blocked": 0,
-    "notApplicable": 18
+    "notApplicable": 19
   },
   "items": [
     {
@@ -6817,9 +6817,33 @@
       "status": "NOT_APPLICABLE",
       "evidence": "Normal popup and forced popup-blocked paths both opened the complete fireWorkWF editor with zero browser errors and HTTP 200 workflow requests. The blocked path reused the current tab. Before and after fingerprints were identical: 6579649724219392|fireWorkWF|1|1|2026-06-19 21:25:00.282317|202020|202021|ea3efa18931d7549d7629dad924ef65c|ea3efa18931d7549d7629dad924ef65c.",
       "issues": []
+    },
+    {
+      "acceptanceSet": "wom-process-consumption-view-regression-20260730",
+      "module": "WOM 工序执行记录产耗查看",
+      "route": "/msService/WOM/produceTask/processExelog/processExeLogList",
+      "operation": "未选择记录时校验提示；选择糖化记录后打开产耗详情并切换投入/产出页签",
+      "api": "GET /msService/baseService/view/layoutJson; GET /msService/WOM/produceTask/processExelog/data/{id}; POST /custom-data-dg1615273225070; GET /data-dg1616479577890",
+      "method": "GET/POST",
+      "requiresPersistence": false,
+      "backendEntry": "baseService runtime view -> WOM processExelog read APIs",
+      "tables": [
+        "public.runtime_extra_view",
+        "public.ec_extra_view"
+      ],
+      "marker": "",
+      "verificationSql": "WITH payloads AS (SELECT code, convert_from(lo_get(view_json), 'UTF8') AS payload FROM runtime_extra_view WHERE code IN ('WOM_1.0.0_produceTask_processExeLogList','WOM_1.0.0_produceTask_matConsuEntryProView')) SELECT code,octet_length(payload),position($needle$ReactAPI.international.getText('WOM.custom.randon1585636817654')$needle$ IN payload),position('请选择一条工序执行记录' IN payload) FROM payloads ORDER BY code;",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The no-selection path displayed readable Chinese and no raw i18n key. The selected process execution opened a nonblank detail page with batch, process and work-unit data; input/output requests were HTTP 200 and the output row showed BPI_MIN_20260727_110711_MAT with quantity 3.00. Browser console, page errors and failed requests were zero. Runtime payloads were 72678/29895 bytes and the legacy raw call position was 0. The operation was read-only.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "",
+      "artifact": "metadata/wom-process-consumption-view-regression-20260730.json",
+      "summary": "Real browser regression restored WOM process-consumption detail rendering, readable no-selection feedback, input/output tabs and the BPI output row. All captured page and data requests returned HTTP 200, browser error arrays were zero, and the operation was read-only."
+    },
     {
       "marker": "",
       "artifact": "metadata/wts-workticket-workflow-config-regression-20260730.json",
