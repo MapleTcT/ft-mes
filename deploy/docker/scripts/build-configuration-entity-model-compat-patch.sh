@@ -11,8 +11,9 @@ maven_repo="$adp_root/bap-server/assembly/repository/maven"
 service_jar="$maven_repo/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/configuration-services-service-1.0.0-SNAPSHOT.jar"
 openapi_jar="$maven_repo/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/configuration-services-open-api-1.0.0-SNAPSHOT.jar"
 base_jar="$maven_repo/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/configuration-services-base-1.0.0-SNAPSHOT.jar"
+workflow_jar="$maven_repo/com/supcon/supfusion/configuration/configuration-workflow/1.0.0-SNAPSHOT/configuration-workflow-1.0.0-SNAPSHOT.jar"
 
-for dep in "$service_jar" "$openapi_jar" "$base_jar"; do
+for dep in "$service_jar" "$openapi_jar" "$base_jar" "$workflow_jar"; do
   if [ ! -f "$dep" ]; then
     echo "missing patch compile dependency: $dep" >&2
     exit 1
@@ -33,7 +34,8 @@ javac -encoding UTF-8 -source 8 -target 8 \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java" \
   "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.java" \
-  "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.java"
+  "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.java" \
+  "$repo_root/backend/modules/com/supcon/supfusion/configuration/configuration-workflow/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/workflow/service/impl/ProcessServiceFlowImpl.java"
 
 mkdir -p "$classes_dir/templates/model"
 cp \

@@ -497,6 +497,7 @@ public class ProcessServiceFlowImpl extends BaseServiceImpl implements ProcessSe
     @Override
     @Transactional(readOnly=true,propagation=Propagation.SUPPORTS)
     public String handleFlowXml(String flowXml) {
+        flowXml = resolvePostgresLargeObject(flowXml);
         String xmlStr = null;
         Document document;
         try {
@@ -559,6 +560,27 @@ public class ProcessServiceFlowImpl extends BaseServiceImpl implements ProcessSe
             document = null;
         }
         return xmlStr;
+    }
+
+    private String resolvePostgresLargeObject(String value) {
+        if (StringUtils.isBlank(value)) {
+            return value;
+        }
+        String oid = value.trim();
+        if (!oid.matches("\\d+")) {
+            return value;
+        }
+        try {
+            String decoded = jdbcTemplate.queryForObject(
+                    "SELECT convert_from(lo_get(CAST(? AS oid)), 'UTF8')",
+                    new Object[]{Long.valueOf(oid)},
+                    String.class
+            );
+            return StringUtils.isBlank(decoded) ? value : decoded;
+        } catch (RuntimeException ex) {
+            log.warn("Unable to resolve workflow XML PostgreSQL large object {}", oid, ex);
+            return value;
+        }
     }
 
     @Override

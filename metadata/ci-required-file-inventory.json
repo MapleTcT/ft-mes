@@ -4905,6 +4905,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/test-workflow-editor-locale-compat.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/test_audit_postgres_mappings.py",
       "state": "tracked",
       "tracked": true
@@ -4912,6 +4918,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/test_configuration_postgres_model_sync.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test_configuration_workflow_postgres_compat.py",
       "state": "tracked",
       "tracked": true
     },
@@ -8038,6 +8050,18 @@
     {
       "ignored": false,
       "path": "metadata/qcs-runtime-config-wom-manu-inspect-regression.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-workflow-editor-after-fix-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-workflow-editor-regression-20260730.json",
       "state": "tracked",
       "tracked": true
     },
@@ -12044,7 +12068,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 701
+      "tracked": 703
     },
     "docs": {
       "tracked": 156
@@ -12053,7 +12077,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 292
+      "tracked": 294
     },
     "package.json": {
       "tracked": 1
@@ -12077,8 +12101,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2003,
-    "tracked": 2003,
+    "totalFiles": 2007,
+    "tracked": 2007,
     "untracked": 0
   },
   "untrackedByDirectory": []

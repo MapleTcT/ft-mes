@@ -1,28 +1,28 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T02:34:06+00:00",
-  "repoCommit": "0e58fd073705e06f16226cef2e3103ea3df11069",
+  "generatedAt": "2026-07-30T03:11:52+00:00",
+  "repoCommit": "30630c3785ba82d97ef25f6eb0b6f44f2172e147",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 407,
-    "totalBytes": 57489408,
+    "totalFiles": 408,
+    "totalBytes": 57633374,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
       "postgres-init-sql": 221,
-      "runtime-binary-patch": 7,
+      "runtime-binary-patch": 8,
       "runtime-patch-source": 23,
       "runtime-script": 27,
       "runtime-static-override": 83
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 28153,
+      "nginx-runtime-config": 30309,
       "postgres-init-sql": 56522164,
-      "runtime-binary-patch": 29988,
+      "runtime-binary-patch": 171602,
       "runtime-patch-source": 95909,
-      "runtime-script": 284123,
+      "runtime-script": 284319,
       "runtime-static-override": 486718
     }
   },
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 27933,
-      "sha256": "bfe5a0a50f63120de5fd7a9bf8f53042e61bf862188e20d30df9d9635478afaf"
+      "sizeBytes": 30089,
+      "sha256": "b962da4daca4cbcbab28b42efd084a8dadb9623349eb8c580687dc1cae18751a"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1639,6 +1639,12 @@
       "sha256": "2a11844eff594a16ad5594411d11d5d9270e4cc17c7441c2c4472f71cf894b8b"
     },
     {
+      "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
+      "category": "runtime-binary-patch",
+      "sizeBytes": 141614,
+      "sha256": "1072a6280abb9b7e8ea05d68039445b9b9c3c441b76c595de0e92748cb63c0a2"
+    },
+    {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 2603,
@@ -1851,8 +1857,8 @@
     {
       "path": "deploy/docker/scripts/patch-configuration-entity-model-runtime.py",
       "category": "runtime-script",
-      "sizeBytes": 6182,
-      "sha256": "d1b98c13df3592464376b1818da39bc6e2ac8ae050ab6d18d65a88e66126ddd1"
+      "sizeBytes": 6378,
+      "sha256": "f6987d6dd3f24060313b544b89e396f7db47fcd1515d4d706adf03f907231171"
     },
     {
       "path": "deploy/docker/scripts/patch-eam-patrol-runtime.py",

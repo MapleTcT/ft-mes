@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T02:36:50+00:00",
-  "repoCommit": "0e58fd073705e06f16226cef2e3103ea3df11069",
+  "generatedAt": "2026-07-30T03:16:19+00:00",
+  "repoCommit": "30630c3785ba82d97ef25f6eb0b6f44f2172e147",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -447,7 +447,7 @@
         "production module test matrix has 44 cases: 44 PASS, 0 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks 0 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and is CLEAR with 0 active items; legacy public produceTaskCreated is retired as NOT_APPLICABLE with explicit rejection/no-persistence evidence.",
-        "persistence acceptance ledger has 302 tested features: 287 PASS, 0 FAIL, 0 BLOCKED, 15 NOT_APPLICABLE",
+        "persistence acceptance ledger has 303 tested features: 287 PASS, 0 FAIL, 0 BLOCKED, 16 NOT_APPLICABLE",
         "2026-07-30 public-browser regression restored organization department-add reachability, one manual-create action each for product and incoming QCS inspection, both complete create forms and the WTS work-permit menu-information configuration page. PostgreSQL verified four non-empty QCS layouts, unique manualAdd actions, scoped WTS LOB compatibility and 25/25 project metadata relations; QCS and organization forms were cancelled before business writes.",
         "2026-07-28 marker ADP_E2E_FRUCTOSE_LINE_01 passed the retained TEST_ONLY_DRAFT fructose pilot through five real WOM/QCS/WMS/ProcessAnalysis pages, PostgreSQL and BPI telemetry: one tonne unit, three materials and batches, two exact process-paired lineage edges, three quality standards with nine items, five handover checks, one four-item qualified QCS report, 35.1 t available WMS stock, five trace snapshots, 24 accepted events and 288 accepted points. Browser console/page/request/bad-response counts were all zero; formal process and QA/QC approval remains required before production use.",
         "2026-07-28 marker ADP_E2E_20260728042954_FACTORY_LINE passed 13/13 through visible factory-architecture navigation and node-type selection, submit API, PostgreSQL hm_factory_models/hm_factory_models_mc readback and WOM factoryLineRef2 picker. Response id and PostgreSQL row id both equal 770612453238016; the optional department remained empty and persisted as null. The retained production-line fixture 果糖产线验收_20260728042954 is visible as 生产线/未占用, and browser console/page/request/bad-HTTP counts are all zero.",
@@ -489,7 +489,8 @@
         "2026-07-20 marker BPI_LIVE_20260720_123058 以真实 WOM start/stop、3 个 SENT context revision、测试专用四眼校准、受控 MQTT、JetLinks/Kafka/Flink/PostgreSQL 和真实浏览器闭合同一指令 START/END：两条候选均 CONFIRMED/r2，同一影子批次进入 CLOSED_RAW/r2，修复前 UNIT_MISMATCH 保留 5 条 raw event 并处置为 RESOLVED/r7；规则、校准、运行开关和 WOM 状态均已恢复，Flink RUNNING 36/36 且 checkpoint 5533 为 36/36。证据 metadata/bpi-live-mqtt-wom-start-end-acceptance.json；物理设备、正式现场证书和 7-14 天真实影子运行仍未完成。",
         "2026-07-20 BPI markers ADP_E2E_20260720_215500_BPI_WMS and ADP_E2E_UI_20260720_222600_BPI_WMS closed controlled QCS Protobuf -> BPI -> target Kafka -> query-first adapter -> material-wms document/line/inventory transaction/stock -> durable receipt -> INBOUNDED/r4. Identical QCS replay, forced Kafka command replay, five real browser APIs, empty-evidence layout, switch shutdown and exact cleanup passed; metadata/bpi-quality-release-wms-target-acceptance.json is the machine evidence.",
         "2026-07-21 marker ADP_E2E_20260721021607_QCS_BPI closed the real WOM/QCS page -> QCS PostgreSQL transaction outbox -> Java 8 sidecar -> three-broker Kafka -> BPI PostgreSQL chain. First delivery moved the shadow batch to RELEASED/r3 with ACCEPTED gate; exact replay kept gate/link/inbox/state/audit/WMS-outbox counts at 1/1/1/2/2/0, DLQ and lag at zero. Browser errors and dual-database marker residue were zero, all six write switches were restored false, and the shadow batch correctly requested no WMS command. Evidence: metadata/qcs-bpi-quality-gate-target-acceptance.json.",
-        "2026-07-30 WTS module-level regression restored approval configuration and JSA menu reads, preserved the truthful empty JSA workflow page, passed the existing work-permit regression, and returned HTTP 200 for all 23 WTS menu-information endpoints sequentially. Invalid WTS ec/project extra-view full_config large-object references changed from 234/234 to 0/0; replay added zero large objects. These read-only checks add 3 NOT_APPLICABLE persistence rows and no workflow, menu or business write."
+        "2026-07-30 WTS module-level regression restored approval configuration and JSA menu reads, preserved the truthful empty JSA workflow page, passed the existing work-permit regression, and returned HTTP 200 for all 23 WTS menu-information endpoints sequentially. Invalid WTS ec/project extra-view full_config large-object references changed from 234/234 to 0/0; replay added zero large objects. These read-only checks add 3 NOT_APPLICABLE persistence rows and no workflow, menu or business write.",
+        "2026-07-30 QCS/WTS workflow-editor regression restored mixed-case locale resources on Linux and decoded PostgreSQL large-object workflow XML before parsing. The QCS manuInspectWorkFlow loaded 20 diagram elements and the WTS fireWorkWF loaded 88, both with HTTP 200 getFlow responses, no loading overlay and zero browser errors; source/design switching, zoom and reopen passed. Exact deployment/XML fingerprints were unchanged, so the read-only editor load adds one NOT_APPLICABLE persistence row."
       ],
       "blockingIssues": [
         "生产矩阵 44 条、制造到追溯八步主链和投料消耗台账已通过；现场 Batch/DCS 切换确认、连续运行及业务负责人签字仍未完成。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH。"
@@ -630,7 +631,9 @@
         "deploy/docker/postgres/init/221-wts-module-config-lob-compat.sql",
         "metadata/wts-module-config-lob-regression-20260730.json",
         "metadata/wts-approve-config-menu-after-fix-20260730.png",
-        "metadata/wts-jsa-workflow-after-fix-20260730.png"
+        "metadata/wts-jsa-workflow-after-fix-20260730.png",
+        "metadata/qcs-workflow-editor-regression-20260730.json",
+        "metadata/qcs-workflow-editor-after-fix-20260730.png"
       ]
     },
     {

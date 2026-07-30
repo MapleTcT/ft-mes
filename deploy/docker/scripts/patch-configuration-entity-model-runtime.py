@@ -13,6 +13,7 @@ from pathlib import Path
 OPEN_API_JAR = "BOOT-INF/lib/configuration-services-open-api-1.0.0-SNAPSHOT.jar"
 BASE_JAR = "BOOT-INF/lib/configuration-services-base-1.0.0-SNAPSHOT.jar"
 SERVICE_JAR = "BOOT-INF/lib/configuration-services-service-1.0.0-SNAPSHOT.jar"
+WORKFLOW_JAR = "BOOT-INF/lib/configuration-workflow-1.0.0-SNAPSHOT.jar"
 
 PATCH_TARGETS = {
     OPEN_API_JAR: [
@@ -36,6 +37,9 @@ PATCH_TARGETS = {
         "com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.class",
         "com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl$1.class",
         "com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl$LetterComparator.class",
+    ],
+    WORKFLOW_JAR: [
+        "com/supcon/supfusion/configuration/workflow/service/impl/ProcessServiceFlowImpl.class",
     ],
 }
 

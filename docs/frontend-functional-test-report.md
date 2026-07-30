@@ -1304,6 +1304,23 @@ WTS CLOB 值，修复后均为 0；迁移重复执行没有新增 PostgreSQL 大
 `metadata/wts-approve-config-menu-after-fix-20260730.png` 和
 `metadata/wts-jsa-workflow-after-fix-20260730.png`。
 
+### 配置平台工作流设计器加载回归（2026-07-30）
+
+本轮从产品检验申请实体配置的“工作流 -> 配置”真实复现无限加载。先修复 Linux
+大小写敏感导致的 `workflowInternational.js` 404，随后继续定位到
+`POST /msService/ec/workflow/getFlow` 将 PostgreSQL large-object OID 当作 XML 解析的
+HTTP 500；两层阻断均修复后再做页面交互和跨模块回归。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| QCS 产品检验申请工作流 | `/msService/ec/workflow/flowEditH5?flowKey=manuInspectWorkFlow&flowVersion=1&deploymentId=6579656982888448` | 打开、重载、放大、切换源码模式、返回设计模式并再次打开 | `GET /bap/static/flowEditH5-release/js/zh_CN/workflowInternational.js`；`POST /msService/ec/workflow/getFlow` | 加载遮罩消失，20 个流程图元和制定/审核/生效/驳回/作废链完整显示；源码模式显示 4243 字符 XML；console/page/request/HTTP 错误均为 0 | 语言脚本由 404 恢复 200；`getFlow` 由 500 恢复 200 并返回 `manuInspectWorkFlow` XML | `wf_deployment`、PostgreSQL large object（只读） | PASS | 无 |
+| WTS 动火作业票工作流 | `/msService/ec/workflow/flowEditH5?flowKey=fireWorkWF&flowVersion=1&deploymentId=6579649724219392` | 使用同一编辑器打开复杂安环审批流 | `POST /msService/ec/workflow/getFlow` | 加载遮罩消失，88 个图元及开票、气体分析、安全措施确认、验票、执行、暂停/恢复、封票等节点完整；浏览器错误均为 0 | `getFlow` HTTP 200 | `wf_deployment`、PostgreSQL large object（只读） | PASS | 无 |
+
+QCS 流程记录在交互前后的版本、修改时间、OID 与四组 XML MD5 指纹完全一致，证明本轮
+没有发布、保存或改写流程。机器证据：
+`metadata/qcs-workflow-editor-regression-20260730.json`；修复后截图：
+`metadata/qcs-workflow-editor-after-fix-20260730.png`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

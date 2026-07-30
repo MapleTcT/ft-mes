@@ -1326,6 +1326,16 @@ WTS 模块设计态和项目草稿态的遗留 CLOB 文本转换为 PostgreSQL l
 提交前逐表自检。机器证据：
 `metadata/wts-module-config-lob-regression-20260730.json`。
 
+### 配置平台工作流 XML 只读兼容（2026-07-30）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 读取并交互产品检验申请工作流 | 产品检验申请实体配置“工作流 -> 配置” | `POST /msService/ec/workflow/getFlow`，载荷 `deploymentId=6579656982888448` | `WorkFlowController.getFlow -> ProcessServiceFlowImpl.resolvePostgresLargeObject/handleFlowXml/analyticXml -> JdbcTemplate lo_get` | `wf_deployment`、`pg_largeobject`（只读） | `select id,process_key,process_version,version,modify_time,process_xml,temp_process_xml,md5(process_xml_text_backup),md5(temp_process_xml_text_backup),md5(convert_from(lo_get(process_xml),'UTF8')),md5(convert_from(lo_get(temp_process_xml),'UTF8')) from public.wf_deployment where id=6579656982888448;` | 接口由 HTTP 500 恢复为 200，页面渲染 20 个图元；交互前后指纹均为 `version=1 / modify_time=2026-06-16 16:41:51.561961 / OID=201335,201336 / XML MD5=5882646ba2baaabe7eebb459c8310251`，没有流程写入 | NOT_APPLICABLE |
+
+该入口使用 POST 是旧平台的只读查询约定；浏览器只发出 `getFlow`，未调用
+`flowPublish`、临时保存或其他写接口。机器证据：
+`metadata/qcs-workflow-editor-regression-20260730.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

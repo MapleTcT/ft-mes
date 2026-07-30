@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-30T10:23:58+08:00",
-  "repoCommit": "0e58fd073705e06f16226cef2e3103ea3df11069+working-tree-wts-module-config-lob-fix",
+  "generatedAt": "2026-07-30T11:08:48+08:00",
+  "repoCommit": "30630c3785ba82d97ef25f6eb0b6f44f2172e147+working-tree-qcs-workflow-editor-fix",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -285,14 +285,20 @@
       "marker": "",
       "evidence": "metadata/wts-module-config-lob-regression-20260730.json",
       "assertions": "Approval configuration, JSA workflow/menu configuration and the existing work-permit page rendered without browser errors; all 23 WTS menu-information endpoints returned HTTP 200 sequentially; invalid WTS extra-view full_config LOB values fell from 234/234 to 0/0 and migration replay created zero new large objects."
+    },
+    "configurationWorkflowEditor": {
+      "status": "PASS_BROWSER_API_POSTGRES_UNCHANGED",
+      "marker": "",
+      "evidence": "metadata/qcs-workflow-editor-regression-20260730.json",
+      "assertions": "Mixed-case workflow locale assets returned 6/6 HTTP 200; QCS manuInspectWorkFlow getFlow changed from 500 to 200 and rendered 20 diagram elements through reload, zoom and source/design mode switching; WTS fireWorkWF rendered 88 elements; browser error arrays were zero and the QCS workflow database fingerprint was unchanged."
     }
   },
   "summary": {
-    "testedFeatures": 302,
+    "testedFeatures": 303,
     "pass": 287,
     "fail": 0,
     "blocked": 0,
-    "notApplicable": 15
+    "notApplicable": 16
   },
   "items": [
     {
@@ -6586,9 +6592,33 @@
       "status": "NOT_APPLICABLE",
       "evidence": "All 23 sequential requests returned HTTP 200 with zero database-error responses. Migration replay left pg_largeobject_metadata unchanged at 196926, proving idempotence. No menu or entity was written.",
       "issues": []
+    },
+    {
+      "acceptanceSet": "qcs-workflow-editor-regression-20260730",
+      "module": "配置平台产品检验申请工作流读取",
+      "route": "/msService/ec/workflow/flowEditH5?flowKey=manuInspectWorkFlow&flowVersion=1&deploymentId=6579656982888448",
+      "operation": "打开、重载、放大、切换源码/设计模式并再次打开产品检验申请工作流",
+      "api": "POST /msService/ec/workflow/getFlow",
+      "method": "POST",
+      "requiresPersistence": false,
+      "backendEntry": "WorkFlowController.getFlow -> ProcessServiceFlowImpl.resolvePostgresLargeObject/handleFlowXml/analyticXml -> JdbcTemplate lo_get",
+      "tables": [
+        "public.wf_deployment",
+        "pg_largeobject"
+      ],
+      "marker": "",
+      "verificationSql": "select id,process_key,process_version,version,modify_time,process_xml,temp_process_xml,md5(process_xml_text_backup),md5(temp_process_xml_text_backup),md5(convert_from(lo_get(process_xml),'UTF8')),md5(convert_from(lo_get(temp_process_xml),'UTF8')) from public.wf_deployment where id=6579656982888448;",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The read-only getFlow call changed from HTTP 500 to 200 and rendered 20 QCS diagram elements with zero browser errors. The before/after workflow fingerprint was identical: version 1, unchanged modify_time, OIDs 201335/201336 and XML MD5 5882646ba2baaabe7eebb459c8310251.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "",
+      "artifact": "metadata/qcs-workflow-editor-regression-20260730.json",
+      "summary": "Real browser, API and PostgreSQL regression restored the QCS product-inspection workflow editor from a permanent loading state: six mixed-case locale assets returned 200, getFlow returned valid XML, 20 QCS and 88 WTS diagram elements rendered without browser errors, and the QCS workflow database fingerprint remained unchanged."
+    },
     {
       "marker": "",
       "artifact": "metadata/wts-module-config-lob-regression-20260730.json",

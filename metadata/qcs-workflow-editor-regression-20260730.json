@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-07-30T11:08:48+08:00",
+  "repoCommit": "30630c3785ba82d97ef25f6eb0b6f44f2172e147+working-tree-qcs-workflow-editor-fix",
+  "environment": {
+    "browserBaseUrl": "http://39.164.227.152:18080",
+    "runtimeHost": "10.11.100.17",
+    "database": "PostgreSQL"
+  },
+  "rootCauses": [
+    {
+      "layer": "static-resource",
+      "before": "GET /bap/static/flowEditH5-release/js/zh_CN/workflowInternational.js returned 404",
+      "cause": "The legacy editor emitted mixed-case locale directories while the Windows-originated runtime bundle stored lowercase directories on a case-sensitive Linux filesystem.",
+      "after": "The mixed-case zh_CN, zh_TW and en_US paths return the corresponding lowercase bundled asset with HTTP 200 for both flowEditH5-release and flowEditH5."
+    },
+    {
+      "layer": "backend",
+      "before": "POST /msService/ec/workflow/getFlow returned HTTP 500 and the editor retained its loading overlay.",
+      "cause": "Hibernate exposed PostgreSQL workflow XML large-object OIDs as numeric strings; ProcessServiceFlowImpl passed the OID to dom4j as if it were XML.",
+      "after": "Numeric OIDs are resolved through a parameterized lo_get query before XML parsing; inline XML behavior is unchanged."
+    }
+  ],
+  "staticAssetAcceptance": {
+    "status": "PASS",
+    "routes": [
+      "/bap/static/flowEditH5-release/js/zh_CN/workflowInternational.js",
+      "/bap/static/flowEditH5-release/js/zh_TW/workflowInternational.js",
+      "/bap/static/flowEditH5-release/js/en_US/workflowInternational.js",
+      "/bap/static/flowEditH5/js/zh_CN/workflowInternational.js",
+      "/bap/static/flowEditH5/js/zh_TW/workflowInternational.js",
+      "/bap/static/flowEditH5/js/en_US/workflowInternational.js"
+    ],
+    "httpStatuses": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200
+    ]
+  },
+  "qcsWorkflowAcceptance": {
+    "status": "PASS",
+    "route": "/msService/ec/workflow/flowEditH5?flowKey=manuInspectWorkFlow&flowVersion=1&deploymentId=6579656982888448",
+    "operation": "Open, reload, zoom, switch to source mode, return to design mode and open again.",
+    "api": {
+      "method": "POST",
+      "url": "/msService/ec/workflow/getFlow",
+      "requestPayload": "deploymentId=6579656982888448",
+      "responseStatus": 200,
+      "responsePrefix": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><process name=\"manuInspectWorkFlow\""
+    },
+    "rendering": {
+      "loadingOverlayPresent": false,
+      "diagramElements": 20,
+      "canvasContainers": 1,
+      "sourceXmlLength": 4243,
+      "zoomAfterInteraction": "135%",
+      "visibleNodes": [
+        "开始活动",
+        "编辑",
+        "审核",
+        "生效",
+        "结束活动",
+        "作废"
+      ]
+    },
+    "browserErrors": {
+      "console": [],
+      "page": [],
+      "http4xx5xx": [],
+      "requestFailures": []
+    },
+    "screenshot": "metadata/qcs-workflow-editor-after-fix-20260730.png"
+  },
+  "crossModuleAcceptance": {
+    "status": "PASS",
+    "route": "/msService/ec/workflow/flowEditH5?flowKey=fireWorkWF&flowVersion=1&deploymentId=6579649724219392",
+    "workflow": "动火作业票工作流",
+    "getFlowStatus": 200,
+    "loadingOverlayPresent": false,
+    "diagramElements": 88,
+    "canvasContainers": 1,
+    "browserErrors": {
+      "console": [],
+      "page": [],
+      "http4xx5xx": [],
+      "requestFailures": []
+    }
+  },
+  "persistenceAcceptance": {
+    "requiresPersistence": false,
+    "status": "NOT_APPLICABLE",
+    "table": "public.wf_deployment",
+    "deploymentId": 6579656982888448,
+    "verificationSql": "select id, process_key, process_version, version, modify_time, process_xml, temp_process_xml, md5(process_xml_text_backup), md5(temp_process_xml_text_backup), md5(convert_from(lo_get(process_xml),'UTF8')), md5(convert_from(lo_get(temp_process_xml),'UTF8')) from public.wf_deployment where id=6579656982888448;",
+    "beforeFingerprint": "6579656982888448|manuInspectWorkFlow|1|1|2026-06-16 16:41:51.561961|201335|201336|5882646ba2baaabe7eebb459c8310251|5882646ba2baaabe7eebb459c8310251|5882646ba2baaabe7eebb459c8310251|5882646ba2baaabe7eebb459c8310251",
+    "afterFingerprint": "6579656982888448|manuInspectWorkFlow|1|1|2026-06-16 16:41:51.561961|201335|201336|5882646ba2baaabe7eebb459c8310251|5882646ba2baaabe7eebb459c8310251|5882646ba2baaabe7eebb459c8310251|5882646ba2baaabe7eebb459c8310251",
+    "result": "The fingerprints are identical. Loading, zooming and switching editor modes did not modify the workflow definition."
+  },
+  "deployment": {
+    "nginxConfigTest": "PASS",
+    "configurationServiceStarted": true,
+    "runtimeJarBeforeSha256": "a87bcb2568ba50901f5e294d21e4a6933c791bd7aff97047669a74d915e9b82b",
+    "runtimeJarAfterSha256": "ae35c128f706bad70bba7d2307873fdc85a22d92d9d074d717ca7a4e1cb6d24f",
+    "rollbackBackup": "supfusion-configuration.jar.bak-entity-model-compat-20260730110354"
+  }
+}

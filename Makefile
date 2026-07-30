@@ -614,6 +614,8 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-qcs-report-chain-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/test-qcs-display-bindings.js
 	$(NODE) deploy/docker/scripts/test-qcs-display-bindings.js
+	$(NODE) --check deploy/docker/scripts/test-workflow-editor-locale-compat.js
+	$(NODE) deploy/docker/scripts/test-workflow-editor-locale-compat.js
 	$(NODE) --check deploy/docker/scripts/adp-teaminfo-scheduleplan-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-craftgraph-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-rbac-authority-smoke.js
@@ -665,6 +667,7 @@ runtime-script-check:
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-eam-patrol-runtime.py
 	$(PYTHON) -m unittest deploy/docker/scripts/test_patch_eam_patrol_runtime.py
 	$(PYTHON) -m unittest deploy/docker/scripts/test_configuration_postgres_model_sync.py
+	$(PYTHON) -m unittest deploy/docker/scripts/test_configuration_workflow_postgres_compat.py
 	$(NODE) deploy/docker/scripts/test-patrol-monitor-fallback.js
 	$(NODE) deploy/docker/scripts/test-patrol-static-assets.js
 	$(PYTHON) -m py_compile deploy/docker/scripts/audit-postgres-mappings.py
