@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-31T05:01:04+00:00",
-  "repoCommit": "aef4ceb7377cd526962d0e2f734648483b6c6f75",
+  "generatedAt": "2026-07-31T08:05:37+00:00",
+  "repoCommit": "14e9d31a40fd0d399ccab2c86aefaa913176d0ae",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 569,
-    "totalBytes": 63352936,
+    "totalFiles": 574,
+    "totalBytes": 64437200,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 240,
+      "postgres-init-sql": 245,
       "runtime-binary-patch": 8,
       "runtime-patch-source": 24,
       "runtime-script": 28,
@@ -18,12 +18,12 @@
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 32485,
-      "postgres-init-sql": 61604220,
+      "nginx-runtime-config": 32681,
+      "postgres-init-sql": 62681544,
       "runtime-binary-patch": 178941,
       "runtime-patch-source": 96564,
-      "runtime-script": 289272,
-      "runtime-static-override": 1109101
+      "runtime-script": 292733,
+      "runtime-static-override": 1112384
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 32265,
-      "sha256": "3fb89290b3b36400d0f145b0c7d15d9d5f59fa0c6e0b98d82c51e56567fd78fc"
+      "sizeBytes": 32461,
+      "sha256": "bc719f74c7f5da5fdbc1ec46345ddc59d7681144aa3475ae9cc3d8233f45b357"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1753,6 +1753,36 @@
       "sha256": "18a856697dc56689b0260c52f6b6331a3da4c0de8546d3aad6d5ad47e5cc625e"
     },
     {
+      "path": "deploy/docker/postgres/init/241-rm-formula-menu-actions-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1069692,
+      "sha256": "1dd0f19e60c49684eaaf900b91122bbe007d883ef9a544e7e3e787308486673e"
+    },
+    {
+      "path": "deploy/docker/postgres/init/242-rm-type-mne-code-tables.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 3531,
+      "sha256": "3835242f6ea6735b6061156b5d15f1e0ba2f399d8be6755fbed7c056caf37daf"
+    },
+    {
+      "path": "deploy/docker/postgres/init/243-rm-formula-type-root.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1477,
+      "sha256": "ad69c39db70d50ef16942c8290bebdcac3d9c436867ec21ed078ca4823c482ac"
+    },
+    {
+      "path": "deploy/docker/postgres/init/244-rm-formula-type-tree-lob-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1008,
+      "sha256": "1523b4d654774ba23500f614ce8081d19eb1234fc938c75a4585eec1864b6100"
+    },
+    {
+      "path": "deploy/docker/postgres/init/245-rm-formula-quality-remark-lob-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1616,
+      "sha256": "46d94cca9c5ab8068f9aaf71d75bde949f7d406417f598990648fe995819e65f"
+    },
+    {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 148953,
@@ -2073,8 +2103,8 @@
     {
       "path": "deploy/docker/scripts/patch-rm-batch-formula-list.py",
       "category": "runtime-script",
-      "sizeBytes": 6554,
-      "sha256": "00d275ac394dad3fd6fe28c0619ca2b49a5b1df87780c05bbf4dbc1b7a97a797"
+      "sizeBytes": 10015,
+      "sha256": "e08234aedd1cc9d44cd34fe332af4a5a4749718102c4257ee06c2758a3251e20"
     },
     {
       "path": "deploy/docker/scripts/patch-signature-log-service-fallback.py",
@@ -3099,8 +3129,8 @@
     {
       "path": "deploy/docker/assets/module-static/RM/formula/editor.html",
       "category": "runtime-static-override",
-      "sizeBytes": 29772,
-      "sha256": "0805e9fc157cf648541afb32c172aaaac2c8c71b5d3fb3e70fb93e3650c5cd4a"
+      "sizeBytes": 30497,
+      "sha256": "a5275c71d01bed956b5eb765c26c683c59acba9f92d75d0c3554a6a935e8c43f"
     },
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskBatchView.html",
@@ -3159,8 +3189,8 @@
     {
       "path": "deploy/docker/assets/module-static/compat/i18n-value.js",
       "category": "runtime-static-override",
-      "sizeBytes": 4188,
-      "sha256": "a6ac041b1d2a8371e35f409cc36e367634407e1faee2b81df02d050266ed885f"
+      "sizeBytes": 6746,
+      "sha256": "66f957053cfd0ed4bccb60bc95507e0fd161f0aed5d1df2a885565d1608ec21d"
     },
     {
       "path": "deploy/docker/assets/module-static/workAppointment/commonJs/WAPSCommon-es5.js",

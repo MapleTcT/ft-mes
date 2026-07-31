@@ -135,6 +135,12 @@ async function setAuth(context, ticket) {
 
 async function pageJson(page, route, options) {
   return page.evaluate(async ({ target, init }) => {
+    init = init || {};
+    init.headers = init.headers || {};
+    const ticket = window.localStorage.getItem("ticket") || window.sessionStorage.getItem("ticket");
+    if (ticket && !init.headers.Authorization) {
+      init.headers.Authorization = `Bearer ${ticket.replace(/^Bearer\s+/i, "")}`;
+    }
     const response = await fetch(target, init);
     const text = await response.text();
     let json = null;
@@ -330,7 +336,6 @@ async function main() {
     const context = await browser.newContext({
       ignoreHTTPSErrors: true,
       viewport: { width: 1440, height: 960 },
-      extraHTTPHeaders: { Authorization: `Bearer ${ticket}` },
     });
     await setAuth(context, ticket);
 

@@ -27,5 +27,22 @@ class DownloadFilenameCompatTest(unittest.TestCase):
         self.assertLess(patched.index(MODULE.DOWNLOAD_FILENAME_COMPAT_MARKER), patched.index("</body>"))
 
 
+class BrowserAuthCompatTest(unittest.TestCase):
+    def test_injects_browser_ticket_for_xhr_and_fetch_once(self) -> None:
+        original = "<html><body><main>RM</main></body></html>"
+
+        patched, changed = MODULE.inject_auth_compat(original)
+        second, second_changed = MODULE.inject_auth_compat(patched)
+
+        self.assertTrue(changed)
+        self.assertFalse(second_changed)
+        self.assertEqual(second, patched)
+        self.assertIn(MODULE.AUTH_COMPAT_MARKER, patched)
+        self.assertIn('"Authorization", "Bearer " + token', patched)
+        self.assertIn("xhrPrototype.__adpRmAuthPatched", patched)
+        self.assertIn("authenticatedFetch.__adpRmAuthPatched", patched)
+        self.assertLess(patched.index(MODULE.AUTH_COMPAT_MARKER), patched.index("</body>"))
+
+
 if __name__ == "__main__":
     unittest.main()

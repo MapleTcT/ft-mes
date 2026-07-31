@@ -1,0 +1,213 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-31T15:31:27+08:00",
+  "repoCommit": "14e9d31a40fd0d399ccab2c86aefaa913176d0ae+working-tree-rm-formula-menu-actions",
+  "environment": {
+    "baseUrl": "http://10.11.100.17:18080",
+    "user": "admin",
+    "database": "PostgreSQL",
+    "oracleRuntime": "legacy-template-only"
+  },
+  "summary": {
+    "testedFeatures": 10,
+    "pass": 3,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 7,
+    "navigableEntries": 9,
+    "visibleActions": 42,
+    "finalHttpErrors": 0,
+    "finalConsoleErrors": 0
+  },
+  "items": [
+    {
+      "module": "RM 配方类型",
+      "route": "/msService/RM/formulaType/formulaType/formualTypeTreeList",
+      "operation": "新增、修改、删除配方类型",
+      "api": "POST /msService/RM/formulaType/formulaType/formualTypeEdit/save; POST /msService/RM/formulaType/formulaType/delete",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RMFormulaTypeController -> RMFormulaTypeServiceImpl -> RMFormulaTypeDao",
+      "tables": [
+        "public.rm_formula_types",
+        "public.rm_formula_types_mc"
+      ],
+      "marker": "ADP_E2E_20260731_1500_RM_FORMULA_TYPE",
+      "verificationSql": "SELECT id,version,valid,code,name,parent_id,lay_rec FROM public.rm_formula_types WHERE code='ADP_E2E_20260731_1500_RM_FORMULA_TYPE'; SELECT count(*) FROM public.rm_formula_types_mc WHERE formula_type=771709741159680;",
+      "status": "PASS",
+      "evidence": "HTTP 200 for create/update/delete. Row id 771709741159680 reached version 3, retained the updated name, and became valid=false; mnemonic rows were cleaned to 0.",
+      "issues": []
+    },
+    {
+      "module": "RM 工序类型",
+      "route": "/msService/RM/processType/processType/processTypeList",
+      "operation": "新增、修改、删除工序类型",
+      "api": "POST /msService/RM/processType/processType/processTypeEdit/save; POST /msService/RM/processType/processType/delete",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RMProcessTypeController -> RMProcessTypeServiceImpl -> RMProcessTypeDao",
+      "tables": [
+        "public.rm_process_types",
+        "public.rm_process_types_mc"
+      ],
+      "marker": "ADP_E2E_20260731_1447_RM_PROCESS_TYPE",
+      "verificationSql": "SELECT id,version,valid,code,name FROM public.rm_process_types WHERE code='ADP_E2E_20260731_1447_RM_PROCESS_TYPE'; SELECT count(*) FROM public.rm_process_types_mc WHERE process_type=771706755638528;",
+      "status": "PASS",
+      "evidence": "HTTP 200 for create/update/delete. Row id 771706755638528 reached version 2, retained the updated name, and became valid=false; mnemonic rows were cleaned to 0.",
+      "issues": []
+    },
+    {
+      "module": "RM 产品 BOM",
+      "route": "/msService/RM/formulaBOM/formulaBomMain/formulaBomList",
+      "operation": "检查六个工具栏动作并打开新增表单",
+      "api": "GET /msService/RM/formulaBOM/formulaBomMain/formulaBomEdit",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "RMFormulaBomController and runtime view metadata",
+      "tables": [
+        "public.runtime_extra_view",
+        "public.runtime_button"
+      ],
+      "marker": "",
+      "verificationSql": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Add, edit, delete, copy, enable and disable are visible. The add form renders BOM and material-detail controls without HTTP or console errors; no record was saved.",
+      "issues": []
+    },
+    {
+      "module": "RM 标准/图形化配方",
+      "route": "/msService/RM/formula/formula/commonFormulaList; /msService/RM/formula/formula/craftFormulaList",
+      "operation": "检查复制、启用、停用、设置默认、设置检验部门、适用产线",
+      "api": "GET list pages and runtime layout APIs",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "RMFormulaController and runtime view metadata",
+      "tables": [
+        "public.runtime_extra_view",
+        "public.runtime_button"
+      ],
+      "marker": "",
+      "verificationSql": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "All six actions render on both pages. Empty-selection feedback is Chinese and no raw RM resource key remains.",
+      "issues": []
+    },
+    {
+      "module": "RM 普通配方启用",
+      "route": "/msService/RM/formula/formula/easyFormulaList",
+      "operation": "选择测试配方并点击启用",
+      "api": "POST /msService/RM/formula/formula/updateFomulaState",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RMFormulaController.updateFomulaState -> RMFormulaServiceImpl.updateFomulaState -> Hibernate",
+      "tables": [
+        "public.rm_formulas",
+        "public.rm_formula_qualities"
+      ],
+      "marker": "ADP_E2E_20260727_MES_FULL_CLOSED_10_FORM",
+      "verificationSql": "SELECT id,version,valid,state,status,formual_code FROM public.rm_formulas WHERE id=9007187463893766; SELECT id,remark,convert_from(lo_get(remark),'UTF8') FROM public.rm_formula_qualities WHERE formula_id=9007187463893766;",
+      "status": "PASS",
+      "evidence": "POST returned HTTP 200. Formula id 9007187463893766 is RM_state/enabled, version 1, valid=true, status 99. Quality remark OID 292131 resolves to the expected marker text.",
+      "issues": []
+    },
+    {
+      "module": "RM 普通配方关联配置",
+      "route": "/msService/RM/formula/formula/easyFormulaList",
+      "operation": "打开适用产线和设置检验部门",
+      "api": "GET /msService/RM/formula/formula/easyArrSuitlineEdit; GET /msService/RM/formula/formula/departEasyEdit",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "RMFormulaController reference/detail reads",
+      "tables": [
+        "public.rm_formulas",
+        "public.rm_formula_qualities"
+      ],
+      "marker": "ADP_E2E_20260727_MES_FULL_CLOSED_10",
+      "verificationSql": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Applicable-line page rendered the existing production line. Inspection-department dialog rendered quality name, work unit, request department/person and inspection department/person. Dialogs were closed without saving.",
+      "issues": []
+    },
+    {
+      "module": "RM 配方组态工具栏",
+      "route": "/msService/RM/formula/formula/batchFormulaList?system=serviceUrl/{004,003,001}",
+      "operation": "检查三个组态入口的 Web编辑、下载模板、导入Excel、导出",
+      "api": "GET batchFormulaList; POST batchFormulaList-query",
+      "method": "GET,POST",
+      "requiresPersistence": false,
+      "backendEntry": "RMFormulaController batch list and runtime list page",
+      "tables": [
+        "public.rm_formulas",
+        "public.runtime_extra_view"
+      ],
+      "marker": "",
+      "verificationSql": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "All three routes rendered four actions and list data with no final HTTP or console errors. Raw product-code resource key was translated to 产品编码.",
+      "issues": []
+    },
+    {
+      "module": "RM 配方 Web 编辑",
+      "route": "/msService/RM/formula/formula/batchFormulaList -> /msService/RM/formula/editor",
+      "operation": "从真实 Web编辑按钮打开编辑器并读取既有配方详情",
+      "api": "GET /msService/RM/formula-editor/formulas; GET /msService/RM/formula-editor/formulas/{id}; GET /references/materials; GET /references/batch-servers",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "RmFormulaEditorController -> FormulaEditorService -> FormulaEditorRepository",
+      "tables": [
+        "public.rm_formulas",
+        "public.rm_formula_processes",
+        "public.rm_process_actives"
+      ],
+      "marker": "ADP_E2E_20260714051133_RM_WEB_FORMULA",
+      "verificationSql": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Normal window.open navigation now reaches the editor. It loads 200 formulas; the marker formula shows version 2, one process and one activity. No global extraHTTPHeaders were used.",
+      "issues": []
+    },
+    {
+      "module": "RM Web 编辑鉴权边界",
+      "route": "/msService/RM/formula/editor; /msService/RM/formula-editor/**",
+      "operation": "验证空壳导航和业务 API 鉴权分离",
+      "api": "GET editor shell; GET formula editor list",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "Nginx auth_request plus RM formula editor API",
+      "tables": [],
+      "marker": "",
+      "verificationSql": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "HTML shell is 200 without an Authorization navigation header. Unauthenticated business API remains 401; authenticated API is 200.",
+      "issues": []
+    },
+    {
+      "module": "RM 配方文件操作",
+      "route": "/msService/RM/formula/formula/batchFormulaList?system=serviceUrl/001",
+      "operation": "下载模板、打开导入文件选择器、导出列表",
+      "api": "GET /downloadXls; POST /batchFormulaList-query with exportFlag=true",
+      "method": "GET,POST",
+      "requiresPersistence": false,
+      "backendEntry": "RM batch import/export endpoints",
+      "tables": [],
+      "marker": "",
+      "verificationSql": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Template download returned an 8704-byte workbook; import opened a single-file chooser; export returned HTTP 200 and RM_batchFormulaList.xlsx (13027 bytes).",
+      "issues": []
+    }
+  ],
+  "screenshots": [
+    "metadata/process-type-add.png",
+    "metadata/formula-type-added.png",
+    "metadata/bom-add-form.png",
+    "metadata/normal-formula-actions-and-data.png",
+    "metadata/normal-formula-suitline.png",
+    "metadata/normal-formula-quality-department.png",
+    "metadata/batch-formula-actions-final.png",
+    "metadata/batch-formula-web-editor-viewport.png"
+  ],
+  "residualRisks": [
+    "External Batch/DCS endpoint, credentials, delivery acknowledgement and rollback sign-off remain production-cutover prerequisites.",
+    "The restored common and graphical formula lists currently have no active business rows suitable for controlled state mutation; their toolbar and validation paths were tested without fabricating data."
+  ]
+}

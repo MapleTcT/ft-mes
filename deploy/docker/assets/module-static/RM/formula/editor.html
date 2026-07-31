@@ -194,6 +194,20 @@
       var requestId = function (prefix) { return prefix + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9); };
       var clientKey = function (prefix) { return prefix + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7); };
 
+      function findAccessToken() {
+        var stores = [window.localStorage, window.sessionStorage];
+        var keys = ["ticket", "suposTicket", "SUPOS_TICKET", "token"];
+        for (var storeIndex = 0; storeIndex < stores.length; storeIndex += 1) {
+          for (var keyIndex = 0; keyIndex < keys.length; keyIndex += 1) {
+            var token = stores[storeIndex].getItem(keys[keyIndex]);
+            if (token && token.length > 20) {
+              return token.replace(/^Bearer\s+/i, "");
+            }
+          }
+        }
+        return "";
+      }
+
       function toast(message, type) {
         var node = byId("toast");
         node.textContent = message;
@@ -215,6 +229,10 @@
         options.credentials = "same-origin";
         options.headers = options.headers || {};
         options.headers.Accept = "application/json";
+        var token = findAccessToken();
+        if (token && !options.headers.Authorization) {
+          options.headers.Authorization = "Bearer " + token;
+        }
         if (options.body) { options.headers["Content-Type"] = "application/json;charset=UTF-8"; }
         return fetch(apiBase + path, options).then(function (response) {
           return response.text().then(function (text) {

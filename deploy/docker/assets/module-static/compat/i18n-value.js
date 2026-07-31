@@ -1,6 +1,32 @@
 window.InternationalResource = window.InternationalResource || {};
 window.InternationalResource["ec.common.tableNo"] = "单据编号";
 window.InternationalResource["ec.common.createTime"] = "创建时间";
+window.InternationalResource["ec.list.taskDescription"] = "待办说明";
+window.InternationalResource["Button.text.cancel"] = "取消";
+window.InternationalResource["Button.text.save"] = "保存";
+window.InternationalResource["EditView.notice.processing"] = "处理中...";
+window.InternationalResource["foundation.language.disable.success"] = "停用成功";
+window.InternationalResource["foundation.language.enable.success"] = "启用成功";
+window.InternationalResource["RM.buttonPropertyshowName.randon1573641411944.flag"] = "设置检验部门";
+window.InternationalResource["RM.custom.dealSuccess"] = "处理成功！";
+window.InternationalResource["RM.custom.formulaEdtionNotNull"] = "配方版本不能为空！";
+window.InternationalResource["RM.custom.formulaNameNotNull"] = "配方标识不能为空！";
+window.InternationalResource["RM.custom.notEffectiveFormulas"] = "配方必须处于生效状态才可设置检验部门！";
+window.InternationalResource["RM.custom.onceOnlyOneRow"] = "只允许对一行进行操作！";
+window.InternationalResource["RM.custom.random1643017683156"] = "配方未启用，无法设置默认！";
+window.InternationalResource["RM.custom.randon1573717880503"] = "请选择一条记录进行操作！";
+window.InternationalResource["RM.custom.randon1574755044078"] = "配方必须处于生效状态才可启用！";
+window.InternationalResource["RM.custom.randon1574759597334"] = "存在单据已启用，不能重复启用！";
+window.InternationalResource["RM.custom.randon1574759822999"] = "存在单据已停用，不能重复停用！";
+window.InternationalResource["RM.custom.randon1574766713193"] = "配方必须处于生效状态才可设置默认！";
+window.InternationalResource["RM.custom.randon1577945423614"] = "配方必须处于生效状态才可设置默认！";
+window.InternationalResource["RM.custom.randon1602291826911"] = "配方必须处于生效状态才可停用！";
+window.InternationalResource["RM.custom.randon1624507911528"] = "配方必须处于生效状态才可停用！";
+window.InternationalResource["RM.custom.randon1624932897664"] = "配方未启用，不能停用！";
+window.InternationalResource["RM.custom.stateNeedEnable"] = "配方必须处于启用状态才可添加适用产线！";
+window.InternationalResource["RM.formula.Formula.productId,BaseSet.material.Material.code"] = "产品编码";
+window.InternationalResource["RM.viewtitle.randon1573709509366"] = "检验部门设置";
+window.InternationalResource["RM.viewtitle.randon1574822696971"] = "配方复制";
 
 (function installCommonI18nCompatibility(resources) {
   var patchFlag = "__adpCommonI18nPatched";

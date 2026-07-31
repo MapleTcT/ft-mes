@@ -1465,6 +1465,22 @@ large-object 总数均为 `200438`。测试机回退备份：
 HTTP 200，且没有浏览器错误。机器证据：
 `metadata/wom-process-execution-actions-acceptance-20260731.json`。
 
+### RM 配方管理写操作与鉴权回归（2026-07-31）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 新增、修改、删除配方类型 | 配方管理 -> 配方类型 | `POST formualTypeEdit/save`；`POST formulaType/delete` | `RMFormulaTypeController -> RMFormulaTypeServiceImpl -> RMFormulaTypeDao` | `rm_formula_types`、`rm_formula_types_mc` | `SELECT id,version,valid,code,name,parent_id,lay_rec FROM public.rm_formula_types WHERE code='ADP_E2E_20260731_1500_RM_FORMULA_TYPE'; SELECT count(*) FROM public.rm_formula_types_mc WHERE formula_type=771709741159680;` | 主记录 `id=771709741159680`，修改名带 `_UPDATED`，删除后 `version=3/valid=false`；助记码 0 | PASS |
+| 新增、修改、删除工序类型 | 配方管理 -> 工序类型 | `POST processTypeEdit/save`；`POST processType/delete` | `RMProcessTypeController -> RMProcessTypeServiceImpl -> RMProcessTypeDao` | `rm_process_types`、`rm_process_types_mc` | `SELECT id,version,valid,code,name FROM public.rm_process_types WHERE code='ADP_E2E_20260731_1447_RM_PROCESS_TYPE'; SELECT count(*) FROM public.rm_process_types_mc WHERE process_type=771706755638528;` | 主记录 `id=771706755638528`，修改名带 `_UPDATED`，删除后 `version=2/valid=false`；助记码 0 | PASS |
+| 启用普通配方 | 普通配方选择 `ADP_E2E_20260727_MES_FULL_CLOSED_10_FORM` 后点击“启用” | `POST /msService/RM/formula/formula/updateFomulaState` | `RMFormulaController.updateFomulaState -> RMFormulaServiceImpl -> Hibernate` | `rm_formulas`、`rm_formula_qualities` | `SELECT id,version,valid,state,status,formual_code FROM public.rm_formulas WHERE id=9007187463893766; SELECT id,remark,convert_from(lo_get(remark),'UTF8') FROM public.rm_formula_qualities WHERE formula_id=9007187463893766;` | HTTP 200；主记录 `state=RM_state/enabled/version=1/valid=true/status=99`；质量备注 OID `292131` 可读 | PASS |
+| 查看 BOM、适用产线、检验部门和 Web 配方 | 各列表真实按钮 | 关联编辑/详情 GET；Web editor GET | RM 只读 controller/service/repository | RM 业务表只读 | 对比操作前后目标记录；检查是否出现 POST/PUT/DELETE | 页面均显示真实业务字段，无保存请求和数据库变化 | NOT_APPLICABLE |
+| 下载模板、导入入口和导出 | 配方组态 001 | `GET downloadXls`；`POST batchFormulaList-query exportFlag=true` | RM import/export endpoints | 无 | 校验文件 magic、content type、文件名和字节数 | 模板 8,704 bytes；导入打开单文件选择器；导出 HTTP 200、`RM_batchFormulaList.xlsx` 13,027 bytes | NOT_APPLICABLE |
+
+Web 编辑鉴权按文档与业务 API 分层：空壳文档导航 200；无登录的业务 API 401；现有
+登录票据由页面附加到同源 API 后返回 200。旧验收脚本已去除会掩盖 `window.open`
+问题的全局 `extraHTTPHeaders`。详细证据：
+`docs/rm-formula-management-functional-acceptance-20260731.md` 和
+`metadata/rm-formula-management-acceptance-20260731.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

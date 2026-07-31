@@ -4695,6 +4695,36 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/241-rm-formula-menu-actions-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/242-rm-type-mne-code-tables.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/243-rm-formula-type-root.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/244-rm-formula-type-tree-lob-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/245-rm-formula-quality-remark-lob-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -7077,6 +7107,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/rm-formula-management-functional-acceptance-20260731.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/runtime-validation-scope.md",
       "state": "tracked",
       "tracked": true
@@ -7630,6 +7666,24 @@
     {
       "ignored": false,
       "path": "metadata/basic-config-coverage.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/batch-formula-actions-final.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/batch-formula-web-editor-viewport.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bom-add-form.png",
       "state": "tracked",
       "tracked": true
     },
@@ -8673,6 +8727,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/formula-type-added.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/frontend-recovered-files.json",
       "state": "tracked",
       "tracked": true
@@ -8764,6 +8824,24 @@
     {
       "ignored": false,
       "path": "metadata/nacos-config-drift-smoke.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/normal-formula-actions-and-data.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/normal-formula-quality-department.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/normal-formula-suitline.png",
       "state": "tracked",
       "tracked": true
     },
@@ -8920,6 +8998,12 @@
     {
       "ignored": false,
       "path": "metadata/process-analysis-trace.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/process-type-add.png",
       "state": "tracked",
       "tracked": true
     },
@@ -9172,6 +9256,12 @@
     {
       "ignored": false,
       "path": "metadata/qualification-management-runtime-acceptance-20260731.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/rm-formula-management-acceptance-20260731.json",
       "state": "tracked",
       "tracked": true
     },
@@ -13358,16 +13448,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 872
+      "tracked": 877
     },
     "docs": {
-      "tracked": 161
+      "tracked": 162
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 335
+      "tracked": 344
     },
     "package.json": {
       "tracked": 1
@@ -13391,8 +13481,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2222,
-    "tracked": 2222,
+    "totalFiles": 2237,
+    "tracked": 2237,
     "untracked": 0
   },
   "untrackedByDirectory": []

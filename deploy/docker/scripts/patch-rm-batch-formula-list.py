@@ -41,6 +41,78 @@ DOWNLOAD_FILENAME_COMPAT_SCRIPT = f'''<script id="{DOWNLOAD_FILENAME_COMPAT_MARK
 }})();
 </script>'''
 
+AUTH_COMPAT_MARKER = "adp-rm-batch-formula-auth"
+AUTH_COMPAT_SCRIPT = f'''<script id="{AUTH_COMPAT_MARKER}">
+(function () {{
+    function findAccessToken() {{
+        var stores = [window.localStorage, window.sessionStorage];
+        var keys = ["ticket", "suposTicket", "SUPOS_TICKET", "token"];
+        for (var storeIndex = 0; storeIndex < stores.length; storeIndex += 1) {{
+            for (var keyIndex = 0; keyIndex < keys.length; keyIndex += 1) {{
+                var token = stores[storeIndex].getItem(keys[keyIndex]);
+                if (token && token.length > 20) {{
+                    return token.replace(/^Bearer\\s+/i, "");
+                }}
+            }}
+        }}
+        return "";
+    }}
+
+    function isSameOrigin(url) {{
+        try {{
+            return new URL(url, window.location.href).origin === window.location.origin;
+        }} catch (_error) {{
+            return false;
+        }}
+    }}
+
+    var xhrPrototype = window.XMLHttpRequest && window.XMLHttpRequest.prototype;
+    if (xhrPrototype && !xhrPrototype.__adpRmAuthPatched) {{
+        var nativeOpen = xhrPrototype.open;
+        var nativeSend = xhrPrototype.send;
+        var nativeSetRequestHeader = xhrPrototype.setRequestHeader;
+        xhrPrototype.open = function (method, url) {{
+            this.__adpRmRequestUrl = url;
+            this.__adpRmHasAuthorization = false;
+            return nativeOpen.apply(this, arguments);
+        }};
+        xhrPrototype.setRequestHeader = function (name, value) {{
+            if (String(name).toLowerCase() === "authorization") {{
+                this.__adpRmHasAuthorization = true;
+            }}
+            return nativeSetRequestHeader.apply(this, arguments);
+        }};
+        xhrPrototype.send = function () {{
+            var token = findAccessToken();
+            if (token && !this.__adpRmHasAuthorization && isSameOrigin(this.__adpRmRequestUrl)) {{
+                nativeSetRequestHeader.call(this, "Authorization", "Bearer " + token);
+            }}
+            return nativeSend.apply(this, arguments);
+        }};
+        xhrPrototype.__adpRmAuthPatched = true;
+    }}
+
+    if (window.fetch && !window.fetch.__adpRmAuthPatched) {{
+        var nativeFetch = window.fetch;
+        var authenticatedFetch = function (input, init) {{
+            var targetUrl = typeof input === "string" ? input : input.url;
+            var token = findAccessToken();
+            if (token && isSameOrigin(targetUrl)) {{
+                init = init || {{}};
+                var headers = new Headers(init.headers || (input && input.headers) || {{}});
+                if (!headers.has("Authorization")) {{
+                    headers.set("Authorization", "Bearer " + token);
+                }}
+                init.headers = headers;
+            }}
+            return nativeFetch.call(window, input, init);
+        }};
+        authenticatedFetch.__adpRmAuthPatched = true;
+        window.fetch = authenticatedFetch;
+    }}
+}})();
+</script>'''
+
 
 def clone_info(info: zipfile.ZipInfo) -> zipfile.ZipInfo:
     result = zipfile.ZipInfo(info.filename, date_time=info.date_time)
@@ -87,6 +159,16 @@ def inject_download_filename_compat(text: str) -> tuple[str, bool]:
     return f"{text}\n{DOWNLOAD_FILENAME_COMPAT_SCRIPT}\n", True
 
 
+def inject_auth_compat(text: str) -> tuple[str, bool]:
+    if AUTH_COMPAT_MARKER in text:
+        return text, False
+    if "</body>" in text:
+        return text.replace("</body>", f"{AUTH_COMPAT_SCRIPT}\n</body>", 1), True
+    if "</html>" in text:
+        return text.replace("</html>", f"{AUTH_COMPAT_SCRIPT}\n</html>", 1), True
+    return f"{text}\n{AUTH_COMPAT_SCRIPT}\n", True
+
+
 def patch_html(data: bytes) -> tuple[bytes, list[str]]:
     text = data.decode("utf-8")
     changes: list[str] = []
@@ -105,6 +187,10 @@ def patch_html(data: bytes) -> tuple[bytes, list[str]]:
     text, changed = inject_download_filename_compat(text)
     if changed:
         changes.append("downloadFilename")
+
+    text, changed = inject_auth_compat(text)
+    if changed:
+        changes.append("browserAuth")
 
     return text.encode("utf-8"), changes
 

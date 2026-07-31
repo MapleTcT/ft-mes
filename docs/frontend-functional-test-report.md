@@ -1485,6 +1485,25 @@ WOM 业务记录。机器证据：
 `docs/wom-process-execution-actions-acceptance-20260731.md`。机器证据：
 `metadata/wom-process-execution-actions-acceptance-20260731.json`。
 
+### RM 配方管理整组操作回归（2026-07-31）
+
+本轮针对“配方管理菜单有页面、无操作按钮”的反馈，按 9 个真实入口逐页恢复并点击
+验收。运行时动作不是 admin 权限缺失，而是原模块动作没有发布到当前运行时；继续操作
+后还发现并修复了类型助记码表缺失、配方类型根节点缺失、两个 Hibernate `@Lob`
+字段与 PostgreSQL 类型不兼容，以及 Web 编辑/导出请求未携带浏览器登录票据。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| RM 配方类型 | `/msService/RM/formulaType/formulaType/formualTypeTreeList` | 新增、修改、删除 marker 类型 | `formualTypeEdit/save`；`formulaType/delete` | 三个按钮及完整表单可用，无浏览器错误 | HTTP 200；删除后 version 3、`valid=false`，助记码清理为 0 | `rm_formula_types`、`rm_formula_types_mc` | PASS | 无 |
+| RM 工序类型 | `/msService/RM/processType/processType/processTypeList` | 新增、修改、删除 marker 类型 | `processTypeEdit/save`；`processType/delete` | 三个按钮及完整表单可用，无浏览器错误 | HTTP 200；删除后 version 2、`valid=false`，助记码清理为 0 | `rm_process_types`、`rm_process_types_mc` | PASS | 无 |
+| RM 产品 BOM | `/msService/RM/formulaBOM/formulaBomMain/formulaBomList` | 检查六个按钮并打开新增 | 编辑页和运行时布局 | 新增、修改、删除、复制、启用、停用均显示；新增表单和物料明细控件完整 | 页面 HTTP 200，本轮未保存 | 运行时配置只读 | PASS | 无 |
+| RM 标准/普通/图形化配方 | 三个配方列表入口 | 检查六个动作；普通配方启用、适用产线、检验部门 | `updateFomulaState`；两个关联配置页 | 每页六个操作完整；普通配方查询 78 条，关联页面均显示既有数据 | 启用 HTTP 200，`rm_formulas.id=9007187463893766` 状态真实变为 enabled | `rm_formulas`、`rm_formula_qualities` | PASS | 无 |
+| RM 配方组态 | `batchFormulaList?system=serviceUrl/{004,003,001}` | Web编辑、模板下载、导入文件选择、导出 | Web editor API；`downloadXls`；导出 query | 三个入口共 12 个操作均可见；Web 编辑显示版本 2、工序 1、活动 1；导出 XLSX 13,027 bytes | 登录 API 200；未认证业务 API 仍为 401；文件操作不落业务数据 | 配方及编辑器三表只读 | PASS | 外部 Batch/DCS 现场投递仍是切换门禁 |
+
+详细报告：
+`docs/rm-formula-management-functional-acceptance-20260731.md`；机器证据：
+`metadata/rm-formula-management-acceptance-20260731.json`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

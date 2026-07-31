@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`240`。
-- 编号范围：`001` 到 `240`。
+- 脚本数量：`245`。
+- 编号范围：`001` 到 `245`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -22,36 +22,36 @@
 | --- | --- |
 | auth-rbac-org | 39 |
 | business | 52 |
-| compatibility | 88 |
+| compatibility | 90 |
 | configuration | 59 |
-| general | 45 |
+| general | 47 |
 | notification | 10 |
-| platform | 72 |
+| platform | 73 |
 | workflow | 21 |
 
 ## 语句统计
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10835 |
+| alter-table | 10840 |
 | create-function | 117 |
-| create-index | 1022 |
-| create-table | 585 |
+| create-index | 1026 |
+| create-table | 587 |
 | create-view | 143 |
-| insert | 11379 |
-| update | 11504 |
+| insert | 11428 |
+| update | 11553 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 257 |
-| do-block | 525 |
-| if-exists | 157 |
-| if-not-exists | 13071 |
-| on-conflict | 11304 |
-| to-regclass | 221 |
-| where-not-exists | 54 |
+| do-block | 547 |
+| if-exists | 173 |
+| if-not-exists | 13080 |
+| on-conflict | 11353 |
+| to-regclass | 222 |
+| where-not-exists | 55 |
 
 ## 脚本清单
 
@@ -297,6 +297,11 @@
 | 238 | 238-qualify-system-config.sql | general | 99 | insert:3, update:3 | 4 | - |
 | 239 | 239-wom-process-execution-actions-runtime.sql | platform, configuration | 65 | insert:3, update:3 | 5 | - |
 | 240 | 240-wom-execution-record-actions-runtime.sql | platform, configuration | 645 | insert:33, update:33 | 55 | - |
+| 241 | 241-rm-formula-menu-actions-runtime.sql | platform | 935 | insert:48, update:48 | 80 | - |
+| 242 | 242-rm-type-mne-code-tables.sql | general | 113 | create-table:2, create-index:4, alter-table:3 | 13 | - |
+| 243 | 243-rm-formula-type-root.sql | general | 64 | insert:1, update:1 | 2 | - |
+| 244 | 244-rm-formula-type-tree-lob-compat.sql | compatibility | 32 | alter-table:1 | 1 | - |
+| 245 | 245-rm-formula-quality-remark-lob-compat.sql | compatibility | 52 | alter-table:1 | 2 | - |
 
 ## 规则
 

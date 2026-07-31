@@ -918,6 +918,61 @@ class ProductRuntimeParityTest(unittest.TestCase):
         self.assertNotIn("runtime_extra_view", migration)
         self.assertNotIn("Oracle", migration)
 
+    def test_rm_formula_menu_action_runtime_migration_restores_original_toolbars(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "241-rm-formula-menu-actions-runtime.sql"
+        ).read_text(encoding="utf-8")
+
+        expected_views = (
+            "RM_1.0.0_formulaType_formualTypeTreeList",
+            "RM_1.0.0_formulaType_formualTypeEdit",
+            "RM_1.0.0_processType_processTypeList",
+            "RM_1.0.0_processType_processTypeEdit",
+            "RM_1.0.0_formulaBOM_formulaBomList",
+            "RM_1.0.0_formulaBOM_formulaBomEdit",
+            "RM_1.0.0_formula_commonFormulaList",
+            "RM_1.0.0_formula_easyFormulaList",
+            "RM_1.0.0_formula_craftFormulaList",
+            "RM_1.0.0_formula_copyFormulaEdit",
+            "RM_1.0.0_formula_qualityDepartEdit",
+            "RM_1.0.0_formula_departEasyEdit",
+            "RM_1.0.0_formula_arrSuitlineEdit",
+            "RM_1.0.0_formula_easyArrSuitlineEdit",
+        )
+        for view_code in expected_views:
+            self.assertIn(view_code, GENERATOR.TARGET_VIEW_CODES)
+            self.assertIn(f"-- {view_code} ", migration)
+
+        for button_name in (
+            "新增",
+            "修改",
+            "删除",
+            "复制",
+            "启用",
+            "停用",
+            "设置默认",
+            "设置检验部门",
+            "适用产线",
+        ):
+            self.assertIn(f'"showname":"{button_name}"', migration)
+
+        self.assertIn(
+            '"buttonoperationcode":"formulaBomList_add_add_'
+            'RM_1.0.0_formulaBOM_formulaBomList"',
+            migration,
+        )
+        for editor_field in (
+            '"key":"formulaType.code"',
+            '"key":"processType.code"',
+            '"key":"formulaBomMain.bomCode"',
+        ):
+            self.assertIn(editor_field, migration)
+        self.assertNotIn("-- RM_1.0.0_formula_batchFormulaList ", migration)
+        self.assertNotIn('"id":"rmFormulaWebEditor"', migration)
+
     def test_make_task_edit_restores_business_tabs_after_form_data_is_ready(self):
         view = view_variant(code="WOM_1.0.0_produceTask_makeTaskEdit")
         packaged_payload = {
@@ -1331,6 +1386,103 @@ ReactAPI.Layout.hideTab('tabs-5');""",
         )
         self.assertIn("compatibility_column_count <> 6", migration)
         self.assertNotIn("DELETE FROM", migration)
+
+    def test_rm_type_mne_code_migration_supports_formula_and_process_type_saves(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "242-rm-type-mne-code-tables.sql"
+        ).read_text(encoding="utf-8")
+
+        for table_name, relation_column in (
+            ("rm_formula_types_mc", "formula_type"),
+            ("rm_process_types_mc", "process_type"),
+        ):
+            self.assertIn(table_name, migration)
+            self.assertIn(relation_column, migration)
+            self.assertIn(f"idx_{table_name}_{relation_column}", migration)
+            self.assertIn(f"idx_{table_name}_mne_code", migration)
+        self.assertIn("'mne_code', 'text'", migration)
+        self.assertIn("missing_columns IS NOT NULL", migration)
+        self.assertNotIn("DROP TABLE", migration)
+        self.assertNotIn("DELETE FROM", migration)
+
+    def test_rm_formula_type_root_bootstraps_first_user_managed_category(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "243-rm-formula-type-root.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("'默认配方分类'", migration)
+        self.assertIn("'defaultFormulaType'", migration)
+        self.assertIn("parent_id", migration)
+        self.assertIn("-1", migration)
+        self.assertIn("ON CONFLICT (id) DO UPDATE", migration)
+        self.assertIn("root_count <> 1", migration)
+        self.assertNotIn("DELETE FROM", migration)
+
+    def test_rm_formula_type_tree_uses_legacy_lob_compatible_oa_column(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "244-rm-formula-type-tree-lob-compat.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("ALTER TABLE public.rm_formula_types", migration)
+        self.assertIn("ALTER COLUMN oa TYPE text", migration)
+        self.assertIn("ELSE oa::text", migration)
+        self.assertIn("oa_type IS DISTINCT FROM 'text'", migration)
+        self.assertNotIn("DROP TABLE", migration)
+        self.assertNotIn("DELETE FROM", migration)
+
+    def test_rm_formula_quality_remark_uses_legacy_lob_compatible_oid_column(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "245-rm-formula-quality-remark-lob-compat.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("ALTER TABLE public.rm_formula_qualities", migration)
+        self.assertIn("ALTER COLUMN remark TYPE oid", migration)
+        self.assertIn(
+            "lo_from_bytea(0, convert_to(remark::text, 'UTF8'))",
+            migration,
+        )
+        self.assertIn("pg_largeobject_metadata", migration)
+        self.assertIn("invalid_lob_count <> 0", migration)
+        self.assertNotIn("DROP TABLE", migration)
+        self.assertNotIn("DELETE FROM", migration)
+
+    def test_common_i18n_fallback_covers_rm_formula_action_feedback(self):
+        i18n_asset = (
+            SCRIPT_PATH.parent.parent
+            / "assets"
+            / "module-static"
+            / "compat"
+            / "i18n-value.js"
+        ).read_text(encoding="utf-8")
+
+        for key, value in (
+            ("RM.custom.randon1573717880503", "请选择一条记录进行操作！"),
+            ("RM.custom.stateNeedEnable", "配方必须处于启用状态才可添加适用产线！"),
+            ("RM.custom.notEffectiveFormulas", "配方必须处于生效状态才可设置检验部门！"),
+            ("foundation.language.enable.success", "启用成功"),
+            ("foundation.language.disable.success", "停用成功"),
+            ("ec.list.taskDescription", "待办说明"),
+            (
+                "RM.formula.Formula.productId,BaseSet.material.Material.code",
+                "产品编码",
+            ),
+        ):
+            self.assertIn(
+                f'window.InternationalResource["{key}"] = "{value}";',
+                i18n_asset,
+            )
 
     def test_qualify_system_config_restores_packaged_default_level_setting(self):
         migration = (

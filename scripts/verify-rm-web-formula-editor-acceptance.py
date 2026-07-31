@@ -9,6 +9,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / "metadata/rm-web-formula-editor-acceptance.json"
 EDITOR = ROOT / "deploy/docker/assets/module-static/RM/formula/editor.html"
+NGINX = ROOT / "deploy/docker/nginx/adp.conf"
+ACCEPTANCE = ROOT / "deploy/docker/scripts/adp-rm-web-formula-editor-persistence-acceptance.js"
 
 
 def main() -> int:
@@ -32,6 +34,38 @@ def main() -> int:
             failures.append(f"Web editor must preserve unsafe 64-bit identifier strings: {fragment}")
     if 'productId: numberValue(' in editor or 'batchServerId: numberValue(' in editor:
         failures.append("Web editor must not coerce 64-bit reference identifiers through Number")
+    for fragment in (
+        "function findAccessToken()",
+        'options.headers.Authorization = "Bearer " + token;',
+    ):
+        if fragment not in editor:
+            failures.append(f"Web editor must authenticate API calls from the normal browser session: {fragment}")
+
+    try:
+        nginx = NGINX.read_text(encoding="utf-8")
+        editor_location = nginx.split(
+            "location = /msService/RM/formula/editor {", 1
+        )[1].split("}", 1)[0]
+        api_location = nginx.split(
+            "location ^~ /msService/RM/formula-editor/ {", 1
+        )[1].split("}", 1)[0]
+        if "auth_request" in editor_location:
+            failures.append(
+                "RM editor HTML navigation must not require an Authorization header"
+            )
+        if "auth_request /_adp_rm_auth;" not in api_location:
+            failures.append("RM editor business APIs must remain protected")
+    except (OSError, IndexError) as error:
+        failures.append(f"cannot verify RM editor Nginx auth boundary: {error}")
+
+    try:
+        acceptance = ACCEPTANCE.read_text(encoding="utf-8")
+        if "extraHTTPHeaders" in acceptance:
+            failures.append(
+                "RM browser acceptance must not hide normal window.open authentication bugs"
+            )
+    except OSError as error:
+        failures.append(f"cannot read {ACCEPTANCE.relative_to(ROOT)}: {error}")
 
     summary = data.get("summary", {})
     if data.get("schemaVersion") != 2:
