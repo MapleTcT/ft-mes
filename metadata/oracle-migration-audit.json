@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-31T11:49:45+00:00",
-  "repoCommit": "13d6b08cd468445f82b0e49167330bbaf07d24e5",
+  "generatedAt": "2026-07-31T12:54:47+00:00",
+  "repoCommit": "4cfa5ab6a872aab53bd96e0453bcb19943362dc6",
   "findingCount": 1640,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
@@ -238,7 +238,7 @@
     },
     {
       "file": "Makefile",
-      "line": 177,
+      "line": 179,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -246,7 +246,7 @@
     },
     {
       "file": "Makefile",
-      "line": 329,
+      "line": 332,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -254,7 +254,7 @@
     },
     {
       "file": "Makefile",
-      "line": 330,
+      "line": 333,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -262,7 +262,7 @@
     },
     {
       "file": "Makefile",
-      "line": 333,
+      "line": 336,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -270,7 +270,7 @@
     },
     {
       "file": "Makefile",
-      "line": 334,
+      "line": 337,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -278,7 +278,7 @@
     },
     {
       "file": "Makefile",
-      "line": 435,
+      "line": 439,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -286,7 +286,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1127,
+      "line": 1132,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -294,7 +294,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1128,
+      "line": 1133,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -302,7 +302,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1130,
+      "line": 1135,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -310,7 +310,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1131,
+      "line": 1136,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -318,7 +318,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1139,
+      "line": 1144,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -326,7 +326,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1140,
+      "line": 1145,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -334,7 +334,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1142,
+      "line": 1147,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -342,7 +342,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1143,
+      "line": 1148,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -9310,7 +9310,7 @@
     },
     {
       "file": "deploy/docker/scripts/test_generate_business_view_runtime_sql.py",
-      "line": 933,
+      "line": 1076,
       "pattern": "oracle-keyword",
       "category": "postgres-conversion-tooling",
       "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",
@@ -9318,7 +9318,7 @@
     },
     {
       "file": "deploy/docker/scripts/test_generate_business_view_runtime_sql.py",
-      "line": 949,
+      "line": 1092,
       "pattern": "oracle-keyword",
       "category": "postgres-conversion-tooling",
       "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",
@@ -9710,7 +9710,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 417,
+      "line": 438,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -9718,7 +9718,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 1367,
+      "line": 1388,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -9726,7 +9726,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 1421,
+      "line": 1442,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",

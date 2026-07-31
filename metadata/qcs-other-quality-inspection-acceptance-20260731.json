@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-31T12:38:36.712Z",
+  "repoCommit": "4cfa5ab6a872aab53bd96e0453bcb19943362dc6",
+  "database": "PostgreSQL",
+  "baseUrl": "http://10.11.100.17:18080",
+  "status": "PASS",
+  "summary": {
+    "testedFeatures": 20,
+    "pass": 20,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0
+  },
+  "frontend": {
+    "pages": [
+      {
+        "module": "其他检验申请",
+        "route": "/msService/QCS/inspect/inspect/otherInspectList",
+        "viewCode": "QCS_5.0.0.0_inspect_otherInspectList",
+        "expectedButtons": [
+          "新增申请",
+          "打开",
+          "关闭",
+          "批量提交",
+          "删除"
+        ],
+        "visibleButtons": [
+          "新增申请",
+          "打开",
+          "关闭",
+          "批量提交",
+          "删除"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "单据编号 业务类型 请检时间 ~ 请检人 请检部门 批号 物料编码 物料名称 关闭 否 查 询 仅查待办 清 空 新增申请 打开 关闭 批量提交 删除 序号 单据编号 业务类型 物料编码 物料名称 采样点 批号 状态 请检人 请检部门 请检时间 需实验室检验 关闭 备注 待办说明 共 0 项 0",
+        "addInteraction": {
+          "beforeUrl": "http://10.11.100.17:18080/msService/QCS/inspect/inspect/otherInspectList",
+          "afterUrl": "http://10.11.100.17:18080/msService/QCS/inspect/inspect/otherInspectList",
+          "popupUrl": "http://10.11.100.17:18080/msService/QCS/inspect/inspect/otherInspectEdit",
+          "beforeFrameCount": 0,
+          "afterFrameCount": 0,
+          "dialogCount": 0,
+          "surfaceKind": "popup",
+          "surfaceChanged": true,
+          "editResponses": [],
+          "expectedFormText": [
+            "业务类型",
+            "请检人",
+            "请检部门",
+            "请检时间"
+          ],
+          "expectedFormTextVisible": true,
+          "bodyTextExcerpt": "其他检验申请 ( 默认人员 2026-07-31 20:38:42 虚拟岗位 ) 状态： 保存 0 *业务类型 其他检验 *请检人 默认人员 *请检部门 虚拟部门 *物料编码 物料名称 *请检时间 批号 计量单位 数量 采样点 需实验室检验 备注 质量标准 参照 删行 序号 质量标准 执行标准 版本号 请检方案 检验项目 序号 检验项目 计量单位 处理结果 填写意见 常用意见"
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/qcs-other-quality-inspection-20260731/otherInspect.png"
+      },
+      {
+        "module": "其他检验报告",
+        "route": "/msService/QCS/inspectReport/inspectReport/otherInspReportList",
+        "viewCode": "QCS_5.0.0.0_inspectReport_otherInspReportList",
+        "expectedButtons": [
+          "删除"
+        ],
+        "visibleButtons": [
+          "删除"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "单据编号 业务类型 检验申请单号 物料编码 物料名称 批号 请检部门 检验部门 查 询 仅查待办 清 空 删除 序号 单据编号 业务类型 检验申请单号 物料编码 物料名称 采样点 批号 质量标准 检验结论 检验时间 请检部门 检验部门 制单人 制单时间 不合格品处理标识 备注 待办说明 共 0 项 0",
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/qcs-other-quality-inspection-20260731/otherReport.png"
+      },
+      {
+        "module": "其他不合格品处理",
+        "route": "/msService/QCS/unQlfDeal/unQlfDeal/otherUnQlfDealList",
+        "viewCode": "QCS_5.0.0.0_unQlfDeal_otherUnQlfDealList",
+        "expectedButtons": [
+          "删除"
+        ],
+        "visibleButtons": [
+          "删除"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "单据编号 业务类型 检验报告单号 物料编码 物料名称 批号 查 询 仅查待办 清 空 删除 序号 单据编号 业务类型 检验报告单号 物料编码 物料名称 批号 处理人 处理部门 处理时间 制单人 制单时间 备注 待办说明 共 0 项 0",
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/qcs-other-quality-inspection-20260731/otherUnqualified.png"
+      },
+      {
+        "module": "质量巡检申请",
+        "route": "/msService/QCS/inspect/inspect/qualityInspectList",
+        "viewCode": "QCS_5.0.0.0_inspect_qualityInspectList",
+        "expectedButtons": [
+          "新增申请",
+          "打开",
+          "关闭",
+          "批量提交",
+          "删除"
+        ],
+        "visibleButtons": [
+          "新增申请",
+          "打开",
+          "关闭",
+          "批量提交",
+          "删除"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "查 询 仅查待办 清 空 新增申请 打开 关闭 批量提交 删除 序号 单据编号 巡检类型 业务类型 物料编码 物料名称 采样点 批号 状态 请检人 请检部门 请检时间 关闭 备注 共 0 项 0",
+        "addInteraction": {
+          "beforeUrl": "http://10.11.100.17:18080/msService/QCS/inspect/inspect/qualityInspectList",
+          "afterUrl": "http://10.11.100.17:18080/msService/QCS/inspect/inspect/qualityInspectList",
+          "popupUrl": "http://10.11.100.17:18080/msService/QCS/inspect/inspect/qualityInspectEdit",
+          "beforeFrameCount": 0,
+          "afterFrameCount": 0,
+          "dialogCount": 0,
+          "surfaceKind": "popup",
+          "surfaceChanged": true,
+          "editResponses": [],
+          "expectedFormText": [
+            "巡检类型",
+            "业务类型",
+            "请检人",
+            "请检部门"
+          ],
+          "expectedFormTextVisible": true,
+          "bodyTextExcerpt": "*业务类型 *请检人 默认人员 *请检部门 虚拟部门 *物料编码 物料名称 *请检时间 批号 计量单位 数量 采样点 样品数量 *工序(工作单元) *盘具（载具）编号 *巡检类型 首检 备注 序号 序号"
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/qcs-other-quality-inspection-20260731/qualityInspect.png"
+      },
+      {
+        "module": "质量巡检报告",
+        "route": "/msService/QCS/inspectReport/inspectReport/quaInspReportList",
+        "viewCode": "QCS_5.0.0.0_inspectReport_quaInspReportList",
+        "expectedButtons": [
+          "删除"
+        ],
+        "visibleButtons": [
+          "删除"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "查 询 仅查待办 清 空 删除 序号 单据编号 业务类型 检验申请单号 物料编码 物料名称 采样点 批号 质量标准 检验结论 检验时间 请检部门 检验部门 制单人 制单时间 不合格品处理标识 备注 共 0 项 0",
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/qcs-other-quality-inspection-20260731/qualityReport.png"
+      }
+    ],
+    "layouts": [
+      {
+        "label": "其他检验申请",
+        "viewCode": "QCS_5.0.0.0_inspect_otherInspectList",
+        "kind": "list",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspect_otherInspectList&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 43671,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "其他检验报告",
+        "viewCode": "QCS_5.0.0.0_inspectReport_otherInspReportList",
+        "kind": "list",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectReport_otherInspReportList&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 46266,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "其他不合格品处理",
+        "viewCode": "QCS_5.0.0.0_unQlfDeal_otherUnQlfDealList",
+        "kind": "list",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_unQlfDeal_otherUnQlfDealList&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 37244,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "质量巡检申请",
+        "viewCode": "QCS_5.0.0.0_inspect_qualityInspectList",
+        "kind": "list",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspect_qualityInspectList&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 10169,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "质量巡检报告",
+        "viewCode": "QCS_5.0.0.0_inspectReport_quaInspReportList",
+        "kind": "list",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectReport_quaInspReportList&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 5821,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "其他检验申请编辑",
+        "viewCode": "QCS_5.0.0.0_inspect_otherInspectEdit",
+        "kind": "edit",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspect_otherInspectEdit&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 81282,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "其他检验申请查看",
+        "viewCode": "QCS_5.0.0.0_inspect_otherInspectView",
+        "kind": "view",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspect_otherInspectView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 67855,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "质量巡检申请编辑",
+        "viewCode": "QCS_5.0.0.0_inspect_qualityInspectEdit",
+        "kind": "edit",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspect_qualityInspectEdit&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 59878,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "质量巡检申请查看",
+        "viewCode": "QCS_5.0.0.0_inspect_qualityInspectView",
+        "kind": "view",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspect_qualityInspectView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 53177,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "其他检验报告编辑",
+        "viewCode": "QCS_5.0.0.0_inspectReport_otherInspReportEdit",
+        "kind": "edit",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectReport_otherInspReportEdit&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 77686,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "其他检验报告查看",
+        "viewCode": "QCS_5.0.0.0_inspectReport_otherInspReportView",
+        "kind": "view",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectReport_otherInspReportView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 65183,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "质量巡检报告编辑",
+        "viewCode": "QCS_5.0.0.0_inspectReport_quaInspReportEdit",
+        "kind": "edit",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectReport_quaInspReportEdit&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 74532,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "质量巡检报告查看",
+        "viewCode": "QCS_5.0.0.0_inspectReport_quaInspReportView",
+        "kind": "view",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectReport_quaInspReportView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 44723,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "其他不合格品处理编辑",
+        "viewCode": "QCS_5.0.0.0_unQlfDeal_otherUnQlfDealEdit",
+        "kind": "edit",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_unQlfDeal_otherUnQlfDealEdit&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 54864,
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "其他不合格品处理查看",
+        "viewCode": "QCS_5.0.0.0_unQlfDeal_otherUnQlfDealView",
+        "kind": "view",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_unQlfDeal_otherUnQlfDealView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 48655,
+        "status": "PASS",
+        "issues": []
+      }
+    ],
+    "console": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "clientErrors": [],
+    "serverErrors": []
+  },
+  "persistence": {
+    "required": false,
+    "status": "NOT_APPLICABLE",
+    "reason": "本轮只恢复并验证运行时页面布局与动作入口，不保存业务单据。"
+  },
+  "issues": [],
+  "login": {
+    "status": 200,
+    "authenticated": true
+  }
+}

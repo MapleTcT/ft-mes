@@ -4737,6 +4737,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/247-qcs-other-quality-inspection-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -5170,6 +5176,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-qcs-inspect-report-config-regression.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-qcs-other-quality-inspection-regression.js",
       "state": "tracked",
       "tracked": true
     },
@@ -7108,6 +7120,12 @@
     {
       "ignored": false,
       "path": "docs/project-objectives.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/qcs-other-quality-inspection-runtime-acceptance-20260731.md",
       "state": "tracked",
       "tracked": true
     },
@@ -9190,6 +9208,12 @@
     {
       "ignored": false,
       "path": "metadata/qcs-manu-manual-add-20260730.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-other-quality-inspection-acceptance-20260731.json",
       "state": "tracked",
       "tracked": true
     },
@@ -13472,16 +13496,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 880
+      "tracked": 882
     },
     "docs": {
-      "tracked": 162
+      "tracked": 163
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 345
+      "tracked": 346
     },
     "package.json": {
       "tracked": 1
@@ -13505,8 +13529,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2241,
-    "tracked": 2241,
+    "totalFiles": 2245,
+    "tracked": 2245,
     "untracked": 0
   },
   "untrackedByDirectory": []

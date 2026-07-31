@@ -335,6 +335,149 @@ class ProductRuntimeParityTest(unittest.TestCase):
             [button["id"] for button in payload["components"][0]["buttons"]],
         )
 
+    def test_qcs_other_inspection_restores_complete_runtime_actions(self):
+        view_code = "QCS_5.0.0.0_inspect_otherInspectList"
+        edit_code = "QCS_5.0.0.0_inspect_otherInspectEdit"
+        view = view_variant(code=view_code)
+        edit_view = view_variant(
+            code=edit_code,
+            title="其他检验申请",
+            name="otherInspectEdit",
+            open_type="frame",
+            url="/msService/QCS/inspect/inspect/otherInspectEdit",
+        )
+        payload = {
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "buttons": [
+                        {
+                            "id": "open",
+                            "showname": "打开",
+                            "buttonoperationcode": "legacy_open",
+                        },
+                        {
+                            "id": "delete",
+                            "showname": "删除",
+                            "buttonoperationcode": "legacy_delete",
+                        },
+                    ],
+                }
+            ]
+        }
+
+        GENERATOR.apply_qcs_secondary_list_actions(
+            view,
+            payload,
+            {view_code: view, edit_code: edit_view},
+        )
+
+        buttons = payload["components"][0]["buttons"]
+        self.assertEqual(
+            ["manualAdd", "open", "close", "bulkSubmit", "delete"],
+            [button["id"] for button in buttons],
+        )
+        self.assertEqual(edit_code, buttons[0]["viewselect"]["code"])
+        self.assertEqual("CUSTOM", buttons[0]["operatetype"])
+        self.assertFalse(buttons[0]["iscallback"])
+        self.assertEqual(
+            "QCS_5.0.0.0_inspect_Inspect", buttons[0]["modelCode"]
+        )
+        self.assertIn("/msService/QCS/inspect/inspect/otherInspectEdit", buttons[0]["funcbody"])
+        self.assertIn(
+            "QCS_5.0.0.0_inspect_otherInspectList_inspect_sdg",
+            buttons[1]["funcbody"],
+        )
+        self.assertEqual("批量提交", buttons[3]["showname"])
+        self.assertEqual("删除", buttons[4]["showname"])
+
+    def test_qcs_quality_inspection_does_not_call_other_inspection_grid(self):
+        view_code = "QCS_5.0.0.0_inspect_qualityInspectList"
+        edit_code = "QCS_5.0.0.0_inspect_qualityInspectEdit"
+        view = view_variant(code=view_code)
+        edit_view = view_variant(
+            code=edit_code,
+            title="质量巡检申请",
+            name="qualityInspectEdit",
+            open_type="frame",
+            url="/msService/QCS/inspect/inspect/qualityInspectEdit",
+        )
+        payload = {
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "buttons": [
+                        {"id": "open", "showname": "默认操作"},
+                        {"id": "close", "showname": "默认操作"},
+                        {"id": "delete", "showname": "默认操作"},
+                    ],
+                }
+            ]
+        }
+
+        GENERATOR.apply_qcs_secondary_list_actions(
+            view,
+            payload,
+            {view_code: view, edit_code: edit_view},
+        )
+
+        buttons = payload["components"][0]["buttons"]
+        self.assertEqual(
+            ["新增申请", "打开", "关闭", "批量提交", "删除"],
+            [button["showname"] for button in buttons],
+        )
+        for button in buttons[1:4]:
+            self.assertNotIn("otherInspectList", button.get("funcbody", ""))
+        self.assertIn(
+            "QCS_5.0.0.0_inspect_qualityInspectList_inspect_sdg",
+            buttons[1]["funcbody"],
+        )
+
+    def test_qcs_secondary_report_delete_label_is_not_default_operation(self):
+        view = view_variant(
+            code="QCS_5.0.0.0_inspectReport_quaInspReportList"
+        )
+        payload = {
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "buttons": [{"id": "delete", "showname": "默认操作"}],
+                }
+            ]
+        }
+
+        GENERATOR.apply_qcs_secondary_list_actions(view, payload, {view.code: view})
+
+        button = payload["components"][0]["buttons"][0]
+        self.assertEqual("删除", button["showname"])
+        self.assertEqual("删除", button["namekey"])
+
+    def test_qcs_table_number_fallback_replaces_namekey_and_display_name(self):
+        view = view_variant(
+            code="QCS_5.0.0.0_unQlfDeal_otherUnQlfDealList"
+        )
+        payload = {
+            "components": [
+                {
+                    "namekey": "ec.common.tableNo",
+                    "element": {
+                        "displayName": "ec.common.tableNo",
+                        "title": "ec.list.taskDescription",
+                    },
+                }
+            ]
+        }
+
+        GENERATOR.apply_view_runtime_overrides(view, payload)
+
+        self.assertEqual("单据编号", payload["components"][0]["namekey"])
+        self.assertEqual(
+            "单据编号", payload["components"][0]["element"]["displayName"]
+        )
+        self.assertEqual(
+            "待办说明", payload["components"][0]["element"]["title"]
+        )
+
     def test_nested_layout_button_uses_parent_view_permission_code(self):
         operation_code = "sampleList_add_add_PATROL_1.0.0_sample_sampleList"
         parent_code = "PATROL_1.0.0_sample_sampleLayout"

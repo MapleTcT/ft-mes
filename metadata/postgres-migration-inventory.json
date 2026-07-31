@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 246,
+  "migrationCount": 247,
   "firstNumber": 1,
-  "lastNumber": 246,
+  "lastNumber": 247,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -17,26 +17,26 @@
     "create-index": 1026,
     "create-table": 587,
     "create-view": 143,
-    "insert": 11446,
-    "update": 11571
+    "insert": 11491,
+    "update": 11616
   },
   "idempotencySignalTotals": {
     "create-or-replace": 257,
-    "do-block": 553,
-    "if-exists": 179,
+    "do-block": 568,
+    "if-exists": 194,
     "if-not-exists": 13080,
-    "on-conflict": 11371,
+    "on-conflict": 11416,
     "to-regclass": 222,
     "where-not-exists": 55
   },
   "tagTotals": {
     "auth-rbac-org": 39,
-    "business": 53,
+    "business": 54,
     "compatibility": 90,
-    "configuration": 60,
+    "configuration": 61,
     "general": 47,
     "notification": 10,
-    "platform": 74,
+    "platform": 75,
     "workflow": 21
   },
   "migrations": [
@@ -9239,6 +9239,41 @@
         "if-not-exists": 0,
         "on-conflict": 18,
         "do-block": 6,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/247-qcs-other-quality-inspection-runtime.sql",
+      "name": "247-qcs-other-quality-inspection-runtime.sql",
+      "number": 247,
+      "slug": "qcs-other-quality-inspection-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration",
+        "business"
+      ],
+      "lineCount": 877,
+      "sha256": "f945dc547c531f43aa87db393800b14b26f0f7886a879589ae43eb1a65acc619",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 45,
+        "update": 45
+      },
+      "idempotencySignals": {
+        "if-exists": 15,
+        "if-not-exists": 0,
+        "on-conflict": 45,
+        "do-block": 15,
         "to-regclass": 0,
         "create-or-replace": 0,
         "where-not-exists": 0

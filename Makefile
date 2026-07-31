@@ -127,6 +127,8 @@ WOM_QRCODE_BROWSER_OUTPUT ?= metadata/wom-qrcode-browser-acceptance.json
 WOM_QRCODE_BROWSER_SCREENSHOT ?= /tmp/adp-wom-qrcode-browser-acceptance.png
 QCS_REPORT_CHAIN_MODE ?= qualified
 QCS_REPORT_CHAIN_PERSISTENCE_OUTPUT ?= /tmp/adp-qcs-report-chain-persistence-acceptance.json
+QCS_OTHER_QUALITY_OUTPUT ?= metadata/qcs-other-quality-inspection-acceptance-20260731.json
+QCS_OTHER_QUALITY_SCREENSHOT_DIR ?= metadata/qcs-other-quality-inspection-20260731
 MES_FULL_FLOW_OUTPUT ?= /tmp/adp-mes-full-production-flow-acceptance.json
 MES_FULL_FLOW_CONFIRM ?= NO
 MES_FULL_FLOW_BPI_BATCH_ID ?=
@@ -181,6 +183,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: acceptance-factory-line-persistence
 .PHONY: acceptance-fructose-line-pilot
 .PHONY: acceptance-wom-process-execution-actions
+.PHONY: acceptance-qcs-other-quality-inspection
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
@@ -424,6 +427,7 @@ help:
 	@printf '%s\n' '  make acceptance-factory-line-persistence Run factory architecture production-line browser/PostgreSQL acceptance'
 	@printf '%s\n' '  make probe-wom-qrcode-route Run WOM QR code route/package probe against the test environment'
 	@printf '%s\n' '  make acceptance-qcs-report-chain-persistence QCS report save/effective WOM backfill acceptance'
+	@printf '%s\n' '  make acceptance-qcs-other-quality-inspection Run QCS other/quality-inspection actions and layout acceptance'
 	@printf '%s\n' '  make acceptance-teaminfo-scheduleplan-persistence Run TeamInfo schedule-plan persistence acceptance'
 	@printf '%s\n' '  make smoke-rbac-authority    Run role/user authority editor API smoke'
 	@printf '%s\n' '  make smoke-business          Run API/layout smoke for restored business module routes'
@@ -614,6 +618,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-wom-manu-inspect-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-checkoutbill-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-qcs-inspect-report-config-regression.js
+	$(NODE) --check deploy/docker/scripts/adp-qcs-other-quality-inspection-regression.js
 	$(NODE) --check deploy/docker/scripts/adp-factory-line-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-public-produce-task-created-noop-probe.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-qrcode-route-probe.js
@@ -1490,6 +1495,9 @@ acceptance-wom-qrcode-browser:
 
 acceptance-qcs-report-chain-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_QCS_REPORT_CHAIN_MODE=$(QCS_REPORT_CHAIN_MODE) ADP_QCS_REPORT_CHAIN_PERSISTENCE_OUTPUT=$(QCS_REPORT_CHAIN_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-qcs-report-chain-persistence-acceptance.js
+
+acceptance-qcs-other-quality-inspection:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_OUTPUT_DIR=$(QCS_OTHER_QUALITY_SCREENSHOT_DIR) ADP_OUTPUT_PATH=$(QCS_OTHER_QUALITY_OUTPUT) $(NODE) deploy/docker/scripts/adp-qcs-other-quality-inspection-regression.js
 
 acceptance-mes-full-production-flow:
 	@set -eu; \

@@ -57,6 +57,21 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "LIMSSteady_6.0.4.1_envCondition_envConditionList",
     "QCS_5.0.0.0_inspect_manuInspectList",
     "QCS_5.0.0.0_inspectReport_manuInspReportEdit",
+    "QCS_5.0.0.0_inspect_otherInspectList",
+    "QCS_5.0.0.0_inspect_otherInspectEdit",
+    "QCS_5.0.0.0_inspect_otherInspectView",
+    "QCS_5.0.0.0_inspect_qualityInspectList",
+    "QCS_5.0.0.0_inspect_qualityInspectEdit",
+    "QCS_5.0.0.0_inspect_qualityInspectView",
+    "QCS_5.0.0.0_inspectReport_otherInspReportList",
+    "QCS_5.0.0.0_inspectReport_otherInspReportEdit",
+    "QCS_5.0.0.0_inspectReport_otherInspReportView",
+    "QCS_5.0.0.0_inspectReport_quaInspReportList",
+    "QCS_5.0.0.0_inspectReport_quaInspReportEdit",
+    "QCS_5.0.0.0_inspectReport_quaInspReportView",
+    "QCS_5.0.0.0_unQlfDeal_otherUnQlfDealList",
+    "QCS_5.0.0.0_unQlfDeal_otherUnQlfDealEdit",
+    "QCS_5.0.0.0_unQlfDeal_otherUnQlfDealView",
     "WOM_1.0.0_produceTask_makeTaskList",
     "WOM_1.0.0_produceTask_prepareMakeTaskList",
     "WOM_1.0.0_produceTask_makeTaskEdit",
@@ -817,7 +832,45 @@ DATAGRID_RUNTIME_OVERRIDES: Dict[str, Dict[str, Any]] = {
 
 PACKAGED_BUTTON_SUPPLEMENT_VIEW_CODES = {
     "QCS_5.0.0.0_inspect_manuInspectList",
+    "QCS_5.0.0.0_inspect_otherInspectList",
+    "QCS_5.0.0.0_inspect_qualityInspectList",
+    "QCS_5.0.0.0_inspectReport_otherInspReportList",
+    "QCS_5.0.0.0_inspectReport_quaInspReportList",
+    "QCS_5.0.0.0_unQlfDeal_otherUnQlfDealList",
 }
+
+QCS_SECONDARY_INSPECTION_LISTS: Dict[str, Dict[str, str]] = {
+    "QCS_5.0.0.0_inspect_otherInspectList": {
+        "prefix": "otherInspectList",
+        "grid_api": "QCS_5.0.0.0_inspect_otherInspectList_inspect_sdg",
+        "edit_view": "QCS_5.0.0.0_inspect_otherInspectEdit",
+        "function_suffix": "OtherInspect",
+    },
+    "QCS_5.0.0.0_inspect_qualityInspectList": {
+        "prefix": "qualityInspectList",
+        "grid_api": "QCS_5.0.0.0_inspect_qualityInspectList_inspect_sdg",
+        "edit_view": "QCS_5.0.0.0_inspect_qualityInspectEdit",
+        "function_suffix": "QualityInspect",
+    },
+}
+
+QCS_SECONDARY_DELETE_LISTS = {
+    "QCS_5.0.0.0_inspectReport_otherInspReportList",
+    "QCS_5.0.0.0_inspectReport_quaInspReportList",
+    "QCS_5.0.0.0_unQlfDeal_otherUnQlfDealList",
+}
+
+QCS_SECONDARY_VIEW_CODES = tuple(
+    code
+    for family in (
+        "QCS_5.0.0.0_inspect_otherInspect",
+        "QCS_5.0.0.0_inspect_qualityInspect",
+        "QCS_5.0.0.0_inspectReport_otherInspReport",
+        "QCS_5.0.0.0_inspectReport_quaInspReport",
+        "QCS_5.0.0.0_unQlfDeal_otherUnQlfDeal",
+    )
+    for code in (family + "List", family + "Edit", family + "View")
+)
 
 MAKE_TASK_BUSINESS_TAB_RESTORE = """
 (function restoreMakeTaskBusinessTabs(attempt) {
@@ -855,6 +908,13 @@ VIEW_ONLOAD_APPENDS: Dict[str, str] = {
 VIEW_NAMEKEY_FALLBACKS: Dict[str, Dict[str, str]] = {
     "HierarchicalMod_1.0.0_factoryModel_factoryEdit": {
         "HierarchicalMod.tabname.randon1618564480544.flag": "装置",
+    },
+    **{
+        code: {
+            "ec.common.tableNo": "单据编号",
+            "ec.list.taskDescription": "待办说明",
+        }
+        for code in QCS_SECONDARY_VIEW_CODES
     },
 }
 
@@ -2695,23 +2755,261 @@ def supplement_packaged_datagrid_buttons(
             existing_keys.add(key)
 
 
+def qcs_runtime_button(
+    button_id: str,
+    show_name: str,
+    operation_code: str,
+    operate_type: str,
+    button_style: str,
+    *,
+    is_permission: bool,
+    is_callback: bool,
+) -> Dict[str, Any]:
+    button = {
+        "id": button_id,
+        "showname": show_name,
+        "name": show_name,
+        "namekey": show_name,
+        "i18nKey": show_name,
+        "buttonstyle": button_style,
+        "operatetype": operate_type,
+        "operateType": operate_type,
+        "isHide": False,
+        "ispermission": is_permission,
+        "isPublished": True,
+        "iscallback": is_callback,
+        "iscustomfunc": False,
+        "useInMore": False,
+        "isconfirm": False,
+        "isSignatureConfig": True,
+        "regionType": "BUTTON",
+        "cellCode": "cell_adp_" + operation_code.replace(".", "_"),
+        "buttonoperationcode": operation_code,
+        "CODE": operation_code,
+        "NAME": show_name,
+        "ICONCLS": "cui-btn-" + button_style,
+        "USEINMORE": False,
+        "SEPARATENUM": "0",
+        "ecEnv": "product",
+    }
+    if is_permission:
+        button["pc"] = button_power_code(operation_code)
+    return button
+
+
+def qcs_inspection_control_button(
+    view_code: str,
+    spec: Dict[str, str],
+    action: str,
+    show_name: str,
+) -> Dict[str, Any]:
+    prefix = spec["prefix"]
+    function_name = action + spec["function_suffix"]
+    operation_code = f"{prefix}_{action}_add_{view_code}"
+    button_code = f"{view_code}_BUTTON_{action}"
+    common_function = "openInpect" if action == "open" else "closeInpect"
+    function_body = (
+        f"function {function_name}() {{\n"
+        "    var inspectDg = ReactAPI.getComponentAPI(\"SupDataGrid\")\n"
+        f"        .APIs(\"{spec['grid_api']}\");\n"
+        f"    {common_function}(inspectDg, \"{operation_code}\", \"{button_code}\");\n"
+        "}"
+    )
+    button = qcs_runtime_button(
+        action,
+        show_name,
+        operation_code,
+        "CUSTOM",
+        "add",
+        is_permission=True,
+        is_callback=False,
+    )
+    button.update(
+        {
+            "funcname": f"onclick='{function_name}()'",
+            "onclick": f"{function_name}()",
+            "ONCLICK": f"{function_name}()",
+            "funcbody": function_body,
+            "funcbody_es5": function_body,
+            "modelCode": "QCS_5.0.0.0_inspect_Inspect",
+        }
+    )
+    return button
+
+
+def qcs_manual_inspection_button(
+    view_code: str,
+    spec: Dict[str, str],
+    views: Dict[str, ViewDef],
+) -> Dict[str, Any]:
+    operation_code = f"{spec['prefix']}_manualAdd_add_{view_code}"
+    edit_view = views.get(spec["edit_view"])
+    edit_url = edit_view.url if edit_view is not None else ""
+    function_name = "manualAdd" + spec["function_suffix"]
+    function_body = (
+        f"function {function_name}() {{\n"
+        f"    var target = {json.dumps(edit_url, ensure_ascii=False)};\n"
+        "    var opened = window.open(target, \"_blank\");\n"
+        "    if (!opened) {\n"
+        "        window.location.href = target;\n"
+        "    }\n"
+        "}"
+    )
+    button = qcs_runtime_button(
+        "manualAdd",
+        "新增申请",
+        operation_code,
+        "CUSTOM",
+        "add",
+        is_permission=False,
+        is_callback=False,
+    )
+    button.update(
+        {
+            "viewselect": view_reference_payload(
+                spec["edit_view"],
+                views,
+                {"iscrosscompany": "false"},
+            ),
+            "funcname": f"onclick='{function_name}()'",
+            "onclick": f"{function_name}()",
+            "ONCLICK": f"{function_name}()",
+            "funcbody": function_body,
+            "funcbody_es5": function_body,
+            "modelCode": "QCS_5.0.0.0_inspect_Inspect",
+        }
+    )
+    return button
+
+
+def qcs_bulk_submit_button(view_code: str, spec: Dict[str, str]) -> Dict[str, Any]:
+    operation_code = f"{spec['prefix']}_bulkSubmit_add_{view_code}"
+    function_name = "bulkSubmit" + spec["function_suffix"]
+    function_body = (
+        f"function {function_name}() {{\n"
+        "    var inspectDg = ReactAPI.getComponentAPI(\"SupDataGrid\")\n"
+        f"        .APIs(\"{spec['grid_api']}\");\n"
+        "    bulkSubmitCustom(inspectDg);\n"
+        "}"
+    )
+    button = qcs_runtime_button(
+        "bulkSubmit",
+        "批量提交",
+        operation_code,
+        "CUSTOM",
+        "add",
+        is_permission=False,
+        is_callback=False,
+    )
+    button.update(
+        {
+            "funcname": f"onclick='{function_name}()'",
+            "onclick": f"{function_name}()",
+            "ONCLICK": f"{function_name}()",
+            "funcbody": function_body,
+            "funcbody_es5": function_body,
+            "modelCode": "QCS_5.0.0.0_inspect_Inspect",
+        }
+    )
+    return button
+
+
+def apply_qcs_secondary_list_actions(
+    view: ViewDef,
+    payload: Any,
+    views: Dict[str, ViewDef],
+) -> None:
+    target = find_layout_datagrid(view, payload)
+    if target is None:
+        return
+
+    if view.code in QCS_SECONDARY_DELETE_LISTS:
+        for button in target.get("buttons") or []:
+            if not isinstance(button, dict) or button.get("id") != "delete":
+                continue
+            button.update(
+                {
+                    "showname": "删除",
+                    "name": "删除",
+                    "namekey": "删除",
+                    "i18nKey": "删除",
+                    "NAME": "删除",
+                }
+            )
+        return
+
+    spec = QCS_SECONDARY_INSPECTION_LISTS.get(view.code)
+    if spec is None:
+        return
+
+    existing_buttons = target.get("buttons")
+    delete_button = next(
+        (
+            copy.deepcopy(button)
+            for button in (existing_buttons or [])
+            if isinstance(button, dict) and button.get("id") == "delete"
+        ),
+        None,
+    )
+    delete_operation = f"{spec['prefix']}_delete_del_{view.code}"
+    if delete_button is None:
+        delete_button = qcs_runtime_button(
+            "delete",
+            "删除",
+            delete_operation,
+            "DELETE",
+            "del",
+            is_permission=True,
+            is_callback=True,
+        )
+    else:
+        delete_button.update(
+            {
+                "showname": "删除",
+                "name": "删除",
+                "namekey": "删除",
+                "i18nKey": "删除",
+                "NAME": "删除",
+                "buttonoperationcode": delete_operation,
+                "CODE": delete_operation,
+                "pc": button_power_code(delete_operation),
+            }
+        )
+
+    managed_ids = {"manualAdd", "open", "close", "bulkSubmit", "delete"}
+    preserved = [
+        copy.deepcopy(button)
+        for button in (existing_buttons or [])
+        if isinstance(button, dict) and button.get("id") not in managed_ids
+    ]
+    target["buttons"] = [
+        qcs_manual_inspection_button(view.code, spec, views),
+        qcs_inspection_control_button(view.code, spec, "open", "打开"),
+        qcs_inspection_control_button(view.code, spec, "close", "关闭"),
+        qcs_bulk_submit_button(view.code, spec),
+        delete_button,
+        *preserved,
+    ]
+
+
 def apply_view_runtime_overrides(view: ViewDef, payload: Any) -> None:
     namekey_fallbacks = VIEW_NAMEKEY_FALLBACKS.get(view.code, {})
     if namekey_fallbacks:
-        def replace_missing_namekey(node: Any) -> None:
+        def replace_missing_label(node: Any) -> None:
             if isinstance(node, list):
                 for child in node:
-                    replace_missing_namekey(child)
+                    replace_missing_label(child)
                 return
             if not isinstance(node, dict):
                 return
-            namekey = node.get("namekey")
-            if namekey in namekey_fallbacks:
-                node["namekey"] = namekey_fallbacks[namekey]
+            for key in ("namekey", "displayName", "showname", "name", "title"):
+                label = node.get(key)
+                if label in namekey_fallbacks:
+                    node[key] = namekey_fallbacks[label]
             for child in node.values():
-                replace_missing_namekey(child)
+                replace_missing_label(child)
 
-        replace_missing_namekey(payload)
+        replace_missing_label(payload)
 
     onload_append = VIEW_ONLOAD_APPENDS.get(view.code)
     if not onload_append or not isinstance(payload, dict):
@@ -3210,6 +3508,7 @@ def view_json(
     if view.code in COMPAT_REGENERATED_ACTION_VIEW_CODES:
         payload["pageType"] = "EDIT"
     supplement_packaged_datagrid_buttons(view, payload, views)
+    apply_qcs_secondary_list_actions(view, payload, views)
     apply_process_execution_action_buttons(view, payload)
     apply_wom_record_action_buttons(view, payload)
     apply_datagrid_runtime_overrides(view, payload)

@@ -1,5 +1,26 @@
 # 前端功能测试报告
 
+## 2026-07-31 QCS 其他检验与质量巡检动作恢复
+
+针对“其他检验”和“质量巡检”菜单页面没有可用操作按钮的问题，本轮从原 QCS 模块定义
+恢复 15 份 list/edit/view 运行时布局，并在 `http://10.11.100.17:18080` 使用真实 admin
+会话完成页面验收。15 个 `layoutJson` 接口和 5 个菜单页面共 20 项全部 PASS；console error、
+page error、request failed 和 HTTP 5xx 均为 0。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| 其他检验申请 | `/msService/QCS/inspect/inspect/otherInspectList` | 查看工具栏；点击新增申请 | list/edit `layoutJson` | 新增申请、打开、关闭、批量提交、删除均可见；新增真实打开其他检验编辑页 | 布局请求 200，编辑表单字段完整 | `runtime_extra_view` | PASS | 无业务行，因此打开/关闭/批量提交/删除未执行数据变更 |
+| 其他检验报告 | `/msService/QCS/inspectReport/inspectReport/otherInspReportList` | 查看原包操作和页面文案 | list/edit/view `layoutJson` | 删除动作恢复；单据编号和待办说明不再显示原始键 | 3 个布局请求均为 200 | `runtime_extra_view` | PASS | 列表当前 0 项，未执行删除 |
+| 其他不合格品处理 | `/msService/QCS/unQlfDeal/unQlfDeal/otherUnQlfDealList` | 查看原包操作和页面文案 | list/edit/view `layoutJson` | 删除动作恢复；单据编号和待办说明正常 | 3 个布局请求均为 200 | `runtime_extra_view` | PASS | 列表当前 0 项，未执行删除 |
+| 质量巡检申请 | `/msService/QCS/inspect/inspect/qualityInspectList` | 查看工具栏；点击新增申请 | list/edit `layoutJson` | 新增申请、打开、关闭、批量提交、删除均可见；新增真实打开质量巡检编辑页 | 布局请求 200；巡检动作绑定本页数据表，不再误调其他检验列表 | `runtime_extra_view` | PASS | 无业务行，因此行级动作未执行数据变更 |
+| 质量巡检报告 | `/msService/QCS/inspectReport/inspectReport/quaInspReportList` | 查看原包操作 | list/edit/view `layoutJson` | 删除动作恢复，页面无原始键 | 3 个布局请求均为 200 | `runtime_extra_view` | PASS | 列表当前 0 项，未执行删除 |
+
+PostgreSQL 复读确认目标 15/15 行均有非空运行时布局，长度为 6411-89017 字节，
+`ec.common.tableNo`、`ec.list.taskDescription` 和“默认操作”残留数为 0。机器证据见
+`metadata/qcs-other-quality-inspection-acceptance-20260731.json`，页面截图见
+`metadata/qcs-other-quality-inspection-20260731/`。本轮没有保存业务单据，业务数据落库状态为
+`NOT_APPLICABLE`；行级状态流转和删除落库需在准备受控测试单据后另行验收。
+
 ## 2026-07-31 QCS 来料检验参照交互验收
 
 针对来料检验申请页中原始国际化键、采样点参照空白和客商档案参照空白的问题，本轮在
