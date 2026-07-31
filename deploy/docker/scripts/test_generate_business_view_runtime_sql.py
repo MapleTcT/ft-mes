@@ -455,6 +455,28 @@ class ProductRuntimeParityTest(unittest.TestCase):
                     "DataGridCode": view.code,
                     "isdbcustom": True,
                     "dbcustomtextarea_es5": "function processExeLogListDB(event,row){}",
+                    "buttons": [
+                        {
+                            "id": "outptConsumption",
+                            "showname": "产耗查看",
+                            "buttonoperationcode": (
+                                "processExeLogList_outptConsumption_add_"
+                                "WOM_1.0.0_produceTask_processExeLogList"
+                            ),
+                            "isPublished": False,
+                            "isHide": False,
+                        },
+                        {
+                            "id": "matConsumEntry",
+                            "showname": "产耗录入",
+                            "buttonoperationcode": (
+                                "processExeLogList_matConsumEntry_add_"
+                                "WOM_1.0.0_produceTask_processExeLogList"
+                            ),
+                            "isPublished": False,
+                            "isHide": True,
+                        },
+                    ],
                 }
             ],
         }
@@ -468,6 +490,67 @@ class ProductRuntimeParityTest(unittest.TestCase):
         self.assertIn("processExecutionId", grid["dbcustomtextarea_es5"])
         self.assertIn("encodeURIComponent(row.id)", grid["dbcustomtextarea"])
         self.assertNotIn("console.info", grid["dbcustomtextarea_es5"])
+        visible_buttons = [
+            button
+            for button in grid["buttons"]
+            if button.get("isPublished") and not button.get("isHide")
+        ]
+        self.assertEqual(
+            ["viewDetail", "outptConsumption", "manualStatistics"],
+            [button["id"] for button in visible_buttons],
+        )
+        self.assertEqual(
+            ["查看详情", "产耗查看", "工艺统计"],
+            [button["showname"] for button in visible_buttons],
+        )
+        self.assertTrue(all(button["ispermission"] is False for button in visible_buttons))
+        button_by_id = {button["id"]: button for button in grid["buttons"]}
+        self.assertIn(
+            "/ProcessAnalysis/processAnalysis/processExecution/detail",
+            button_by_id["viewDetail"]["funcbody_es5"],
+        )
+        self.assertIn(
+            "/WOM/produceTask/processExelog/matConsuEntryProView",
+            button_by_id["outptConsumption"]["funcbody_es5"],
+        )
+        self.assertIn(
+            "/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess",
+            button_by_id["manualStatistics"]["funcbody_es5"],
+        )
+        self.assertIn("needParamAna", button_by_id["manualStatistics"]["funcbody_es5"])
+        self.assertIn(
+            'runStateId !== "WOM_runState/finished"',
+            button_by_id["manualStatistics"]["funcbody_es5"],
+        )
+        self.assertTrue(button_by_id["matConsumEntry"]["isHide"])
+        self.assertFalse(button_by_id["matConsumEntry"]["isPublished"])
+
+    def test_runtime_extra_view_oid_upsert_reuses_unchanged_large_object(self):
+        view = view_variant()
+
+        migration = GENERATOR.runtime_extra_view_sql(view, {view.code: view})
+
+        self.assertIn(
+            "SELECT view_json INTO runtime_extra_view_existing_oid",
+            migration,
+        )
+        self.assertIn(
+            "convert_from(lo_get(runtime_extra_view_existing_oid), 'UTF8') = "
+            "runtime_extra_view_payload",
+            migration,
+        )
+        self.assertIn(
+            "runtime_extra_view_target_oid := runtime_extra_view_existing_oid",
+            migration,
+        )
+        self.assertIn(
+            "runtime_extra_view_target_oid := lo_from_bytea",
+            migration,
+        )
+        self.assertIn(
+            "runtime_extra_view_target_oid, false)",
+            migration,
+        )
 
     def test_make_task_runtime_migration_restores_business_tabs_and_grid_columns(self):
         migration = (

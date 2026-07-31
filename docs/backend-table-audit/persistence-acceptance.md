@@ -1426,6 +1426,16 @@ large-object 总数均为 `200438`。测试机回退备份：
 幂等恢复。机器证据：
 `metadata/wom-process-consumption-view-regression-20260730.json`。
 
+### WOM 工序统计快照落库验收（2026-07-31）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 对已完成的糖化工序执行工艺统计 | 工序执行记录选中 `9007190231282109`，点击“工艺统计” | `GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess?processId=9007190231282109` | `ProcessAnalysisController.analyzeProcess -> TraceabilityService.analyzeProcess/snapshot -> ProcessAnalysisRepository.upsertSnapshot` | `public.pa_trace_snapshots` | `SELECT id,tenant_id,source_type,source_id,task_id,batch_no,source_state,revision,updated_at FROM public.pa_trace_snapshots WHERE tenant_id='dt' AND source_type='PROCESS' AND source_id=9007190231282109 ORDER BY revision;` | 页面返回“工艺参数统计完成”，HTTP 200/code 200；快照 `id=176`、批次 `BPI-LINES0701-20260727-E22B71C8`、状态 `WOM_runState/finished`，revision `4 -> 5`；临时启用的 `wom_process_exelogs.need_param_ana` 已恢复为 `false` | PASS |
+
+`查看详情` 和 `产耗查看` 均为只读，落库状态为 `NOT_APPLICABLE`；页面和数据请求
+HTTP 200，且没有浏览器错误。机器证据：
+`metadata/wom-process-execution-actions-acceptance-20260731.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

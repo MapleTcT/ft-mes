@@ -91,6 +91,157 @@ PROCESS_EXECUTION_DETAIL_DOUBLE_CLICK = """function processExeLogListDB(event, r
     return true;
 }"""
 
+PROCESS_EXECUTION_DETAIL_BUTTON_BODY = """function viewProcessExecutionDetail() {
+    var selected = ReactAPI.getComponentAPI("SupDataGrid")
+        .APIs("WOM_1.0.0_produceTask_processExeLogList_processExelog_sdg")
+        .getSelecteds();
+    if (!selected || !selected.length || !selected[0].id) {
+        ReactAPI.showMessage("w", "请选择一条工序执行记录");
+        return false;
+    }
+    window.open(
+        "/msService/ProcessAnalysis/processAnalysis/processExecution/detail"
+            + "?processExecutionId=" + encodeURIComponent(selected[0].id),
+        "_blank"
+    );
+    return true;
+}"""
+
+PROCESS_EXECUTION_CONSUMPTION_BUTTON_BODY = """function viewProcessConsumption() {
+    var selected = ReactAPI.getComponentAPI("SupDataGrid")
+        .APIs("WOM_1.0.0_produceTask_processExeLogList_processExelog_sdg")
+        .getSelecteds();
+    if (!selected || !selected.length || !selected[0].id) {
+        ReactAPI.showMessage("w", "请选择一条工序执行记录");
+        return false;
+    }
+    var target = "/msService/WOM/produceTask/processExelog/matConsuEntryProView"
+        + "?viewCode=WOM_1.0.0_produceTask_processExeLogList"
+        + "&entityCode=WOM_1.0.0_produceTask"
+        + "&iscrosscompany=false"
+        + "&openType=frame"
+        + "&buttonCode=WOM_1.0.0_produceTask_processExeLogList_BUTTON_outptConsumption"
+        + "&iscallback=false"
+        + "&id=" + encodeURIComponent(selected[0].id);
+    window.open(target, "_blank");
+    return true;
+}"""
+
+PROCESS_EXECUTION_STATISTICS_BUTTON_BODY = """function runProcessStatistics() {
+    var selected = ReactAPI.getComponentAPI("SupDataGrid")
+        .APIs("WOM_1.0.0_produceTask_processExeLogList_processExelog_sdg")
+        .getSelecteds();
+    if (!selected || !selected.length || !selected[0].id) {
+        ReactAPI.showMessage("w", "请选择一条工序执行记录");
+        return false;
+    }
+    var row = selected[0];
+    var needStatistics = row.needParamAna;
+    if (needStatistics !== true && needStatistics !== "true"
+            && needStatistics !== 1 && needStatistics !== "1") {
+        ReactAPI.showMessage("w", "该工序未启用工艺参数统计");
+        return false;
+    }
+    var runState = row.processRunState;
+    var runStateId = runState && typeof runState === "object" ? runState.id : runState;
+    if (runStateId !== "WOM_runState/finished") {
+        ReactAPI.showMessage("w", "工序尚未完成，不能执行工艺统计");
+        return false;
+    }
+    if (!row.actStartTime || !row.actEndTime) {
+        ReactAPI.showMessage("w", "工序缺少实际开始或结束时间，不能执行工艺统计");
+        return false;
+    }
+    ReactAPI.openLoading("正在统计工艺参数...");
+    ReactAPI.request({
+        type: "get",
+        async: true,
+        url: "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess"
+            + "?processId=" + encodeURIComponent(row.id)
+    }, function (res) {
+        ReactAPI.closeLoading();
+        if (res && res.code == 200) {
+            ReactAPI.showMessage("s", "工艺参数统计完成");
+            return;
+        }
+        ReactAPI.showMessage("f", res && res.message ? res.message : "工艺参数统计失败");
+    });
+    return true;
+}"""
+
+
+def process_execution_action_button(
+    button_id: str,
+    show_name: str,
+    style: str,
+    function_name: str,
+    function_body: str,
+) -> Dict[str, Any]:
+    operation_code = (
+        "processExeLogList_"
+        + button_id
+        + "_"
+        + style
+        + "_WOM_1.0.0_produceTask_processExeLogList"
+    )
+    onclick = function_name + "()"
+    return {
+        "id": button_id,
+        "showname": show_name,
+        "name": show_name,
+        "namekey": show_name,
+        "buttonstyle": style,
+        "operatetype": "CUSTOM",
+        "operateType": "CUSTOM",
+        "isHide": False,
+        "ispermission": False,
+        "isPublished": True,
+        "buttonoperationcode": operation_code,
+        "funcname": "onclick='" + onclick + "'",
+        "onclick": onclick,
+        "ONCLICK": onclick,
+        "funcbody": function_body,
+        "funcbody_es5": function_body,
+        "iscallback": False,
+        "iscustomfunc": False,
+        "useInMore": False,
+        "isconfirm": False,
+        "isSignatureConfig": True,
+        "ecEnv": "product",
+        "regionType": "BUTTON",
+        "modelCode": "WOM_1.0.0_produceTask_ProcessExelog",
+        "CODE": operation_code,
+        "NAME": show_name,
+        "ICONCLS": "cui-btn-" + style,
+        "USEINMORE": False,
+        "SEPARATENUM": "0",
+    }
+
+
+PROCESS_EXECUTION_ACTION_BUTTONS = (
+    process_execution_action_button(
+        "viewDetail",
+        "查看详情",
+        "view",
+        "viewProcessExecutionDetail",
+        PROCESS_EXECUTION_DETAIL_BUTTON_BODY,
+    ),
+    process_execution_action_button(
+        "outptConsumption",
+        "产耗查看",
+        "view",
+        "viewProcessConsumption",
+        PROCESS_EXECUTION_CONSUMPTION_BUTTON_BODY,
+    ),
+    process_execution_action_button(
+        "manualStatistics",
+        "工艺统计",
+        "add",
+        "runProcessStatistics",
+        PROCESS_EXECUTION_STATISTICS_BUTTON_BODY,
+    ),
+)
+
 DATAGRID_RUNTIME_OVERRIDES: Dict[str, Dict[str, Any]] = {
     "HierarchicalMod_1.0.0_factoryModel_factoryListPart": {
         "DataGridCode": "HierarchicalMod_1.0.0_factoryModel_factoryListPart",
@@ -1843,6 +1994,58 @@ def apply_datagrid_runtime_overrides(view: ViewDef, payload: Any) -> None:
         target.update(copy.deepcopy(overrides))
 
 
+def apply_process_execution_action_buttons(view: ViewDef, payload: Any) -> None:
+    if view.code != "WOM_1.0.0_produceTask_processExeLogList":
+        return
+
+    expected_grid_code = first_datagrid_code(view) or view.code
+    candidates: List[Dict[str, Any]] = []
+
+    def visit(node: Any) -> None:
+        if isinstance(node, list):
+            for child in node:
+                visit(child)
+            return
+        if not isinstance(node, dict):
+            return
+        if node.get("type") == "layoutDatagrid":
+            candidates.append(node)
+        for child in node.values():
+            visit(child)
+
+    visit(payload)
+    target = next(
+        (
+            candidate
+            for candidate in candidates
+            if candidate.get("DataGridCode") == expected_grid_code
+            or candidate.get("code") == expected_grid_code
+        ),
+        candidates[0] if candidates else None,
+    )
+    if target is None:
+        return
+
+    managed_ids = {"viewDetail", "outptConsumption", "manualStatistics"}
+    existing_buttons = target.get("buttons")
+    preserved_buttons: List[Dict[str, Any]] = []
+    if isinstance(existing_buttons, list):
+        for button in existing_buttons:
+            if not isinstance(button, dict):
+                continue
+            button_id = str(button.get("id") or "").strip()
+            operation_code = str(button.get("buttonoperationcode") or "").strip()
+            if button_id in managed_ids or any(
+                "_" + managed_id + "_" in operation_code for managed_id in managed_ids
+            ):
+                continue
+            preserved_buttons.append(button)
+    target["buttons"] = [
+        *copy.deepcopy(PROCESS_EXECUTION_ACTION_BUTTONS),
+        *preserved_buttons,
+    ]
+
+
 def supplement_packaged_datagrid_buttons(
     view: ViewDef,
     payload: Any,
@@ -2410,6 +2613,7 @@ def view_json(
     else:
         payload = list_json(view, views=views)
     supplement_packaged_datagrid_buttons(view, payload, views)
+    apply_process_execution_action_buttons(view, payload)
     apply_datagrid_runtime_overrides(view, payload)
     apply_view_runtime_overrides(view, payload)
     sanitize_runtime_strings(payload)
@@ -3858,6 +4062,8 @@ def runtime_extra_view_sql(
         "DO $$\n"
         "DECLARE runtime_extra_view_json_is_oid boolean;\n"
         f"DECLARE runtime_extra_view_payload text := {payload_literal};\n"
+        "DECLARE runtime_extra_view_existing_oid oid;\n"
+        "DECLARE runtime_extra_view_target_oid oid;\n"
         "BEGIN\n"
         "    SELECT udt_name = 'oid' INTO runtime_extra_view_json_is_oid\n"
         "    FROM information_schema.columns\n"
@@ -3865,8 +4071,25 @@ def runtime_extra_view_sql(
         "      AND table_name = 'runtime_extra_view'\n"
         "      AND column_name = 'view_json';\n"
         "    IF COALESCE(runtime_extra_view_json_is_oid, false) THEN\n"
+        "        SELECT view_json INTO runtime_extra_view_existing_oid\n"
+        "        FROM public.runtime_extra_view\n"
+        f"        WHERE code = {code};\n"
+        "        IF runtime_extra_view_existing_oid IS NOT NULL THEN\n"
+        "            IF EXISTS (\n"
+        "                SELECT 1\n"
+        "                FROM pg_largeobject_metadata\n"
+        "                WHERE oid = runtime_extra_view_existing_oid\n"
+        "            ) THEN\n"
+        "                IF convert_from(lo_get(runtime_extra_view_existing_oid), 'UTF8') = runtime_extra_view_payload THEN\n"
+        "                    runtime_extra_view_target_oid := runtime_extra_view_existing_oid;\n"
+        "                END IF;\n"
+        "            END IF;\n"
+        "        END IF;\n"
+        "        IF runtime_extra_view_target_oid IS NULL THEN\n"
+        "            runtime_extra_view_target_oid := lo_from_bytea(0, convert_to(runtime_extra_view_payload, 'UTF8'));\n"
+        "        END IF;\n"
         "        INSERT INTO public.runtime_extra_view (code, ec_env, version, view_code, view_json, proj_flag)\n"
-        f"        VALUES ({code}, {ec_env}, 0, {code}, lo_from_bytea(0, convert_to(runtime_extra_view_payload, 'UTF8')), false)\n"
+        f"        VALUES ({code}, {ec_env}, 0, {code}, runtime_extra_view_target_oid, false)\n"
         "        ON CONFLICT (code) DO UPDATE SET\n"
         "            ec_env = COALESCE(EXCLUDED.ec_env, public.runtime_extra_view.ec_env),\n"
         "            version = GREATEST(COALESCE(public.runtime_extra_view.version, 0), EXCLUDED.version),\n"

@@ -1,0 +1,220 @@
+{
+  "generatedAt": "2026-07-31T02:39:00.587Z",
+  "repoCommit": "ef2079491ed0bc2a12819ee48129ee67a619987a+working-tree",
+  "database": "PostgreSQL",
+  "environment": "http://10.11.100.17:18080",
+  "marker": "ADP_E2E_20260731023859_WOM_PROCESS_ACTIONS",
+  "module": "WOM 工序执行记录",
+  "route": "/msService/WOM/produceTask/processExelog/processExeLogList",
+  "processExecutionId": "9007190231282109",
+  "status": "PASS",
+  "navigation": {
+    "status": 200,
+    "url": "http://10.11.100.17:18080/msService/WOM/produceTask/processExelog/processExeLogList",
+    "title": "工序执行记录"
+  },
+  "toolbar": [
+    {
+      "id": "btn-viewDetail",
+      "present": true,
+      "visible": true,
+      "text": "查看详情"
+    },
+    {
+      "id": "btn-outptConsumption",
+      "present": true,
+      "visible": true,
+      "text": "产耗查看"
+    },
+    {
+      "id": "btn-manualStatistics",
+      "present": true,
+      "visible": true,
+      "text": "工艺统计"
+    },
+    {
+      "id": "btn-matConsumEntry",
+      "present": true,
+      "visible": false,
+      "text": "产耗录入"
+    }
+  ],
+  "noSelection": {
+    "messages": [
+      [
+        "w",
+        "请选择一条工序执行记录"
+      ]
+    ],
+    "popupCount": 0
+  },
+  "selection": {
+    "id": "9007190231282109",
+    "name": "糖化",
+    "produceBatchNum": "BPI-LINES0701-20260727-E22B71C8",
+    "needParamAna": true,
+    "processRunState": "WOM_runState/finished",
+    "actStartTime": 1785139256000,
+    "actEndTime": 1785139292000
+  },
+  "detail": {
+    "status": 200,
+    "url": "http://10.11.100.17:18080/msService/ProcessAnalysis/processAnalysis/processExecution/detail?processExecutionId=9007190231282109",
+    "title": "工序执行详情",
+    "body": "工序执行详情\n查看批次追溯\n刷新\n执行概况\n制造指令\nBPI_MIN_20260727_110711_TASK_TN\n生产批号\nBPI-LINES0701-20260727-E22B71C8\n产品\nBPI_MIN_20260727_110711_MAT BPI_MIN_20260727_110711 material\n生产线\nBPI_MIN_20260727_110711_LINE BPI_MIN_20260727_110711 production line\n工序\n糖化\n执行状态\n已完成\n实际开始\n2026/7/27 16:00:56\n实际结束\n2026/7/27 16:01:32\n工序边界\n上一工序\n喷射\n开始：2026/7/27 16:00:20\n结束：2026/7/27 16:00:44\n连续交接\n12 秒\n当前工序\n糖化\n开始：2026/7/27 16:00:56\n结束：2026/7/27 16:01:32\n末工序\n无下游工序\n下一工序\n无相邻工序\n流量与波美值证据\n\nPLANT-01 / LINE-S07-01，2026/7/27 16:00:56 至 2026/7/27 16:01:32\n\n瞬时流量\n波美值\n测点\t单位\t样本数\t最小值\t平均值\t最大值\njet.feed.baume\tBe\t10\t20.25\t20.25\t20.25\njet.flow.instant\tm3/h\t10\t0\t0\t0\nsaccharification.inlet.flow.instant\tm3/h\t10\t0.1\t9.6\t16.8\nsaccharification.liquor.baume\tBe\t10\t20.2\t20.619999999999997\t20.7"
+  },
+  "consumption": {
+    "status": 200,
+    "url": "http://10.11.100.17:18080/msService/WOM/produceTask/processExelog/matConsuEntryProView?viewCode=WOM_1.0.0_produceTask_processExeLogList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&buttonCode=WOM_1.0.0_produceTask_processExeLogList_BUTTON_outptConsumption&iscallback=false&id=9007190231282109",
+    "title": "产耗查看",
+    "body": "产耗查看\n(\n2026-07-27 16:16:44\n )\n0\n\t\t\t\t\t\n\n生产批号\n\t\nBPI-LINES0701-20260727-E22B71C8\n\t\n工序名称\n\t\n糖化\n\t\n工作单元\n\t\nBPI_MIN_20260727_110711 work unit\n\n\n实际开始\n\t\n2026-07-27 16:00:56\n\t\n实际结束\n\t\n2026-07-27 16:01:32\n\t\n\t\n投入记录\n产出记录\n消耗记录\n序号\n活动名称\n物料编码\n物料名称\n物料批号\n操作人\n使用量\n报工量\n使用时长\n使用开始时间\n使用结束时间\n仓库编码\n仓库名称\n货位状态\n货位编码\n货位名称\n需要同步\n已同步\n数据来源"
+  },
+  "statistics": {
+    "method": "GET",
+    "endpoint": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess?processId=9007190231282109",
+    "httpStatus": 200,
+    "responseCode": 200,
+    "response": {
+      "code": 200,
+      "data": {
+        "success": true,
+        "snapshot": {
+          "id": 176,
+          "tenant_id": "dt",
+          "source_type": "PROCESS",
+          "source_id": 9007190231282109,
+          "task_id": 9007190231280101,
+          "batch_no": "BPI-LINES0701-20260727-E22B71C8",
+          "source_state": "WOM_runState/finished",
+          "revision": 5,
+          "source_updated_at": "2026-07-27T13:47:09.311+0000",
+          "created_at": "2026-07-31T02:32:00.444+0000",
+          "updated_at": "2026-07-31T02:39:10.132+0000"
+        }
+      },
+      "message": "success",
+      "msg": "success"
+    },
+    "messages": [
+      [
+        "w",
+        "请选择一条工序执行记录"
+      ],
+      [
+        "s",
+        "工艺参数统计完成"
+      ]
+    ]
+  },
+  "http": [
+    {
+      "page": "list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/processExelog/processExeLogList",
+      "status": 200
+    },
+    {
+      "page": "list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/produceTask/processExelog/processExeLogList/i18n-value.js?0.2767145622726016",
+      "status": 200
+    },
+    {
+      "page": "list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_processExeLogList&menuCode=WOM_1.0.0_produceTask_processExeLogList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_produceTask_processExelog_processExeLogList_query",
+      "status": 200
+    },
+    {
+      "page": "list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/processExelog/processExeLogList-query",
+      "status": 200
+    },
+    {
+      "page": "consumption",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/processExelog/editStates?viewCode=WOM_1.0.0_produceTask_matConsuEntryProView&id=9007190231282109",
+      "status": 200
+    },
+    {
+      "page": "consumption",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsuEntryProView&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "consumption",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/baseService/workbench/upload-list?linkId=9007190231282109&type=WOM_produceTask_ProcessExelog&viewCode=WOM_1.0.0_produceTask_matConsuEntryProView",
+      "status": 200
+    },
+    {
+      "page": "consumption",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/processExelog/custom-data-dg1615273225070?dataGridCode=WOM_1.0.0_produceTask_matConsuEntryProViewdg1615273225070&procExelogId=9007190231282109",
+      "status": 200
+    },
+    {
+      "page": "consumption",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/processExelog/custom-data-dg1615273225070?dataGridCode=WOM_1.0.0_produceTask_matConsuEntryProViewdg1615273225070&procExelogId=9007190231282109",
+      "status": 200
+    },
+    {
+      "page": "list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess?processId=9007190231282109",
+      "status": 200
+    }
+  ],
+  "browser": {
+    "console": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "failedResponses": []
+  },
+  "screenshots": {
+    "list": "metadata/wom-process-execution-actions-list-20260731.png",
+    "detail": "metadata/wom-process-execution-actions-detail-20260731.png",
+    "consumption": "metadata/wom-process-execution-actions-consumption-20260731.png",
+    "statistics": "metadata/wom-process-execution-actions-statistics-20260731.png"
+  },
+  "persistence": {
+    "table": "public.pa_trace_snapshots",
+    "originalNeedParamAna": "false",
+    "before": {
+      "maxRevision": 4,
+      "rowCount": 1
+    },
+    "verificationSql": "SELECT id,tenant_id,source_type,source_id,task_id,batch_no,source_state,revision,updated_at FROM public.pa_trace_snapshots WHERE tenant_id='dt' AND source_type='PROCESS' AND source_id=9007190231282109 ORDER BY revision;",
+    "after": {
+      "maxRevision": 5,
+      "rowCount": 1
+    },
+    "rows": [
+      [
+        "176",
+        "dt",
+        "PROCESS",
+        "9007190231282109",
+        "9007190231280101",
+        "BPI-LINES0701-20260727-E22B71C8",
+        "WOM_runState/finished",
+        "5",
+        "2026-07-31 10:39:10.13249+08"
+      ]
+    ],
+    "restoredNeedParamAna": "false"
+  },
+  "issues": [],
+  "login": {
+    "status": 200
+  }
+}

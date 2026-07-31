@@ -4683,6 +4683,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/239-wom-process-execution-actions-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -5218,6 +5224,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-wom-prepare-need-persistence-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-wom-process-execution-actions-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -7461,6 +7473,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/wom-process-execution-actions-acceptance-20260731.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/wom-toolbar-action-coverage.md",
       "state": "tracked",
       "tracked": true
@@ -9316,6 +9334,36 @@
     {
       "ignored": false,
       "path": "metadata/wom-process-consumption-view-regression-20260730.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-process-execution-actions-acceptance-20260731.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-process-execution-actions-consumption-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-process-execution-actions-detail-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-process-execution-actions-list-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-process-execution-actions-statistics-20260731.png",
       "state": "tracked",
       "tracked": true
     },
@@ -13208,16 +13256,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 868
+      "tracked": 870
     },
     "docs": {
-      "tracked": 160
+      "tracked": 161
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 315
+      "tracked": 320
     },
     "package.json": {
       "tracked": 1
@@ -13241,8 +13289,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2197,
-    "tracked": 2197,
+    "totalFiles": 2205,
+    "tracked": 2205,
     "untracked": 0
   },
   "untrackedByDirectory": []

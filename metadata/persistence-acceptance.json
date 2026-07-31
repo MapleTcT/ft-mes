@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-30T20:28:28+08:00",
-  "repoCommit": "3ad9b065a4d273b500c08749f6af38192de90364+working-tree-wts-basic-settings",
+  "generatedAt": "2026-07-31T02:42:53.294Z",
+  "repoCommit": "ef2079491ed0bc2a12819ee48129ee67a619987a+working-tree-wom-process-actions",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
-    "generatedAt": "2026-07-30T20:28:28+08:00",
+    "generatedAt": "2026-07-31T02:42:53.294Z",
     "wtsBasicSettings": {
       "status": "PASS_RENDER_11_OF_11_AND_REPRESENTATIVE_CRUD",
       "marker": "ADP_E2E_20260730_WTS_BASIC_1785414128217",
@@ -297,14 +297,20 @@
       "marker": "",
       "evidence": "metadata/qcs-workflow-editor-regression-20260730.json",
       "assertions": "Mixed-case workflow locale assets returned 6/6 HTTP 200; QCS manuInspectWorkFlow getFlow changed from 500 to 200 and rendered 20 diagram elements through reload, zoom and source/design mode switching; WTS fireWorkWF rendered 88 elements; browser error arrays were zero and the QCS workflow database fingerprint was unchanged."
+    },
+    "womProcessExecutionActions": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260731023859_WOM_PROCESS_ACTIONS",
+      "evidence": "metadata/wom-process-execution-actions-acceptance-20260731.json",
+      "assertions": "three visible actions; no-selection warning; detail and consumption HTTP 200; PROCESS snapshot revision 4->5; controlled flag restored; browser errors zero"
     }
   },
   "summary": {
-    "testedFeatures": 314,
-    "pass": 294,
+    "testedFeatures": 317,
+    "pass": 295,
     "fail": 1,
     "blocked": 0,
-    "notApplicable": 19
+    "notApplicable": 21
   },
   "items": [
     {
@@ -404,9 +410,9 @@
       "requiresPersistence": true,
       "backendEntry": "PATROL public item controller/service/mapper",
       "tables": [
-      "mp_work_items",
-      "mp_work_areas",
-      "mp_work_groups"
+        "mp_work_items",
+        "mp_work_areas",
+        "mp_work_groups"
       ],
       "marker": "ADP_E2E_20260730065159_PATROL_ITEM",
       "verificationSql": "Marker-scoped PATROL item create/update/delete queries recorded in /tmp/adp-admin-patrol-item-retest-20260730.json.",
@@ -6860,9 +6866,73 @@
       "status": "NOT_APPLICABLE",
       "evidence": "The no-selection path displayed readable Chinese and no raw i18n key. The selected process execution opened a nonblank detail page with batch, process and work-unit data; input/output requests were HTTP 200 and the output row showed BPI_MIN_20260727_110711_MAT with quantity 3.00. Browser console, page errors and failed requests were zero. Runtime payloads were 72678/29895 bytes and the legacy raw call position was 0. The operation was read-only.",
       "issues": []
+    },
+    {
+      "acceptanceSet": "wom-process-execution-actions-20260731",
+      "module": "WOM 工序执行详情",
+      "route": "/msService/WOM/produceTask/processExelog/processExeLogList",
+      "operation": "未选择记录校验提示；选择糖化工序后点击查看详情",
+      "api": "GET /msService/ProcessAnalysis/processAnalysis/processExecution/detail; GET /msService/ProcessAnalysis/processAnalysis/api/process-executions/{id}",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "ProcessAnalysisController.processExecutionDetailPage/processExecutionDetail -> TraceabilityService.processExecutionDetail -> ProcessAnalysisRepository",
+      "tables": [
+        "public.wom_process_exelogs",
+        "public.wom_produce_tasks",
+        "public.wom_bpi_production_context_bindings"
+      ],
+      "marker": "ADP_E2E_20260731023859_WOM_PROCESS_ACTIONS",
+      "verificationSql": "SELECT id,name,produce_batch_num,process_run_state,act_start_time,act_end_time FROM public.wom_process_exelogs WHERE id=9007190231282109;",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The real toolbar showed 查看详情. No selection produced the readable warning without opening a blank page. The selected BPI sugar process opened HTTP 200 detail with a 12-second injection-to-saccharification handover and four flow/Baume telemetry points. This operation is read-only.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wom-process-execution-actions-20260731",
+      "module": "WOM 工序产耗查看",
+      "route": "/msService/WOM/produceTask/processExelog/processExeLogList",
+      "operation": "选择糖化工序后点击产耗查看",
+      "api": "GET /msService/WOM/produceTask/processExelog/matConsuEntryProView; GET /editStates; GET /baseService/view/layoutJson",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "WOM processExelog read view and data endpoints",
+      "tables": [
+        "public.runtime_extra_view",
+        "public.ec_extra_view",
+        "public.wom_process_exelogs"
+      ],
+      "marker": "ADP_E2E_20260731023859_WOM_PROCESS_ACTIONS",
+      "verificationSql": "SELECT id,name,produce_batch_num,process_run_state,act_start_time,act_end_time FROM public.wom_process_exelogs WHERE id=9007190231282109;",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The selected process opened the production-consumption page with HTTP 200. Input, output and consumption tabs rendered after loading; browser error arrays were zero. This operation is read-only.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wom-process-execution-actions-20260731",
+      "module": "WOM 工序工艺统计",
+      "route": "/msService/WOM/produceTask/processExelog/processExeLogList",
+      "operation": "选择已完成且临时启用参数统计的糖化工序，点击工艺统计",
+      "api": "GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess?processId=9007190231282109",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "ProcessAnalysisController.analyzeProcess -> TraceabilityService.analyzeProcess/snapshot -> ProcessAnalysisRepository.upsertSnapshot",
+      "tables": [
+        "public.wom_process_exelogs",
+        "public.pa_trace_snapshots"
+      ],
+      "marker": "ADP_E2E_20260731023859_WOM_PROCESS_ACTIONS",
+      "verificationSql": "SELECT id,tenant_id,source_type,source_id,task_id,batch_no,source_state,revision,updated_at FROM public.pa_trace_snapshots WHERE tenant_id='dt' AND source_type='PROCESS' AND source_id=9007190231282109 ORDER BY revision;",
+      "status": "PASS",
+      "evidence": "HTTP 200/code 200 returned 工艺参数统计完成. PostgreSQL snapshot id 176 retained source state WOM_runState/finished and revision advanced 4 -> 5. The controlled need_param_ana flag was restored to false. Browser console/page/request/HTTP error arrays were zero.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260731023859_WOM_PROCESS_ACTIONS",
+      "artifact": "metadata/wom-process-execution-actions-acceptance-20260731.json",
+      "summary": "Real WOM process-execution toolbar acceptance restored three visible actions, rendered process boundary/telemetry and production-consumption pages, persisted a PROCESS snapshot revision 4->5, restored the controlled statistics flag, and observed zero browser errors."
+    },
     {
       "marker": "",
       "artifact": "metadata/wom-process-consumption-view-regression-20260730.json",

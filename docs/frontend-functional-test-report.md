@@ -1451,6 +1451,20 @@ WOM 业务记录。机器证据：
 `metadata/admin-permission-directory-scan-20260730.json` 和
 `metadata/admin-config-deep-scan-20260730.json`。
 
+### WOM 工序执行记录动作回归（2026-07-31）
+
+用户反馈“指令执行记录”列表有数据但工具栏为空。运行时视图中的供应商动作均为未发布，
+并非 admin 角色遗漏授权。本轮按历史执行记录语义恢复只读详情、产耗查看和派生统计，
+没有在审计页增加会破坏执行谱系的新增/删除动作。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WOM 工序执行记录 | `/msService/WOM/produceTask/processExelog/processExeLogList` | 检查工具栏；未选行点击；选中糖化记录依次查看详情、产耗和执行工艺统计 | 列表 `layoutJson/query`；ProcessAnalysis 工序详情；WOM 产耗详情；`GET /ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess` | `查看详情`、`产耗查看`、`工艺统计` 可见；未选行提示正确；详情显示喷射到糖化 12 秒边界与流量/波美值；产耗三页签完整；统计成功；浏览器四类错误为 0 | 统计接口 HTTP 200/code 200；`pa_trace_snapshots` 的受控 PROCESS 快照 revision `4 -> 5`；临时统计标志已恢复为 `false` | `runtime_extra_view`、`ec_extra_view`、`wom_process_exelogs`、`pa_trace_snapshots` | PASS | 无 |
+
+详细报告：
+`docs/wom-process-execution-actions-acceptance-20260731.md`。机器证据：
+`metadata/wom-process-execution-actions-acceptance-20260731.json`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

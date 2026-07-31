@@ -87,6 +87,8 @@ WOM_TOOLBAR_ROW_SMOKE_OUTPUT ?= metadata/wom-toolbar-row-smoke.json
 WOM_TOOLBAR_ROW_SMOKE_SEED_OUTPUT ?= /tmp/adp-wom-toolbar-row-smoke-seed.json
 WOM_TOOLBAR_ROW_SMOKE_SCREENSHOT ?= metadata/wom-toolbar-row-smoke.png
 WOM_TOOLBAR_PAGE_TIMEOUT_MS ?= 240000
+WOM_PROCESS_ACTIONS_OUTPUT ?= metadata/wom-process-execution-actions-acceptance-20260731.json
+WOM_PROCESS_ACTIONS_SCREENSHOT_DIR ?= metadata
 WOM_STOP_PERSISTENCE_OUTPUT ?= /tmp/adp-wom-stop-persistence-acceptance.json
 WOM_STOP_OUTPUT_PERSISTENCE_OUTPUT ?= /tmp/adp-wom-stop-output-persistence-acceptance.json
 WOM_ADVANCE_RELEASE_PERSISTENCE_OUTPUT ?= /tmp/adp-wom-advance-release-persistence-acceptance.json
@@ -178,6 +180,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: acceptance-wom-public-produce-task-created-retirement
 .PHONY: acceptance-factory-line-persistence
 .PHONY: acceptance-fructose-line-pilot
+.PHONY: acceptance-wom-process-execution-actions
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
@@ -605,6 +608,7 @@ runtime-script-check:
 	$(NODE) --test deploy/docker/scripts/qcs-quality-profile.test.js
 	$(NODE) --check deploy/docker/scripts/adp-core-flow-runtime-rollback-rehearsal.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-toolbar-row-smoke.js
+	$(NODE) --check deploy/docker/scripts/adp-wom-process-execution-actions-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-prepare-need-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-active-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-wom-manu-inspect-persistence-acceptance.js
@@ -1420,6 +1424,9 @@ acceptance-wom-hold-restart-persistence:
 smoke-wom-toolbar-row:
 	$(MAKE) acceptance-wom-hold-restart-persistence WOM_HOLD_RESTART_PERSISTENCE_OUTPUT=$(WOM_TOOLBAR_ROW_SMOKE_SEED_OUTPUT) ADP_PAGE_TIMEOUT_MS=$(WOM_TOOLBAR_PAGE_TIMEOUT_MS) ADP_GRID_TIMEOUT_MS=$(WOM_TOOLBAR_PAGE_TIMEOUT_MS) ADP_WOM_KEEP_FIXTURE=true
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(WOM_TOOLBAR_PAGE_TIMEOUT_MS) ADP_GRID_TIMEOUT_MS=$(WOM_TOOLBAR_PAGE_TIMEOUT_MS) ADP_WOM_TOOLBAR_SEED_EVIDENCE=$(WOM_TOOLBAR_ROW_SMOKE_SEED_OUTPUT) ADP_WOM_TOOLBAR_ROW_SMOKE_OUTPUT=$(WOM_TOOLBAR_ROW_SMOKE_OUTPUT) ADP_WOM_TOOLBAR_SCREENSHOT=$(WOM_TOOLBAR_ROW_SMOKE_SCREENSHOT) $(NODE) deploy/docker/scripts/adp-wom-toolbar-row-smoke.js
+
+acceptance-wom-process-execution-actions:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_WOM_PROCESS_ACTIONS_OUTPUT=$(WOM_PROCESS_ACTIONS_OUTPUT) ADP_WOM_PROCESS_ACTIONS_SCREENSHOT_DIR=$(WOM_PROCESS_ACTIONS_SCREENSHOT_DIR) $(NODE) deploy/docker/scripts/adp-wom-process-execution-actions-acceptance.js
 
 acceptance-wom-stop-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_WOM_TRANSITIONS=start,stop ADP_WOM_STATE_PERSISTENCE_OUTPUT=$(WOM_STOP_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-wom-start-persistence-acceptance.js
