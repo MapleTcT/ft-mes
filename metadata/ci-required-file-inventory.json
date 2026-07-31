@@ -7041,6 +7041,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/qualification-management-functional-acceptance-20260731.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/repository-overview.md",
       "state": "tracked",
       "tracked": true
@@ -9130,6 +9136,12 @@
     {
       "ignored": false,
       "path": "metadata/qcs-wts-organization-regression-20260730.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qualification-management-runtime-acceptance-20260731.json",
       "state": "tracked",
       "tracked": true
     },
@@ -13199,13 +13211,13 @@
       "tracked": 868
     },
     "docs": {
-      "tracked": 159
+      "tracked": 160
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 314
+      "tracked": 315
     },
     "package.json": {
       "tracked": 1
@@ -13229,8 +13241,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2195,
-    "tracked": 2195,
+    "totalFiles": 2197,
+    "tracked": 2197,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -1,0 +1,145 @@
+{
+  "generatedAt": "2026-07-31T01:59:31Z",
+  "repoCommit": "da10c0d26710479c282172821a334373c17aa31e",
+  "environment": {
+    "baseUrl": "http://10.11.100.17:18080",
+    "database": "PostgreSQL"
+  },
+  "summary": {
+    "menuPages": 10,
+    "pageActionPass": 10,
+    "pageActionFail": 0,
+    "persistenceScenarios": 2,
+    "persistencePass": 2,
+    "persistenceFail": 0,
+    "deferredBusinessScenarios": 3
+  },
+  "items": [
+    {
+      "module": "过期提醒人",
+      "route": "/msService/Qualify/reminderSet/reminderSet/reminderSetLayout",
+      "expectedActions": ["新增", "修改", "删除", "导入"],
+      "acceptanceLevel": "PAGE_ACTIONS",
+      "status": "PASS",
+      "persistenceStatus": "NOT_EXECUTED"
+    },
+    {
+      "module": "人员资质查询",
+      "route": "/msService/Qualify/staffCertificate/staffCert/staffCertList",
+      "expectedActions": ["查询", "清空"],
+      "acceptanceLevel": "PAGE_ACTIONS",
+      "status": "PASS",
+      "persistenceStatus": "NOT_APPLICABLE"
+    },
+    {
+      "module": "企业资质（导入）",
+      "route": "/msService/Qualify/companyCertificateImport/companyCertImp/companyCertImpList",
+      "expectedActions": ["导入"],
+      "acceptanceLevel": "PAGE_ACTIONS",
+      "status": "PASS",
+      "persistenceStatus": "NOT_EXECUTED"
+    },
+    {
+      "module": "人员资质设置",
+      "route": "/msService/Qualify/staffCertificate/certStaff/certStaffList",
+      "expectedActions": ["人员资质设置", "外部修改记录查看"],
+      "acceptanceLevel": "PAGE_ACTIONS",
+      "status": "PASS",
+      "persistenceStatus": "NOT_EXECUTED"
+    },
+    {
+      "module": "企业资质设置",
+      "route": "/msService/Qualify/companyCertificate/certCompany/certCompanyList",
+      "expectedActions": ["企业资质设置"],
+      "acceptanceLevel": "PAGE_ACTIONS",
+      "status": "PASS",
+      "persistenceStatus": "NOT_EXECUTED"
+    },
+    {
+      "module": "资质分类",
+      "route": "/msService/Qualify/certificateType/certificateType/cerTypeLayOut",
+      "expectedActions": ["新增", "修改", "删除", "导入"],
+      "acceptanceLevel": "PAGE_API_POSTGRES",
+      "status": "PASS",
+      "persistenceStatus": "PASS",
+      "marker": "ADP_E2E_20260731_QUAL_TYPE_1785456672809",
+      "recordId": "771611831981312",
+      "api": {
+        "submit": "/msService/Qualify/certificateType/certificateType/cerTypeEdit/submit",
+        "delete": "/msService/Qualify/certificateType/certificateType/delete",
+        "responseStatus": 200
+      },
+      "tables": ["qlf_certificate_types", "qlf_certificate_types_mc"],
+      "verificationSql": [
+        "SELECT id, name, valid, parent_id FROM public.qlf_certificate_types WHERE id = 771611831981312",
+        "SELECT count(*) FROM public.qlf_certificate_types_mc WHERE COALESCE(certificate_type, certificate_type_id, certificatetype_id, cer_type) = 771611831981312"
+      ],
+      "result": {
+        "nameSuffix": "_EDIT",
+        "valid": false,
+        "parentId": "1000",
+        "mnemonicRows": 0
+      }
+    },
+    {
+      "module": "企业资质查询",
+      "route": "/msService/Qualify/companyCertificate/companyCert/companyCertList",
+      "expectedActions": ["查询", "清空"],
+      "acceptanceLevel": "PAGE_ACTIONS",
+      "status": "PASS",
+      "persistenceStatus": "NOT_APPLICABLE"
+    },
+    {
+      "module": "过期提醒待办",
+      "route": "/msService/Qualify/reminderPend/reminderPend/reminderPendList",
+      "expectedActions": ["处理"],
+      "acceptanceLevel": "PAGE_ACTIONS",
+      "status": "PASS",
+      "persistenceStatus": "NOT_EXECUTED"
+    },
+    {
+      "module": "资质",
+      "route": "/msService/Qualify/certificate/certificate/certifcateLayOut",
+      "expectedActions": ["新增", "修改", "删除", "导入"],
+      "acceptanceLevel": "PAGE_API_POSTGRES",
+      "status": "PASS",
+      "persistenceStatus": "PASS",
+      "marker": "ADP_E2E_QUAL_CERT_1785460608011",
+      "recordId": "771626883347712",
+      "childRecordId": "771626884224256",
+      "api": {
+        "submit": "/msService/Qualify/certificate/certificate/certificateEdit/submit",
+        "delete": "/msService/Qualify/certificate/certificate/delete",
+        "responseStatus": 200
+      },
+      "tables": ["qlf_certificates", "qlf_certificate_levels"],
+      "verificationSql": [
+        "SELECT id, code, name, memo_field, cer_type, valid, version FROM public.qlf_certificates WHERE id = 771626883347712",
+        "SELECT id, certificate, code, name, memo_field, valid, version FROM public.qlf_certificate_levels WHERE id = 771626884224256"
+      ],
+      "result": {
+        "parentValid": false,
+        "parentVersion": 2,
+        "childRowsAfterDelete": 0
+      }
+    },
+    {
+      "module": "人员资质（导入）",
+      "route": "/msService/Qualify/staffCertificateImport/staffCertImp/staffCertImpList",
+      "expectedActions": ["导入"],
+      "acceptanceLevel": "PAGE_ACTIONS",
+      "status": "PASS",
+      "persistenceStatus": "NOT_EXECUTED"
+    }
+  ],
+  "browserEvidence": {
+    "routesVisited": 10,
+    "consoleErrors": 0,
+    "httpErrors": 0
+  },
+  "openItems": [
+    "人员和企业资质导入的文件解析、错误回执与事务回滚",
+    "人员和企业资质分配、续期、撤销与历史记录",
+    "过期提醒生成、待办处理和消息送达"
+  ]
+}
