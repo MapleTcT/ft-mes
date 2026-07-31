@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-31T12:57:30+00:00",
-  "repoCommit": "4cfa5ab6a872aab53bd96e0453bcb19943362dc6",
+  "generatedAt": "2026-07-31T17:49:32+00:00",
+  "repoCommit": "a4f1f0dc889bb6fb93805871792b822951f32dcb",
   "generatedFrom": [
     "metadata/current-content-inventory.json",
     "metadata/backend-module-dependency-inventory.json",
@@ -24,7 +24,7 @@
     "sourceModuleOraclePolicyPass": true,
     "oracleBacklogReferenceCount": 1640,
     "directOracleDependencyCount": 2,
-    "postgresMigrationCount": 247,
+    "postgresMigrationCount": 255,
     "postgresMigrationHighRiskCount": 0,
     "postgresMapperAuditErrorCount": 0,
     "postgresMapperAuditWarningCount": 0,
@@ -82,8 +82,8 @@
     "topFiles": []
   },
   "oracleMigrationAudit": {
-    "generatedAt": "2026-07-31T12:54:47+00:00",
-    "repoCommit": "4cfa5ab6a872aab53bd96e0453bcb19943362dc6",
+    "generatedAt": "2026-07-31T17:49:14+00:00",
+    "repoCommit": "a4f1f0dc889bb6fb93805871792b822951f32dcb",
     "findingCount": 1640,
     "categoryTotal": 1640,
     "unclassifiedReferenceCount": 0
@@ -178,7 +178,7 @@
       "id": "oracle-audit-current-and-classified",
       "title": "Oracle migration audit 可追溯且无未分类引用",
       "status": "pass",
-      "evidence": "generatedAt=2026-07-31T12:54:47+00:00, repoCommit=4cfa5ab6a872aab53bd96e0453bcb19943362dc6, unclassified=0, findingCount=1640, categoryTotal=1640",
+      "evidence": "generatedAt=2026-07-31T17:49:14+00:00, repoCommit=a4f1f0dc889bb6fb93805871792b822951f32dcb, unclassified=0, findingCount=1640, categoryTotal=1640",
       "nextAction": "先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。",
       "blocking": false
     },
@@ -202,7 +202,7 @@
       "id": "postgres-migration-governance",
       "title": "PostgreSQL 初始化脚本可审计",
       "status": "pass",
-      "evidence": "247 scripts, range=001-247, highRisk=0, watch=90",
+      "evidence": "255 scripts, range=001-255, highRisk=0, watch=90",
       "nextAction": "新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。",
       "blocking": false
     },

@@ -4743,6 +4743,54 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/248-wts-business-statistics-actions-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/249-wts-business-statistics-actions-lob-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/250-wts-ticket-edit-subgrid-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/251-wts-ledger-export-runtime-datagrid.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/252-wts-ledger-export-query-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/253-wts-certificate-part-entity.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/254-wts-firework-batch-print-render-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/255-wts-firework-native-batch-print-collision.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -5350,6 +5398,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-workappointment-workplan-persistence-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-wts-business-statistics-actions-regression.js",
       "state": "tracked",
       "tracked": true
     },
@@ -6046,6 +6100,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/test_patch_rm_batch_formula_list.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test_patch_wts_runtime_compat.py",
       "state": "tracked",
       "tracked": true
     },
@@ -7570,6 +7630,12 @@
     {
       "ignored": false,
       "path": "docs/wts-basic-settings-functional-acceptance-20260730.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/wts-business-statistics-functional-acceptance-20260731.md",
       "state": "tracked",
       "tracked": true
     },
@@ -9676,6 +9742,12 @@
     {
       "ignored": false,
       "path": "metadata/wts-basic-settings-runtime-acceptance-20260730.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wts-business-statistics-runtime-acceptance-20260731.json",
       "state": "tracked",
       "tracked": true
     },
@@ -13496,16 +13568,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 882
+      "tracked": 892
     },
     "docs": {
-      "tracked": 163
+      "tracked": 164
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 346
+      "tracked": 347
     },
     "package.json": {
       "tracked": 1
@@ -13529,8 +13601,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2245,
-    "tracked": 2245,
+    "totalFiles": 2257,
+    "tracked": 2257,
     "untracked": 0
   },
   "untrackedByDirectory": []

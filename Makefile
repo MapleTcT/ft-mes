@@ -691,6 +691,8 @@ runtime-script-check:
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-msgmanagement-notice-protocol-mapper.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-eam-reactapi-ready.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-wts-runtime-compat.py
+	$(PYTHON) -m unittest deploy/docker/scripts/test_patch_wts_runtime_compat.py
+	$(NODE) --check deploy/docker/scripts/adp-wts-business-statistics-actions-regression.js
 	$(PYTHON) -m py_compile scripts/generate-runtime-patch-manifest.py
 
 sustainable-check:

@@ -97,6 +97,24 @@ console、page error、4xx/5xx 和 request failed 均为 0。测试库当前有 
 `metadata/wts-basic-settings-runtime-acceptance-20260730.json`。其余 10 个入口本轮只验收
 新增表单渲染，没有提交业务记录。
 
+## 2026-07-31 WTS 业务管理与统计分析动作回归
+
+针对“作业管理 -> 业务管理/统计分析”11 个菜单工具栏为空的问题，恢复 24 份
+list/edit/view 运行时布局、作业票新增/详情动作、台账导出和动火批量打印兼容入口。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WTS 业务管理 | 8 类安全作业列表 | 检查动作栏；点击新增、详情和打印未选择校验 | 8 个列表及 13 个 edit/view `layoutJson` | 8/8 页面动作可见；5 个新增表单打开；动火详情打开 | 页面与布局接口正常 | `runtime_extra_view`、`ec_extra_view` | PASS | 7 个空列表的真实详情仍 BLOCKED |
+| WTS 作业台账 | `/msService/WTS/workTicket/workTicket/workList` | 选择记录查看详情；导出 | `workList-query`、动火详情路由 | 详情弹窗和 `.xls` 下载成功 | 导出 HTTP 200 | 只读 | PASS | 无 |
+| WTS 盲板台账 | `/msService/WTS/blindPlateAccount/plateAccount/plateAccountList` | 导出 | `plateAccountList-query` | `.xls` 下载成功 | 导出 HTTP 200 | 只读 | PASS | 无 |
+| WTS 作业统计 | `/msService/WTS/workTicket/assWorkTickets/workTicket` | 查看仪表盘；导出 | 统计页面数据接口、客户端导出 | 图表和表格渲染；`.csv` 下载成功 | 只读查询正常 | 只读 | PASS | 无 |
+| WTS 动火批量打印 | 动火安全作业列表 | 点击批量打印 | `batchPrintOnServer` 打印契约 | 中文按钮和未选数据提示正常 | 原打印端点/操作码已保留 | 只读 | BLOCKED | 测试环境标准打印控件未授权，未验实际打印 |
+
+真实浏览器和布局共 35/35 检查通过，console、page、request 和 HTTP 错误均为 0；
+详细页面矩阵、PostgreSQL 元数据复读和边界见
+`docs/wts-business-statistics-functional-acceptance-20260731.md`，机器记录为
+`metadata/wts-business-statistics-runtime-acceptance-20260731.json`。
+
 ## 2026-07-28 标准核心链路复验
 
 本轮冻结外围模块，只验收

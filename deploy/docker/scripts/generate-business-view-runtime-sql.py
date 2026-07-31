@@ -17,7 +17,7 @@ import json
 import re
 import sys
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -114,6 +114,30 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "TOOL_6.0.0.0_toolInfo_toolLayout",
     "Special_0.0.1_semFinishCheck_finishCheckList",
     "WTS_1.0.0_workPermit_workPermitList",
+    "WTS_1.0.0_workTicket_soilWork",
+    "WTS_1.0.0_workTicket_limitSpaceWork",
+    "WTS_1.0.0_workTicket_liftWork",
+    "WTS_1.0.0_workTicket_electricityWork",
+    "WTS_1.0.0_workTicket_heightWork",
+    "WTS_1.0.0_workTicket_firework",
+    "WTS_1.0.0_workTicket_breakWork",
+    "WTS_1.0.0_workTicket_blockWork",
+    "WTS_1.0.0_workTicket_workList",
+    "WTS_1.0.0_blindPlateAccount_plateAccountList",
+    "WTS_1.0.0_workTicket_workTicket",
+    "WTS_1.0.0_workTicket_soilWorkEdit",
+    "WTS_1.0.0_workTicket_limitSpaceWorkEdit",
+    "WTS_1.0.0_workTicket_electricityEdit",
+    "WTS_1.0.0_workTicket_heightWorkEdit",
+    "WTS_1.0.0_workTicket_breakWorkEdit",
+    "WTS_1.0.0_workTicket_soilWorkView",
+    "WTS_1.0.0_workTicket_limitSpaceView",
+    "WTS_1.0.0_workTicket_liftWorkView",
+    "WTS_1.0.0_workTicket_electricityView",
+    "WTS_1.0.0_workTicket_heightWorkView",
+    "WTS_1.0.0_workTicket_fireworkView",
+    "WTS_1.0.0_workTicket_breakWorkView",
+    "WTS_1.0.0_workTicket_blockWorkView",
     "workAppointment_6.1.6.1_workPlan_workPlanList",
 )
 
@@ -871,6 +895,85 @@ QCS_SECONDARY_VIEW_CODES = tuple(
     )
     for code in (family + "List", family + "Edit", family + "View")
 )
+
+WTS_WORK_TICKET_LIST_ACTIONS: Dict[str, Dict[str, str]] = {
+    "WTS_1.0.0_workTicket_soilWork": {
+        "grid_api": "WTS_1.0.0_workTicket_soilWork_workTicket_sdg",
+        "detail_view": "WTS_1.0.0_workTicket_soilWorkView",
+        "edit_view": "WTS_1.0.0_workTicket_soilWorkEdit",
+        "add_operation": "soilWork_add_add_WTS_1.0.0_workTicket_soilWork",
+    },
+    "WTS_1.0.0_workTicket_limitSpaceWork": {
+        "grid_api": "WTS_1.0.0_workTicket_limitSpaceWork_workTicket_sdg",
+        "detail_view": "WTS_1.0.0_workTicket_limitSpaceView",
+        "edit_view": "WTS_1.0.0_workTicket_limitSpaceWorkEdit",
+        "add_operation": "limitSpaceWork_add_add_WTS_1.0.0_workTicket_limitSpaceWork",
+    },
+    "WTS_1.0.0_workTicket_liftWork": {
+        "grid_api": "WTS_1.0.0_workTicket_liftWork_workTicket_sdg",
+        "detail_view": "WTS_1.0.0_workTicket_liftWorkView",
+    },
+    "WTS_1.0.0_workTicket_electricityWork": {
+        "grid_api": "WTS_1.0.0_workTicket_electricityWork_workTicket_sdg",
+        "detail_view": "WTS_1.0.0_workTicket_electricityView",
+        "edit_view": "WTS_1.0.0_workTicket_electricityEdit",
+        "add_operation": "electricityWork_add_add_WTS_1.0.0_workTicket_electricityWork",
+    },
+    "WTS_1.0.0_workTicket_heightWork": {
+        "grid_api": "WTS_1.0.0_workTicket_heightWork_workTicket_sdg",
+        "detail_view": "WTS_1.0.0_workTicket_heightWorkView",
+        "edit_view": "WTS_1.0.0_workTicket_heightWorkEdit",
+        "add_operation": "heightWork_add_add_WTS_1.0.0_workTicket_heightWork",
+    },
+    "WTS_1.0.0_workTicket_firework": {
+        "grid_api": "WTS_1.0.0_workTicket_firework_workTicket_sdg",
+        "detail_view": "WTS_1.0.0_workTicket_fireworkView",
+        "batch_print_operation": "firework_batchPrint_dy_WTS_1.0.0_workTicket_firework",
+    },
+    "WTS_1.0.0_workTicket_breakWork": {
+        "grid_api": "WTS_1.0.0_workTicket_breakWork_workTicket_sdg",
+        "detail_view": "WTS_1.0.0_workTicket_breakWorkView",
+        "edit_view": "WTS_1.0.0_workTicket_breakWorkEdit",
+        "add_operation": "breakWork_add_add_WTS_1.0.0_workTicket_breakWork",
+    },
+    "WTS_1.0.0_workTicket_blockWork": {
+        "grid_api": "WTS_1.0.0_workTicket_blockWork_workTicket_sdg",
+        "detail_view": "WTS_1.0.0_workTicket_blockWorkView",
+    },
+}
+
+WTS_WORK_TYPE_DETAIL_ROUTES: Dict[str, str] = {
+    "WTS_workType/fireWork": "/msService/WTS/workTicket/workTicket/fireworkView",
+    "WTS_workType/limitSpaceWork": "/msService/WTS/workTicket/workTicket/limitSpaceView",
+    "WTS_workType/blockWork": "/msService/WTS/workTicket/workTicket/blockWorkView",
+    "WTS_workType/heightWork": "/msService/WTS/workTicket/workTicket/heightWorkView",
+    "WTS_workType/liftWork": "/msService/WTS/workTicket/workTicket/liftWorkView",
+    "WTS_workType/electricityWork": "/msService/WTS/workTicket/workTicket/electricityView",
+    "WTS_workType/soilWork": "/msService/WTS/workTicket/workTicket/soilWorkView",
+    "WTS_workType/breakWork": "/msService/WTS/workTicket/workTicket/breakWorkView",
+}
+
+WTS_READ_ONLY_LIST_ACTIONS: Dict[str, Dict[str, str]] = {
+    "WTS_1.0.0_workTicket_workList": {
+        "grid_api": "WTS_1.0.0_workTicket_workList_workTicket_sdg",
+        "query_url": "/msService/WTS/workTicket/workTicket/workList-query",
+        "download_url": "/msService/WTS/workTicket/workTicket/downloadXls",
+        "file_name": "WTS_work_ticket_ledger.xls",
+        "dynamic_detail": "true",
+    },
+    "WTS_1.0.0_blindPlateAccount_plateAccountList": {
+        "grid_api": "WTS_1.0.0_blindPlateAccount_plateAccountList",
+        "query_url": "/msService/WTS/blindPlateAccount/plateAccount/plateAccountList-query",
+        "download_url": "/msService/WTS/blindPlateAccount/plateAccount/downloadXls",
+        "file_name": "WTS_blind_plate_ledger.xls",
+    },
+    "WTS_1.0.0_workTicket_workTicket": {
+        "grid_api": "WTS_1.0.0_workTicket_workTicket",
+        "query_url": "/msService/WTS/workTicket/assWorkTickets/workTicket-query",
+        "download_url": "/msService/WTS/workTicket/assWorkTickets/downloadXls",
+        "file_name": "WTS_work_statistics.xls",
+    },
+}
 
 MAKE_TASK_BUSINESS_TAB_RESTORE = """
 (function restoreMakeTaskBusinessTabs(attempt) {
@@ -1789,9 +1892,69 @@ PACKAGED_UI_TABLE_SPECS: Tuple[PackagedUiTableSpec, ...] = (
 )
 
 
-def load_packaged_ui_rows(modules_root: Path) -> Dict[str, List[Dict[str, Any]]]:
-    """Load authoritative executable page metadata from the newest package export."""
-    table_names = {spec.runtime_table for spec in PACKAGED_UI_TABLE_SPECS}
+PACKAGED_MODEL_DEPENDENCY_SPECS: Tuple[PackagedUiTableSpec, ...] = (
+    PackagedUiTableSpec(
+        runtime_table="runtime_model",
+        product_table="ec_model",
+        columns=(
+            "code", "ec_env", "version", "create_time", "modify_time", "valid",
+            "is_error_sql", "proj_flag", "is_config_special", "special_auth_isandrel",
+            "is_mne_code", "is_control", "is_cache", "entity_class", "is_extra_col",
+            "enable_data_audit", "enable_operation_audit", "enable_sync", "table_name",
+            "inherent_common_flag", "ec_version", "jpa_name", "module_code",
+            "extends_model_code", "is_extends", "type", "data_type", "is_main",
+            "entity_code", "description", "model_name", "value_zh_cn", "name",
+        ),
+        boolean_columns=(
+            "valid", "proj_flag", "is_config_special", "special_auth_isandrel",
+            "is_mne_code", "is_control", "is_cache", "is_extra_col",
+            "enable_data_audit", "enable_operation_audit", "enable_sync",
+            "inherent_common_flag", "is_extends", "is_main",
+        ),
+        integer_columns=("version", "is_error_sql", "type", "data_type"),
+    ),
+    PackagedUiTableSpec(
+        runtime_table="runtime_property",
+        product_table="ec_property",
+        columns=(
+            "code", "ec_env", "version", "create_time", "modify_time", "valid",
+            "entity_code", "module_code", "only_leaf", "is_group_object",
+            "proj_custom_in_use", "proj_flag", "sort", "is_hidden", "is_engine",
+            "fetch_mode", "associated_property_code", "associated_type", "is_custom",
+            "is_mne_whole_like_query", "column_name", "senior_system_code", "no_analyzer",
+            "is_main_associated", "is_used_for_search", "stretch", "pic_height",
+            "pic_width", "is_bussiness_key", "is_control", "is_used_mne_code",
+            "default_value", "is_sensitive", "is_main_display", "is_used_for_list",
+            "model_code", "description", "is_pk", "is_ignore_audit", "is_inherent",
+            "is_unique", "multable", "decimal_num", "max_length", "nullable",
+            "is_index", "field_type", "format", "type", "display_name", "name",
+            "is_support_sup_and_sub", "is_pic_support_multi_select", "max_pic_num",
+            "org_column_name", "is_tree_system_code", "show_width", "fillcontent",
+        ),
+        boolean_columns=(
+            "valid", "only_leaf", "is_group_object", "proj_custom_in_use", "proj_flag",
+            "is_hidden", "is_engine", "is_custom", "is_mne_whole_like_query",
+            "senior_system_code", "no_analyzer", "is_main_associated",
+            "is_used_for_search", "stretch", "is_bussiness_key", "is_control",
+            "is_used_mne_code", "is_sensitive", "is_main_display", "is_used_for_list",
+            "is_pk", "is_ignore_audit", "is_inherent", "is_unique", "multable",
+            "nullable", "is_index", "is_support_sup_and_sub",
+            "is_pic_support_multi_select", "is_tree_system_code",
+        ),
+        integer_columns=(
+            "version", "sort", "associated_type", "decimal_num", "max_length",
+            "max_pic_num", "show_width",
+        ),
+        lob_columns=("fillcontent",),
+    ),
+)
+
+
+def load_packaged_rows(
+    modules_root: Path, specs: Sequence[PackagedUiTableSpec]
+) -> Dict[str, List[Dict[str, Any]]]:
+    """Load authoritative metadata rows from the newest package export."""
+    table_names = {spec.runtime_table for spec in specs}
     selected: Dict[Tuple[str, str], Tuple[Tuple[int, ...], int, str, Dict[str, Any]]] = {}
     for metadata_path in sorted(modules_root.rglob("metadata.json")):
         if "target" in metadata_path.parts:
@@ -1829,6 +1992,11 @@ def load_packaged_ui_rows(modules_root: Path) -> Dict[str, List[Dict[str, Any]]]
     for (table_name, _code), candidate in sorted(selected.items()):
         result[table_name].append(candidate[3])
     return result
+
+
+def load_packaged_ui_rows(modules_root: Path) -> Dict[str, List[Dict[str, Any]]]:
+    """Load authoritative executable page metadata from the newest package export."""
+    return load_packaged_rows(modules_root, PACKAGED_UI_TABLE_SPECS)
 
 
 def packaged_row_matches_modules(row: Dict[str, Any], module_codes: Sequence[str]) -> bool:
@@ -1931,6 +2099,181 @@ def generate_packaged_ui_runtime_sql(modules_root: Path, module_codes: Sequence[
         for row in rows:
             lines.append(packaged_ui_row_sql(spec, row, runtime=True))
             lines.append(packaged_ui_row_sql(spec, row, runtime=False))
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def generate_packaged_datagrid_runtime_sql(
+    modules_root: Path, datagrid_codes: Sequence[str]
+) -> str:
+    """Restore exact packaged datagrids, fields, and target model dependencies."""
+    requested = tuple(dict.fromkeys(code for code in datagrid_codes if code))
+    requested_set = set(requested)
+    rows_by_table = load_packaged_ui_rows(modules_root)
+    data_grid_rows = [
+        row
+        for row in rows_by_table.get("runtime_data_grid", [])
+        if str(row.get("CODE") or row.get("code") or "").strip() in requested_set
+    ]
+    resolved = {
+        str(row.get("CODE") or row.get("code") or "").strip()
+        for row in data_grid_rows
+    }
+    missing = [code for code in requested if code not in resolved]
+    if missing:
+        raise ValueError("packaged datagrid metadata not found: " + ", ".join(missing))
+
+    field_rows = [
+        row
+        for row in rows_by_table.get("runtime_field", [])
+        if str(row.get("DATAGRID_CODE") or row.get("datagrid_code") or "").strip()
+        in requested_set
+    ]
+    target_model_codes = tuple(
+        dict.fromkeys(
+            str(row.get("TARGETMODEL_CODE") or row.get("targetmodel_code") or "").strip()
+            for row in data_grid_rows
+            if str(row.get("TARGETMODEL_CODE") or row.get("targetmodel_code") or "").strip()
+        )
+    )
+    dependency_rows = load_packaged_rows(modules_root, PACKAGED_MODEL_DEPENDENCY_SPECS)
+    packaged_model_rows = {
+        str(row.get("CODE") or row.get("code") or "").strip(): row
+        for row in dependency_rows.get("runtime_model", [])
+        if str(row.get("CODE") or row.get("code") or "").strip() in target_model_codes
+    }
+    packaged_property_rows = [
+        row
+        for row in dependency_rows.get("runtime_property", [])
+        if str(row.get("MODEL_CODE") or row.get("model_code") or "").strip()
+        in target_model_codes
+    ]
+    parsed_models = load_models(modules_root)
+    missing_models = [
+        code
+        for code in target_model_codes
+        if code not in packaged_model_rows and code not in parsed_models
+    ]
+    if missing_models:
+        raise ValueError(
+            "packaged datagrid target model metadata not found: "
+            + ", ".join(missing_models)
+        )
+
+    table_rows = {
+        "runtime_field": field_rows,
+        "runtime_data_grid": data_grid_rows,
+    }
+    lines = [
+        "-- Generated by deploy/docker/scripts/generate-business-view-runtime-sql.py --packaged-datagrid-runtime-only",
+        "-- Restores exact packaged datagrids, their owned fields, and target models without importing the full module.",
+        f"-- modules_root: {modules_root}",
+        f"-- requested_datagrid_codes: {','.join(requested)}",
+        "",
+    ]
+
+    model_spec, property_spec = PACKAGED_MODEL_DEPENDENCY_SPECS
+    lines.append(f"-- target models: {len(target_model_codes)}")
+    for model_code in target_model_codes:
+        packaged_model = packaged_model_rows.get(model_code)
+        if packaged_model is not None:
+            lines.append(packaged_ui_row_sql(model_spec, packaged_model, runtime=True))
+            lines.append(packaged_ui_row_sql(model_spec, packaged_model, runtime=False))
+            continue
+        model = parsed_models[model_code]
+        lines.append(runtime_model_sql(model))
+        lines.append(ec_model_sql(model))
+    lines.append("")
+
+    lines.append(f"-- target model properties: {len(packaged_property_rows)} packaged rows")
+    emitted_packaged_models = {
+        str(row.get("MODEL_CODE") or row.get("model_code") or "").strip()
+        for row in packaged_property_rows
+    }
+    for row in packaged_property_rows:
+        lines.append(packaged_ui_row_sql(property_spec, row, runtime=True))
+        lines.append(packaged_ui_row_sql(property_spec, row, runtime=False))
+    for model_code in target_model_codes:
+        if model_code in emitted_packaged_models:
+            continue
+        model = parsed_models[model_code]
+        for prop in model.properties:
+            lines.append(runtime_property_sql(prop))
+            lines.append(ec_property_sql(prop))
+    lines.append("")
+
+    for table_name in ("runtime_field", "runtime_data_grid"):
+        spec = next(
+            item for item in PACKAGED_UI_TABLE_SPECS
+            if item.runtime_table == table_name
+        )
+        rows = table_rows[table_name]
+        lines.append(f"-- {table_name}: {len(rows)} packaged rows")
+        for row in rows:
+            lines.append(packaged_ui_row_sql(spec, row, runtime=True))
+            lines.append(packaged_ui_row_sql(spec, row, runtime=False))
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def generate_datagrid_query_runtime_sql(
+    modules_root: Path, view_datagrid_bindings: Sequence[Tuple[str, str]]
+) -> str:
+    """Bind packaged view query metadata to recovered runtime datagrid codes."""
+    bindings = tuple(
+        dict.fromkeys(
+            (view_code.strip(), datagrid_code.strip())
+            for view_code, datagrid_code in view_datagrid_bindings
+            if view_code.strip() and datagrid_code.strip()
+        )
+    )
+    views = load_views(modules_root)
+    conditions = load_customer_conditions(modules_root)
+    sql_defs = load_sql_defs(modules_root)
+    lines = [
+        "-- Generated by deploy/docker/scripts/generate-business-view-runtime-sql.py --datagrid-query-runtime-only",
+        "-- Binds authoritative packaged view queries to recovered runtime datagrid codes.",
+        f"-- modules_root: {modules_root}",
+        "-- bindings: " + ",".join(f"{view}={grid}" for view, grid in bindings),
+        "",
+    ]
+    for view_code, datagrid_code in bindings:
+        view = views.get(view_code)
+        if view is None:
+            raise ValueError(f"view metadata not found for datagrid query binding: {view_code}")
+        condition = next(
+            (
+                item
+                for item in conditions.values()
+                if item.view_code == view_code or item.code == view_code
+            ),
+            synthetic_customer_condition(view),
+        )
+        bound_condition = replace(
+            condition,
+            datagrid_code=datagrid_code,
+            view_code=view_code,
+            module_code=condition.module_code or view.module_code,
+            entity_code=condition.entity_code or view.entity_code,
+        )
+        lines.append(f"-- query binding: {view_code} -> {datagrid_code}")
+        lines.append(runtime_customer_condition_sql(bound_condition))
+        lines.append(ec_customer_condition_sql(bound_condition))
+
+        matched_sql = sorted(
+            (
+                item
+                for item in sql_defs.values()
+                if item.view_code == view_code
+            ),
+            key=lambda item: (item.sql_type if item.sql_type is not None else -1, item.code),
+        )
+        if not matched_sql:
+            raise ValueError(f"SQL metadata not found for datagrid query binding: {view_code}")
+        for sql_def in matched_sql:
+            bound_sql = replace(sql_def, data_grid_code=datagrid_code)
+            lines.append(runtime_sql_sql(bound_sql))
+            lines.append(ec_sql_sql(bound_sql))
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
@@ -2992,6 +3335,420 @@ def apply_qcs_secondary_list_actions(
     ]
 
 
+def wts_runtime_button(
+    button_id: str,
+    show_name: str,
+    operation_code: str,
+    operate_type: str,
+    button_style: str,
+    *,
+    is_permission: bool = False,
+    is_callback: bool = False,
+) -> Dict[str, Any]:
+    button = qcs_runtime_button(
+        button_id,
+        show_name,
+        operation_code,
+        operate_type,
+        button_style,
+        is_permission=is_permission,
+        is_callback=is_callback,
+    )
+    button["modelCode"] = "WTS_1.0.0_workTicket_WorkTicket"
+    return button
+
+
+def wts_add_button(
+    view_code: str,
+    spec: Dict[str, str],
+    views: Dict[str, ViewDef],
+) -> Dict[str, Any]:
+    operation_code = spec["add_operation"]
+    button = wts_runtime_button(
+        "add",
+        "新增",
+        operation_code,
+        "ADD",
+        "add",
+        is_permission=True,
+        is_callback=True,
+    )
+    button["viewselect"] = view_reference_payload(
+        spec["edit_view"],
+        views,
+        {"iscrosscompany": "false"},
+    )
+    return button
+
+
+def wts_fixed_detail_button(
+    view_code: str,
+    spec: Dict[str, str],
+    views: Dict[str, ViewDef],
+) -> Dict[str, Any]:
+    detail_code = spec["detail_view"]
+    detail_view = views.get(detail_code)
+    detail_url = detail_view.url if detail_view is not None else ""
+    function_suffix = re.sub(r"[^A-Za-z0-9_$]", "", view_code.rsplit("_", 1)[-1])
+    function_name = "viewWts" + function_suffix[:1].upper() + function_suffix[1:] + "Detail"
+    operation_code = f"{view_code}_viewDetail_view"
+    function_body = (
+        f"function {function_name}() {{\n"
+        "    var selected = ReactAPI.getComponentAPI(\"SupDataGrid\")\n"
+        f"        .APIs({json.dumps(spec['grid_api'])})\n"
+        "        .getSelecteds();\n"
+        "    if (!selected || !selected.length || !selected[0].id) {\n"
+        "        ReactAPI.showMessage(\"w\", \"请选择一条作业票记录\");\n"
+        "        return false;\n"
+        "    }\n"
+        f"    var target = {json.dumps(detail_url, ensure_ascii=False)}\n"
+        f"        + \"?viewCode={view_code}\"\n"
+        "        + \"&entityCode=WTS_1.0.0_workTicket\"\n"
+        "        + \"&iscrosscompany=false\"\n"
+        "        + \"&openType=frame\"\n"
+        f"        + \"&buttonCode={operation_code}\"\n"
+        "        + \"&iscallback=false\"\n"
+        "        + \"&id=\" + encodeURIComponent(selected[0].id);\n"
+        "    window.open(target, \"_blank\");\n"
+        "    return true;\n"
+        "}"
+    )
+    button = wts_runtime_button(
+        "viewDetail",
+        "查看详情",
+        operation_code,
+        "CUSTOM",
+        "view",
+    )
+    onclick = function_name + "()"
+    button.update(
+        {
+            "viewselect": view_reference_payload(
+                detail_code,
+                views,
+                {"iscrosscompany": "false"},
+            ),
+            "funcname": f"onclick='{onclick}'",
+            "onclick": onclick,
+            "ONCLICK": onclick,
+            "funcbody": function_body,
+            "funcbody_es5": function_body,
+        }
+    )
+    return button
+
+
+def wts_dynamic_ledger_detail_button(view_code: str, grid_api: str) -> Dict[str, Any]:
+    operation_code = f"{view_code}_viewDetail_view"
+    route_map = json.dumps(WTS_WORK_TYPE_DETAIL_ROUTES, ensure_ascii=False, separators=(",", ":"))
+    function_name = "viewWtsWorkLedgerDetail"
+    function_body = (
+        f"function {function_name}() {{\n"
+        "    var selected = ReactAPI.getComponentAPI(\"SupDataGrid\")\n"
+        f"        .APIs({json.dumps(grid_api)})\n"
+        "        .getSelecteds();\n"
+        "    if (!selected || !selected.length || !selected[0].id) {\n"
+        "        ReactAPI.showMessage(\"w\", \"请选择一条作业台账记录\");\n"
+        "        return false;\n"
+        "    }\n"
+        "    var row = selected[0];\n"
+        "    var workType = row.workType;\n"
+        "    var workTypeId = workType && typeof workType === \"object\" ? workType.id : workType;\n"
+        f"    var detailRoutes = {route_map};\n"
+        "    var detailUrl = detailRoutes[workTypeId];\n"
+        "    if (!detailUrl) {\n"
+        "        ReactAPI.showMessage(\"w\", \"当前作业类型没有可用的详情页\");\n"
+        "        return false;\n"
+        "    }\n"
+        f"    var target = detailUrl + \"?viewCode={view_code}\"\n"
+        "        + \"&entityCode=WTS_1.0.0_workTicket\"\n"
+        "        + \"&iscrosscompany=false\"\n"
+        "        + \"&openType=frame\"\n"
+        f"        + \"&buttonCode={operation_code}\"\n"
+        "        + \"&iscallback=false\"\n"
+        "        + \"&id=\" + encodeURIComponent(row.id);\n"
+        "    window.open(target, \"_blank\");\n"
+        "    return true;\n"
+        "}"
+    )
+    button = wts_runtime_button(
+        "viewDetail",
+        "查看详情",
+        operation_code,
+        "CUSTOM",
+        "view",
+    )
+    onclick = function_name + "()"
+    button.update(
+        {
+            "funcname": f"onclick='{onclick}'",
+            "onclick": onclick,
+            "ONCLICK": onclick,
+            "funcbody": function_body,
+            "funcbody_es5": function_body,
+        }
+    )
+    return button
+
+
+def wts_batch_print_button(view_code: str, operation_code: str) -> Dict[str, Any]:
+    grid_api = WTS_WORK_TICKET_LIST_ACTIONS[view_code]["grid_api"]
+    function_name = "printWtsFireworkTickets"
+    print_url = "/WTS/workTicket/workTicket/batchPrintOnServer"
+    compat_operation_code = f"{view_code}_printTickets_custom"
+    function_body = (
+        f"function {function_name}() {{\n"
+        "    var gridFactory = ReactAPI.getComponentAPI(\"SupDataGrid\");\n"
+        f"    var grid = gridFactory && gridFactory.APIs({json.dumps(grid_api)});\n"
+        "    var selected = grid && grid.getSelecteds ? grid.getSelecteds() : [];\n"
+        "    if (!selected || !selected.length) {\n"
+        "        ReactAPI.showMessage(\"w\", \"请选择至少一条动火安全作业票\");\n"
+        "        return false;\n"
+        "    }\n"
+        "    var componentApi = ReactAPI.getComponentAPI();\n"
+        "    var searchList = componentApi && componentApi.ListView\n"
+        "        && componentApi.ListView.SearchList;\n"
+        "    if (!searchList || typeof searchList.handleBatchPrint !== \"function\") {\n"
+        "        ReactAPI.showMessage(\"e\", \"打印组件尚未就绪，请刷新页面后重试\");\n"
+        "        return false;\n"
+        "    }\n"
+        "    searchList.handleBatchPrint({\n"
+        f"        code: {json.dumps(operation_code)},\n"
+        f"        buttonCode: {json.dumps(operation_code)},\n"
+        f"        printUrl: {json.dumps(print_url)},\n"
+        "        selects: selected\n"
+        "    }, false);\n"
+        "    return true;\n"
+        "}"
+    )
+    button = wts_runtime_button(
+        # The configuration service also synthesizes a native button named
+        # ``batchPrint`` when batch-control printing is enabled.  A distinct
+        # id keeps that merge from replacing this compatibility action's
+        # Chinese label with the raw ec.print.batchPrint resource key.
+        "printTickets",
+        "批量打印",
+        # Do not reuse the native BATCH_PRINT operation as the visible custom
+        # button code. The permission merge would replace its Chinese label
+        # with the untranslated ec.print.batchPrint key.
+        compat_operation_code,
+        # greenDill SearchList strips BATCH_PRINT buttons before rendering.
+        # Keep the native print contract, but expose it through a CUSTOM action.
+        "CUSTOM",
+        # ``dy`` is reserved by the configuration service for its synthesized
+        # batch-print action and causes that action's raw i18n key to be merged
+        # into this button.  A dedicated style avoids the server-side collision.
+        "customPrint",
+        is_permission=False,
+        is_callback=False,
+    )
+    onclick = function_name + "()"
+    button.update(
+        {
+            "code": compat_operation_code,
+            "funcname": f"onclick='{onclick}'",
+            "onclick": onclick,
+            "ONCLICK": onclick,
+            "funcbody": function_body,
+            "funcbody_es5": function_body,
+            "scriptCode": function_body,
+            "iscustomfunc": True,
+            "isCustomFunc": True,
+        }
+    )
+    return button
+
+
+def wts_firework_print_label_init() -> str:
+    """Keep the restored print action readable after the legacy layout merge."""
+
+    return (
+        "(function normalizeWtsFireworkPrintLabel() {\n"
+        "    var attempts = 0;\n"
+        "    function replaceLabel() {\n"
+        "        var cell = document.getElementById(\"btn-printTickets\");\n"
+        "        if (!cell) { return false; }\n"
+        "        var item = cell.querySelector(\".sup-datagrid-button-item\") || cell;\n"
+        "        function replaceText(node) {\n"
+        "            if (node.nodeType === 3 && String(node.nodeValue || \"\").trim()) {\n"
+        "                node.nodeValue = \"批量打印\";\n"
+        "                return true;\n"
+        "            }\n"
+        "            for (var index = 0; index < node.childNodes.length; index += 1) {\n"
+        "                if (replaceText(node.childNodes[index])) { return true; }\n"
+        "            }\n"
+        "            return false;\n"
+        "        }\n"
+        "        item.setAttribute(\"title\", \"批量打印\");\n"
+        "        return replaceText(item);\n"
+        "    }\n"
+        "    replaceLabel();\n"
+        "    var timer = window.setInterval(function retryPrintLabel() {\n"
+        "        attempts += 1;\n"
+        "        replaceLabel();\n"
+        "        if (attempts >= 40) { window.clearInterval(timer); }\n"
+        "    }, 250);\n"
+        "}());"
+    )
+
+
+def wts_export_button(view_code: str, spec: Dict[str, str]) -> Dict[str, Any]:
+    operation_code = f"{view_code}_export_exportExcel"
+    function_suffix = re.sub(r"[^A-Za-z0-9_$]", "", view_code.rsplit("_", 1)[-1])
+    function_name = "exportWts" + function_suffix[:1].upper() + function_suffix[1:]
+    function_body = (
+        f"function {function_name}(event) {{\n"
+        "    if (event && event.preventDefault) { event.preventDefault(); }\n"
+        "    var payload = {\n"
+        "        classifyCodes: \"\", customCondition: {},\n"
+        f"        permissionCode: {json.dumps(view_code)},\n"
+        "        pageNo: 1, paging: true, pageSize: 20, crossCompanyFlag: \"true\",\n"
+        "        exportFlag: true, exportAuxiliaryModelFlag: false,\n"
+        "        useForImportFlag: false, properties: [],\n"
+        f"        datagridCode: {json.dumps(spec['grid_api'])}, viewCode: {json.dumps(view_code)}\n"
+        "    };\n"
+        "    var token = \"\";\n"
+        "    try {\n"
+        "        token = window.localStorage.getItem(\"suposTicket\")\n"
+        "            || window.localStorage.getItem(\"SUPOS_TICKET\")\n"
+        "            || window.localStorage.getItem(\"token\")\n"
+        "            || window.sessionStorage.getItem(\"suposTicket\")\n"
+        "            || window.sessionStorage.getItem(\"SUPOS_TICKET\")\n"
+        "            || window.sessionStorage.getItem(\"token\") || \"\";\n"
+        "    } catch (ignore) {}\n"
+        "    var xhr = new XMLHttpRequest();\n"
+        f"    xhr.open(\"POST\", {json.dumps(spec['query_url'])}, true);\n"
+        "    xhr.responseType = \"blob\";\n"
+        "    xhr.setRequestHeader(\"Accept\", \"*/*\");\n"
+        "    xhr.setRequestHeader(\"Content-Type\", \"application/json;charset=UTF-8\");\n"
+        "    if (token) {\n"
+        "        xhr.setRequestHeader(\"Authorization\", token.indexOf(\"Bearer \") === 0 ? token : \"Bearer \" + token);\n"
+        "    }\n"
+        "    xhr.onload = function() {\n"
+        "        if (xhr.status >= 200 && xhr.status < 300 && xhr.response && xhr.response.size > 0) {\n"
+        "            var blobUrl = window.URL.createObjectURL(xhr.response);\n"
+        "            var link = document.createElement(\"a\");\n"
+        "            link.href = blobUrl;\n"
+        f"            link.download = {json.dumps(spec['file_name'])};\n"
+        "            link.style.display = \"none\";\n"
+        "            document.body.appendChild(link);\n"
+        "            link.click();\n"
+        "            window.setTimeout(function() {\n"
+        "                window.URL.revokeObjectURL(blobUrl);\n"
+        "                if (link.parentNode) { link.parentNode.removeChild(link); }\n"
+        "            }, 1000);\n"
+        "            return;\n"
+        "        }\n"
+        "        ReactAPI.showMessage(\"f\", \"导出失败：HTTP \" + xhr.status);\n"
+        "    };\n"
+        "    xhr.onerror = function() { ReactAPI.showMessage(\"f\", \"导出失败：网络异常\"); };\n"
+        "    xhr.send(JSON.stringify(payload));\n"
+        "    return true;\n"
+        "}"
+    )
+    button = wts_runtime_button(
+        "exportExcel",
+        "导出",
+        operation_code,
+        "CUSTOM",
+        "export",
+    )
+    onclick = function_name + "(event)"
+    button.update(
+        {
+            "funcname": f"onclick='{onclick}'",
+            "onclick": onclick,
+            "ONCLICK": onclick,
+            "funcbody": function_body,
+            "funcbody_es5": function_body,
+            "scriptCode": function_body,
+            "events": [
+                {
+                    "name": "onclick",
+                    "function": function_body,
+                    "function_es5": function_body,
+                }
+            ],
+            "iscallback": True,
+            "iscustomfunc": True,
+            "isCustomFunc": True,
+            "url": spec["query_url"],
+            "downloadXls": spec["download_url"],
+        }
+    )
+    return button
+
+
+def apply_wts_business_list_actions(
+    view: ViewDef,
+    payload: Any,
+    views: Dict[str, ViewDef],
+) -> None:
+    ticket_spec = WTS_WORK_TICKET_LIST_ACTIONS.get(view.code)
+    read_only_spec = WTS_READ_ONLY_LIST_ACTIONS.get(view.code)
+    if ticket_spec is None and read_only_spec is None:
+        return
+
+    target = find_layout_datagrid(view, payload)
+    if target is None:
+        return
+
+    spec = ticket_spec or read_only_spec or {}
+    target.setdefault("DataGridCode", spec["grid_api"])
+    target.setdefault("code", spec["grid_api"])
+    target.setdefault("dataGridName", spec["grid_api"])
+    target.setdefault("datagridName", spec["grid_api"])
+
+    managed_ids = {
+        "add",
+        "viewDetail",
+        "batchPrint",
+        "batchPrintCompat",
+        "printTickets",
+        "exportExcel",
+    }
+    existing_buttons = target.get("buttons")
+    preserved = [
+        copy.deepcopy(button)
+        for button in (existing_buttons or [])
+        if isinstance(button, dict)
+        and str(button.get("id") or "").strip() not in managed_ids
+    ]
+
+    restored: List[Dict[str, Any]] = []
+    if ticket_spec is not None:
+        if ticket_spec.get("add_operation") and ticket_spec.get("edit_view"):
+            restored.append(wts_add_button(view.code, ticket_spec, views))
+        restored.append(wts_fixed_detail_button(view.code, ticket_spec, views))
+        if ticket_spec.get("batch_print_operation"):
+            restored.append(
+                wts_batch_print_button(view.code, ticket_spec["batch_print_operation"])
+            )
+    elif read_only_spec is not None:
+        if read_only_spec.get("dynamic_detail") == "true":
+            restored.append(
+                wts_dynamic_ledger_detail_button(view.code, read_only_spec["grid_api"])
+            )
+        restored.append(wts_export_button(view.code, read_only_spec))
+        target["exportExcel"] = True
+        target["isExportExcel"] = True
+        target["downloadXls"] = read_only_spec["download_url"]
+        target["dataUrl"] = read_only_spec["query_url"]
+        list_property = target.get("listProperty")
+        if not isinstance(list_property, dict):
+            list_property = {}
+            target["listProperty"] = list_property
+        list_property.update({"exportExcel": True, "isExportExcel": True})
+
+    target["buttons"] = [*restored, *preserved]
+    if view.code == "WTS_1.0.0_workTicket_firework":
+        label_init = wts_firework_print_label_init()
+        for init_key in ("ptPageInit", "ptPageInit_es5"):
+            current_init = str(target.get(init_key) or "").strip()
+            if label_init not in current_init:
+                target[init_key] = f"{current_init}\n{label_init}".strip()
+
+
 def apply_view_runtime_overrides(view: ViewDef, payload: Any) -> None:
     namekey_fallbacks = VIEW_NAMEKEY_FALLBACKS.get(view.code, {})
     if namekey_fallbacks:
@@ -3509,6 +4266,7 @@ def view_json(
         payload["pageType"] = "EDIT"
     supplement_packaged_datagrid_buttons(view, payload, views)
     apply_qcs_secondary_list_actions(view, payload, views)
+    apply_wts_business_list_actions(view, payload, views)
     apply_process_execution_action_buttons(view, payload)
     apply_wom_record_action_buttons(view, payload)
     apply_datagrid_runtime_overrides(view, payload)
@@ -5361,6 +6119,28 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Emit packaged field/grid/button/event/query metadata for the selected module codes.",
     )
+    parser.add_argument(
+        "--packaged-datagrid-runtime-only",
+        action="store_true",
+        help="Emit exact packaged datagrids and their owned fields.",
+    )
+    parser.add_argument(
+        "--packaged-datagrid-code",
+        action="append",
+        dest="packaged_datagrid_codes",
+        help="Datagrid code for --packaged-datagrid-runtime-only. Can be repeated.",
+    )
+    parser.add_argument(
+        "--datagrid-query-runtime-only",
+        action="store_true",
+        help="Bind packaged view query metadata to recovered datagrid codes.",
+    )
+    parser.add_argument(
+        "--view-datagrid-binding",
+        action="append",
+        dest="view_datagrid_bindings",
+        help="VIEW_CODE=DATAGRID_CODE binding. Can be repeated.",
+    )
     return parser.parse_args()
 
 
@@ -5372,10 +6152,47 @@ def main() -> int:
         return 2
     module_codes = tuple(args.module_codes or ())
     targets = tuple(args.targets or (() if module_codes else TARGET_VIEW_CODES))
-    if args.runtime_extra_view_only and args.packaged_ui_runtime_only:
+    output_modes = sum(
+        bool(value)
+        for value in (
+            args.runtime_extra_view_only,
+            args.packaged_ui_runtime_only,
+            args.packaged_datagrid_runtime_only,
+            args.datagrid_query_runtime_only,
+        )
+    )
+    if output_modes > 1:
         print("Choose only one output mode.", file=sys.stderr)
         return 2
-    if args.packaged_ui_runtime_only:
+    if args.datagrid_query_runtime_only:
+        raw_bindings = tuple(args.view_datagrid_bindings or ())
+        bindings: List[Tuple[str, str]] = []
+        for raw_binding in raw_bindings:
+            view_code, separator, datagrid_code = raw_binding.partition("=")
+            if not separator or not view_code.strip() or not datagrid_code.strip():
+                print(
+                    "--view-datagrid-binding must use VIEW_CODE=DATAGRID_CODE.",
+                    file=sys.stderr,
+                )
+                return 2
+            bindings.append((view_code, datagrid_code))
+        if not bindings:
+            print(
+                "--datagrid-query-runtime-only requires at least one --view-datagrid-binding.",
+                file=sys.stderr,
+            )
+            return 2
+        output = generate_datagrid_query_runtime_sql(modules_root, bindings)
+    elif args.packaged_datagrid_runtime_only:
+        datagrid_codes = tuple(args.packaged_datagrid_codes or ())
+        if not datagrid_codes:
+            print(
+                "--packaged-datagrid-runtime-only requires at least one --packaged-datagrid-code.",
+                file=sys.stderr,
+            )
+            return 2
+        output = generate_packaged_datagrid_runtime_sql(modules_root, datagrid_codes)
+    elif args.packaged_ui_runtime_only:
         if not module_codes:
             print("--packaged-ui-runtime-only requires at least one --module-code.", file=sys.stderr)
             return 2

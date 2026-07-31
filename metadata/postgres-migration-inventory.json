@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 247,
+  "migrationCount": 255,
   "firstNumber": 1,
-  "lastNumber": 247,
+  "lastNumber": 255,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -14,29 +14,29 @@
   "statementTotals": {
     "alter-table": 10840,
     "create-function": 117,
-    "create-index": 1026,
-    "create-table": 587,
+    "create-index": 1029,
+    "create-table": 588,
     "create-view": 143,
-    "insert": 11491,
-    "update": 11616
+    "insert": 11668,
+    "update": 11797
   },
   "idempotencySignalTotals": {
     "create-or-replace": 257,
-    "do-block": 568,
-    "if-exists": 194,
-    "if-not-exists": 13080,
-    "on-conflict": 11416,
+    "do-block": 593,
+    "if-exists": 219,
+    "if-not-exists": 13084,
+    "on-conflict": 11593,
     "to-regclass": 222,
     "where-not-exists": 55
   },
   "tagTotals": {
     "auth-rbac-org": 39,
-    "business": 54,
-    "compatibility": 90,
-    "configuration": 61,
+    "business": 62,
+    "compatibility": 92,
+    "configuration": 62,
     "general": 47,
     "notification": 10,
-    "platform": 75,
+    "platform": 79,
     "workflow": 21
   },
   "migrations": [
@@ -9274,6 +9274,277 @@
         "if-not-exists": 0,
         "on-conflict": 45,
         "do-block": 15,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/248-wts-business-statistics-actions-runtime.sql",
+      "name": "248-wts-business-statistics-actions-runtime.sql",
+      "number": 248,
+      "slug": "wts-business-statistics-actions-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 1399,
+      "sha256": "57485265335231acd96bd76c1c7108f829a6b0984922d97b6f82cf2e1dd606fe",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 72,
+        "update": 72
+      },
+      "idempotencySignals": {
+        "if-exists": 24,
+        "if-not-exists": 0,
+        "on-conflict": 72,
+        "do-block": 24,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/249-wts-business-statistics-actions-lob-compat.sql",
+      "name": "249-wts-business-statistics-actions-lob-compat.sql",
+      "number": 249,
+      "slug": "wts-business-statistics-actions-lob-compat",
+      "validName": true,
+      "tags": [
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 81,
+      "sha256": "a737c9ae6afa1e23177f2d2b1de94ea320b7e0952ce39d7489412f0869a35d8a",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/250-wts-ticket-edit-subgrid-runtime.sql",
+      "name": "250-wts-ticket-edit-subgrid-runtime.sql",
+      "number": 250,
+      "slug": "wts-ticket-edit-subgrid-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 2306,
+      "sha256": "69d8f22e5151db01aa918d5cda80912e8c2e0e7126b1511df0e8aa403132a2fd",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 80,
+        "update": 80
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 80,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/251-wts-ledger-export-runtime-datagrid.sql",
+      "name": "251-wts-ledger-export-runtime-datagrid.sql",
+      "number": 251,
+      "slug": "wts-ledger-export-runtime-datagrid",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 156,
+      "sha256": "8022f27c1237d38ed67c44f11aa3ad8e9cfbbc87b7e8728618a60e8fde87a009",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 2,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/252-wts-ledger-export-query-runtime.sql",
+      "name": "252-wts-ledger-export-query-runtime.sql",
+      "number": 252,
+      "slug": "wts-ledger-export-query-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 220,
+      "sha256": "2b9612ec2246486ea6e44673bb8606ecdfe8cf12aa9acfb54f374b100873fce4",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 20,
+        "update": 20
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 20,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/253-wts-certificate-part-entity.sql",
+      "name": "253-wts-certificate-part-entity.sql",
+      "number": 253,
+      "slug": "wts-certificate-part-entity",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business"
+      ],
+      "lineCount": 46,
+      "sha256": "e4f635f9a02aec76253b40bfa2fe1241c0ee783583d9b50163db2cf8ed2147a2",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 4,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/254-wts-firework-batch-print-render-compat.sql",
+      "name": "254-wts-firework-batch-print-render-compat.sql",
+      "number": 254,
+      "slug": "wts-firework-batch-print-render-compat",
+      "validName": true,
+      "tags": [
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 65,
+      "sha256": "54906272dfafe84ec60f6a7194933c15ded00f31dfaeb404bf0613f233779ba9",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 3,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 3,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/255-wts-firework-native-batch-print-collision.sql",
+      "name": "255-wts-firework-native-batch-print-collision.sql",
+      "number": 255,
+      "slug": "wts-firework-native-batch-print-collision",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 24,
+      "sha256": "727755347b6fed02783cb5cca42c748a0ca6d30415824b427efbd81ff78f28bf",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
         "to-regclass": 0,
         "create-or-replace": 0,
         "where-not-exists": 0

@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-31T12:51:24+00:00",
-  "repoCommit": "4cfa5ab6a872aab53bd96e0453bcb19943362dc6",
+  "generatedAt": "2026-07-31T17:49:33+00:00",
+  "repoCommit": "a4f1f0dc889bb6fb93805871792b822951f32dcb",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 577,
-    "totalBytes": 66225684,
+    "totalFiles": 585,
+    "totalBytes": 70653795,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 247,
+      "postgres-init-sql": 255,
       "runtime-binary-patch": 8,
       "runtime-patch-source": 25,
       "runtime-script": 28,
@@ -19,10 +19,10 @@
     "bytesByCategory": {
       "nacos-config-template": 42353,
       "nginx-runtime-config": 33728,
-      "postgres-init-sql": 64466770,
+      "postgres-init-sql": 68886623,
       "runtime-binary-patch": 178941,
       "runtime-patch-source": 98301,
-      "runtime-script": 293207,
+      "runtime-script": 301465,
       "runtime-static-override": 1112384
     }
   },
@@ -1795,6 +1795,54 @@
       "sha256": "f945dc547c531f43aa87db393800b14b26f0f7886a879589ae43eb1a65acc619"
     },
     {
+      "path": "deploy/docker/postgres/init/248-wts-business-statistics-actions-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 3972532,
+      "sha256": "57485265335231acd96bd76c1c7108f829a6b0984922d97b6f82cf2e1dd606fe"
+    },
+    {
+      "path": "deploy/docker/postgres/init/249-wts-business-statistics-actions-lob-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 2643,
+      "sha256": "a737c9ae6afa1e23177f2d2b1de94ea320b7e0952ce39d7489412f0869a35d8a"
+    },
+    {
+      "path": "deploy/docker/postgres/init/250-wts-ticket-edit-subgrid-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 326713,
+      "sha256": "69d8f22e5151db01aa918d5cda80912e8c2e0e7126b1511df0e8aa403132a2fd"
+    },
+    {
+      "path": "deploy/docker/postgres/init/251-wts-ledger-export-runtime-datagrid.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 6873,
+      "sha256": "8022f27c1237d38ed67c44f11aa3ad8e9cfbbc87b7e8728618a60e8fde87a009"
+    },
+    {
+      "path": "deploy/docker/postgres/init/252-wts-ledger-export-query-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 30433,
+      "sha256": "2b9612ec2246486ea6e44673bb8606ecdfe8cf12aa9acfb54f374b100873fce4"
+    },
+    {
+      "path": "deploy/docker/postgres/init/253-wts-certificate-part-entity.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1541,
+      "sha256": "e4f635f9a02aec76253b40bfa2fe1241c0ee783583d9b50163db2cf8ed2147a2"
+    },
+    {
+      "path": "deploy/docker/postgres/init/254-wts-firework-batch-print-render-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 78137,
+      "sha256": "54906272dfafe84ec60f6a7194933c15ded00f31dfaeb404bf0613f233779ba9"
+    },
+    {
+      "path": "deploy/docker/postgres/init/255-wts-firework-native-batch-print-collision.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 981,
+      "sha256": "727755347b6fed02783cb5cca42c748a0ca6d30415824b427efbd81ff78f28bf"
+    },
+    {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 148953,
@@ -2145,8 +2193,8 @@
     {
       "path": "deploy/docker/scripts/patch-wts-runtime-compat.py",
       "category": "runtime-script",
-      "sizeBytes": 46418,
-      "sha256": "4746cab144927f58beb1b78bb452ae9fe58ff29553dac66a228de79da265e560"
+      "sizeBytes": 54676,
+      "sha256": "80140c7f512d16ebecf5fac98b7538d5fdd3cbdaa692d26de45194df47961001"
     },
     {
       "path": "deploy/docker/scripts/prepare-runtime-patches.sh",

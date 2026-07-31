@@ -452,6 +452,258 @@ class ProductRuntimeParityTest(unittest.TestCase):
         self.assertEqual("删除", button["showname"])
         self.assertEqual("删除", button["namekey"])
 
+    def test_wts_ticket_lists_restore_source_actions_and_detail(self):
+        cases = (
+            (
+                "WTS_1.0.0_workTicket_soilWork",
+                "WTS_1.0.0_workTicket_soilWorkEdit",
+                "WTS_1.0.0_workTicket_soilWorkView",
+                "soilWork_add_add_WTS_1.0.0_workTicket_soilWork",
+            ),
+            (
+                "WTS_1.0.0_workTicket_limitSpaceWork",
+                "WTS_1.0.0_workTicket_limitSpaceWorkEdit",
+                "WTS_1.0.0_workTicket_limitSpaceView",
+                "limitSpaceWork_add_add_WTS_1.0.0_workTicket_limitSpaceWork",
+            ),
+            (
+                "WTS_1.0.0_workTicket_electricityWork",
+                "WTS_1.0.0_workTicket_electricityEdit",
+                "WTS_1.0.0_workTicket_electricityView",
+                "electricityWork_add_add_WTS_1.0.0_workTicket_electricityWork",
+            ),
+            (
+                "WTS_1.0.0_workTicket_heightWork",
+                "WTS_1.0.0_workTicket_heightWorkEdit",
+                "WTS_1.0.0_workTicket_heightWorkView",
+                "heightWork_add_add_WTS_1.0.0_workTicket_heightWork",
+            ),
+            (
+                "WTS_1.0.0_workTicket_breakWork",
+                "WTS_1.0.0_workTicket_breakWorkEdit",
+                "WTS_1.0.0_workTicket_breakWorkView",
+                "breakWork_add_add_WTS_1.0.0_workTicket_breakWork",
+            ),
+        )
+
+        for view_code, edit_code, detail_code, operation_code in cases:
+            with self.subTest(view_code=view_code):
+                view = view_variant(code=view_code)
+                edit_view = view_variant(
+                    code=edit_code,
+                    url="/msService/WTS/workTicket/workTicket/" + edit_code.rsplit("_", 1)[-1],
+                    view_type="EDIT",
+                    open_type="frame",
+                )
+                detail_view = view_variant(
+                    code=detail_code,
+                    url="/msService/WTS/workTicket/workTicket/" + detail_code.rsplit("_", 1)[-1],
+                    view_type="VIEW",
+                    open_type="frame",
+                )
+                payload = {
+                    "components": [{"type": "layoutDatagrid", "buttons": []}]
+                }
+
+                GENERATOR.apply_wts_business_list_actions(
+                    view,
+                    payload,
+                    {
+                        view_code: view,
+                        edit_code: edit_view,
+                        detail_code: detail_view,
+                    },
+                )
+
+                buttons = payload["components"][0]["buttons"]
+                self.assertEqual(["add", "viewDetail"], [button["id"] for button in buttons])
+                self.assertEqual(operation_code, buttons[0]["buttonoperationcode"])
+                self.assertTrue(buttons[0]["ispermission"])
+                self.assertEqual(edit_code, buttons[0]["viewselect"]["code"])
+                self.assertEqual(detail_code, buttons[1]["viewselect"]["code"])
+                self.assertIn(detail_view.url, buttons[1]["funcbody"])
+
+    def test_wts_height_add_targets_height_edit_instead_of_vendor_lift_edit(self):
+        view_code = "WTS_1.0.0_workTicket_heightWork"
+        edit_code = "WTS_1.0.0_workTicket_heightWorkEdit"
+        detail_code = "WTS_1.0.0_workTicket_heightWorkView"
+        view = view_variant(code=view_code)
+        edit_view = view_variant(
+            code=edit_code,
+            url="/msService/WTS/workTicket/workTicket/heightWorkEdit",
+            view_type="EDIT",
+            open_type="frame",
+        )
+        detail_view = view_variant(
+            code=detail_code,
+            url="/msService/WTS/workTicket/workTicket/heightWorkView",
+            view_type="VIEW",
+            open_type="frame",
+        )
+        payload = {"components": [{"type": "layoutDatagrid", "buttons": []}]}
+
+        GENERATOR.apply_wts_business_list_actions(
+            view,
+            payload,
+            {view_code: view, edit_code: edit_view, detail_code: detail_view},
+        )
+
+        add_button = payload["components"][0]["buttons"][0]
+        self.assertEqual(edit_code, add_button["viewselect"]["code"])
+        self.assertIn("heightWorkEdit", add_button["viewselect"]["url"])
+        self.assertNotIn("liftWorkEdit", str(add_button["viewselect"]))
+
+    def test_wts_read_only_ticket_lists_only_restore_detail(self):
+        for view_code, detail_code in (
+            (
+                "WTS_1.0.0_workTicket_liftWork",
+                "WTS_1.0.0_workTicket_liftWorkView",
+            ),
+            (
+                "WTS_1.0.0_workTicket_blockWork",
+                "WTS_1.0.0_workTicket_blockWorkView",
+            ),
+        ):
+            with self.subTest(view_code=view_code):
+                view = view_variant(code=view_code)
+                detail_view = view_variant(
+                    code=detail_code,
+                    url="/msService/WTS/workTicket/workTicket/" + detail_code.rsplit("_", 1)[-1],
+                    view_type="VIEW",
+                    open_type="frame",
+                )
+                payload = {"components": [{"type": "layoutDatagrid", "buttons": []}]}
+
+                GENERATOR.apply_wts_business_list_actions(
+                    view,
+                    payload,
+                    {view_code: view, detail_code: detail_view},
+                )
+
+                buttons = payload["components"][0]["buttons"]
+                self.assertEqual(["viewDetail"], [button["id"] for button in buttons])
+                self.assertNotIn("ADD", [button["operatetype"] for button in buttons])
+
+    def test_wts_firework_restores_detail_and_source_batch_print(self):
+        view_code = "WTS_1.0.0_workTicket_firework"
+        detail_code = "WTS_1.0.0_workTicket_fireworkView"
+        view = view_variant(code=view_code)
+        detail_view = view_variant(
+            code=detail_code,
+            url="/msService/WTS/workTicket/workTicket/fireworkView",
+            view_type="VIEW",
+            open_type="frame",
+        )
+        payload = {"components": [{"type": "layoutDatagrid", "buttons": []}]}
+
+        GENERATOR.apply_wts_business_list_actions(
+            view,
+            payload,
+            {view_code: view, detail_code: detail_view},
+        )
+
+        buttons = payload["components"][0]["buttons"]
+        self.assertEqual(
+            ["viewDetail", "printTickets"],
+            [button["id"] for button in buttons],
+        )
+        self.assertEqual("CUSTOM", buttons[1]["operatetype"])
+        self.assertEqual(
+            "WTS_1.0.0_workTicket_firework_printTickets_custom",
+            buttons[1]["buttonoperationcode"],
+        )
+        self.assertEqual("customPrint", buttons[1]["buttonstyle"])
+        self.assertNotIn("sourceOperationCode", buttons[1])
+        self.assertNotIn("printUrl", buttons[1])
+        self.assertFalse(buttons[1]["ispermission"])
+        self.assertTrue(buttons[1]["isPublished"])
+        self.assertFalse(buttons[1]["iscallback"])
+        self.assertTrue(buttons[1]["iscustomfunc"])
+        self.assertIn(
+            'APIs("WTS_1.0.0_workTicket_firework_workTicket_sdg")',
+            buttons[1]["funcbody"],
+        )
+        self.assertIn("请选择至少一条动火安全作业票", buttons[1]["funcbody"])
+        self.assertIn("handleBatchPrint", buttons[1]["funcbody"])
+        self.assertIn(
+            "firework_batchPrint_dy_WTS_1.0.0_workTicket_firework",
+            buttons[1]["funcbody"],
+        )
+        self.assertIn(
+            "/WTS/workTicket/workTicket/batchPrintOnServer",
+            buttons[1]["funcbody"],
+        )
+        self.assertIn("normalizeWtsFireworkPrintLabel", payload["components"][0]["ptPageInit"])
+        self.assertIn('getElementById("btn-printTickets")', payload["components"][0]["ptPageInit"])
+        self.assertIn('node.nodeValue = "批量打印"', payload["components"][0]["ptPageInit"])
+        self.assertIn("normalizeWtsFireworkPrintLabel", payload["components"][0]["ptPageInit_es5"])
+
+    def test_wts_work_ledger_detail_maps_all_ticket_types_and_exports(self):
+        view_code = "WTS_1.0.0_workTicket_workList"
+        view = view_variant(code=view_code)
+        payload = {"components": [{"type": "layoutDatagrid", "buttons": []}]}
+
+        GENERATOR.apply_wts_business_list_actions(view, payload, {view_code: view})
+
+        grid = payload["components"][0]
+        buttons = grid["buttons"]
+        self.assertEqual(["viewDetail", "exportExcel"], [button["id"] for button in buttons])
+        self.assertEqual(8, buttons[0]["funcbody"].count("WTS_workType/"))
+        self.assertIn("workList_workTicket_sdg", buttons[0]["funcbody"])
+        self.assertIn("exportFlag: true", buttons[1]["funcbody"])
+        self.assertIn(
+            'datagridCode: "WTS_1.0.0_workTicket_workList_workTicket_sdg"',
+            buttons[1]["funcbody"],
+        )
+        self.assertIn("/workList-query", buttons[1]["funcbody"])
+        self.assertTrue(buttons[1]["iscustomfunc"])
+        self.assertTrue(buttons[1]["iscallback"])
+        self.assertTrue(grid["isExportExcel"])
+
+    def test_wts_ledger_and_statistics_pages_only_restore_export(self):
+        for view_code, query_fragment in (
+            (
+                "WTS_1.0.0_blindPlateAccount_plateAccountList",
+                "/plateAccountList-query",
+            ),
+            (
+                "WTS_1.0.0_workTicket_workTicket",
+                "/assWorkTickets/workTicket-query",
+            ),
+        ):
+            with self.subTest(view_code=view_code):
+                view = view_variant(code=view_code)
+                payload = {"components": [{"type": "layoutDatagrid", "buttons": []}]}
+
+                GENERATOR.apply_wts_business_list_actions(
+                    view,
+                    payload,
+                    {view_code: view},
+                )
+
+                buttons = payload["components"][0]["buttons"]
+                self.assertEqual(["exportExcel"], [button["id"] for button in buttons])
+                self.assertIn(query_fragment, buttons[0]["funcbody"])
+                self.assertNotIn("ADD", [button["operatetype"] for button in buttons])
+                self.assertNotIn("DELETE", [button["operatetype"] for button in buttons])
+
+    def test_wts_business_action_support_views_are_default_targets(self):
+        expected = {
+            *GENERATOR.WTS_WORK_TICKET_LIST_ACTIONS.keys(),
+            *GENERATOR.WTS_READ_ONLY_LIST_ACTIONS.keys(),
+            *(
+                spec["detail_view"]
+                for spec in GENERATOR.WTS_WORK_TICKET_LIST_ACTIONS.values()
+            ),
+            *(
+                spec["edit_view"]
+                for spec in GENERATOR.WTS_WORK_TICKET_LIST_ACTIONS.values()
+                if spec.get("edit_view")
+            ),
+        }
+
+        self.assertTrue(expected.issubset(set(GENERATOR.TARGET_VIEW_CODES)))
+
     def test_qcs_table_number_fallback_replaces_namekey_and_display_name(self):
         view = view_variant(
             code="QCS_5.0.0.0_unQlfDeal_otherUnQlfDealList"
@@ -1366,6 +1618,125 @@ ReactAPI.Layout.hideTab('tabs-5');""",
         self.assertIn("-- runtime_data_grid: 1 packaged rows", sql)
         self.assertIn("PATROL_1.0.0_sample_sampleListdg1", sql)
         self.assertNotIn("EAM_1.0.0_sample_sampleListdg1", sql)
+
+    def test_packaged_datagrid_generator_only_emits_requested_grid_and_fields(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            modules_root = Path(temp_dir)
+            metadata_path = modules_root / "WTS_6.1.8.2" / "META-INF" / "init" / "metadata.json"
+            metadata_path.parent.mkdir(parents=True)
+            metadata_path.write_text(
+                json.dumps(
+                    [
+                        {
+                            "tableName": "runtime_field",
+                            "metadata": [
+                                {
+                                    "CODE": "WTS_grid1_FIELD_name",
+                                    "DATAGRID_CODE": "WTS_grid1",
+                                    "CONFIG": "<config />",
+                                },
+                                {
+                                    "CODE": "WTS_grid2_FIELD_name",
+                                    "DATAGRID_CODE": "WTS_grid2",
+                                    "CONFIG": "<config />",
+                                },
+                            ],
+                        },
+                        {
+                            "tableName": "runtime_data_grid",
+                            "metadata": [
+                                {
+                                    "CODE": "WTS_grid1",
+                                    "DATA_GRID_JSON": "{}",
+                                    "TARGETMODEL_CODE": "WTS_model1",
+                                },
+                                {
+                                    "CODE": "WTS_grid2",
+                                    "DATA_GRID_JSON": "{}",
+                                    "TARGETMODEL_CODE": "WTS_model2",
+                                },
+                            ],
+                        },
+                        {
+                            "tableName": "runtime_model",
+                            "metadata": [
+                                {"CODE": "WTS_model1", "TABLE_NAME": "WTS_MODEL_1"},
+                                {"CODE": "WTS_model2", "TABLE_NAME": "WTS_MODEL_2"},
+                            ],
+                        },
+                        {
+                            "tableName": "runtime_property",
+                            "metadata": [
+                                {
+                                    "CODE": "WTS_model1_name",
+                                    "MODEL_CODE": "WTS_model1",
+                                    "NAME": "name",
+                                },
+                                {
+                                    "CODE": "WTS_model2_name",
+                                    "MODEL_CODE": "WTS_model2",
+                                    "NAME": "name",
+                                },
+                            ],
+                        },
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            sql = GENERATOR.generate_packaged_datagrid_runtime_sql(
+                modules_root, ("WTS_grid1",)
+            )
+
+        self.assertIn("-- runtime_field: 1 packaged rows", sql)
+        self.assertIn("-- runtime_data_grid: 1 packaged rows", sql)
+        self.assertIn("-- target models: 1", sql)
+        self.assertIn("-- target model properties: 1 packaged rows", sql)
+        self.assertIn("INSERT INTO public.runtime_model", sql)
+        self.assertIn("INSERT INTO public.ec_model", sql)
+        self.assertIn("INSERT INTO public.runtime_property", sql)
+        self.assertIn("INSERT INTO public.ec_property", sql)
+        self.assertIn("WTS_grid1_FIELD_name", sql)
+        self.assertIn("WTS_model1_name", sql)
+        self.assertIn("WTS_grid1", sql)
+        self.assertNotIn("WTS_grid2", sql)
+        self.assertNotIn("WTS_model2", sql)
+
+    def test_datagrid_query_generator_binds_view_sql_and_condition(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            modules_root = Path(temp_dir)
+            module_xml = modules_root / "WTS_6.1.8.2" / "META-INF" / "bap" / "module.xml"
+            module_xml.parent.mkdir(parents=True)
+            module_xml.write_text(
+                """<module>
+                <code>WTS_1.0.0</code>
+                <views><view>
+                  <code>WTS_ticketList</code><type>LIST</type>
+                  <moduleCode>WTS_1.0.0</moduleCode><entityCode>WTS_ticket</entityCode>
+                </view></views>
+                <customerConditions><customerCondition>
+                  <code>WTS_ticketList</code><view><code>WTS_ticketList</code></view>
+                  <moduleCode>WTS_1.0.0</moduleCode><entityCode>WTS_ticket</entityCode>
+                </customerCondition></customerConditions>
+                <sqls>
+                  <sql><code>WTS_ticketList_3</code><viewCode>WTS_ticketList</viewCode><type>3</type><sql>SELECT COUNT(*) FROM tickets</sql></sql>
+                  <sql><code>WTS_ticketList_6</code><viewCode>WTS_ticketList</viewCode><type>6</type><sql>SELECT * FROM tickets</sql></sql>
+                </sqls>
+                </module>""",
+                encoding="utf-8",
+            )
+
+            sql = GENERATOR.generate_datagrid_query_runtime_sql(
+                modules_root, (("WTS_ticketList", "WTS_ticketList_grid"),)
+            )
+
+        self.assertIn("INSERT INTO public.runtime_customer_condition", sql)
+        self.assertIn("INSERT INTO public.ec_customer_condition", sql)
+        self.assertIn("INSERT INTO public.runtime_sql", sql)
+        self.assertIn("INSERT INTO public.ec_sql", sql)
+        self.assertIn("WTS_ticketList_grid", sql)
+        self.assertIn("SELECT COUNT(*) FROM tickets", sql)
+        self.assertIn("SELECT * FROM tickets", sql)
 
     def test_full_generator_wires_product_and_runtime_layers(self):
         source = Path(GENERATOR.__file__).read_text(encoding="utf-8")

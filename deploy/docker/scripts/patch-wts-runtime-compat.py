@@ -41,8 +41,24 @@ WORK_TICKET_2_PERMIT_SERVICE_CLASS = (
 WORK_TICKET_EVENT_CLASS = "com/supcon/orchid/WTS/superzy/basic/events/WorkTicketEvent.class"
 AUTO_NODE_EVENT_CLASS = "com/supcon/orchid/WTS/superzy/basic/events/AutoNodeEvent.class"
 WORK_PERMIT_VIEW_EVENT_CLASS = "com/supcon/orchid/WTS/superzy/view/events/WorkPermitViewEvent.class"
+WTS_CERTIFICATE_CLASS = "com/supcon/orchid/WTS/entities/WTSCertificate.class"
 STAT_ICON_SOURCE = "custom/WTS/_static_jobStatistics/assets/images/comp_icon.png"
 STAT_ICON_ALIAS = "static/WTS/assets/images/comp_icon.png"
+STAT_EXPORT_SCRIPT = "custom/WTS/_static_jobStatistics/job-statistics-export-compat.js"
+STAT_EXPORT_HTML = {
+    "custom/WTS/_static_jobStatistics/index.html",
+    "custom/WTS/_static_jobStatistics/WTS/workTicket/assWorkTickets/workTicket/index.html",
+    "custom/WTS/workTicket/assWorkTickets/workTicket/index.html",
+}
+STAT_EXPORT_MARKER = "job-statistics-export-compat.js"
+STAT_EXPORT_SCRIPT_TAG = (
+    '<script src="/msService/WTS/_static_jobStatistics/job-statistics-export-compat.js"></script>'
+)
+STAT_UMI_SCRIPT_TAG = '<script src="/msService/WTS/_static_jobStatistics/umi.js"></script>'
+STAT_RUNTIME_HTML = {
+    Path("index.html"),
+    Path("WTS/workTicket/assWorkTickets/workTicket/index.html"),
+}
 SCRIPT_MARKER = "greenDill/static/scripts/vendors.sesgis.js"
 ECHARTS_RE = re.compile(
     r'(<script[^>]+src="/greenDill/static/scripts/vendors\.echarts\.js\?v=([^"]+)"[^>]*></script>)'
@@ -311,11 +327,14 @@ def patch_inner_wts_jar(
     data: bytes,
     upload_list_controller_class: bytes | None = None,
     extra_classes: Dict[str, bytes] | None = None,
+    statistics_export_script: bytes | None = None,
 ) -> Tuple[bytes, Dict[str, Any]]:
     patched_files: List[str] = []
     added_alias = False
     patched_upload_list_controller = False
     patched_extra_classes: List[str] = []
+    patched_statistics_html: List[str] = []
+    patched_statistics_script = False
     extra_classes = extra_classes or {}
     output = io.BytesIO()
     with zipfile.ZipFile(io.BytesIO(data), "r") as source:
@@ -329,8 +348,29 @@ def patch_inner_wts_jar(
                 if info.filename in extra_classes:
                     content = extra_classes[info.filename]
                     patched_extra_classes.append(info.filename)
+                if statistics_export_script is not None and info.filename == STAT_EXPORT_SCRIPT:
+                    if content != statistics_export_script:
+                        content = statistics_export_script
+                        patched_statistics_script = True
                 if info.filename.endswith(".html"):
                     text = content.decode("utf-8", "ignore")
+                    if (
+                        statistics_export_script is not None
+                        and info.filename in STAT_EXPORT_HTML
+                        and STAT_EXPORT_MARKER not in text
+                    ):
+                        if STAT_UMI_SCRIPT_TAG in text:
+                            text = text.replace(
+                                STAT_UMI_SCRIPT_TAG,
+                                STAT_EXPORT_SCRIPT_TAG + STAT_UMI_SCRIPT_TAG,
+                                1,
+                            )
+                        elif "</body>" in text:
+                            text = text.replace("</body>", STAT_EXPORT_SCRIPT_TAG + "</body>", 1)
+                        else:
+                            raise RuntimeError(f"cannot find statistics bootstrap in {info.filename}")
+                        content = text.encode("utf-8")
+                        patched_statistics_html.append(info.filename)
                     is_lowcode_desktop = (
                         "greenDill/static/scripts/vendors.echarts.js" in text
                         and SCRIPT_MARKER not in text
@@ -358,6 +398,20 @@ def patch_inner_wts_jar(
                         patched_files.append(info.filename)
                 target.writestr(copy_zip_info(info), content)
 
+            if statistics_export_script is not None and STAT_EXPORT_SCRIPT not in names:
+                script_info = zipfile.ZipInfo(STAT_EXPORT_SCRIPT, time.localtime()[:6])
+                script_info.compress_type = zipfile.ZIP_DEFLATED
+                target.writestr(script_info, statistics_export_script)
+                patched_statistics_script = True
+
+            for class_entry, class_bytes in extra_classes.items():
+                if class_entry in names:
+                    continue
+                class_info = zipfile.ZipInfo(class_entry, time.localtime()[:6])
+                class_info.compress_type = zipfile.ZIP_DEFLATED
+                target.writestr(class_info, class_bytes)
+                patched_extra_classes.append(class_entry)
+
             if STAT_ICON_ALIAS not in names and STAT_ICON_SOURCE in names:
                 alias_info = zipfile.ZipInfo(STAT_ICON_ALIAS, time.localtime()[:6])
                 alias_info.compress_type = zipfile.ZIP_DEFLATED
@@ -369,6 +423,57 @@ def patch_inner_wts_jar(
         "added_static_alias": added_alias,
         "patched_upload_list_controller": patched_upload_list_controller,
         "patched_extra_classes": patched_extra_classes,
+        "patched_statistics_html": patched_statistics_html,
+        "patched_statistics_script": patched_statistics_script,
+    }
+
+
+def patch_statistics_static_root(
+    static_root: Path,
+    statistics_export_script: bytes,
+    backup_suffix: str,
+) -> Dict[str, Any]:
+    """Patch the extracted BAP static workspace used by the running gateway."""
+    if not static_root.exists():
+        return {"changed": False, "missing": str(static_root), "html_patched": [], "script_patched": False}
+
+    changed = False
+    html_patched: List[str] = []
+    script_path = static_root / Path(STAT_EXPORT_SCRIPT).name
+    script_patched = not script_path.exists() or script_path.read_bytes() != statistics_export_script
+    if script_patched:
+        if script_path.exists():
+            backup = script_path.with_name(script_path.name + backup_suffix)
+            if not backup.exists():
+                shutil.copy2(script_path, backup)
+        script_path.write_bytes(statistics_export_script)
+        changed = True
+
+    for relative_path in sorted(STAT_RUNTIME_HTML):
+        html_path = static_root / relative_path
+        if not html_path.exists():
+            continue
+        html = html_path.read_text(encoding="utf-8")
+        if STAT_EXPORT_MARKER in html:
+            continue
+        if STAT_UMI_SCRIPT_TAG in html:
+            patched = html.replace(STAT_UMI_SCRIPT_TAG, STAT_EXPORT_SCRIPT_TAG + STAT_UMI_SCRIPT_TAG, 1)
+        elif "</body>" in html:
+            patched = html.replace("</body>", STAT_EXPORT_SCRIPT_TAG + "</body>", 1)
+        else:
+            raise RuntimeError(f"cannot find statistics bootstrap in {html_path}")
+        backup = html_path.with_name(html_path.name + backup_suffix)
+        if not backup.exists():
+            shutil.copy2(html_path, backup)
+        html_path.write_text(patched, encoding="utf-8")
+        html_patched.append(str(relative_path))
+        changed = True
+
+    return {
+        "changed": changed,
+        "missing": None,
+        "html_patched": html_patched,
+        "script_patched": script_patched,
     }
 
 
@@ -608,6 +713,16 @@ def compile_work_permit_view_event(jar_path: Path, source_path: Path) -> bytes:
     )
 
 
+def compile_wts_certificate_entity(jar_path: Path, source_path: Path) -> bytes:
+    return compile_java_class_patch(
+        jar_path,
+        source_path,
+        WTS_CERTIFICATE_CLASS,
+        source_path.read_text(encoding="utf-8"),
+        "adp-wts-certificate-entity-",
+    )
+
+
 def read_precompiled_class(precompiled_dir: Path, class_entry: str) -> bytes:
     class_path = precompiled_dir / class_entry
     if not class_path.exists():
@@ -620,6 +735,7 @@ def patch_wts_jar(
     backup_suffix: str,
     upload_list_controller_class: bytes | None = None,
     extra_classes: Dict[str, bytes] | None = None,
+    statistics_export_script: bytes | None = None,
 ) -> Dict[str, Any]:
     original = jar_path.read_bytes()
     changed = False
@@ -632,12 +748,19 @@ def patch_wts_jar(
             for info in source.infolist():
                 content = source.read(info.filename)
                 if info.filename == INNER_WTS_SERVICE_JAR:
-                    content, stats = patch_inner_wts_jar(content, upload_list_controller_class, extra_classes)
+                    content, stats = patch_inner_wts_jar(
+                        content,
+                        upload_list_controller_class,
+                        extra_classes,
+                        statistics_export_script,
+                    )
                     changed = bool(
                         stats["html_patched"]
                         or stats["added_static_alias"]
                         or stats["patched_upload_list_controller"]
                         or stats["patched_extra_classes"]
+                        or stats["patched_statistics_html"]
+                        or stats["patched_statistics_script"]
                     )
                 target.writestr(copy_zip_info(info), content)
 
@@ -914,6 +1037,10 @@ def parse_args() -> argparse.Namespace:
         root.parent
         / "mes-modules-source-repo/modules/wts/WTS_6.1.8.2/service/src/main/custom/com/supcon/orchid/WTS/superzy/view/events/WorkPermitViewEvent.java"
     )
+    default_wts_certificate_entity_source = (
+        root
+        / "deploy/docker/runtime-patches/wts/java/com/supcon/orchid/WTS/entities/WTSCertificate.java"
+    )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=root)
     parser.add_argument(
@@ -978,6 +1105,40 @@ def parse_args() -> argparse.Namespace:
         help="skip WTS work-ticket permit lookup and close-node compatibility patches",
     )
     parser.add_argument(
+        "--wts-certificate-entity-source",
+        type=Path,
+        default=Path(os.environ.get("ADP_WTS_CERTIFICATE_ENTITY_SOURCE", default_wts_certificate_entity_source)),
+        help="recovered WTSCertificate.java used by work-ticket qualification subgrids",
+    )
+    parser.add_argument(
+        "--no-certificate-entity",
+        action="store_true",
+        help="skip the recovered WTSCertificate runtime entity patch",
+    )
+    parser.add_argument(
+        "--wts-statistics-export-script",
+        type=Path,
+        default=root / "deploy/docker/runtime-patches/wts/job-statistics-export-compat.js",
+        help="browser-side export compatibility script for the WTS job statistics page",
+    )
+    parser.add_argument(
+        "--no-statistics-export",
+        action="store_true",
+        help="skip the WTS job statistics export compatibility patch",
+    )
+    parser.add_argument(
+        "--wts-statistics-static-root",
+        type=Path,
+        default=root
+        / "runtime/bap-server/bap-workspace/bap-static/greenDill/static/WTS/_static_jobStatistics",
+        help="extracted WTS job-statistics static directory served by the gateway",
+    )
+    parser.add_argument(
+        "--no-statistics-static",
+        action="store_true",
+        help="skip patching the extracted WTS job-statistics static directory",
+    )
+    parser.add_argument(
         "--precompiled-work-ticket-class-dir",
         type=Path,
         default=Path(os.environ["ADP_WTS_PRECOMPILED_WORK_TICKET_CLASS_DIR"])
@@ -994,6 +1155,9 @@ def main() -> int:
     args = parse_args()
     result: Dict[str, Any] = {}
     try:
+        statistics_export_script = None
+        if not args.no_statistics_export:
+            statistics_export_script = args.wts_statistics_export_script.expanduser().resolve().read_bytes()
         if not args.no_jar:
             upload_list_controller_class = None
             if not args.no_upload_list_controller:
@@ -1046,11 +1210,29 @@ def main() -> int:
                         args.wts_jar.expanduser().resolve(),
                         args.wts_work_permit_view_event_source.expanduser().resolve(),
                     )
+            if not args.no_certificate_entity:
+                if args.precompiled_work_ticket_class_dir:
+                    extra_classes[WTS_CERTIFICATE_CLASS] = read_precompiled_class(
+                        args.precompiled_work_ticket_class_dir.expanduser().resolve(),
+                        WTS_CERTIFICATE_CLASS,
+                    )
+                else:
+                    extra_classes[WTS_CERTIFICATE_CLASS] = compile_wts_certificate_entity(
+                        args.wts_jar.expanduser().resolve(),
+                        args.wts_certificate_entity_source.expanduser().resolve(),
+                    )
             result["jar"] = patch_wts_jar(
                 args.wts_jar.expanduser().resolve(),
                 args.backup_suffix,
                 upload_list_controller_class,
                 extra_classes,
+                statistics_export_script,
+            )
+        if statistics_export_script is not None and not args.no_statistics_static:
+            result["statistics_static"] = patch_statistics_static_root(
+                args.wts_statistics_static_root.expanduser().resolve(),
+                statistics_export_script,
+                args.backup_suffix,
             )
         if not args.no_db:
             result["db"] = patch_wts_layouts(args.postgres_container)

@@ -1,0 +1,634 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-31T17:17:54.797Z",
+  "repoCommit": "a4f1f0dc889bb6fb93805871792b822951f32dcb+working-tree-wts-business-statistics",
+  "database": "PostgreSQL",
+  "baseUrl": "http://10.11.100.17:18080",
+  "status": "PASS",
+  "summary": {
+    "testedFeatures": 35,
+    "pass": 35,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "blockedInteractions": 8,
+    "pages": 11,
+    "layouts": 24
+  },
+  "frontend": {
+    "pages": [
+      {
+        "module": "动土安全作业",
+        "route": "/msService/WTS/workTicket/workTicket/soilWork",
+        "viewCode": "WTS_1.0.0_workTicket_soilWork",
+        "expectedButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "visibleButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "作业内容 作业票编号 申请人 申请单位 申请时间 ~ 查 询 仅查待办 清 空 新增 查看详情 序号 作业票编号 作业内容 申请人 申请单位 申请时间 待办说明 共 0 项 0",
+        "addInteraction": {
+          "status": "PASS",
+          "surfaceKind": "popup",
+          "url": "http://10.11.100.17:18080/msService/WTS/workTicket/workTicket/soilWorkEdit?__pc__=c29pbFdvcmtfYWRkX2FkZF9XVFNfMS4wLjBfd29ya1RpY2tldF9zb2lsV29ya3w_&viewCode=WTS_1.0.0_workTicket_soilWork&entityCode=WTS_1.0.0_workTicket&iscrosscompany=false&openType=frame&buttonCode=WTS_1.0.0_workTicket_soilWork_BUTTON_add&iscallback=true",
+          "responses": [],
+          "bodyTextExcerpt": "动土作业申请 ( 默认人员 2026-08-01 01:18:01 虚拟岗位 ) 状态： 保存 关联作业票 0 作业内容 *申请人 *申请单位 作业地点 *开始时间 *结束时间 是否内部单位 监护人(内部) 监护人(外部) *施工单位 名称或拼音 施工负责人 *作业人 *施工单位 名称或拼音 施工负责人 *作业人 *危害识别 风险与安全措施 增行 ec.view.deleteline 收起 序号 类型 内容 入选本票 定位 拍照 勾选确认 录入文字 审批签名 收起 序号 名称 签名时间 签名人 电子签名（弃用） 意见 处理结果 填写意见 常用意见"
+        },
+        "detailInteraction": {
+          "status": "BLOCKED",
+          "reason": "当前列表无业务记录，已验证无选择提示"
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/wts-business-statistics-20260731/soilWork.png"
+      },
+      {
+        "module": "受限空间安全作业",
+        "route": "/msService/WTS/workTicket/workTicket/limitSpaceWork",
+        "viewCode": "WTS_1.0.0_workTicket_limitSpaceWork",
+        "expectedButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "visibleButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "作业内容 作业票编号 申请人 申请单位 申请时间 ~ 查 询 仅查待办 清 空 新增 查看详情 序号 作业票编号 作业内容 申请人 申请单位 申请时间 待办说明 共 0 项 0",
+        "addInteraction": {
+          "status": "PASS",
+          "surfaceKind": "popup",
+          "url": "http://10.11.100.17:18080/msService/WTS/workTicket/workTicket/limitSpaceWorkEdit?__pc__=bGltaXRTcGFjZVdvcmtfYWRkX2FkZF9XVFNfMS4wLjBfd29ya1RpY2tldF9saW1pdFNwYWNlV29ya3w_&viewCode=WTS_1.0.0_workTicket_limitSpaceWork&entityCode=WTS_1.0.0_workTicket&iscrosscompany=false&openType=frame&buttonCode=WTS_1.0.0_workTicket_limitSpaceWork_BUTTON_add&iscallback=true",
+          "responses": [],
+          "bodyTextExcerpt": "受限空间作业申请 ( 默认人员 2026-08-01 01:18:07 虚拟岗位 ) 状态： 保存 关联作业票 0 作业内容 *申请人 *申请单位 作业地点 *开始时间 *结束时间 是否内部单位 监护人(内部) 监护人(外部) *施工单位 名称或拼音 施工负责人 作业人 *施工单位 名称或拼音 施工负责人 *作业人 *危害识别 *主要介质 风险与安全措施 增行 ec.view.deleteline 收起 序号 类型 内容 入选本票 定位 拍照 勾选确认 录入文字 审批签名 收起 序号 名称 签名时间 签名人 电子签名（弃用） 意见 处理结果 填写意见 常用意见"
+        },
+        "detailInteraction": {
+          "status": "BLOCKED",
+          "reason": "当前列表无业务记录，已验证无选择提示"
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/wts-business-statistics-20260731/limitSpaceWork.png"
+      },
+      {
+        "module": "吊装安全作业",
+        "route": "/msService/WTS/workTicket/workTicket/liftWork",
+        "viewCode": "WTS_1.0.0_workTicket_liftWork",
+        "expectedButtons": [
+          "查看详情"
+        ],
+        "visibleButtons": [
+          "查看详情"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "作业内容 作业票编号 申请人 申请单位 申请时间 ~ 查 询 仅查待办 清 空 查看详情 序号 作业票编号 作业内容 申请人 申请单位 申请时间 待办说明 共 0 项 0",
+        "detailInteraction": {
+          "status": "BLOCKED",
+          "reason": "当前列表无业务记录，已验证无选择提示"
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/wts-business-statistics-20260731/liftWork.png"
+      },
+      {
+        "module": "临时用电安全作业",
+        "route": "/msService/WTS/workTicket/workTicket/electricityWork",
+        "viewCode": "WTS_1.0.0_workTicket_electricityWork",
+        "expectedButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "visibleButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "作业内容 作业票编号 申请人 申请单位 申请时间 ~ 查 询 仅查待办 清 空 新增 查看详情 序号 作业票编号 作业内容 申请人 申请单位 申请时间 待办说明 共 0 项 0",
+        "addInteraction": {
+          "status": "PASS",
+          "surfaceKind": "popup",
+          "url": "http://10.11.100.17:18080/msService/WTS/workTicket/workTicket/electricityEdit?__pc__=ZWxlY3RyaWNpdHlXb3JrX2FkZF9hZGRfV1RTXzEuMC4wX3dvcmtUaWNrZXRfZWxlY3RyaWNpdHlXb3JrfA__&viewCode=WTS_1.0.0_workTicket_electricityWork&entityCode=WTS_1.0.0_workTicket&iscrosscompany=false&openType=frame&buttonCode=WTS_1.0.0_workTicket_electricityWork_BUTTON_add&iscallback=true",
+          "responses": [],
+          "bodyTextExcerpt": "临时用电作业申请 ( 默认人员 2026-08-01 01:18:15 虚拟岗位 ) 状态： 保存 关联作业票 0 作业内容 *申请人 *申请单位 作业地点 *开始时间 *结束时间 是否内部单位 监护人(内部) 监护人(外部) *施工单位 名称或拼音 施工负责人 *作业人 *施工单位 名称或拼音 施工负责人 *作业人 *危害识别 *工作电压(V) *功率(W) 风险与安全措施 增行 ec.view.deleteline 收起 序号 类型 内容 入选本票 定位 拍照 勾选确认 录入文字 审批签名 收起 序号 名称 签名时间 签名人 电子签名（弃用） 意见 处理结果 填写意见 常用意见"
+        },
+        "detailInteraction": {
+          "status": "BLOCKED",
+          "reason": "当前列表无业务记录，已验证无选择提示"
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/wts-business-statistics-20260731/electricityWork.png"
+      },
+      {
+        "module": "高处安全作业",
+        "route": "/msService/WTS/workTicket/workTicket/heightWork",
+        "viewCode": "WTS_1.0.0_workTicket_heightWork",
+        "expectedButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "visibleButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "等级 作业内容 作业票编号 申请人 申请单位 申请时间 ~ 查 询 仅查待办 清 空 新增 查看详情 序号 作业票编号 作业内容 等级 申请人 申请单位 申请时间 待办说明 共 0 项 0",
+        "addInteraction": {
+          "status": "PASS",
+          "surfaceKind": "popup",
+          "url": "http://10.11.100.17:18080/msService/WTS/workTicket/workTicket/heightWorkEdit?__pc__=aGVpZ2h0V29ya19hZGRfYWRkX1dUU18xLjAuMF93b3JrVGlja2V0X2hlaWdodFdvcmt8&viewCode=WTS_1.0.0_workTicket_heightWork&entityCode=WTS_1.0.0_workTicket&iscrosscompany=false&openType=frame&buttonCode=WTS_1.0.0_workTicket_heightWork_BUTTON_add&iscallback=true",
+          "responses": [],
+          "bodyTextExcerpt": "高处作业申请 ( 默认人员 2026-08-01 01:18:21 虚拟岗位 ) 状态： 保存 关联作业票 0 作业内容 *申请人 *申请单位 作业地点 *开始时间 *结束时间 是否内部单位 监护人(内部) 监护人(外部) *施工单位 名称或拼音 施工负责人 *作业人 *施工单位 名称或拼音 施工负责人 *作业人 *危害识别 *等级 *作业高度(m) 风险与安全措施 增行 ec.view.deleteline 收起 序号 类型 内容 入选本票 定位 拍照 勾选确认 录入文字 审批签名 收起 序号 名称 签名时间 签名人 电子签名（弃用） 意见 处理结果 填写意见 常用意见"
+        },
+        "detailInteraction": {
+          "status": "BLOCKED",
+          "reason": "当前列表无业务记录，已验证无选择提示"
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/wts-business-statistics-20260731/heightWork.png"
+      },
+      {
+        "module": "动火安全作业",
+        "route": "/msService/WTS/workTicket/workTicket/firework",
+        "viewCode": "WTS_1.0.0_workTicket_firework",
+        "expectedButtons": [
+          "查看详情",
+          "批量打印"
+        ],
+        "visibleButtons": [
+          "查看详情",
+          "批量打印"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "等级 作业内容 作业票编号 申请人 申请单位 申请时间 ~ 动火方式 查 询 仅查待办 清 空 查看详情 批量打印 序号 作业票编号 作业内容 等级 申请人 申请单位 申请时间 动火方式 待办说明 1 ADP_E2E_20260619144115_WTS_FIREWORK_STOP_FIRE ADP_E2E_20260619144115_WTS_FIREWORK_STOP 动火作业票 一级 虚拟人员 虚拟部门 2026-06-19 22:41:36 开票申请 2 ADP_E2E_20260619135441_WTS_FIREWORK_FIRE ADP_E2E_20260619135441_WTS_FIREWORK 动火作业票 一级 虚拟人员 虚拟部门 2026-06-19 21:55:01 开票申请 3 ADP_E2E_20260619134425_WTS_FIREWORK_FIRE ADP_E2E_20260619134425_WTS_FIREWORK 动火作业票 一级 虚拟人员 虚拟部门 2026-06-19 21:44:38 作业验票 4 ADP_E2E_20260619133413_WTS_FIREWORK_FIRE ADP_E2E_20260619133413_WTS_FIREWORK 动火作业票 一级 虚拟人员 虚拟部门 2026-06-19 21:34:55 作业验票 5 ADP_E2E_20260619095233_WTS_CHILD_FIRE ADP_E2E_20260619095233_WTS_CHILD 动火作业票 一级 虚拟人员 虚拟部门 2026-06-19 17:52:51 作业封票 共 5 项 1",
+        "batchPrintInteraction": {
+          "status": "BLOCKED",
+          "reason": "已验证未选择数据提示；测试环境未安装并授权标准打印控件，未调用本机打印进程",
+          "noSelectionFeedback": true
+        },
+        "detailInteraction": {
+          "status": "PASS",
+          "surfaceKind": "popup",
+          "url": "http://10.11.100.17:18080/msService/WTS/workTicket/workTicket/fireworkView?viewCode=WTS_1.0.0_workTicket_firework&entityCode=WTS_1.0.0_workTicket&iscrosscompany=false&openType=frame&buttonCode=WTS_1.0.0_workTicket_firework_viewDetail_view&iscallback=false&id=6599268619764288",
+          "responses": [],
+          "bodyTextExcerpt": "动火作业查看 workTicket_20260619_007 ( 虚拟人员 2026-06-19 22:41:36 虚拟岗位 ) 状态：开票申请 关联作业票关闭窗口 0 作业票编号 ADP_E2E_20260619144115_WTS_FIREWORK_STOP_FIRE 许可编号 ADP_E2E_20260619144115_WTS_FIREWORK_STOP 申请时间 2026-06-19 22:41:36 申请人 虚拟人员 申请单位 虚拟部门 作业内容 ADP_E2E_20260619144115_WTS_FIREWORK_STOP 动火作业票 开始时间 2026-06-19 23:46:35 结束时间 2026-06-20 01:46:35 作业地点 ADP_E2E_20260619144115_WTS_FIREWORK_STOP 区域 是否内部单位 监护人姓名(内部) 监护人姓名(外部) 施工单位 虚拟部门 施工负责人 默认人员 作业人 施工单位 施工负责人 作业人 作业等级 一级 动火方式 危害识别 验收结果 风险与安全措施 收起 序号 类型 内容 入选本票 定位 拍照 勾",
+          "rowText": "{\"applyDept\":{\"attrMap\":null,\"id\":1,\"name\":\"虚拟部门\"},\"applyStaff\":{\"id\":1,\"name\":\"虚拟人员\"},\"applyTime\":1781880096024,\"attrMap\":null,\"blockRoadPicAttachementInfo\":null,\"blockRoadPicDocument\":null,\"cid\":1000,\"cidName\":\"默认公司\",\"constructionDrawingAttachementInfo\":null,\"constructionDrawingDocument\":null,\"content\":\"ADP_E2E_20260619144115_WTS_FIREWORK_STOP 动火作业票\",\"createStaff\":null,\"createTime\":null,\"drawingAttachementInfo\":null,\"drawingDocument\":null,\"fireWay\":null,\"fireWayForDisplay\":null,\"id\":6599268619"
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/wts-business-statistics-20260731/firework.png"
+      },
+      {
+        "module": "断路安全作业",
+        "route": "/msService/WTS/workTicket/workTicket/breakWork",
+        "viewCode": "WTS_1.0.0_workTicket_breakWork",
+        "expectedButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "visibleButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "作业内容 作业票编号 申请人 申请单位 申请时间 ~ 查 询 仅查待办 清 空 新增 查看详情 序号 作业票编号 作业内容 申请人 申请单位 申请时间 待办说明 共 0 项 0",
+        "addInteraction": {
+          "status": "PASS",
+          "surfaceKind": "popup",
+          "url": "http://10.11.100.17:18080/msService/WTS/workTicket/workTicket/breakWorkEdit?__pc__=YnJlYWtXb3JrX2FkZF9hZGRfV1RTXzEuMC4wX3dvcmtUaWNrZXRfYnJlYWtXb3JrfA__&viewCode=WTS_1.0.0_workTicket_breakWork&entityCode=WTS_1.0.0_workTicket&iscrosscompany=false&openType=frame&buttonCode=WTS_1.0.0_workTicket_breakWork_BUTTON_add&iscallback=true",
+          "responses": [],
+          "bodyTextExcerpt": "断路作业申请 ( 默认人员 2026-08-01 01:18:32 虚拟岗位 ) 状态： 保存 关联作业票 0 作业内容 *申请人 *申请单位 作业地点 *开始时间 *结束时间 是否内部单位 监护人(内部) 监护人(外部) *施工单位 名称或拼音 施工负责人 *作业人 *施工单位 名称或拼音 施工负责人 *作业人 *危害识别 *断路原因 风险与安全措施 增行 ec.view.deleteline 收起 序号 类型 内容 入选本票 定位 拍照 勾选确认 录入文字 审批签名 收起 序号 名称 签名时间 签名人 电子签名（弃用） 意见 处理结果 填写意见 常用意见"
+        },
+        "detailInteraction": {
+          "status": "BLOCKED",
+          "reason": "当前列表无业务记录，已验证无选择提示"
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/wts-business-statistics-20260731/breakWork.png"
+      },
+      {
+        "module": "盲板抽堵安全作业",
+        "route": "/msService/WTS/workTicket/workTicket/blockWork",
+        "viewCode": "WTS_1.0.0_workTicket_blockWork",
+        "expectedButtons": [
+          "查看详情"
+        ],
+        "visibleButtons": [
+          "查看详情"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "作业内容 作业票编号 申请人 申请单位 申请时间 ~ 查 询 仅查待办 清 空 查看详情 序号 作业票编号 作业内容 申请人 申请单位 申请时间 ec.list.taskDescription 共 0 项 0",
+        "detailInteraction": {
+          "status": "BLOCKED",
+          "reason": "当前列表无业务记录，已验证无选择提示"
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/wts-business-statistics-20260731/blockWork.png"
+      },
+      {
+        "module": "作业台账",
+        "route": "/msService/WTS/workTicket/workTicket/workList",
+        "viewCode": "WTS_1.0.0_workTicket_workList",
+        "expectedButtons": [
+          "查看详情",
+          "导出"
+        ],
+        "visibleButtons": [
+          "查看详情",
+          "导出"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "作业内容 作业票编号 申请时间 ~ 许可编号 施工单位 作业类型 开始时间 ~ 结束时间 ~ 查 询 仅查待办 清 空 查看详情 导出 序号 作业票编号 许可编号 作业内容 申请人 申请单位 申请时间 作业类型 开始时间 结束时间 施工单位 作业人 待办说明 1 ADP_E2E_20260730080536_WTS_FIREWORK_FIRE ADP_E2E_20260730080536_WTS_FIREWORK ADP_E2E_20260730080536_WTS_FIREWORK 动火作业票 虚拟人员 虚拟部门 2026-07-30 16:05:38 动火安全作业 2026-07-30 17:10:37 2026-07-30 19:10:37 生效 2 ADP_E2E_20260730080108_WTS_FIREWORK_FIRE ADP_E2E_20260730080108_WTS_FIREWORK ADP_E2E_20260730080108_WTS_FIREWORK 动火作业票 虚拟人员 虚拟部门 2026-07-30 16:01:11 动火安全作业 2026-07-30 17:06:11 2026-07-30 19:06:11 生效 3 ADP_E2E_20260730074843_WTS_FIREWORK_FIRE ADP_E2E_20260730074843_WTS_FIREWORK ADP_E2E_20260730074843_WTS_FIREWORK 动火作业票 虚拟人员 虚拟部门 2026-07-30 15:48:46 动火安全作业 2026-07-30 16:53:46 2026-07-30 18:53:46 生效 4 ADP_E2E_20260730065541_WTS_FIREWORK_FIRE ADP_E2E_20260730065541_WTS_FIREWORK ADP_E2E_20260730065541_WTS_FIREWORK 动火作业票 虚拟人员 虚拟部门 2026-07-30 14:55:45 动火安全作业 2026-07-30 16:00:45 2026-07-30 18:00:45 生效 5 ADP_E2E_20260730065353_WTS_FIREWORK_FIRE ADP_E2E_20260730065353_WTS_FIREWORK ADP_E2E_20260730065353_WTS_FIREWORK 动火作业票 虚拟人员 虚拟部门 2026-07-30 14:53:56 动火安全作业 2026-07-30 15:58:55 2026-07-30 17:58:55 生效 6 ADP_E2E_20260619144549_WTS_FIREWORK_STOP_FIRE ADP_E2E_202606191",
+        "detailInteraction": {
+          "status": "PASS",
+          "url": "http://10.11.100.17:18080/msService/WTS/workTicket/workTicket/fireworkView?viewCode=WTS_1.0.0_workTicket_workList&entityCode=WTS_1.0.0_workTicket&iscrosscompany=false&openType=frame&buttonCode=WTS_1.0.0_workTicket_workList_viewDetail_view&iscallback=false&id=6714567464403104",
+          "rowText": "{\"applyDept\":{\"attrMap\":null,\"id\":1,\"name\":\"虚拟部门\"},\"applyStaff\":{\"id\":1,\"name\":\"虚拟人员\"},\"applyTime\":1785398738159,\"attrMap\":null,\"blockRoadPicAttachementInfo\":null,\"blockRoadPicDocument\":null,\"cid\":1000,\"cidName\":\"默认公司\",\"constructionDrawingAttachementInfo\":null,\"constructionDrawingDocument\":null,\"content\":\"ADP_E2E_20260730080536_WTS_FIREWORK 动火作业票\",\"contractor\":{\"attrMap\":null,\"id\":null,\"name\":null},\"createDepartment\":null,\"createPosition\":null,\"createStaff\":null,\"createTime\":null,\"deleteStaff\":n",
+          "bodyTextExcerpt": "动火作业查看 workTicket_20260730_005 ( 虚拟人员 2026-07-30 16:05:38 虚拟岗位 ) 状态：生效 关联作业票关闭窗口 0 作业票编号 ADP_E2E_20260730080536_WTS_FIREWORK_FIRE 许可编号 ADP_E2E_20260730080536_WTS_FIREWORK 申请时间 2026-07-30 16:05:38 申请人 虚拟人员 申请单位 虚拟部门 作业内容 ADP_E2E_20260730080536_WTS_FIREWORK 动火作业票 开始时间 2026-07-30 17:10:37 结束时间 2026-07-30 19:10:37 作业地点 ADP_E2E_20260730080536_WTS_FIREWORK 区域 是否内部单位 监护人姓名(内部) 监护人姓名(外部) 施工单位 虚拟部门 施工负责人 默认人员 作业人 施工单位 施工负责人 作业人 作业等级 一级 动火方式 危害识别 验收结果 ADP_E2E_20260730080536_WTS_FIREWORK_CLOSE_ACCEPT 风险与安全"
+        },
+        "exportInteraction": {
+          "status": "PASS",
+          "responseStatus": 200,
+          "responseUrl": "http://10.11.100.17:18080/msService/WTS/workTicket/workTicket/workList-query",
+          "downloadSuggestedFilename": "WTS_work_ticket_ledger.xls",
+          "issues": []
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/wts-business-statistics-20260731/workList.png"
+      },
+      {
+        "module": "盲板台账",
+        "route": "/msService/WTS/blindPlateAccount/plateAccount/plateAccountList",
+        "viewCode": "WTS_1.0.0_blindPlateAccount_plateAccountList",
+        "expectedButtons": [
+          "导出"
+        ],
+        "visibleButtons": [
+          "导出"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "查 询 清 空 导出 序号 堵盲板作业票编号 抽盲板作业票编号 盲板状态 设备管道名称 盲板位置编号 盲板编号 堵时间 抽时间 盲板规格 盲板材质 备注 共 0 项 0",
+        "exportInteraction": {
+          "status": "PASS",
+          "responseStatus": 200,
+          "responseUrl": "http://10.11.100.17:18080/msService/WTS/blindPlateAccount/plateAccount/plateAccountList-query",
+          "downloadSuggestedFilename": "WTS_blind_plate_ledger.xls",
+          "issues": []
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/wts-business-statistics-20260731/plateAccountList.png"
+      },
+      {
+        "module": "作业统计",
+        "route": "/msService/WTS/workTicket/assWorkTickets/workTicket",
+        "viewCode": "WTS_1.0.0_workTicket_workTicket",
+        "expectedButtons": [
+          "导出"
+        ],
+        "visibleButtons": [
+          "导出"
+        ],
+        "httpStatus": 200,
+        "status": "PASS",
+        "issues": [],
+        "bodyTextExcerpt": "统计时间 ~ 部门/车间 作业区域 作业类型 查 询 清 空 导出 作业总览 本时段作业总数 10 新增作业总数 5 异常封票 0 异常占比 0% 作业类型 每日开/封票 作业执行情况 高处 0 受限空间 0 临时用电 0 动火 0 断路 0 吊装 0 盲板抽堵 0 动土 0 外来承包商统计 承包商作业人员统计 部门作业一览表 部门 开票 封票 异常 执行中 数智部 0 0 0 0 办公室 0 0 0 0 财务部 0 0 0 0 供应部 0 0 0 0 1 作业区域排行榜",
+        "exportInteraction": {
+          "status": "PASS",
+          "responseStatus": null,
+          "responseUrl": null,
+          "downloadSuggestedFilename": "WTS_job_statistics_2026-07-31.csv",
+          "issues": []
+        },
+        "serverErrors": [],
+        "clientErrors": [],
+        "screenshot": "metadata/wts-business-statistics-20260731/workStatistics.png"
+      }
+    ],
+    "layouts": [
+      {
+        "label": "动土安全作业",
+        "viewCode": "WTS_1.0.0_workTicket_soilWork",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_soilWork&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 20403,
+        "expectedButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "受限空间安全作业",
+        "viewCode": "WTS_1.0.0_workTicket_limitSpaceWork",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_limitSpaceWork&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 20777,
+        "expectedButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "吊装安全作业",
+        "viewCode": "WTS_1.0.0_workTicket_liftWork",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_liftWork&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 19393,
+        "expectedButtons": [
+          "查看详情"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "临时用电安全作业",
+        "viewCode": "WTS_1.0.0_workTicket_electricityWork",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_electricityWork&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 20837,
+        "expectedButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "高处安全作业",
+        "viewCode": "WTS_1.0.0_workTicket_heightWork",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_heightWork&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 22802,
+        "expectedButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "动火安全作业",
+        "viewCode": "WTS_1.0.0_workTicket_firework",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_firework&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 33679,
+        "expectedButtons": [
+          "查看详情",
+          "批量打印"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "断路安全作业",
+        "viewCode": "WTS_1.0.0_workTicket_breakWork",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_breakWork&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 20464,
+        "expectedButtons": [
+          "新增",
+          "查看详情"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "盲板抽堵安全作业",
+        "viewCode": "WTS_1.0.0_workTicket_blockWork",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_blockWork&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 19394,
+        "expectedButtons": [
+          "查看详情"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "作业台账",
+        "viewCode": "WTS_1.0.0_workTicket_workList",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_workList&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 48605,
+        "expectedButtons": [
+          "查看详情",
+          "导出"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "盲板台账",
+        "viewCode": "WTS_1.0.0_blindPlateAccount_plateAccountList",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_blindPlateAccount_plateAccountList&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 16262,
+        "expectedButtons": [
+          "导出"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "作业统计",
+        "viewCode": "WTS_1.0.0_workTicket_workTicket",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_workTicket&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 11938,
+        "expectedButtons": [
+          "导出"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_soilWorkEdit",
+        "viewCode": "WTS_1.0.0_workTicket_soilWorkEdit",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_soilWorkEdit&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 119738,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_limitSpaceWorkEdit",
+        "viewCode": "WTS_1.0.0_workTicket_limitSpaceWorkEdit",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_limitSpaceWorkEdit&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 124665,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_electricityEdit",
+        "viewCode": "WTS_1.0.0_workTicket_electricityEdit",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_electricityEdit&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 126972,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_heightWorkEdit",
+        "viewCode": "WTS_1.0.0_workTicket_heightWorkEdit",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_heightWorkEdit&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 127012,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_breakWorkEdit",
+        "viewCode": "WTS_1.0.0_workTicket_breakWorkEdit",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_breakWorkEdit&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 122612,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_soilWorkView",
+        "viewCode": "WTS_1.0.0_workTicket_soilWorkView",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_soilWorkView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 118280,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_limitSpaceView",
+        "viewCode": "WTS_1.0.0_workTicket_limitSpaceView",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_limitSpaceView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 120838,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_liftWorkView",
+        "viewCode": "WTS_1.0.0_workTicket_liftWorkView",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_liftWorkView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 126900,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_electricityView",
+        "viewCode": "WTS_1.0.0_workTicket_electricityView",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_electricityView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 123848,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_heightWorkView",
+        "viewCode": "WTS_1.0.0_workTicket_heightWorkView",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_heightWorkView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 123456,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_fireworkView",
+        "viewCode": "WTS_1.0.0_workTicket_fireworkView",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_fireworkView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 123169,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_breakWorkView",
+        "viewCode": "WTS_1.0.0_workTicket_breakWorkView",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_breakWorkView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 120001,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "label": "WTS_1.0.0_workTicket_blockWorkView",
+        "viewCode": "WTS_1.0.0_workTicket_blockWorkView",
+        "endpoint": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workTicket_blockWorkView&isEs5=true",
+        "httpStatus": 200,
+        "responseBytes": 141028,
+        "expectedButtons": [],
+        "status": "PASS",
+        "issues": []
+      }
+    ],
+    "console": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "clientErrors": [],
+    "serverErrors": []
+  },
+  "persistence": {
+    "required": false,
+    "status": "NOT_APPLICABLE",
+    "reason": "本轮验证动作入口、详情、打印提示和只读导出，不提交作业票业务单据。"
+  },
+  "issues": [],
+  "login": {
+    "status": 200,
+    "authenticated": true
+  },
+  "acceptanceNote": "blockedInteractions are nested action checks and are not failed page/layout checks",
+  "migrations": [
+    "deploy/docker/postgres/init/248-wts-business-statistics-actions-runtime.sql",
+    "deploy/docker/postgres/init/249-wts-business-statistics-actions-lob-compat.sql",
+    "deploy/docker/postgres/init/250-wts-ticket-edit-subgrid-runtime.sql",
+    "deploy/docker/postgres/init/251-wts-ledger-export-runtime-datagrid.sql",
+    "deploy/docker/postgres/init/252-wts-ledger-export-query-runtime.sql",
+    "deploy/docker/postgres/init/253-wts-certificate-part-entity.sql",
+    "deploy/docker/postgres/init/254-wts-firework-batch-print-render-compat.sql",
+    "deploy/docker/postgres/init/255-wts-firework-native-batch-print-collision.sql"
+  ]
+}

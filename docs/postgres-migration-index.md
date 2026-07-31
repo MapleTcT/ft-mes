@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`247`。
-- 编号范围：`001` 到 `247`。
+- 脚本数量：`255`。
+- 编号范围：`001` 到 `255`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -21,12 +21,12 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 39 |
-| business | 54 |
-| compatibility | 90 |
-| configuration | 61 |
+| business | 62 |
+| compatibility | 92 |
+| configuration | 62 |
 | general | 47 |
 | notification | 10 |
-| platform | 75 |
+| platform | 79 |
 | workflow | 21 |
 
 ## 语句统计
@@ -35,21 +35,21 @@
 | --- | --- |
 | alter-table | 10840 |
 | create-function | 117 |
-| create-index | 1026 |
-| create-table | 587 |
+| create-index | 1029 |
+| create-table | 588 |
 | create-view | 143 |
-| insert | 11491 |
-| update | 11616 |
+| insert | 11668 |
+| update | 11797 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 257 |
-| do-block | 568 |
-| if-exists | 194 |
-| if-not-exists | 13080 |
-| on-conflict | 11416 |
+| do-block | 593 |
+| if-exists | 219 |
+| if-not-exists | 13084 |
+| on-conflict | 11593 |
 | to-regclass | 222 |
 | where-not-exists | 55 |
 
@@ -304,6 +304,14 @@
 | 245 | 245-rm-formula-quality-remark-lob-compat.sql | compatibility | 52 | alter-table:1 | 2 | - |
 | 246 | 246-qcs-incoming-inspect-reference-runtime.sql | platform, configuration, business | 355 | insert:18, update:18 | 30 | - |
 | 247 | 247-qcs-other-quality-inspection-runtime.sql | platform, configuration, business | 877 | insert:45, update:45 | 75 | - |
+| 248 | 248-wts-business-statistics-actions-runtime.sql | platform, business | 1399 | insert:72, update:72 | 120 | - |
+| 249 | 249-wts-business-statistics-actions-lob-compat.sql | business, compatibility | 81 | update:1 | 0 | - |
+| 250 | 250-wts-ticket-edit-subgrid-runtime.sql | platform, business | 2306 | insert:80, update:80 | 80 | - |
+| 251 | 251-wts-ledger-export-runtime-datagrid.sql | platform, business | 156 | insert:2, update:2 | 2 | - |
+| 252 | 252-wts-ledger-export-query-runtime.sql | platform, business | 220 | insert:20, update:20 | 20 | - |
+| 253 | 253-wts-certificate-part-entity.sql | configuration, business | 46 | create-table:1, create-index:3 | 4 | - |
+| 254 | 254-wts-firework-batch-print-render-compat.sql | business, compatibility | 65 | insert:3, update:3 | 5 | - |
+| 255 | 255-wts-firework-native-batch-print-collision.sql | business | 24 | update:3 | 0 | - |
 
 ## 规则
 
