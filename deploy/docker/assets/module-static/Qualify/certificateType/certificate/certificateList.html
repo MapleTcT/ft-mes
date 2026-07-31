@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>资质列表</title>
+    <link href="/greenDill/static/styles/theme-colors.css?v=1569373039412" rel="stylesheet">
+    <link href="/greenDill/static/styles/vendors.commons.css?v=1569373039412" rel="stylesheet">
+    <link href="/greenDill/static/styles/list.css?v=1569373039412" rel="stylesheet">
+    <!-- 自定义代码，在custom对应目录下 -->
+    
+    
+    
+    
+    <script type="text/javascript">
+        var pageConfig = {
+            "prefix": "/msService",//url前缀
+            "viewCode": "Qualify_1.0.0_certificateType_certificateList", // 视图编码
+            "entityCode":"Qualify_1.0.0_certificateType",
+            "menuCode": "Qualify_1.0.0_certificateType_certificateList",
+            "viewName": "资质列表",
+            "viewType": "LIST",
+            "modelCode": "Qualify_1.0.0_certificateType_Certificate",
+            "showType": "PART",
+            "modelAlias": "certificate",
+            "workflowEnabled": false,
+            "listButtons":{
+                "ADD":"certificateList_new_add_Qualify_1.0.0_certificateType_certificateList",
+                "MODIFY":"certificateList_edit_modify_Qualify_1.0.0_certificateType_certificateList",
+            },
+            "interfaceApi": {
+                "mainView": "", // 主查看视图
+                "editView": "/msService/Qualify/certificateType/certificate/certificateEdit?",//编辑视图
+                "deleteData": "/Qualify/certificateType/certificate/delete",//删除数据
+                "sourceData": "/Qualify/certificateType/certificate/certificateList-", // 列表数据
+            },
+            "baseServiceApi": {
+                "flowRoot": "/baseService/workflow/flowRoot", // 路由数据
+                "layoutJson": "/baseService/view/layoutJson", // 布局数据
+                "uploadList": "/baseService/workbench/upload-list", // 附件列表
+                "systemCodeJson": "/baseService/systemCode/systemCodeJson", // 系统编码
+                "uploadFile": "/baseService/workbench/uploadFile", // 附件上传
+                "deleteFile": "/baseService/workbench/deleteFile", // 附件删除
+                "mneClient": "/baseService/workbench/common/mneClient", // 助记码
+            },
+        }
+    </script>
+</head>
+
+<body class="supos-container">
+    <div id="app"></div>
+    <script type="text/javascript" src="/greenDill/static/scripts/vendors.core.js?v=1569373039412"></script>
+    <script type="text/javascript" src="/greenDill/static/scripts/vendors.antdicons.js?v=1569373039412"></script>
+    <script type="text/javascript" src="/greenDill/static/scripts/vendors.antd.js?v=1569373039412"></script>
+    <script type="text/javascript" src="/greenDill/static/scripts/i18n.js?v=1569373039412"></script>
+    <script type="text/javascript" src="/greenDill/static/scripts/vendors.commons.js?v=1569373039412"></script>
+    <script type="text/javascript" src="/greenDill/static/scripts/list.js?v=1569373039412"></script>
+    <!-- 自定义代码，在custom对应目录下 -->
+    
+    
+</body>
+</html>

@@ -1,42 +1,42 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 234,
+  "migrationCount": 238,
   "firstNumber": 1,
-  "lastNumber": 234,
+  "lastNumber": 238,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 89,
+  "watchStatementCount": 90,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 10833,
-    "create-function": 116,
-    "create-index": 1017,
-    "create-table": 584,
+    "alter-table": 10835,
+    "create-function": 117,
+    "create-index": 1022,
+    "create-table": 585,
     "create-view": 143,
-    "insert": 11216,
-    "update": 11339
+    "insert": 11343,
+    "update": 11468
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 256,
-    "do-block": 467,
-    "if-exists": 144,
-    "if-not-exists": 13063,
-    "on-conflict": 11142,
+    "create-or-replace": 257,
+    "do-block": 513,
+    "if-exists": 145,
+    "if-not-exists": 13071,
+    "on-conflict": 11268,
     "to-regclass": 221,
-    "where-not-exists": 53
+    "where-not-exists": 54
   },
   "tagTotals": {
     "auth-rbac-org": 39,
     "business": 52,
-    "compatibility": 87,
+    "compatibility": 88,
     "configuration": 57,
-    "general": 43,
+    "general": 45,
     "notification": 10,
-    "platform": 69,
+    "platform": 70,
     "workflow": 21
   },
   "migrations": [
@@ -8831,6 +8831,149 @@
         "to-regclass": 0,
         "create-or-replace": 0,
         "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/235-qualify-action-runtime-json.sql",
+      "name": "235-qualify-action-runtime-json.sql",
+      "number": 235,
+      "slug": "qualify-action-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 1606,
+      "sha256": "49f6e99eef843505e3f7b0726de4f456b4e6f8c175182ba13050ab92a1627fbf",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 123,
+        "update": 123
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 123,
+        "do-block": 41,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/236-qualify-certificate-type-roots.sql",
+      "name": "236-qualify-certificate-type-roots.sql",
+      "number": 236,
+      "slug": "qualify-certificate-type-roots",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 53,
+      "sha256": "53eb8061c192d8d78690eb8c5ca80dd8bd7c220157c3d5e837e1cf16acc22956",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 1,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/237-qualify-certificate-type-mne-code-compat.sql",
+      "name": "237-qualify-certificate-type-mne-code-compat.sql",
+      "number": 237,
+      "slug": "qualify-certificate-type-mne-code-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 181,
+      "sha256": "95d29c2407818f8835982a90bd05db5c11b37ddcff2d2c689942d603951266c8",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 5,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 8,
+        "on-conflict": 0,
+        "do-block": 3,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 134,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_sync_qlf_certificate_types_mc_aliases",
+          "statement": "DROP TRIGGER IF EXISTS trg_sync_qlf_certificate_types_mc_aliases ON public.qlf_certificate_types_mc;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/238-qualify-system-config.sql",
+      "name": "238-qualify-system-config.sql",
+      "number": 238,
+      "slug": "qualify-system-config",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 99,
+      "sha256": "fe06cf3736de1d838bfd85946def63c21d5e4419bace239fe65b8214d1eadbcb",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 3,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 2,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 1
       },
       "highRiskStatements": [],
       "watchStatements": [],

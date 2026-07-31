@@ -1,0 +1,14 @@
+TreeList.NavTree.chooseNode
+Qualify.certificateType.certTypeIsRelated
+Button.text.save
+Qualify.viewtitle.randon1569401770550
+Qualify.TreeList.NavTree.addNewClass
+Qualify.operate.noDeletePermission
+SupDatagrid.button.error
+Qualify.operate.noDeletePermission
+SupDatagrid.button.delete
+Button.text.cancel
+ec.common.confirm
+Notification.message.deleteSuccess
+Notification.message.title.info
+ec.edit.button.uncurrent.company

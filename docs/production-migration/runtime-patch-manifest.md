@@ -7,23 +7,23 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-30T12:52:10+00:00` |
-| Repo Commit | `3ad9b065a4d273b500c08749f6af38192de90364` |
+| Generated At | `2026-07-31T01:40:11+00:00` |
+| Repo Commit | `53298f6693a4ad19b02ecb920e28f6c72c159c71` |
 | Database Target | `PostgreSQL` |
-| Total Files | `423` |
-| Total Bytes | `59490678` |
+| Total Files | `567` |
+| Total Bytes | `62250530` |
 
 ## Categories
 
 | Category | Files | Bytes | Description |
 | --- | ---: | ---: | --- |
 | `nacos-config-template` | 44 | 42353 | Sanitized Nacos configuration templates used by render-nacos-configs.py. |
-| `nginx-runtime-config` | 2 | 31715 | Nginx runtime configuration used by the Docker frontend gateway. |
-| `postgres-init-sql` | 234 | 58361742 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
+| `nginx-runtime-config` | 2 | 32485 | Nginx runtime configuration used by the Docker frontend gateway. |
+| `postgres-init-sql` | 238 | 60501814 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
 | `runtime-binary-patch` | 8 | 178941 | Compiled runtime patch payloads copied into the recovered Windows package at deploy time. |
-| `runtime-patch-source` | 23 | 95909 | Source or template files used to rebuild runtime patch payloads. |
-| `runtime-script` | 28 | 289112 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
-| `runtime-static-override` | 84 | 490906 | Static frontend runtime overrides mounted into the Docker frontend gateway. |
+| `runtime-patch-source` | 24 | 96564 | Source or template files used to rebuild runtime patch payloads. |
+| `runtime-script` | 28 | 289272 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
+| `runtime-static-override` | 223 | 1109101 | Static frontend runtime overrides mounted into the Docker frontend gateway. |
 
 ## Manifest Entries
 
@@ -73,7 +73,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `nacos-config-template` | `deploy/nacos-config/supfusion-systemConfig.properties` | 807 | `557f134990f19b26597602b918aa3ce1f611d20ddcb4dfd828dd7c1f4e4805ea` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-task-scheduler.properties` | 1680 | `578b65e2754b9053209fb17cac4d8f027e3a1279a6fdd35f75c8b8435579f4ad` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-theme.properties` | 630 | `f62add6300bbb4758d3fba662cc7646530e9ecfbfe7da64452dbec2b30213c17` |
-| `nginx-runtime-config` | `deploy/docker/nginx/adp.conf` | 31495 | `0af98630ecdf875750d0b5efe627da4f2595f1992447347f66f0c210e1fe93f9` |
+| `nginx-runtime-config` | `deploy/docker/nginx/adp.conf` | 32265 | `3fb89290b3b36400d0f145b0c7d15d9d5f59fa0c6e0b98d82c51e56567fd78fc` |
 | `nginx-runtime-config` | `deploy/docker/nginx/gzip.conf` | 220 | `605130384f1677fdd26d0ea7514d87b8ad2619c794548a3a1cf200a3aa0d0a64` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/001-adp-postgres-compat.sql` | 4430 | `cea2ef60626794cdd7b2149a221072807385f3c5a587c8bb641a9f08eaa24f96` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/002-sms-jincang.sql` | 612 | `43007e1051a191caa4b6eb1238520600530c2605258ce166d0b00cdd0a32e598` |
@@ -309,6 +309,10 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `postgres-init-sql` | `deploy/docker/postgres/init/232-wts-hazid-action-permissions.sql` | 10739 | `21879679b14853b550a478e36afbbd36cb0ed302ea89bb3f70831dbab0d63cf8` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/233-wts-hazid-i18n-labels.sql` | 7393 | `557fd1df7d76acab9d04205d5da1695ab2086272aa5d4ccee029fe15ddbc21f0` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/234-wts-risk-safe-measures-script-entrypoints.sql` | 6871 | `29fd625f62388ea9b3e93c5342e9a2730f8d73e09f64de8b704739c0bc8e2747` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/235-qualify-action-runtime-json.sql` | 2129396 | `49f6e99eef843505e3f7b0726de4f456b4e6f8c175182ba13050ab92a1627fbf` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/236-qualify-certificate-type-roots.sql` | 1490 | `53eb8061c192d8d78690eb8c5ca80dd8bd7c220157c3d5e837e1cf16acc22956` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/237-qualify-certificate-type-mne-code-compat.sql` | 5766 | `95d29c2407818f8835982a90bd05db5c11b37ddcff2d2c689942d603951266c8` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/238-qualify-system-config.sql` | 3420 | `fe06cf3736de1d838bfd85946def63c21d5e4419bace239fe65b8214d1eadbcb` |
 | `runtime-binary-patch` | `deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar` | 148953 | `5b274bf1f2bcefbc9d7a31fc06e4599dd1a1be7f727e009a18cb4fb3636a7c40` |
 | `runtime-binary-patch` | `deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar` | 2603 | `4af609b0f58221eb3b9794437cecc5cd9ca6ee159d90a90739bfab01a9675eca` |
 | `runtime-binary-patch` | `deploy/docker/patches/notification-dynamic-templates/notification-dynamic-templates.jar` | 2056 | `929fad64e9dc57463ab4ba54d1274c8a7ee49d5f1af2a0b44a5734b2611bf058` |
@@ -334,6 +338,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `runtime-patch-source` | `deploy/docker/patches/orgmanagement-standalone-auth-tasks/src/com/supcon/supfusion/auth/service/task/AuthOnlionLoginTask.java` | 221 | `3453d6226dca13709fb6ae231b81de425390285148daa2084979b62bb7da9bf7` |
 | `runtime-patch-source` | `deploy/docker/patches/printer-empty-registration/src/com/supcon/supfusion/printer/service/impl/PrinterAppDataServiceImpl.java` | 3404 | `86a48f814b43991e029af015e960ac60c8cb242b65e659ab24f496f932ae40f9` |
 | `runtime-patch-source` | `deploy/docker/patches/qcs-config-defaults/src/com/supcon/orchid/QCS/utils/QCSConfigureUtil.java` | 2717 | `cb03c1a568a0a911ca66a85a24f66a1172c4c9be953453617ed70dce38fb79ab` |
+| `runtime-patch-source` | `deploy/docker/patches/qualify-config-defaults/src/com/supcon/orchid/Qualify/services/impl/QualifyConfigureUtil.java` | 655 | `8da17ddef4b68db16e78bf9a95e83b9be008e9d6ae61c17d58429c4ee7c1901d` |
 | `runtime-patch-source` | `deploy/docker/patches/rm-config-defaults/src/com/supcon/orchid/RM/utils/RMConfigure.java` | 1863 | `b18677f756977ce6f2c07e813473332fda54bb6de5ff5082954bccd5aa2c20fc` |
 | `runtime-patch-source` | `deploy/docker/patches/scaffold-dbp-postgresql-url/src/com/supcon/supfusion/framework/scaffold/dbp/factory/jdbc/HikariDataSourceProvider.java` | 3521 | `d1e96598a8a2f7a534eb2448a6332e5ea73e98cacb35ce84b0050f8179c80571` |
 | `runtime-patch-source` | `deploy/docker/patches/scaffold-dbp-postgresql-url/src/com/supcon/supfusion/framework/scaffold/dbp/factory/line/PostgresqlDataSourceProductionLine.java` | 1204 | `e0eef4050c5fd13af315a924da5d5693765d179923fcce00432c47cf2e58bba2` |
@@ -366,7 +371,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `runtime-script` | `deploy/docker/scripts/patch-sms-datasource.py` | 5566 | `03fbcad521c99c38b2cf1d8a2481852f85703faa8d44635d05b87ad4e4d8b3f5` |
 | `runtime-script` | `deploy/docker/scripts/patch-workappointment-upload-list-runtime-compat.py` | 9925 | `4953ea769bfc7be38a9775f34abd541f767e9c2d202289a35315be29e66ae6d6` |
 | `runtime-script` | `deploy/docker/scripts/patch-wts-runtime-compat.py` | 46418 | `4746cab144927f58beb1b78bb452ae9fe58ff29553dac66a228de79da265e560` |
-| `runtime-script` | `deploy/docker/scripts/prepare-runtime-patches.sh` | 3920 | `30aded0f6947ad91b240e4a42d4c26cd420c4dea9326e3025f9db4caf939adb7` |
+| `runtime-script` | `deploy/docker/scripts/prepare-runtime-patches.sh` | 4080 | `d3fe0e8a97fc76bed6cfaed0aea9536f64d7125957cfa340d8b1c74fb1b64cd9` |
 | `runtime-script` | `deploy/docker/scripts/render-nacos-configs.py` | 9124 | `10e97501621b82f3ba205a0ae25843af8607aa901f55837439cfca90c75a6145` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/PATROL/i18n-value.js` | 117485 | `08de9c6f27095b1a729da3f1d9b7c6db974092cc7a25af1fbf39fe9a724335ec` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/PATROL/inputStandard/inputStandard/inputStanEdit/body-es5.js` | 2226 | `d91a9083befa8db7ee634a8c50027dc027dd24bd7b363f537f54973e3d0ab608` |
@@ -393,6 +398,145 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `runtime-static-override` | `deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportView/platform-common-zh_CN.properties` | 119 | `3adf79c76b5e30e83f34e6d811b1194badd7b100b51a97fa088621b2624e210e` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/QCS/testPlan/inspectPlan/manuInspPlanList/i18n-value.js` | 5937 | `5170755e473f27ed75578e96e7ad566c208abb15c1cf5d847e1c57fc2e965cee` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/QCS/testPlan/inspectPlan/manuInspPlanList/platform-common-zh_CN.properties` | 1292 | `26ecbf18b249be77835567f1c144196cb374b0097f3ffa893a3559030ed212ec` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut.html` | 6635 | `68f3be365003e5261c066ebfc273acc0fc182e97ac3806d66a84f3cc6763c6c0` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut/i18n-key.txt` | 125 | `3c62bf28c4725a891a6497a121aa7f262b0da32336dccb113714790c895e4c5c` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut/i18n-value.js` | 11717 | `8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit.html` | 5350 | `b7e690103354df343b8a3483cf101a6a73c5b7733c24500041ba5a2c5088fdc9` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit/eventJs/customEvent.js` | 2897 | `0169570e60a598e3f268b414e606d22e6afca49a37bd029a923a0a7aca00eafe` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit/i18n-key.txt` | 193 | `31258e28ad283c4683a19dcc0e4a2539b938d17c504d7f01e36b3eb3dd60e3b9` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit/i18n-value.js` | 11717 | `8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateLayOut.html` | 3976 | `a9f7695707e041df9db0a9582af926c6d3082f87508a2921c391c5f18c02828f` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateList.html` | 5503 | `010fa6a6d080d3d82d8193771f032dc70431c4885791f7d6059dfba555d7be59` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateList/eventJs/customEvent.js` | 2424 | `0b211ce450a58783bd12910bd8395c64ed9a494fe462c90266c4893908aba467` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef-mobile.html` | 4840 | `2ec8e05ce373a417abed8d1ba8fcbfc13407770a6691d493d4da9c82fbdd9574` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef.html` | 5145 | `6c66ce430a77bfe49cefe2a2d7da301513c1c5acf10dfbc50cbbfb66fcc61be1` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRefLayout.html` | 6012 | `77dd216dad8c7d208e32511592343a66a5f21e60f3e2ceeb28d5d5bbc5238f15` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRefLayout/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef__mobile__/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateView.html` | 5204 | `c394350a905e46152c3b11b151015f59f05cf3a5d50559720d755089b4c2bc25` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateView/eventJs/customEvent.js` | 2687 | `191b20dc4132a6e6b01b3c78b615627c618d1261b0d34b7bb4c5a1a070af83cf` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef-mobile.html` | 4870 | `ba3efa63ef5efd7032efd0817d549a5bbf32c7762859fcdd087c00f79e5f4ced` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef.html` | 5187 | `2783283a1d5092d98a8cfe089c4a130a3f5d43a81d1495135a8398a5e4107fca` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef/eventJs/customEvent.js` | 1459 | `81935b42d627d876141246db243ce9fa3f55ca32e132ea68d514da434861ffca` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef__mobile__/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef-mobile.html` | 4876 | `25ff379488d5c8359244670349b21fd9fdf8232a41411e2e7f088ccf7b4268f2` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef.html` | 5191 | `b6ad9a5ae225d929c45f774bbaa7c4f41523d516063419dbad731dfeaec50644` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef__mobile__/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificate/cerTypeLayOut.html` | 4010 | `c5fc1326d86c274fdea26f3708bb36f8d6ff0fe3a4b29e8d467a8795ae4ef237` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificate/certificateEdit.html` | 3415 | `40ec41f4e50ac6f02b06822e459360fdef49cccd3f6a28fd2aa033ec233c1556` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificate/certificateEdit/eventJs/customEvent.js` | 297 | `7192a5c4315e768cde1e18fbc785f49d453d78ad737c9703cdd3105d364e68f7` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificate/certificateList.html` | 3249 | `f1e5b102f5848ec6b5742aa9d41775e3f9d6823189402f05f02865dd96f93d2c` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeEdit.html` | 5392 | `6c3d0e43665cd4b824d5ca123833d06771cc1e4fe44a90ec912f886378864b48` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeEdit/eventJs/customEvent.js` | 1277 | `da0d2aedc78bfd617453d3e5cc93b8a98815411f2cdca2eeb9e2808d0649180f` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut.html` | 6753 | `efe10c3ab82c49424b32faad223c5fbcf84c756c48378b44c189621d6561344f` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/body-es5.js` | 1333 | `cb65a7c4e6beae16c3623a6fbf429f8e90bf83846925521d98460ce8fd15af45` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/body.js` | 1339 | `30c616bb29b92d81cc165e0ffccc46e3c6a110cd6051b207d8801533983718b2` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/i18n-key.txt` | 419 | `fb25925504ad0332a83c0dfa14170a9a087785c373e94b8e17953169cf4b7afe` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/i18n-value.js` | 11717 | `8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOutRef.html` | 6175 | `793f9c2405a181958e9abca4306655024c7f0f3ad82f8b63e034e6fe2f0d367b` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOutRef/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeList.html` | 5582 | `ff11efb64fd2e3d9598e4fe9ea620401bd61ca948e340c11ad112e1e04066375` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeList/eventJs/customEvent.js` | 4025 | `5c7e4b881e679ed18f40e2e67ce7e7741ce28b796bbbb0c3cdf3784a342f07fa` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef-mobile.html` | 4977 | `846d7ac23cab007d67151264291e68c1048615b5a622d2824accf69e3ce27873` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef.html` | 5313 | `5385e9c53aafaab493b4ca58013048aa026d49ca12a83faff39ec3a6bf3c3047` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef__mobile__/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTree.html` | 5498 | `5ecb50b72ff8079ed035f8a3b371bf1118d83e210c6b84e92b78127ee0bc72a5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTree/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTreeRef.html` | 4706 | `814eaba84a0ca871b1bec95f04975a49c1728a0a51f144293b2c25e022ac24ff` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTreeRef/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeView.html` | 5392 | `bea26332440185446151ee2d86b91ea4b1845864eb8a9dd2b85e2eb6802ad458` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeView/eventJs/customEvent.js` | 1276 | `82ed09892a2b6f8d3ec370d33ad63e3711beea75911d17be15ab0ac0558366c1` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateMne.html` | 4700 | `bec11f2310e6fe58b9a3cb7237fc3a2e56adedfc1c882c7fbbcc86c6b887ffd9` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateMne/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeEdit.html` | 3483 | `b9c8c3c23e003caeab4cf693b51cfb36d508a566c045c594c41cf2340d2f264a` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeEdit/eventJs/customEvent.js` | 305 | `c1f3c87980d8ba7d2657c90e1683f14a8298ba84f2e02f53784229e27f2310ec` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeRef.html` | 2987 | `83581ed10d9cc8b11ebbbccec32beb68a3bfb3cd8325051f32b4fc4a0252d606` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeTree.html` | 2530 | `c6fcf879534d7b32caff8b06ebf13e39c611086d853a1da2774b39bea1d5aa59` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList.html` | 5385 | `1c1b446a50cd8aff9862be1a0e98eaf7076ecb68c6fe07b68b75ebb0947e0f64` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList/eventJs/customEvent.js` | 3370 | `2ed4e61e1317e21b87784ab763497792dc2d4459e6b1b288f286adfafd320ab7` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList/i18n-key.txt` | 148 | `70935eb60f6484d5a6c6cff1a4e1f6b6da39e78368165a5022e976ae13624917` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList/i18n-value.js` | 11717 | `8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit.html` | 5592 | `59c147de838d773616ad9f7a5c05425a5bfb97ea71f9394579c6f20df4d53a8d` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/body-es5.js` | 2088 | `8f5b568f7d2d406db43ff525c97fc44e496927081b9672fbe332137457a888a5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/body.js` | 2082 | `e026f5c64c024453874efee5680bd2f2b0518e799deceeffb4cdc4077c1617f7` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/eventJs/customEvent.js` | 15419 | `5e1977d13f53cbeb3f5e0b9f358aa37b86120eff3792a602ed7f8bca32dc585b` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/i18n-key.txt` | 1127 | `cc8bd3f9b479970a9c6f846ae28f8c802486484a8468869c004062b231490f06` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/i18n-value.js` | 11717 | `8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertView.html` | 5341 | `154e80fd97ea4e9cdf858f2955488cfb30c4152776cc88042a9e27d086c2e1c4` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertView/eventJs/customEvent.js` | 13302 | `607de1889385e9104c6e379f3b5c3f9aa7436cda3a1c1cd6883f5d92d724e809` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList-mobile.html` | 4914 | `b9b95f9918145c0602fac8d484ec2bdd725577df3d768338bf7d1c138ffe7271` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList.html` | 5386 | `f2783d0225916bfd5f731c47b8dfa8906fda597dbfb4f051f82510c184b7f214` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList/i18n-key.txt` | 208 | `9506ad9b32a71398eaf8f9d61788724222894600027f4e2f2697df1ba15fe940` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList/i18n-value.js` | 11717 | `8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList__mobile__/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef-mobile.html` | 4904 | `7f083ea3f36c811eff4e6106458b524a84eb6447441066467702ff53da54486e` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef.html` | 5223 | `cb32dcfe66a8acf430c310d6467021a50280142d49f1795d3b1824cf3c11e834` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef__mobile__/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificateImport/companyCertImp/companyCertImpList.html` | 5361 | `1dc8855ca0a98e2fcc9a9f4f35b9ae546ebb5cc43ea30d309929fbbf4d538a75` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/companyCertificateImport/companyCertImp/companyCertImpList/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/homePage/js/common.js` | 4651 | `d56208b34821da1540d3aaf310c233591d03adab35d15f0b05c41c3ca49f2109` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/homePage/js/customPublicMethod.js` | 5376 | `7ef9e33e9eae502215a293e3e229ac47ffa77fd7795662e2ef550aa52af3e2a9` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/homePage/js/dateUtil.js` | 2013 | `9769aa63885a583e7f9fce6b1e3d37fa8fc2c73c66811fd67e7472e44e967267` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/homePage/js/homePageInternational.js` | 2225 | `b0982da9e28aa3aabbbf39893add0b741cc9cd939cc5217cee8ba7e8c40dd4bd` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/homePage/js/jquery-3.4.1.min.js` | 88145 | `0925e8ad7bd971391a8b1e98be8e87a6971919eb5b60c196485941c3c1df089a` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/homePage/js/theme/walden.js` | 13982 | `034f17b19a580e58389617c6e451e213f95978c11563ecd911347a790bd573c4` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/homePage/reminderPend.html` | 4974 | `5bd397e39db7cefd444cb8cf7ca325eef645ba9688457e0ec41c4c1b572e41af` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList-mobile.html` | 4815 | `e23d413031ed82b1ba89719a9cd5321bc19e59827ea050b1caefb96dcc1d2759` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList.html` | 5359 | `027bfaf9f0ea820d29e2749ffe69ffd1e2a1c1c12e663b0a07b63b8a5a86cd66` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/body.js` | 0 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/eventJs/customEvent.js` | 1359 | `8b27ace03e036e5447d969b9321b9f63888573399bbfd33ef5a1701d41273d48` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/i18n-key.txt` | 56 | `6bfa651807a2a283519aa0552c35e5f68a8c0601e97daf6f20143ebc85e89012` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/i18n-value.js` | 11717 | `8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList__mobile__/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetEdit.html` | 5222 | `35d740dfea334bf21dfbf2ee56d963d627476e52b5c86d075cf8cc3b89f5a2b0` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetEdit/eventJs/customEvent.js` | 1022 | `4771488abb5b55b67cb795aa518ef02e8d063d336134ec28948c283911accb66` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout.html` | 6389 | `ba8395e8904ea2034e68e938038c33d8abcea73d6160387dd111beda522bd4c4` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/body.js` | 0 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/i18n-key.txt` | 96 | `ac86b4261d666c59e9e7078eeef56f9f678c43bcb28d32f0cf43d62aa238adf7` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/i18n-value.js` | 11717 | `8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetList.html` | 5492 | `08bccae52a14884cfccba678ed56dd895666bab930f1b1ab20732a8e8f931e42` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetList/eventJs/customEvent.js` | 2357 | `705e23a391a954c53e358d7743fb806c3891a832308dbf8f8d7f4f96ab36173b` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetView.html` | 5222 | `0b84643bddd9c772b0a09d737918b1e7bb1fbc56463bb9387470e93e4bb980cb` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetView/eventJs/customEvent.js` | 1022 | `4771488abb5b55b67cb795aa518ef02e8d063d336134ec28948c283911accb66` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList.html` | 5331 | `ba050b61e4a67a30f4051b557bea90cfc423b42b32b0a37d93a4e8d32e4b346a` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList/eventJs/customEvent.js` | 4814 | `a4402f75513dc081c8bfedfb7f796de87240f42e33c71c67cc2b978bc6a7330a` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList/i18n-key.txt` | 204 | `422848e612616ff9b6d117717136205935f8a4d06dda0b9c3825b66b434d84ec` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList/i18n-value.js` | 11717 | `8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit.html` | 5524 | `47861c7d13ebd294b86badb031ea33a792b29d53521cd13cbdcede4e37bb0c70` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/body-es5.js` | 2054 | `e5d75584e9569db4bb105649352bca45ac66e90b5570a4c52addcb03a0029939` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/body.js` | 2035 | `afc3b31d8849841d2dd46ec484ce21508a86d2a267054517c70d50fec307a264` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/eventJs/customEvent.js` | 14940 | `80349c3f3df952644a4c891aa5c676d81993ba2a0a0bae2b4aef3c48a3b5bcd1` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/i18n-key.txt` | 1146 | `8072c8ea0bd6e78e4cbf554b5bd883eb05adb2c1cccf70661777bcb07d076cd9` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/i18n-value.js` | 11717 | `8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView.html` | 5401 | `5fbb055db3fc2d4d6d40640ffbc7444ea16c178e031a3321bbf3320ace29bb37` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView/body-es5.js` | 21 | `f57efd1c292497140eff4604c8ae201cddc131ff2dfedfa8caa3aa3b003c106c` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView/body.js` | 19 | `b326ccc538aeec460de8f02bd7d876306cf87d75066d20980d5b03353b179511` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView/eventJs/customEvent.js` | 783 | `c06314e79c820457cc70a0fcaf215078700b1fc2878fc573983e0cb6ac959fac` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertEdit.html` | 3686 | `c1dbaffbe1dbe4456369d41345cfac922c6dab82e74270955b03944a7c901e79` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList-mobile.html` | 4871 | `f462c6133a852eb4b4e931b94f0ac8702e887069a2a4b087c09e9dfdffbab078` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList.html` | 5331 | `71e7d6b10cc28b07f848f8852bdecf6f8ea99eb01dcc81effefcee94e24b67dd` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList/eventJs/customEvent.js` | 1847 | `f956718547e88750a733833c2d95f90cbd301c202449a48621dd19ebd8402bc7` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList/i18n-key.txt` | 208 | `9506ad9b32a71398eaf8f9d61788724222894600027f4e2f2697df1ba15fe940` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList/i18n-value.js` | 11717 | `8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList__mobile__/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef-mobile.html` | 4860 | `be4ae8ab7b73bfc09dd52f541dfe0f926a99f707916127468a92c326bccbf318` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef.html` | 5174 | `38f21d425f687b956da36c5baa902ff69f507108b3f3807695f5013ba1779bdf` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef/eventJs/customEvent.js` | 1716 | `93399cbf75b392766cb8f8091caa5a518feeece224a433d7570b5503b7f0107d` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef__mobile__/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertLog/staffCertLogView.html` | 3722 | `d0256a016760476e3f4403fbe9c70508de09845e46bbbeea626975a24bcae057` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertLog/staffCertLogView/eventJs/customEvent.js` | 264 | `2c1323f9e3b4e2b7bca0a6d779235b935613949f562156ee2acbb00b2f25cb51` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertificate/staffCertEdit.html` | 3741 | `9bc1f0609c3c089c864b20bb250670842701498d7babda61f475d96c3f8ec27e` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertificate/staffCertList.html` | 3433 | `6e19d691ee634b3affdcf19065d765effaa5604ab8cd781c201d4a9dbe56b89e` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificateImport/staffCertImp/staffCertImpList.html` | 5309 | `c774b945bbbb60b83f81f98eb7c4d90adf7e65632137d5a62aab4f804bedb230` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/Qualify/staffCertificateImport/staffCertImp/staffCertImpList/eventJs/customEvent.js` | 260 | `6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/RM/formula/editor.html` | 29772 | `0805e9fc157cf648541afb32c172aaaac2c8c71b5d3fb3e70fb93e3650c5cd4a` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskBatchView.html` | 5299 | `61a018dfba75f33df6f566b09b83ca43f6df2ec08cef24469f790d49d89e560b` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskEdit.html` | 5189 | `4fe7d559bfa24d3752a3aa4237c843d181971f002ad01b5f7227e5687b33485a` |

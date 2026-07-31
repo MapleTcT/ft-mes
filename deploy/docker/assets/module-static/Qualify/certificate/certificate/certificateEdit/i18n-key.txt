@@ -1,0 +1,4 @@
+Qualify.certificate.certificate.aRecordNeeded
+Qualify.certificate.certificate.certLevelNotNull
+Qualify.certificate.certificate.certLevelIsNull
+Qualify.certificate.certificate.certLevelRepeat

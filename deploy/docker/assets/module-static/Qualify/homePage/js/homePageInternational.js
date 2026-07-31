@@ -1,0 +1,20 @@
+// 国际化
+var isLoading = getLocalMessage("BEAM2.custom.randon1558612849916"); // 展示加载操作  BEAM2.custom.randon1558612849916  正在加载...
+var noInfo = getLocalMessage("BEAM2.custom.randon1558612945963"); // 展示无信息  BEAM2.custom.randon1558612945963  无信息
+var noData = getLocalMessage("BEAM2.custom.randon1558612107862");   // BEAM2.custom.randon1558612107862  暂无数据
+var thisMonth = getLocalMessage("BEAM2.custom.randon1558611360931");  // BEAM2.custom.randon1558611360931  本月
+var lastMonth = getLocalMessage("BEAM2.custom.randon1558612003075");  // BEAM2.custom.randon1558612003075  上月
+var thisYear = getLocalMessage("BEAM2.custom.randon1558612043038");   // BEAM2.custom.randon1558612043038  本年
+var departant = getLocalMessage("BEAM2.custom.randon1558613964096");    // BEAM2.custom.randon1558613964096  部门
+var faultInfoSum = getLocalMessage("BEAM.homePage.hiddenDangerNumber");   // BEAM.homePage.hiddenDangerNumber  隐患数量(个)
+var faultInfoComplete = getLocalMessage("BEAM.homepage.integrityRateDone");   // BEAM.homepage.integrityRateDone  完成率
+var eamGood = getLocalMessage("BEAM2.menuInfoname.radion1536711032866");   // BEAM2.menuInfoname.radion1536711032866  设备完好率
+var nextWeek = getLocalMessage("BEAM.homepage.nextWeek");    // BEAM.homepage.nextWeek  下周
+var thisWeek = getLocalMessage("BEAM.homepage.thisWeek");    // BEAM.homepage.thisWeek  本周
+var timePeriodType = getLocalMessage("BEAM.homePage.runByPeriodType");    // BEAM.homePage.runByPeriodType  时间频率
+var runningTime = getLocalMessage("BEAM.homePage.runByAdvanceType");   // BEAM.homePage.runByAdvanceType  运行时长
+var more = getLocalMessage("BEAM2.custom.randon1558613027446");   // BEAM2.custom.randon1558613027446  更多
+var lastYear = getLocalMessage("BEAM2.custom.randon1558665180751");    // BEAM2.custom.randon1558665180751  去年
+var leakageRate = getLocalMessage("BEAM.homepage.leakageRate");   // BEAM.homepage.leakageRate  漏检率
+var vacancyRate = getLocalMessage("BEAM.homepage.vacancyRate");   // BEAM.homepage.vacancyRate  消缺率
+var month = getLocalMessage("BEAM2.custom.randon1558665398468");   // BEAM2.custom.randon1558665398468  月份

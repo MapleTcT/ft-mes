@@ -1,0 +1,5 @@
+SupDatagrid.button.error
+Qualify.operate.onlyChooseOneRecord
+Qualify.viewtitle.randon1575276708573
+Button.text.save
+ec.edit.button.uncurrent.company

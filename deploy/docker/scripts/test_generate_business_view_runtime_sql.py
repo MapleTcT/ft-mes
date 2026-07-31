@@ -897,6 +897,216 @@ ReactAPI.Layout.hideTab('tabs-5');""",
             migration,
         )
 
+    def test_qualify_runtime_migration_restores_module_action_views(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "235-qualify-action-runtime-json.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("-- target_view_count: 41", migration)
+        self.assertIn("-- requested_module_codes: Qualify_1.0.0", migration)
+        self.assertIn("-- emitted_view_count: 41", migration)
+        self.assertEqual(82, migration.count("INSERT INTO public.runtime_extra_view"))
+        self.assertEqual(41, migration.count("INSERT INTO public.ec_extra_view"))
+        for view_code in (
+            "Qualify_1.0.0_reminderSet_reminderSetLayout",
+            "Qualify_1.0.0_reminderSet_reminderSetList",
+            "Qualify_1.0.0_certificateType_cerTypeLayOut",
+            "Qualify_1.0.0_certificateType_cerTypeList",
+            "Qualify_1.0.0_certificate_certifcateLayOut",
+            "Qualify_1.0.0_certificate_certificateList",
+            "Qualify_1.0.0_companyCertificateImport_companyCertImpList",
+            "Qualify_1.0.0_staffCertificate_certStaffList",
+            "Qualify_1.0.0_companyCertificate_certCompanyList",
+            "Qualify_1.0.0_reminderPend_reminderPendList",
+            "Qualify_1.0.0_staffCertificateImport_staffCertImpList",
+        ):
+            self.assertIn(view_code, migration)
+        for operation_code in (
+            "certificateList_addCertificate_add_Qualify_1.0.0_certificate_certificateList",
+            "certificateList_delCertificate_del_Qualify_1.0.0_certificate_certificateList",
+            "cerTypeList_add_add_Qualify_1.0.0_certificateType_cerTypeList",
+            "reminderSetList_customAdd_add_Qualify_1.0.0_reminderSet_reminderSetList",
+            "certStaffList_staffCertSet_add_Qualify_1.0.0_staffCertificate_certStaffList",
+            "certCompanyList_companyCertSet_add_Qualify_1.0.0_companyCertificate_certCompanyList",
+            "reminderPendList_proccess_add_Qualify_1.0.0_reminderPend_reminderPendList",
+        ):
+            self.assertIn(operation_code, migration)
+
+    def test_qualify_custom_assets_are_served_before_generic_fallbacks(self):
+        docker_root = SCRIPT_PATH.parent.parent
+        static_root = docker_root / "assets" / "module-static" / "Qualify"
+        for relative_path in (
+            "certificate/certificate/certificateList/eventJs/customEvent.js",
+            "certificate/certificate/certifcateLayOut/i18n-value.js",
+            "certificateType/certificateType/cerTypeLayOut/body.js",
+            "certificateType/certificateType/cerTypeList/eventJs/customEvent.js",
+            "reminderSet/reminderSet/reminderSetList/eventJs/customEvent.js",
+            "staffCertificate/certStaff/certStaffList/eventJs/customEvent.js",
+            "companyCertificate/certCompany/certCompanyList/eventJs/customEvent.js",
+            "reminderPend/reminderPend/reminderPendList/eventJs/customEvent.js",
+        ):
+            self.assertTrue((static_root / relative_path).is_file(), relative_path)
+
+        nginx_config = (docker_root / "nginx" / "adp.conf").read_text(encoding="utf-8")
+        qualify_location = "location ^~ /greenDill/static/Qualify/"
+        generic_js_location = r"location ~* \.(?:js|css)$"
+        self.assertIn(qualify_location, nginx_config)
+        self.assertLess(
+            nginx_config.index(qualify_location),
+            nginx_config.index(generic_js_location),
+        )
+        self.assertIn(
+            "alias /usr/share/nginx/module-static/Qualify/;",
+            nginx_config,
+        )
+        self.assertIn(
+            "location = /greenDill/static/scripts/treeList.js",
+            nginx_config,
+        )
+        self.assertIn(
+            """sub_filter 'else console.error("请将参数放在数组里!")' 'else resolve()';""",
+            nginx_config,
+        )
+
+        qualify_i18n_files = sorted(static_root.rglob("i18n-value.js"))
+        self.assertEqual(11, len(qualify_i18n_files))
+        for i18n_file in qualify_i18n_files:
+            i18n = i18n_file.read_text(encoding="utf-8")
+            for resource in (
+                'window.InternationalResource["Button.text.save"] = "保存";',
+                'window.InternationalResource["Button.text.cancel"] = "取消";',
+                'window.InternationalResource["SupDatagrid.button.delete"] = "确定删除吗？";',
+                'window.InternationalResource["ec.common.confirm"] = "确定";',
+                'window.InternationalResource["Qualify.viewtitle.randon1569401770550"] = "资质分类";',
+                'window.InternationalResource["Qualify.viewtitle.randon1569416513467"] = "资质";',
+            ):
+                self.assertIn(resource, i18n, str(i18n_file))
+
+    def test_qualify_root_category_migration_preserves_original_product_roots(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "236-qualify-certificate-type-roots.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("(1000, 0, true, 1000", migration)
+        self.assertIn("'人员资质', 'staffCert'", migration)
+        self.assertIn("(1001, 0, true, 1000", migration)
+        self.assertIn("'企业资质', 'companyCert'", migration)
+        self.assertIn("ON CONFLICT (id) DO UPDATE", migration)
+        self.assertIn("IF root_count <> 2", migration)
+        self.assertNotIn("DELETE FROM", migration)
+
+    def test_qualify_certificate_type_mne_code_migration_syncs_all_aliases(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "237-qualify-certificate-type-mne-code-compat.sql"
+        ).read_text(encoding="utf-8")
+
+        for column_name in (
+            "certificate_type",
+            "certificate_type_id",
+            "certificatetype_id",
+            "cer_type",
+            "mne_code",
+            "mnecode",
+        ):
+            self.assertIn(column_name, migration)
+        self.assertIn(
+            "CREATE OR REPLACE FUNCTION public.sync_qlf_certificate_types_mc_aliases()",
+            migration,
+        )
+        self.assertIn(
+            "CREATE TRIGGER trg_sync_qlf_certificate_types_mc_aliases",
+            migration,
+        )
+        self.assertIn(
+            "idx_qlf_certificate_types_mc_certificate_type",
+            migration,
+        )
+        self.assertIn("compatibility_column_count <> 6", migration)
+        self.assertNotIn("DELETE FROM", migration)
+
+    def test_qualify_system_config_restores_packaged_default_level_setting(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "238-qualify-system-config.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("'Qualify', 'Qualify', 2, 'false', 'false'", migration)
+        self.assertIn("'setDefaultLevel'", migration)
+        self.assertIn("'dt/Qualify/Qualify'", migration)
+        self.assertIn("configured_value IS DISTINCT FROM 'false'", migration)
+        self.assertIn("ON CONFLICT (app_code, code) DO UPDATE", migration)
+        self.assertNotIn("DELETE FROM", migration)
+
+    def test_foundation_runtime_supplies_qualify_default_level_fallback(self):
+        patch_source = (
+            SCRIPT_PATH.parent.parent
+            / "patches"
+            / "qualify-config-defaults"
+            / "src"
+            / "com"
+            / "supcon"
+            / "orchid"
+            / "Qualify"
+            / "services"
+            / "impl"
+            / "QualifyConfigureUtil.java"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            '@Value("${Qualify/Qualify.setDefaultLevel:false}")',
+            patch_source,
+        )
+        self.assertIn(
+            "return setDefaultLevel != null ? setDefaultLevel : Boolean.FALSE;",
+            patch_source,
+        )
+
+        prepare_script = (
+            SCRIPT_PATH.parent.parent
+            / "scripts"
+            / "prepare-runtime-patches.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "patches/qualify-config-defaults/build.sh",
+            prepare_script,
+        )
+        self.assertIn(
+            'foundation_jar="$runtime_dir/module-Server/FoundationMs/manual/FoundationMs-1.0.0.jar"',
+            prepare_script,
+        )
+
+        build_script = (
+            SCRIPT_PATH.parent.parent
+            / "patches"
+            / "qualify-config-defaults"
+            / "build.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            'jar_path="$patch_root/qualify-config-defaults.jar"',
+            build_script,
+        )
+        self.assertIn('jar xf "$foundation_jar" BOOT-INF/lib', build_script)
+
+        manifest_script = (
+            SCRIPT_PATH.parent.parent.parent.parent
+            / "scripts"
+            / "generate-runtime-patch-manifest.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            '"deploy/docker/patches/qualify-config-defaults/qualify-config-defaults.jar"',
+            manifest_script,
+        )
+
     def test_wts_basic_settings_lob_migration_covers_all_entities(self):
         migration = (
             SCRIPT_PATH.parent.parent

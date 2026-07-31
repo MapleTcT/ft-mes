@@ -81,6 +81,10 @@ EXCLUDED_PATH_PARTS = {
     "build",
 }
 
+EXCLUDED_PATHS = {
+    "deploy/docker/patches/qualify-config-defaults/qualify-config-defaults.jar",
+}
+
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -113,8 +117,10 @@ def collect_entries() -> list[dict[str, Any]]:
                 relative_parts = path.relative_to(ROOT).parts
                 if any(part in EXCLUDED_PATH_PARTS for part in relative_parts):
                     continue
-                seen.add(path)
                 relative = path.relative_to(ROOT).as_posix()
+                if relative in EXCLUDED_PATHS:
+                    continue
+                seen.add(path)
                 entries.append(
                     {
                         "path": relative,

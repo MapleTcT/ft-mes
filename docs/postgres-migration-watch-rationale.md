@@ -11,7 +11,7 @@
 
 ## 摘要
 
-- Watch 语句：`89`。
+- Watch 语句：`90`。
 - Watch 安全问题：`0`。
 
 ## 语句清单
@@ -107,3 +107,4 @@
 | 223-qcs-inspect-report-config-lob-compat.sql | 233 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_qcs_inspect_report_is_lob_ref(text); |
 | 229-qcs-inspect-config-lob-compat.sql | 281 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_qcs_inspect_convert_lob( text, text, text ); |
 | 229-qcs-inspect-config-lob-compat.sql | 286 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_qcs_inspect_is_lob_ref(text); |
+| 237-qualify-certificate-type-mne-code-compat.sql | 134 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS trg_sync_qlf_certificate_types_mc_aliases ON public.qlf_certificate_types_mc; |

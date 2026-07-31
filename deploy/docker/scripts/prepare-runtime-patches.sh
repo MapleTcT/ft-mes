@@ -15,6 +15,8 @@ fi
 if [ ! -f "$docker_dir/patches/scdog-test-bypass/lib/libSCDog.so" ]; then
   "$docker_dir/scripts/build-test-scdog.sh"
 fi
+foundation_jar="$runtime_dir/module-Server/FoundationMs/manual/FoundationMs-1.0.0.jar"
+"$docker_dir/patches/qualify-config-defaults/build.sh" "$foundation_jar"
 mkdir -p "$patch_dir"
 copied=0
 for patch_jar in "$docker_dir"/patches/*/*.jar "$docker_dir"/patches/*/*/*.jar; do

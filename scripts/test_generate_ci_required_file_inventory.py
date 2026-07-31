@@ -24,6 +24,14 @@ class GeneratedReferenceTest(unittest.TestCase):
         self.assertFalse(MODULE.is_generated_reference("backend/source-modules/material-wms/pom.xml"))
         self.assertFalse(MODULE.is_generated_reference("runtime/bap-server/material-wms.jar"))
 
+    def test_qualify_patch_jar_is_excluded_as_generated_output(self) -> None:
+        self.assertTrue(
+            MODULE.should_exclude_candidate(
+                MODULE.ROOT
+                / "deploy/docker/patches/qualify-config-defaults/qualify-config-defaults.jar"
+            )
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1779,6 +1779,840 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut/i18n-key.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit/i18n-key.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateLayOut.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateList/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef-mobile.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRefLayout.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRefLayout/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef__mobile__/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateView.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateView/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef-mobile.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef__mobile__/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef-mobile.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef__mobile__/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificate/cerTypeLayOut.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificate/certificateEdit.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificate/certificateEdit/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificate/certificateList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeEdit.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeEdit/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/body-es5.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/i18n-key.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOutRef.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOutRef/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeList/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef-mobile.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef__mobile__/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTree.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTree/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTreeRef.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTreeRef/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeView.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeView/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateMne.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateMne/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeEdit.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeEdit/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeRef.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeTree.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList/i18n-key.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/body-es5.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/i18n-key.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertView.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertView/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList-mobile.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList/i18n-key.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList__mobile__/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef-mobile.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef__mobile__/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificateImport/companyCertImp/companyCertImpList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificateImport/companyCertImp/companyCertImpList/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/common.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/customPublicMethod.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/dateUtil.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/homePageInternational.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/jquery-3.4.1.min.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/theme/walden.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/reminderPend.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList-mobile.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/i18n-key.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList__mobile__/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetEdit.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetEdit/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/i18n-key.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetList/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetView.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetView/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList/i18n-key.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/body-es5.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/i18n-key.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView/body-es5.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertEdit.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList-mobile.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList/i18n-key.txt",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList__mobile__/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef-mobile.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef__mobile__/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertLog/staffCertLogView.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertLog/staffCertLogView/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertificate/staffCertEdit.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertificate/staffCertList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificateImport/staffCertImp/staffCertImpList.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificateImport/staffCertImp/staffCertImpList/eventJs/customEvent.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/RM/formula/editor.html",
       "state": "tracked",
       "tracked": true
@@ -2290,6 +3124,24 @@
     {
       "ignored": false,
       "path": "deploy/docker/patches/qcs-redis-safe-payload/.gitignore",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/patches/qualify-config-defaults/.gitignore",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/patches/qualify-config-defaults/build.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/patches/qualify-config-defaults/src/com/supcon/orchid/Qualify/services/impl/QualifyConfigureUtil.java",
       "state": "tracked",
       "tracked": true
     },
@@ -3802,6 +4654,30 @@
     {
       "ignored": false,
       "path": "deploy/docker/postgres/init/234-wts-risk-safe-measures-script-entrypoints.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/235-qualify-action-runtime-json.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/236-qualify-certificate-type-roots.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/237-qualify-certificate-type-mne-code-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/238-qualify-system-config.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -12320,7 +13196,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 722
+      "tracked": 868
     },
     "docs": {
       "tracked": 159
@@ -12353,8 +13229,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2049,
-    "tracked": 2049,
+    "totalFiles": 2195,
+    "tracked": 2195,
     "untracked": 0
   },
   "untrackedByDirectory": []

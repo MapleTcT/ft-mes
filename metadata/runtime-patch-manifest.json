@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T12:52:10+00:00",
-  "repoCommit": "3ad9b065a4d273b500c08749f6af38192de90364",
+  "generatedAt": "2026-07-31T01:40:11+00:00",
+  "repoCommit": "53298f6693a4ad19b02ecb920e28f6c72c159c71",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 423,
-    "totalBytes": 59490678,
+    "totalFiles": 567,
+    "totalBytes": 62250530,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 234,
+      "postgres-init-sql": 238,
       "runtime-binary-patch": 8,
-      "runtime-patch-source": 23,
+      "runtime-patch-source": 24,
       "runtime-script": 28,
-      "runtime-static-override": 84
+      "runtime-static-override": 223
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 31715,
-      "postgres-init-sql": 58361742,
+      "nginx-runtime-config": 32485,
+      "postgres-init-sql": 60501814,
       "runtime-binary-patch": 178941,
-      "runtime-patch-source": 95909,
-      "runtime-script": 289112,
-      "runtime-static-override": 490906
+      "runtime-patch-source": 96564,
+      "runtime-script": 289272,
+      "runtime-static-override": 1109101
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 31495,
-      "sha256": "0af98630ecdf875750d0b5efe627da4f2595f1992447347f66f0c210e1fe93f9"
+      "sizeBytes": 32265,
+      "sha256": "3fb89290b3b36400d0f145b0c7d15d9d5f59fa0c6e0b98d82c51e56567fd78fc"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1717,6 +1717,30 @@
       "sha256": "29fd625f62388ea9b3e93c5342e9a2730f8d73e09f64de8b704739c0bc8e2747"
     },
     {
+      "path": "deploy/docker/postgres/init/235-qualify-action-runtime-json.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 2129396,
+      "sha256": "49f6e99eef843505e3f7b0726de4f456b4e6f8c175182ba13050ab92a1627fbf"
+    },
+    {
+      "path": "deploy/docker/postgres/init/236-qualify-certificate-type-roots.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1490,
+      "sha256": "53eb8061c192d8d78690eb8c5ca80dd8bd7c220157c3d5e837e1cf16acc22956"
+    },
+    {
+      "path": "deploy/docker/postgres/init/237-qualify-certificate-type-mne-code-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 5766,
+      "sha256": "95d29c2407818f8835982a90bd05db5c11b37ddcff2d2c689942d603951266c8"
+    },
+    {
+      "path": "deploy/docker/postgres/init/238-qualify-system-config.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 3420,
+      "sha256": "fe06cf3736de1d838bfd85946def63c21d5e4419bace239fe65b8214d1eadbcb"
+    },
+    {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 148953,
@@ -1865,6 +1889,12 @@
       "category": "runtime-patch-source",
       "sizeBytes": 2717,
       "sha256": "cb03c1a568a0a911ca66a85a24f66a1172c4c9be953453617ed70dce38fb79ab"
+    },
+    {
+      "path": "deploy/docker/patches/qualify-config-defaults/src/com/supcon/orchid/Qualify/services/impl/QualifyConfigureUtil.java",
+      "category": "runtime-patch-source",
+      "sizeBytes": 655,
+      "sha256": "8da17ddef4b68db16e78bf9a95e83b9be008e9d6ae61c17d58429c4ee7c1901d"
     },
     {
       "path": "deploy/docker/patches/rm-config-defaults/src/com/supcon/orchid/RM/utils/RMConfigure.java",
@@ -2061,8 +2091,8 @@
     {
       "path": "deploy/docker/scripts/prepare-runtime-patches.sh",
       "category": "runtime-script",
-      "sizeBytes": 3920,
-      "sha256": "30aded0f6947ad91b240e4a42d4c26cd420c4dea9326e3025f9db4caf939adb7"
+      "sizeBytes": 4080,
+      "sha256": "d3fe0e8a97fc76bed6cfaed0aea9536f64d7125957cfa340d8b1c74fb1b64cd9"
     },
     {
       "path": "deploy/docker/scripts/render-nacos-configs.py",
@@ -2219,6 +2249,840 @@
       "category": "runtime-static-override",
       "sizeBytes": 1292,
       "sha256": "26ecbf18b249be77835567f1c144196cb374b0097f3ffa893a3559030ed212ec"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 6635,
+      "sha256": "68f3be365003e5261c066ebfc273acc0fc182e97ac3806d66a84f3cc6763c6c0"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut/i18n-key.txt",
+      "category": "runtime-static-override",
+      "sizeBytes": 125,
+      "sha256": "3c62bf28c4725a891a6497a121aa7f262b0da32336dccb113714790c895e4c5c"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certifcateLayOut/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 11717,
+      "sha256": "8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5350,
+      "sha256": "b7e690103354df343b8a3483cf101a6a73c5b7733c24500041ba5a2c5088fdc9"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2897,
+      "sha256": "0169570e60a598e3f268b414e606d22e6afca49a37bd029a923a0a7aca00eafe"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit/i18n-key.txt",
+      "category": "runtime-static-override",
+      "sizeBytes": 193,
+      "sha256": "31258e28ad283c4683a19dcc0e4a2539b938d17c504d7f01e36b3eb3dd60e3b9"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateEdit/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 11717,
+      "sha256": "8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateLayOut.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 3976,
+      "sha256": "a9f7695707e041df9db0a9582af926c6d3082f87508a2921c391c5f18c02828f"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5503,
+      "sha256": "010fa6a6d080d3d82d8193771f032dc70431c4885791f7d6059dfba555d7be59"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateList/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2424,
+      "sha256": "0b211ce450a58783bd12910bd8395c64ed9a494fe462c90266c4893908aba467"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef-mobile.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4840,
+      "sha256": "2ec8e05ce373a417abed8d1ba8fcbfc13407770a6691d493d4da9c82fbdd9574"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5145,
+      "sha256": "6c66ce430a77bfe49cefe2a2d7da301513c1c5acf10dfbc50cbbfb66fcc61be1"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRefLayout.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 6012,
+      "sha256": "77dd216dad8c7d208e32511592343a66a5f21e60f3e2ceeb28d5d5bbc5238f15"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRefLayout/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateRef__mobile__/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateView.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5204,
+      "sha256": "c394350a905e46152c3b11b151015f59f05cf3a5d50559720d755089b4c2bc25"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificate/certificateView/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2687,
+      "sha256": "191b20dc4132a6e6b01b3c78b615627c618d1261b0d34b7bb4c5a1a070af83cf"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef-mobile.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4870,
+      "sha256": "ba3efa63ef5efd7032efd0817d549a5bbf32c7762859fcdd087c00f79e5f4ced"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5187,
+      "sha256": "2783283a1d5092d98a8cfe089c4a130a3f5d43a81d1495135a8398a5e4107fca"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 1459,
+      "sha256": "81935b42d627d876141246db243ce9fa3f55ca32e132ea68d514da434861ffca"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certLevelRef__mobile__/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef-mobile.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4876,
+      "sha256": "25ff379488d5c8359244670349b21fd9fdf8232a41411e2e7f088ccf7b4268f2"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5191,
+      "sha256": "b6ad9a5ae225d929c45f774bbaa7c4f41523d516063419dbad731dfeaec50644"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificate/certificateLevel/certificateRef__mobile__/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificate/cerTypeLayOut.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4010,
+      "sha256": "c5fc1326d86c274fdea26f3708bb36f8d6ff0fe3a4b29e8d467a8795ae4ef237"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificate/certificateEdit.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 3415,
+      "sha256": "40ec41f4e50ac6f02b06822e459360fdef49cccd3f6a28fd2aa033ec233c1556"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificate/certificateEdit/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 297,
+      "sha256": "7192a5c4315e768cde1e18fbc785f49d453d78ad737c9703cdd3105d364e68f7"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificate/certificateList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 3249,
+      "sha256": "f1e5b102f5848ec6b5742aa9d41775e3f9d6823189402f05f02865dd96f93d2c"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeEdit.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5392,
+      "sha256": "6c3d0e43665cd4b824d5ca123833d06771cc1e4fe44a90ec912f886378864b48"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeEdit/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 1277,
+      "sha256": "da0d2aedc78bfd617453d3e5cc93b8a98815411f2cdca2eeb9e2808d0649180f"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 6753,
+      "sha256": "efe10c3ab82c49424b32faad223c5fbcf84c756c48378b44c189621d6561344f"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/body-es5.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 1333,
+      "sha256": "cb65a7c4e6beae16c3623a6fbf429f8e90bf83846925521d98460ce8fd15af45"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/body.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 1339,
+      "sha256": "30c616bb29b92d81cc165e0ffccc46e3c6a110cd6051b207d8801533983718b2"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/i18n-key.txt",
+      "category": "runtime-static-override",
+      "sizeBytes": 419,
+      "sha256": "fb25925504ad0332a83c0dfa14170a9a087785c373e94b8e17953169cf4b7afe"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOut/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 11717,
+      "sha256": "8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOutRef.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 6175,
+      "sha256": "793f9c2405a181958e9abca4306655024c7f0f3ad82f8b63e034e6fe2f0d367b"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeLayOutRef/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5582,
+      "sha256": "ff11efb64fd2e3d9598e4fe9ea620401bd61ca948e340c11ad112e1e04066375"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeList/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 4025,
+      "sha256": "5c7e4b881e679ed18f40e2e67ce7e7741ce28b796bbbb0c3cdf3784a342f07fa"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef-mobile.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4977,
+      "sha256": "846d7ac23cab007d67151264291e68c1048615b5a622d2824accf69e3ce27873"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5313,
+      "sha256": "5385e9c53aafaab493b4ca58013048aa026d49ca12a83faff39ec3a6bf3c3047"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeRef__mobile__/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTree.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5498,
+      "sha256": "5ecb50b72ff8079ed035f8a3b371bf1118d83e210c6b84e92b78127ee0bc72a5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTree/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTreeRef.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4706,
+      "sha256": "814eaba84a0ca871b1bec95f04975a49c1728a0a51f144293b2c25e022ac24ff"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeTreeRef/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeView.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5392,
+      "sha256": "bea26332440185446151ee2d86b91ea4b1845864eb8a9dd2b85e2eb6802ad458"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/cerTypeView/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 1276,
+      "sha256": "82ed09892a2b6f8d3ec370d33ad63e3711beea75911d17be15ab0ac0558366c1"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateMne.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4700,
+      "sha256": "bec11f2310e6fe58b9a3cb7237fc3a2e56adedfc1c882c7fbbcc86c6b887ffd9"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateMne/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeEdit.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 3483,
+      "sha256": "b9c8c3c23e003caeab4cf693b51cfb36d508a566c045c594c41cf2340d2f264a"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeEdit/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 305,
+      "sha256": "c1f3c87980d8ba7d2657c90e1683f14a8298ba84f2e02f53784229e27f2310ec"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeRef.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 2987,
+      "sha256": "83581ed10d9cc8b11ebbbccec32beb68a3bfb3cd8325051f32b4fc4a0252d606"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/certificateType/certificateType/certificateTypeTree.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 2530,
+      "sha256": "c6fcf879534d7b32caff8b06ebf13e39c611086d853a1da2774b39bea1d5aa59"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5385,
+      "sha256": "1c1b446a50cd8aff9862be1a0e98eaf7076ecb68c6fe07b68b75ebb0947e0f64"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 3370,
+      "sha256": "2ed4e61e1317e21b87784ab763497792dc2d4459e6b1b288f286adfafd320ab7"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList/i18n-key.txt",
+      "category": "runtime-static-override",
+      "sizeBytes": 148,
+      "sha256": "70935eb60f6484d5a6c6cff1a4e1f6b6da39e78368165a5022e976ae13624917"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompany/certCompanyList/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 11717,
+      "sha256": "8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5592,
+      "sha256": "59c147de838d773616ad9f7a5c05425a5bfb97ea71f9394579c6f20df4d53a8d"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/body-es5.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2088,
+      "sha256": "8f5b568f7d2d406db43ff525c97fc44e496927081b9672fbe332137457a888a5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/body.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2082,
+      "sha256": "e026f5c64c024453874efee5680bd2f2b0518e799deceeffb4cdc4077c1617f7"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 15419,
+      "sha256": "5e1977d13f53cbeb3f5e0b9f358aa37b86120eff3792a602ed7f8bca32dc585b"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/i18n-key.txt",
+      "category": "runtime-static-override",
+      "sizeBytes": 1127,
+      "sha256": "cc8bd3f9b479970a9c6f846ae28f8c802486484a8468869c004062b231490f06"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertEdit/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 11717,
+      "sha256": "8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertView.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5341,
+      "sha256": "154e80fd97ea4e9cdf858f2955488cfb30c4152776cc88042a9e27d086c2e1c4"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/certCompanySet/companyCertView/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 13302,
+      "sha256": "607de1889385e9104c6e379f3b5c3f9aa7436cda3a1c1cd6883f5d92d724e809"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList-mobile.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4914,
+      "sha256": "b9b95f9918145c0602fac8d484ec2bdd725577df3d768338bf7d1c138ffe7271"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5386,
+      "sha256": "f2783d0225916bfd5f731c47b8dfa8906fda597dbfb4f051f82510c184b7f214"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList/i18n-key.txt",
+      "category": "runtime-static-override",
+      "sizeBytes": 208,
+      "sha256": "9506ad9b32a71398eaf8f9d61788724222894600027f4e2f2697df1ba15fe940"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 11717,
+      "sha256": "8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertList__mobile__/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef-mobile.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4904,
+      "sha256": "7f083ea3f36c811eff4e6106458b524a84eb6447441066467702ff53da54486e"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5223,
+      "sha256": "cb32dcfe66a8acf430c310d6467021a50280142d49f1795d3b1824cf3c11e834"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificate/companyCert/companyCertRef__mobile__/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificateImport/companyCertImp/companyCertImpList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5361,
+      "sha256": "1dc8855ca0a98e2fcc9a9f4f35b9ae546ebb5cc43ea30d309929fbbf4d538a75"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/companyCertificateImport/companyCertImp/companyCertImpList/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/common.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 4651,
+      "sha256": "d56208b34821da1540d3aaf310c233591d03adab35d15f0b05c41c3ca49f2109"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/customPublicMethod.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 5376,
+      "sha256": "7ef9e33e9eae502215a293e3e229ac47ffa77fd7795662e2ef550aa52af3e2a9"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/dateUtil.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2013,
+      "sha256": "9769aa63885a583e7f9fce6b1e3d37fa8fc2c73c66811fd67e7472e44e967267"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/homePageInternational.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2225,
+      "sha256": "b0982da9e28aa3aabbbf39893add0b741cc9cd939cc5217cee8ba7e8c40dd4bd"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/jquery-3.4.1.min.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 88145,
+      "sha256": "0925e8ad7bd971391a8b1e98be8e87a6971919eb5b60c196485941c3c1df089a"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/js/theme/walden.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 13982,
+      "sha256": "034f17b19a580e58389617c6e451e213f95978c11563ecd911347a790bd573c4"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/homePage/reminderPend.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4974,
+      "sha256": "5bd397e39db7cefd444cb8cf7ca325eef645ba9688457e0ec41c4c1b572e41af"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList-mobile.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4815,
+      "sha256": "e23d413031ed82b1ba89719a9cd5321bc19e59827ea050b1caefb96dcc1d2759"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5359,
+      "sha256": "027bfaf9f0ea820d29e2749ffe69ffd1e2a1c1c12e663b0a07b63b8a5a86cd66"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/body.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 1359,
+      "sha256": "8b27ace03e036e5447d969b9321b9f63888573399bbfd33ef5a1701d41273d48"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/i18n-key.txt",
+      "category": "runtime-static-override",
+      "sizeBytes": 56,
+      "sha256": "6bfa651807a2a283519aa0552c35e5f68a8c0601e97daf6f20143ebc85e89012"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 11717,
+      "sha256": "8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderPend/reminderPend/reminderPendList__mobile__/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetEdit.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5222,
+      "sha256": "35d740dfea334bf21dfbf2ee56d963d627476e52b5c86d075cf8cc3b89f5a2b0"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetEdit/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 1022,
+      "sha256": "4771488abb5b55b67cb795aa518ef02e8d063d336134ec28948c283911accb66"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 6389,
+      "sha256": "ba8395e8904ea2034e68e938038c33d8abcea73d6160387dd111beda522bd4c4"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/body.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/i18n-key.txt",
+      "category": "runtime-static-override",
+      "sizeBytes": 96,
+      "sha256": "ac86b4261d666c59e9e7078eeef56f9f678c43bcb28d32f0cf43d62aa238adf7"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetLayout/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 11717,
+      "sha256": "8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5492,
+      "sha256": "08bccae52a14884cfccba678ed56dd895666bab930f1b1ab20732a8e8f931e42"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetList/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2357,
+      "sha256": "705e23a391a954c53e358d7743fb806c3891a832308dbf8f8d7f4f96ab36173b"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetView.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5222,
+      "sha256": "0b84643bddd9c772b0a09d737918b1e7bb1fbc56463bb9387470e93e4bb980cb"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/reminderSet/reminderSet/reminderSetView/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 1022,
+      "sha256": "4771488abb5b55b67cb795aa518ef02e8d063d336134ec28948c283911accb66"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5331,
+      "sha256": "ba050b61e4a67a30f4051b557bea90cfc423b42b32b0a37d93a4e8d32e4b346a"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 4814,
+      "sha256": "a4402f75513dc081c8bfedfb7f796de87240f42e33c71c67cc2b978bc6a7330a"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList/i18n-key.txt",
+      "category": "runtime-static-override",
+      "sizeBytes": 204,
+      "sha256": "422848e612616ff9b6d117717136205935f8a4d06dda0b9c3825b66b434d84ec"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaff/certStaffList/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 11717,
+      "sha256": "8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5524,
+      "sha256": "47861c7d13ebd294b86badb031ea33a792b29d53521cd13cbdcede4e37bb0c70"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/body-es5.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2054,
+      "sha256": "e5d75584e9569db4bb105649352bca45ac66e90b5570a4c52addcb03a0029939"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/body.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2035,
+      "sha256": "afc3b31d8849841d2dd46ec484ce21508a86d2a267054517c70d50fec307a264"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 14940,
+      "sha256": "80349c3f3df952644a4c891aa5c676d81993ba2a0a0bae2b4aef3c48a3b5bcd1"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/i18n-key.txt",
+      "category": "runtime-static-override",
+      "sizeBytes": 1146,
+      "sha256": "8072c8ea0bd6e78e4cbf554b5bd883eb05adb2c1cccf70661777bcb07d076cd9"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertEdit/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 11717,
+      "sha256": "8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5401,
+      "sha256": "5fbb055db3fc2d4d6d40640ffbc7444ea16c178e031a3321bbf3320ace29bb37"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView/body-es5.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 21,
+      "sha256": "f57efd1c292497140eff4604c8ae201cddc131ff2dfedfa8caa3aa3b003c106c"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView/body.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 19,
+      "sha256": "b326ccc538aeec460de8f02bd7d876306cf87d75066d20980d5b03353b179511"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/certStaffSet/staffCertLogView/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 783,
+      "sha256": "c06314e79c820457cc70a0fcaf215078700b1fc2878fc573983e0cb6ac959fac"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertEdit.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 3686,
+      "sha256": "c1dbaffbe1dbe4456369d41345cfac922c6dab82e74270955b03944a7c901e79"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList-mobile.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4871,
+      "sha256": "f462c6133a852eb4b4e931b94f0ac8702e887069a2a4b087c09e9dfdffbab078"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5331,
+      "sha256": "71e7d6b10cc28b07f848f8852bdecf6f8ea99eb01dcc81effefcee94e24b67dd"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 1847,
+      "sha256": "f956718547e88750a733833c2d95f90cbd301c202449a48621dd19ebd8402bc7"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList/i18n-key.txt",
+      "category": "runtime-static-override",
+      "sizeBytes": 208,
+      "sha256": "9506ad9b32a71398eaf8f9d61788724222894600027f4e2f2697df1ba15fe940"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 11717,
+      "sha256": "8f39933ffa57dd0a820d3aaed887d78c4ddb065f85a6ca80a5f2a05eeed09059"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertList__mobile__/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef-mobile.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 4860,
+      "sha256": "be4ae8ab7b73bfc09dd52f541dfe0f926a99f707916127468a92c326bccbf318"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5174,
+      "sha256": "38f21d425f687b956da36c5baa902ff69f507108b3f3807695f5013ba1779bdf"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 1716,
+      "sha256": "93399cbf75b392766cb8f8091caa5a518feeece224a433d7570b5503b7f0107d"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCert/staffCertRef__mobile__/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertLog/staffCertLogView.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 3722,
+      "sha256": "d0256a016760476e3f4403fbe9c70508de09845e46bbbeea626975a24bcae057"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertLog/staffCertLogView/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 264,
+      "sha256": "2c1323f9e3b4e2b7bca0a6d779235b935613949f562156ee2acbb00b2f25cb51"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertificate/staffCertEdit.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 3741,
+      "sha256": "9bc1f0609c3c089c864b20bb250670842701498d7babda61f475d96c3f8ec27e"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificate/staffCertificate/staffCertList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 3433,
+      "sha256": "6e19d691ee634b3affdcf19065d765effaa5604ab8cd781c201d4a9dbe56b89e"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificateImport/staffCertImp/staffCertImpList.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 5309,
+      "sha256": "c774b945bbbb60b83f81f98eb7c4d90adf7e65632137d5a62aab4f804bedb230"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/Qualify/staffCertificateImport/staffCertImp/staffCertImpList/eventJs/customEvent.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 260,
+      "sha256": "6b220a25729da10d4e91e68bc996afeb7945b59b12c099b485eb3618f79efbe5"
     },
     {
       "path": "deploy/docker/assets/module-static/RM/formula/editor.html",

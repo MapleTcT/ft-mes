@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>资质列表</title>
+    <link href="/greenDill/static/styles/theme-colors.css?v=1569413625319" rel="stylesheet">
+    <link href="/greenDill/static/styles/vendors.commons.css?v=1569413625319" rel="stylesheet">
+    <link href="/greenDill/static/styles/treeList.css?v=1569413625319" rel="stylesheet">
+    <!-- 自定义代码，在custom对应目录下 -->
+    
+    
+    
+    
+    <script type="text/javascript">
+        var pageConfig = {
+            "prefix": "/msService",//url前缀
+            "viewCode": "Qualify_1.0.0_certificate_certificateLayOut", // 视图编码
+            "entityCode":"Qualify_1.0.0_certificate",
+            "menuCode": "Qualify_1.0.0_certificate_certificateLayOut",
+            "viewName": "资质列表",
+            "viewType": "LIST",
+            "modelCode": "Qualify_1.0.0_certificate_Certificate",
+            "associatedProperty": "cerType",
+            "showType": "LAYOUT2",
+            "modelAlias": "certificate",
+            "workflowEnabled": false,
+            "listButtons":{
+                "ADD":"Qualify_1.0.0_certificate_certificateLayOut_certificateList_addCertificate_add_Qualify_1.0.0_certificate_certificateList",
+                "MODIFY":"Qualify_1.0.0_certificate_certificateLayOut_certificateList_editCertificate_modify_Qualify_1.0.0_certificate_certificateList",
+                "DELETE":"Qualify_1.0.0_certificate_certificateLayOut_certificateList_delCertificate_del_Qualify_1.0.0_certificate_certificateList",
+            },
+            "interfaceApi": {
+                "mainView": "", // 主查看视图
+                "editView": "/msService/Qualify/certificate/certificate/certificateEdit?",//编辑视图
+                "deleteData": "/Qualify/certificate/certificate/delete",//删除数据
+                "sourceData": "/Qualify/certificate/certificate/certificateList-", // 树形列表数据
+                "getChildNodes": "/Qualify/certificateType/certificateType/cerTypeTreeTreeData",
+                "getNodeInfo": "/Qualify/certificateType/certificateType/data",
+                "deleteNode": "/Qualify/certificateType/certificateType/delete",
+                "sortNode": "/Qualify/certificateType/certificateType/cerTypeTreeTreeSort",
+                "dragNode": "/Qualify/certificateType/certificateType/cerTypeTreeTreeMove"
+            },
+            "baseServiceApi": {
+                "flowRoot": "/baseService/workflow/flowRoot", // 路由数据
+                "layoutJson": "/baseService/view/layoutJson", // 布局数据
+                "uploadList": "/baseService/workbench/upload-list", // 附件列表
+                "systemCodeJson": "/baseService/systemCode/systemCodeJson", // 系统编码
+                "uploadFile": "/baseService/workbench/uploadFile", // 附件上传
+                "deleteFile": "/baseService/workbench/deleteFile", // 附件删除
+                "mneClient": "/baseService/workbench/common/mneClient", // 助记码
+            },
+        }
+    </script>
+</head>
+
+<body class="supos-container">
+    <div id="app"></div>
+    <script type="text/javascript" src="/greenDill/static/scripts/vendors.core.js?v=1569413625319"></script>
+    <script type="text/javascript" src="/greenDill/static/scripts/vendors.antdicons.js?v=1569413625319"></script>
+    <script type="text/javascript" src="/greenDill/static/scripts/vendors.antd.js?v=1569413625319"></script>
+    <script type="text/javascript" src="/greenDill/static/scripts/i18n.js?v=1569413625319"></script>
+    <script type="text/javascript" src="/greenDill/static/scripts/vendors.commons.js?v=1569413625319"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/treeList.js?v=1569413625319"></script>
+    <!-- 自定义代码，在custom对应目录下 -->
+    
+    
+</body>
+</html>

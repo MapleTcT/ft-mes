@@ -1,0 +1,3 @@
+Qualify.reminderSet.ReminderSet.chooseNodeFirst
+Qualify.reminderSet.ReminderSet
+Button.text.save

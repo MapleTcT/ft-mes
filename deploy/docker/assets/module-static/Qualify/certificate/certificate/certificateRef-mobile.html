@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no,viewport-fit=cover">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>资质参照列表</title>
+	<link href="/greenDill/mobile-static/css/vendor.css?v=1638336722446" rel="stylesheet" />
+	<link href="/greenDill/mobile-static/css/itemList.css?v=1638336722446" rel="stylesheet" />
+	<script>		
+		var loadScript = function(url, placeBody) {
+			function loadUrlContent(url, successCallback, errorCallback) {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", url, false);
+				if ("overrideMimeType" in xhr) {
+					xhr.overrideMimeType("text/plain");
+				}
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState === 4) {
+					if (xhr.status === 0 || xhr.status === 200) {
+						successCallback(xhr.responseText);
+					} else {
+						errorCallback && errorCallback();
+						throw new Error("Could not load " + url);
+					}
+					}
+				};
+				return xhr.send(null);
+			}
+			var isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+			if (!isChrome) {
+				url += '-es5';
+			}
+			url += '.js?v=' + Math.random();
+			
+			loadUrlContent(url, function(content){
+				var parentEl = document.getElementsByTagName('head')[0];
+				var s = document.createElement('script');
+				s.text = content;
+				parentEl.appendChild(s);
+			});
+		};
+	</script>
+	<!-- 自定义代码，在custom对应目录下 -->
+	<!-- head.html--start -->
+	
+	<!-- head.html--end -->
+	<script>
+		
+		
+		
+	</script>
+	<script type="text/javascript">
+		var pageConfig = {
+			"prefix": "/msService",// url前缀
+			"viewCode": "Qualify_1.0.0_certificate_certificateRef__mobile__", //  视图编码
+			"entityCode":"Qualify_1.0.0_certificate",// 实体编码
+			"menuCode": "Qualify_1.0.0_certificate_certificateRef",
+			"hasAttachment":"false",
+			"viewName": "certificateRef__mobile__",// 视图名称
+			"viewTitle": "资质参照列表",//视图标题
+			"viewType": "REFERENCE",// 视图类型
+			"modelCode": "Qualify_1.0.0_certificate_Certificate",// 模型编码
+			"isMain":true,// 主模型
+			"permissionCode":null, // 视图权限操作码（主要参照视图使用）
+			"showType": "PART",// 视图展示类型
+			"modelAlias": "certificate",// 模型别名
+			"workflowEnabled": false,// 启用工作流
+			"listButtons":{
+			},
+			"interfaceApi": {
+			    "downloadFile":"/Qualify/baseService/workbench/download",//  下载附件接口
+			    "uploadList": "/Qualify/baseService/workbench/upload-list", //  附件列表
+                "countFile": "/Qualify/baseService/workbench/countFile", //  附件列表
+				"PreviewAttachments":"/Qualify/baseService/workbench/preview",//附件预览
+                "PreviewPicture":"/Qualify/baseService/workbench/preview/picture",//图片预览
+                "authenticationMessage":"/msService/Qualify/baseService/workbench/download/getAuthenticationMessage",//附件下载预览鉴权信息
+				"mainView": "/msService/Qualify/certificate/certificate/certificateView", //  主查看视图
+				"downloadXls": "/msService/Qualify/certificate/certificate/downloadXls", //  下载导入模板
+                "importMainXls": "/msService/Qualify/certificate/certificate/importMainXls", //  导入Excel
+                "deleteData": "/msService/Qualify/certificate/certificate/delete",// 删除数据
+                "sourceData": "/msService/Qualify/certificate/certificate/certificateRef__mobile__-", //  列表数据
+				"echartsData": "/msService/Qualify/certificate/certificate/echartsData", //  图表数据源
+			},
+			"baseServiceApi": {
+                "flowRoot": "/msService/baseService/workflow/flowRoot", //  路由数据
+                "layoutJson": "/msService/baseService/view/layoutJson", //  布局数据
+                "systemCodeJson": "/inter-api/systemcode/v1/systemCodeJson", //  系统编码
+                "uploadFile": "/inter-api/file-server/v1/file/upload/file", //  附件上传
+                "deleteFile": "/inter-api/file-server/v1/file/delete", //  附件删除
+                "mneClient": "/msService/baseService/workbench/common/mneClient", //  助记码
+            },
+		}
+	</script>
+</head>
+
+<body class="supos-container">
+	<div id="app"></div>
+	<script type="text/javascript" src="/greenDill/mobile-static/js/manifest.js?v=1638336722446"></script>
+	<script type="text/javascript" src="/greenDill/mobile-static/js/vendor.js?v=1638336722446"></script>
+	<script type="text/javascript" src="/greenDill/mobile-static/js/itemList.js?v=1638336722446"></script>
+	<script>
+	</script>
+	<!-- 自定义代码，在custom对应目录下 -->
+	<!-- body.html--start -->
+	
+	<!-- body.html--end -->
+	<script>
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!--过期提醒待办-->
+<div id="reminderPend" class="rowItemDiv" style="min-height: 68px;">
+    <div class="mod modBody">
+        <table width="100%" cellpadding="0" cellspacing="0">
+            <tbody>
+            <tr>
+                <td id="reminderPendContext">
+                    <div class="port-panes">
+                        <div id="content" style=" margin: auto; display:block;">
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>
+	.beamPortalDataGrid {
+		background: none;
+		font-size: 12px;
+		padding-bottom: 0px;
+		padding-left: 0px;
+		text-decoration: none;
+		border-bottom: 1px solid #e7eaec;
+		height: 34px !important;
+		line-height: 34px;
+	}
+
+	.beamPortalDataGridLink {
+		float: right;
+		color: #166f6e !important;
+		margin-right: 15px;
+		padding-top: 3px;
+		clear: both;
+		text-decoration: underline;
+	}
+
+	#sparePartExpiresContext li {
+		white-space: nowrap;
+	}
+</style>
+<script src="/msService/Qualify/homePage/js/customPublicMethod.js"></script>
+<script src="/msService/Qualify/homePage/js/dateUtil.js"></script>
+<script src="/msService/Qualify/homePage/js/common.js"></script>
+<script type="text/javascript">
+	/*
+     * 此页面定义的变量名、方法名需要加上当前页面的唯一标识，因为此处js会集中到一起，如果主页多个窗口，变量、方法会被覆盖，会导致功能错乱
+     */
+	//最外层DOM ID
+	var ieContentId = "#reminderPend";
+	//数据来源列表视图的viewCode
+	var ieViewCode = "Qualify_1.0.0_reminderPend_reminderPend";
+	//更多页面菜单编码
+	var ieMoreMenuCode = "Qualify_1.0.0_reminderPend_reminderPendList";
+    //加载数据
+	ieRefreshTable();
+	function ieRefreshTable() {
+		/* 所有参数必填，否则会报错
+		var params = {
+			domId: null, //最外层DOM ID
+			url: null,//请求url
+			permissionCode: null,//查询条件穿的 权限编码（参照列表视图的查询方法的传参）
+			fastQueryCond: null,//快速查询条件（参照列表视图的查询方法）
+			success: null//请求成功后的处理事件
+		};
+		*/
+		var params = {
+			domId: ieContentId,
+			url: '/msService/Qualify/reminderPend/reminderPend/reminderPendList-query',
+			permissionCode: ieViewCode,
+			fastQueryCond: {},
+			success: ieRequestSuccess
+		};
+		//获取数据
+		getData(params);
+	}
+	function ieRequestSuccess(data) {
+		//重新渲染表格数据
+		refreshDom(ieContentId, ieGenerateDom(data.result), ieMoreMenuCode);
+	}
+	/**
+	 * 构造数据内容DOM
+	 */
+	function ieGenerateDom(data) {
+		// 添加组件数据
+		var contentHtml = '<li class="beamPortalDataGrid"><span style = "width:20%;text-align:center" ><b>提醒状态</b></span><span style ="width:15%;text-align:center" ><b>提醒日期</b></span><span style = "width:15%;text-align:center" ><b>员工编号</b></span><span style = "width:15%;text-align:center" ><b>员工姓名</b></span><span style = "width:15%;text-align:center" ><b>资质编码</b></span><span style = "width:15%;text-align:center" ><b>资质名称</b></span></li>';
+		if (data.length > 0) {
+			var dataLength = data.length;
+			if (dataLength > 0 && dataLength < 8) {
+				for (var i = 0; i < (8 - dataLength); i++) {
+					data.push(null);
+				}
+			}
+			//构造DOM
+			$.each(data, function (index, value) {
+				var remindState = "";//提醒状态
+				var remindDate = "";//提醒日期
+				var staffCode = "";//员工编号
+				var staffName = "";//员工姓名
+				var certCode = "";//资质编码
+				var certName = "";//资质名称
+				if (value) {
+					remindState = value.remindState.value;//提醒状态
+					remindDate = new Date(value.remindDate).Format("yyyy-MM-dd");//提醒日期
+					staffCode = value.staffCertificate.staffId.code;//员工编号
+					staffName = value.staffCertificate.staffId.name;//员工姓名
+					certCode = value.staffCertificate.certLvId.certId.code;//资质编码
+					certName = value.staffCertificate.certLvId.certId.name;//资质名称
+					contentHtml += '<li onclick = "" style="height: 34px;white-space:nowrap;" class="beamPortalDataGrid">';
+                    contentHtml += '<span style = "width:20%;text-align:center;color:rgb(179, 3, 3)" >' + remindState + '</span>';//提醒状态
+                    contentHtml += '<span style = "width:15%;text-align:center" >' + remindDate + '</span>';//提醒日期
+                    contentHtml += '<span style = "width:15%;text-align:center" >' + staffCode + '</span>';//员工编号
+                    contentHtml += '<span style = "width:15%;text-align:center" >' + staffName + '</span>';//员工姓名
+                    contentHtml += '<span style = "width:15%;text-align:center" >' + certCode + '</span>';//资质编码
+                    contentHtml += '<span style = "width:15%;text-align:center" >' + certName + '</span>';//资质名称
+                    contentHtml += '</li>';
+				}
+			});
+		}
+		return contentHtml;
+	}
+</script>

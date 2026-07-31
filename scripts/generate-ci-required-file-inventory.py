@@ -235,6 +235,14 @@ def should_exclude_candidate(path: Path) -> bool:
         "configuration-entity-model-compat.jar",
     ):
         return True
+    if parts == (
+        "deploy",
+        "docker",
+        "patches",
+        "qualify-config-defaults",
+        "qualify-config-defaults.jar",
+    ):
+        return True
     if "qcs-redis-safe-payload" in parts and path.name != ".gitignore":
         return True
     return False

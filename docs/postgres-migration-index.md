@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`234`。
-- 编号范围：`001` 到 `234`。
+- 脚本数量：`238`。
+- 编号范围：`001` 到 `238`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`89`。
+- 需关注语句：`90`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -22,36 +22,36 @@
 | --- | --- |
 | auth-rbac-org | 39 |
 | business | 52 |
-| compatibility | 87 |
+| compatibility | 88 |
 | configuration | 57 |
-| general | 43 |
+| general | 45 |
 | notification | 10 |
-| platform | 69 |
+| platform | 70 |
 | workflow | 21 |
 
 ## 语句统计
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10833 |
-| create-function | 116 |
-| create-index | 1017 |
-| create-table | 584 |
+| alter-table | 10835 |
+| create-function | 117 |
+| create-index | 1022 |
+| create-table | 585 |
 | create-view | 143 |
-| insert | 11216 |
-| update | 11339 |
+| insert | 11343 |
+| update | 11468 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 256 |
-| do-block | 467 |
-| if-exists | 144 |
-| if-not-exists | 13063 |
-| on-conflict | 11142 |
+| create-or-replace | 257 |
+| do-block | 513 |
+| if-exists | 145 |
+| if-not-exists | 13071 |
+| on-conflict | 11268 |
 | to-regclass | 221 |
-| where-not-exists | 53 |
+| where-not-exists | 54 |
 
 ## 脚本清单
 
@@ -291,6 +291,10 @@
 | 232 | 232-wts-hazid-action-permissions.sql | auth-rbac-org, business | 408 | insert:3 | 3 | - |
 | 233 | 233-wts-hazid-i18n-labels.sql | platform, business | 257 | insert:1, update:3 | 2 | - |
 | 234 | 234-wts-risk-safe-measures-script-entrypoints.sql | business | 209 | update:2 | 0 | - |
+| 235 | 235-qualify-action-runtime-json.sql | platform | 1606 | insert:123, update:123 | 164 | - |
+| 236 | 236-qualify-certificate-type-roots.sql | general | 53 | insert:1, update:1 | 2 | - |
+| 237 | 237-qualify-certificate-type-mne-code-compat.sql | compatibility | 181 | create-table:1, create-function:1, create-index:5, alter-table:2, update:2 | 13 | watch:1 |
+| 238 | 238-qualify-system-config.sql | general | 99 | insert:3, update:3 | 4 | - |
 
 ## 规则
 
