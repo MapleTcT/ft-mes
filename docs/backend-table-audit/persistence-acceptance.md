@@ -1,5 +1,34 @@
 # 后端落库验收报告
 
+## 2026-07-31 WOM 执行记录工艺统计落库验收
+
+本轮六类记录页中，查看详情和双击均为只读；会改变数据的动作只有指令、活动两类
+“工艺统计”。两个动作都从真实列表选择业务记录，经正式 ProcessAnalysis 接口执行后，
+直接查询 PostgreSQL 快照表确认 revision 推进，并复核受控统计开关恢复到执行前状态。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| 指令执行工艺统计 | 指令执行记录 -> 工艺统计 | `GET /msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask?taskExeLogId=771353614402816` | ProcessAnalysis task analysis -> trace snapshot upsert | `wom_produce_task_exelog`、`pa_trace_snapshots` | `source_type='TASK' AND source_id=771353614402816`；HTTP 200，快照 revision `7 -> 8`，状态保持 `WOM_runState/finished` | PASS |
+| 活动执行工艺统计 | 活动执行记录 -> 工艺统计 | `GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive?activeId=771353684604160` | ProcessAnalysis activity analysis -> trace snapshot upsert | `wom_acti_exelogs`、`pa_trace_snapshots` | `source_type='ACTIVITY' AND source_id=771353684604160`；HTTP 200，快照 revision `5 -> 6`，状态保持 `WOM_runState/finished` | PASS |
+| 六类记录详情和双击 | 指令、活动、检查、投料、产出记录页 | 对应 `data/{id}` 与运行时布局接口 | WOM 只读 controller/service/DAO | WOM 执行、检查、投料和产出表 | 所有列表、详情和双击请求 HTTP 200，页面真实显示业务字段；不产生业务写入 | NOT_APPLICABLE |
+
+验收 SQL：
+
+```sql
+SELECT source_type, source_id, revision, source_state, updated_at
+FROM public.pa_trace_snapshots
+WHERE tenant_id = 'dt'
+  AND (
+    (source_type = 'TASK' AND source_id = 771353614402816)
+    OR
+    (source_type = 'ACTIVITY' AND source_id = 771353684604160)
+  )
+ORDER BY source_type, revision;
+```
+
+实际终态为 `ACTIVITY/r6/finished` 和 `TASK/r8/finished`。机器证据：
+`metadata/wom-execution-record-actions-acceptance-20260731.json`。
+
 ## 2026-07-30 admin 代表业务落库与通知回归
 
 本轮先逐页扫描 admin 的 398 个可导航入口，再对会改变业务数据的代表动作使用唯一 marker

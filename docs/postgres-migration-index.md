@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`239`。
-- 编号范围：`001` 到 `239`。
+- 脚本数量：`240`。
+- 编号范围：`001` 到 `240`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -23,10 +23,10 @@
 | auth-rbac-org | 39 |
 | business | 52 |
 | compatibility | 88 |
-| configuration | 58 |
+| configuration | 59 |
 | general | 45 |
 | notification | 10 |
-| platform | 71 |
+| platform | 72 |
 | workflow | 21 |
 
 ## 语句统计
@@ -38,18 +38,18 @@
 | create-index | 1022 |
 | create-table | 585 |
 | create-view | 143 |
-| insert | 11346 |
-| update | 11471 |
+| insert | 11379 |
+| update | 11504 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 257 |
-| do-block | 514 |
-| if-exists | 146 |
+| do-block | 525 |
+| if-exists | 157 |
 | if-not-exists | 13071 |
-| on-conflict | 11271 |
+| on-conflict | 11304 |
 | to-regclass | 221 |
 | where-not-exists | 54 |
 
@@ -296,6 +296,7 @@
 | 237 | 237-qualify-certificate-type-mne-code-compat.sql | compatibility | 181 | create-table:1, create-function:1, create-index:5, alter-table:2, update:2 | 13 | watch:1 |
 | 238 | 238-qualify-system-config.sql | general | 99 | insert:3, update:3 | 4 | - |
 | 239 | 239-wom-process-execution-actions-runtime.sql | platform, configuration | 65 | insert:3, update:3 | 5 | - |
+| 240 | 240-wom-execution-record-actions-runtime.sql | platform, configuration | 645 | insert:33, update:33 | 55 | - |
 
 ## 规则
 

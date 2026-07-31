@@ -4689,6 +4689,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/240-wom-execution-record-actions-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -5200,6 +5206,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-wom-checkoutbill-persistence-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-wom-execution-record-actions-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -9249,13 +9261,67 @@
     },
     {
       "ignored": false,
+      "path": "metadata/wom-activity-output-record-actions-detail-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-activity-output-record-actions-list-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-activity-record-actions-detail-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-activity-record-actions-list-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/wom-bad-quantity-analysis.json",
       "state": "tracked",
       "tracked": true
     },
     {
       "ignored": false,
+      "path": "metadata/wom-check-record-actions-detail-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-check-record-actions-list-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/wom-consumption-record-analysis.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-execution-record-actions-acceptance-20260731.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-input-record-actions-detail-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-input-record-actions-list-20260731.png",
       "state": "tracked",
       "tracked": true
     },
@@ -9328,6 +9394,18 @@
     {
       "ignored": false,
       "path": "metadata/wom-manual-task-entry-result.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-output-record-actions-detail-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-output-record-actions-list-20260731.png",
       "state": "tracked",
       "tracked": true
     },
@@ -9406,6 +9484,30 @@
     {
       "ignored": false,
       "path": "metadata/wom-quality-quantity-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-task-record-actions-analysis-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-task-record-actions-detail-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-task-record-actions-list-20260731.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-task-record-actions-trace-20260731.png",
       "state": "tracked",
       "tracked": true
     },
@@ -13256,7 +13358,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 870
+      "tracked": 872
     },
     "docs": {
       "tracked": 161
@@ -13265,7 +13367,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 320
+      "tracked": 335
     },
     "package.json": {
       "tracked": 1
@@ -13289,8 +13391,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2205,
-    "tracked": 2205,
+    "totalFiles": 2222,
+    "tracked": 2222,
     "untracked": 0
   },
   "untrackedByDirectory": []

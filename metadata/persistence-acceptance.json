@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-31T02:42:53.294Z",
-  "repoCommit": "ef2079491ed0bc2a12819ee48129ee67a619987a+working-tree-wom-process-actions",
+  "generatedAt": "2026-07-31T04:39:12.073Z",
+  "repoCommit": "aef4ceb7377cd526962d0e2f734648483b6c6f75+working-tree-wom-record-actions",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -303,14 +303,20 @@
       "marker": "ADP_E2E_20260731023859_WOM_PROCESS_ACTIONS",
       "evidence": "metadata/wom-process-execution-actions-acceptance-20260731.json",
       "assertions": "three visible actions; no-selection warning; detail and consumption HTTP 200; PROCESS snapshot revision 4->5; controlled flag restored; browser errors zero"
+    },
+    "womExecutionRecordActions": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+      "evidence": "metadata/wom-execution-record-actions-acceptance-20260731.json",
+      "assertions": "six real record pages passed; task/activity/check/input/output details and double-clicks rendered business fields; TASK snapshot revision 7->8; ACTIVITY snapshot revision 5->6; controlled flags restored; browser errors zero"
     }
   },
   "summary": {
-    "testedFeatures": 317,
-    "pass": 295,
+    "testedFeatures": 326,
+    "pass": 297,
     "fail": 1,
     "blocked": 0,
-    "notApplicable": 21
+    "notApplicable": 28
   },
   "items": [
     {
@@ -6925,9 +6931,190 @@
       "status": "PASS",
       "evidence": "HTTP 200/code 200 returned 工艺参数统计完成. PostgreSQL snapshot id 176 retained source state WOM_runState/finished and revision advanced 4 -> 5. The controlled need_param_ana flag was restored to false. Browser console/page/request/HTTP error arrays were zero.",
       "issues": []
+    },
+    {
+      "acceptanceSet": "wom-execution-record-actions-20260731",
+      "module": "WOM 指令执行记录详情",
+      "route": "/msService/WOM/produceTask/prodTaskExelog/makeTaskExecuList",
+      "operation": "选择指令执行记录后点击产耗查看并双击同一行",
+      "api": "GET /msService/WOM/produceTask/prodTaskExelog/data/771353614402816; GET /msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsumEntryView",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "WOM prodTaskExelog read controller/service/DAO and runtime view service",
+      "tables": [
+        "public.wom_produce_task_exelog",
+        "public.runtime_extra_view"
+      ],
+      "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+      "verificationSql": "SELECT id,task_id,produce_batch_num,task_run_state,act_start_time,act_end_time FROM public.wom_produce_task_exelog WHERE id=771353614402816;",
+      "status": "NOT_APPLICABLE",
+      "evidence": "The toolbar exposed 产耗查看, 工艺查看, 批次追溯 and 工艺统计. Toolbar detail and double-click both returned HTTP 200 and rendered the production batch, line, actual times and material input row. This operation is read-only.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wom-execution-record-actions-20260731",
+      "module": "WOM 指令执行批次追溯",
+      "route": "/msService/WOM/produceTask/prodTaskExelog/makeTaskExecuList",
+      "operation": "选择指令执行记录后点击批次追溯和工艺查看",
+      "api": "GET /msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?batchNo=MES_FULL_20260730064545076_a23187_BATCH",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "ProcessAnalysis trace read service",
+      "tables": [
+        "public.wom_produce_tasks",
+        "public.wom_process_exelogs",
+        "public.wom_acti_exelogs",
+        "public.qcs_inspects",
+        "public.qcs_inspect_reports"
+      ],
+      "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+      "verificationSql": "SELECT id,table_no,produce_batch_num,task_run_state FROM public.wom_produce_tasks WHERE produce_batch_num='MES_FULL_20260730064545076_a23187_BATCH';",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Both actions opened HTTP 200 trace content with 12 timeline events covering the manufacturing instruction, process, activities, material events and qualified QCS result. This operation is read-only.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wom-execution-record-actions-20260731",
+      "module": "WOM 指令执行工艺统计",
+      "route": "/msService/WOM/produceTask/prodTaskExelog/makeTaskExecuList",
+      "operation": "选择已完成且启用参数统计的指令执行记录，点击工艺统计",
+      "api": "GET /msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask?taskExeLogId=771353614402816",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "ProcessAnalysis task analysis -> trace snapshot upsert",
+      "tables": [
+        "public.wom_produce_task_exelog",
+        "public.pa_trace_snapshots"
+      ],
+      "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+      "verificationSql": "SELECT source_type,source_id,revision,source_state,updated_at FROM public.pa_trace_snapshots WHERE tenant_id='dt' AND source_type='TASK' AND source_id=771353614402816;",
+      "status": "PASS",
+      "evidence": "HTTP 200/code 200 returned success. PostgreSQL retained source state WOM_runState/finished and advanced the single TASK snapshot revision 7 -> 8. Controlled task statistics flags were restored to their original values.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wom-execution-record-actions-20260731",
+      "module": "WOM 活动执行记录详情",
+      "route": "/msService/WOM/produceTask/actiExelog/activeExeLogList",
+      "operation": "选择投料活动后点击查看详情并双击同一行",
+      "api": "GET /msService/WOM/produceTask/actiExelog/data/771353684604160; GET /msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsuEntryActView",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "WOM actiExelog read controller/service/DAO and runtime view service",
+      "tables": [
+        "public.wom_acti_exelogs",
+        "public.runtime_extra_view"
+      ],
+      "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+      "verificationSql": "SELECT id,task_id,task_process_id,produce_batch_num,run_state,act_start_time,act_end_time FROM public.wom_acti_exelogs WHERE id=771353684604160;",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Toolbar detail and double-click both returned HTTP 200 and rendered the production batch, process, work unit, activity and actual start/end times. This operation is read-only.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wom-execution-record-actions-20260731",
+      "module": "WOM 活动执行工艺统计",
+      "route": "/msService/WOM/produceTask/actiExelog/activeExeLogList",
+      "operation": "选择已完成且启用参数统计的投料活动，点击工艺统计",
+      "api": "GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive?activeId=771353684604160",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "ProcessAnalysis activity analysis -> trace snapshot upsert",
+      "tables": [
+        "public.wom_acti_exelogs",
+        "public.pa_trace_snapshots"
+      ],
+      "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+      "verificationSql": "SELECT source_type,source_id,revision,source_state,updated_at FROM public.pa_trace_snapshots WHERE tenant_id='dt' AND source_type='ACTIVITY' AND source_id=771353684604160;",
+      "status": "PASS",
+      "evidence": "HTTP 200/code 200 returned 工艺参数统计完成. PostgreSQL retained source state WOM_runState/finished and advanced the single ACTIVITY snapshot revision 5 -> 6. The controlled activity statistics flag was restored to its original value.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wom-execution-record-actions-20260731",
+      "module": "WOM 检查记录详情",
+      "route": "/msService/WOM/produceTask/checkRecord/checkRecordList",
+      "operation": "选择检查记录后点击查看详情并双击同一行",
+      "api": "GET /msService/WOM/produceTask/actiExelog/data/8388184063665800; GET /msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_checkRecord",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "WOM check record read view backed by activity execution data",
+      "tables": [
+        "public.wom_acti_exelogs",
+        "public.runtime_extra_view"
+      ],
+      "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+      "verificationSql": "SELECT id,task_id,task_process_id,produce_batch_num,run_state,act_start_time,act_end_time FROM public.wom_acti_exelogs WHERE id=8388184063665800;",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Toolbar detail and double-click both returned HTTP 200 and rendered the check item, standard, reported value and check time. This operation is read-only.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wom-execution-record-actions-20260731",
+      "module": "WOM 产出活动详情",
+      "route": "/msService/WOM/produceTask/actiExelog/activeExeLogList",
+      "operation": "选择产出活动后点击查看详情并双击同一行",
+      "api": "GET /msService/WOM/produceTask/actiExelog/data/9007185760134776; GET /msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matOutputActView",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "WOM output activity read controller/service/DAO and runtime view service",
+      "tables": [
+        "public.wom_acti_exelogs",
+        "public.runtime_extra_view"
+      ],
+      "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+      "verificationSql": "SELECT id,task_id,task_process_id,produce_batch_num,run_state,act_start_time,act_end_time FROM public.wom_acti_exelogs WHERE id=9007185760134776;",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Toolbar detail and double-click both returned HTTP 200 and rendered the STD_CORE sugar output activity in the correct 产出查看 layout. This operation is read-only.",
+      "issues": [
+        "The current activity list API did not return controlled output activity 9007185760134776; acceptance fetched the same real row from its detail API before exercising the actual grid actions."
+      ]
+    },
+    {
+      "acceptanceSet": "wom-execution-record-actions-20260731",
+      "module": "WOM 投料记录详情",
+      "route": "/msService/WOM/produceTask/matConsumRecod/matConsumRecodList",
+      "operation": "选择投料记录后点击查看详情并双击同一行",
+      "api": "GET /msService/WOM/produceTask/matConsumRecod/data/9007185760134876; GET /msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsumeRecordView",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "WOM material consumption record read controller/service/DAO",
+      "tables": [
+        "public.wom_mat_consum_recods",
+        "public.runtime_extra_view"
+      ],
+      "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+      "verificationSql": "SELECT id,table_no,material_batch_num,use_num,report_num,act_start_time,act_end_time FROM public.wom_mat_consum_recods WHERE id=9007185760134876;",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Toolbar detail and double-click both returned HTTP 200 and rendered liquefied-syrup input, batch, quantity, operator and timing fields. Existing 手动同步 and 修改 actions remained visible. This operation is read-only.",
+      "issues": []
+    },
+    {
+      "acceptanceSet": "wom-execution-record-actions-20260731",
+      "module": "WOM 产出记录详情",
+      "route": "/msService/WOM/produceTask/matOutptRecord/matOutptRecordList",
+      "operation": "选择产出记录后点击查看详情并双击同一行",
+      "api": "GET /msService/WOM/produceTask/matOutptRecord/data/9007185760134878; GET /msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matOutputRecordView",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "WOM material output record read controller/service/DAO",
+      "tables": [
+        "public.wom_mat_outpt_records",
+        "public.runtime_extra_view"
+      ],
+      "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+      "verificationSql": "SELECT id,table_no,material_batch_num,output_num,report_num,act_start_time,act_end_time FROM public.wom_mat_outpt_records WHERE id=9007185760134878;",
+      "status": "NOT_APPLICABLE",
+      "evidence": "Toolbar detail and double-click both returned HTTP 200 and rendered saccharified-liquor output, batch, quantity, operator and timing fields. Existing 手动同步 and 修改 actions remained visible. This operation is read-only.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+      "artifact": "metadata/wom-execution-record-actions-acceptance-20260731.json",
+      "summary": "Six real WOM execution-record pages restored usable toolbars and double-click details. All detail data requests returned HTTP 200 and rendered business fields; TASK and ACTIVITY snapshot revisions advanced 7->8 and 5->6; controlled flags were restored and browser error arrays were zero. Output-activity list visibility remains a separate documented issue."
+    },
     {
       "marker": "ADP_E2E_20260731023859_WOM_PROCESS_ACTIONS",
       "artifact": "metadata/wom-process-execution-actions-acceptance-20260731.json",

@@ -63,6 +63,12 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "WOM_1.0.0_produceTask_makeTaskBatchView",
     "WOM_1.0.0_produceTask_easyTaskOperateView",
     "WOM_1.0.0_produceTask_processExeLogList",
+    "WOM_1.0.0_produceTask_matConsumEntryView",
+    "WOM_1.0.0_produceTask_matConsuEntryActView",
+    "WOM_1.0.0_produceTask_matOutputActView",
+    "WOM_1.0.0_produceTask_checkRecord",
+    "WOM_1.0.0_produceTask_matConsumeRecordView",
+    "WOM_1.0.0_produceTask_matOutputRecordView",
     "WOM_1.0.0_procReport_outPutCommonTaskEdit",
     "WOM_1.0.0_batchMaterial_baRetireMentPDAList",
     "WOM_1.0.0_rejectMaterilal_batchRejectEdit",
@@ -79,6 +85,13 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "WTS_1.0.0_workPermit_workPermitList",
     "workAppointment_6.1.6.1_workPlan_workPlanList",
 )
+
+COMPAT_REGENERATED_ACTION_VIEW_CODES = {
+    "WOM_1.0.0_produceTask_matConsuEntryActView",
+    "WOM_1.0.0_produceTask_matOutputActView",
+    "WOM_1.0.0_produceTask_matConsumeRecordView",
+    "WOM_1.0.0_produceTask_matOutputRecordView",
+}
 
 PROCESS_EXECUTION_DETAIL_DOUBLE_CLICK = """function processExeLogListDB(event, row) {
     if (!row || !row.id) {
@@ -242,6 +255,511 @@ PROCESS_EXECUTION_ACTION_BUTTONS = (
     ),
 )
 
+TASK_EXECUTION_VIEW_CODE = "WOM_1.0.0_produceTask_makeTaskExecuList"
+ACTIVITY_EXECUTION_VIEW_CODE = "WOM_1.0.0_produceTask_activeExeLogList"
+CHECK_RECORD_VIEW_CODE = "WOM_1.0.0_produceTask_checkRecordList"
+MATERIAL_CONSUMPTION_RECORD_VIEW_CODE = "WOM_1.0.0_produceTask_matConsumRecodList"
+MATERIAL_OUTPUT_RECORD_VIEW_CODE = "WOM_1.0.0_produceTask_matOutptRecordList"
+
+TASK_EXECUTION_CONSUMPTION_DOUBLE_CLICK = """function makeTaskExecuListDB(event, row) {
+    if (!row || !row.id) {
+        ReactAPI.showMessage("w", "请选择一条指令执行记录");
+        return false;
+    }
+    var target = "/msService/WOM/produceTask/prodTaskExelog/matConsumEntryView"
+        + "?viewCode=WOM_1.0.0_produceTask_makeTaskExecuList"
+        + "&entityCode=WOM_1.0.0_produceTask"
+        + "&iscrosscompany=false"
+        + "&openType=frame"
+        + "&buttonCode=WOM_1.0.0_produceTask_makeTaskExecuList_BUTTON_outptConsumption"
+        + "&iscallback=false"
+        + "&id=" + encodeURIComponent(row.id);
+    window.open(target, "_blank");
+    return true;
+}"""
+
+TASK_EXECUTION_CONSUMPTION_BUTTON_BODY = """function viewTaskExecutionConsumption() {
+    var selected = ReactAPI.getComponentAPI("SupDataGrid")
+        .APIs("WOM_1.0.0_produceTask_makeTaskExecuList_prodTaskExelog_sdg")
+        .getSelecteds();
+    if (!selected || !selected.length || !selected[0].id) {
+        ReactAPI.showMessage("w", "请选择一条指令执行记录");
+        return false;
+    }
+    var target = "/msService/WOM/produceTask/prodTaskExelog/matConsumEntryView"
+        + "?viewCode=WOM_1.0.0_produceTask_makeTaskExecuList"
+        + "&entityCode=WOM_1.0.0_produceTask"
+        + "&iscrosscompany=false"
+        + "&openType=frame"
+        + "&buttonCode=WOM_1.0.0_produceTask_makeTaskExecuList_BUTTON_outptConsumption"
+        + "&iscallback=false"
+        + "&id=" + encodeURIComponent(selected[0].id);
+    window.open(target, "_blank");
+    return true;
+}"""
+
+TASK_EXECUTION_ANALYSIS_BUTTON_BODY = """function viewTaskExecutionAnalysis() {
+    var selected = ReactAPI.getComponentAPI("SupDataGrid")
+        .APIs("WOM_1.0.0_produceTask_makeTaskExecuList_prodTaskExelog_sdg")
+        .getSelecteds();
+    if (!selected || !selected.length || !selected[0].id) {
+        ReactAPI.showMessage("w", "请选择一条指令执行记录");
+        return false;
+    }
+    var row = selected[0];
+    var runState = row.taskRunState;
+    var runStateId = runState && typeof runState === "object" ? runState.id : runState;
+    if (runStateId !== "WOM_runState/finished") {
+        ReactAPI.showMessage("w", "指令尚未完成，不能查看工艺分析");
+        return false;
+    }
+    var needStatistics = row.needParamAna;
+    if (needStatistics !== true && needStatistics !== "true"
+            && needStatistics !== 1 && needStatistics !== "1") {
+        ReactAPI.showMessage("w", "该指令未启用工艺参数统计");
+        return false;
+    }
+    var analyzed = row.analysisFlag;
+    if (analyzed !== true && analyzed !== "true" && analyzed !== 1 && analyzed !== "1") {
+        ReactAPI.showMessage("w", "该指令尚未完成工艺统计");
+        return false;
+    }
+    var task = row.taskId || {};
+    var product = task.productId || {};
+    var batchNo = row.produceBatchNum || task.produceBatchNum;
+    var productNo = product.code || row.productCode || "";
+    if (!batchNo) {
+        ReactAPI.showMessage("w", "指令缺少生产批号，无法查看工艺分析");
+        return false;
+    }
+    var target = "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut"
+        + "?workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut"
+        + "&openType=page"
+        + "&batchNo=" + encodeURIComponent(batchNo);
+    if (productNo) {
+        target += "&productNo=" + encodeURIComponent(productNo);
+    }
+    window.open(target, "_blank");
+    return true;
+}"""
+
+TASK_EXECUTION_TRACE_BUTTON_BODY = """function viewTaskExecutionTrace() {
+    var selected = ReactAPI.getComponentAPI("SupDataGrid")
+        .APIs("WOM_1.0.0_produceTask_makeTaskExecuList_prodTaskExelog_sdg")
+        .getSelecteds();
+    if (!selected || !selected.length) {
+        ReactAPI.showMessage("w", "请选择一条指令执行记录");
+        return false;
+    }
+    var row = selected[0];
+    var task = row.taskId || {};
+    var product = task.productId || {};
+    var batchNo = row.produceBatchNum || task.produceBatchNum;
+    var productNo = product.code || row.productCode || "";
+    if (!batchNo) {
+        ReactAPI.showMessage("w", "该指令缺少生产批号，无法查看批次追溯");
+        return false;
+    }
+    var target = "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut"
+        + "?workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut"
+        + "&openType=page"
+        + "&batchNo=" + encodeURIComponent(batchNo);
+    if (productNo) {
+        target += "&productNo=" + encodeURIComponent(productNo);
+    }
+    window.open(target, "_blank");
+    return true;
+}"""
+
+ACTIVITY_EXECUTION_DETAIL_DOUBLE_CLICK = """function activeExeLogListDB(event, row) {
+    if (!row || !row.id) {
+        ReactAPI.showMessage("w", "请选择一条活动执行记录");
+        return false;
+    }
+    var activeType = row.activeType;
+    var activeTypeId = activeType && typeof activeType === "object"
+        ? activeType.id : activeType;
+    var target = "";
+    if (activeTypeId === "RM_activeType/check") {
+        target = "/msService/WOM/produceTask/actiExelog/checkRecord";
+    } else if (activeTypeId === "RM_activeType/putin"
+            || activeTypeId === "RM_activeType/pipePutin"
+            || activeTypeId === "RM_activeType/batchPutin"
+            || activeTypeId === "RM_activeType/pipeBatchPutin") {
+        target = "/msService/WOM/produceTask/actiExelog/matConsuEntryActView";
+    } else if (activeTypeId === "RM_activeType/output"
+            || activeTypeId === "RM_activeType/pipeOutput") {
+        target = "/msService/WOM/produceTask/actiExelog/matOutputActView";
+    } else {
+        ReactAPI.showMessage("w", "该活动类型没有独立明细页面");
+        return false;
+    }
+    window.open(
+        target + "?viewCode=WOM_1.0.0_produceTask_activeExeLogList"
+            + "&entityCode=WOM_1.0.0_produceTask"
+            + "&iscrosscompany=false"
+            + "&openType=frame"
+            + "&iscallback=false"
+            + "&id=" + encodeURIComponent(row.id),
+        "_blank"
+    );
+    return true;
+}"""
+
+ACTIVITY_EXECUTION_DETAIL_BUTTON_BODY = """function viewActivityExecutionDetail() {
+    var selected = ReactAPI.getComponentAPI("SupDataGrid")
+        .APIs("WOM_1.0.0_produceTask_activeExeLogList_actiExelog_sdg")
+        .getSelecteds();
+    if (!selected || !selected.length || !selected[0].id) {
+        ReactAPI.showMessage("w", "请选择一条活动执行记录");
+        return false;
+    }
+    var row = selected[0];
+    var activeType = row.activeType;
+    var activeTypeId = activeType && typeof activeType === "object"
+        ? activeType.id : activeType;
+    var target = "";
+    if (activeTypeId === "RM_activeType/check") {
+        target = "/msService/WOM/produceTask/actiExelog/checkRecord";
+    } else if (activeTypeId === "RM_activeType/putin"
+            || activeTypeId === "RM_activeType/pipePutin"
+            || activeTypeId === "RM_activeType/batchPutin"
+            || activeTypeId === "RM_activeType/pipeBatchPutin") {
+        target = "/msService/WOM/produceTask/actiExelog/matConsuEntryActView";
+    } else if (activeTypeId === "RM_activeType/output"
+            || activeTypeId === "RM_activeType/pipeOutput") {
+        target = "/msService/WOM/produceTask/actiExelog/matOutputActView";
+    } else {
+        ReactAPI.showMessage("w", "该活动类型没有独立明细页面");
+        return false;
+    }
+    window.open(
+        target + "?viewCode=WOM_1.0.0_produceTask_activeExeLogList"
+            + "&entityCode=WOM_1.0.0_produceTask"
+            + "&iscrosscompany=false"
+            + "&openType=frame"
+            + "&iscallback=false"
+            + "&id=" + encodeURIComponent(row.id),
+        "_blank"
+    );
+    return true;
+}"""
+
+ACTIVITY_EXECUTION_STATISTICS_BUTTON_BODY = """function runActivityExecutionStatistics() {
+    var selected = ReactAPI.getComponentAPI("SupDataGrid")
+        .APIs("WOM_1.0.0_produceTask_activeExeLogList_actiExelog_sdg")
+        .getSelecteds();
+    if (!selected || !selected.length || !selected[0].id) {
+        ReactAPI.showMessage("w", "请选择一条活动执行记录");
+        return false;
+    }
+    var row = selected[0];
+    var needStatistics = row.needParamAna;
+    if (needStatistics !== true && needStatistics !== "true"
+            && needStatistics !== 1 && needStatistics !== "1") {
+        ReactAPI.showMessage("w", "该活动未启用工艺参数统计");
+        return false;
+    }
+    var runState = row.runState;
+    var runStateId = runState && typeof runState === "object" ? runState.id : runState;
+    if (runStateId !== "WOM_runState/finished") {
+        ReactAPI.showMessage("w", "活动尚未完成，不能执行工艺统计");
+        return false;
+    }
+    if (!row.actStartTime || !row.actEndTime) {
+        ReactAPI.showMessage("w", "活动缺少实际开始或结束时间，不能执行工艺统计");
+        return false;
+    }
+    ReactAPI.openLoading("正在统计工艺参数...");
+    ReactAPI.request({
+        type: "get",
+        async: true,
+        url: "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive"
+            + "?activeId=" + encodeURIComponent(row.id)
+    }, function (res) {
+        ReactAPI.closeLoading();
+        if (res && res.code == 200) {
+            ReactAPI.showMessage("s", "工艺参数统计完成");
+            return;
+        }
+        ReactAPI.showMessage("f", res && res.message ? res.message : "工艺参数统计失败");
+    });
+    return true;
+}"""
+
+CHECK_RECORD_DETAIL_DOUBLE_CLICK = """function checkRecordListDB(event, row) {
+    var activity = row && row.actExelogId;
+    var activityId = activity && typeof activity === "object" ? activity.id : activity;
+    if (!activityId) {
+        ReactAPI.showMessage("w", "该检查记录缺少活动执行标识");
+        return false;
+    }
+    window.open(
+        "/msService/WOM/produceTask/actiExelog/checkRecord"
+            + "?viewCode=WOM_1.0.0_produceTask_checkRecordList"
+            + "&entityCode=WOM_1.0.0_produceTask"
+            + "&iscrosscompany=false"
+            + "&openType=frame"
+            + "&iscallback=false"
+            + "&id=" + encodeURIComponent(activityId),
+        "_blank"
+    );
+    return true;
+}"""
+
+CHECK_RECORD_DETAIL_BUTTON_BODY = """function viewCheckRecordDetail() {
+    var selected = ReactAPI.getComponentAPI("SupDataGrid")
+        .APIs("WOM_1.0.0_produceTask_checkRecordList_checkRecord_sdg")
+        .getSelecteds();
+    var row = selected && selected.length ? selected[0] : null;
+    var activity = row && row.actExelogId;
+    var activityId = activity && typeof activity === "object" ? activity.id : activity;
+    if (!activityId) {
+        ReactAPI.showMessage("w", "请选择一条有效的检查记录");
+        return false;
+    }
+    window.open(
+        "/msService/WOM/produceTask/actiExelog/checkRecord"
+            + "?viewCode=WOM_1.0.0_produceTask_checkRecordList"
+            + "&entityCode=WOM_1.0.0_produceTask"
+            + "&iscrosscompany=false"
+            + "&openType=frame"
+            + "&iscallback=false"
+            + "&id=" + encodeURIComponent(activityId),
+        "_blank"
+    );
+    return true;
+}"""
+
+MATERIAL_CONSUMPTION_DETAIL_DOUBLE_CLICK = """function matConsumRecodListDB(event, row) {
+    if (!row || !row.id) {
+        ReactAPI.showMessage("w", "请选择一条投料记录");
+        return false;
+    }
+    window.open(
+        "/msService/WOM/produceTask/matConsumRecod/matConsumeRecordView"
+            + "?viewCode=WOM_1.0.0_produceTask_matConsumRecodList"
+            + "&entityCode=WOM_1.0.0_produceTask"
+            + "&iscrosscompany=false"
+            + "&openType=frame"
+            + "&iscallback=false"
+            + "&id=" + encodeURIComponent(row.id),
+        "_blank"
+    );
+    return true;
+}"""
+
+MATERIAL_CONSUMPTION_DETAIL_BUTTON_BODY = """function viewMaterialConsumptionRecord() {
+    var selected = ReactAPI.getComponentAPI("SupDataGrid")
+        .APIs("WOM_1.0.0_produceTask_matConsumRecodList_matConsumRecod_sdg")
+        .getSelecteds();
+    if (!selected || !selected.length || !selected[0].id) {
+        ReactAPI.showMessage("w", "请选择一条投料记录");
+        return false;
+    }
+    window.open(
+        "/msService/WOM/produceTask/matConsumRecod/matConsumeRecordView"
+            + "?viewCode=WOM_1.0.0_produceTask_matConsumRecodList"
+            + "&entityCode=WOM_1.0.0_produceTask"
+            + "&iscrosscompany=false"
+            + "&openType=frame"
+            + "&iscallback=false"
+            + "&id=" + encodeURIComponent(selected[0].id),
+        "_blank"
+    );
+    return true;
+}"""
+
+MATERIAL_OUTPUT_DETAIL_DOUBLE_CLICK = """function matOutptRecordListDB(event, row) {
+    if (!row || !row.id) {
+        ReactAPI.showMessage("w", "请选择一条产出记录");
+        return false;
+    }
+    window.open(
+        "/msService/WOM/produceTask/matOutptRecord/matOutputRecordView"
+            + "?viewCode=WOM_1.0.0_produceTask_matOutptRecordList"
+            + "&entityCode=WOM_1.0.0_produceTask"
+            + "&iscrosscompany=false"
+            + "&openType=frame"
+            + "&iscallback=false"
+            + "&id=" + encodeURIComponent(row.id),
+        "_blank"
+    );
+    return true;
+}"""
+
+MATERIAL_OUTPUT_DETAIL_BUTTON_BODY = """function viewMaterialOutputRecord() {
+    var selected = ReactAPI.getComponentAPI("SupDataGrid")
+        .APIs("WOM_1.0.0_produceTask_matOutptRecordList_matOutptRecord_sdg")
+        .getSelecteds();
+    if (!selected || !selected.length || !selected[0].id) {
+        ReactAPI.showMessage("w", "请选择一条产出记录");
+        return false;
+    }
+    window.open(
+        "/msService/WOM/produceTask/matOutptRecord/matOutputRecordView"
+            + "?viewCode=WOM_1.0.0_produceTask_matOutptRecordList"
+            + "&entityCode=WOM_1.0.0_produceTask"
+            + "&iscrosscompany=false"
+            + "&openType=frame"
+            + "&iscallback=false"
+            + "&id=" + encodeURIComponent(selected[0].id),
+        "_blank"
+    );
+    return true;
+}"""
+
+
+def wom_record_action_button(
+    view_code: str,
+    model_code: str,
+    button_id: str,
+    show_name: str,
+    style: str,
+    function_name: str,
+    function_body: str,
+    *,
+    permission_required: bool,
+    cell_code: Optional[str] = None,
+) -> Dict[str, Any]:
+    view_name = view_code.rsplit("_", 1)[-1]
+    operation_code = f"{view_name}_{button_id}_{style}_{view_code}"
+    onclick = function_name + "()"
+    button = {
+        "id": button_id,
+        "showname": show_name,
+        "name": show_name,
+        "namekey": show_name,
+        "buttonstyle": style,
+        "operatetype": "CUSTOM",
+        "operateType": "CUSTOM",
+        "isHide": False,
+        "ispermission": permission_required,
+        "isPublished": True,
+        "buttonoperationcode": operation_code,
+        "funcname": "onclick='" + onclick + "'",
+        "onclick": onclick,
+        "ONCLICK": onclick,
+        "funcbody": function_body,
+        "funcbody_es5": function_body,
+        "iscallback": False,
+        "iscustomfunc": False,
+        "useInMore": False,
+        "isconfirm": False,
+        "isSignatureConfig": True,
+        "ecEnv": "product",
+        "regionType": "BUTTON",
+        "modelCode": model_code,
+        "CODE": operation_code,
+        "NAME": show_name,
+        "ICONCLS": "cui-btn-" + style,
+        "USEINMORE": False,
+        "SEPARATENUM": "0",
+    }
+    if cell_code:
+        button["cellCode"] = cell_code
+    power_operation_code = operation_code if permission_required else f"{view_code}_self"
+    encoded_power_code = base64.urlsafe_b64encode(
+        (power_operation_code + "|").encode("utf-8")
+    ).decode("ascii")
+    button["pc"] = "__pc__=" + encoded_power_code.replace("=", "_")
+    return button
+
+
+WOM_RECORD_ACTION_BUTTONS: Dict[str, Tuple[Dict[str, Any], ...]] = {
+    TASK_EXECUTION_VIEW_CODE: (
+        wom_record_action_button(
+            TASK_EXECUTION_VIEW_CODE,
+            "WOM_1.0.0_produceTask_ProdTaskExelog",
+            "outptConsumption",
+            "产耗查看",
+            "view",
+            "viewTaskExecutionConsumption",
+            TASK_EXECUTION_CONSUMPTION_BUTTON_BODY,
+            permission_required=False,
+        ),
+        wom_record_action_button(
+            TASK_EXECUTION_VIEW_CODE,
+            "WOM_1.0.0_produceTask_ProdTaskExelog",
+            "analysisView",
+            "工艺查看",
+            "add",
+            "viewTaskExecutionAnalysis",
+            TASK_EXECUTION_ANALYSIS_BUTTON_BODY,
+            permission_required=False,
+        ),
+        wom_record_action_button(
+            TASK_EXECUTION_VIEW_CODE,
+            "WOM_1.0.0_produceTask_ProdTaskExelog",
+            "batchReportPreview",
+            "批次追溯",
+            "add",
+            "viewTaskExecutionTrace",
+            TASK_EXECUTION_TRACE_BUTTON_BODY,
+            permission_required=False,
+        ),
+    ),
+    ACTIVITY_EXECUTION_VIEW_CODE: (
+        wom_record_action_button(
+            ACTIVITY_EXECUTION_VIEW_CODE,
+            "WOM_1.0.0_produceTask_ActiExelog",
+            "viewDetail",
+            "查看详情",
+            "view",
+            "viewActivityExecutionDetail",
+            ACTIVITY_EXECUTION_DETAIL_BUTTON_BODY,
+            permission_required=False,
+        ),
+        wom_record_action_button(
+            ACTIVITY_EXECUTION_VIEW_CODE,
+            "WOM_1.0.0_produceTask_ActiExelog",
+            "manualStatistics",
+            "工艺统计",
+            "add",
+            "runActivityExecutionStatistics",
+            ACTIVITY_EXECUTION_STATISTICS_BUTTON_BODY,
+            permission_required=True,
+            cell_code="cell_1600247412569_8869",
+        ),
+    ),
+    CHECK_RECORD_VIEW_CODE: (
+        wom_record_action_button(
+            CHECK_RECORD_VIEW_CODE,
+            "WOM_1.0.0_produceTask_CheckRecord",
+            "viewDetail",
+            "查看详情",
+            "view",
+            "viewCheckRecordDetail",
+            CHECK_RECORD_DETAIL_BUTTON_BODY,
+            permission_required=False,
+        ),
+    ),
+    MATERIAL_CONSUMPTION_RECORD_VIEW_CODE: (
+        wom_record_action_button(
+            MATERIAL_CONSUMPTION_RECORD_VIEW_CODE,
+            "WOM_1.0.0_produceTask_MatConsumRecod",
+            "viewDetail",
+            "查看详情",
+            "view",
+            "viewMaterialConsumptionRecord",
+            MATERIAL_CONSUMPTION_DETAIL_BUTTON_BODY,
+            permission_required=False,
+        ),
+    ),
+    MATERIAL_OUTPUT_RECORD_VIEW_CODE: (
+        wom_record_action_button(
+            MATERIAL_OUTPUT_RECORD_VIEW_CODE,
+            "WOM_1.0.0_produceTask_MatOutptRecord",
+            "viewDetail",
+            "查看详情",
+            "view",
+            "viewMaterialOutputRecord",
+            MATERIAL_OUTPUT_DETAIL_BUTTON_BODY,
+            permission_required=False,
+        ),
+    ),
+}
+
 DATAGRID_RUNTIME_OVERRIDES: Dict[str, Dict[str, Any]] = {
     "HierarchicalMod_1.0.0_factoryModel_factoryListPart": {
         "DataGridCode": "HierarchicalMod_1.0.0_factoryModel_factoryListPart",
@@ -253,6 +771,31 @@ DATAGRID_RUNTIME_OVERRIDES: Dict[str, Dict[str, Any]] = {
         "isdbcustom": True,
         "dbcustomtextarea": PROCESS_EXECUTION_DETAIL_DOUBLE_CLICK,
         "dbcustomtextarea_es5": PROCESS_EXECUTION_DETAIL_DOUBLE_CLICK,
+    },
+    TASK_EXECUTION_VIEW_CODE: {
+        "isdbcustom": True,
+        "dbcustomtextarea": TASK_EXECUTION_CONSUMPTION_DOUBLE_CLICK,
+        "dbcustomtextarea_es5": TASK_EXECUTION_CONSUMPTION_DOUBLE_CLICK,
+    },
+    ACTIVITY_EXECUTION_VIEW_CODE: {
+        "isdbcustom": True,
+        "dbcustomtextarea": ACTIVITY_EXECUTION_DETAIL_DOUBLE_CLICK,
+        "dbcustomtextarea_es5": ACTIVITY_EXECUTION_DETAIL_DOUBLE_CLICK,
+    },
+    CHECK_RECORD_VIEW_CODE: {
+        "isdbcustom": True,
+        "dbcustomtextarea": CHECK_RECORD_DETAIL_DOUBLE_CLICK,
+        "dbcustomtextarea_es5": CHECK_RECORD_DETAIL_DOUBLE_CLICK,
+    },
+    MATERIAL_CONSUMPTION_RECORD_VIEW_CODE: {
+        "isdbcustom": True,
+        "dbcustomtextarea": MATERIAL_CONSUMPTION_DETAIL_DOUBLE_CLICK,
+        "dbcustomtextarea_es5": MATERIAL_CONSUMPTION_DETAIL_DOUBLE_CLICK,
+    },
+    MATERIAL_OUTPUT_RECORD_VIEW_CODE: {
+        "isdbcustom": True,
+        "dbcustomtextarea": MATERIAL_OUTPUT_DETAIL_DOUBLE_CLICK,
+        "dbcustomtextarea_es5": MATERIAL_OUTPUT_DETAIL_DOUBLE_CLICK,
     },
 }
 
@@ -1994,10 +2537,7 @@ def apply_datagrid_runtime_overrides(view: ViewDef, payload: Any) -> None:
         target.update(copy.deepcopy(overrides))
 
 
-def apply_process_execution_action_buttons(view: ViewDef, payload: Any) -> None:
-    if view.code != "WOM_1.0.0_produceTask_processExeLogList":
-        return
-
+def find_layout_datagrid(view: ViewDef, payload: Any) -> Optional[Dict[str, Any]]:
     expected_grid_code = first_datagrid_code(view) or view.code
     candidates: List[Dict[str, Any]] = []
 
@@ -2023,6 +2563,14 @@ def apply_process_execution_action_buttons(view: ViewDef, payload: Any) -> None:
         ),
         candidates[0] if candidates else None,
     )
+    return target
+
+
+def apply_process_execution_action_buttons(view: ViewDef, payload: Any) -> None:
+    if view.code != "WOM_1.0.0_produceTask_processExeLogList":
+        return
+
+    target = find_layout_datagrid(view, payload)
     if target is None:
         return
 
@@ -2042,6 +2590,35 @@ def apply_process_execution_action_buttons(view: ViewDef, payload: Any) -> None:
             preserved_buttons.append(button)
     target["buttons"] = [
         *copy.deepcopy(PROCESS_EXECUTION_ACTION_BUTTONS),
+        *preserved_buttons,
+    ]
+
+
+def apply_wom_record_action_buttons(view: ViewDef, payload: Any) -> None:
+    action_buttons = WOM_RECORD_ACTION_BUTTONS.get(view.code)
+    if not action_buttons:
+        return
+
+    target = find_layout_datagrid(view, payload)
+    if target is None:
+        return
+
+    managed_ids = {str(button.get("id") or "") for button in action_buttons}
+    existing_buttons = target.get("buttons")
+    preserved_buttons: List[Dict[str, Any]] = []
+    if isinstance(existing_buttons, list):
+        for button in existing_buttons:
+            if not isinstance(button, dict):
+                continue
+            button_id = str(button.get("id") or "").strip()
+            operation_code = str(button.get("buttonoperationcode") or "").strip()
+            if button_id in managed_ids or any(
+                "_" + managed_id + "_" in operation_code for managed_id in managed_ids
+            ):
+                continue
+            preserved_buttons.append(button)
+    target["buttons"] = [
+        *copy.deepcopy(action_buttons),
         *preserved_buttons,
     ]
 
@@ -2597,6 +3174,8 @@ def view_json(
     packaged_view_json: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> str:
     packaged_payload = (packaged_view_json or {}).get(view.code)
+    if view.code in COMPAT_REGENERATED_ACTION_VIEW_CODES:
+        packaged_payload = None
     if packaged_payload is not None:
         payload = normalize_packaged_runtime_payload(packaged_payload)
     elif view.show_type == "LAYOUT2":
@@ -2612,8 +3191,11 @@ def view_json(
         payload = action_view_json(view, views)
     else:
         payload = list_json(view, views=views)
+    if view.code in COMPAT_REGENERATED_ACTION_VIEW_CODES:
+        payload["pageType"] = "EDIT"
     supplement_packaged_datagrid_buttons(view, payload, views)
     apply_process_execution_action_buttons(view, payload)
+    apply_wom_record_action_buttons(view, payload)
     apply_datagrid_runtime_overrides(view, payload)
     apply_view_runtime_overrides(view, payload)
     sanitize_runtime_strings(payload)

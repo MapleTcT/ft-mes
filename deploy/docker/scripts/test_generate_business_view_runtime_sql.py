@@ -525,6 +525,222 @@ class ProductRuntimeParityTest(unittest.TestCase):
         self.assertTrue(button_by_id["matConsumEntry"]["isHide"])
         self.assertFalse(button_by_id["matConsumEntry"]["isPublished"])
 
+    def test_wom_execution_record_lists_restore_safe_actions_and_double_click(self):
+        cases = {
+            GENERATOR.TASK_EXECUTION_VIEW_CODE: {
+                "url": "/msService/WOM/produceTask/prodTaskExelog/makeTaskExecuList",
+                "button_ids": [
+                    "outptConsumption",
+                    "analysisView",
+                    "batchReportPreview",
+                    "manualStatistics",
+                ],
+                "button_names": ["产耗查看", "工艺查看", "批次追溯", "工艺统计"],
+                "double_click_route": "matConsumEntryView",
+                "detail_route": "matConsumEntryView",
+                "source_buttons": [
+                    {
+                        "id": "manualStatistics",
+                        "showname": "工艺统计",
+                        "isPublished": True,
+                        "isHide": False,
+                        "ispermission": True,
+                    },
+                    {
+                        "id": "analysisView",
+                        "showname": "工艺查看",
+                        "isPublished": True,
+                        "isHide": False,
+                        "ispermission": True,
+                    },
+                    {
+                        "id": "batchReportPreview",
+                        "showname": "批次报告",
+                        "isPublished": True,
+                        "isHide": False,
+                        "ispermission": True,
+                    },
+                ],
+            },
+            GENERATOR.ACTIVITY_EXECUTION_VIEW_CODE: {
+                "url": "/msService/WOM/produceTask/actiExelog/activeExeLogList",
+                "button_ids": ["viewDetail", "manualStatistics"],
+                "button_names": ["查看详情", "工艺统计"],
+                "double_click_route": "matConsuEntryActView",
+                "detail_route": "checkRecord",
+                "source_buttons": [
+                    {
+                        "id": "manualStatistics",
+                        "showname": "工艺统计",
+                        "isPublished": True,
+                        "isHide": False,
+                        "ispermission": True,
+                    },
+                ],
+            },
+            GENERATOR.CHECK_RECORD_VIEW_CODE: {
+                "url": "/msService/WOM/produceTask/checkRecord/checkRecordList",
+                "button_ids": ["viewDetail"],
+                "button_names": ["查看详情"],
+                "double_click_route": "actiExelog/checkRecord",
+                "detail_route": "actiExelog/checkRecord",
+            },
+            GENERATOR.MATERIAL_CONSUMPTION_RECORD_VIEW_CODE: {
+                "url": "/msService/WOM/produceTask/matConsumRecod/matConsumRecodList",
+                "button_ids": ["viewDetail"],
+                "button_names": ["查看详情"],
+                "double_click_route": "matConsumeRecordView",
+                "detail_route": "matConsumeRecordView",
+            },
+            GENERATOR.MATERIAL_OUTPUT_RECORD_VIEW_CODE: {
+                "url": "/msService/WOM/produceTask/matOutptRecord/matOutptRecordList",
+                "button_ids": ["viewDetail"],
+                "button_names": ["查看详情"],
+                "double_click_route": "matOutputRecordView",
+                "detail_route": "matOutputRecordView",
+            },
+        }
+
+        for code, expected in cases.items():
+            with self.subTest(view_code=code):
+                view = view_variant(code=code, url=expected["url"])
+                packaged_payload = {
+                    "pageType": "LIST",
+                    "components": [
+                        {
+                            "type": "layoutDatagrid",
+                            "DataGridCode": code,
+                            "buttons": [
+                                *expected.get("source_buttons", []),
+                                {
+                                    "id": "vendorHidden",
+                                    "showname": "旧包隐藏动作",
+                                    "buttonoperationcode": f"{code}_vendorHidden",
+                                    "isPublished": False,
+                                    "isHide": True,
+                                }
+                            ],
+                        }
+                    ],
+                }
+
+                payload = json.loads(
+                    GENERATOR.view_json(
+                        view,
+                        {view.code: view},
+                        {view.code: packaged_payload},
+                    )
+                )
+                grid = payload["components"][0]
+                visible_buttons = [
+                    button
+                    for button in grid["buttons"]
+                    if button.get("isPublished") and not button.get("isHide")
+                ]
+
+                self.assertEqual(
+                    expected["button_ids"],
+                    [button["id"] for button in visible_buttons],
+                )
+                self.assertEqual(
+                    expected["button_names"],
+                    [button["showname"] for button in visible_buttons],
+                )
+                self.assertIs(grid["isdbcustom"], True)
+                self.assertIn(
+                    expected["double_click_route"],
+                    grid["dbcustomtextarea_es5"],
+                )
+                self.assertIn(
+                    "encodeURIComponent",
+                    grid["dbcustomtextarea_es5"],
+                )
+                self.assertIn(
+                    expected["detail_route"],
+                    visible_buttons[0]["funcbody_es5"],
+                )
+                self.assertTrue(grid["buttons"][-1]["isHide"])
+                self.assertFalse(grid["buttons"][-1]["isPublished"])
+
+        task_buttons = GENERATOR.WOM_RECORD_ACTION_BUTTONS[
+            GENERATOR.TASK_EXECUTION_VIEW_CODE
+        ]
+        self.assertFalse(task_buttons[0]["ispermission"])
+        self.assertFalse(task_buttons[1]["ispermission"])
+        self.assertFalse(task_buttons[2]["ispermission"])
+        self.assertEqual(
+            GENERATOR.button_power_code(
+                "WOM_1.0.0_produceTask_makeTaskExecuList_self"
+            ),
+            task_buttons[0]["pc"],
+        )
+        self.assertIn(
+            "/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut",
+            task_buttons[2]["funcbody_es5"],
+        )
+        self.assertIn("productNo", task_buttons[2]["funcbody_es5"])
+        activity_buttons = GENERATOR.WOM_RECORD_ACTION_BUTTONS[
+            GENERATOR.ACTIVITY_EXECUTION_VIEW_CODE
+        ]
+        self.assertFalse(activity_buttons[0]["ispermission"])
+        self.assertTrue(activity_buttons[1]["ispermission"])
+        self.assertEqual(
+            "cell_1600247412569_8869",
+            activity_buttons[1]["cellCode"],
+        )
+        self.assertEqual(
+            GENERATOR.button_power_code(
+                "activeExeLogList_manualStatistics_add_"
+                "WOM_1.0.0_produceTask_activeExeLogList"
+            ),
+            activity_buttons[1]["pc"],
+        )
+        self.assertIn(
+            "/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive",
+            activity_buttons[1]["funcbody_es5"],
+        )
+        self.assertNotIn(
+            "/ProcessAnalysis/paramDetail/paramDetail/analysisiActive",
+            activity_buttons[1]["funcbody_es5"],
+        )
+        for detail_view_code in (
+            "WOM_1.0.0_produceTask_matConsumEntryView",
+            "WOM_1.0.0_produceTask_matConsuEntryActView",
+            "WOM_1.0.0_produceTask_matOutputActView",
+            "WOM_1.0.0_produceTask_checkRecord",
+            "WOM_1.0.0_produceTask_matConsumeRecordView",
+            "WOM_1.0.0_produceTask_matOutputRecordView",
+        ):
+            self.assertIn(detail_view_code, GENERATOR.TARGET_VIEW_CODES)
+
+    def test_incompatible_wom_action_views_are_regenerated_from_module_xml(self):
+        packaged_payload = {
+            "pageType": "EDIT",
+            "legacyRuntimeMarker": "must-not-survive",
+            "components": [{"type": "legacy-layout"}],
+        }
+
+        for view_code in GENERATOR.COMPAT_REGENERATED_ACTION_VIEW_CODES:
+            with self.subTest(view_code=view_code):
+                view = view_variant(
+                    code=view_code,
+                    view_type="VIEW",
+                    show_type="SINGLE",
+                    title="Compatible detail",
+                )
+                payload = json.loads(
+                    GENERATOR.view_json(
+                        view,
+                        {view.code: view},
+                        {view.code: packaged_payload},
+                    )
+                )
+
+                self.assertNotIn("legacyRuntimeMarker", payload)
+                self.assertEqual("EDIT", payload["pageType"])
+                self.assertTrue(payload["isMain"])
+                self.assertEqual("layout", payload["components"][0]["type"])
+
     def test_runtime_extra_view_oid_upsert_reuses_unchanged_large_object(self):
         view = view_variant()
 

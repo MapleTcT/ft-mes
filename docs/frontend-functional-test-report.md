@@ -1,5 +1,25 @@
 # 前端功能测试报告
 
+## 2026-07-31 WOM 执行记录交互验收
+
+针对指令、活动、检查、投料和产出记录页面“有数据但没有可用交互”的问题，本轮恢复
+列表工具栏、无选择提示、单击查看和双击详情，并在
+`http://10.11.100.17:18080` 使用真实 `admin` 会话逐页复验。六类页面 6/6 PASS；
+详情页均发起真实数据请求并显示业务字段，console、page、request 和 HTTP 错误均为 0。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| 指令执行记录 | `/msService/WOM/produceTask/prodTaskExelog/makeTaskExecuList` | 产耗查看、工艺查看、批次追溯、工艺统计、双击详情 | `prodTaskExelog/data/{id}`、`analysisiTask`、ProcessAnalysis trace | 4 个业务按钮可见；详情和双击均显示生产批次及投入记录 | 详情/追溯 HTTP 200；TASK 快照 revision `7 -> 8` | `wom_produce_task_exelog`、`pa_trace_snapshots` | PASS | 无 |
+| 活动执行记录 | `/msService/WOM/produceTask/actiExelog/activeExeLogList` | 查看详情、工艺统计、双击详情 | `actiExelog/data/{id}`、`manualStatActive` | 投料活动详情显示工序、活动和起止时间 | HTTP 200；ACTIVITY 快照 revision `5 -> 6` | `wom_acti_exelogs`、`pa_trace_snapshots` | PASS | 无 |
+| 检查记录 | `/msService/WOM/produceTask/checkRecord/checkRecordList` | 查看详情、双击详情 | `actiExelog/data/{id}` | 检查项、标准值、报出值和检查时间正常显示 | 详情数据请求 HTTP 200，只读 | WOM 检查记录相关表 | PASS | 无 |
+| 活动执行记录（产出） | 同活动执行记录 | 选择产出活动后查看详情、双击详情 | `actiExelog/data/9007185760134776` | 正确进入“产出查看”，显示糖化液产出活动 | 详情数据请求 HTTP 200，只读 | `wom_acti_exelogs` | PASS | 当前列表查询未返回该受控产出活动；本轮从同一真实详情接口取行后验证交互，列表可见性另行修复 |
+| 投料记录 | `/msService/WOM/produceTask/matConsumRecod/matConsumRecodList` | 查看详情、双击详情；保留手动同步和修改 | `matConsumRecod/data/{id}` | 显示液化液投入、批次、用量和时间 | 详情数据请求 HTTP 200，只读 | `wom_mat_consum_recods` | PASS | 无 |
+| 产出记录 | `/msService/WOM/produceTask/matOutptRecord/matOutptRecordList` | 查看详情、双击详情；保留手动同步和修改 | `matOutptRecord/data/{id}` | 显示糖化液产出、批次、数量和时间 | 详情数据请求 HTTP 200，只读 | `wom_mat_outpt_records` | PASS | 无 |
+
+机器证据见 `metadata/wom-execution-record-actions-acceptance-20260731.json`，页面和详情截图见
+`metadata/wom-*-record-actions-*-20260731.png`。旧详情的关联数据查询仍可能需要约 6-9 秒，
+本轮已改为等待真实数据渲染，不再把空壳页面判为通过；查询性能作为后续优化项保留。
+
 ## 2026-07-30 admin 权限目录全量扫描
 
 本轮从 admin 的真实权限目录出发，核对 652 个参考节点、533 个可见节点和 398 个可导航页面。

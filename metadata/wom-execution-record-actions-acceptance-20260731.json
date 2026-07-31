@@ -1,0 +1,962 @@
+{
+  "generatedAt": "2026-07-31T04:39:12.073Z",
+  "repoCommit": "aef4ceb7377cd526962d0e2f734648483b6c6f75+working-tree",
+  "database": "PostgreSQL",
+  "environment": "http://10.11.100.17:18080",
+  "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
+  "module": "WOM 执行记录交互",
+  "status": "PASS",
+  "summary": {
+    "testedPages": 6,
+    "pass": 6,
+    "fail": 0
+  },
+  "items": [
+    {
+      "module": "指令执行记录",
+      "route": "/msService/WOM/produceTask/prodTaskExelog/makeTaskExecuList",
+      "status": "PASS",
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/prodTaskExelog/makeTaskExecuList",
+        "title": "指令执行记录"
+      },
+      "toolbar": [
+        {
+          "id": "btn-outptConsumption",
+          "text": "产耗查看",
+          "visible": true
+        },
+        {
+          "id": "btn-analysisView",
+          "text": "工艺查看",
+          "visible": true
+        },
+        {
+          "id": "btn-batchReportPreview",
+          "text": "批次追溯",
+          "visible": true
+        },
+        {
+          "id": "btn-manualStatistics",
+          "text": "工艺统计",
+          "visible": true
+        },
+        {
+          "id": "btn-matConsumEntry",
+          "text": "产耗录入",
+          "visible": false
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条指令执行记录"
+          ]
+        ],
+        "popupCount": 0
+      },
+      "selection": {
+        "id": "771353614402816",
+        "batchNo": "MES_FULL_20260730064545076_a23187_BATCH",
+        "needParamAna": true,
+        "analysisFlag": false
+      },
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/prodTaskExelog/matConsumEntryView?viewCode=WOM_1.0.0_produceTask_makeTaskExecuList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&buttonCode=WOM_1.0.0_produceTask_makeTaskExecuList_BUTTON_outptConsumption&iscallback=false&id=771353614402816",
+        "title": "产耗查看",
+        "body": "产耗查看\n(\n2026-07-30 14:45:53\n )\n0\n\t\t\t\t\t\n\n生产批号\n\t\nMES_FULL_20260730064545076_a23187_BATCH\n\t\n生产线\n\t\nMES_FULL_20260730064545076_a23187 production line\n\t\n实际开始\n\t\n2026-07-30 14:45:53\n\n\n实际结束\n\t\n2026-07-30 14:47:56\n\t\n\t\n\t\n\t\n投入记录\n产出记录\n消耗记录\n序号\n工序名称\n活动名称\n物料编码\n物料名称\n物料批号\n操作人\n使用量\n报工量\n使用时长\n使用开始时间\n使用结束时间\n仓库编码\n仓库名称\n货位状态\n货位编码\n货位名称\n需要同步\n已同步\n数据来源\n1\nMES_FULL_20260730064545076_a23187 process\n投入MES_FULL_20260730064545076_a23187 material\nMES_FULL_20260730064545076_a23187_MAT\nMES_FULL_20260730064545076_a23187 material\nMES_FULL_20260730064545076_a23187_BATCH\n虚拟人员\n2.00\n2.00\n4.00\n2026-07-30 14:42:09\n2026-07-30 14:46:09\n活动",
+        "bodyLength": 595
+      },
+      "doubleClick": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/prodTaskExelog/matConsumEntryView?viewCode=WOM_1.0.0_produceTask_makeTaskExecuList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&buttonCode=WOM_1.0.0_produceTask_makeTaskExecuList_BUTTON_outptConsumption&iscallback=false&id=771353614402816",
+        "title": "产耗查看",
+        "body": "产耗查看\n(\n2026-07-30 14:45:53\n )\n0\n\t\t\t\t\t\n\n生产批号\n\t\nMES_FULL_20260730064545076_a23187_BATCH\n\t\n生产线\n\t\nMES_FULL_20260730064545076_a23187 production line\n\t\n实际开始\n\t\n2026-07-30 14:45:53\n\n\n实际结束\n\t\n2026-07-30 14:47:56\n\t\n\t\n\t\n\t\n投入记录\n产出记录\n消耗记录\n序号\n工序名称\n活动名称\n物料编码\n物料名称\n物料批号\n操作人\n使用量\n报工量\n使用时长\n使用开始时间\n使用结束时间\n仓库编码\n仓库名称\n货位状态\n货位编码\n货位名称\n需要同步\n已同步\n数据来源\n1\nMES_FULL_20260730064545076_a23187 process\n投入MES_FULL_20260730064545076_a23187 material\nMES_FULL_20260730064545076_a23187_MAT\nMES_FULL_20260730064545076_a23187 material\nMES_FULL_20260730064545076_a23187_BATCH\n虚拟人员\n2.00\n2.00\n4.00\n2026-07-30 14:42:09\n2026-07-30 14:46:09\n活动",
+        "bodyLength": 595
+      },
+      "screenshots": {
+        "list": "metadata/wom-task-record-actions-list-20260731.png",
+        "detail": "metadata/wom-task-record-actions-detail-20260731.png",
+        "trace": "metadata/wom-task-record-actions-trace-20260731.png",
+        "analysis": "metadata/wom-task-record-actions-analysis-20260731.png"
+      },
+      "observations": [],
+      "issues": [],
+      "selectionSource": {
+        "source": "list-api",
+        "endpoint": "/msService/WOM/produceTask/prodTaskExelog/makeTaskExecuList-query",
+        "id": "771353614402816"
+      },
+      "trace": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut&openType=page&batchNo=MES_FULL_20260730064545076_a23187_BATCH&productNo=MES_FULL_20260730064545076_a23187_MAT",
+        "title": "生产过程追溯",
+        "body": "生产过程追溯\n\n制造指令、物料、质量与库存事实链\n\n刷新\n追溯数据已加载：MES_FULL_20260730064545076_a23187_BATCH，共 12 个时间轴事件。\n制造指令 / 生产批次\nMES_FULL_20260730064545076_a23187_TASK_TN\nMES_FULL_20260730064545076_a23187_BATCH\n工序\n1\n活动\n2\n物料事件\n4\n质量事件\n3\n库存事件\n0\n生产时间轴\n2026-07-30 14:41:13.632272\n活动执行\nWOM_runState/finished\nwom_acti_exelogs #9007182684508221\n2026-07-30 14:42:09.706\n活动执行\nWOM_runState/finished\nwom_acti_exelogs #771353684604160\n2026-07-30 14:45:46.800595\n制造指令创建\nWOM_runState/finished\nwom_produce_tasks #9007182684506211\n2026-07-30 14:45:53.405\n制造指令开始\nWOM_runState/finished\nwom_produce_tasks #9007182684506211\n2026-07-30 14:45:53.516\n任务执行记录\nWOM_runState/finished\nwom_produce_task_exelog #771353614402816\n2026-07-30 14:45:57.34456\n工序\nWOM_runState/finished\nwom_task_processes #9007182684507215\n2026-07-30 14:45:57.34456\n活动\nWOM_runState/finished\nwom_task_actives #9007182684507216\n2026-07-30 14:46:00.302\n工序执行\nWOM_runState/finished\nwom_process_exelogs #771353642255616\n2026-07-30 14:46:13.632272\n活动\nWOM_runState/finished\nwom_task_actives #9007182684508216\n2026-07-30 14:46:47.22\n生产请检\nQCS_checkState/reported\nqcs_inspects #771353834374400\n2026-07-30 14:46:58.843\n检验报告\n合格\nqcs_inspect_reports #771353881978112\n2026-07-30 14:47:56.979\n制造指令结束\nWOM_runState/finished\nwom_produce_tasks #9007182684506211\n工序执行\n工序\t状态\t开始时间\t结束时间\nMES_FULL_20260730064545076_a23187 process\tWOM_runState/finished\t2026-07-30T06:46:00.302+0000\t2026-07-30T06:47:36.855+0000\n活动执行\n活动\t状态\t物料批次\t开始时间\t结束时间\nMES_FULL_20260730064545076_a23187 active\tWOM_runState/finished\tMES_FULL_20260730064545076_a23187_BATCH\t2026-07-30T06:41:13.632+0000\t2026-07-30T06:46:15.610+0000\n投入MES_FULL_20260730064545076_a23187 material\tWOM_runState/finished\tMES_FULL_20260730064545076_a23187_BATCH\t2026-07-30T06:42:09.706+0000\t2026-07-30T06:46:09.706+0000\n物料谱系\nMES_FULL_20260730064545076_a23187_BATCH\nMES_FULL_20260730064545076_a23187 process >\nMES_FULL_20260730064545076_a23187_BATCH\n投入记录\n物料ID\t物料批次\t投料量\t使用量\t投料时间\n9007182684506209\tMES_FULL_20260730064545076_a23187_BATCH\t2\t2\t2026-07-30T06:42:09.706+0000\n产出记录\n物料ID\t产出批次\t生产批次\t产出量\t产出时间\n-\t-\t-\t3\t-\n9007182684506209\tMES_FULL_20260730064545076_a23187_BATCH\tMES_FULL_20260730064545076_a23187_BATCH\t3\t2026-07-30T06:41:13.632+0000\n9007182684506209\tMES_FULL_20260730064545076_a23187_BATCH\tMES_FULL_20260730064545076_a23187_BATCH\t5\t2026-07-30T06:42:55.981+0000\n质量闭环\n类型\t单号\t状态\t结论/原因\t时间\n请检\tmanuInspect_20260730_001\tQCS_checkState/reported\t-\t2026-07-30T06:46:47.220+0000\n检验报告\tmanuReport_20260730_001\t-\t合格\t2026-07-30T06:46:58.843+0000\n检测项\tMES_FULL_20260730064545076_a23187 QCS report item\t合格\t合格\t2026-07-30T06:46:59.029+0000\n完工入库与库存流水\n暂无数据",
+        "bodyLength": 2568
+      },
+      "statistics": {
+        "endpoint": "/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask?taskExeLogId=771353614402816",
+        "httpStatus": 200,
+        "response": {
+          "code": 200,
+          "data": {
+            "success": true,
+            "snapshot": {
+              "id": 181,
+              "tenant_id": "dt",
+              "source_type": "TASK",
+              "source_id": 771353614402816,
+              "task_id": 9007182684506211,
+              "batch_no": "MES_FULL_20260730064545076_a23187_BATCH",
+              "source_state": "WOM_runState/finished",
+              "revision": 8,
+              "source_updated_at": "2026-07-30T06:47:57.087+0000",
+              "created_at": "2026-07-31T03:47:15.374+0000",
+              "updated_at": "2026-07-31T04:39:21.043+0000"
+            }
+          },
+          "message": "success",
+          "msg": "success"
+        },
+        "messages": [
+          [
+            "w",
+            "请选择一条指令执行记录"
+          ],
+          [
+            "s",
+            "WOM.custom.randon1597231220469"
+          ]
+        ]
+      },
+      "analysis": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut&openType=page&batchNo=MES_FULL_20260730064545076_a23187_BATCH&productNo=MES_FULL_20260730064545076_a23187_MAT",
+        "title": "生产过程追溯",
+        "body": "生产过程追溯\n\n制造指令、物料、质量与库存事实链\n\n刷新\n追溯数据已加载：MES_FULL_20260730064545076_a23187_BATCH，共 12 个时间轴事件。\n制造指令 / 生产批次\nMES_FULL_20260730064545076_a23187_TASK_TN\nMES_FULL_20260730064545076_a23187_BATCH\n工序\n1\n活动\n2\n物料事件\n4\n质量事件\n3\n库存事件\n0\n生产时间轴\n2026-07-30 14:41:13.632272\n活动执行\nWOM_runState/finished\nwom_acti_exelogs #9007182684508221\n2026-07-30 14:42:09.706\n活动执行\nWOM_runState/finished\nwom_acti_exelogs #771353684604160\n2026-07-30 14:45:46.800595\n制造指令创建\nWOM_runState/finished\nwom_produce_tasks #9007182684506211\n2026-07-30 14:45:53.405\n制造指令开始\nWOM_runState/finished\nwom_produce_tasks #9007182684506211\n2026-07-30 14:45:53.516\n任务执行记录\nWOM_runState/finished\nwom_produce_task_exelog #771353614402816\n2026-07-30 14:45:57.34456\n工序\nWOM_runState/finished\nwom_task_processes #9007182684507215\n2026-07-30 14:45:57.34456\n活动\nWOM_runState/finished\nwom_task_actives #9007182684507216\n2026-07-30 14:46:00.302\n工序执行\nWOM_runState/finished\nwom_process_exelogs #771353642255616\n2026-07-30 14:46:13.632272\n活动\nWOM_runState/finished\nwom_task_actives #9007182684508216\n2026-07-30 14:46:47.22\n生产请检\nQCS_checkState/reported\nqcs_inspects #771353834374400\n2026-07-30 14:46:58.843\n检验报告\n合格\nqcs_inspect_reports #771353881978112\n2026-07-30 14:47:56.979\n制造指令结束\nWOM_runState/finished\nwom_produce_tasks #9007182684506211\n工序执行\n工序\t状态\t开始时间\t结束时间\nMES_FULL_20260730064545076_a23187 process\tWOM_runState/finished\t2026-07-30T06:46:00.302+0000\t2026-07-30T06:47:36.855+0000\n活动执行\n活动\t状态\t物料批次\t开始时间\t结束时间\nMES_FULL_20260730064545076_a23187 active\tWOM_runState/finished\tMES_FULL_20260730064545076_a23187_BATCH\t2026-07-30T06:41:13.632+0000\t2026-07-30T06:46:15.610+0000\n投入MES_FULL_20260730064545076_a23187 material\tWOM_runState/finished\tMES_FULL_20260730064545076_a23187_BATCH\t2026-07-30T06:42:09.706+0000\t2026-07-30T06:46:09.706+0000\n物料谱系\nMES_FULL_20260730064545076_a23187_BATCH\nMES_FULL_20260730064545076_a23187 process >\nMES_FULL_20260730064545076_a23187_BATCH\n投入记录\n物料ID\t物料批次\t投料量\t使用量\t投料时间\n9007182684506209\tMES_FULL_20260730064545076_a23187_BATCH\t2\t2\t2026-07-30T06:42:09.706+0000\n产出记录\n物料ID\t产出批次\t生产批次\t产出量\t产出时间\n-\t-\t-\t3\t-\n9007182684506209\tMES_FULL_20260730064545076_a23187_BATCH\tMES_FULL_20260730064545076_a23187_BATCH\t3\t2026-07-30T06:41:13.632+0000\n9007182684506209\tMES_FULL_20260730064545076_a23187_BATCH\tMES_FULL_20260730064545076_a23187_BATCH\t5\t2026-07-30T06:42:55.981+0000\n质量闭环\n类型\t单号\t状态\t结论/原因\t时间\n请检\tmanuInspect_20260730_001\tQCS_checkState/reported\t-\t2026-07-30T06:46:47.220+0000\n检验报告\tmanuReport_20260730_001\t-\t合格\t2026-07-30T06:46:58.843+0000\n检测项\tMES_FULL_20260730064545076_a23187 QCS report item\t合格\t合格\t2026-07-30T06:46:59.029+0000\n完工入库与库存流水\n暂无数据",
+        "bodyLength": 2568
+      },
+      "selectionAfterStatistics": {
+        "id": "771353614402816",
+        "batchNo": "MES_FULL_20260730064545076_a23187_BATCH",
+        "needParamAna": true,
+        "analysisFlag": true
+      }
+    },
+    {
+      "module": "活动执行记录",
+      "route": "/msService/WOM/produceTask/actiExelog/activeExeLogList",
+      "status": "PASS",
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/activeExeLogList",
+        "title": "活动执行记录"
+      },
+      "toolbar": [
+        {
+          "id": "btn-viewDetail",
+          "text": "查看详情",
+          "visible": true
+        },
+        {
+          "id": "btn-manualStatistics",
+          "text": "工艺统计",
+          "visible": true
+        },
+        {
+          "id": "btn-secondSyn",
+          "text": "二次同步",
+          "visible": false
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条活动执行记录"
+          ]
+        ],
+        "popupCount": 0
+      },
+      "selection": {
+        "id": "771353684604160",
+        "activeType": "RM_activeType/putin",
+        "batchNo": "MES_FULL_20260730064545076_a23187_BATCH",
+        "needParamAna": true,
+        "analysisFlag": false
+      },
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/matConsuEntryActView?viewCode=WOM_1.0.0_produceTask_activeExeLogList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&iscallback=false&id=771353684604160",
+        "title": "产耗查看",
+        "body": "\t\t\t\t\t\n\n生产批号\n\t\nMES_FULL_20260730064545076_a23187_BATCH\n\t\n工序名称\n\t\nMES_FULL_20260730064545076_a23187 process\n\t\n工作单元\n\t\nMES_FULL_20260730064545076_a23187 work unit\n\n\n活动名称\n\t\n投入MES_FULL_20260730064545076_a23187 material\n\t\n活动开始\n\t\n2026-07-30 14:42:09\n\t\n活动结束\n\t\n2026-07-30 14:46:09\n\t\t\t\t\t\n\n序号",
+        "bodyLength": 272
+      },
+      "doubleClick": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/matConsuEntryActView?viewCode=WOM_1.0.0_produceTask_activeExeLogList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&iscallback=false&id=771353684604160",
+        "title": "产耗查看",
+        "body": "\t\t\t\t\t\n\n生产批号\n\t\nMES_FULL_20260730064545076_a23187_BATCH\n\t\n工序名称\n\t\nMES_FULL_20260730064545076_a23187 process\n\t\n工作单元\n\t\nMES_FULL_20260730064545076_a23187 work unit\n\n\n活动名称\n\t\n投入MES_FULL_20260730064545076_a23187 material\n\t\n活动开始\n\t\n2026-07-30 14:42:09\n\t\n活动结束\n\t\n2026-07-30 14:46:09\n\t\t\t\t\t\n\n序号",
+        "bodyLength": 272
+      },
+      "screenshots": {
+        "list": "metadata/wom-activity-record-actions-list-20260731.png",
+        "detail": "metadata/wom-activity-record-actions-detail-20260731.png"
+      },
+      "observations": [],
+      "issues": [],
+      "selectionSource": {
+        "source": "list-api",
+        "endpoint": "/msService/WOM/produceTask/actiExelog/activeExeLogList-query",
+        "id": "771353684604160"
+      },
+      "statistics": {
+        "endpoint": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive?activeId=771353684604160",
+        "httpStatus": 200,
+        "response": {
+          "code": 200,
+          "data": {
+            "success": true,
+            "snapshot": {
+              "id": 184,
+              "tenant_id": "dt",
+              "source_type": "ACTIVITY",
+              "source_id": 771353684604160,
+              "task_id": 9007182684506211,
+              "batch_no": "MES_FULL_20260730064545076_a23187_BATCH",
+              "source_state": "WOM_runState/finished",
+              "revision": 6,
+              "source_updated_at": "2026-07-30T06:46:10.693+0000",
+              "created_at": "2026-07-31T04:10:31.947+0000",
+              "updated_at": "2026-07-31T04:39:39.909+0000"
+            }
+          },
+          "message": "success",
+          "msg": "success"
+        },
+        "messages": [
+          [
+            "w",
+            "请选择一条活动执行记录"
+          ],
+          [
+            "s",
+            "工艺参数统计完成"
+          ]
+        ]
+      }
+    },
+    {
+      "module": "检查记录",
+      "route": "/msService/WOM/produceTask/checkRecord/checkRecordList",
+      "status": "PASS",
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/checkRecord/checkRecordList",
+        "title": "检查记录"
+      },
+      "toolbar": [
+        {
+          "id": "btn-viewDetail",
+          "text": "查看详情",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条有效的检查记录"
+          ]
+        ],
+        "popupCount": 0
+      },
+      "selection": {
+        "id": "756799292564736",
+        "batchNo": "ADP_E2E_20260619034356_WOM_ACTIVE_BATCH"
+      },
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/checkRecord?viewCode=WOM_1.0.0_produceTask_checkRecordList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&iscallback=false&id=8388184063665800",
+        "title": "检查结果",
+        "body": "检查结果\n(\n2026-06-19 11:44:04\n )\n0\n\t\t\t\t\t\n\n生产批号\n\t\nADP_E2E_20260619034356_WOM_ACTIVE_BATCH\n\t\n工序名称\n\t\nADP_E2E_20260619034356_WOM_ACTIVE process\n\t\n工作单元\n\t\n\n\n活动名称\n\t\nADP_E2E_20260619034356_WOM_ACTIVE active\n\t\n活动开始\n\t\n2026-06-19 11:39:04\n\t\n活动结束\n\t\n2026-06-19 11:44:12\n序号\n检查项\n标准值\n报出值\n检查人\n检查时间\n1\nADP_E2E_20260619034356_WOM_ACTIVE check item\nADP_E2E_20260619034356_WOM_ACTIVE standard\nADP_E2E_20260619034356_WOM_ACTIVE report value\n2026-06-19 11:44:12",
+        "bodyLength": 434
+      },
+      "doubleClick": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/checkRecord?viewCode=WOM_1.0.0_produceTask_checkRecordList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&iscallback=false&id=8388184063665800",
+        "title": "检查结果",
+        "body": "检查结果\n(\n2026-06-19 11:44:04\n )\n0\n\t\t\t\t\t\n\n生产批号\n\t\nADP_E2E_20260619034356_WOM_ACTIVE_BATCH\n\t\n工序名称\n\t\nADP_E2E_20260619034356_WOM_ACTIVE process\n\t\n工作单元\n\t\n\n\n活动名称\n\t\nADP_E2E_20260619034356_WOM_ACTIVE active\n\t\n活动开始\n\t\n2026-06-19 11:39:04\n\t\n活动结束\n\t\n2026-06-19 11:44:12\n序号\n检查项\n标准值\n报出值\n检查人\n检查时间\n1\nADP_E2E_20260619034356_WOM_ACTIVE check item\nADP_E2E_20260619034356_WOM_ACTIVE standard\nADP_E2E_20260619034356_WOM_ACTIVE report value\n2026-06-19 11:44:12",
+        "bodyLength": 434
+      },
+      "screenshots": {
+        "list": "metadata/wom-check-record-actions-list-20260731.png",
+        "detail": "metadata/wom-check-record-actions-detail-20260731.png"
+      },
+      "observations": [],
+      "issues": [],
+      "selectionSource": {
+        "source": "list-api",
+        "endpoint": "/msService/WOM/produceTask/checkRecord/checkRecordList-query",
+        "id": "756799292564736"
+      }
+    },
+    {
+      "module": "活动执行记录（产出活动）",
+      "route": "/msService/WOM/produceTask/actiExelog/activeExeLogList",
+      "status": "PASS",
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/activeExeLogList",
+        "title": "活动执行记录"
+      },
+      "toolbar": [
+        {
+          "id": "btn-viewDetail",
+          "text": "查看详情",
+          "visible": true
+        },
+        {
+          "id": "btn-manualStatistics",
+          "text": "工艺统计",
+          "visible": true
+        },
+        {
+          "id": "btn-secondSyn",
+          "text": "二次同步",
+          "visible": false
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条活动执行记录"
+          ]
+        ],
+        "popupCount": 0
+      },
+      "selection": {
+        "id": "9007185760134776",
+        "activeType": "RM_activeType/output",
+        "batchNo": "STD_CORE_20260728_194300_BATCH",
+        "needParamAna": false,
+        "analysisFlag": false
+      },
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/matOutputActView?viewCode=WOM_1.0.0_produceTask_activeExeLogList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&iscallback=false&id=9007185760134776",
+        "title": "产出查看",
+        "body": "\t\t\t\t\t\n\n生产批号\n\t\nSTD_CORE_20260728_194300_BATCH\n\t\n工序名称\n\t\n糖化\n\t\n工作单元\n\t\nSTD_CORE_20260728_194300 work unit\n\n\n活动名称\n\t\n糖化液产出\n\t\n活动开始\n\t\n2026-07-27 16:01:28\n\t\n活动结束\n\t\n2026-07-27 16:01:32\n\t\t\t\t\t\n\n序号",
+        "bodyLength": 176
+      },
+      "doubleClick": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/matOutputActView?viewCode=WOM_1.0.0_produceTask_activeExeLogList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&iscallback=false&id=9007185760134776",
+        "title": "产出查看",
+        "body": "\t\t\t\t\t\n\n生产批号\n\t\nSTD_CORE_20260728_194300_BATCH\n\t\n工序名称\n\t\n糖化\n\t\n工作单元\n\t\nSTD_CORE_20260728_194300 work unit\n\n\n活动名称\n\t\n糖化液产出\n\t\n活动开始\n\t\n2026-07-27 16:01:28\n\t\n活动结束\n\t\n2026-07-27 16:01:32\n\t\t\t\t\t\n\n序号",
+        "bodyLength": 176
+      },
+      "screenshots": {
+        "list": "metadata/wom-activity-output-record-actions-list-20260731.png",
+        "detail": "metadata/wom-activity-output-record-actions-detail-20260731.png"
+      },
+      "observations": [
+        "The list API did not return controlled row 9007185760134776; the interaction used the same row fetched from its real detail API."
+      ],
+      "issues": [],
+      "selectionSource": {
+        "source": "detail-api",
+        "endpoint": "/msService/WOM/produceTask/actiExelog/data/9007185760134776",
+        "status": 200,
+        "id": "9007185760134776"
+      }
+    },
+    {
+      "module": "投料记录",
+      "route": "/msService/WOM/produceTask/matConsumRecod/matConsumRecodList",
+      "status": "PASS",
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matConsumRecod/matConsumRecodList",
+        "title": "物料消耗记录"
+      },
+      "toolbar": [
+        {
+          "id": "btn-viewDetail",
+          "text": "查看详情",
+          "visible": true
+        },
+        {
+          "id": "btn-manualSync",
+          "text": "手动同步",
+          "visible": true
+        },
+        {
+          "id": "btn-modifyConsumRecod",
+          "text": "修改",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条投料记录"
+          ]
+        ],
+        "popupCount": 0
+      },
+      "selection": {
+        "id": "9007185760134876",
+        "batchNo": "STD_CORE_20260728_194300_BATCH"
+      },
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matConsumRecod/matConsumeRecordView?viewCode=WOM_1.0.0_produceTask_matConsumRecodList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&iscallback=false&id=9007185760134876",
+        "title": "物料消耗查看",
+        "body": "\t\t\t\t\t\n\n生产批号\n\t\nSTD_CORE_20260728_194300_BATCH\n\t\n工序名称\n\t\n糖化\n\t\n活动名称\n\t\n液化液投入\n\n\n物料编码\n\t\nSTD_CORE_20260728_194300_LIQUEFIED_SYRUP\n\t\n物料名称\n\t\n液化液（试运行）\n\t\n使用量\n\t\n34.80\n\n\n报工量\n\t\n34.80\n\t\n操作人\n\t\n虚拟人员\n\t\n投料开始时间\n\t\n2026-07-27 16:00:56\n\n\n投料时间\n\t\n2026-07-27 16:01:00\n\t\n操作时长\n\t\n4.000000\n\t\n投入方式\n\t\n人工\n\n\n数据来源\n\t\n活动\n\t\n\t\n\t\n\t",
+        "bodyLength": 275
+      },
+      "doubleClick": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matConsumRecod/matConsumeRecordView?viewCode=WOM_1.0.0_produceTask_matConsumRecodList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&iscallback=false&id=9007185760134876",
+        "title": "物料消耗查看",
+        "body": "\t\t\t\t\t\n\n生产批号\n\t\nSTD_CORE_20260728_194300_BATCH\n\t\n工序名称\n\t\n糖化\n\t\n活动名称\n\t\n液化液投入\n\n\n物料编码\n\t\nSTD_CORE_20260728_194300_LIQUEFIED_SYRUP\n\t\n物料名称\n\t\n液化液（试运行）\n\t\n使用量\n\t\n34.80\n\n\n报工量\n\t\n34.80\n\t\n操作人\n\t\n虚拟人员\n\t\n投料开始时间\n\t\n2026-07-27 16:00:56\n\n\n投料时间\n\t\n2026-07-27 16:01:00\n\t\n操作时长\n\t\n4.000000\n\t\n投入方式\n\t\n人工\n\n\n数据来源\n\t\n活动\n\t\n\t\n\t\n\t",
+        "bodyLength": 275
+      },
+      "screenshots": {
+        "list": "metadata/wom-input-record-actions-list-20260731.png",
+        "detail": "metadata/wom-input-record-actions-detail-20260731.png"
+      },
+      "observations": [],
+      "issues": [],
+      "selectionSource": {
+        "source": "list-api",
+        "endpoint": "/msService/WOM/produceTask/matConsumRecod/matConsumRecodList-query",
+        "id": "9007185760134876"
+      }
+    },
+    {
+      "module": "产出记录",
+      "route": "/msService/WOM/produceTask/matOutptRecord/matOutptRecordList",
+      "status": "PASS",
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matOutptRecord/matOutptRecordList",
+        "title": "物料产出记录"
+      },
+      "toolbar": [
+        {
+          "id": "btn-viewDetail",
+          "text": "查看详情",
+          "visible": true
+        },
+        {
+          "id": "btn-manualSync",
+          "text": "手动同步",
+          "visible": true
+        },
+        {
+          "id": "btn-modifyMatOutptRecord",
+          "text": "修改",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条产出记录"
+          ]
+        ],
+        "popupCount": 0
+      },
+      "selection": {
+        "id": "9007185760134878",
+        "batchNo": "STD_CORE_20260728_194300_BATCH"
+      },
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matOutptRecord/matOutputRecordView?viewCode=WOM_1.0.0_produceTask_matOutptRecordList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&iscallback=false&id=9007185760134878",
+        "title": "物料产出查看",
+        "body": "\t\t\t\t\t\n\n生产批号\n\t\nSTD_CORE_20260728_194300_BATCH\n\t\n工序名称\n\t\n糖化\n\t\n活动名称\n\t\n糖化液产出\n\n\n物料编码\n\t\nSTD_CORE_20260728_194300_SACCHARIFIED_LIQUOR\n\t\n物料名称\n\t\n糖化液（试运行）\n\t\n产出量\n\t\n35.10\n\n\n报工量\n\t\n35.10\n\t\n操作人\n\t\n虚拟人员\n\t\n产出开始时间\n\t\n2026-07-27 16:01:28\n\n\n产出时间\n\t\n2026-07-27 16:01:32\n\t\n操作时长\n\t\n4.000000\n\t\n产出方式\n\t\n人工\n\n\n数据来源\n\t\n活动\n\t\n\t\n\t\n\t",
+        "bodyLength": 279
+      },
+      "doubleClick": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matOutptRecord/matOutputRecordView?viewCode=WOM_1.0.0_produceTask_matOutptRecordList&entityCode=WOM_1.0.0_produceTask&iscrosscompany=false&openType=frame&iscallback=false&id=9007185760134878",
+        "title": "物料产出查看",
+        "body": "\t\t\t\t\t\n\n生产批号\n\t\nSTD_CORE_20260728_194300_BATCH\n\t\n工序名称\n\t\n糖化\n\t\n活动名称\n\t\n糖化液产出\n\n\n物料编码\n\t\nSTD_CORE_20260728_194300_SACCHARIFIED_LIQUOR\n\t\n物料名称\n\t\n糖化液（试运行）\n\t\n产出量\n\t\n35.10\n\n\n报工量\n\t\n35.10\n\t\n操作人\n\t\n虚拟人员\n\t\n产出开始时间\n\t\n2026-07-27 16:01:28\n\n\n产出时间\n\t\n2026-07-27 16:01:32\n\t\n操作时长\n\t\n4.000000\n\t\n产出方式\n\t\n人工\n\n\n数据来源\n\t\n活动\n\t\n\t\n\t\n\t",
+        "bodyLength": 279
+      },
+      "screenshots": {
+        "list": "metadata/wom-output-record-actions-list-20260731.png",
+        "detail": "metadata/wom-output-record-actions-detail-20260731.png"
+      },
+      "observations": [],
+      "issues": [],
+      "selectionSource": {
+        "source": "list-api",
+        "endpoint": "/msService/WOM/produceTask/matOutptRecord/matOutptRecordList-query",
+        "id": "9007185760134878"
+      }
+    }
+  ],
+  "http": [
+    {
+      "page": "task-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/prodTaskExelog/makeTaskExecuList",
+      "status": 200
+    },
+    {
+      "page": "task-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/produceTask/prodTaskExelog/makeTaskExecuList/i18n-value.js?0.49055406289692194",
+      "status": 200
+    },
+    {
+      "page": "task-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskExecuList&menuCode=WOM_1.0.0_produceTask_makeTaskExecuList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "task-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_produceTask_prodTaskExelog_makeTaskExecuList_query",
+      "status": 200
+    },
+    {
+      "page": "task-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/prodTaskExelog/makeTaskExecuList-query",
+      "status": 200
+    },
+    {
+      "page": "task-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsumEntryView&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "task-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/prodTaskExelog/data/771353614402816",
+      "status": 200
+    },
+    {
+      "page": "task-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsumEntryView&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "task-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/prodTaskExelog/data/771353614402816",
+      "status": 200
+    },
+    {
+      "page": "task-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask?taskExeLogId=771353614402816",
+      "status": 200
+    },
+    {
+      "page": "task-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/prodTaskExelog/makeTaskExecuList-query",
+      "status": 200
+    },
+    {
+      "page": "activity-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/activeExeLogList",
+      "status": 200
+    },
+    {
+      "page": "activity-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_activeExeLogList&menuCode=WOM_1.0.0_produceTask_activeExeLogList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "activity-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_produceTask_actiExelog_activeExeLogList_query",
+      "status": 200
+    },
+    {
+      "page": "activity-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/activeExeLogList-query",
+      "status": 200
+    },
+    {
+      "page": "activity-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsuEntryActView&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "activity-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/data/771353684604160",
+      "status": 200
+    },
+    {
+      "page": "activity-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsuEntryActView&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "activity-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/data/771353684604160",
+      "status": 200
+    },
+    {
+      "page": "activity-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive?activeId=771353684604160",
+      "status": 200
+    },
+    {
+      "page": "check-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/checkRecord/checkRecordList",
+      "status": 200
+    },
+    {
+      "page": "check-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_checkRecordList&menuCode=WOM_1.0.0_produceTask_checkRecordList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "check-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_produceTask_checkRecord_checkRecordList_query",
+      "status": 200
+    },
+    {
+      "page": "check-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/checkRecord/checkRecordList-query",
+      "status": 200
+    },
+    {
+      "page": "check-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_checkRecord&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "check-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/data/8388184063665800",
+      "status": 200
+    },
+    {
+      "page": "check-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_checkRecord&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "check-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/data/8388184063665800",
+      "status": 200
+    },
+    {
+      "page": "activity-output-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/activeExeLogList",
+      "status": 200
+    },
+    {
+      "page": "activity-output-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_activeExeLogList&menuCode=WOM_1.0.0_produceTask_activeExeLogList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "activity-output-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_produceTask_actiExelog_activeExeLogList_query",
+      "status": 200
+    },
+    {
+      "page": "activity-output-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/activeExeLogList-query",
+      "status": 200
+    },
+    {
+      "page": "activity-output-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matOutputActView&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "activity-output-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/data/9007185760134776",
+      "status": 200
+    },
+    {
+      "page": "activity-output-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matOutputActView&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "activity-output-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/actiExelog/data/9007185760134776",
+      "status": 200
+    },
+    {
+      "page": "input-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matConsumRecod/matConsumRecodList",
+      "status": 200
+    },
+    {
+      "page": "input-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/produceTask/matConsumRecod/matConsumRecodList/i18n-value.js?0.1534563614052017",
+      "status": 200
+    },
+    {
+      "page": "input-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsumRecodList&menuCode=WOM_1.0.0_produceTask_matConsumRecodList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "input-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_produceTask_matConsumRecod_matConsumRecodList_query",
+      "status": 200
+    },
+    {
+      "page": "input-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matConsumRecod/matConsumRecodList-query",
+      "status": 200
+    },
+    {
+      "page": "input-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsumeRecordView&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "input-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matConsumRecod/data/9007185760134876",
+      "status": 200
+    },
+    {
+      "page": "input-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matConsumeRecordView&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "input-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matConsumRecod/data/9007185760134876",
+      "status": 200
+    },
+    {
+      "page": "output-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matOutptRecord/matOutptRecordList",
+      "status": 200
+    },
+    {
+      "page": "output-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/produceTask/matOutptRecord/matOutptRecordList/i18n-value.js?0.6033296986994862",
+      "status": 200
+    },
+    {
+      "page": "output-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matOutptRecordList&menuCode=WOM_1.0.0_produceTask_matOutptRecordList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "output-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_produceTask_matOutptRecord_matOutptRecordList_query",
+      "status": 200
+    },
+    {
+      "page": "output-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matOutptRecord/matOutptRecordList-query",
+      "status": 200
+    },
+    {
+      "page": "output-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matOutputRecordView&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "output-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matOutptRecord/data/9007185760134878",
+      "status": 200
+    },
+    {
+      "page": "output-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_matOutputRecordView&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "output-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/matOutptRecord/data/9007185760134878",
+      "status": 200
+    }
+  ],
+  "browser": {
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "failedResponses": []
+  },
+  "persistence": {
+    "table": "public.pa_trace_snapshots",
+    "original": {
+      "taskNeedParamAna": "true",
+      "taskAnalysisFlag": "true",
+      "activityNeedParamAna": "true"
+    },
+    "snapshots": {
+      "task": {
+        "sourceType": "TASK",
+        "sourceId": 771353614402816,
+        "before": {
+          "maxRevision": 7,
+          "rowCount": 1
+        },
+        "after": {
+          "maxRevision": 8,
+          "rowCount": 1
+        }
+      },
+      "activity": {
+        "sourceType": "ACTIVITY",
+        "sourceId": 771353684604160,
+        "before": {
+          "maxRevision": 5,
+          "rowCount": 1
+        },
+        "after": {
+          "maxRevision": 6,
+          "rowCount": 1
+        }
+      }
+    },
+    "verificationSql": "SELECT source_type,source_id,revision,source_state,updated_at FROM public.pa_trace_snapshots WHERE tenant_id='dt' AND ((source_type='TASK' AND source_id=771353614402816) OR (source_type='ACTIVITY' AND source_id=771353684604160)) ORDER BY source_type,revision;",
+    "restored": {
+      "taskNeedParamAna": "true",
+      "taskAnalysisFlag": "true",
+      "activityNeedParamAna": "true"
+    },
+    "rows": [
+      [
+        "ACTIVITY",
+        "771353684604160",
+        "6",
+        "WOM_runState/finished",
+        "2026-07-31 12:39:39.909269+08"
+      ],
+      [
+        "TASK",
+        "771353614402816",
+        "8",
+        "WOM_runState/finished",
+        "2026-07-31 12:39:21.043054+08"
+      ]
+    ]
+  },
+  "issues": [],
+  "login": {
+    "status": 200
+  }
+}
