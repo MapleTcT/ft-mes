@@ -88,10 +88,29 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "WOM_1.0.0_produceTask_matOutputRecordView",
     "WOM_1.0.0_procReport_outPutCommonTaskEdit",
     "WOM_1.0.0_batchMaterial_baRetireMentPDAList",
+    "WOM_1.0.0_rejectMaterilal_prePareRejectList",
     "WOM_1.0.0_rejectMaterilal_batchRejectEdit",
+    "WOM_1.0.0_rejectMaterilal_batchRejectList",
+    "WOM_1.0.0_rejectMaterilal_batchRejectView",
+    "WOM_1.0.0_rejectMaterilal_batchRejectPrtList",
     "WOM_1.0.0_rejectMaterilal_materiaRejectEdit",
+    "WOM_1.0.0_rejectMaterilal_materiaRejectList",
+    "WOM_1.0.0_rejectMaterilal_materiaRejectView",
     "WOM_1.0.0_rejectMaterilal_materiaEditableEdit",
     "WOM_1.0.0_rejectMaterilal_prePareRejectEdit",
+    "WOM_1.0.0_rejectMaterilal_prePareRejectView",
+    "WOM_1.0.0_putInMaterial_putinList",
+    "WOM_1.0.0_putInMaterial_putinView",
+    "WOM_1.0.0_putInMaterial_putInDetailList",
+    "WOM_1.0.0_putInMaterial_putInDetailView",
+    "WOM_1.0.0_outputMaterial_outputList",
+    "WOM_1.0.0_outputMaterial_outputView",
+    "WOM_1.0.0_outputMaterial_outputDetailList",
+    "WOM_1.0.0_remainMaterial_remainMaterialList",
+    "WOM_1.0.0_remainMaterial_remainMaterialEdit",
+    "WOM_1.0.0_remainMaterial_remainMaterialEdit2",
+    "WOM_1.0.0_procReport_putinDetailList",
+    "WOM_1.0.0_procReport_outputDetailList",
     "RM_1.0.0_formulaType_formualTypeTreeList",
     "RM_1.0.0_formulaType_formualTypeEdit",
     "RM_1.0.0_processType_processTypeList",
@@ -895,6 +914,110 @@ QCS_SECONDARY_VIEW_CODES = tuple(
     )
     for code in (family + "List", family + "Edit", family + "View")
 )
+
+WOM_MATERIAL_REPORT_LIST_ACTIONS: Dict[str, Dict[str, str]] = {
+    "WOM_1.0.0_rejectMaterilal_prePareRejectList": {
+        "grid_api": "WOM_1.0.0_rejectMaterilal_prePareRejectList_rejectMaterial_sdg",
+        "model_code": "WOM_1.0.0_rejectMaterilal_RejectMaterial",
+        "entity_code": "WOM_1.0.0_rejectMaterilal",
+        "add_view": "WOM_1.0.0_rejectMaterilal_prePareRejectEdit",
+        "detail_view": "WOM_1.0.0_rejectMaterilal_prePareRejectView",
+        "detail_id_path": "id",
+        "selection_message": "请选择一条备料退料申请",
+        "add_label": "新增退料申请",
+        "detail_label": "查看详情",
+    },
+    "WOM_1.0.0_rejectMaterilal_batchRejectList": {
+        "grid_api": "WOM_1.0.0_rejectMaterilal_batchRejectList_rejectMaterial_sdg",
+        "model_code": "WOM_1.0.0_rejectMaterilal_RejectMaterial",
+        "entity_code": "WOM_1.0.0_rejectMaterilal",
+        "add_view": "WOM_1.0.0_rejectMaterilal_batchRejectEdit",
+        "detail_view": "WOM_1.0.0_rejectMaterilal_batchRejectView",
+        "detail_id_path": "id",
+        "selection_message": "请选择一条配料退料申请",
+        "add_label": "新增退料申请",
+        "detail_label": "查看详情",
+    },
+    "WOM_1.0.0_rejectMaterilal_materiaRejectList": {
+        "grid_api": "WOM_1.0.0_rejectMaterilal_materiaRejectList_rejectMaterial_sdg",
+        "model_code": "WOM_1.0.0_rejectMaterilal_RejectMaterial",
+        "entity_code": "WOM_1.0.0_rejectMaterilal",
+        "add_view": "WOM_1.0.0_rejectMaterilal_materiaRejectEdit",
+        "detail_view": "WOM_1.0.0_rejectMaterilal_materiaRejectView",
+        "detail_id_path": "id",
+        "selection_message": "请选择一条车间物料退料申请",
+        "add_label": "新增退料申请",
+        "detail_label": "查看详情",
+    },
+    "WOM_1.0.0_rejectMaterilal_batchRejectPrtList": {
+        "grid_api": "WOM_1.0.0_rejectMaterilal_batchRejectPrtList_rejctMatalPart_sdg",
+        "model_code": "WOM_1.0.0_rejectMaterilal_RejctMatalPart",
+        "entity_code": "WOM_1.0.0_rejectMaterilal",
+        "detail_mode": "reject_application",
+        "selection_message": "请选择一条退料记录",
+        "detail_label": "查看退料单",
+    },
+    "WOM_1.0.0_putInMaterial_putinList": {
+        "grid_api": "WOM_1.0.0_putInMaterial_putinList_putInMaterial_sdg",
+        "model_code": "WOM_1.0.0_putInMaterial_PutInMaterial",
+        "entity_code": "WOM_1.0.0_putInMaterial",
+        "detail_view": "WOM_1.0.0_putInMaterial_putinView",
+        "detail_id_path": "id",
+        "selection_message": "请选择一条生产用料单",
+        "detail_label": "查看详情",
+    },
+    "WOM_1.0.0_putInMaterial_putInDetailList": {
+        "grid_api": "WOM_1.0.0_putInMaterial_putInDetailList_putMateiDetail_sdg",
+        "model_code": "WOM_1.0.0_putInMaterial_PutMateiDetail",
+        "entity_code": "WOM_1.0.0_putInMaterial",
+        "detail_view": "WOM_1.0.0_putInMaterial_putInDetailView",
+        "detail_id_path": "id",
+        "selection_message": "请选择一条生产用料明细",
+        "detail_label": "查看详情",
+    },
+    "WOM_1.0.0_outputMaterial_outputList": {
+        "grid_api": "WOM_1.0.0_outputMaterial_outputList_outputMaterial_sdg",
+        "model_code": "WOM_1.0.0_outputMaterial_OutputMaterial",
+        "entity_code": "WOM_1.0.0_outputMaterial",
+        "detail_view": "WOM_1.0.0_outputMaterial_outputView",
+        "detail_id_path": "id",
+        "selection_message": "请选择一条生产报工单",
+        "detail_label": "查看详情",
+    },
+    "WOM_1.0.0_outputMaterial_outputDetailList": {
+        "grid_api": "WOM_1.0.0_outputMaterial_outputDetailList_outMateDetail_sdg",
+        "model_code": "WOM_1.0.0_outputMaterial_OutMateDetail",
+        "entity_code": "WOM_1.0.0_outputMaterial",
+        "detail_view": "WOM_1.0.0_outputMaterial_outputView",
+        "detail_id_path": "headId.id",
+        "selection_message": "请选择一条生产报工明细",
+        "detail_label": "查看报工单",
+    },
+    "WOM_1.0.0_remainMaterial_remainMaterialList": {
+        "grid_api": "WOM_1.0.0_remainMaterial_remainMaterialList_remainMaterial_sdg",
+        "model_code": "WOM_1.0.0_remainMaterial_RemainMaterial",
+        "entity_code": "WOM_1.0.0_remainMaterial",
+        "action_mode": "source_crud",
+    },
+    "WOM_1.0.0_procReport_putinDetailList": {
+        "grid_api": "WOM_1.0.0_procReport_putinDetailList_putinDetail_sdg",
+        "model_code": "WOM_1.0.0_procReport_PutinDetail",
+        "entity_code": "WOM_1.0.0_produceTask",
+        "detail_view": "WOM_1.0.0_produceTask_makeTaskView",
+        "detail_id_path": "headId.taskId.id",
+        "selection_message": "请选择一条尾料投料记录",
+        "detail_label": "查看指令",
+    },
+    "WOM_1.0.0_procReport_outputDetailList": {
+        "grid_api": "WOM_1.0.0_procReport_outputDetailList_outputDetail_sdg",
+        "model_code": "WOM_1.0.0_procReport_OutputDetail",
+        "entity_code": "WOM_1.0.0_produceTask",
+        "detail_view": "WOM_1.0.0_produceTask_makeTaskView",
+        "detail_id_path": "headId.taskId.id",
+        "selection_message": "请选择一条尾料产出记录",
+        "detail_label": "查看指令",
+    },
+}
 
 WTS_WORK_TICKET_LIST_ACTIONS: Dict[str, Dict[str, str]] = {
     "WTS_1.0.0_workTicket_soilWork": {
@@ -3335,6 +3458,305 @@ def apply_qcs_secondary_list_actions(
     ]
 
 
+def wom_material_report_runtime_button(
+    view_code: str,
+    spec: Dict[str, str],
+    button_id: str,
+    show_name: str,
+    button_style: str,
+) -> Dict[str, Any]:
+    button = qcs_runtime_button(
+        button_id,
+        show_name,
+        f"{view_code}_{button_id}_{button_style}",
+        "CUSTOM",
+        button_style,
+        is_permission=False,
+        is_callback=False,
+    )
+    button["modelCode"] = spec["model_code"]
+    return button
+
+
+def wom_material_report_add_button(
+    view_code: str,
+    spec: Dict[str, str],
+    views: Dict[str, ViewDef],
+) -> Dict[str, Any]:
+    edit_code = spec["add_view"]
+    edit_view = views.get(edit_code)
+    edit_url = edit_view.url if edit_view is not None else ""
+    function_suffix = re.sub(r"[^A-Za-z0-9_$]", "", view_code.rsplit("_", 1)[-1])
+    function_name = "addWom" + function_suffix[:1].upper() + function_suffix[1:]
+    function_body = (
+        f"function {function_name}() {{\n"
+        f"    var target = {json.dumps(edit_url, ensure_ascii=False)}\n"
+        f"        + \"?viewCode={view_code}\"\n"
+        f"        + \"&entityCode={spec['entity_code']}\"\n"
+        "        + \"&iscrosscompany=false\"\n"
+        "        + \"&openType=frame\"\n"
+        "        + \"&iscallback=false\";\n"
+        "    window.open(target, \"_blank\");\n"
+        "    return true;\n"
+        "}"
+    )
+    button = wom_material_report_runtime_button(
+        view_code,
+        spec,
+        "add",
+        spec.get("add_label", "新增"),
+        "add",
+    )
+    onclick = function_name + "()"
+    button.update(
+        {
+            "viewselect": view_reference_payload(
+                edit_code,
+                views,
+                {"iscrosscompany": "false"},
+            ),
+            "funcname": f"onclick='{onclick}'",
+            "onclick": onclick,
+            "ONCLICK": onclick,
+            "funcbody": function_body,
+            "funcbody_es5": function_body,
+        }
+    )
+    return button
+
+
+def wom_material_report_detail_script(
+    view_code: str,
+    spec: Dict[str, str],
+    views: Dict[str, ViewDef],
+    function_name: str,
+    *,
+    selected_from_grid: bool,
+) -> str:
+    if selected_from_grid:
+        row_source = (
+            "    var gridFactory = ReactAPI.getComponentAPI(\"SupDataGrid\");\n"
+            f"    var grid = gridFactory && gridFactory.APIs({json.dumps(spec['grid_api'])});\n"
+            "    var selected = grid && grid.getSelecteds ? grid.getSelecteds() : [];\n"
+            "    if (!selected || !selected.length) {\n"
+            f"        ReactAPI.showMessage(\"w\", {json.dumps(spec['selection_message'], ensure_ascii=False)});\n"
+            "        return false;\n"
+            "    }\n"
+            "    var row = selected[0];\n"
+        )
+    else:
+        row_source = (
+            "    if (!row) {\n"
+            f"        ReactAPI.showMessage(\"w\", {json.dumps(spec['selection_message'], ensure_ascii=False)});\n"
+            "        return false;\n"
+            "    }\n"
+        )
+
+    nested_value = (
+        "    function valueAtPath(source, path) {\n"
+        "        if (!source) { return null; }\n"
+        "        if (Object.prototype.hasOwnProperty.call(source, path)) {\n"
+        "            return source[path];\n"
+        "        }\n"
+        "        var value = source;\n"
+        "        var parts = path.split(\".\");\n"
+        "        for (var index = 0; index < parts.length; index += 1) {\n"
+        "            if (value === null || value === undefined) { return null; }\n"
+        "            value = value[parts[index]];\n"
+        "        }\n"
+        "        if (value && typeof value === \"object\" && value.id !== undefined) {\n"
+        "            return value.id;\n"
+        "        }\n"
+        "        return value;\n"
+        "    }\n"
+    )
+
+    if spec.get("detail_mode") == "reject_application":
+        detail_setup = (
+            "    var recordId = valueAtPath(row, \"headId.id\");\n"
+            "    var rejectType = valueAtPath(row, \"headId.rejectType.id\")\n"
+            "        || valueAtPath(row, \"headId.rejectType\");\n"
+            "    var routes = {\n"
+            "        \"WOM_rejectType/forPrepare\": \"/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectView\",\n"
+            "        \"WOM_rejectType/forBatch\": \"/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectView\",\n"
+            "        \"WOM_rejectType/factoryMateria\": \"/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectView\"\n"
+            "    };\n"
+            "    var detailUrl = routes[rejectType];\n"
+            "    if (!recordId || !detailUrl) {\n"
+            "        ReactAPI.showMessage(\"w\", \"当前退料记录缺少可用的来源单据\");\n"
+            "        return false;\n"
+            "    }\n"
+            f"    var target = detailUrl + \"?viewCode={view_code}\"\n"
+        )
+    else:
+        detail_code = spec["detail_view"]
+        detail_view = views.get(detail_code)
+        detail_url = detail_view.url if detail_view is not None else ""
+        detail_setup = (
+            f"    var recordId = valueAtPath(row, {json.dumps(spec['detail_id_path'])});\n"
+            "    if (!recordId) {\n"
+            f"        ReactAPI.showMessage(\"w\", {json.dumps(spec['selection_message'], ensure_ascii=False)});\n"
+            "        return false;\n"
+            "    }\n"
+            f"    var target = {json.dumps(detail_url, ensure_ascii=False)}\n"
+            f"        + \"?viewCode={view_code}\"\n"
+        )
+
+    return (
+        f"function {function_name}({'' if selected_from_grid else 'event, row'}) {{\n"
+        + row_source
+        + nested_value
+        + detail_setup
+        + f"        + \"&entityCode={spec['entity_code']}\"\n"
+        + "        + \"&iscrosscompany=false\"\n"
+        + "        + \"&openType=frame\"\n"
+        + "        + \"&iscallback=false\"\n"
+        + "        + \"&id=\" + encodeURIComponent(recordId);\n"
+        + "    window.open(target, \"_blank\");\n"
+        + "    return true;\n"
+        + "}"
+    )
+
+
+def wom_material_report_detail_button(
+    view_code: str,
+    spec: Dict[str, str],
+    views: Dict[str, ViewDef],
+) -> Dict[str, Any]:
+    function_suffix = re.sub(r"[^A-Za-z0-9_$]", "", view_code.rsplit("_", 1)[-1])
+    function_name = "viewWom" + function_suffix[:1].upper() + function_suffix[1:]
+    function_body = wom_material_report_detail_script(
+        view_code,
+        spec,
+        views,
+        function_name,
+        selected_from_grid=True,
+    )
+    button_id = "viewTask" if spec.get("detail_label") == "查看指令" else "viewDetail"
+    button = wom_material_report_runtime_button(
+        view_code,
+        spec,
+        button_id,
+        spec.get("detail_label", "查看详情"),
+        "view",
+    )
+    detail_code = spec.get("detail_view")
+    if detail_code:
+        button["viewselect"] = view_reference_payload(
+            detail_code,
+            views,
+            {"iscrosscompany": "false"},
+        )
+    onclick = function_name + "()"
+    button.update(
+        {
+            "funcname": f"onclick='{onclick}'",
+            "onclick": onclick,
+            "ONCLICK": onclick,
+            "funcbody": function_body,
+            "funcbody_es5": function_body,
+        }
+    )
+    return button
+
+
+def apply_wom_material_report_list_actions(
+    view: ViewDef,
+    payload: Any,
+    views: Dict[str, ViewDef],
+) -> None:
+    spec = WOM_MATERIAL_REPORT_LIST_ACTIONS.get(view.code)
+    if spec is None:
+        return
+
+    target = find_layout_datagrid(view, payload)
+    if target is None:
+        return
+
+    grid_api = spec["grid_api"]
+    target.update(
+        {
+            "dataUrl": view.url + "-query",
+            "exportExcel": True,
+            "isExportExcel": True,
+        }
+    )
+    list_property = target.get("listProperty")
+    if not isinstance(list_property, dict):
+        list_property = {}
+        target["listProperty"] = list_property
+    list_property.update({"exportExcel": True, "isExportExcel": True})
+
+    existing_buttons = target.get("buttons")
+    if not isinstance(existing_buttons, list):
+        existing_buttons = []
+
+    if spec.get("action_mode") == "source_crud":
+        labels = {
+            "insertRow": "新增",
+            "update": "修改",
+            "deleteRow": "删除",
+        }
+        restored: List[Dict[str, Any]] = []
+        preserved: List[Dict[str, Any]] = []
+        for raw_button in existing_buttons:
+            if not isinstance(raw_button, dict):
+                continue
+            button = copy.deepcopy(raw_button)
+            button_id = str(button.get("id") or "").strip()
+            label = labels.get(button_id)
+            if label is None:
+                preserved.append(button)
+                continue
+            button.update(
+                {
+                    "showname": label,
+                    "name": label,
+                    "namekey": label,
+                    "i18nKey": label,
+                    "NAME": label,
+                    "isHide": False,
+                    "isPublished": True,
+                }
+            )
+            restored.append(button)
+        target["buttons"] = [*restored, *preserved]
+        return
+
+    managed_ids = {"add", "viewDetail", "viewTask"}
+    preserved = [
+        copy.deepcopy(button)
+        for button in existing_buttons
+        if isinstance(button, dict)
+        and str(button.get("id") or "").strip() not in managed_ids
+    ]
+    restored = []
+    if spec.get("add_view"):
+        restored.append(wom_material_report_add_button(view.code, spec, views))
+    restored.append(wom_material_report_detail_button(view.code, spec, views))
+    target["buttons"] = [*restored, *preserved]
+
+    # The legacy datagrid invokes a fixed global named after the list view.
+    # Declaring any other function leaves double-click visually inert.
+    double_click_name = (
+        re.sub(r"[^A-Za-z0-9_$]", "", view.code.rsplit("_", 1)[-1]) + "DB"
+    )
+    double_click = wom_material_report_detail_script(
+        view.code,
+        spec,
+        views,
+        double_click_name,
+        selected_from_grid=False,
+    )
+    target.update(
+        {
+            "isdbcustom": True,
+            "dbcustomtextarea": double_click,
+            "dbcustomtextarea_es5": double_click,
+        }
+    )
+
+
 def wts_runtime_button(
     button_id: str,
     show_name: str,
@@ -4266,6 +4688,7 @@ def view_json(
         payload["pageType"] = "EDIT"
     supplement_packaged_datagrid_buttons(view, payload, views)
     apply_qcs_secondary_list_actions(view, payload, views)
+    apply_wom_material_report_list_actions(view, payload, views)
     apply_wts_business_list_actions(view, payload, views)
     apply_process_execution_action_buttons(view, payload)
     apply_wom_record_action_buttons(view, payload)

@@ -252,6 +252,8 @@ public class MaterialWmsIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
             .andExpect(content().string(containsString("完工入库")))
+            .andExpect(content().string(containsString("查看详情")))
+            .andExpect(content().string(containsString("导出当前结果")))
             .andExpect(content().string(containsString("/wms/completion-inbounds")));
     }
 

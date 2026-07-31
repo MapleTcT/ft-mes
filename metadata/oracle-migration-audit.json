@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-31T17:49:14+00:00",
-  "repoCommit": "a4f1f0dc889bb6fb93805871792b822951f32dcb",
+  "generatedAt": "2026-07-31T19:44:19+00:00",
+  "repoCommit": "43be2ca4cd8f422bb61cbf8f65ba0fc9a809f36f",
   "findingCount": 1640,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
@@ -9310,7 +9310,7 @@
     },
     {
       "file": "deploy/docker/scripts/test_generate_business_view_runtime_sql.py",
-      "line": 1328,
+      "line": 1509,
       "pattern": "oracle-keyword",
       "category": "postgres-conversion-tooling",
       "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",
@@ -9318,7 +9318,7 @@
     },
     {
       "file": "deploy/docker/scripts/test_generate_business_view_runtime_sql.py",
-      "line": 1344,
+      "line": 1525,
       "pattern": "oracle-keyword",
       "category": "postgres-conversion-tooling",
       "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",

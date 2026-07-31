@@ -1562,6 +1562,22 @@ WOM 业务记录。机器证据：
 `docs/rm-formula-management-functional-acceptance-20260731.md`；机器证据：
 `metadata/rm-formula-management-acceptance-20260731.json`。
 
+### WOM 退料、用料、报工、尾料与完工入库操作回归（2026-08-01）
+
+本轮针对用户反馈的 12 个无操作入口页面做真实浏览器修复和复验。结果 12/12 页面级
+PASS，浏览器四类错误均为 0，10 张业务表前后行数一致。
+
+| 模块 | 页面数量 | 真实操作结果 | 状态 | 边界 |
+|---|---:|---|---|---|
+| 退料管理 | 4 | 三类申请新增/查看/双击可用；退料记录按来源打开真实退料单 | PASS | 真实列表共 12 行 |
+| 用料与报工 | 4 | 查看、双击和导出入口已发布；查询 HTTP 200 | PASS | 当前列表 0 行，详情 NOT_APPLICABLE |
+| 尾料管理 | 3 | 尾料记录原生增改删恢复；投入/产出恢复查看指令和导出 | PASS | 当前列表 0 行，行级动作待样例数据 |
+| 完工入库台账 | 1 | 查看详情、双击、入库明细、库存流水和 CSV 导出可用 | PASS | 当前页面 1 行 |
+
+详细步骤和限制见
+`docs/wom-material-report-actions-functional-acceptance-20260801.md`；机器证据见
+`metadata/wom-material-report-actions-acceptance-20260801.json`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

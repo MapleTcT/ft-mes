@@ -14,7 +14,7 @@
     input { width: min(360px, 100%); height: 36px; border: 1px solid #c9d0da; border-radius: 4px; padding: 0 12px; font-size: 14px; }
     button { height: 36px; border: 1px solid #1668dc; border-radius: 4px; padding: 0 18px; background: #1668dc; color: #fff; font-size: 14px; cursor: pointer; }
     button.secondary { background: #fff; color: #1668dc; }
-    button:disabled { cursor: wait; opacity: .55; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
     .message { display: none; margin-bottom: 12px; padding: 10px 12px; border-left: 4px solid #d14343; background: #fff2f2; color: #9f1f1f; }
     .table-wrap { overflow: auto; border: 1px solid #dce1e8; background: #fff; }
     table { width: 100%; min-width: 980px; border-collapse: collapse; table-layout: fixed; }
@@ -22,6 +22,7 @@
     th { background: #f1f3f6; color: #4b5563; font-weight: 600; }
     tbody tr:hover { background: #f5f9ff; }
     tbody tr { cursor: pointer; }
+    tbody tr.selected { background: #e8f2ff; box-shadow: inset 3px 0 #1668dc; }
     .status { display: inline-flex; min-width: 72px; justify-content: center; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
     .status.qualified { background: #eaf7ef; color: #18794e; }
     .status.unqualified { background: #fff0f0; color: #b42318; }
@@ -53,6 +54,8 @@
       <input id="keyword" aria-label="搜索" placeholder="单号、来源单号、制造指令号">
       <button id="search" type="button">查询</button>
       <button id="clear" class="secondary" type="button">清空</button>
+      <button id="view-detail" class="secondary" type="button" disabled>查看详情</button>
+      <button id="export-current" class="secondary" type="button" disabled>导出当前结果</button>
     </div>
     <div id="message" class="message" role="alert"></div>
     <div class="table-wrap">
@@ -90,6 +93,10 @@
       var keyword = document.getElementById('keyword');
       var search = document.getElementById('search');
       var dialog = document.getElementById('detail-dialog');
+      var detailButton = document.getElementById('view-detail');
+      var exportButton = document.getElementById('export-current');
+      var currentItems = [];
+      var selectedItem = null;
 
       function text(value) { return value === null || value === undefined || value === '' ? '-' : String(value); }
       function cell(value) { var td = document.createElement('td'); td.textContent = text(value); return td; }
@@ -107,19 +114,35 @@
           .then(function (response) { if (!response.ok) throw new Error('请求失败: HTTP ' + response.status); return response.json(); })
           .then(function (body) { if (body.code !== 200) throw new Error(body.message || '请求失败'); return body.data; });
       }
+      function selectRow(item, tr) {
+        Array.prototype.forEach.call(rows.querySelectorAll('tr'), function (candidate) {
+          candidate.classList.remove('selected');
+          candidate.setAttribute('aria-selected', 'false');
+        });
+        selectedItem = item;
+        tr.classList.add('selected');
+        tr.setAttribute('aria-selected', 'true');
+        detailButton.disabled = false;
+      }
       function load() {
         clearError(); search.disabled = true;
         request(apiPrefix + '/wms/completion-inbounds?size=100&keyword=' + encodeURIComponent(keyword.value.trim()))
           .then(function (data) {
             rows.textContent = '';
-            (data.items || []).forEach(function (item) {
+            currentItems = data.items || [];
+            selectedItem = null;
+            detailButton.disabled = true;
+            exportButton.disabled = currentItems.length === 0;
+            currentItems.forEach(function (item) {
               var tr = document.createElement('tr'); tr.tabIndex = 0;
+              tr.setAttribute('aria-selected', 'false');
               tr.appendChild(cell(item.document_no)); tr.appendChild(cell(item.source_document_no));
               tr.appendChild(cell(item.directive_no)); tr.appendChild(cell(item.company_code));
               tr.appendChild(cell(item.warehouse_code)); tr.appendChild(cell(item.storage_date));
               var quality = document.createElement('td'); quality.appendChild(status(item.quality_status)); tr.appendChild(quality);
               tr.appendChild(cell(item.created_at));
-              tr.addEventListener('click', function () { loadDetail(item.id); });
+              tr.addEventListener('click', function () { selectRow(item, tr); });
+              tr.addEventListener('dblclick', function () { selectRow(item, tr); loadDetail(item.id); });
               tr.addEventListener('keydown', function (event) { if (event.key === 'Enter') loadDetail(item.id); });
               rows.appendChild(tr);
             });
@@ -128,6 +151,31 @@
           })
           .catch(showError)
           .then(function () { search.disabled = false; });
+      }
+      function csvValue(value) {
+        var rendered = value === null || value === undefined ? '' : String(value);
+        if (/^[=+\-@]/.test(rendered)) rendered = "'" + rendered;
+        return '"' + rendered.replace(/"/g, '""') + '"';
+      }
+      function exportCurrent() {
+        if (!currentItems.length) return;
+        var columns = [
+          ['入库单号', 'document_no'], ['来源单号', 'source_document_no'],
+          ['制造指令号', 'directive_no'], ['公司', 'company_code'],
+          ['仓库', 'warehouse_code'], ['入库日期', 'storage_date'],
+          ['质量状态', 'quality_status'], ['创建时间', 'created_at']
+        ];
+        var lines = [columns.map(function (column) { return csvValue(column[0]); }).join(',')];
+        currentItems.forEach(function (item) {
+          lines.push(columns.map(function (column) { return csvValue(item[column[1]]); }).join(','));
+        });
+        var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+        var link = document.createElement('a');
+        var objectUrl = URL.createObjectURL(blob);
+        link.href = objectUrl;
+        link.download = '完工入库台账_' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(link); link.click(); link.remove();
+        setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 0);
       }
       function fact(label, value) {
         var wrap = document.createElement('div'); wrap.className = 'fact';
@@ -161,6 +209,8 @@
 
       search.addEventListener('click', load);
       document.getElementById('clear').addEventListener('click', function () { keyword.value = ''; load(); });
+      detailButton.addEventListener('click', function () { if (selectedItem) loadDetail(selectedItem.id); });
+      exportButton.addEventListener('click', exportCurrent);
       keyword.addEventListener('keydown', function (event) { if (event.key === 'Enter') load(); });
       document.getElementById('close-detail').addEventListener('click', function () { dialog.close(); });
       load();

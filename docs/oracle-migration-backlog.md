@@ -6,8 +6,8 @@
 
 ## 摘要
 
-- Generated At：`2026-07-31T17:49:14+00:00`。
-- Repo Commit：`a4f1f0dc889bb6fb93805871792b822951f32dcb`。
+- Generated At：`2026-07-31T19:44:19+00:00`。
+- Repo Commit：`43be2ca4cd8f422bb61cbf8f65ba0fc9a809f36f`。
 - 总引用数：`1640`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。

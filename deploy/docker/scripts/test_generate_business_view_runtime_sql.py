@@ -1108,6 +1108,187 @@ class ProductRuntimeParityTest(unittest.TestCase):
         ):
             self.assertIn(detail_view_code, GENERATOR.TARGET_VIEW_CODES)
 
+    def test_wom_return_application_lists_restore_add_detail_and_export(self):
+        cases = (
+            (
+                "WOM_1.0.0_rejectMaterilal_prePareRejectList",
+                "/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList",
+                "WOM_1.0.0_rejectMaterilal_prePareRejectEdit",
+                "/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectEdit",
+                "WOM_1.0.0_rejectMaterilal_prePareRejectView",
+                "/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectView",
+            ),
+            (
+                "WOM_1.0.0_rejectMaterilal_batchRejectList",
+                "/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList",
+                "WOM_1.0.0_rejectMaterilal_batchRejectEdit",
+                "/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectEdit",
+                "WOM_1.0.0_rejectMaterilal_batchRejectView",
+                "/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectView",
+            ),
+            (
+                "WOM_1.0.0_rejectMaterilal_materiaRejectList",
+                "/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList",
+                "WOM_1.0.0_rejectMaterilal_materiaRejectEdit",
+                "/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectEdit",
+                "WOM_1.0.0_rejectMaterilal_materiaRejectView",
+                "/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectView",
+            ),
+        )
+
+        for code, url, edit_code, edit_url, detail_code, detail_url in cases:
+            with self.subTest(view_code=code):
+                view = view_variant(code=code, url=url)
+                edit_view = view_variant(
+                    code=edit_code,
+                    url=edit_url,
+                    view_type="EDIT",
+                    open_type="frame",
+                )
+                detail_view = view_variant(
+                    code=detail_code,
+                    url=detail_url,
+                    view_type="VIEW",
+                    open_type="frame",
+                )
+                payload = {"components": [{"type": "layoutDatagrid", "buttons": []}]}
+
+                GENERATOR.apply_wom_material_report_list_actions(
+                    view,
+                    payload,
+                    {
+                        code: view,
+                        edit_code: edit_view,
+                        detail_code: detail_view,
+                    },
+                )
+
+                grid = payload["components"][0]
+                self.assertEqual(["add", "viewDetail"], [b["id"] for b in grid["buttons"]])
+                self.assertIn(edit_url, grid["buttons"][0]["funcbody"])
+                self.assertIn(detail_url, grid["buttons"][1]["funcbody"])
+                self.assertTrue(grid["isExportExcel"])
+                self.assertTrue(grid["listProperty"]["exportExcel"])
+                self.assertEqual(url + "-query", grid["dataUrl"])
+                self.assertTrue(grid["isdbcustom"])
+                expected_double_click_name = code.rsplit("_", 1)[-1] + "DB"
+                self.assertIn(
+                    f"function {expected_double_click_name}(event, row)",
+                    grid["dbcustomtextarea_es5"],
+                )
+                self.assertIn(detail_url, grid["dbcustomtextarea_es5"])
+                self.assertNotIn(
+                    "DELETE", [button["operatetype"] for button in grid["buttons"]]
+                )
+
+    def test_wom_material_report_ledgers_restore_detail_and_export_only(self):
+        read_only_codes = (
+            "WOM_1.0.0_rejectMaterilal_batchRejectPrtList",
+            "WOM_1.0.0_putInMaterial_putinList",
+            "WOM_1.0.0_putInMaterial_putInDetailList",
+            "WOM_1.0.0_outputMaterial_outputList",
+            "WOM_1.0.0_outputMaterial_outputDetailList",
+            "WOM_1.0.0_procReport_putinDetailList",
+            "WOM_1.0.0_procReport_outputDetailList",
+        )
+        support_views = {}
+        for detail_code in {
+            spec["detail_view"]
+            for code, spec in GENERATOR.WOM_MATERIAL_REPORT_LIST_ACTIONS.items()
+            if code in read_only_codes and spec.get("detail_view")
+        }:
+            support_views[detail_code] = view_variant(
+                code=detail_code,
+                url="/msService/WOM/support/" + detail_code.rsplit("_", 1)[-1],
+                view_type="VIEW",
+                open_type="frame",
+            )
+
+        for code in read_only_codes:
+            with self.subTest(view_code=code):
+                spec = GENERATOR.WOM_MATERIAL_REPORT_LIST_ACTIONS[code]
+                view = view_variant(code=code, url="/msService/WOM/list/" + code.rsplit("_", 1)[-1])
+                payload = {"components": [{"type": "layoutDatagrid", "buttons": []}]}
+
+                GENERATOR.apply_wom_material_report_list_actions(
+                    view,
+                    payload,
+                    {code: view, **support_views},
+                )
+
+                grid = payload["components"][0]
+                expected_id = "viewTask" if spec.get("detail_label") == "查看指令" else "viewDetail"
+                self.assertEqual([expected_id], [button["id"] for button in grid["buttons"]])
+                self.assertTrue(grid["exportExcel"])
+                self.assertTrue(grid["listProperty"]["isExportExcel"])
+                for identity_key in (
+                    "DataGridCode",
+                    "code",
+                    "dataGridName",
+                    "datagridName",
+                ):
+                    self.assertNotIn(identity_key, grid)
+                self.assertNotIn(
+                    "ADD", [button["operatetype"] for button in grid["buttons"]]
+                )
+                self.assertNotIn(
+                    "DELETE", [button["operatetype"] for button in grid["buttons"]]
+                )
+                expected_double_click_name = code.rsplit("_", 1)[-1] + "DB"
+                self.assertIn(
+                    f"function {expected_double_click_name}(event, row)",
+                    grid["dbcustomtextarea_es5"],
+                )
+                self.assertIn(spec["detail_id_path"] if spec.get("detail_id_path") else "headId.id", grid["dbcustomtextarea"])
+
+    def test_wom_tail_material_list_restores_only_source_crud_actions(self):
+        code = "WOM_1.0.0_remainMaterial_remainMaterialList"
+        view = view_variant(
+            code=code,
+            url="/msService/WOM/remainMaterial/remainMaterial/remainMaterialList",
+        )
+        payload = {
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "buttons": [
+                        {"id": "insertRow", "showname": "增行", "isPublished": True, "isHide": True},
+                        {"id": "update", "showname": "修改", "isPublished": True, "isHide": True},
+                        {"id": "deleteRow", "showname": "删行", "isPublished": True, "isHide": True},
+                        {"id": "print", "showname": "打印", "isPublished": False, "isHide": True},
+                    ],
+                }
+            ]
+        }
+
+        GENERATOR.apply_wom_material_report_list_actions(view, payload, {code: view})
+
+        grid = payload["components"][0]
+        visible = [button for button in grid["buttons"] if button["isPublished"] and not button["isHide"]]
+        self.assertEqual(
+            [("insertRow", "新增"), ("update", "修改"), ("deleteRow", "删除")],
+            [(button["id"], button["showname"]) for button in visible],
+        )
+        self.assertTrue(grid["buttons"][-1]["isHide"])
+        self.assertFalse(grid["buttons"][-1]["isPublished"])
+
+    def test_wom_material_report_action_views_are_default_targets(self):
+        expected = {
+            *GENERATOR.WOM_MATERIAL_REPORT_LIST_ACTIONS.keys(),
+            *(
+                spec["add_view"]
+                for spec in GENERATOR.WOM_MATERIAL_REPORT_LIST_ACTIONS.values()
+                if spec.get("add_view")
+            ),
+            *(
+                spec["detail_view"]
+                for spec in GENERATOR.WOM_MATERIAL_REPORT_LIST_ACTIONS.values()
+                if spec.get("detail_view")
+            ),
+        }
+
+        self.assertTrue(expected.issubset(set(GENERATOR.TARGET_VIEW_CODES)))
+
     def test_incompatible_wom_action_views_are_regenerated_from_module_xml(self):
         packaged_payload = {
             "pageType": "EDIT",
@@ -2190,6 +2371,49 @@ ReactAPI.Layout.hideTab('tabs-5');""",
         self.assertIn("decoded.payload::jsonb", migration)
         self.assertIn("runtime_valid_count <> 2", migration)
         self.assertIn("product_valid_count <> 2", migration)
+
+    def test_wom_material_report_action_migration_covers_twelve_page_round(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "256-wom-material-report-actions-runtime.sql"
+        ).read_text(encoding="utf-8")
+
+        support_view_codes = {
+            "WOM_1.0.0_rejectMaterilal_prePareRejectEdit",
+            "WOM_1.0.0_rejectMaterilal_prePareRejectView",
+            "WOM_1.0.0_rejectMaterilal_batchRejectEdit",
+            "WOM_1.0.0_rejectMaterilal_batchRejectView",
+            "WOM_1.0.0_rejectMaterilal_materiaRejectEdit",
+            "WOM_1.0.0_rejectMaterilal_materiaRejectView",
+            "WOM_1.0.0_putInMaterial_putinView",
+            "WOM_1.0.0_putInMaterial_putInDetailView",
+            "WOM_1.0.0_outputMaterial_outputView",
+            "WOM_1.0.0_remainMaterial_remainMaterialEdit",
+            "WOM_1.0.0_remainMaterial_remainMaterialEdit2",
+            "WOM_1.0.0_produceTask_makeTaskView",
+        }
+        expected_view_codes = {
+            *GENERATOR.WOM_MATERIAL_REPORT_LIST_ACTIONS,
+            *support_view_codes,
+        }
+        self.assertEqual(23, len(expected_view_codes))
+        self.assertIn("-- target_view_count: 23", migration)
+        for view_code in expected_view_codes:
+            self.assertIn("-- " + view_code + " from ", migration)
+        for marker in (
+            '"showname":"新增退料申请"',
+            '"showname":"查看详情"',
+            '"showname":"查看退料单"',
+            '"showname":"查看指令"',
+            '"namekey":"新增","id":"insertRow"',
+            '"namekey":"修改","id":"update"',
+            '"namekey":"删除","id":"deleteRow"',
+            '"exportExcel":true',
+            '"isdbcustom":true',
+        ):
+            self.assertIn(marker, migration)
 
     def test_cli_output_strips_trailing_whitespace_from_embedded_source(self):
         output = GENERATOR.strip_generated_line_trailing_whitespace(

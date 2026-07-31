@@ -1,0 +1,1500 @@
+{
+  "generatedAt": "2026-07-31T19:26:22.871Z",
+  "repoCommit": "43be2ca4cd8f422bb61cbf8f65ba0fc9a809f36f+working-tree",
+  "database": "PostgreSQL",
+  "environment": "http://10.11.100.17:18080",
+  "module": "WOM 退料/用料/报工/尾料与 WMS 完工入库交互",
+  "status": "PASS",
+  "summary": {
+    "testedPages": 12,
+    "pass": 12,
+    "fail": 0
+  },
+  "items": [
+    {
+      "module": "备料退料",
+      "route": "/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList",
+      "operation": "新增与查看",
+      "api": "/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "tables": [],
+      "status": "PASS",
+      "toolbar": [
+        {
+          "id": "btn-add",
+          "text": "新增退料申请",
+          "visible": true
+        },
+        {
+          "id": "btn-viewDetail",
+          "text": "查看详情",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "query": {
+        "endpoint": "/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList-query",
+        "status": 200,
+        "rowCount": 4,
+        "visibleStatus": 200,
+        "renderedRows": 4
+      },
+      "add": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectEdit?viewCode=WOM_1.0.0_rejectMaterilal_prePareRejectList&entityCode=WOM_1.0.0_rejectMaterilal&iscrosscompany=false&openType=frame&iscallback=false",
+        "title": "备料退料单",
+        "bodyLength": 237,
+        "body": "备料退料单\n(\n默认人员\n2026-08-01 03:26:29\n虚拟岗位\n )\n状态：\n保存\n0\n\t\t\t\t\t\n\n*退料申请人\n\t\n默认人员 \n\t\n申请时间\n\t\n\t\n退料类型\n\t\n备料退料\n\n\n备注\n\t\n参照备料记录\n删行\n序号\n物料编码\n物料名称\n出库仓库编码\n出库仓库名称\n出库货位状态\n出库货位编码\n出库货位名称\n物料批号\n备料数量\n接收数量\n入库仓库编码\n入库仓库名称\n入库货位状态\n入库货位编码\n入库货位名称\n退料数量\n退料原因\n备注\n处理结果\n填写意见\n常用意见",
+        "inputCount": 25,
+        "controlCount": 28
+      },
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectView?viewCode=WOM_1.0.0_rejectMaterilal_prePareRejectList&entityCode=WOM_1.0.0_rejectMaterilal&iscrosscompany=false&openType=frame&iscallback=false&id=756671297930496",
+        "title": "备料退料单",
+        "bodyLength": 263,
+        "body": "备料退料单\nrejectMaterilal_20260619_009\n(\n虚拟人员\n2026-06-19 03:03:23\n虚拟岗位\n )\n状态：生效\n关闭窗口\n0\n\t\t\t\t\t\n\n退料申请人\n\t\n虚拟人员\n\t\n申请时间\n\t\n2026-06-19 03:03:49\n\t\n退料类型\n\t\n备料退料\n\n\n备注\n\t\n序号\n物料编码\n物料名称\n出库仓库编码\n出库仓库名称\n出库货位状态\n出库货位编码\n出库货位名称\n物料批号\n备料数量\n接收数量\n入库仓库编码\n入库仓库名称\n入库货位状态\n入库货位编码\n入库货位名称\n退料数量\n退料原因\n备注",
+        "inputCount": 20,
+        "controlCount": 21
+      },
+      "doubleClick": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectView?viewCode=WOM_1.0.0_rejectMaterilal_prePareRejectList&entityCode=WOM_1.0.0_rejectMaterilal&iscrosscompany=false&openType=frame&iscallback=false&id=756671297930496",
+        "title": "备料退料单",
+        "bodyLength": 263,
+        "body": "备料退料单\nrejectMaterilal_20260619_009\n(\n虚拟人员\n2026-06-19 03:03:23\n虚拟岗位\n )\n状态：生效\n关闭窗口\n0\n\t\t\t\t\t\n\n退料申请人\n\t\n虚拟人员\n\t\n申请时间\n\t\n2026-06-19 03:03:49\n\t\n退料类型\n\t\n备料退料\n\n\n备注\n\t\n序号\n物料编码\n物料名称\n出库仓库编码\n出库仓库名称\n出库货位状态\n出库货位编码\n出库货位名称\n物料批号\n备料数量\n接收数量\n入库仓库编码\n入库仓库名称\n入库货位状态\n入库货位编码\n入库货位名称\n退料数量\n退料原因\n备注",
+        "inputCount": 20,
+        "controlCount": 21
+      },
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList",
+        "title": "备料退料列表"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/prepare-return.png",
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条备料退料申请"
+          ]
+        ]
+      },
+      "selection": {
+        "id": "756671297930496",
+        "tableNo": "rejectMaterilal_20260619_009",
+        "headId": null,
+        "flatHeadId": null,
+        "flatRejectType": null
+      }
+    },
+    {
+      "module": "配料退料",
+      "route": "/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList",
+      "operation": "新增与查看",
+      "api": "/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "tables": [],
+      "status": "PASS",
+      "toolbar": [
+        {
+          "id": "btn-add",
+          "text": "新增退料申请",
+          "visible": true
+        },
+        {
+          "id": "btn-viewDetail",
+          "text": "查看详情",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "query": {
+        "endpoint": "/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList-query",
+        "status": 200,
+        "rowCount": 2,
+        "visibleStatus": 200,
+        "renderedRows": 2
+      },
+      "add": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectEdit?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectList&entityCode=WOM_1.0.0_rejectMaterilal&iscrosscompany=false&openType=frame&iscallback=false",
+        "title": "配料退料单",
+        "bodyLength": 242,
+        "body": "配料退料单\n(\n默认人员\n2026-08-01 03:26:37\n虚拟岗位\n )\n状态：\n保存\n0\n\t\t\t\t\t\n\n*退料申请人\n\t\n默认人员 \n\t\n申请时间\n\t\n\t\n退料类型\n\t\n配料退料\n\n\n备注\n\t\n参照配料记录\n删行\n序号\n物料编码\n物料名称\n物料批号\n记录状态\n配料数量\n已投数量\n出库仓库编码\n出库仓库名称\n出库货位状态\n出库货位编码\n出库货位名称\n入库仓库编码\n入库仓库名称\n入库货位状态\n入库货位编码\n入库货位名称\n退料数量\n退料原因\n备注\n处理结果\n填写意见\n常用意见",
+        "inputCount": 26,
+        "controlCount": 29
+      },
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectView?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectList&entityCode=WOM_1.0.0_rejectMaterilal&iscrosscompany=false&openType=frame&iscallback=false&id=756677581907200",
+        "title": "配料退料单",
+        "bodyLength": 447,
+        "body": "配料退料单\nrejectMaterilal_20260619_011\n(\n虚拟人员\n2026-06-19 03:28:57\n虚拟岗位\n )\n状态：生效\n关闭窗口\n0\n\t\t\t\t\t\n\n退料申请人\n\t\n虚拟人员\n\t\n申请时间\n\t\n2026-06-19 03:29:27\n\t\n退料类型\n\t\n配料退料\n\n\n备注\n\t\n序号\n物料编码\n物料名称\n物料批号\n配料数量\n已投数量\n出库仓库编码\n出库仓库名称\n出库货位状态\n出库货位编码\n出库货位名称\n入库仓库编码\n入库仓库名称\n入库货位状态\n入库货位编码\n入库货位名称\n退料数量\n退料原因\n备注\n1\nADP_E2E_20260615191905_WOMSTART_MAT\nADP_E2E_20260615191905_WOMSTART material\nADP_E2E_20260618192824_WOM_REJECT_MATERIAL\n10.00\n0.00\n2.00\n错发\nADP_E2E_20260618192824_WOM_REJECT_MATERIAL",
+        "inputCount": 22,
+        "controlCount": 23
+      },
+      "doubleClick": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectView?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectList&entityCode=WOM_1.0.0_rejectMaterilal&iscrosscompany=false&openType=frame&iscallback=false&id=756677581907200",
+        "title": "配料退料单",
+        "bodyLength": 447,
+        "body": "配料退料单\nrejectMaterilal_20260619_011\n(\n虚拟人员\n2026-06-19 03:28:57\n虚拟岗位\n )\n状态：生效\n关闭窗口\n0\n\t\t\t\t\t\n\n退料申请人\n\t\n虚拟人员\n\t\n申请时间\n\t\n2026-06-19 03:29:27\n\t\n退料类型\n\t\n配料退料\n\n\n备注\n\t\n序号\n物料编码\n物料名称\n物料批号\n配料数量\n已投数量\n出库仓库编码\n出库仓库名称\n出库货位状态\n出库货位编码\n出库货位名称\n入库仓库编码\n入库仓库名称\n入库货位状态\n入库货位编码\n入库货位名称\n退料数量\n退料原因\n备注\n1\nADP_E2E_20260615191905_WOMSTART_MAT\nADP_E2E_20260615191905_WOMSTART material\nADP_E2E_20260618192824_WOM_REJECT_MATERIAL\n10.00\n0.00\n2.00\n错发\nADP_E2E_20260618192824_WOM_REJECT_MATERIAL",
+        "inputCount": 22,
+        "controlCount": 23
+      },
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList",
+        "title": "配料退料列表"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/batch-return.png",
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条配料退料申请"
+          ]
+        ]
+      },
+      "selection": {
+        "id": "756677581907200",
+        "tableNo": "rejectMaterilal_20260619_011",
+        "headId": null,
+        "flatHeadId": null,
+        "flatRejectType": null
+      }
+    },
+    {
+      "module": "车间物料退料",
+      "route": "/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList",
+      "operation": "新增与查看",
+      "api": "/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "tables": [],
+      "status": "PASS",
+      "toolbar": [
+        {
+          "id": "btn-add",
+          "text": "新增退料申请",
+          "visible": true
+        },
+        {
+          "id": "btn-viewDetail",
+          "text": "查看详情",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "query": {
+        "endpoint": "/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList-query",
+        "status": 200,
+        "rowCount": 3,
+        "visibleStatus": 200,
+        "renderedRows": 3
+      },
+      "add": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectEdit?viewCode=WOM_1.0.0_rejectMaterilal_materiaRejectList&entityCode=WOM_1.0.0_rejectMaterilal&iscrosscompany=false&openType=frame&iscallback=false",
+        "title": "车间物料退料单",
+        "bodyLength": 261,
+        "body": "车间物料退料单\n(\n默认人员\n2026-08-01 03:26:45\n虚拟岗位\n )\n状态：\n保存\n0\n\t\t\t\t\t\n\n*退料申请人\n\t\n默认人员 \n\t\n申请时间\n\t\n\t\n退料类型\n\t\n车间物料退料\n\n\n*生产区域\n\t\n名称或拼音\n \n\t\n\t\n\t\n\t\n\n\n备注\n\t\n参照车间物料\n删行\n序号\n物料编码\n物料名称\n物料批号\n出库仓库编码\n出库仓库名称\n出库货位状态\n出库货位编码\n出库货位名称\n入库仓库编码\n入库仓库名称\n入库货位状态\n入库货位编码\n入库货位名称\n可用量\n退料数量\n退料原因\n备注\n处理结果\n填写意见\n常用意见",
+        "inputCount": 27,
+        "controlCount": 30
+      },
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectView?viewCode=WOM_1.0.0_rejectMaterilal_materiaRejectList&entityCode=WOM_1.0.0_rejectMaterilal&iscrosscompany=false&openType=frame&iscallback=false&id=756670413997312",
+        "title": "车间物料退料单",
+        "bodyLength": 390,
+        "body": "车间物料退料单\nrejectMaterilal_20260619_008\n(\n虚拟人员\n2026-06-19 02:59:47\n虚拟岗位\n )\n状态：生效\n关闭窗口\n0\n\t\t\t\t\t\n\n退料申请人\n\t\n虚拟人员\n\t\n申请时间\n\t\n2026-06-19 03:01:30\n\t\n退料类型\n\t\n车间物料退料\n\n\n生产区域\n\t\n\t\n\t\n\t\n\t\n\n\n备注\n\t\nADP_E2E_20260618185904_WOM_REJECT_MATERIAL_EFFECTIVE\n序号\n物料编码\n物料名称\n物料批号\n出库仓库编码\n出库仓库名称\n出库货位状态\n出库货位编码\n出库货位名称\n入库仓库编码\n入库仓库名称\n入库货位状态\n入库货位编码\n入库货位名称\n可用量\n退料数量\n退料原因\n备注\n1\n8.00\n2.00\n错发\n\nADP_E2E_20260618185904_WOM_REJECT_MATERIAL",
+        "inputCount": 20,
+        "controlCount": 21
+      },
+      "doubleClick": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectView?viewCode=WOM_1.0.0_rejectMaterilal_materiaRejectList&entityCode=WOM_1.0.0_rejectMaterilal&iscrosscompany=false&openType=frame&iscallback=false&id=756670413997312",
+        "title": "车间物料退料单",
+        "bodyLength": 390,
+        "body": "车间物料退料单\nrejectMaterilal_20260619_008\n(\n虚拟人员\n2026-06-19 02:59:47\n虚拟岗位\n )\n状态：生效\n关闭窗口\n0\n\t\t\t\t\t\n\n退料申请人\n\t\n虚拟人员\n\t\n申请时间\n\t\n2026-06-19 03:01:30\n\t\n退料类型\n\t\n车间物料退料\n\n\n生产区域\n\t\n\t\n\t\n\t\n\t\n\n\n备注\n\t\nADP_E2E_20260618185904_WOM_REJECT_MATERIAL_EFFECTIVE\n序号\n物料编码\n物料名称\n物料批号\n出库仓库编码\n出库仓库名称\n出库货位状态\n出库货位编码\n出库货位名称\n入库仓库编码\n入库仓库名称\n入库货位状态\n入库货位编码\n入库货位名称\n可用量\n退料数量\n退料原因\n备注\n1\n8.00\n2.00\n错发\n\nADP_E2E_20260618185904_WOM_REJECT_MATERIAL",
+        "inputCount": 20,
+        "controlCount": 21
+      },
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList",
+        "title": "车间物料退料列表"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/workshop-return.png",
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条车间物料退料申请"
+          ]
+        ]
+      },
+      "selection": {
+        "id": "756670413997312",
+        "tableNo": "rejectMaterilal_20260619_008",
+        "headId": null,
+        "flatHeadId": null,
+        "flatRejectType": null
+      }
+    },
+    {
+      "module": "退料记录",
+      "route": "/msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList",
+      "operation": "查看与导出",
+      "api": "/msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "tables": [],
+      "status": "PASS",
+      "toolbar": [
+        {
+          "id": "btn-viewDetail",
+          "text": "查看退料单",
+          "visible": true
+        },
+        {
+          "id": "btn-createApproOrAdjust",
+          "text": "退料记录下推物料",
+          "visible": false
+        },
+        {
+          "id": "btn-secondSyn",
+          "text": "二次同步",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "query": {
+        "endpoint": "/msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList-query",
+        "status": 200,
+        "rowCount": 3,
+        "visibleStatus": 200,
+        "renderedRows": 3
+      },
+      "add": null,
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectView?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectPrtList&entityCode=WOM_1.0.0_rejectMaterilal&iscrosscompany=false&openType=frame&iscallback=false&id=756677581907200",
+        "title": "配料退料单",
+        "bodyLength": 447,
+        "body": "配料退料单\nrejectMaterilal_20260619_011\n(\n虚拟人员\n2026-06-19 03:28:57\n虚拟岗位\n )\n状态：生效\n关闭窗口\n0\n\t\t\t\t\t\n\n退料申请人\n\t\n虚拟人员\n\t\n申请时间\n\t\n2026-06-19 03:29:27\n\t\n退料类型\n\t\n配料退料\n\n\n备注\n\t\n序号\n物料编码\n物料名称\n物料批号\n配料数量\n已投数量\n出库仓库编码\n出库仓库名称\n出库货位状态\n出库货位编码\n出库货位名称\n入库仓库编码\n入库仓库名称\n入库货位状态\n入库货位编码\n入库货位名称\n退料数量\n退料原因\n备注\n1\nADP_E2E_20260615191905_WOMSTART_MAT\nADP_E2E_20260615191905_WOMSTART material\nADP_E2E_20260618192824_WOM_REJECT_MATERIAL\n10.00\n0.00\n2.00\n错发\nADP_E2E_20260618192824_WOM_REJECT_MATERIAL",
+        "inputCount": 22,
+        "controlCount": 23
+      },
+      "doubleClick": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectView?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectPrtList&entityCode=WOM_1.0.0_rejectMaterilal&iscrosscompany=false&openType=frame&iscallback=false&id=756677581907200",
+        "title": "配料退料单",
+        "bodyLength": 447,
+        "body": "配料退料单\nrejectMaterilal_20260619_011\n(\n虚拟人员\n2026-06-19 03:28:57\n虚拟岗位\n )\n状态：生效\n关闭窗口\n0\n\t\t\t\t\t\n\n退料申请人\n\t\n虚拟人员\n\t\n申请时间\n\t\n2026-06-19 03:29:27\n\t\n退料类型\n\t\n配料退料\n\n\n备注\n\t\n序号\n物料编码\n物料名称\n物料批号\n配料数量\n已投数量\n出库仓库编码\n出库仓库名称\n出库货位状态\n出库货位编码\n出库货位名称\n入库仓库编码\n入库仓库名称\n入库货位状态\n入库货位编码\n入库货位名称\n退料数量\n退料原因\n备注\n1\nADP_E2E_20260615191905_WOMSTART_MAT\nADP_E2E_20260615191905_WOMSTART material\nADP_E2E_20260618192824_WOM_REJECT_MATERIAL\n10.00\n0.00\n2.00\n错发\nADP_E2E_20260618192824_WOM_REJECT_MATERIAL",
+        "inputCount": 22,
+        "controlCount": 23
+      },
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList",
+        "title": "退料记录列表"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/return-record.png",
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条退料记录"
+          ]
+        ]
+      },
+      "selection": {
+        "id": "756677582132480",
+        "tableNo": "",
+        "headId": {
+          "attrMap": null,
+          "id": 756677581907200,
+          "rejectApplyStaff": {
+            "id": 1,
+            "name": "虚拟人员"
+          },
+          "rejectType": {
+            "id": "WOM_rejectType/forBatch",
+            "value": "配料退料"
+          },
+          "tableNo": "rejectMaterilal_20260619_011"
+        },
+        "flatHeadId": null,
+        "flatRejectType": null
+      }
+    },
+    {
+      "module": "生产用料单",
+      "route": "/msService/WOM/putInMaterial/putInMaterial/putinList",
+      "operation": "查看与导出",
+      "api": "/msService/WOM/putInMaterial/putInMaterial/putinList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "tables": [],
+      "status": "PASS",
+      "toolbar": [
+        {
+          "id": "btn-viewDetail",
+          "text": "查看详情",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "query": {
+        "endpoint": "/msService/WOM/putInMaterial/putInMaterial/putinList-query",
+        "status": 200,
+        "rowCount": 0,
+        "visibleStatus": 200,
+        "renderedRows": 0
+      },
+      "add": null,
+      "detail": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据，已验证按钮及无选择提示"
+      },
+      "doubleClick": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据"
+      },
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/putInMaterial/putInMaterial/putinList",
+        "title": "生产用料列表"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/material-use.png",
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条生产用料单"
+          ]
+        ]
+      }
+    },
+    {
+      "module": "生产用料明细",
+      "route": "/msService/WOM/putInMaterial/putMateiDetail/putInDetailList",
+      "operation": "查看与导出",
+      "api": "/msService/WOM/putInMaterial/putMateiDetail/putInDetailList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "tables": [],
+      "status": "PASS",
+      "toolbar": [
+        {
+          "id": "btn-viewDetail",
+          "text": "查看详情",
+          "visible": true
+        },
+        {
+          "id": "btn-secondSyn",
+          "text": "二次同步",
+          "visible": false
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "query": {
+        "endpoint": "/msService/WOM/putInMaterial/putMateiDetail/putInDetailList-query",
+        "status": 200,
+        "rowCount": 0,
+        "visibleStatus": 200,
+        "renderedRows": 0
+      },
+      "add": null,
+      "detail": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据，已验证按钮及无选择提示"
+      },
+      "doubleClick": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据"
+      },
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/putInMaterial/putMateiDetail/putInDetailList",
+        "title": "生产用料明细"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/material-use-detail.png",
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条生产用料明细"
+          ]
+        ]
+      }
+    },
+    {
+      "module": "生产报工单",
+      "route": "/msService/WOM/outputMaterial/outputMaterial/outputList",
+      "operation": "查看与导出",
+      "api": "/msService/WOM/outputMaterial/outputMaterial/outputList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "tables": [],
+      "status": "PASS",
+      "toolbar": [
+        {
+          "id": "btn-viewDetail",
+          "text": "查看详情",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "query": {
+        "endpoint": "/msService/WOM/outputMaterial/outputMaterial/outputList-query",
+        "status": 200,
+        "rowCount": 0,
+        "visibleStatus": 200,
+        "renderedRows": 0
+      },
+      "add": null,
+      "detail": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据，已验证按钮及无选择提示"
+      },
+      "doubleClick": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据"
+      },
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/outputMaterial/outputMaterial/outputList",
+        "title": "生产报工列表"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/production-report.png",
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条生产报工单"
+          ]
+        ]
+      }
+    },
+    {
+      "module": "生产报工明细",
+      "route": "/msService/WOM/outputMaterial/outMateDetail/outputDetailList",
+      "operation": "查看与导出",
+      "api": "/msService/WOM/outputMaterial/outMateDetail/outputDetailList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "tables": [],
+      "status": "PASS",
+      "toolbar": [
+        {
+          "id": "btn-viewDetail",
+          "text": "查看报工单",
+          "visible": true
+        },
+        {
+          "id": "btn-secondSyn",
+          "text": "二次同步",
+          "visible": false
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "query": {
+        "endpoint": "/msService/WOM/outputMaterial/outMateDetail/outputDetailList-query",
+        "status": 200,
+        "rowCount": 0,
+        "visibleStatus": 200,
+        "renderedRows": 0
+      },
+      "add": null,
+      "detail": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据，已验证按钮及无选择提示"
+      },
+      "doubleClick": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据"
+      },
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/outputMaterial/outMateDetail/outputDetailList",
+        "title": "生产报工明细列表"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/production-report-detail.png",
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条生产报工明细"
+          ]
+        ]
+      }
+    },
+    {
+      "module": "尾料记录",
+      "route": "/msService/WOM/remainMaterial/remainMaterial/remainMaterialList",
+      "operation": "新增/修改/删除入口",
+      "api": "/msService/WOM/remainMaterial/remainMaterial/remainMaterialList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "tables": [],
+      "status": "PASS",
+      "toolbar": [
+        {
+          "id": "btn-insertRow",
+          "text": "新增",
+          "visible": true
+        },
+        {
+          "id": "btn-update",
+          "text": "修改",
+          "visible": true
+        },
+        {
+          "id": "btn-deleteRow",
+          "text": "删除",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "query": {
+        "endpoint": "/msService/WOM/remainMaterial/remainMaterial/remainMaterialList-query",
+        "status": 200,
+        "rowCount": 0,
+        "visibleStatus": 200,
+        "renderedRows": 0
+      },
+      "add": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/remainMaterial/remainMaterial/remainMaterialEdit?__pc__=cmVtYWluTWF0ZXJpYWxMaXN0X2luc2VydFJvd19hZGRfV09NXzEuMC4wX3JlbWFpbk1hdGVyaWFsX3JlbWFpbk1hdGVyaWFsTGlzdHw_&viewCode=WOM_1.0.0_remainMaterial_remainMaterialList&entityCode=WOM_1.0.0_remainMaterial&iscrosscompany=false&openType=frame&buttonCode=WOM_1.0.0_remainMaterial_remainMaterialList_BUTTON_insertRow&iscallback=true",
+        "title": "尾料记录",
+        "bodyLength": 217,
+        "body": "尾料记录\n(\n默认人员\n2026-08-01 03:27:08\n虚拟岗位\n )\n保存\n\t\t\t\t\t\n\n*尾料类型\n\t\n\t\n*生产区域\n\t\n名称或拼音\n \n\t\n*物料批号\n\t\n\n\n*物料编码\n\t\n名称或拼音\n \n\t\n物料名称\n\t\n\t\n物料规格\n\t\n\n\n单位\n\t\n\t\n仓库编码\n\t\n名称或拼音\n \n\t\n仓库名称\n\t\n\n\n货位状态\n\t\n\t\n货位编码\n\t\n\t\n货位名称\n\t\n\n\n*尾料可用数量\n\t\n\t\n累计使用量\n\t\n\t\n初始数量\n\t\n\n\n备注\n\t",
+        "inputCount": 16,
+        "controlCount": 16
+      },
+      "detail": null,
+      "doubleClick": null,
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/remainMaterial/remainMaterial/remainMaterialList",
+        "title": "尾料列表视图"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/remaining-material.png"
+    },
+    {
+      "module": "尾料投料",
+      "route": "/msService/WOM/procReport/putinDetail/putinDetailList",
+      "operation": "查看与导出",
+      "api": "/msService/WOM/procReport/putinDetail/putinDetailList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "tables": [],
+      "status": "PASS",
+      "toolbar": [
+        {
+          "id": "btn-viewTask",
+          "text": "查看指令",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "query": {
+        "endpoint": "/msService/WOM/procReport/putinDetail/putinDetailList-query",
+        "status": 200,
+        "rowCount": 0,
+        "visibleStatus": 200,
+        "renderedRows": 0
+      },
+      "add": null,
+      "detail": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据，已验证按钮及无选择提示"
+      },
+      "doubleClick": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据"
+      },
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/procReport/putinDetail/putinDetailList",
+        "title": "用料清单列表"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/remaining-input.png",
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条尾料投料记录"
+          ]
+        ]
+      }
+    },
+    {
+      "module": "尾料产出",
+      "route": "/msService/WOM/procReport/outputDetail/outputDetailList",
+      "operation": "查看与导出",
+      "api": "/msService/WOM/procReport/outputDetail/outputDetailList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "tables": [],
+      "status": "PASS",
+      "toolbar": [
+        {
+          "id": "btn-viewTask",
+          "text": "查看指令",
+          "visible": true
+        },
+        {
+          "id": "btn-own-sz",
+          "text": "",
+          "visible": true
+        },
+        {
+          "id": "btn-export",
+          "text": "",
+          "visible": true
+        }
+      ],
+      "query": {
+        "endpoint": "/msService/WOM/procReport/outputDetail/outputDetailList-query",
+        "status": 200,
+        "rowCount": 0,
+        "visibleStatus": 200,
+        "renderedRows": 0
+      },
+      "add": null,
+      "detail": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据，已验证按钮及无选择提示"
+      },
+      "doubleClick": {
+        "status": "NOT_APPLICABLE",
+        "reason": "列表当前无业务数据"
+      },
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/WOM/procReport/outputDetail/outputDetailList",
+        "title": "产出清单列表"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/remaining-output.png",
+      "noSelection": {
+        "messages": [
+          [
+            "w",
+            "请选择一条尾料产出记录"
+          ]
+        ]
+      }
+    },
+    {
+      "module": "完工入库台账",
+      "route": "/msService/material/wms",
+      "operation": "查询/查看详情/双击详情/导出",
+      "api": "/msService/material/wms/completion-inbounds",
+      "method": "GET",
+      "requiresPersistence": false,
+      "tables": [
+        "wms_stock_documents",
+        "wms_stock_document_lines",
+        "wms_inventory_transactions"
+      ],
+      "status": "PASS",
+      "issues": [],
+      "navigation": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/material/wms",
+        "title": "完工入库"
+      },
+      "query": {
+        "status": 200,
+        "rowCount": 1
+      },
+      "toolbar": {
+        "viewDetail": "查看详情",
+        "exportCurrent": "导出当前结果"
+      },
+      "screenshot": "/tmp/adp-wom-material-report-actions-20260801/completion-inbound-ledger.png",
+      "detail": {
+        "hasInboundLines": 1,
+        "hasTransactions": 1
+      },
+      "doubleClick": {
+        "opened": true
+      },
+      "export": {
+        "fileName": "完工入库台账_2026-07-31.csv",
+        "bytes": 346
+      }
+    }
+  ],
+  "http": [
+    {
+      "page": "prepare-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_rejectMaterilal_rejectMaterial_prePareRejectList_query",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList-pending",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList-query",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/editStates?viewCode=WOM_1.0.0_rejectMaterilal_prePareRejectView&id=756671297930496",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data/756671297930496",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-double-click",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data-dg1582766773873?datagridCode=WOM_1.0.0_rejectMaterilal_prePareRejectViewdg1582766773873&id=756671297930496",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_rejectMaterilal_rejectMaterial_prePareRejectList_query",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList-pending",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-add",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/rejectMaterilal/rejectMaterial/prePareRejectEdit/i18n-value.js?0.8858861430846182",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-add",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/rejectMaterilal/rejectMaterial/prePareRejectEdit/body-es5.js?v=0.7894318577103872",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-add",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/editStates?viewCode=WOM_1.0.0_rejectMaterilal_prePareRejectEdit",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-add",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data-dg1581994918681?datagridCode=WOM_1.0.0_rejectMaterilal_prePareRejectEditdg1581994918681&id=-1",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/editStates?viewCode=WOM_1.0.0_rejectMaterilal_prePareRejectView&id=756671297930496",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data/756671297930496",
+      "status": 200
+    },
+    {
+      "page": "prepare-return-detail",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data-dg1582766773873?datagridCode=WOM_1.0.0_rejectMaterilal_prePareRejectViewdg1582766773873&id=756671297930496",
+      "status": 200
+    },
+    {
+      "page": "batch-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList",
+      "status": 200
+    },
+    {
+      "page": "batch-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_rejectMaterilal_rejectMaterial_batchRejectList_query",
+      "status": 200
+    },
+    {
+      "page": "batch-return-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList-pending",
+      "status": 200
+    },
+    {
+      "page": "batch-return-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList-query",
+      "status": 200
+    },
+    {
+      "page": "batch-return-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/editStates?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectView&id=756677581907200",
+      "status": 200
+    },
+    {
+      "page": "batch-return-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data/756677581907200",
+      "status": 200
+    },
+    {
+      "page": "batch-return-double-click",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data-dg1582766743262?datagridCode=WOM_1.0.0_rejectMaterilal_batchRejectViewdg1582766743262&id=756677581907200",
+      "status": 200
+    },
+    {
+      "page": "batch-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList",
+      "status": 200
+    },
+    {
+      "page": "batch-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_rejectMaterilal_rejectMaterial_batchRejectList_query",
+      "status": 200
+    },
+    {
+      "page": "batch-return-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList-pending",
+      "status": 200
+    },
+    {
+      "page": "batch-return-add",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/rejectMaterilal/rejectMaterial/batchRejectEdit/i18n-value.js?0.1136027808220782",
+      "status": 200
+    },
+    {
+      "page": "batch-return-add",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/rejectMaterilal/rejectMaterial/batchRejectEdit/body-es5.js?v=0.976711824226402",
+      "status": 200
+    },
+    {
+      "page": "batch-return-add",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/editStates?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectEdit",
+      "status": 200
+    },
+    {
+      "page": "batch-return-add",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data-dg1581993495790?datagridCode=WOM_1.0.0_rejectMaterilal_batchRejectEditdg1581993495790&id=-1",
+      "status": 200
+    },
+    {
+      "page": "batch-return-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/editStates?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectView&id=756677581907200",
+      "status": 200
+    },
+    {
+      "page": "batch-return-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data/756677581907200",
+      "status": 200
+    },
+    {
+      "page": "batch-return-detail",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data-dg1582766743262?datagridCode=WOM_1.0.0_rejectMaterilal_batchRejectViewdg1582766743262&id=756677581907200",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_rejectMaterilal_rejectMaterial_materiaRejectList_query",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList-pending",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList-query",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/editStates?viewCode=WOM_1.0.0_rejectMaterilal_materiaRejectView&id=756670413997312",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data/756670413997312",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-double-click",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data-dg1597659905616?datagridCode=WOM_1.0.0_rejectMaterilal_materiaRejectViewdg1597659905616&id=756670413997312",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_rejectMaterilal_rejectMaterial_materiaRejectList_query",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList-pending",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-add",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/rejectMaterilal/rejectMaterial/materiaRejectEdit/i18n-value.js?0.794420495896235",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-add",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/editStates?viewCode=WOM_1.0.0_rejectMaterilal_materiaRejectEdit",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-add",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data-dg1597224100590?datagridCode=WOM_1.0.0_rejectMaterilal_materiaRejectEditdg1597224100590&id=-1",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/editStates?viewCode=WOM_1.0.0_rejectMaterilal_materiaRejectView&id=756670413997312",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data/756670413997312",
+      "status": 200
+    },
+    {
+      "page": "workshop-return-detail",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data-dg1597659905616?datagridCode=WOM_1.0.0_rejectMaterilal_materiaRejectViewdg1597659905616&id=756670413997312",
+      "status": 200
+    },
+    {
+      "page": "return-record-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList",
+      "status": 200
+    },
+    {
+      "page": "return-record-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList/i18n-value.js?0.7570116503283509",
+      "status": 200
+    },
+    {
+      "page": "return-record-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectPrtList&menuCode=WOM_1.0.0_rejectMaterilal_batchRejectPrtList&entityCode=WOM_1.0.0_rejectMaterilal&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "return-record-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_rejectMaterilal_rejctMatalPart_batchRejectPrtList_query",
+      "status": 200
+    },
+    {
+      "page": "return-record-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList-query",
+      "status": 200
+    },
+    {
+      "page": "return-record-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList-query",
+      "status": 200
+    },
+    {
+      "page": "return-record-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/editStates?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectView&id=756677581907200",
+      "status": 200
+    },
+    {
+      "page": "return-record-double-click",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data/756677581907200",
+      "status": 200
+    },
+    {
+      "page": "return-record-double-click",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data-dg1582766743262?datagridCode=WOM_1.0.0_rejectMaterilal_batchRejectViewdg1582766743262&id=756677581907200",
+      "status": 200
+    },
+    {
+      "page": "return-record-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList",
+      "status": 200
+    },
+    {
+      "page": "return-record-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList/i18n-value.js?0.040393297375709514",
+      "status": 200
+    },
+    {
+      "page": "return-record-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectPrtList&menuCode=WOM_1.0.0_rejectMaterilal_batchRejectPrtList&entityCode=WOM_1.0.0_rejectMaterilal&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "return-record-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_rejectMaterilal_rejctMatalPart_batchRejectPrtList_query",
+      "status": 200
+    },
+    {
+      "page": "return-record-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList-query",
+      "status": 200
+    },
+    {
+      "page": "return-record-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/editStates?viewCode=WOM_1.0.0_rejectMaterilal_batchRejectView&id=756677581907200",
+      "status": 200
+    },
+    {
+      "page": "return-record-detail",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data/756677581907200",
+      "status": 200
+    },
+    {
+      "page": "return-record-detail",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/rejectMaterilal/rejectMaterial/data-dg1582766743262?datagridCode=WOM_1.0.0_rejectMaterilal_batchRejectViewdg1582766743262&id=756677581907200",
+      "status": 200
+    },
+    {
+      "page": "material-use-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/putInMaterial/putInMaterial/putinList",
+      "status": 200
+    },
+    {
+      "page": "material-use-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_putInMaterial_putinList&menuCode=WOM_1.0.0_putInMaterial_putinList&entityCode=WOM_1.0.0_putInMaterial&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "material-use-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_putInMaterial_putInMaterial_putinList_query",
+      "status": 200
+    },
+    {
+      "page": "material-use-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/putInMaterial/putInMaterial/putinList-pending",
+      "status": 200
+    },
+    {
+      "page": "material-use-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/putInMaterial/putInMaterial/putinList-query",
+      "status": 200
+    },
+    {
+      "page": "material-use-detail-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/putInMaterial/putMateiDetail/putInDetailList",
+      "status": 200
+    },
+    {
+      "page": "material-use-detail-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/putInMaterial/putMateiDetail/putInDetailList/i18n-value.js?0.6662049099751203",
+      "status": 200
+    },
+    {
+      "page": "material-use-detail-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_putInMaterial_putInDetailList&menuCode=WOM_1.0.0_putInMaterial_putInDetailList&entityCode=WOM_1.0.0_putInMaterial&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "material-use-detail-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_putInMaterial_putMateiDetail_putInDetailList_query",
+      "status": 200
+    },
+    {
+      "page": "material-use-detail-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/putInMaterial/putMateiDetail/putInDetailList-query",
+      "status": 200
+    },
+    {
+      "page": "material-use-detail-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/putInMaterial/putMateiDetail/putInDetailList-query",
+      "status": 200
+    },
+    {
+      "page": "production-report-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/outputMaterial/outputMaterial/outputList",
+      "status": 200
+    },
+    {
+      "page": "production-report-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_outputMaterial_outputList&menuCode=WOM_1.0.0_outputMaterial_outputList&entityCode=WOM_1.0.0_outputMaterial&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "production-report-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_outputMaterial_outputMaterial_outputList_query",
+      "status": 200
+    },
+    {
+      "page": "production-report-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/outputMaterial/outputMaterial/outputList-pending",
+      "status": 200
+    },
+    {
+      "page": "production-report-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/outputMaterial/outputMaterial/outputList-query",
+      "status": 200
+    },
+    {
+      "page": "production-report-detail-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/outputMaterial/outMateDetail/outputDetailList",
+      "status": 200
+    },
+    {
+      "page": "production-report-detail-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/outputMaterial/outMateDetail/outputDetailList/i18n-value.js?0.8249123282856913",
+      "status": 200
+    },
+    {
+      "page": "production-report-detail-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_outputMaterial_outputDetailList&menuCode=WOM_1.0.0_outputMaterial_outputDetailList&entityCode=WOM_1.0.0_outputMaterial&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "production-report-detail-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_outputMaterial_outMateDetail_outputDetailList_query",
+      "status": 200
+    },
+    {
+      "page": "production-report-detail-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/outputMaterial/outMateDetail/outputDetailList-query",
+      "status": 200
+    },
+    {
+      "page": "production-report-detail-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/outputMaterial/outMateDetail/outputDetailList-query",
+      "status": 200
+    },
+    {
+      "page": "remaining-material-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/remainMaterial/remainMaterial/remainMaterialList",
+      "status": 200
+    },
+    {
+      "page": "remaining-material-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/remainMaterial/remainMaterial/remainMaterialList/i18n-value.js?0.3131154784113892",
+      "status": 200
+    },
+    {
+      "page": "remaining-material-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_remainMaterial_remainMaterialList&menuCode=WOM_1.0.0_remainMaterial_remainMaterialList&entityCode=WOM_1.0.0_remainMaterial&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "remaining-material-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_remainMaterial_remainMaterial_remainMaterialList_query",
+      "status": 200
+    },
+    {
+      "page": "remaining-material-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/remainMaterial/remainMaterial/remainMaterialList-query",
+      "status": 200
+    },
+    {
+      "page": "remaining-material-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/remainMaterial/remainMaterial/remainMaterialList-query",
+      "status": 200
+    },
+    {
+      "page": "remaining-output-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/procReport/outputDetail/outputDetailList",
+      "status": 200
+    },
+    {
+      "page": "remaining-output-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/procReport/outputDetail/outputDetailList/i18n-value.js?0.45734567157644124",
+      "status": 200
+    },
+    {
+      "page": "remaining-output-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_procReport_outputDetailList&menuCode=WOM_1.0.0_procReport_outputDetailList&entityCode=WOM_1.0.0_procReport&isEs5=true",
+      "status": 200
+    },
+    {
+      "page": "remaining-output-list",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_ec_WOM_procReport_outputDetail_outputDetailList_query",
+      "status": 200
+    },
+    {
+      "page": "remaining-output-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/procReport/outputDetail/outputDetailList-query",
+      "status": 200
+    },
+    {
+      "page": "remaining-output-list",
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/procReport/outputDetail/outputDetailList-query",
+      "status": 200
+    },
+    {
+      "page": "completion-inbound-ledger",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/material/wms/completion-inbounds?size=100&keyword=",
+      "status": 200
+    },
+    {
+      "page": "completion-inbound-ledger",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/material/wms/completion-inbounds/20",
+      "status": 200
+    },
+    {
+      "page": "completion-inbound-ledger",
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/material/wms/completion-inbounds/20",
+      "status": 200
+    }
+  ],
+  "browser": {
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "failedResponses": []
+  },
+  "persistence": {
+    "reason": "本轮仅查看、新增空表单和本地网格插行，不提交业务数据",
+    "before": {
+      "wom_reject_materials": 13,
+      "wom_rejct_matal_parts": 5,
+      "wom_put_in_materials": 0,
+      "wom_put_matei_details": 0,
+      "wom_output_materials": 0,
+      "wom_output_details": 34,
+      "wom_remain_materials": 0,
+      "wms_stock_documents": 13,
+      "wms_stock_document_lines": 13,
+      "wms_inventory_transactions": 26
+    },
+    "after": {
+      "wom_reject_materials": 13,
+      "wom_rejct_matal_parts": 5,
+      "wom_put_in_materials": 0,
+      "wom_put_matei_details": 0,
+      "wom_output_materials": 0,
+      "wom_output_details": 34,
+      "wom_remain_materials": 0,
+      "wms_stock_documents": 13,
+      "wms_stock_document_lines": 13,
+      "wms_inventory_transactions": 26
+    },
+    "unchanged": true
+  },
+  "issues": [],
+  "login": {
+    "status": 200
+  }
+}

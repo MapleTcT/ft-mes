@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 255,
+  "migrationCount": 256,
   "firstNumber": 1,
-  "lastNumber": 255,
+  "lastNumber": 256,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -17,15 +17,15 @@
     "create-index": 1029,
     "create-table": 588,
     "create-view": 143,
-    "insert": 11668,
-    "update": 11797
+    "insert": 11737,
+    "update": 11866
   },
   "idempotencySignalTotals": {
     "create-or-replace": 257,
-    "do-block": 593,
-    "if-exists": 219,
+    "do-block": 616,
+    "if-exists": 242,
     "if-not-exists": 13084,
-    "on-conflict": 11593,
+    "on-conflict": 11662,
     "to-regclass": 222,
     "where-not-exists": 55
   },
@@ -36,7 +36,7 @@
     "configuration": 62,
     "general": 47,
     "notification": 10,
-    "platform": 79,
+    "platform": 80,
     "workflow": 21
   },
   "migrations": [
@@ -9545,6 +9545,39 @@
         "if-not-exists": 0,
         "on-conflict": 0,
         "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/256-wom-material-report-actions-runtime.sql",
+      "name": "256-wom-material-report-actions-runtime.sql",
+      "number": 256,
+      "slug": "wom-material-report-actions-runtime",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 1341,
+      "sha256": "b7329f4ae1246866d4eed3491b78d1ad62f7fdff9763b5fdbd312085c949c273",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 69,
+        "update": 69
+      },
+      "idempotencySignals": {
+        "if-exists": 23,
+        "if-not-exists": 0,
+        "on-conflict": 69,
+        "do-block": 23,
         "to-regclass": 0,
         "create-or-replace": 0,
         "where-not-exists": 0

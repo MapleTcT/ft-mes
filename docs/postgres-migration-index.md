@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`255`。
-- 编号范围：`001` 到 `255`。
+- 脚本数量：`256`。
+- 编号范围：`001` 到 `256`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -26,7 +26,7 @@
 | configuration | 62 |
 | general | 47 |
 | notification | 10 |
-| platform | 79 |
+| platform | 80 |
 | workflow | 21 |
 
 ## 语句统计
@@ -38,18 +38,18 @@
 | create-index | 1029 |
 | create-table | 588 |
 | create-view | 143 |
-| insert | 11668 |
-| update | 11797 |
+| insert | 11737 |
+| update | 11866 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 257 |
-| do-block | 593 |
-| if-exists | 219 |
+| do-block | 616 |
+| if-exists | 242 |
 | if-not-exists | 13084 |
-| on-conflict | 11593 |
+| on-conflict | 11662 |
 | to-regclass | 222 |
 | where-not-exists | 55 |
 
@@ -312,6 +312,7 @@
 | 253 | 253-wts-certificate-part-entity.sql | configuration, business | 46 | create-table:1, create-index:3 | 4 | - |
 | 254 | 254-wts-firework-batch-print-render-compat.sql | business, compatibility | 65 | insert:3, update:3 | 5 | - |
 | 255 | 255-wts-firework-native-batch-print-collision.sql | business | 24 | update:3 | 0 | - |
+| 256 | 256-wom-material-report-actions-runtime.sql | platform | 1341 | insert:69, update:69 | 115 | - |
 
 ## 规则
 

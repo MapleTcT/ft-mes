@@ -4791,6 +4791,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/256-wom-material-report-actions-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -5338,6 +5344,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-wom-manufacturing-order-persistence-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-wom-material-report-actions-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -7617,6 +7629,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/wom-material-report-actions-functional-acceptance-20260801.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/wom-process-execution-actions-acceptance-20260731.md",
       "state": "tracked",
       "tracked": true
@@ -9598,6 +9616,12 @@
     {
       "ignored": false,
       "path": "metadata/wom-manual-task-entry-result.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-material-report-actions-acceptance-20260801.json",
       "state": "tracked",
       "tracked": true
     },
@@ -13568,16 +13592,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 892
+      "tracked": 894
     },
     "docs": {
-      "tracked": 164
+      "tracked": 165
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 347
+      "tracked": 348
     },
     "package.json": {
       "tracked": 1
@@ -13601,8 +13625,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2257,
-    "tracked": 2257,
+    "totalFiles": 2261,
+    "tracked": 2261,
     "untracked": 0
   },
   "untrackedByDirectory": []

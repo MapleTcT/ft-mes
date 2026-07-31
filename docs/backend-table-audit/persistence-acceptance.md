@@ -1511,6 +1511,18 @@ Web 编辑鉴权按文档与业务 API 分层：空壳文档导航 200；无登�
 `docs/rm-formula-management-functional-acceptance-20260731.md` 和
 `metadata/rm-formula-management-acceptance-20260731.json`。
 
+### WOM 退料、用料、报工、尾料与完工入库只读回归（2026-08-01）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 查询并查看退料、用料、报工、尾料记录 | 11 个 WOM 列表页 | 各页面 `POST {listRoute}-query`；运行时 `layoutJson` | WOM 原模块列表控制器；baseService runtime view | 10 张 WOM/WMS 业务表只读；`runtime_extra_view`、`ec_extra_view` 为配置迁移 | 对 10 张业务表分别执行 `SELECT count(*)`；对 23 个目标 view code 统计两张运行时表非空 payload 数量 | 12/12 页面 PASS；业务表计数前后完全一致；运行时配置 `23|23|23` | NOT_APPLICABLE |
+| 查看和导出完工入库台账 | `/msService/material/wms` | `GET /material/wms/completion-inbounds` 及详情接口 | `MaterialWmsController -> MaterialInventoryService` | `wms_stock_documents`、`wms_stock_document_lines`、`wms_inventory_transactions`（只读） | 三表验收前后分别为 `13/13/26` | 页面 1 行；详情含入库明细和库存流水；CSV 346 bytes；三表计数不变 | NOT_APPLICABLE |
+
+本轮没有提交新增空表单，也没有执行无业务行页面的修改/删除，因此不产生 marker，不能
+替代后续受控样例的写入级落库验收。详细证据：
+`docs/wom-material-report-actions-functional-acceptance-20260801.md`、
+`metadata/wom-material-report-actions-acceptance-20260801.json`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。
