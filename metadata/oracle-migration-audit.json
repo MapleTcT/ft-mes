@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-31T08:05:20+00:00",
-  "repoCommit": "14e9d31a40fd0d399ccab2c86aefaa913176d0ae",
-  "findingCount": 1639,
+  "generatedAt": "2026-07-31T11:49:45+00:00",
+  "repoCommit": "13d6b08cd468445f82b0e49167330bbaf07d24e5",
+  "findingCount": 1640,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
@@ -12,7 +12,7 @@
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 579,
-    "postgres-conversion-tooling": 49,
+    "postgres-conversion-tooling": 50,
     "recovered-source-backlog": 253,
     "runtime-patch-backlog": 9,
     "tooling-or-audit-code": 269
@@ -21,7 +21,7 @@
     "decode-sql": 5,
     "from-dual": 140,
     "ojdbc": 15,
-    "oracle-keyword": 648,
+    "oracle-keyword": 649,
     "rownum": 696,
     "sysdate": 135
   },
@@ -9310,7 +9310,15 @@
     },
     {
       "file": "deploy/docker/scripts/test_generate_business_view_runtime_sql.py",
-      "line": 919,
+      "line": 933,
+      "pattern": "oracle-keyword",
+      "category": "postgres-conversion-tooling",
+      "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",
+      "excerpt": "self.assertNotIn(\"Oracle\", migration)"
+    },
+    {
+      "file": "deploy/docker/scripts/test_generate_business_view_runtime_sql.py",
+      "line": 949,
       "pattern": "oracle-keyword",
       "category": "postgres-conversion-tooling",
       "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",
@@ -9702,7 +9710,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 398,
+      "line": 417,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -9710,7 +9718,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 1348,
+      "line": 1367,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -9718,7 +9726,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 1402,
+      "line": 1421,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10194,7 +10202,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `336` 项，其中 `300 PASS / 1 FAIL / 0 BLOCKED / 35 NOT_APPLICABLE`"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `340` 项，其中 `300 PASS / 1 FAIL / 0 BLOCKED / 39 NOT_APPLICABLE`"
     },
     {
       "file": "docs/project-objectives.md",

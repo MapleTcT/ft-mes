@@ -902,6 +902,36 @@ class ProductRuntimeParityTest(unittest.TestCase):
         self.assertIn("INSERT INTO public.runtime_extra_view", migration)
         self.assertIn("INSERT INTO public.ec_extra_view", migration)
 
+    def test_qcs_incoming_reference_runtime_migration_restores_optional_pickers(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "246-qcs-incoming-inspect-reference-runtime.sql"
+        ).read_text(encoding="utf-8")
+
+        expected_views = (
+            "BaseSet_1.0.0_cooperateClass_cmcClassTreeRef",
+            "BaseSet_1.0.0_cooperate_cmcPartRef",
+            "BaseSet_1.0.0_cooperate_cmcLayoutRef",
+            "LIMSBasic_1.0.0_pickSite_pickSiteTreeRef",
+            "LIMSBasic_1.0.0_pickSite_pickSiteRefPart",
+            "LIMSBasic_1.0.0_pickSite_pickSiteRefLayout",
+        )
+        for view_code in expected_views:
+            self.assertIn(f"-- {view_code} ", migration)
+
+        for target_view_code in (
+            "BaseSet_1.0.0_cooperate_cmcLayoutRef",
+            "LIMSBasic_1.0.0_pickSite_pickSiteRefLayout",
+        ):
+            self.assertIn(target_view_code, GENERATOR.TARGET_VIEW_CODES)
+
+        # Each view emits one insert path for a new LOB and one for an existing LOB.
+        self.assertEqual(12, migration.count("INSERT INTO public.runtime_extra_view"))
+        self.assertEqual(6, migration.count("INSERT INTO public.ec_extra_view"))
+        self.assertNotIn("Oracle", migration)
+
     def test_factory_node_type_customer_condition_registration_is_idempotent(self):
         migration = (
             SCRIPT_PATH.parent.parent

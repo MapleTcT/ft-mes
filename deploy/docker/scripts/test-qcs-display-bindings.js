@@ -43,6 +43,9 @@ const limsPatchScript = read(
 const limsResponseSource = read(
   "deploy/docker/patches/limsbasic-wom-source-response/src/com/supcon/orchid/LIMSBasic/utils/ServiceClientUtils.java"
 );
+const limsConfigSource = read(
+  "deploy/docker/patches/limsbasic-config-defaults/src/com/supcon/orchid/LIMSBasic/utils/LIMSBasicConfigureUtil.java"
+);
 const acceptance = read(
   "deploy/docker/scripts/adp-qcs-report-chain-persistence-acceptance.js"
 );
@@ -77,6 +80,25 @@ assert(
   "QCS edit i18n asset must have an exact no-cache nginx route"
 );
 assert(
+  nginx.includes(
+    "location = /greenDill/static/QCS/inspect/inspect/purchInspectEdit/i18n-value.js"
+  ) &&
+    nginx.includes(
+      "alias /usr/share/nginx/module-static/QCS/inspect/inspect/manuInspectEdit/i18n-value.js;"
+    ),
+  "QCS incoming-inspection edit must reuse the translated edit resource"
+);
+assert(
+  nginx.includes(
+    "location = /msService/baseService/workflow/flowRoot"
+  ) &&
+    nginx.includes('if ($arg_deploymentid = "null")') &&
+    nginx.includes(
+      `return 200 '{"code":200,"data":{},"success":true,"message":""}';`
+    ),
+  "new workflow forms must treat a literal null deployment as an empty workflow"
+);
+assert(
   editI18n.includes(
     'window.InternationalResource["LIMSBasic.viewtitle.randon1584520303249"] = "质量标准参照";'
   ) &&
@@ -90,6 +112,12 @@ assert(
       'window.InternationalResource["Reference.confirm.tip.message"] = "请至少选中一行！";'
     ),
   "QCS edit quality-standard reference must translate its title, actions, and empty-selection feedback"
+);
+assert(
+  editI18n.includes(
+    'window.InternationalResource["QCS.Inspect.operate.warn.selectProduct"] = "请先选择物料！";'
+  ),
+  "QCS incoming-inspection validation must show a Chinese material prompt"
 );
 assert(
   editI18n.includes("installQCS_MANU_INSPECT_EDITI18nCompatibility"),
@@ -169,8 +197,9 @@ assert(
 );
 assert(
   limsPatchScript.includes("com.supcon.greendill.LIMSBasic.service-") &&
-    limsPatchScript.includes("ServiceClientUtils.class"),
-  "LIMS boot patcher must replace the LIMSBasic WOM response client class"
+    limsPatchScript.includes("ServiceClientUtils.class") &&
+    limsPatchScript.includes("LIMSBasicConfigureUtil.class"),
+  "LIMS boot patcher must replace the LIMSBasic response and configuration compatibility classes"
 );
 assert(
   limsPatchScript.includes("ADP_JAVA8_JDK_IMAGE") &&
@@ -182,6 +211,12 @@ assert(
   limsResponseSource.includes('"200".equals(String.valueOf(responseCode))') &&
     limsResponseSource.includes("JSONObject.parseObject((String) rawData)"),
   "LIMSBasic WOM response client must accept the current code/data-string envelope"
+);
+assert(
+  limsConfigSource.includes("LIMSBasic/LIMSBasic.dataPermission:false") &&
+    limsConfigSource.includes("LIMSSample/LIMSSample.dataPermission:false") &&
+    limsConfigSource.includes("Boolean.TRUE.equals(baseDataPermission)"),
+  "LIMSBasic optional data-permission flags must default safely when system configuration is absent"
 );
 assert(
   acceptance.includes("effectiveReportDisplay") &&

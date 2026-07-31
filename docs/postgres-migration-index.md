@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`245`。
-- 编号范围：`001` 到 `245`。
+- 脚本数量：`246`。
+- 编号范围：`001` 到 `246`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -21,12 +21,12 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 39 |
-| business | 52 |
+| business | 53 |
 | compatibility | 90 |
-| configuration | 59 |
+| configuration | 60 |
 | general | 47 |
 | notification | 10 |
-| platform | 73 |
+| platform | 74 |
 | workflow | 21 |
 
 ## 语句统计
@@ -38,18 +38,18 @@
 | create-index | 1026 |
 | create-table | 587 |
 | create-view | 143 |
-| insert | 11428 |
-| update | 11553 |
+| insert | 11446 |
+| update | 11571 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 257 |
-| do-block | 547 |
-| if-exists | 173 |
+| do-block | 553 |
+| if-exists | 179 |
 | if-not-exists | 13080 |
-| on-conflict | 11353 |
+| on-conflict | 11371 |
 | to-regclass | 222 |
 | where-not-exists | 55 |
 
@@ -302,6 +302,7 @@
 | 243 | 243-rm-formula-type-root.sql | general | 64 | insert:1, update:1 | 2 | - |
 | 244 | 244-rm-formula-type-tree-lob-compat.sql | compatibility | 32 | alter-table:1 | 1 | - |
 | 245 | 245-rm-formula-quality-remark-lob-compat.sql | compatibility | 52 | alter-table:1 | 2 | - |
+| 246 | 246-qcs-incoming-inspect-reference-runtime.sql | platform, configuration, business | 355 | insert:18, update:18 | 30 | - |
 
 ## 规则
 

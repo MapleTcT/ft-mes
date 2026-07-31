@@ -1,28 +1,28 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-31T08:05:37+00:00",
-  "repoCommit": "14e9d31a40fd0d399ccab2c86aefaa913176d0ae",
+  "generatedAt": "2026-07-31T11:46:12+00:00",
+  "repoCommit": "13d6b08cd468445f82b0e49167330bbaf07d24e5",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 574,
-    "totalBytes": 64437200,
+    "totalFiles": 576,
+    "totalBytes": 64561780,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 245,
+      "postgres-init-sql": 246,
       "runtime-binary-patch": 8,
-      "runtime-patch-source": 24,
+      "runtime-patch-source": 25,
       "runtime-script": 28,
       "runtime-static-override": 223
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 32681,
-      "postgres-init-sql": 62681544,
+      "nginx-runtime-config": 33728,
+      "postgres-init-sql": 62802866,
       "runtime-binary-patch": 178941,
-      "runtime-patch-source": 96564,
-      "runtime-script": 292733,
+      "runtime-patch-source": 98301,
+      "runtime-script": 293207,
       "runtime-static-override": 1112384
     }
   },
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 32461,
-      "sha256": "bc719f74c7f5da5fdbc1ec46345ddc59d7681144aa3475ae9cc3d8233f45b357"
+      "sizeBytes": 33508,
+      "sha256": "63eb27970c6b25a12c94912ac0476f509e4ec6894099a347c04f5c7119af520d"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1783,6 +1783,12 @@
       "sha256": "46d94cca9c5ab8068f9aaf71d75bde949f7d406417f598990648fe995819e65f"
     },
     {
+      "path": "deploy/docker/postgres/init/246-qcs-incoming-inspect-reference-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 121322,
+      "sha256": "a9ecd6fb40153cda0efc223459b745528eb2beef5f1d7c1c87b995bbb833b692"
+    },
+    {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 148953,
@@ -1877,6 +1883,12 @@
       "category": "runtime-patch-source",
       "sizeBytes": 595,
       "sha256": "21463fdd4f898918c721f7cb9084fae995aa4d7eda8183337b0aa9cde2b4f955"
+    },
+    {
+      "path": "deploy/docker/patches/limsbasic-config-defaults/src/com/supcon/orchid/LIMSBasic/utils/LIMSBasicConfigureUtil.java",
+      "category": "runtime-patch-source",
+      "sizeBytes": 1737,
+      "sha256": "7590266337f852514f244efeb0f35f83f7a29d4d87a76603666f6da242b3a0ce"
     },
     {
       "path": "deploy/docker/patches/limsbasic-wom-source-response/src/com/supcon/orchid/LIMSBasic/utils/ServiceClientUtils.java",
@@ -2037,8 +2049,8 @@
     {
       "path": "deploy/docker/scripts/patch-lims-qcs-inspect-report-service.sh",
       "category": "runtime-script",
-      "sizeBytes": 7589,
-      "sha256": "72550345b0477e4d39d0450f29dcb922238c473a219942a724dda7f1dc514d5c"
+      "sizeBytes": 8063,
+      "sha256": "1de89b726f9bc026d72ffd2d3349caebf6f47212df2017d12cf3672f35a95376"
     },
     {
       "path": "deploy/docker/scripts/patch-msgmanagement-notice-protocol-mapper.py",

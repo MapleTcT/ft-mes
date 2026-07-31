@@ -1,5 +1,24 @@
 # 前端功能测试报告
 
+## 2026-07-31 QCS 来料检验参照交互验收
+
+针对来料检验申请页中原始国际化键、采样点参照空白和客商档案参照空白的问题，本轮在
+`http://10.11.100.17:18080` 使用真实 `admin` 会话完成页面复验。4 项操作 4/4 PASS；
+console、page error、4xx/5xx 和 request failed 均为 0。测试库当前有 248 条物料，但采样点和
+供应商主数据均为 0 条，因此后两项的正确结果是完整查询界面和“0 项”，本轮未用假数据
+掩盖主数据空态。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| QCS 来料检验 | `/msService/QCS/inspect/inspect/purchInspectEdit` | 打开物料参照 | `GET materialRefLayout`、`POST materialRef-query` | 弹窗显示物料编码、物料名称和查询控件 | 两个请求均为 200，物料主数据 248 条 | `baseset_materials` | PASS | 无 |
+| QCS 来料检验 | 同上 | 打开采样点参照 | `GET pickSiteRefLayout`、`POST pickSiteTreeRefTreeDataCustom`、`POST pickSiteRefPart-query` | 弹窗显示树、查询条件、采样点/样品模板/质量标准等表头和“0 项” | LIMS、LIMSINT 两个 provider 均返回 200；测试库暂无采样点 | `limsba_picksite` | PASS | 主数据为 0 条，后续业务使用前需维护真实采样点 |
+| QCS 来料检验 | 同上 | 打开供应商/客商档案参照 | `GET cmcLayoutRef`、`POST cmcPartRef-query` | 弹窗显示客商查询界面和“0 项” | 请求均为 200；测试库暂无供应商 | `baseset_cooperates` | PASS | 主数据为 0 条，后续业务使用前需维护真实供应商 |
+| QCS 来料检验 | 同上 | 未选择物料时点击质量标准“参照” | 前端必填校验；空流程兼容 `GET flowRoot?deploymentId=null` | 显示“请先选择物料！”，不再显示 `QCS.Inspect.operate.warn.selectProduct` | 未发起无效质量标准或保存请求；空流程返回 200 | 不适用 | PASS | 无 |
+
+机器证据见 `metadata/qcs-incoming-reference-acceptance-20260731.json`。本轮只验证参照读取和
+必填校验，没有保存业务单据；采样点、供应商主数据维护及完整来料检验落库流程应在真实
+主数据到位后单独验收。
+
 ## 2026-07-31 WOM 执行记录交互验收
 
 针对指令、活动、检查、投料和产出记录页面“有数据但没有可用交互”的问题，本轮恢复

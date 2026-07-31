@@ -3069,6 +3069,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/patches/limsbasic-config-defaults/src/com/supcon/orchid/LIMSBasic/utils/LIMSBasicConfigureUtil.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/patches/limsbasic-wom-source-response/src/com/supcon/orchid/LIMSBasic/utils/ServiceClientUtils.java",
       "state": "tracked",
       "tracked": true
@@ -4725,6 +4731,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/246-qcs-incoming-inspect-reference-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -5146,6 +5158,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-production-export-readiness-smoke.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-qcs-incoming-reference-regression.js",
       "state": "tracked",
       "tracked": true
     },
@@ -9100,6 +9118,12 @@
     {
       "ignored": false,
       "path": "metadata/qcs-display-cold-restart-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/qcs-incoming-reference-acceptance-20260731.json",
       "state": "tracked",
       "tracked": true
     },
@@ -13448,7 +13472,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 877
+      "tracked": 880
     },
     "docs": {
       "tracked": 162
@@ -13457,7 +13481,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 344
+      "tracked": 345
     },
     "package.json": {
       "tracked": 1
@@ -13481,8 +13505,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2237,
-    "tracked": 2237,
+    "totalFiles": 2241,
+    "tracked": 2241,
     "untracked": 0
   },
   "untrackedByDirectory": []

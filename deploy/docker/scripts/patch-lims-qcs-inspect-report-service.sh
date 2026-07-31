@@ -9,6 +9,7 @@ python_bin="${PYTHON:-python3}"
 
 source_file="${QCS_INSPECT_REPORT_SOURCE:-$adp_root/mes-modules-source-repo/modules/lims/QCS_6.1.3.5/service/src/main/java/com/supcon/orchid/QCS/services/impl/QCSInspectReportServiceImpl.java}"
 limsbasic_source_file="${LIMSBASIC_WOM_SOURCE_RESPONSE_SOURCE:-$docker_dir/patches/limsbasic-wom-source-response/src/com/supcon/orchid/LIMSBasic/utils/ServiceClientUtils.java}"
+limsbasic_config_source_file="${LIMSBASIC_CONFIG_DEFAULTS_SOURCE:-$docker_dir/patches/limsbasic-config-defaults/src/com/supcon/orchid/LIMSBasic/utils/LIMSBasicConfigureUtil.java}"
 lims_jar="${LIMS_BOOT_JAR:-$runtime_dir/module-Server/LIMS/manual/LIMS-1.0.0.jar}"
 
 if [ ! -f "$lims_jar" ]; then
@@ -18,6 +19,10 @@ fi
 
 if [ ! -f "$limsbasic_source_file" ]; then
   echo "LIMSBasic WOM response compatibility source not found: $limsbasic_source_file" >&2
+  exit 1
+fi
+if [ ! -f "$limsbasic_config_source_file" ]; then
+  echo "LIMSBasic configuration defaults source not found: $limsbasic_config_source_file" >&2
   exit 1
 fi
 
@@ -100,9 +105,9 @@ compile_java() {
 }
 
 if [ "$qcs_source_enabled" = true ]; then
-  compile_java "$source_file" "$limsbasic_source_file"
+  compile_java "$source_file" "$limsbasic_source_file" "$limsbasic_config_source_file"
 else
-  compile_java "$limsbasic_source_file"
+  compile_java "$limsbasic_source_file" "$limsbasic_config_source_file"
 fi
 
 "$python_bin" - "$lims_jar" "$classes_dir" "$qcs_source_enabled" <<'PY'
@@ -137,6 +142,7 @@ if len(limsbasic_jars) != 1:
 replacements = {
     limsbasic_jars[0]: [
         "com/supcon/orchid/LIMSBasic/utils/ServiceClientUtils.class",
+        "com/supcon/orchid/LIMSBasic/utils/LIMSBasicConfigureUtil.class",
     ],
 }
 if qcs_source_enabled:

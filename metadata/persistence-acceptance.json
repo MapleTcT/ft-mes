@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-31T07:37:46.125Z",
-  "repoCommit": "14e9d31a40fd0d399ccab2c86aefaa913176d0ae+working-tree-rm-formula-management",
+  "generatedAt": "2026-07-31T11:36:08.141Z",
+  "repoCommit": "13d6b08cd468445f82b0e49167330bbaf07d24e5+working-tree-qcs-incoming-references",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
@@ -309,14 +309,20 @@
       "marker": "ADP_E2E_20260731043911_WOM_RECORD_ACTIONS",
       "evidence": "metadata/wom-execution-record-actions-acceptance-20260731.json",
       "assertions": "six real record pages passed; task/activity/check/input/output details and double-clicks rendered business fields; TASK snapshot revision 7->8; ACTIVITY snapshot revision 5->6; controlled flags restored; browser errors zero"
+    },
+    "qcsIncomingInspectionReferences": {
+      "status": "PASS_FUNCTIONAL_READ_ONLY",
+      "marker": "",
+      "evidence": "metadata/qcs-incoming-reference-acceptance-20260731.json",
+      "assertions": "4/4 real-browser checks passed; material, sampling-point and supplier references rendered and returned HTTP 200; required-material warning localized; browser error arrays zero; PostgreSQL source counts 248/0/0 and qcs_inspects remained 43 with latest create_time on 2026-07-30."
     }
   },
   "summary": {
-    "testedFeatures": 336,
+    "testedFeatures": 340,
     "pass": 300,
     "fail": 1,
     "blocked": 0,
-    "notApplicable": 35
+    "notApplicable": 39
   },
   "items": [
     {
@@ -7292,6 +7298,82 @@
       "status": "NOT_APPLICABLE",
       "evidence": "Template download returned an 8704-byte workbook; import opened a single-file chooser; export returned HTTP 200 and RM_batchFormulaList.xlsx (13027 bytes).",
       "issues": []
+    },
+    {
+      "acceptanceSet": "qcs-incoming-reference-20260731",
+      "module": "QCS 来料检验申请参照",
+      "route": "/msService/QCS/inspect/inspect/purchInspectEdit",
+      "requiresPersistence": false,
+      "marker": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "metadata/qcs-incoming-reference-acceptance-20260731.json; real admin browser; zero console/page/request/4xx/5xx errors; no save or submit request",
+      "issues": [],
+      "operation": "打开物料参照并查询",
+      "api": "GET materialRefLayout; POST materialRef-query",
+      "method": "GET,POST",
+      "backendEntry": "BaseSet material reference controller/service/DAO",
+      "tables": [
+        "public.baseset_materials"
+      ],
+      "verificationSql": "SELECT count(*) FROM public.baseset_materials; -- 248"
+    },
+    {
+      "acceptanceSet": "qcs-incoming-reference-20260731",
+      "module": "QCS 来料检验申请参照",
+      "route": "/msService/QCS/inspect/inspect/purchInspectEdit",
+      "requiresPersistence": false,
+      "marker": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "metadata/qcs-incoming-reference-acceptance-20260731.json; real admin browser; zero console/page/request/4xx/5xx errors; no save or submit request",
+      "issues": [
+        "No sampling-point master data exists in the test database; the accepted result is a complete empty-state dialog, not a populated business list."
+      ],
+      "operation": "打开采样点参照并查询树和列表",
+      "api": "GET pickSiteRefLayout; POST pickSiteTreeRefTreeDataCustom; POST pickSiteRefPart-query",
+      "method": "GET,POST",
+      "backendEntry": "LIMSBasic pick-site reference controller/service/DAO through both LIMS and LIMSINT providers",
+      "tables": [
+        "public.limsba_picksite"
+      ],
+      "verificationSql": "SELECT count(*) FROM public.limsba_picksite; -- 0"
+    },
+    {
+      "acceptanceSet": "qcs-incoming-reference-20260731",
+      "module": "QCS 来料检验申请参照",
+      "route": "/msService/QCS/inspect/inspect/purchInspectEdit",
+      "requiresPersistence": false,
+      "marker": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "metadata/qcs-incoming-reference-acceptance-20260731.json; real admin browser; zero console/page/request/4xx/5xx errors; no save or submit request",
+      "issues": [
+        "No supplier master data exists in the test database; the accepted result is a complete empty-state dialog, not a populated business list."
+      ],
+      "operation": "打开供应商客商档案参照并查询",
+      "api": "GET cmcLayoutRef; POST cmcPartRef-query",
+      "method": "GET,POST",
+      "backendEntry": "BaseSet cooperate reference controller/service/DAO",
+      "tables": [
+        "public.baseset_cooperates"
+      ],
+      "verificationSql": "SELECT count(*) FROM public.baseset_cooperates; -- 0"
+    },
+    {
+      "acceptanceSet": "qcs-incoming-reference-20260731",
+      "module": "QCS 来料检验申请参照",
+      "route": "/msService/QCS/inspect/inspect/purchInspectEdit",
+      "requiresPersistence": false,
+      "marker": "",
+      "status": "NOT_APPLICABLE",
+      "evidence": "metadata/qcs-incoming-reference-acceptance-20260731.json; real admin browser; zero console/page/request/4xx/5xx errors; no save or submit request",
+      "issues": [],
+      "operation": "未选择物料时点击质量标准参照并验证中文必填提示",
+      "api": "GET /msService/baseService/workflow/flowRoot?deploymentId=null; no QCS business submit",
+      "method": "GET",
+      "backendEntry": "GreenDill required-field validation and Nginx empty-workflow compatibility",
+      "tables": [
+        "public.qcs_inspects"
+      ],
+      "verificationSql": "SELECT count(*), max(create_time) FROM public.qcs_inspects; -- 43, 2026-07-30 14:46:47.22; no July 31 write"
     }
   ],
   "evidence": [
@@ -7564,6 +7646,11 @@
       "marker": "ADP_E2E_20260716190100_PATROL_AREA",
       "artifact": "metadata/patrol-area-persistence-acceptance.json",
       "summary": "PATROL real browser area editor row actions and add/modify/stop/run/delete passed 21/21 on 10.11.100.17; PostgreSQL mp_work_areas verified every state transition, soft deletion and seed preservation with zero console/page/request errors."
+    },
+    {
+      "marker": "",
+      "artifact": "metadata/qcs-incoming-reference-acceptance-20260731.json",
+      "summary": "Incoming-inspection material, sampling-point and supplier references plus localized required-material guard passed 4/4 in the real browser with zero errors. Read-only PostgreSQL evidence was 248/0/0 source rows and unchanged qcs_inspects=43."
     }
   ]
 }

@@ -24,6 +24,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 TARGET_VIEW_CODES: Sequence[str] = (
     "BaseSet_1.0.0_cooperate_cmcLayout",
+    "BaseSet_1.0.0_cooperate_cmcLayoutRef",
     "BaseSet_1.0.0_material_materialLayout",
     "BaseSet_1.0.0_unit_unitGroupList",
     "ChartReportMap_1.0.0_scatterChartSet_scatterChartList",
@@ -45,6 +46,7 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "DocManage_1.0.0_document_documentList",
     "LIMSBasic_1.0.0_analySample_analySampleList",
     "LIMSBasic_1.0.0_sampleType_sampleTypeList",
+    "LIMSBasic_1.0.0_pickSite_pickSiteRefLayout",
     "LIMSDC_5.1.0.1_analysisFile_analysisFileRef",
     "LIMSDC_5.1.0.1_analysisFile_analysisFileRef2",
     "LIMSDC_5.1.0.1_collectionType_collectionTypeRef",

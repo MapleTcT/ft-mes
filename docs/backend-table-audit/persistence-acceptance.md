@@ -1,5 +1,35 @@
 # 后端落库验收报告
 
+## 2026-07-31 QCS 来料检验参照只读验收
+
+本轮从真实来料检验申请页打开三个参照并执行未选物料校验。所有动作均为只读或前端
+必填校验，没有点击保存，也没有发出 QCS 业务写请求，因此落库状态统一为
+`NOT_APPLICABLE`。PostgreSQL 复读确认 `qcs_inspects` 仍为 43 条，最新 `create_time` 为
+`2026-07-30 14:46:47.22`，早于本轮 7 月 31 日验收。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| 物料参照查询 | 来料检验申请 -> 物料编码 | `GET materialRefLayout`；`POST materialRef-query` | BaseSet material reference controller/service/DAO | `baseset_materials` | `SELECT count(*) FROM public.baseset_materials;` -> 248；两个请求 200 | NOT_APPLICABLE |
+| 采样点参照查询 | 来料检验申请 -> 采样点 | `GET pickSiteRefLayout`；`POST pickSiteTreeRefTreeDataCustom`；`POST pickSiteRefPart-query` | LIMSBasic pick-site reference controller/service/DAO | `limsba_picksite` | `SELECT count(*) FROM public.limsba_picksite;` -> 0；LIMS、LIMSINT provider 请求均为 200 | NOT_APPLICABLE |
+| 供应商参照查询 | 来料检验申请 -> 供应商 | `GET cmcLayoutRef`；`POST cmcPartRef-query` | BaseSet cooperate reference controller/service/DAO | `baseset_cooperates` | `SELECT count(*) FROM public.baseset_cooperates;` -> 0；两个请求 200 | NOT_APPLICABLE |
+| 未选物料必填校验 | 来料检验申请 -> 质量标准“参照” | 无业务提交；`GET flowRoot?deploymentId=null` 仅初始化空流程 | GreenDill 客户端校验；Nginx 空流程兼容 | 无 | 页面显示“请先选择物料！”，未发出 `/purchInspectEdit/submit`；`qcs_inspects=43`，最新记录仍为 7 月 30 日 | NOT_APPLICABLE |
+
+验收 SQL：
+
+```sql
+SELECT 'baseset_materials' AS table_name, count(*) FROM public.baseset_materials
+UNION ALL SELECT 'limsba_picksite', count(*) FROM public.limsba_picksite
+UNION ALL SELECT 'baseset_cooperates', count(*) FROM public.baseset_cooperates
+UNION ALL SELECT 'qcs_inspects', count(*) FROM public.qcs_inspects;
+
+SELECT count(*) AS qcs_inspect_count, max(create_time) AS latest_create_time
+FROM public.qcs_inspects;
+```
+
+结果依次为 `248/0/0/43`，最新 QCS 申请时间为 `2026-07-30 14:46:47.22`。机器证据见
+`metadata/qcs-incoming-reference-acceptance-20260731.json`。这项通过只证明参照页、空态、
+翻译和读取链路可用，不等同于来料检验单新增、审批、报告和质量处置已在本轮重新落库。
+
 ## 2026-07-31 WOM 执行记录工艺统计落库验收
 
 本轮六类记录页中，查看详情和双击均为只读；会改变数据的动作只有指令、活动两类
