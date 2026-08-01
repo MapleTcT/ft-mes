@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`256`。
-- 编号范围：`001` 到 `256`。
+- 脚本数量：`257`。
+- 编号范围：`001` 到 `257`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -21,12 +21,12 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 39 |
-| business | 62 |
+| business | 63 |
 | compatibility | 92 |
 | configuration | 62 |
 | general | 47 |
 | notification | 10 |
-| platform | 80 |
+| platform | 81 |
 | workflow | 21 |
 
 ## 语句统计
@@ -38,8 +38,8 @@
 | create-index | 1029 |
 | create-table | 588 |
 | create-view | 143 |
-| insert | 11737 |
-| update | 11866 |
+| insert | 11744 |
+| update | 11872 |
 
 ## 幂等信号统计
 
@@ -47,11 +47,11 @@
 | --- | --- |
 | create-or-replace | 257 |
 | do-block | 616 |
-| if-exists | 242 |
-| if-not-exists | 13084 |
-| on-conflict | 11662 |
+| if-exists | 248 |
+| if-not-exists | 13085 |
+| on-conflict | 11663 |
 | to-regclass | 222 |
-| where-not-exists | 55 |
+| where-not-exists | 57 |
 
 ## 脚本清单
 
@@ -313,6 +313,7 @@
 | 254 | 254-wts-firework-batch-print-render-compat.sql | business, compatibility | 65 | insert:3, update:3 | 5 | - |
 | 255 | 255-wts-firework-native-batch-print-collision.sql | business | 24 | update:3 | 0 | - |
 | 256 | 256-wom-material-report-actions-runtime.sql | platform | 1341 | insert:69, update:69 | 115 | - |
+| 257 | 257-lims-sample-menu-consolidation.sql | platform, business | 470 | insert:7, update:6 | 10 | - |
 
 ## 规则
 

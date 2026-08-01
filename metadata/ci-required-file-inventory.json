@@ -4797,6 +4797,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/257-lims-sample-menu-consolidation.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -5062,6 +5068,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-keycloak-jwt-runtime-smoke.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-lims-sample-menu-consolidation-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -5944,6 +5956,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/qcs-quality-profile.test.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/refresh-lims-sample-menu-i18n.sh",
       "state": "tracked",
       "tracked": true
     },
@@ -7599,6 +7617,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/lims-sample-menu-consolidation-acceptance-20260801.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/material-wms-completion-inbound-reversal-contract-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -8884,6 +8908,12 @@
     {
       "ignored": false,
       "path": "metadata/keycloak-jwt-runtime-smoke.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/lims-sample-menu-consolidation-acceptance-20260801.json",
       "state": "tracked",
       "tracked": true
     },
@@ -13592,16 +13622,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 894
+      "tracked": 897
     },
     "docs": {
-      "tracked": 165
+      "tracked": 166
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 348
+      "tracked": 349
     },
     "package.json": {
       "tracked": 1
@@ -13625,8 +13655,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2261,
-    "tracked": 2261,
+    "totalFiles": 2266,
+    "tracked": 2266,
     "untracked": 0
   },
   "untrackedByDirectory": []

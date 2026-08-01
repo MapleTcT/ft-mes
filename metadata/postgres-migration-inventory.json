@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 256,
+  "migrationCount": 257,
   "firstNumber": 1,
-  "lastNumber": 256,
+  "lastNumber": 257,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -17,26 +17,26 @@
     "create-index": 1029,
     "create-table": 588,
     "create-view": 143,
-    "insert": 11737,
-    "update": 11866
+    "insert": 11744,
+    "update": 11872
   },
   "idempotencySignalTotals": {
     "create-or-replace": 257,
     "do-block": 616,
-    "if-exists": 242,
-    "if-not-exists": 13084,
-    "on-conflict": 11662,
+    "if-exists": 248,
+    "if-not-exists": 13085,
+    "on-conflict": 11663,
     "to-regclass": 222,
-    "where-not-exists": 55
+    "where-not-exists": 57
   },
   "tagTotals": {
     "auth-rbac-org": 39,
-    "business": 62,
+    "business": 63,
     "compatibility": 92,
     "configuration": 62,
     "general": 47,
     "notification": 10,
-    "platform": 80,
+    "platform": 81,
     "workflow": 21
   },
   "migrations": [
@@ -9581,6 +9581,40 @@
         "to-regclass": 0,
         "create-or-replace": 0,
         "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/257-lims-sample-menu-consolidation.sql",
+      "name": "257-lims-sample-menu-consolidation.sql",
+      "number": 257,
+      "slug": "lims-sample-menu-consolidation",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 470,
+      "sha256": "e16aab585c95d3bcfc7cf21d4956f1698ad40f7cd85ad266ceba04b8878fdc34",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 7,
+        "update": 6
+      },
+      "idempotencySignals": {
+        "if-exists": 6,
+        "if-not-exists": 1,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 2
       },
       "highRiskStatements": [],
       "watchStatements": [],

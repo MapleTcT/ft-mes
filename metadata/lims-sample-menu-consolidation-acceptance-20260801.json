@@ -1,0 +1,116 @@
+{
+  "generatedAt": "2026-08-01T03:30:42.071Z",
+  "repoCommit": "2317b80a478bc1c38db95655aa68c6837abb02b3+working-tree",
+  "database": "PostgreSQL",
+  "environment": "http://10.11.100.17:18080",
+  "module": "LIMSSample 样品管理导航",
+  "status": "PASS",
+  "scope": "navigation-only",
+  "summary": {
+    "originalPageCount": 24,
+    "groupCount": 5,
+    "retainedPageCount": 24,
+    "retainedOperationCount": 74,
+    "representativePagesTested": 5,
+    "pass": 5,
+    "fail": 0
+  },
+  "groups": [
+    {
+      "code": "LIMSSample.group.registerCollect",
+      "name": "登记与取样",
+      "pageCount": 5,
+      "pages": [
+        "样品登记",
+        "计划登样",
+        "批量登样",
+        "取样任务分配",
+        "样品取样"
+      ],
+      "representativeRoute": "/msService/LIMSSample/sample/sampleInfo/sampleRegisterLayout",
+      "status": "PASS"
+    },
+    {
+      "code": "LIMSSample.group.receivePrepare",
+      "name": "收样与制备",
+      "pageCount": 4,
+      "pages": [
+        "样品收样",
+        "扫码收样",
+        "样品制样",
+        "样品交接"
+      ],
+      "representativeRoute": "/msService/LIMSSample/sample/sampleInfo/receiveListLayout?customConditionKey=menuCode&menuCode=sampleReceive",
+      "status": "PASS"
+    },
+    {
+      "code": "LIMSSample.group.resultReview",
+      "name": "结果录入与复核",
+      "pageCount": 6,
+      "pages": [
+        "按项目批量录入",
+        "单样品录入结果",
+        "按项目录入结果",
+        "按样品录入结果",
+        "按样品结果复核",
+        "按项目结果复核"
+      ],
+      "representativeRoute": "/msService/LIMSSample/sample/sampleInfo/batchRecordByTest",
+      "status": "PASS"
+    },
+    {
+      "code": "LIMSSample.group.auditDisposition",
+      "name": "审核与处置",
+      "pageCount": 6,
+      "pages": [
+        "样品审核",
+        "样品拒绝",
+        "样品接受",
+        "样品处理",
+        "剩余样品处理",
+        "样品留样"
+      ],
+      "representativeRoute": "/msService/LIMSSample/sample/sampleInfo/sampleCheck",
+      "status": "PASS"
+    },
+    {
+      "code": "LIMSSample.group.ledgerReport",
+      "name": "台账与报告",
+      "pageCount": 3,
+      "pages": [
+        "检验进度查询",
+        "样品台账",
+        "样品检验报告"
+      ],
+      "representativeRoute": "/msService/LIMSSample/sample/sampleInfo/sampleTestProgress",
+      "status": "PASS"
+    }
+  ],
+  "invariants": {
+    "pageIdsPreserved": true,
+    "pageRoutesPreserved": true,
+    "businessApisChanged": false,
+    "businessTablesChanged": false,
+    "buttonPermissionsChanged": false,
+    "pagesStillDirectlyUnderRoot": 0,
+    "invalidMenuPaths": 0
+  },
+  "browserEvidence": {
+    "loginStatus": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "networkErrors": [],
+    "visibleSystemError": null,
+    "report": "/tmp/adp-lims-sample-menu-20260801-pass1/acceptance.json",
+    "screenshot": "/tmp/adp-lims-sample-menu-20260801-pass1/lims-sample-menu-groups.png"
+  },
+  "artifacts": {
+    "migration": "deploy/docker/postgres/init/257-lims-sample-menu-consolidation.sql",
+    "acceptanceScript": "deploy/docker/scripts/adp-lims-sample-menu-consolidation-acceptance.js",
+    "i18nCacheRefresh": "deploy/docker/scripts/refresh-lims-sample-menu-i18n.sh",
+    "preMigrationBackup": "/home/v6/adp-mes-docker-newbase-20260611-181921/backups/20260801-lims-sample-menu/rbac_menuinfo-before.csv"
+  },
+  "knownIssues": [
+    "Legacy sysmanagement cannot hot-load new menu keys while /opt/adp/tmp/counter.zip is missing; literal menu display names provide the current runtime fallback."
+  ]
+}
