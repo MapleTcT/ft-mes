@@ -1629,6 +1629,30 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/LIMSSample/LIMSSample_C_zh_CN.properties",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/LIMSSample/LIMSSample_M_zh_CN.properties",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/LIMSSample/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/LIMSSample/platform-common-zh_CN.properties",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/PATROL/i18n-value.js",
       "state": "tracked",
       "tracked": true
@@ -4803,6 +4827,24 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/258-lims-sample-actions-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/259-lims-sample-actions-button-metadata.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/260-lims-sample-action-dialog-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -5068,6 +5110,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-keycloak-jwt-runtime-smoke.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-lims-sample-actions-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -5925,6 +5973,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/prepare-lims-sample-static-assets.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/prepare-qcs-static-assets.sh",
       "state": "tracked",
       "tracked": true
@@ -6028,6 +6082,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/test-bpi-wms-outage-fixture.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test-lims-sample-static-assets.js",
       "state": "tracked",
       "tracked": true
     },
@@ -7617,6 +7677,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/lims-sample-actions-acceptance-20260803.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/lims-sample-menu-consolidation-acceptance-20260801.md",
       "state": "tracked",
       "tracked": true
@@ -8908,6 +8974,12 @@
     {
       "ignored": false,
       "path": "metadata/keycloak-jwt-runtime-smoke.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/lims-sample-actions-acceptance-20260803.json",
       "state": "tracked",
       "tracked": true
     },
@@ -13622,16 +13694,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 897
+      "tracked": 907
     },
     "docs": {
-      "tracked": 166
+      "tracked": 167
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 349
+      "tracked": 350
     },
     "package.json": {
       "tracked": 1
@@ -13655,8 +13727,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2266,
-    "tracked": 2266,
+    "totalFiles": 2278,
+    "tracked": 2278,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -519,6 +519,7 @@ runtime-script-check:
 	$(PYTHON) -m py_compile scripts/verify-bpi-feature-flag-governance.py
 	sh -n deploy/docker/scripts/prepare-runtime-patches.sh
 	sh -n deploy/docker/scripts/prepare-qcs-static-assets.sh
+	sh -n deploy/docker/scripts/prepare-lims-sample-static-assets.sh
 	sh -n deploy/docker/scripts/patch-lims-qcs-inspect-report-service.sh
 	sh -n deploy/docker/scripts/build-rm-import-transaction-patch.sh
 	sh -n deploy/docker/scripts/build-wom-core-production-boot-jar.sh
@@ -626,6 +627,8 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-qcs-report-chain-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/test-qcs-display-bindings.js
 	$(NODE) deploy/docker/scripts/test-qcs-display-bindings.js
+	$(NODE) --check deploy/docker/scripts/test-lims-sample-static-assets.js
+	$(NODE) deploy/docker/scripts/test-lims-sample-static-assets.js
 	$(NODE) --check deploy/docker/scripts/test-workflow-editor-locale-compat.js
 	$(NODE) deploy/docker/scripts/test-workflow-editor-locale-compat.js
 	$(NODE) --check deploy/docker/scripts/test-workflow-config-entry-popup-fallback.js
@@ -1242,6 +1245,7 @@ render-config:
 prepare-runtime:
 	cd $(DEPLOY_DIR) && scripts/prepare-static-placeholders.sh
 	cd $(DEPLOY_DIR) && scripts/prepare-qcs-static-assets.sh
+	cd $(DEPLOY_DIR) && scripts/prepare-lims-sample-static-assets.sh
 	cd $(DEPLOY_DIR) && scripts/prepare-eam-static-assets.sh
 	cd $(DEPLOY_DIR) && scripts/prepare-runtime-patches.sh ../../runtime/bap-server
 

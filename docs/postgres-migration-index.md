@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`257`。
-- 编号范围：`001` 到 `257`。
+- 脚本数量：`260`。
+- 编号范围：`001` 到 `260`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -21,12 +21,12 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 39 |
-| business | 63 |
+| business | 66 |
 | compatibility | 92 |
 | configuration | 62 |
 | general | 47 |
 | notification | 10 |
-| platform | 81 |
+| platform | 83 |
 | workflow | 21 |
 
 ## 语句统计
@@ -34,22 +34,22 @@
 | Statement | Count |
 | --- | --- |
 | alter-table | 10840 |
-| create-function | 117 |
+| create-function | 118 |
 | create-index | 1029 |
 | create-table | 588 |
 | create-view | 143 |
-| insert | 11744 |
-| update | 11872 |
+| insert | 11792 |
+| update | 11925 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 257 |
-| do-block | 616 |
-| if-exists | 248 |
+| create-or-replace | 258 |
+| do-block | 634 |
+| if-exists | 264 |
 | if-not-exists | 13085 |
-| on-conflict | 11663 |
+| on-conflict | 11711 |
 | to-regclass | 222 |
 | where-not-exists | 57 |
 
@@ -314,6 +314,9 @@
 | 255 | 255-wts-firework-native-batch-print-collision.sql | business | 24 | update:3 | 0 | - |
 | 256 | 256-wom-material-report-actions-runtime.sql | platform | 1341 | insert:69, update:69 | 115 | - |
 | 257 | 257-lims-sample-menu-consolidation.sql | platform, business | 470 | insert:7, update:6 | 10 | - |
+| 258 | 258-lims-sample-actions-runtime.sql | platform, business | 119 | create-function:1, update:3 | 2 | - |
+| 259 | 259-lims-sample-actions-button-metadata.sql | business | 171 | update:2 | 1 | - |
+| 260 | 260-lims-sample-action-dialog-runtime.sql | platform, business | 935 | insert:48, update:48 | 80 | - |
 
 ## 规则
 

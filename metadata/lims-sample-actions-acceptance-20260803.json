@@ -1,0 +1,494 @@
+{
+  "generatedAt": "2026-08-03T09:10:55.585Z",
+  "baseUrl": "http://10.11.100.17:18080",
+  "status": "PASS",
+  "summary": {
+    "totalPages": 24,
+    "actionPages": 16,
+    "queryOnlyPages": 8,
+    "expectedButtons": 29,
+    "passedPages": 24,
+    "failedPages": 0,
+    "missingButtons": 0,
+    "visibleErrors": 0,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "networkErrors": 0,
+    "rawI18nKeys": 0,
+    "loadingHangs": 0
+  },
+  "pages": [
+    {
+      "code": "LIMSSample_5.0.0.0_sample_sampleRegisterLayout",
+      "name": "样品登记",
+      "url": "/msService/LIMSSample/sample/sampleInfo/sampleRegisterLayout",
+      "status": 200,
+      "expectedButtons": [
+        "登记",
+        "设置检测项目",
+        "取消"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": {
+        "label": "登记",
+        "nonGetRequests": [
+          {
+            "method": "POST",
+            "url": "http://10.11.100.17:18080/msService/LIMSBasic/sampleType/customPropPart/customPropertyNeedDisplay"
+          }
+        ],
+        "openedPageCount": 0,
+        "loadingVisible": false,
+        "rawI18nKeys": []
+      },
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSBasic_1.0.0_testPlan_planSetSampleList",
+      "name": "计划登样",
+      "url": "/msService/LIMSBasic/testPlan/testPlanDetail/planSetSampleList",
+      "status": 200,
+      "expectedButtons": [
+        "生成样品"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_batchSampleRegister",
+      "name": "批量登样",
+      "url": "/msService/LIMSSample/sample/sampleHead/batchSampleRegister",
+      "status": 200,
+      "expectedButtons": [],
+      "missingButtons": [],
+      "actionStatus": "NOT_APPLICABLE",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_sampTaskAlcatLayOutNew",
+      "name": "取样任务分配",
+      "url": "/msService/LIMSSample/sample/sampleInfo/sampTaskAlcatLayOut?customConditionKey=menuCode&menuCode=sampleTask",
+      "status": 200,
+      "expectedButtons": [
+        "任务分配"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": {
+        "label": "任务分配",
+        "nonGetRequests": [],
+        "openedPageCount": 0,
+        "loadingVisible": false,
+        "rawI18nKeys": []
+      },
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_collectListLayoutNew",
+      "name": "样品取样",
+      "url": "/msService/LIMSSample/sample/sampleInfo/collectListLayout?customConditionKey=menuCode&menuCode=sampleCollect",
+      "status": 200,
+      "expectedButtons": [
+        "取样",
+        "取样信息设置"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_receiveListLayoutNew",
+      "name": "样品收样",
+      "url": "/msService/LIMSSample/sample/sampleInfo/receiveListLayout?customConditionKey=menuCode&menuCode=sampleReceive",
+      "status": 200,
+      "expectedButtons": [
+        "收样",
+        "设置检测项目"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_sampleSweepReceive",
+      "name": "扫码收样",
+      "url": "/msService/LIMSSample/sample/sampleInfo/sampleSweepReceive",
+      "status": 200,
+      "expectedButtons": [
+        "提交",
+        "删行"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_makeListLayoutNew",
+      "name": "样品制样",
+      "url": "/msService/LIMSSample/sample/sampleInfo/makeListLayout?customConditionKey=menuCode&menuCode=sampleMake",
+      "status": 200,
+      "expectedButtons": [
+        "制样"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_handoverListLayoutNew",
+      "name": "样品交接",
+      "url": "/msService/LIMSSample/sample/sampleInfo/handoverListLayout?customConditionKey=menuCode&menuCode=sampleHandover",
+      "status": 200,
+      "expectedButtons": [
+        "领用"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_batchRecordByTest",
+      "name": "按项目批量录入",
+      "url": "/msService/LIMSSample/sample/sampleInfo/batchRecordByTest",
+      "status": 200,
+      "expectedButtons": [],
+      "missingButtons": [],
+      "actionStatus": "NOT_APPLICABLE",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_recordBySingleSample",
+      "name": "单样品录入结果",
+      "url": "/msService/LIMSSample/sample/sampleInfo/recordBySingleSample",
+      "status": 200,
+      "expectedButtons": [
+        "环境条件记录"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_recordByTest",
+      "name": "按项目录入结果",
+      "url": "/msService/LIMSSample/sample/sampleInfo/recordByTest",
+      "status": 200,
+      "expectedButtons": [],
+      "missingButtons": [],
+      "actionStatus": "NOT_APPLICABLE",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_recordBySample",
+      "name": "按样品录入结果",
+      "url": "/msService/LIMSSample/sample/sampleInfo/recordBySample",
+      "status": 200,
+      "expectedButtons": [
+        "环境条件记录"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_recordCheckBySample",
+      "name": "按样品结果复核",
+      "url": "/msService/LIMSSample/sample/sampleInfo/recordCheckBySample",
+      "status": 200,
+      "expectedButtons": [],
+      "missingButtons": [],
+      "actionStatus": "NOT_APPLICABLE",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_recordCheckByTest",
+      "name": "按项目结果复核",
+      "url": "/msService/LIMSSample/sample/sampleInfo/recordCheckByTest",
+      "status": 200,
+      "expectedButtons": [
+        "刷新"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_sampleCheck",
+      "name": "样品审核",
+      "url": "/msService/LIMSSample/sample/sampleInfo/sampleCheck",
+      "status": 200,
+      "expectedButtons": [
+        "样品查看"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_sampleRefuse",
+      "name": "样品拒绝",
+      "url": "/msService/LIMSSample/sample/sampleInfo/sampleRefuse",
+      "status": 200,
+      "expectedButtons": [],
+      "missingButtons": [],
+      "actionStatus": "NOT_APPLICABLE",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_sampleAccept",
+      "name": "样品接受",
+      "url": "/msService/LIMSSample/sample/sampleInfo/sampleAccept",
+      "status": 200,
+      "expectedButtons": [],
+      "missingButtons": [],
+      "actionStatus": "NOT_APPLICABLE",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_sampleDealListLayout",
+      "name": "样品处理",
+      "url": "/msService/LIMSSample/sample/sampleInfo/sampleDealListLayout",
+      "status": 200,
+      "expectedButtons": [
+        "样品信息修改",
+        "设置检测项目",
+        "取消",
+        "恢复",
+        "重新取样检验",
+        "激活",
+        "删除"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_remainSampleLayout",
+      "name": "剩余样品处理",
+      "url": "/msService/LIMSSample/sample/sampleInfo/remainSampleLayout",
+      "status": 200,
+      "expectedButtons": [
+        "归还",
+        "销毁"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": {
+        "label": "归还",
+        "nonGetRequests": [],
+        "openedPageCount": 0,
+        "loadingVisible": false,
+        "rawI18nKeys": []
+      },
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_retainListLayout",
+      "name": "样品留样",
+      "url": "/msService/LIMSSample/sample/sampleInfo/retainListLayout",
+      "status": 200,
+      "expectedButtons": [
+        "留样"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_sampleTestProgress",
+      "name": "检验进度查询",
+      "url": "/msService/LIMSSample/sample/sampleInfo/sampleTestProgress",
+      "status": 200,
+      "expectedButtons": [],
+      "missingButtons": [],
+      "actionStatus": "NOT_APPLICABLE",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sample_sampleInfoLayout",
+      "name": "样品台账",
+      "url": "/msService/LIMSSample/sample/sampleInfo/sampleInfoLayout",
+      "status": 200,
+      "expectedButtons": [
+        "样品查看",
+        "处理记录查看"
+      ],
+      "missingButtons": [],
+      "actionStatus": "TESTED",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    },
+    {
+      "code": "LIMSSample_5.0.0.0_sampleReport_sampleReportList",
+      "name": "样品检验报告",
+      "url": "/msService/LIMSSample/sampleReport/sampleReport/sampleReportList",
+      "status": 200,
+      "expectedButtons": [],
+      "missingButtons": [],
+      "actionStatus": "NOT_APPLICABLE",
+      "safeClickResult": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "networkErrors": [],
+      "safeClickError": null
+    }
+  ],
+  "issues": [],
+  "loginStatus": 200,
+  "repoBaseCommit": "fc8ed235a31e7b6751060d00dd1eb6f38379900a",
+  "database": "PostgreSQL 15",
+  "scope": {
+    "groupedMenus": 5,
+    "totalPages": 24,
+    "actionPages": 16,
+    "queryOnlyPages": 8,
+    "originalPublishedActions": 29
+  },
+  "databaseEvidence": {
+    "sampleStageGroups": 5,
+    "sampleLeafPages": 24,
+    "restoredRuntimeButtons": 29,
+    "runtimePermissionCodesInRbac": 29,
+    "adminRolePermissions": 29,
+    "restoredActionParentViews": 16,
+    "restoredActionDialogViews": 16,
+    "status": "PASS"
+  },
+  "staticI18nEvidence": {
+    "resourceCount": 1263,
+    "moduleRoute": "/greenDill/static/LIMSSample/*/i18n-value.js",
+    "status": "PASS"
+  },
+  "deploymentEvidence": {
+    "migrations": [
+      "258-lims-sample-actions-runtime.sql",
+      "259-lims-sample-actions-button-metadata.sql",
+      "260-lims-sample-action-dialog-runtime.sql"
+    ],
+    "backups": [
+      "/home/v6/adp-backups/lims-sample-actions-20260803-160729/",
+      "/home/v6/adp-backups/lims-sample-dialogs-20260803-163959/",
+      "/home/v6/adp-backups/lims-sample-static-20260803-170939/"
+    ],
+    "nginxConfigTest": "PASS",
+    "nginxReload": "PASS"
+  },
+  "limitations": [
+    "Safe non-mutating clicks were used; submit, delete, destroy and other business writes were not executed in this button-recovery round.",
+    "Eight supplier query/workflow pages intentionally have no independent list actions."
+  ]
+}

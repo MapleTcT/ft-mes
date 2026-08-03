@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-01T03:37:55+00:00",
-  "repoCommit": "2317b80a478bc1c38db95655aa68c6837abb02b3",
+  "generatedAt": "2026-08-03T09:24:53+00:00",
+  "repoCommit": "fc8ed235a31e7b6751060d00dd1eb6f38379900a",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 587,
-    "totalBytes": 73434739,
+    "totalFiles": 594,
+    "totalBytes": 75215066,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 257,
+      "postgres-init-sql": 260,
       "runtime-binary-patch": 8,
       "runtime-patch-source": 25,
       "runtime-script": 28,
-      "runtime-static-override": 223
+      "runtime-static-override": 227
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 33728,
-      "postgres-init-sql": 71667567,
+      "nginx-runtime-config": 34023,
+      "postgres-init-sql": 73209261,
       "runtime-binary-patch": 178941,
       "runtime-patch-source": 98301,
       "runtime-script": 301465,
-      "runtime-static-override": 1112384
+      "runtime-static-override": 1350722
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 33508,
-      "sha256": "63eb27970c6b25a12c94912ac0476f509e4ec6894099a347c04f5c7119af520d"
+      "sizeBytes": 33803,
+      "sha256": "8e5465769841f857993129363f6f31a36c042c1fca3d82138417d36081be54e3"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1855,6 +1855,24 @@
       "sha256": "e16aab585c95d3bcfc7cf21d4956f1698ad40f7cd85ad266ceba04b8878fdc34"
     },
     {
+      "path": "deploy/docker/postgres/init/258-lims-sample-actions-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 179040,
+      "sha256": "ce727c053d7cffc32e1b9b08264fcc26062d3b8776edb49cddc20bdb58ee6e6c"
+    },
+    {
+      "path": "deploy/docker/postgres/init/259-lims-sample-actions-button-metadata.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 15398,
+      "sha256": "87561a6d7bc33e9dc624b30f61dfcc8a8816a75640ae00c60c6344a841909544"
+    },
+    {
+      "path": "deploy/docker/postgres/init/260-lims-sample-action-dialog-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1347256,
+      "sha256": "9f1b541449ef5a67249f7a626ec7d2282ca68ba1c30f6287a5c2853999622e51"
+    },
+    {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 148953,
@@ -2219,6 +2237,30 @@
       "category": "runtime-script",
       "sizeBytes": 9124,
       "sha256": "10e97501621b82f3ba205a0ae25843af8607aa901f55837439cfca90c75a6145"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/LIMSSample/LIMSSample_C_zh_CN.properties",
+      "category": "runtime-static-override",
+      "sizeBytes": 24030,
+      "sha256": "78bc5cfbee6296b40d8e48f8714732e984eaf616a81db23c46f050aa99d4ec25"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/LIMSSample/LIMSSample_M_zh_CN.properties",
+      "category": "runtime-static-override",
+      "sizeBytes": 74290,
+      "sha256": "e8a90657d88061591668421b2e38e1de328ec68d292a271cd853dbe1a59c19ee"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/LIMSSample/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 136408,
+      "sha256": "bd9c156ca20dfee815be434591fa2ffabaa0702ed69ab3b9e916776ac6e9423c"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/LIMSSample/platform-common-zh_CN.properties",
+      "category": "runtime-static-override",
+      "sizeBytes": 3610,
+      "sha256": "c6b4b35ff838c8c87d318c53dcaaafcc09fd64093e3c4daecdd63f442282153e"
     },
     {
       "path": "deploy/docker/assets/module-static/PATROL/i18n-value.js",

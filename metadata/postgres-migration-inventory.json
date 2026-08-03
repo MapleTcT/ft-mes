@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 257,
+  "migrationCount": 260,
   "firstNumber": 1,
-  "lastNumber": 257,
+  "lastNumber": 260,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -13,30 +13,30 @@
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 10840,
-    "create-function": 117,
+    "create-function": 118,
     "create-index": 1029,
     "create-table": 588,
     "create-view": 143,
-    "insert": 11744,
-    "update": 11872
+    "insert": 11792,
+    "update": 11925
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 257,
-    "do-block": 616,
-    "if-exists": 248,
+    "create-or-replace": 258,
+    "do-block": 634,
+    "if-exists": 264,
     "if-not-exists": 13085,
-    "on-conflict": 11663,
+    "on-conflict": 11711,
     "to-regclass": 222,
     "where-not-exists": 57
   },
   "tagTotals": {
     "auth-rbac-org": 39,
-    "business": 63,
+    "business": 66,
     "compatibility": 92,
     "configuration": 62,
     "general": 47,
     "notification": 10,
-    "platform": 81,
+    "platform": 83,
     "workflow": 21
   },
   "migrations": [
@@ -9615,6 +9615,107 @@
         "to-regclass": 0,
         "create-or-replace": 0,
         "where-not-exists": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/258-lims-sample-actions-runtime.sql",
+      "name": "258-lims-sample-actions-runtime.sql",
+      "number": 258,
+      "slug": "lims-sample-actions-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 119,
+      "sha256": "ce727c053d7cffc32e1b9b08264fcc26062d3b8776edb49cddc20bdb58ee6e6c",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/259-lims-sample-actions-button-metadata.sql",
+      "name": "259-lims-sample-actions-button-metadata.sql",
+      "number": 259,
+      "slug": "lims-sample-actions-button-metadata",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 171,
+      "sha256": "87561a6d7bc33e9dc624b30f61dfcc8a8816a75640ae00c60c6344a841909544",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/260-lims-sample-action-dialog-runtime.sql",
+      "name": "260-lims-sample-action-dialog-runtime.sql",
+      "number": 260,
+      "slug": "lims-sample-action-dialog-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 935,
+      "sha256": "9f1b541449ef5a67249f7a626ec7d2282ca68ba1c30f6287a5c2853999622e51",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 48,
+        "update": 48
+      },
+      "idempotencySignals": {
+        "if-exists": 16,
+        "if-not-exists": 0,
+        "on-conflict": 48,
+        "do-block": 16,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
       },
       "highRiskStatements": [],
       "watchStatements": [],

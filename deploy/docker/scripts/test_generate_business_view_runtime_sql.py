@@ -301,6 +301,93 @@ class ProductRuntimeParityTest(unittest.TestCase):
         self.assertEqual("bulkSubmitManu()", payload["onclick"])
         self.assertEqual("onclick='bulkSubmitManu()'", payload["funcname"])
 
+    def test_named_function_button_variants_are_repaired(self):
+        variants = {
+            "onclick='function devRecord()'": "devRecord()",
+            "onclick='nction taskAlcat()'": "taskAlcat()",
+            "onclick='ction sweepDelete()'": "sweepDelete()",
+        }
+
+        for raw_funcname, expected in variants.items():
+            with self.subTest(raw_funcname=raw_funcname):
+                self.assertEqual(
+                    expected,
+                    GENERATOR.canonical_button_onclick(raw_funcname),
+                )
+
+    def test_lims_sample_actions_restore_packaged_button_and_parent_permission(self):
+        view_code = "LIMSSample_5.0.0.0_sample_sampleRegisterLayout"
+        operation_code = (
+            "sampleRegisterPart_register_add_"
+            "LIMSSample_5.0.0.0_sample_sampleRegisterPart"
+        )
+        view = view_variant(code=view_code)
+        payload = {
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "buttons": [],
+                    "isCheckBox": False,
+                }
+            ]
+        }
+        packaged = {
+            view_code: {
+                "components": [
+                    {
+                        "type": "layoutDatagrid",
+                        "buttons": [
+                            {
+                                "id": "register",
+                                "showname": "登记",
+                                "namekey": "LIMSSample.sample.register",
+                                "buttonoperationcode": operation_code,
+                                "funcname": "onclick='sampleRegister()'",
+                                "buttonstyle": "add",
+                                "isPublished": True,
+                                "ispermission": True,
+                            },
+                            {
+                                "id": "setTestItem",
+                                "showname": "设置检测项目",
+                                "buttonoperationcode": "sampleRegisterPart_setTestItem_modify_source",
+                            },
+                            {
+                                "id": "cancel",
+                                "showname": "取消",
+                                "buttonoperationcode": "sampleRegisterPart_cancel_del_source",
+                            },
+                        ],
+                    }
+                ]
+            }
+        }
+
+        GENERATOR.apply_lims_sample_action_buttons(
+            view,
+            payload,
+            {view_code: view},
+            packaged,
+        )
+
+        grid = payload["components"][0]
+        self.assertIs(grid["isCheckBox"], True)
+        self.assertEqual(
+            ["register", "setTestItem", "cancel"],
+            [button["id"] for button in grid["buttons"]],
+        )
+        register = grid["buttons"][0]
+        self.assertEqual("登记", register["namekey"])
+        self.assertEqual("LIMSSample.sample.register", register["i18nKey"])
+        self.assertEqual("sampleRegister()", register["onclick"])
+        self.assertEqual(
+            GENERATOR.button_power_code(f"{view_code}_{operation_code}"),
+            register["pc"],
+        )
+        self.assertIs(register["isPublished"], True)
+        self.assertIs(register["ispermission"], True)
+        self.assertIs(register["isHide"], False)
+
     def test_qcs_packaged_list_supplements_missing_source_button(self):
         config_root = ET.fromstring(
             "<config><layout><sections><list><list-item>"
