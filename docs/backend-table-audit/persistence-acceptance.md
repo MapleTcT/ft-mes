@@ -1523,6 +1523,18 @@ Web 编辑鉴权按文档与业务 API 分层：空壳文档导航 200；无登�
 `docs/wom-material-report-actions-functional-acceptance-20260801.md`、
 `metadata/wom-material-report-actions-acceptance-20260801.json`。
 
+### WOM 备料与配料结构兼容及写入门禁（2026-08-03）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 补齐配料指令子项 PostgreSQL 结构 | 配料需求 -> 创建配料指令弹窗 | 运行时 layout/model 读取 | baseService 模型解析；WOM 原服务 ORM 映射 | `wom_make_bat_ord_parts`、`wom_make_bat_ord_parts_sv` | `SELECT to_regclass('public.wom_make_bat_ord_parts'), to_regclass('public.wom_make_bat_ord_parts_sv'), (SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='wom_make_bat_ord_parts'), (SELECT count(*) FROM public.wom_make_bat_ord_parts);` | 表和视图均存在，字段数 67，当前行数 0；迁移以 `ON_ERROR_STOP=1` 应用并可幂等重放 | PASS |
+| 拦截不完整旧测试需求 | 配料需求选中退料测试行后点击“创建配料指令” | 无写请求；`getOrderBatchNumByNeedId` 调用数 0 | 前端业务前置校验 | 无 | 复读 `wom_make_bat_ord_parts` 行数；观察 network | 显示“当前记录不是有效的生产配料需求，请从制造指令生成配料需求”；没有编号请求、500 或数据库变化 | NOT_APPLICABLE |
+| 正常生产需求创建配料指令并保存子项 | 配料需求 -> 创建配料指令 -> 保存 | 待有效业务种子后记录 | WOM controller/service/ORM 待真实请求确认 | `wom_make_bat_ord_parts` 及关联配料需求/指令表 | 使用 `ADP_E2E_YYYYMMDD_HHMMSS_WOM_BATCH` marker 后查询父单、子项、数量和状态 | 测试环境现有两行均为缺少需求状态、配料点和生产任务的退料测试数据，不能作为正常生产需求提交 | BLOCKED |
+
+页面动作可见性 `10/10 PASS` 不能替代第三行的真实写入验收。机器证据：
+`metadata/wom-material-preparation-action-coverage-20260803.json`；迁移：
+`deploy/docker/postgres/init/262-wom-make-batch-order-part-schema.sql`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

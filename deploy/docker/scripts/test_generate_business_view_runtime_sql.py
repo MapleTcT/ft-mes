@@ -817,6 +817,32 @@ class ProductRuntimeParityTest(unittest.TestCase):
             "待办说明", payload["components"][0]["element"]["title"]
         )
 
+    def test_wom_prepare_material_table_number_fallback_replaces_runtime_key(self):
+        view = view_variant(
+            code="WOM_1.0.0_prepareMaterialNeed_prepareMaterialList"
+        )
+        payload = {
+            "components": [
+                {
+                    "namekey": "ec.common.tableNo",
+                    "element": {
+                        "displayName": "ec.common.tableNo",
+                        "title": "ec.list.taskDescription",
+                    },
+                }
+            ]
+        }
+
+        GENERATOR.apply_view_runtime_overrides(view, payload)
+
+        self.assertEqual("单据编号", payload["components"][0]["namekey"])
+        self.assertEqual(
+            "单据编号", payload["components"][0]["element"]["displayName"]
+        )
+        self.assertEqual(
+            "待办说明", payload["components"][0]["element"]["title"]
+        )
+
     def test_nested_layout_button_uses_parent_view_permission_code(self):
         operation_code = "sampleList_add_add_PATROL_1.0.0_sample_sampleList"
         parent_code = "PATROL_1.0.0_sample_sampleLayout"
@@ -1376,6 +1402,244 @@ class ProductRuntimeParityTest(unittest.TestCase):
 
         self.assertTrue(expected.issubset(set(GENERATOR.TARGET_VIEW_CODES)))
 
+    def test_wom_material_preparation_actions_publish_only_business_whitelist(self):
+        code = "WOM_1.0.0_batchMaterial_materialRecodList"
+        view = view_variant(code=code)
+        payload = {
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "buttons": [
+                        {
+                            "id": button_id,
+                            "showname": button_id,
+                            "funcname": f"onclick='{button_id}()'",
+                            "isPublished": False,
+                            "isHide": False,
+                            "ispermission": False,
+                        }
+                        for button_id in (
+                            *GENERATOR.WOM_MATERIAL_PREPARATION_PUBLISHED_ACTIONS[code],
+                            "secondSyn",
+                        )
+                    ],
+                }
+            ]
+        }
+        payload["components"][0]["buttons"][-1]["isPublished"] = True
+
+        GENERATOR.publish_wom_material_preparation_actions(view, payload, {code: view})
+
+        buttons = {
+            button["id"]: button for button in payload["components"][0]["buttons"]
+        }
+        for button_id in GENERATOR.WOM_MATERIAL_PREPARATION_PUBLISHED_ACTIONS[code]:
+            self.assertTrue(buttons[button_id]["isPublished"])
+            self.assertFalse(buttons[button_id]["isHide"])
+            self.assertFalse(buttons[button_id]["ispermission"])
+            self.assertEqual(f"{button_id}()", buttons[button_id]["onclick"])
+        self.assertFalse(buttons["secondSyn"]["isPublished"])
+        self.assertTrue(buttons["secondSyn"]["isHide"])
+
+    def test_wom_batch_material_render_over_handles_empty_grid(self):
+        code = GENERATOR.WOM_BATCH_MATERIAL_LIST_VIEW_CODE
+        view = view_variant(code=code)
+        data_expression = (
+            'ReactAPI.getComponentAPI("SupDataGrid").APIs("'
+            + GENERATOR.WOM_BATCH_MATERIAL_LIST_GRID_CODE
+            + '").getDatagridData()'
+        )
+        unsafe_probe = (
+            'ReactAPI.getComponentAPI().SupDataGrid.APIs("'
+            + GENERATOR.WOM_BATCH_MATERIAL_LIST_GRID_CODE
+            + '").getDatagridData()[0].productId.code;'
+        )
+        payload = {
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "renderOver": (
+                        unsafe_probe
+                        + f"\nlet data = {data_expression};"
+                        + "\nif (res.code = 200) { consume(res.data); }"
+                    ),
+                    "renderOver_es5": (
+                        unsafe_probe
+                        + f"\nvar data = {data_expression};"
+                        + "\nif (res.code = 200) { consume(res.data); }"
+                    ),
+                }
+            ]
+        }
+
+        GENERATOR.repair_wom_batch_material_render_over(view, payload)
+
+        grid = payload["components"][0]
+        for key in ("renderOver", "renderOver_es5"):
+            self.assertNotIn("[0].productId.code", grid[key])
+            self.assertIn("if (!data || !data.length) { return; }", grid[key])
+            self.assertIn(
+                "if (res && Number(res.code) === 200 && Array.isArray(res.data))",
+                grid[key],
+            )
+
+    def test_wom_batch_material_need_action_handles_empty_state(self):
+        code = "WOM_1.0.0_batchMaterialNeed_batchMaterialNeed"
+        view = view_variant(code=code)
+        unsafe_script = (
+            'if (selectedData[i].needState.id == "WOM_batMatState/done") {'
+            " return false; }"
+        )
+        payload = {
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "buttons": [
+                        {
+                            "id": "addBatchMaterial",
+                            "funcbody": unsafe_script + "\n//选了多条数据，有",
+                            "funcbody_es5": unsafe_script + "\n//选了多条数据，有",
+                        },
+                        {
+                            "id": "complete",
+                            "funcbody": unsafe_script + "\n//如果全部已更新无需再操作",
+                            "funcbody_es5": unsafe_script + "\n//如果全部已更新无需再操作",
+                        },
+                    ],
+                }
+            ]
+        }
+
+        GENERATOR.repair_wom_material_preparation_action_scripts(view, payload)
+
+        for button in payload["components"][0]["buttons"]:
+            for key in ("funcbody", "funcbody_es5"):
+                self.assertNotIn(
+                    "if (selectedData[i].needState.id ==",
+                    button[key],
+                )
+                self.assertIn(
+                    "(selectedData[i].needState && selectedData[i].needState.id)",
+                    button[key],
+                )
+
+        add_script = payload["components"][0]["buttons"][0]["funcbody"]
+        self.assertIn("当前记录不是有效的生产配料需求", add_script)
+        self.assertIn("!invalidRow.batchSite", add_script)
+
+        complete_script = payload["components"][0]["buttons"][1]["funcbody"]
+        self.assertIn("当前记录缺少配料需求状态", complete_script)
+
+    def test_wom_make_batch_order_dialog_is_null_safe_and_actionable(self):
+        code = "WOM_1.0.0_batchMaterialNeed_makeBatOrdEdit"
+        view = view_variant(code=code)
+        unsafe_render = """
+var offerNum = "";
+if ((planNum - offerNum) > 0) {
+    offerNum = planNum = offerNum;
+}
+batchNum = res.data;
+var batchSite = dataGrid[j].batchSite.id;
+if (res.code = 200) { consume(res.data); }
+"""
+        payload = {
+            "components": [
+                {
+                    "type": "layoutDatagrid",
+                    "DataGridCode": "WOM_1.0.0_batchMaterialNeed_makeBatOrdEditdg1582856369922",
+                    "modelCode": "WOM_1.0.0_batchMaterialNeed_BatchMatNeed",
+                    "renderOver": unsafe_render,
+                    "renderOver_es5": unsafe_render,
+                    "buttons": [
+                        {
+                            "id": "copy",
+                            "isPublished": False,
+                            "funcbody": "var batchSite = editTable.getDatagridData()[newline.rowIndex].batchSite.id;",
+                            "funcbody_es5": "if (res.code = 200) { consume(res.data); }",
+                        },
+                        {"id": "delete", "isPublished": False},
+                    ],
+                }
+            ]
+        }
+
+        GENERATOR.repair_wom_material_preparation_action_scripts(view, payload)
+
+        grid = payload["components"][0]
+        self.assertEqual(
+            "WOM_1.0.0_batchMaterialNeed_MakeBatOrdPart",
+            grid["modelCode"],
+        )
+        self.assertTrue(all(button["isPublished"] for button in grid["buttons"]))
+        for key in ("renderOver", "renderOver_es5"):
+            self.assertNotIn("offerNum = planNum = offerNum", grid[key])
+            self.assertIn("Math.max(Number(planNum) - Number(offerNum), 0)", grid[key])
+            self.assertIn("if (!batchSite) { continue; }", grid[key])
+            self.assertIn("Array.isArray(res.data)", grid[key])
+        self.assertIn("|| {}).id", grid["buttons"][0]["funcbody"])
+        self.assertIn("Array.isArray(res.data)", grid["buttons"][0]["funcbody_es5"])
+
+    def test_embedded_part_model_is_a_required_schema_dependency(self):
+        entity_code = "WOM_1.0.0_batchMaterialNeed"
+        main_code = entity_code + "_BatchMatNeed"
+        part_code = entity_code + "_MakeBatOrdPart"
+        view_xml = ET.fromstring(
+            f"""<view>
+                <code>{entity_code}_makeBatOrdEdit</code>
+                <type>EDIT</type>
+                <entityCode>{entity_code}</entityCode>
+                <assModel><code>{main_code}</code></assModel>
+                <targetPropertyCode>{part_code}_needId</targetPropertyCode>
+                <modelcode>{part_code}</modelcode>
+            </view>"""
+        )
+        view = GENERATOR.parse_view(Path("module.xml"), view_xml)
+        self.assertIsNotNone(view)
+        self.assertEqual((part_code,), view.dependency_model_codes)
+
+        models = {
+            main_code: SimpleNamespace(code=main_code),
+            part_code: SimpleNamespace(code=part_code),
+        }
+        required = GENERATOR.resolve_required_models(models, [view])
+        self.assertEqual([main_code, part_code], [model.code for model in required])
+
+    def test_wom_make_batch_order_part_schema_migration_exists(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "262-wom-make-batch-order-part-schema.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            "CREATE TABLE IF NOT EXISTS public.wom_make_bat_ord_parts",
+            migration,
+        )
+        self.assertIn("ADD COLUMN IF NOT EXISTS need_id int8", migration)
+        self.assertIn("wom_make_bat_ord_parts_sv", migration)
+
+    def test_wom_material_preparation_action_views_are_default_targets(self):
+        expected = {
+            *GENERATOR.WOM_MATERIAL_PREPARATION_PUBLISHED_ACTIONS.keys(),
+            "WOM_1.0.0_prepareMaterialNeed_prepareMaterialList",
+            "WOM_1.0.0_prepareMaterialNeed_prepareOrderHeadEdit",
+            "WOM_1.0.0_prepareMaterialNeed_demandShutEdit",
+            "WOM_1.0.0_prepareMaterialNeed_needPartAdjustEdit",
+            "WOM_1.0.0_prePraOrder_orderOperateEdit",
+            "WOM_1.0.0_prePraOrder_instructionEdit",
+            "WOM_1.0.0_prePraOrder_recordingDeliverEdit",
+            "WOM_1.0.0_prePraOrder_recordingReceiveEdit",
+            "WOM_1.0.0_batchMaterialNeed_makeBatOrdEdit",
+            "WOM_1.0.0_batchMaterial_batchMaterialEdit",
+            "WOM_1.0.0_batchMaterial_materailRecodSingFor",
+            "WOM_1.0.0_batchMaterial_batchRejection",
+            "HierarchicalMod_1.0.0_factoryWare_factoryRepairRef",
+            "HierarchicalMod_1.0.0_factoryWare_factoryRepairEdit",
+        }
+
+        self.assertTrue(expected.issubset(set(GENERATOR.TARGET_VIEW_CODES)))
+
     def test_incompatible_wom_action_views_are_regenerated_from_module_xml(self):
         packaged_payload = {
             "pageType": "EDIT",
@@ -1610,6 +1874,87 @@ class ProductRuntimeParityTest(unittest.TestCase):
         self.assertEqual(2, migration.count("ON CONFLICT (code) DO UPDATE SET"))
         self.assertNotIn("runtime_extra_view", migration)
         self.assertNotIn("Oracle", migration)
+
+    def test_wom_material_preparation_runtime_migration_publishes_whitelist(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "261-wom-material-preparation-actions-runtime.sql"
+        ).read_text(encoding="utf-8")
+
+        for view_code, expected_button_ids in (
+            GENERATOR.WOM_MATERIAL_PREPARATION_PUBLISHED_ACTIONS.items()
+        ):
+            marker = f"-- {view_code} "
+            self.assertIn(marker, migration)
+            view_start = migration.index(marker)
+            payload_prefix = "DECLARE runtime_extra_view_payload text := '"
+            payload_start = migration.index(payload_prefix, view_start) + len(payload_prefix)
+            payload_end = migration.index(
+                "';\nDECLARE runtime_extra_view_existing_oid", payload_start
+            )
+            payload = json.loads(
+                migration[payload_start:payload_end].replace("''", "'")
+            )
+            buttons = {
+                str(button.get("id") or ""): button
+                for button in GENERATOR.collect_runtime_buttons(payload)
+            }
+            for button_id in expected_button_ids:
+                self.assertTrue(buttons[button_id]["isPublished"])
+                self.assertFalse(buttons[button_id]["isHide"])
+                self.assertFalse(buttons[button_id]["ispermission"])
+
+        material_record_marker = (
+            "-- WOM_1.0.0_batchMaterial_materialRecodList "
+        )
+        material_record_start = migration.index(material_record_marker)
+        payload_prefix = "DECLARE runtime_extra_view_payload text := '"
+        payload_start = migration.index(payload_prefix, material_record_start) + len(
+            payload_prefix
+        )
+        payload_end = migration.index(
+            "';\nDECLARE runtime_extra_view_existing_oid", payload_start
+        )
+        material_record_payload = json.loads(
+            migration[payload_start:payload_end].replace("''", "'")
+        )
+        material_record_buttons = {
+            str(button.get("id") or ""): button
+            for button in GENERATOR.collect_runtime_buttons(material_record_payload)
+        }
+        self.assertFalse(material_record_buttons["secondSyn"]["isPublished"])
+
+        batch_list_marker = f"-- {GENERATOR.WOM_BATCH_MATERIAL_LIST_VIEW_CODE} "
+        batch_list_start = migration.index(batch_list_marker)
+        payload_start = migration.index(payload_prefix, batch_list_start) + len(
+            payload_prefix
+        )
+        payload_end = migration.index(
+            "';\nDECLARE runtime_extra_view_existing_oid", payload_start
+        )
+        batch_list_payload = migration[payload_start:payload_end].replace("''", "'")
+        self.assertNotIn("[0].productId.code", batch_list_payload)
+        self.assertIn("if (!data || !data.length) { return; }", batch_list_payload)
+
+        batch_need_marker = "-- WOM_1.0.0_batchMaterialNeed_batchMaterialNeed "
+        batch_need_start = migration.index(batch_need_marker)
+        payload_start = migration.index(payload_prefix, batch_need_start) + len(
+            payload_prefix
+        )
+        payload_end = migration.index(
+            "';\nDECLARE runtime_extra_view_existing_oid", payload_start
+        )
+        batch_need_payload = migration[payload_start:payload_end].replace("''", "'")
+        self.assertNotIn(
+            "if (selectedData[i].needState.id ==",
+            batch_need_payload,
+        )
+        self.assertIn(
+            "(selectedData[i].needState && selectedData[i].needState.id)",
+            batch_need_payload,
+        )
 
     def test_rm_formula_menu_action_runtime_migration_restores_original_toolbars(self):
         migration = (

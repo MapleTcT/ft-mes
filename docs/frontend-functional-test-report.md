@@ -1578,6 +1578,29 @@ PASS，浏览器四类错误均为 0，10 张业务表前后行数一致。
 `docs/wom-material-report-actions-functional-acceptance-20260801.md`；机器证据见
 `metadata/wom-material-report-actions-acceptance-20260801.json`。
 
+### WOM 备料与配料动作回归（2026-08-03）
+
+本轮针对备料、配料菜单“页面存在但业务按钮缺失”的问题，恢复受控业务动作并逐页执行
+真实浏览器回归。以下 `PASS` 只表示页面、查询和动作入口可用；未实际提交的写动作不会
+外推为落库通过。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| 异常补料 | `/msService/HierarchicalMod/factoryWare/factoryMateria/factoryRepairList` | 显示“补料” | 页面及列表 query | 页面 200，按钮可见，四类浏览器错误为 0 | 查询无错误响应 | 运行时视图只读 | PASS | 写入未在本轮执行 |
+| 备料需求 | `/msService/WOM/prepareMaterialNeed/prePareNeed/prepareMaterialList` | 查询需求 | 页面及列表 query | 页面 200，空态/列表正常 | 查询无错误响应 | WOM 需求表只读 | PASS | 标准产品应作为需求工作台 |
+| 备料需求明细 | `/msService/WOM/prepareMaterialNeed/prePraNeedPart/demandBreakdownList` | 创建指令、关闭、调整 | 页面及列表 query | 三个动作可见，无浏览器错误 | 查询无错误响应 | WOM 需求明细只读 | PASS | 后续并入需求工作台页签 |
+| 备料调度 | `/msService/WOM/prePraOrder/prePraOrder/preOrderScheduleList` | 完成、停止、取消 | 页面及列表 query | 三个动作可见，无浏览器错误 | 查询无错误响应 | WOM 备料指令只读 | PASS | 后续作为调度角色视图 |
+| 备料执行 | `/msService/WOM/prePraOrder/prePraOrder/preOrderDepartList` | 备料 | 页面及列表 query | 业务动作可见，无浏览器错误 | 查询无错误响应 | WOM 备料指令只读 | PASS | 后续作为仓储作业视图 |
+| 备料记录 | `/msService/WOM/prePraOrder/prepMatralReco/recordingList` | 提交、撤回、派送 | 页面及列表 query | 三个动作可见；“二次同步”已隐藏 | 查询无错误响应 | WOM 备料记录只读 | PASS | 后续并入执行历史 |
+| 备料接收 | `/msService/WOM/prePraOrder/prepMatralReco/recordingReceiveList` | 接收 | 页面及列表 query | 业务动作可见，无浏览器错误 | 查询无错误响应 | WOM 备料记录只读 | PASS | 后续并入待接收状态 |
+| 配料需求 | `/msService/WOM/batchMaterialNeed/batchMatNeed/batchMaterialNeed` | 创建配料指令、完成 | 页面及列表 query | 两个动作可见；旧异常行显示明确提示 | 旧异常行未调用编号接口，未触发 500 | `wom_make_bat_ord_parts` 当前 0 行 | PASS | 正常业务种子写入为 BLOCKED |
+| 配料执行 | `/msService/WOM/batchMaterial/batchMateril/batchMaterilList` | 批量配料、完成 | 页面及列表 query | 两个动作可见，无浏览器错误 | 查询无错误响应 | WOM 配料指令只读 | PASS | 写入未在本轮执行 |
+| 配料记录 | `/msService/WOM/batchMaterial/batMaterilPart/materialRecodList` | 配料完成、撤回、派送、接收、配放、退废 | 页面及列表 query | 六个业务动作可见；“二次同步”已隐藏 | 查询无错误响应 | WOM 配料记录只读 | PASS | 后续并入配料历史 |
+
+完整机器证据：
+`metadata/wom-material-preparation-action-coverage-20260803.json`。产品取舍和菜单收敛方案见
+`docs/product/wom-material-preparation-standardization.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

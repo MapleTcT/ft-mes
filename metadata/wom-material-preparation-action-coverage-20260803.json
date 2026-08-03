@@ -1,0 +1,214 @@
+{
+  "generatedAt": "2026-08-03T12:10:28.655Z",
+  "baseUrl": "http://10.11.100.17:18080",
+  "database": "PostgreSQL",
+  "summary": {
+    "testedPages": 10,
+    "pass": 10,
+    "fail": 0,
+    "invalidLegacyDemandGuard": "PASS"
+  },
+  "items": [
+    {
+      "module": "异常补料",
+      "route": "/msService/HierarchicalMod/factoryWare/factoryMateria/factoryRepairList",
+      "expectedActions": [
+        "补料"
+      ],
+      "forbiddenActions": [],
+      "navigationStatus": 200,
+      "missingActions": [],
+      "visibleForbiddenActions": [],
+      "untranslatedKeys": [],
+      "visibleError": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "badResponses": [],
+      "status": "PASS"
+    },
+    {
+      "module": "备料需求",
+      "route": "/msService/WOM/prepareMaterialNeed/prePareNeed/prepareMaterialList",
+      "expectedActions": [],
+      "forbiddenActions": [],
+      "navigationStatus": 200,
+      "missingActions": [],
+      "visibleForbiddenActions": [],
+      "untranslatedKeys": [],
+      "visibleError": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "badResponses": [],
+      "status": "PASS"
+    },
+    {
+      "module": "备料需求明细",
+      "route": "/msService/WOM/prepareMaterialNeed/prePraNeedPart/demandBreakdownList",
+      "expectedActions": [
+        "创建指令",
+        "关闭",
+        "调整"
+      ],
+      "forbiddenActions": [],
+      "navigationStatus": 200,
+      "missingActions": [],
+      "visibleForbiddenActions": [],
+      "untranslatedKeys": [],
+      "visibleError": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "badResponses": [],
+      "status": "PASS"
+    },
+    {
+      "module": "备料调度",
+      "route": "/msService/WOM/prePraOrder/prePraOrder/preOrderScheduleList",
+      "expectedActions": [
+        "完成",
+        "停止",
+        "取消"
+      ],
+      "forbiddenActions": [],
+      "navigationStatus": 200,
+      "missingActions": [],
+      "visibleForbiddenActions": [],
+      "untranslatedKeys": [],
+      "visibleError": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "badResponses": [],
+      "status": "PASS"
+    },
+    {
+      "module": "备料执行",
+      "route": "/msService/WOM/prePraOrder/prePraOrder/preOrderDepartList",
+      "expectedActions": [
+        "备料"
+      ],
+      "forbiddenActions": [],
+      "navigationStatus": 200,
+      "missingActions": [],
+      "visibleForbiddenActions": [],
+      "untranslatedKeys": [],
+      "visibleError": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "badResponses": [],
+      "status": "PASS"
+    },
+    {
+      "module": "备料记录",
+      "route": "/msService/WOM/prePraOrder/prepMatralReco/recordingList",
+      "expectedActions": [
+        "提交",
+        "撤回",
+        "派送"
+      ],
+      "forbiddenActions": [
+        "二次同步"
+      ],
+      "navigationStatus": 200,
+      "missingActions": [],
+      "visibleForbiddenActions": [],
+      "untranslatedKeys": [],
+      "visibleError": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "badResponses": [],
+      "status": "PASS"
+    },
+    {
+      "module": "备料接收",
+      "route": "/msService/WOM/prePraOrder/prepMatralReco/recordingReceiveList",
+      "expectedActions": [
+        "接收"
+      ],
+      "forbiddenActions": [],
+      "navigationStatus": 200,
+      "missingActions": [],
+      "visibleForbiddenActions": [],
+      "untranslatedKeys": [],
+      "visibleError": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "badResponses": [],
+      "status": "PASS"
+    },
+    {
+      "module": "配料需求",
+      "route": "/msService/WOM/batchMaterialNeed/batchMatNeed/batchMaterialNeed",
+      "expectedActions": [
+        "创建配料指令",
+        "完成"
+      ],
+      "forbiddenActions": [],
+      "navigationStatus": 200,
+      "missingActions": [],
+      "visibleForbiddenActions": [],
+      "untranslatedKeys": [],
+      "visibleError": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "badResponses": [],
+      "status": "PASS"
+    },
+    {
+      "module": "配料执行",
+      "route": "/msService/WOM/batchMaterial/batchMateril/batchMaterilList",
+      "expectedActions": [
+        "批量配料",
+        "完成"
+      ],
+      "forbiddenActions": [],
+      "navigationStatus": 200,
+      "missingActions": [],
+      "visibleForbiddenActions": [],
+      "untranslatedKeys": [],
+      "visibleError": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "badResponses": [],
+      "status": "PASS"
+    },
+    {
+      "module": "配料记录",
+      "route": "/msService/WOM/batchMaterial/batMaterilPart/materialRecodList",
+      "expectedActions": [
+        "配料完成",
+        "撤回",
+        "派送",
+        "接收",
+        "配放",
+        "退废"
+      ],
+      "forbiddenActions": [
+        "二次同步"
+      ],
+      "navigationStatus": 200,
+      "missingActions": [],
+      "visibleForbiddenActions": [],
+      "untranslatedKeys": [],
+      "visibleError": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "badResponses": [],
+      "status": "PASS"
+    }
+  ],
+  "invalidLegacyDemandGuard": {
+    "warning": "当前记录不是有效的生产配料需求，请从制造指令生成配料需求",
+    "warningVisible": true,
+    "backendNumberRequestCount": 0,
+    "status": "PASS"
+  }
+}
