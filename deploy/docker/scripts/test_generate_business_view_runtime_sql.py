@@ -1640,6 +1640,97 @@ if (res.code = 200) { consume(res.data); }
 
         self.assertTrue(expected.issubset(set(GENERATOR.TARGET_VIEW_CODES)))
 
+    def test_wom_nested_reference_views_are_default_targets(self):
+        expected = {
+            "BaseSet_1.0.0_warehouse_warehouseRefLayout",
+            "BaseSet_1.0.0_warehouse_storeSetRefLayout",
+            "HierarchicalMod_1.0.0_factoryModel_factoryNeedRef",
+            "WOM_1.0.0_batchMaterial_batchMaterilRefList",
+            "WOM_1.0.0_batchMaterial_recodRefForReject",
+            "WOM_1.0.0_batchMaterial_recodRefForReport",
+            "WOM_1.0.0_prePraOrder_preOrderRef",
+            "WOM_1.0.0_prepareMaterialNeed_prepareMaterialRef",
+            "WOM_1.0.0_produceTask_makeTaskRef",
+        }
+
+        self.assertTrue(expected.issubset(set(GENERATOR.WOM_NESTED_REFERENCE_VIEW_CODES)))
+        self.assertTrue(expected.issubset(set(GENERATOR.TARGET_VIEW_CODES)))
+
+    def test_wom_nested_reference_runtime_migration_restores_dialog_content(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "263-wom-nested-reference-views-runtime.sql"
+        ).read_text(encoding="utf-8")
+
+        for view_code in GENERATOR.WOM_NESTED_REFERENCE_VIEW_CODES:
+            self.assertIn(f"-- {view_code} ", migration)
+        self.assertIn(
+            "WOM_1.0.0_batchMaterial_recodRefForReject_LISTPT", migration
+        )
+        self.assertIn(
+            '"modelCode":"WOM_1.0.0_batchMaterial_BatMaterilPart"', migration
+        )
+        self.assertIn('"type":"layoutDatagrid"', migration)
+        self.assertIn("INSERT INTO public.runtime_extra_view", migration)
+        self.assertIn("INSERT INTO public.ec_extra_view", migration)
+
+    def test_common_i18n_fallback_covers_wom_nested_dialogs(self):
+        i18n_asset = (
+            SCRIPT_PATH.parent.parent
+            / "assets"
+            / "module-static"
+            / "compat"
+            / "i18n-value.js"
+        ).read_text(encoding="utf-8")
+
+        for resource in (
+            'window.InternationalResource["Button.text.select"] = "选择";',
+            'window.InternationalResource["WOM.viewtitle.randon1582180064545"] = "配料记录参照";',
+            'window.InternationalResource["WOM.viewtitle.randon1585807903041"] = "配料记录参照";',
+            'window.InternationalResource["WOM.viewtitle.randon1584673601625"] = "配料指令参照";',
+            'window.InternationalResource["WOM.batchMaterial.BatchMateril.已配数量"] = "已退数量";',
+            'window.InternationalResource["WOM.batchMaterial.BatMaterilPart.签收状态"] = "拒签原因";',
+        ):
+            self.assertIn(resource, i18n_asset)
+
+    def test_wom_nested_reference_query_compatibility_is_postgresql_native(self):
+        migration = (
+            SCRIPT_PATH.parent.parent
+            / "postgres"
+            / "init"
+            / "264-wom-nested-reference-query-compat.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("CREATE OR REPLACE VIEW public.wom_prepre_materials", migration)
+        self.assertIn("FROM public.wom_pre_pra_orders", migration)
+        self.assertIn("prepare_staff AS pre_pare_staff", migration)
+        self.assertIn("need_end_time AS need_date", migration)
+        self.assertIn('"outputDetail".PRODUCT', migration)
+        self.assertIn('"outputDetail".OUTPUT_NUM AS "putinNum"', migration)
+        self.assertNotIn('"outputDetail".MATERIAL_ID', migration)
+        self.assertNotIn('"outputDetail".PUTIN_NUM', migration)
+        self.assertIn("customCondition && customCondition.warehouseId", migration)
+        self.assertIn("return '1=1';", migration)
+        self.assertIn("customCondition && customCondition.factoryId", migration)
+        self.assertIn("UPDATE public.ec_customer_condition", migration)
+
+    def test_wom_dynamic_pages_load_additive_i18n_compatibility(self):
+        nginx_config = (
+            SCRIPT_PATH.parent.parent / "nginx" / "adp.conf"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("location ^~ /msService/WOM/ {", nginx_config)
+        self.assertIn(
+            'sub_filter \'</head>\' \'<script src="/greenDill/static/compat/i18n-value.js"></script></head>\';',
+            nginx_config,
+        )
+        self.assertIn(
+            "location = /greenDill/static/compat/i18n-value.js {",
+            nginx_config,
+        )
+
     def test_incompatible_wom_action_views_are_regenerated_from_module_xml(self):
         packaged_payload = {
             "pageType": "EDIT",

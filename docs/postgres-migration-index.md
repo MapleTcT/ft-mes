@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`260`。
-- 编号范围：`001` 到 `260`。
+- 脚本数量：`264`。
+- 编号范围：`001` 到 `264`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -22,35 +22,35 @@
 | --- | --- |
 | auth-rbac-org | 39 |
 | business | 66 |
-| compatibility | 92 |
-| configuration | 62 |
-| general | 47 |
+| compatibility | 93 |
+| configuration | 63 |
+| general | 48 |
 | notification | 10 |
-| platform | 83 |
+| platform | 85 |
 | workflow | 21 |
 
 ## 语句统计
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10840 |
+| alter-table | 10906 |
 | create-function | 118 |
-| create-index | 1029 |
-| create-table | 588 |
-| create-view | 143 |
-| insert | 11792 |
-| update | 11925 |
+| create-index | 1032 |
+| create-table | 589 |
+| create-view | 145 |
+| insert | 12440 |
+| update | 12579 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 258 |
-| do-block | 634 |
-| if-exists | 264 |
-| if-not-exists | 13085 |
-| on-conflict | 11711 |
-| to-regclass | 222 |
+| create-or-replace | 260 |
+| do-block | 851 |
+| if-exists | 480 |
+| if-not-exists | 13155 |
+| on-conflict | 12359 |
+| to-regclass | 224 |
 | where-not-exists | 57 |
 
 ## 脚本清单
@@ -317,6 +317,10 @@
 | 258 | 258-lims-sample-actions-runtime.sql | platform, business | 119 | create-function:1, update:3 | 2 | - |
 | 259 | 259-lims-sample-actions-button-metadata.sql | business | 171 | update:2 | 1 | - |
 | 260 | 260-lims-sample-action-dialog-runtime.sql | platform, business | 935 | insert:48, update:48 | 80 | - |
+| 261 | 261-wom-material-preparation-actions-runtime.sql | platform | 10621 | insert:549, update:549 | 915 | - |
+| 262 | 262-wom-make-batch-order-part-schema.sql | general | 98 | create-table:1, create-view:1, create-index:3, alter-table:66 | 74 | - |
+| 263 | 263-wom-nested-reference-views-runtime.sql | platform, configuration | 1921 | insert:99, update:99 | 165 | - |
+| 264 | 264-wom-nested-reference-query-compat.sql | compatibility | 164 | create-view:1, update:6 | 1 | - |
 
 ## 规则
 

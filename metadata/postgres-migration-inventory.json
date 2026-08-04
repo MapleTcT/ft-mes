@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 260,
+  "migrationCount": 264,
   "firstNumber": 1,
-  "lastNumber": 260,
+  "lastNumber": 264,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -12,31 +12,31 @@
   "watchStatementCount": 90,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 10840,
+    "alter-table": 10906,
     "create-function": 118,
-    "create-index": 1029,
-    "create-table": 588,
-    "create-view": 143,
-    "insert": 11792,
-    "update": 11925
+    "create-index": 1032,
+    "create-table": 589,
+    "create-view": 145,
+    "insert": 12440,
+    "update": 12579
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 258,
-    "do-block": 634,
-    "if-exists": 264,
-    "if-not-exists": 13085,
-    "on-conflict": 11711,
-    "to-regclass": 222,
+    "create-or-replace": 260,
+    "do-block": 851,
+    "if-exists": 480,
+    "if-not-exists": 13155,
+    "on-conflict": 12359,
+    "to-regclass": 224,
     "where-not-exists": 57
   },
   "tagTotals": {
     "auth-rbac-org": 39,
     "business": 66,
-    "compatibility": 92,
-    "configuration": 62,
-    "general": 47,
+    "compatibility": 93,
+    "configuration": 63,
+    "general": 48,
     "notification": 10,
-    "platform": 83,
+    "platform": 85,
     "workflow": 21
   },
   "migrations": [
@@ -9715,6 +9715,139 @@
         "do-block": 16,
         "to-regclass": 0,
         "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/261-wom-material-preparation-actions-runtime.sql",
+      "name": "261-wom-material-preparation-actions-runtime.sql",
+      "number": 261,
+      "slug": "wom-material-preparation-actions-runtime",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 10621,
+      "sha256": "1ccee345046a5ea9e4eba8ef122ab11c815babcc3ad7454859503ddca98624e6",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 549,
+        "update": 549
+      },
+      "idempotencySignals": {
+        "if-exists": 183,
+        "if-not-exists": 0,
+        "on-conflict": 549,
+        "do-block": 183,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/262-wom-make-batch-order-part-schema.sql",
+      "name": "262-wom-make-batch-order-part-schema.sql",
+      "number": 262,
+      "slug": "wom-make-batch-order-part-schema",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 98,
+      "sha256": "99c72f0bf353d1b1b8781645458ddd7c81321f95be955239fcd39fad0b99044c",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 66,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 70,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 2,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/263-wom-nested-reference-views-runtime.sql",
+      "name": "263-wom-nested-reference-views-runtime.sql",
+      "number": 263,
+      "slug": "wom-nested-reference-views-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration"
+      ],
+      "lineCount": 1921,
+      "sha256": "c662969d4519c2f65900de3c084b086c5a5784665736afc20eb34d3e2097c4c0",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 99,
+        "update": 99
+      },
+      "idempotencySignals": {
+        "if-exists": 33,
+        "if-not-exists": 0,
+        "on-conflict": 99,
+        "do-block": 33,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/264-wom-nested-reference-query-compat.sql",
+      "name": "264-wom-nested-reference-query-compat.sql",
+      "number": 264,
+      "slug": "wom-nested-reference-query-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 164,
+      "sha256": "88d99d873c220bdd5f7786e7390cbbc0398e1efae2d0bca507ec2003a710e22b",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 6
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
         "where-not-exists": 0
       },
       "highRiskStatements": [],

@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-03T09:24:53+00:00",
-  "repoCommit": "fc8ed235a31e7b6751060d00dd1eb6f38379900a",
+  "generatedAt": "2026-08-04T01:50:35+00:00",
+  "repoCommit": "5cc67dc7827d5b6070c2a1a2eba8e4890799e7d1",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 594,
-    "totalBytes": 75215066,
+    "totalFiles": 598,
+    "totalBytes": 95737630,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 260,
+      "postgres-init-sql": 264,
       "runtime-binary-patch": 8,
       "runtime-patch-source": 25,
       "runtime-script": 28,
@@ -18,12 +18,12 @@
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 34023,
-      "postgres-init-sql": 73209261,
+      "nginx-runtime-config": 35073,
+      "postgres-init-sql": 93728074,
       "runtime-binary-patch": 178941,
       "runtime-patch-source": 98301,
       "runtime-script": 301465,
-      "runtime-static-override": 1350722
+      "runtime-static-override": 1353423
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 33803,
-      "sha256": "8e5465769841f857993129363f6f31a36c042c1fca3d82138417d36081be54e3"
+      "sizeBytes": 34853,
+      "sha256": "b021c9752b3817486106f231108db88100492e7a33708da82301465f7e76ff7f"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1873,6 +1873,30 @@
       "sha256": "9f1b541449ef5a67249f7a626ec7d2282ca68ba1c30f6287a5c2853999622e51"
     },
     {
+      "path": "deploy/docker/postgres/init/261-wom-material-preparation-actions-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 18701130,
+      "sha256": "1ccee345046a5ea9e4eba8ef122ab11c815babcc3ad7454859503ddca98624e6"
+    },
+    {
+      "path": "deploy/docker/postgres/init/262-wom-make-batch-order-part-schema.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 7091,
+      "sha256": "99c72f0bf353d1b1b8781645458ddd7c81321f95be955239fcd39fad0b99044c"
+    },
+    {
+      "path": "deploy/docker/postgres/init/263-wom-nested-reference-views-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 1805022,
+      "sha256": "c662969d4519c2f65900de3c084b086c5a5784665736afc20eb34d3e2097c4c0"
+    },
+    {
+      "path": "deploy/docker/postgres/init/264-wom-nested-reference-query-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 5570,
+      "sha256": "88d99d873c220bdd5f7786e7390cbbc0398e1efae2d0bca507ec2003a710e22b"
+    },
+    {
       "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 148953,
@@ -3309,8 +3333,8 @@
     {
       "path": "deploy/docker/assets/module-static/compat/i18n-value.js",
       "category": "runtime-static-override",
-      "sizeBytes": 6746,
-      "sha256": "66f957053cfd0ed4bccb60bc95507e0fd161f0aed5d1df2a885565d1608ec21d"
+      "sizeBytes": 9447,
+      "sha256": "a88435d2f7a5fab72e41c6204547f8d21e320d669767be8683fbd5c5821d0e90"
     },
     {
       "path": "deploy/docker/assets/module-static/workAppointment/commonJs/WAPSCommon-es5.js",

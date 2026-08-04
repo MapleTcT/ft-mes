@@ -4845,6 +4845,30 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/261-wom-material-preparation-actions-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/262-wom-make-batch-order-part-schema.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/263-wom-nested-reference-views-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/264-wom-nested-reference-query-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-admin-permission-directory-scan.js",
       "state": "tracked",
       "tracked": true
@@ -5410,6 +5434,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-wom-material-report-actions-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-wom-nested-reference-view-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -7149,6 +7179,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/product/wom-material-preparation-standardization.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/production-cutover-gate.md",
       "state": "tracked",
       "tracked": true
@@ -7714,6 +7750,12 @@
     {
       "ignored": false,
       "path": "docs/testing/standard-core-flow-acceptance-20260728.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/wom-nested-reference-acceptance-20260804.md",
       "state": "tracked",
       "tracked": true
     },
@@ -9723,7 +9765,19 @@
     },
     {
       "ignored": false,
+      "path": "metadata/wom-material-preparation-action-coverage-20260803.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/wom-material-report-actions-acceptance-20260801.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-nested-reference-acceptance-20260804.json",
       "state": "tracked",
       "tracked": true
     },
@@ -13694,16 +13748,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 907
+      "tracked": 912
     },
     "docs": {
-      "tracked": 167
+      "tracked": 169
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 350
+      "tracked": 352
     },
     "package.json": {
       "tracked": 1
@@ -13727,8 +13781,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2278,
-    "tracked": 2278,
+    "totalFiles": 2287,
+    "tracked": 2287,
     "untracked": 0
   },
   "untrackedByDirectory": []

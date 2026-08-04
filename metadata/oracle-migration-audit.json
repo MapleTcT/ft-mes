@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-03T09:41:53+00:00",
-  "repoCommit": "fc8ed235a31e7b6751060d00dd1eb6f38379900a",
-  "findingCount": 1640,
+  "generatedAt": "2026-08-04T01:54:05+00:00",
+  "repoCommit": "5cc67dc7827d5b6070c2a1a2eba8e4890799e7d1",
+  "findingCount": 1641,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 195,
+    "documentation-or-workflow": 196,
     "frontend-row-index-noise": 4,
     "java-row-index-noise": 93,
     "legacy-ojdbc-dependency": 6,
@@ -21,7 +21,7 @@
     "decode-sql": 5,
     "from-dual": 140,
     "ojdbc": 15,
-    "oracle-keyword": 649,
+    "oracle-keyword": 650,
     "rownum": 696,
     "sysdate": 135
   },
@@ -9310,7 +9310,7 @@
     },
     {
       "file": "deploy/docker/scripts/test_generate_business_view_runtime_sql.py",
-      "line": 1596,
+      "line": 1951,
       "pattern": "oracle-keyword",
       "category": "postgres-conversion-tooling",
       "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",
@@ -9318,7 +9318,7 @@
     },
     {
       "file": "deploy/docker/scripts/test_generate_business_view_runtime_sql.py",
-      "line": 1612,
+      "line": 1967,
       "pattern": "oracle-keyword",
       "category": "postgres-conversion-tooling",
       "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",
@@ -10563,6 +10563,14 @@
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
       "excerpt": "- PostgreSQL 是唯一默认数据库；Oracle 未进入本次运行链。"
+    },
+    {
+      "file": "docs/testing/wom-nested-reference-acceptance-20260804.md",
+      "line": 24,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "本轮没有将 Oracle 改回默认路径，也没有使用 mock 替代真实参照接口。"
     },
     {
       "file": "docs/wts-basic-settings-functional-acceptance-20260730.md",

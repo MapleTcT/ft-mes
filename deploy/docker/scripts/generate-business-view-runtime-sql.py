@@ -22,6 +22,39 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
+WOM_NESTED_REFERENCE_VIEW_CODES: Sequence[str] = (
+    "BaseSet_1.0.0_warehouse_warehouseRefLayout",
+    "BaseSet_1.0.0_warehouse_storeSetRefLayout",
+    "HierarchicalMod_1.0.0_factoryModel_factoryNeedRef",
+    "WOM_1.0.0_batchMaterialNeed_batOrdPartRef",
+    "WOM_1.0.0_batchMaterial_batchMatOrderView",
+    "WOM_1.0.0_batchMaterial_batchMaterilRefList",
+    "WOM_1.0.0_batchMaterial_recodRefForReject",
+    "WOM_1.0.0_batchMaterial_recodRefForReport",
+    "WOM_1.0.0_outputMaterial_outputRef",
+    "WOM_1.0.0_prePraOrder_preOrderRef",
+    "WOM_1.0.0_prepareMaterialNeed_prePraNeedPartRef",
+    "WOM_1.0.0_prepareMaterialNeed_prepareMaterialRef",
+    "WOM_1.0.0_prepareMaterial_instructionReference",
+    "WOM_1.0.0_procReport_outputRef",
+    "WOM_1.0.0_procReport_procReportRef",
+    "WOM_1.0.0_procReport_putinRef",
+    "WOM_1.0.0_produceTask_activeExeLogRef",
+    "WOM_1.0.0_produceTask_makeTaskExecuRef",
+    "WOM_1.0.0_produceTask_makeTaskRef",
+    "WOM_1.0.0_produceTask_processExeLogRefer",
+    "WOM_1.0.0_produceTask_processExelogRef",
+    "WOM_1.0.0_produceTask_taskActiveExelogRef",
+    "WOM_1.0.0_produceTask_taskActiveRef",
+    "WOM_1.0.0_produceTask_taskProcessExelogRef",
+    "WOM_1.0.0_produceTask_taskRefForPrNeed",
+    "WOM_1.0.0_putInMaterial_putinRef",
+    "WOM_1.0.0_rejectMaterilal_batchRejectRef",
+    "WOM_1.0.0_rejectMaterilal_prePareRejectRef",
+    "WOM_1.0.0_remainMaterial_remainMaterialRef",
+)
+
+
 TARGET_VIEW_CODES: Sequence[str] = (
     "BaseSet_1.0.0_cooperate_cmcLayout",
     "BaseSet_1.0.0_cooperate_cmcLayoutRef",
@@ -134,6 +167,7 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "WOM_1.0.0_remainMaterial_remainMaterialEdit2",
     "WOM_1.0.0_procReport_putinDetailList",
     "WOM_1.0.0_procReport_outputDetailList",
+    *WOM_NESTED_REFERENCE_VIEW_CODES,
     "RM_1.0.0_formulaType_formualTypeTreeList",
     "RM_1.0.0_formulaType_formualTypeEdit",
     "RM_1.0.0_processType_processTypeList",
