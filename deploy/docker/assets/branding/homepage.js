@@ -2,7 +2,7 @@
   "use strict";
 
   var productTitle = "飞天生物制造执行系统";
-  var styleHref = "/bap/static/adp-custom/homepage/style/index.css?v=20260729";
+  var styleHref = "/bap/static/adp-custom/homepage/style/index.css?v=20260805";
 
   function ensureStyle() {
     if (document.querySelector('link[data-feitian-homepage-branding="true"]')) return;

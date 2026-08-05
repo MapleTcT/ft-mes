@@ -1,13 +1,39 @@
+#v3_head {
+  background-color: #102f49 !important;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+}
+
 #v3_logo {
-  background-color: #fff !important;
+  background-color: #102f49 !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
   background-size: 156px auto !important;
-  box-shadow: inset -1px 0 0 rgba(7, 77, 162, 0.16);
-  filter: none;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.14);
+  filter: none !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+#v3_logo::after {
+  background-image: url("/bap/static/adp-custom/branding/feitian-logo-login.png");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 156px auto;
+  clip-path: inset(0 0 0 53%);
+  content: "";
+  filter: brightness(0) invert(1);
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
 }
 
 body.v3_menu_collapsed #v3_logo {
   background-position: left center !important;
   background-size: 100px auto !important;
+}
+
+body.v3_menu_collapsed #v3_logo::after {
+  background-position: left center;
+  background-size: 100px auto;
+  clip-path: inset(0 0 0 54px);
 }
