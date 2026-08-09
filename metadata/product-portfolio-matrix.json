@@ -1,0 +1,826 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-08-10T00:00:00+08:00",
+  "repoCommit": "c1233a3c2319ed8ff26c974c9f297d50cb673744",
+  "evidenceMode": "LOCAL_STATIC_AND_HISTORICAL_ACCEPTANCE_NO_FRESH_SERVER_VALIDATION",
+  "architectureDecision": "docs/decisions/0001-modular-product-line-architecture.md",
+  "productPortfolioDocument": "docs/product/ft-mes-modular-product-portfolio.md",
+  "principles": [
+    "Shared foundations are implemented once and are not exposed as a large business menu.",
+    "Domain products have independent maturity, release, persistence acceptance and rollback gates.",
+    "Commercial bundles compose products and never create new source-code dependencies.",
+    "Industry differences prefer manifests, templates and adapters over permanent code forks.",
+    "PostgreSQL is the default database; Oracle remains legacy-template-only."
+  ],
+  "dependencyTypes": {
+    "HARD": "The product cannot start or preserve its own business invariants without the dependency.",
+    "INTEGRATION": "The product can run independently, but a cross-domain closed loop is reduced.",
+    "DATA_SOURCE": "A feature requires an authoritative external or field data source and must fail closed when it is absent.",
+    "BUNDLE": "A commercial or implementation composition with no additional code dependency."
+  },
+  "maturityLevels": [
+    {
+      "id": "M0_ASSET_ONLY",
+      "rank": 0,
+      "requiredEvidence": "Source, package, menu or schema assets only.",
+      "releaseMeaning": "Assessment only; not a usable product."
+    },
+    {
+      "id": "M1_NAVIGABLE",
+      "rank": 1,
+      "requiredEvidence": "Navigable pages and read paths without fatal client errors.",
+      "releaseMeaning": "Demonstration only; no transactional promise."
+    },
+    {
+      "id": "M2_TRANSACTIONAL",
+      "rank": 2,
+      "requiredEvidence": "Real page action, API, PostgreSQL marker, update/delete and idempotency evidence.",
+      "releaseMeaning": "Eligible for a controlled pilot."
+    },
+    {
+      "id": "M3_SCENARIO_COMPLETE",
+      "rank": 3,
+      "requiredEvidence": "Main scenario, abnormal path, compensation or rollback, authorization and restart re-read evidence.",
+      "releaseMeaning": "Eligible to become a standard release candidate."
+    },
+    {
+      "id": "M4_PRODUCTION_READY",
+      "rank": 4,
+      "requiredEvidence": "Authoritative field data, capacity, stability, security, backup/restore and business sign-off.",
+      "releaseMeaning": "Eligible for formal production release."
+    }
+  ],
+  "summary": {
+    "productUnits": 11,
+    "foundationUnits": 2,
+    "domainProducts": 9,
+    "commercialBundles": 7,
+    "industrySolutions": 6,
+    "currentMaturity": {
+      "M0_ASSET_ONLY": 1,
+      "M1_NAVIGABLE": 1,
+      "M2_TRANSACTIONAL": 5,
+      "M3_SCENARIO_COMPLETE": 4,
+      "M4_PRODUCTION_READY": 0
+    }
+  },
+  "products": [
+    {
+      "id": "ft-platform-foundation",
+      "name": "FT Platform Foundation",
+      "type": "FOUNDATION",
+      "productResponsibility": "Identity, organization, RBAC, codes, workflow, tasks, notifications, files, audit, integration contracts and edition manifests.",
+      "hardDependencies": [],
+      "integrationDependencies": [],
+      "externalIntegrations": [
+        "OIDC/Keycloak",
+        "MinIO/S3",
+        "Nacos"
+      ],
+      "dataSourceDependencies": [],
+      "includedCapabilities": [
+        "identity-and-organization",
+        "rbac-and-audit",
+        "system-code-and-numbering",
+        "workflow-and-todo",
+        "file-and-attachment",
+        "notification-baseline",
+        "product-edition-manifest"
+      ],
+      "deployables": [
+        "foundation-service",
+        "file-service",
+        "integration-hub"
+      ],
+      "databaseSchemas": [
+        "platform",
+        "file",
+        "integration"
+      ],
+      "menuGroups": [
+        "工作台基础",
+        "系统管理"
+      ],
+      "currentMaturity": "M3_SCENARIO_COMPLETE",
+      "maturityNote": "Representative organization, RBAC, configuration and workflow persistence chains have controlled evidence; no fresh production-host validation in this audit.",
+      "targetMaturity": "M4_PRODUCTION_READY",
+      "releaseStatus": "SHARED_FOUNDATION"
+    },
+    {
+      "id": "ft-manufacturing-foundation",
+      "name": "FT Manufacturing Foundation",
+      "type": "FOUNDATION",
+      "productResponsibility": "Factory, workshop, line, work unit, material, unit, formula/BOM, route, team, shift and batch-policy master data.",
+      "hardDependencies": [
+        "ft-platform-foundation"
+      ],
+      "integrationDependencies": [],
+      "externalIntegrations": [
+        "ERP master-data source"
+      ],
+      "dataSourceDependencies": [],
+      "includedCapabilities": [
+        "factory-model",
+        "material-and-product-master",
+        "formula-and-bom",
+        "process-route",
+        "team-shift-calendar",
+        "batch-policy"
+      ],
+      "deployables": [
+        "manufacturing-master-service"
+      ],
+      "databaseSchemas": [
+        "manufacturing_master"
+      ],
+      "menuGroups": [
+        "主数据"
+      ],
+      "currentMaturity": "M3_SCENARIO_COMPLETE",
+      "maturityNote": "Factory line, team schedule and formula representative transactions have controlled evidence; duplicated historical master-data screens still need consolidation.",
+      "targetMaturity": "M4_PRODUCTION_READY",
+      "releaseStatus": "SHARED_FOUNDATION"
+    },
+    {
+      "id": "ft-mes-execute",
+      "name": "FT MES Execute",
+      "type": "DOMAIN_PRODUCT",
+      "productResponsibility": "Manufacturing orders, process and activity execution, material issue/return, reporting, output and execution state machines.",
+      "hardDependencies": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation"
+      ],
+      "integrationDependencies": [
+        "ft-qms-core",
+        "ft-wms-production",
+        "ft-trace-center",
+        "ft-bpi",
+        "ft-ehs-operations"
+      ],
+      "externalIntegrations": [
+        "ERP production planning"
+      ],
+      "dataSourceDependencies": [],
+      "includedCapabilities": [
+        "manufacturing-order",
+        "process-execution",
+        "activity-execution",
+        "material-consumption-and-return",
+        "production-reporting-and-output"
+      ],
+      "deployables": [
+        "mes-production-service"
+      ],
+      "databaseSchemas": [
+        "mes"
+      ],
+      "menuGroups": [
+        "生产执行"
+      ],
+      "currentMaturity": "M3_SCENARIO_COMPLETE",
+      "maturityNote": "The controlled manufacturing chain and PostgreSQL persistence evidence exist; full-role regression, field sign-off and production NFR evidence remain.",
+      "targetMaturity": "M4_PRODUCTION_READY",
+      "releaseStatus": "STANDARD_CANDIDATE"
+    },
+    {
+      "id": "ft-qms-core",
+      "name": "FT QMS Core",
+      "type": "DOMAIN_PRODUCT",
+      "productResponsibility": "Quality standards, inspection requests, results, reports, decisions, nonconformance disposition and release.",
+      "hardDependencies": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation"
+      ],
+      "integrationDependencies": [
+        "ft-mes-execute",
+        "ft-wms-production",
+        "ft-trace-center",
+        "ft-bpi"
+      ],
+      "externalIntegrations": [
+        "External LIMS",
+        "ERP receiving"
+      ],
+      "dataSourceDependencies": [],
+      "includedCapabilities": [
+        "quality-standard",
+        "inspection-request",
+        "inspection-result-and-report",
+        "quality-decision",
+        "nonconformance-disposition",
+        "quality-release"
+      ],
+      "deployables": [
+        "quality-service"
+      ],
+      "databaseSchemas": [
+        "qms"
+      ],
+      "menuGroups": [
+        "质量管理"
+      ],
+      "currentMaturity": "M2_TRANSACTIONAL",
+      "maturityNote": "Core request/report/disposition transactions have evidence, but duplicated menus, blank references and inconsistent button interactions prevent an M3 product conclusion.",
+      "targetMaturity": "M4_PRODUCTION_READY",
+      "releaseStatus": "STANDARD_CANDIDATE"
+    },
+    {
+      "id": "ft-wms-production",
+      "name": "FT WMS Production",
+      "type": "DOMAIN_PRODUCT",
+      "productResponsibility": "Production issue/return, finished-goods receipt, reversal, batch inventory, immutable stock transactions and quality hold/release.",
+      "hardDependencies": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation"
+      ],
+      "integrationDependencies": [
+        "ft-mes-execute",
+        "ft-qms-core",
+        "ft-trace-center"
+      ],
+      "externalIntegrations": [
+        "ERP/WMS authoritative warehouse"
+      ],
+      "dataSourceDependencies": [],
+      "includedCapabilities": [
+        "production-issue-and-return",
+        "finished-goods-receipt",
+        "inventory-reversal",
+        "batch-stock",
+        "stock-transaction-ledger",
+        "quality-hold-and-release"
+      ],
+      "deployables": [
+        "inventory-service"
+      ],
+      "databaseSchemas": [
+        "wms"
+      ],
+      "menuGroups": [
+        "物料库存"
+      ],
+      "currentMaturity": "M2_TRANSACTIONAL",
+      "maturityNote": "Internal receipt, reversal and quality-gate evidence exists; standalone UX, concurrent inventory and external ERP/WMS contracts remain incomplete.",
+      "targetMaturity": "M4_PRODUCTION_READY",
+      "releaseStatus": "CONTROLLED_PILOT"
+    },
+    {
+      "id": "ft-trace-center",
+      "name": "FT Trace Center",
+      "type": "DOMAIN_PRODUCT",
+      "productResponsibility": "Bidirectional batch genealogy and a read-only timeline over execution, quality, inventory and process evidence.",
+      "hardDependencies": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation"
+      ],
+      "integrationDependencies": [
+        "ft-mes-execute",
+        "ft-qms-core",
+        "ft-wms-production",
+        "ft-bpi",
+        "ft-energy"
+      ],
+      "externalIntegrations": [
+        "External genealogy event sources"
+      ],
+      "dataSourceDependencies": [],
+      "includedCapabilities": [
+        "batch-genealogy",
+        "forward-and-backward-trace",
+        "execution-timeline",
+        "quality-and-inventory-timeline",
+        "process-evidence-projection"
+      ],
+      "deployables": [
+        "trace-service"
+      ],
+      "databaseSchemas": [
+        "trace"
+      ],
+      "menuGroups": [
+        "批次追溯"
+      ],
+      "currentMaturity": "M2_TRANSACTIONAL",
+      "maturityNote": "Controlled MES-chain trace views exist, but an independently owned event projection, performance proof and cross-system consistency gate are not complete.",
+      "targetMaturity": "M4_PRODUCTION_READY",
+      "releaseStatus": "INCLUDED_COMPONENT"
+    },
+    {
+      "id": "ft-bpi",
+      "name": "FT BPI",
+      "type": "DOMAIN_PRODUCT",
+      "productResponsibility": "Real-time process state, point/rule governance, batch-boundary candidates, shadow batches, data quality and process evidence.",
+      "hardDependencies": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation"
+      ],
+      "integrationDependencies": [
+        "ft-mes-execute",
+        "ft-qms-core",
+        "ft-wms-production",
+        "ft-trace-center"
+      ],
+      "externalIntegrations": [
+        "JetLinks/IoT",
+        "MQTT",
+        "Kafka",
+        "Flink"
+      ],
+      "dataSourceDependencies": [
+        {
+          "id": "authoritative-production-context",
+          "requiredFor": "Associating candidates and shadow batches with real production orders and operations."
+        },
+        {
+          "id": "qualified-iot-telemetry",
+          "requiredFor": "Evaluating event-time boundary rules with source sequence, unit and calibration evidence."
+        }
+      ],
+      "includedCapabilities": [
+        "live-process-state",
+        "point-topology-rule-governance",
+        "batch-candidate",
+        "shadow-batch",
+        "data-quality",
+        "process-evidence"
+      ],
+      "deployables": [
+        "bpi-control-service",
+        "bpi-stream"
+      ],
+      "databaseSchemas": [
+        "bpi"
+      ],
+      "menuGroups": [
+        "智能批次"
+      ],
+      "currentMaturity": "M3_SCENARIO_COMPLETE",
+      "maturityNote": "Controlled MQTT, Kafka/Flink, candidate and shadow-batch scenarios exist; physical points, formal calibration, sustained field operation and capacity evidence remain.",
+      "targetMaturity": "M4_PRODUCTION_READY",
+      "releaseStatus": "CONTROLLED_PILOT"
+    },
+    {
+      "id": "ft-lab",
+      "name": "FT Lab",
+      "type": "DOMAIN_PRODUCT",
+      "productResponsibility": "Sample registration, sampling, receipt, preparation, result review, retain samples, stability and compliance records.",
+      "hardDependencies": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation",
+        "ft-qms-core"
+      ],
+      "integrationDependencies": [
+        "ft-trace-center"
+      ],
+      "externalIntegrations": [
+        "Laboratory instruments",
+        "Document control",
+        "Electronic signature"
+      ],
+      "dataSourceDependencies": [],
+      "includedCapabilities": [
+        "sample-lifecycle",
+        "result-review",
+        "retain-sample",
+        "stability-study",
+        "laboratory-compliance"
+      ],
+      "deployables": [
+        "quality-service"
+      ],
+      "databaseSchemas": [
+        "lab"
+      ],
+      "menuGroups": [
+        "实验室"
+      ],
+      "currentMaturity": "M1_NAVIGABLE",
+      "maturityNote": "Recovered assets and partial pages exist; the complete sample lifecycle and persistence acceptance are not closed.",
+      "targetMaturity": "M3_SCENARIO_COMPLETE",
+      "releaseStatus": "HIDDEN"
+    },
+    {
+      "id": "ft-reliability-patrol",
+      "name": "FT Reliability Patrol",
+      "type": "DOMAIN_PRODUCT",
+      "productResponsibility": "Shared equipment/EHS patrol routes, tasks, execution, results, abnormalities and governance handoff.",
+      "hardDependencies": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation"
+      ],
+      "integrationDependencies": [
+        "ft-mes-execute",
+        "ft-ehs-operations"
+      ],
+      "externalIntegrations": [
+        "IoT condition monitoring",
+        "Advanced EAM/OEE"
+      ],
+      "dataSourceDependencies": [],
+      "includedCapabilities": [
+        "patrol-standard",
+        "route-and-task",
+        "patrol-execution",
+        "normal-and-abnormal-result",
+        "hidden-danger-handoff"
+      ],
+      "deployables": [
+        "optional-domain-service"
+      ],
+      "databaseSchemas": [
+        "reliability"
+      ],
+      "menuGroups": [
+        "设备可靠性"
+      ],
+      "currentMaturity": "M2_TRANSACTIONAL",
+      "maturityNote": "Patrol task/result/abnormal slices have controlled evidence; historical EAM, spares, maintenance and OEE are not part of the current product promise.",
+      "targetMaturity": "M3_SCENARIO_COMPLETE",
+      "releaseStatus": "CONTROLLED_PILOT"
+    },
+    {
+      "id": "ft-ehs-operations",
+      "name": "FT EHS Operations",
+      "type": "DOMAIN_PRODUCT",
+      "productResponsibility": "JSA, work permits, risks and measures, safety disclosure, work ledgers and EHS patrol.",
+      "hardDependencies": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation"
+      ],
+      "integrationDependencies": [
+        "ft-reliability-patrol",
+        "ft-mes-execute"
+      ],
+      "externalIntegrations": [
+        "GIS",
+        "Access control",
+        "Video"
+      ],
+      "dataSourceDependencies": [],
+      "includedCapabilities": [
+        "jsa",
+        "work-permit",
+        "risk-and-safety-measures",
+        "safety-disclosure",
+        "work-ledger",
+        "ehs-patrol"
+      ],
+      "deployables": [
+        "optional-domain-service"
+      ],
+      "databaseSchemas": [
+        "ehs"
+      ],
+      "menuGroups": [
+        "安环作业"
+      ],
+      "currentMaturity": "M2_TRANSACTIONAL",
+      "maturityNote": "A core fire-work permit slice has evidence; other permit types, references and workflow configuration require separate acceptance.",
+      "targetMaturity": "M3_SCENARIO_COMPLETE",
+      "releaseStatus": "CONTROLLED_PILOT"
+    },
+    {
+      "id": "ft-energy",
+      "name": "FT Energy",
+      "type": "DOMAIN_PRODUCT",
+      "productResponsibility": "Energy measurement, planning, analysis, prediction and per-product or per-batch consumption.",
+      "hardDependencies": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation"
+      ],
+      "integrationDependencies": [
+        "ft-mes-execute",
+        "ft-bpi",
+        "ft-trace-center"
+      ],
+      "externalIntegrations": [
+        "IoT energy meters",
+        "Indicator dependency"
+      ],
+      "dataSourceDependencies": [
+        {
+          "id": "authoritative-energy-telemetry",
+          "requiredFor": "Energy measurement, allocation and analysis."
+        }
+      ],
+      "includedCapabilities": [
+        "energy-measurement",
+        "energy-plan",
+        "energy-analysis",
+        "energy-prediction",
+        "batch-energy"
+      ],
+      "deployables": [
+        "optional-domain-service"
+      ],
+      "databaseSchemas": [
+        "energy"
+      ],
+      "menuGroups": [
+        "能源管理"
+      ],
+      "currentMaturity": "M0_ASSET_ONLY",
+      "maturityNote": "Source packages exist, but the Indicator dependency, PostgreSQL migration, authoritative telemetry and business scenario remain blocked.",
+      "targetMaturity": "M3_SCENARIO_COMPLETE",
+      "releaseStatus": "BLOCKED"
+    }
+  ],
+  "commercialBundles": [
+    {
+      "id": "mes-start",
+      "name": "MES Start",
+      "requiredProducts": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation",
+        "ft-mes-execute",
+        "ft-trace-center"
+      ],
+      "optionalProducts": [],
+      "targetScenarios": [
+        "Small plant execution",
+        "Manufacturing order to production trace"
+      ],
+      "runtimeWeight": "LIGHT",
+      "releaseStatus": "RECOMMENDED"
+    },
+    {
+      "id": "mes-standard",
+      "name": "MES Standard",
+      "requiredProducts": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation",
+        "ft-mes-execute",
+        "ft-qms-core",
+        "ft-wms-production",
+        "ft-trace-center"
+      ],
+      "optionalProducts": [],
+      "targetScenarios": [
+        "Production-quality-inventory closed loop",
+        "Batch genealogy"
+      ],
+      "runtimeWeight": "MEDIUM",
+      "releaseStatus": "RECOMMENDED"
+    },
+    {
+      "id": "process-intelligence",
+      "name": "Process Intelligence",
+      "requiredProducts": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation",
+        "ft-mes-execute",
+        "ft-qms-core",
+        "ft-wms-production",
+        "ft-trace-center",
+        "ft-bpi"
+      ],
+      "optionalProducts": [],
+      "targetScenarios": [
+        "Continuous and semi-continuous production",
+        "Signal-derived batch boundaries"
+      ],
+      "runtimeWeight": "MEDIUM_HEAVY",
+      "releaseStatus": "CONTROLLED_PILOT"
+    },
+    {
+      "id": "quality-lab",
+      "name": "Quality & Lab",
+      "requiredProducts": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation",
+        "ft-qms-core",
+        "ft-lab",
+        "ft-trace-center"
+      ],
+      "optionalProducts": [],
+      "targetScenarios": [
+        "Independent quality center",
+        "Laboratory compliance"
+      ],
+      "runtimeWeight": "MEDIUM",
+      "releaseStatus": "PLANNED"
+    },
+    {
+      "id": "asset-reliability",
+      "name": "Asset Reliability",
+      "requiredProducts": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation",
+        "ft-reliability-patrol"
+      ],
+      "optionalProducts": [
+        "ft-mes-execute"
+      ],
+      "targetScenarios": [
+        "Equipment patrol",
+        "Abnormality and hidden-danger handoff"
+      ],
+      "runtimeWeight": "LIGHT",
+      "releaseStatus": "CONTROLLED_PILOT"
+    },
+    {
+      "id": "ehs-operations",
+      "name": "EHS Operations",
+      "requiredProducts": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation",
+        "ft-ehs-operations",
+        "ft-reliability-patrol"
+      ],
+      "optionalProducts": [
+        "ft-mes-execute"
+      ],
+      "targetScenarios": [
+        "Work permits and JSA",
+        "EHS patrol"
+      ],
+      "runtimeWeight": "LIGHT_MEDIUM",
+      "releaseStatus": "CONTROLLED_PILOT"
+    },
+    {
+      "id": "energy-optimization",
+      "name": "Energy Optimization",
+      "requiredProducts": [
+        "ft-platform-foundation",
+        "ft-manufacturing-foundation",
+        "ft-energy"
+      ],
+      "optionalProducts": [
+        "ft-mes-execute",
+        "ft-bpi",
+        "ft-trace-center"
+      ],
+      "targetScenarios": [
+        "Energy measurement",
+        "Per-batch energy analysis"
+      ],
+      "runtimeWeight": "MEDIUM",
+      "releaseStatus": "BLOCKED"
+    }
+  ],
+  "industrySolutions": [
+    {
+      "id": "food-bioprocess",
+      "name": "Food & Bio Process Manufacturing",
+      "baseBundle": "process-intelligence",
+      "additionalProducts": [],
+      "industryPacks": [
+        "tank-batch",
+        "intermediate-material",
+        "flow-and-baume",
+        "cip-record",
+        "food-quality-template"
+      ],
+      "excludedByDefault": [
+        "ft-lab",
+        "ft-energy"
+      ]
+    },
+    {
+      "id": "chemical-batch",
+      "name": "Fine Chemical Batch Manufacturing",
+      "baseBundle": "process-intelligence",
+      "additionalProducts": [
+        "ft-ehs-operations"
+      ],
+      "industryPacks": [
+        "batch-recipe",
+        "hazardous-operation",
+        "chemical-process-parameter"
+      ],
+      "excludedByDefault": [
+        "ft-lab"
+      ]
+    },
+    {
+      "id": "discrete-lite",
+      "name": "Discrete Manufacturing Lite",
+      "baseBundle": "mes-start",
+      "additionalProducts": [
+        "ft-wms-production"
+      ],
+      "industryPacks": [
+        "work-order-bom-station"
+      ],
+      "excludedByDefault": [
+        "ft-bpi",
+        "ft-lab"
+      ]
+    },
+    {
+      "id": "laboratory-quality-center",
+      "name": "Laboratory & Quality Center",
+      "baseBundle": "quality-lab",
+      "additionalProducts": [],
+      "industryPacks": [
+        "instrument-adapter",
+        "retain-and-stability",
+        "document-and-signature"
+      ],
+      "excludedByDefault": [
+        "ft-mes-execute",
+        "ft-wms-production"
+      ]
+    },
+    {
+      "id": "reliability-center",
+      "name": "Asset Reliability Center",
+      "baseBundle": "asset-reliability",
+      "additionalProducts": [],
+      "industryPacks": [
+        "advanced-eam-when-ready",
+        "oee-when-ready"
+      ],
+      "excludedByDefault": [
+        "ft-qms-core",
+        "ft-wms-production",
+        "ft-energy"
+      ]
+    },
+    {
+      "id": "ehs-work-center",
+      "name": "EHS Work Center",
+      "baseBundle": "ehs-operations",
+      "additionalProducts": [],
+      "industryPacks": [
+        "gis-adapter",
+        "access-control-adapter",
+        "video-adapter"
+      ],
+      "excludedByDefault": [
+        "ft-qms-core",
+        "ft-lab",
+        "ft-energy"
+      ]
+    }
+  ],
+  "targetDeploymentUnits": [
+    {
+      "id": "foundation-service",
+      "ownedSchemas": [
+        "platform"
+      ]
+    },
+    {
+      "id": "manufacturing-master-service",
+      "ownedSchemas": [
+        "manufacturing_master"
+      ]
+    },
+    {
+      "id": "mes-production-service",
+      "ownedSchemas": [
+        "mes"
+      ]
+    },
+    {
+      "id": "quality-service",
+      "ownedSchemas": [
+        "qms",
+        "lab"
+      ]
+    },
+    {
+      "id": "inventory-service",
+      "ownedSchemas": [
+        "wms"
+      ]
+    },
+    {
+      "id": "trace-service",
+      "ownedSchemas": [
+        "trace"
+      ]
+    },
+    {
+      "id": "integration-hub",
+      "ownedSchemas": [
+        "integration"
+      ]
+    },
+    {
+      "id": "file-service",
+      "ownedSchemas": [
+        "file"
+      ]
+    },
+    {
+      "id": "bpi-control-service",
+      "ownedSchemas": [
+        "bpi"
+      ]
+    },
+    {
+      "id": "bpi-stream",
+      "ownedSchemas": []
+    },
+    {
+      "id": "optional-domain-service",
+      "ownedSchemas": [
+        "reliability",
+        "ehs",
+        "energy"
+      ]
+    }
+  ]
+}

@@ -6999,6 +6999,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/decisions/0001-modular-product-line-architecture.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/designs/README.md",
       "state": "tracked",
       "tracked": true
@@ -7174,6 +7180,24 @@
     {
       "ignored": false,
       "path": "docs/product/ft-mes-bpi-product-interaction-manual.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/product/ft-mes-capability-rationalization.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/product/ft-mes-lean-standard-product-manual.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/product/ft-mes-modular-product-portfolio.md",
       "state": "tracked",
       "tracked": true
     },
@@ -9279,6 +9303,18 @@
     },
     {
       "ignored": false,
+      "path": "metadata/product-capability-rationalization.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/product-portfolio-matrix.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/production-cutover-gate.json",
       "state": "tracked",
       "tracked": true
@@ -10221,7 +10257,19 @@
     },
     {
       "ignored": false,
+      "path": "scripts/verify-product-capability-rationalization.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "scripts/verify-product-interaction-manual.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "scripts/verify-product-portfolio-matrix.py",
       "state": "tracked",
       "tracked": true
     },
@@ -13751,13 +13799,13 @@
       "tracked": 912
     },
     "docs": {
-      "tracked": 169
+      "tracked": 173
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 352
+      "tracked": 354
     },
     "package.json": {
       "tracked": 1
@@ -13766,7 +13814,7 @@
       "tracked": 1
     },
     "scripts": {
-      "tracked": 58
+      "tracked": 60
     },
     "services": {
       "tracked": 459
@@ -13781,8 +13829,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 2287,
-    "tracked": 2287,
+    "totalFiles": 2295,
+    "tracked": 2295,
     "untracked": 0
   },
   "untrackedByDirectory": []

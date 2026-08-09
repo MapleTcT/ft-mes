@@ -37,17 +37,26 @@
 
 当前代码、本机目录、公司内网/Tailscale 入口、九个 BPI 页面、角色、交互、API、PostgreSQL 表和生产边界，
 统一见 [FT MES + BPI 当前项目地址与产品交互说明书](docs/product/ft-mes-bpi-product-interaction-manual.md)。
+从 2026-08-10 起，产品范围以
+[FT 制造软件模块化产品矩阵](docs/product/ft-mes-modular-product-portfolio.md) 为产品层权威基线，
+[FT MES 精简标准版产品说明书](docs/product/ft-mes-lean-standard-product-manual.md) 和
+[功能裁剪与行业分支策略](docs/product/ft-mes-capability-rationalization.md) 分别描述核心业务体验和实现层减法。
+产品采用共享底座、可独立交付领域产品和行业组合方案，不再把所有恢复模块绑定成一个大套件。
+恢复资产存在不等于对应产品已经成熟或应当启用。
 本轮环境清理前的分支归并、迁移来源和保留目录见
 [2026-07-24 main 汇总基线](docs/main-consolidation-20260724.md)。
 
 ## 项目定位
 
-仓库承载两条边界明确、逐步集成的产品线：
+仓库承载一个模块化制造产品族。ADP/BAP 恢复层是这些产品的兼容基础，不再作为独立的大而全产品线
+对外承诺：
 
-| 产品线 | 目标 | 当前边界 |
+| 产品层 | 目标 | 当前边界 |
 |---|---|---|
-| ADP/MES 恢复与 PostgreSQL 迁移 | 把恢复前端、后端、配置和运行资产提升为可维护工程，逐步闭合生产、质量、仓储等业务 | 恢复资产不等于原厂完整源码；每项功能必须重新做页面、API 和落库验收 |
-| 智能批次与工艺数据中心（BPI） | 连接数采、生产上下文、工艺规则、质量和物料系统，自动识别批次边界并形成可追溯生产事实 | Phase 1 只生成影子批次，不直接改写 WOM、QCS 或 WMS 生产状态 |
+| 共享底座 | 统一身份权限、审计、文件、工作流和制造主数据 | 只建设一次，不作为大量业务菜单销售 |
+| 领域产品 | MES、QMS、生产仓储、追溯、BPI、Lab、可靠性、EHS、Energy 独立成熟和发布 | 每个产品独立声明依赖、数据库、菜单、验收和回滚 |
+| 商业组合 | `MES Start`、`MES Standard`、`Process Intelligence` 等按需装配 | Bundle 只组合产品，不新增源码依赖 |
+| 行业方案 | 食品生物、精细化工、离散、实验室、可靠性和安环模板 | 通过 manifest、模板和适配器实现，不建立永久行业分支 |
 
 默认数据库是 **PostgreSQL**。Oracle 只允许存在于显式 `legacy-template-only` 模板、迁移对照和 backlog 中，不允许重新成为默认运行路径。
 
@@ -70,10 +79,16 @@
 
 ## 当前开发主线
 
-当前以 BPI Phase 1 可信批次事实、Phase 3A 可复现数据集清单、Phase 3B-A 版本锁定 Parquet 制品、
-Phase 3B-B 可核验 Iceberg/Object Lock 恢复包、Phase 3C-A MLflow Dataset Input、Phase 3C-B
-离线训练就绪评估、Phase 3C-C 工艺信号窗口、Phase 3C-D/E/F 现场覆盖/遥测/实时事实以及
-Phase 3C-G 过程窗口 Parquet v2/Iceberg 交付为同一条开发主线：
+当前产品主线切换为 `standard-core` 收敛：先冻结八个一级入口，合并 WOM/QCS/RM 的重复页面，
+持续回归制造指令、工序执行、物料、质量、入库和追溯；未进入标准版的旧包先隐藏，不再逐页补按钮。
+
+```text
+制造指令 -> 工序执行 -> 投料/退料/报工 -> 请检 -> 质量处置
+        -> 完工入库 -> 批次追溯
+```
+
+`standard-bpi` 保留已经形成证据的可信批次运行链。Phase 3A 至 Phase 3C-G 的 manifest、Parquet、
+Iceberg、Object Lock 和 MLflow 资产转为默认关闭的研发数据 profile，不再阻塞标准 MES 冻结版：
 
 ```text
 JetLinks/IoT 测点 + MES 生产指令/生产上下文

@@ -1,5 +1,11 @@
 # ADP 系统设计逻辑梳理
 
+> **适用范围更新（2026-08-10）：** 本文描述的是最初 ADP/BAP 基础交付包及当时的恢复边界。
+> 后续已找回 WOM、QCS/LIMS、RM、PATROL、WTS、EAM/EMS 等业务包，并新建 BPI、material-wms 和
+> ProcessAnalysis，因此“当前包只包含平台能力”已不是整个仓库的现状。当前产品权威边界请以
+> [FT MES 精简标准版产品说明书](product/ft-mes-lean-standard-product-manual.md) 和
+> [功能裁剪与行业分支策略](product/ft-mes-capability-rationalization.md) 为准。
+
 ## 结论
 
 当前交付包不是一套完整 MES 业务产品说明书对应的业务系统，而是一套 ADP/BAP 平台运行包。它的核心定位是“企业信息系统快速开发平台”，用于通过实体配置、流程配置、菜单权限、打印、导入导出、任务调度、门户等平台能力，快速组态或二次开发 MES 生产过程中的业务模块。
